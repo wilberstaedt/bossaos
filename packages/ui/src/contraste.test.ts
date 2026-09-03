@@ -17,6 +17,8 @@ const CITRICO = '#DDEA91';
 const CINZA = '#51666A';
 const BRANCO = '#FFFFFF';
 const CORAL_LOGO = '#FB4C39';
+const CORAL_SINAL = '#D85A44';
+const SUAVE = '#E9EFEC';
 
 describe('contraste', () => {
   // A tabela da p. 16 do manual de marca não foi calculada por mim. Se a minha
@@ -59,6 +61,49 @@ describe('contraste', () => {
   it('a regra que o CT-13 escreve em voz alta: branco sobre coral não serve para texto', () => {
     assert.ok(!cumpre(BRANCO, CORAL, 'normal'));
     assert.ok(!cumpre(BRANCO, CORAL_LOGO, 'normal'));
+  });
+
+  // Este par de testes é a razão de `acentoSinal` existir. O primeiro mostra o
+  // problema, o segundo mostra que a correcção o resolve — e nas TRÊS
+  // superfícies claras, não só naquela onde o defeito foi encontrado.
+  it('o acento da MARCA não chega ao mínimo de indicador nas superfícies do produto', () => {
+    // Escrevi isto primeiro a dizer "em nenhuma das três" e falhou: sobre BRANCO
+    // PURO o coral da marca dá 3,05 e passa — à justa. Só que o produto não
+    // assenta em branco puro; o fundo é a Areia Clara e os blocos de apoio são a
+    // superfície suave, e é aí que ele não chega. A afirmação certa é esta.
+    for (const [nome, fundo] of [['areia', AREIA], ['suave', SUAVE]] as const) {
+      assert.ok(
+        !cumpre(CORAL, fundo, 'grande'),
+        `coral da marca sobre ${nome} dá ${razaoArredondada(CORAL, fundo)}:1 — se passar, o token de sinal deixou de ser preciso e há que o dizer`,
+      );
+    }
+    assert.equal(razaoArredondada(CORAL, AREIA), 2.77);
+    assert.equal(razaoArredondada(CORAL, SUAVE), 2.62);
+    // E sobre branco passa por 0,05. Uma margem dessas não é uma autorização.
+    assert.equal(razaoArredondada(CORAL, BRANCO), 3.05);
+  });
+
+  it('o acento de SINAL chega, com margem, nas três superfícies claras', () => {
+    const medidas = { areia: razaoArredondada(CORAL_SINAL, AREIA), suave: razaoArredondada(CORAL_SINAL, SUAVE), branco: razaoArredondada(CORAL_SINAL, BRANCO) };
+    assert.deepEqual(medidas, { areia: 3.5, suave: 3.3, branco: 3.84 });
+    for (const [nome, razao] of Object.entries(medidas)) {
+      assert.ok(razao >= 3, `${nome}: ${razao}:1`);
+      // Margem: um valor à justa não sobrevive à primeira superfície nova.
+      assert.ok(razao >= 3.2, `${nome} está à justa (${razao}:1) — escolha uma cor com folga`);
+    }
+  });
+
+  it('o acento de sinal continua a ser o mesmo coral, só mais escuro', () => {
+    // Mesma matiz: cada canal escurecido pelo mesmo factor. Se alguém trocar por
+    // uma cor de outra família, os rácios entre canais mudam e isto apanha.
+    const marca = lerHex(CORAL);
+    const sinal = lerHex(CORAL_SINAL);
+    const factores = sinal.map((v, i) => v / (marca[i] as number));
+    const media = factores.reduce((a, b) => a + b, 0) / 3;
+    for (const f of factores) {
+      assert.ok(Math.abs(f - media) < 0.03, `canais escurecidos de forma desigual: ${factores.map((x) => x.toFixed(3)).join(', ')}`);
+    }
+    assert.ok(media < 1, 'tem de ser mais escuro');
   });
 
   it('é simétrico e os extremos são conhecidos', () => {

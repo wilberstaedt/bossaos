@@ -1,15 +1,17 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E02 — design system, responsividade e idiomas
-**Estado:** implementado pelo JR, **aguardando validação do sénior**.
-**Próxima ação:** o sénior valida o E02 (`docs/progress/E02.md`, capturas em
-`docs/progress/capturas/E02/`). O JR **não** avançou para E03.
+**Estado:** segunda declaração do JR, **aguardando validação do sénior**.
+**Próxima ação:** o sénior revalida o E02. A primeira revisão
+(`docs/reviews/E02.md`) não o validou: um defeito medido e uma guarda em falta. Os dois
+estão fechados — ver "Segunda declaração" em `docs/progress/E02.md`. O JR **não** avançou
+para E03.
 
 | Etapa | Estado |
 | --- | --- |
 | E00 — contrato e leitura das fontes | implementado, **aguardando validação**. Sete documentos em `docs/architecture`. Quem os escreveu não os valida: a prova vem no E11, quando se vir se o E02-E10 se construíram a partir deles. |
 | E01 — repositório e verificação contínua | **validado** · `docs/reviews/E01.md` |
-| E02 — design system, responsividade e idiomas | implementado, **aguardando validação** · `docs/progress/E02.md` |
+| E02 — design system, responsividade e idiomas | 1ª revisão: **não validado** (`docs/reviews/E02.md`). Corrigido; segunda declaração, aguardando validação · `docs/progress/E02.md` |
 
 **Primeiras telas.** O E02 é a primeira etapa que toca `coverage.csv`: STATE 001-003,
 005, 007 e 016. Até aqui o medidor de telas esteve a 0 % e isso era verdade, não uma
@@ -23,9 +25,20 @@ componentes, 5 estruturas) e `packages/i18n` (es-ES · pt-BR · en, moeda em uni
 mínimas inteiras). Catálogo de inspecção em `/[idioma]/interno/catalogo`, fora das rotas
 comerciais; as cinco molduras em `/[idioma]/interno/estruturas/[qual]`.
 
-**62 testes unitários + 62 verificações no browser, 0 falhas.** A inspecção (Playwright,
-só Chromium) corre as cinco larguras do aceite, mede contraste no DOM e prova a armadilha
-de foco e o regresso ao accionador. Entrou na CI.
+**69 testes unitários + 69 verificações no browser, 0 falhas.** A inspecção (Playwright,
+só Chromium) corre as cinco larguras do aceite, mede contraste de texto **e de indicadores
+de estado** no DOM, e prova a armadilha de foco e o regresso ao accionador. Entrou na CI.
+
+**O que a 1ª revisão apanhou, e como ficou.** O sublinhado do separador activo estava
+pintado com o Coral Bossa a 2,77:1 sobre a areia — indicador de estado, precisamente o uso
+que o meu próprio aviso dizia não poder acontecer. Duas correcções: `acentoSinal`
+(`#D85A44`, 3,50 / 3,30 / 3,84 nas três superfícies claras) mais um segundo sinal que não é
+cor (peso 700 contra 600); e `acento.test.ts`, uma guarda de **lista de permissão** que
+reprova o acento em qualquer papel visual sem justificação escrita, provada com seis
+plantações. A segunda plantação apanhou um buraco na própria guarda — uma pseudo-classe
+partia o leitor de propriedades — que sem o controlo negativo teria sido entregue.
+
+A lição que fica: **um aviso diz, não impede.** Uma regra sem detector é uma intenção.
 
 Três achados que mudaram código, dos nove em `E02.md`:
 

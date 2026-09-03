@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
 import {
   IDIOMAS, LARGURAS, PAGINAS,
-  alvosPequenos, elementosForaDoEcra, textosComPoucoContraste, transbordaNaHorizontal,
+  alvosPequenos, elementosForaDoEcra, indicadoresDeEstadoComPoucoContraste,
+  textosComPoucoContraste, transbordaNaHorizontal,
 } from './ajudas.ts';
 
 /**
@@ -111,5 +112,39 @@ test.describe('acção repetida no topo', () => {
     await page.goto('/es-ES/interno/estruturas/admin');
     await page.waitForLoadState('networkidle');
     await expect(page.locator('.bo-estado__accao-topo')).toBeVisible();
+  });
+});
+
+/**
+ * Aceite 2, a metade que faltava: contraste de INDICADORES DE ESTADO.
+ *
+ * A verificação de texto não vê um sublinhado de 3 px. Foi assim que o separador
+ * activo passou o E02 inteiro a 2,77:1 — encontrado à mão, na revisão. Agora é
+ * medido a cada corrida, na página construída.
+ */
+test.describe('indicadores de estado (WCAG 1.4.11)', () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
+
+  for (const pagina of PAGINAS) {
+    test(`${pagina.nome} — nenhum indicador abaixo de 3:1`, async ({ page }) => {
+      await page.goto(`/es-ES${pagina.caminho}`);
+      await page.waitForLoadState('networkidle');
+      const maus = await indicadoresDeEstadoComPoucoContraste(page);
+      expect(maus, `indicadores com pouco contraste:\n${maus.join('\n')}`).toEqual([]);
+    });
+  }
+
+  test('o separador activo tem um segundo sinal, que não é cor', async ({ page }) => {
+    await page.goto('/es-ES/interno/catalogo');
+    await page.waitForLoadState('networkidle');
+    const activo = page.locator('[role="tab"][aria-selected="true"]').first();
+    const inactivo = page.locator('[role="tab"][aria-selected="false"]').first();
+
+    const peso = async (l: typeof activo) =>
+      Number(await l.evaluate((el) => getComputedStyle(el).fontWeight));
+
+    // Uma pista só-cor entre dois tons escuros não resgata um indicador. O peso
+    // do rótulo é o sinal que sobrevive a quem não distingue as duas cores.
+    expect(await peso(activo)).toBeGreaterThan(await peso(inactivo));
   });
 });

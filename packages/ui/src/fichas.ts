@@ -31,6 +31,26 @@ export const marca = {
 } as const;
 
 /**
+ * O acento **no papel de sinal**: `#D85A44`.
+ *
+ * O Coral Bossa da marca dá 2,77:1 sobre a Areia Clara e 2,62:1 sobre a
+ * superfície suave. Serve para decoração editorial — a WCAG 1.4.11 não exige
+ * contraste a decoração — mas **não serve para desenhar um indicador de estado
+ * nem um controlo**, que é o caso que a norma cobre a 3:1.
+ *
+ * Foi assim que este token nasceu: o sublinhado do separador activo estava
+ * pintado com o coral da marca, a 2,77:1. Era exactamente o uso que o aviso de
+ * `validarTema` diz que não pode acontecer, e o aviso dizia sem impedir.
+ *
+ * Este valor é o mesmo coral escurecido pelo mesmo factor em cada canal — a
+ * matiz não muda. Escolhido com margem e não à justa: o primeiro que passava era
+ * `#E15E47`, a 3,06 sobre a superfície suave, e 0,06 de folga não sobrevive à
+ * primeira superfície nova. Este dá 3,50 / 3,30 / 3,84 sobre areia, suave e
+ * branco. Medido em `contraste.test.ts`, não afirmado aqui.
+ */
+export const acentoSinal = '#D85A44';
+
+/**
  * Coral da ARTE da logo, `#FB4C39`. Não é o token de interface.
  *
  * Os dois corais foram medidos no ADR 0001: o do manual passa texto sobre o

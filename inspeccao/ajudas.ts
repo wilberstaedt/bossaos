@@ -127,3 +127,112 @@ export async function textosComPoucoContraste(pagina: Page): Promise<string[]> {
     return maus;
   });
 }
+
+/**
+ * Contraste de INDICADORES DE ESTADO, medido na página construída.
+ *
+ * A verificação de texto não chega aqui: um sublinhado de 3 px não tem texto
+ * nenhum, e foi assim que o sublinhado do separador activo passou por todas as
+ * verificações do E02 a 2,77:1. A WCAG 1.4.11 pede 3:1 a partes visuais que são
+ * necessárias para identificar o estado de um componente.
+ *
+ * Mede só elementos que DIZEM que carregam estado (`aria-selected`,
+ * `aria-current`, `aria-checked`, `aria-invalid`) e só as bordas e contornos que
+ * são mesmo visíveis — largura acima de zero e cor opaca. Uma borda transparente
+ * no separador inactivo não é indicador de nada.
+ */
+export async function indicadoresDeEstadoComPoucoContraste(pagina: Page): Promise<string[]> {
+  return pagina.evaluate(() => {
+    function canais(cor: string): [number, number, number, number] {
+      const m = cor.match(/rgba?\(([^)]+)\)/);
+      if (!m?.[1]) return [0, 0, 0, 0];
+      const p = m[1].split(',').map((v) => parseFloat(v.trim()));
+      return [p[0] ?? 0, p[1] ?? 0, p[2] ?? 0, p[3] ?? 1];
+    }
+    function luminancia(rgb: [number, number, number]): number {
+      const [r, g, b] = rgb.map((v) => {
+        const c = v / 255;
+        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+      }) as [number, number, number];
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+    function razao(a: [number, number, number], b: [number, number, number]): number {
+      const la = luminancia(a);
+      const lb = luminancia(b);
+      return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+    }
+    function fundoEfectivo(el: Element | null): [number, number, number] {
+      for (let p: Element | null = el; p; p = p.parentElement) {
+        const [r, g, b, a] = canais(getComputedStyle(p).backgroundColor);
+        if (a > 0.95) return [r, g, b];
+      }
+      return [255, 255, 255];
+    }
+
+    const LADOS = ['Top', 'Right', 'Bottom', 'Left'] as const;
+    const maus: string[] = [];
+    const comEstado = document.querySelectorAll<HTMLElement>(
+      '[aria-selected="true"], [aria-current]:not([aria-current="false"]), [aria-checked="true"], [aria-invalid="true"]',
+    );
+
+    for (const el of comEstado) {
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) continue;
+      const estilo = getComputedStyle(el);
+      // O fundo por trás: o do próprio elemento se o tiver, senão o do pai.
+      const [, , , alfaProprio] = canais(estilo.backgroundColor);
+      const fundo = alfaProprio > 0.95 ? fundoEfectivo(el) : fundoEfectivo(el.parentElement);
+
+      const rotulo = `${el.tagName.toLowerCase()} "${(el.textContent ?? '').trim().slice(0, 24)}"`;
+
+      for (const lado of LADOS) {
+        const largura = parseFloat(estilo.getPropertyValue(`border-${lado.toLowerCase()}-width`));
+        if (!(largura > 0)) continue;
+        const cor = estilo.getPropertyValue(`border-${lado.toLowerCase()}-color`);
+        const [cr, cg, cb, ca] = canais(cor);
+        if (ca < 0.95) continue;
+        const valor = razao([cr, cg, cb], fundo);
+        if (valor < 3) {
+          maus.push(`${rotulo} · borda ${lado.toLowerCase()} ${cor} sobre rgb(${fundo.join(', ')}) = ${valor.toFixed(2)}:1 < 3`);
+        }
+      }
+
+      // Um fundo próprio pode ser o sinal de estado — mas só se MUDAR com o
+      // estado. A primeira versão media qualquer fundo e acusou um campo
+      // inválido por ser branco sobre a areia: só que o campo válido também é
+      // branco, e o que marca o erro ali é a borda vermelha. O que não muda com
+      // o estado não é indicador de estado.
+      //
+      // Procura-se um irmão da mesma classe no estado contrário; se o fundo for
+      // igual ao dele, não é sinal. Sem irmão para comparar, não se afirma nada:
+      // acusar por suspeita seria trocar um falso negativo por um falso positivo.
+      if (alfaProprio > 0.95 && el.className) {
+        const iguais = Array.from(
+          document.querySelectorAll<HTMLElement>(`${el.tagName.toLowerCase()}.${el.className.trim().split(/\s+/).join('.')}`),
+        );
+        const contrario = iguais.find((outro) => {
+          if (outro === el) return false;
+          return (
+            outro.getAttribute('aria-selected') === 'false' ||
+            outro.getAttribute('aria-checked') === 'false' ||
+            outro.getAttribute('aria-invalid') === null ||
+            outro.getAttribute('aria-current') === null
+          );
+        });
+        if (contrario) {
+          const meu = getComputedStyle(el).backgroundColor;
+          const dele = getComputedStyle(contrario).backgroundColor;
+          if (meu !== dele) {
+            const [br, bg, bb] = canais(meu);
+            const atras = fundoEfectivo(el.parentElement);
+            const valor = razao([br, bg, bb], atras);
+            if (valor < 3) {
+              maus.push(`${rotulo} · fundo ${meu} (muda com o estado) sobre rgb(${atras.join(', ')}) = ${valor.toFixed(2)}:1 < 3`);
+            }
+          }
+        }
+      }
+    }
+    return maus;
+  });
+}

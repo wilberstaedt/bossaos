@@ -67,8 +67,15 @@ export interface ResultadoDeTema {
  * E reprovar seria errado, não inconveniente: a WCAG 1.4.11 pede 3:1 a
  * componentes de interface e a gráficos que CARREGAM informação — não a
  * decoração editorial, que é o que o coral é no manual (um traço acima de um
- * título). O que o produto tem de garantir é que ninguém use esta cor para
- * desenhar um controlo ou um sinal, e é isso que o aviso diz.
+ * título).
+ *
+ * O que o produto tem de garantir é que ninguém use esta cor para desenhar um
+ * controlo ou um sinal. Esta frase acabava aqui a dizer "e é isso que o aviso
+ * diz" — e um aviso **diz, não impede**. No mesmo dia em que a regra passou a
+ * aviso, o sublinhado do separador activo foi pintado com o acento, a 2,77:1, e
+ * nada ficou vermelho. Quem impede é `acento.test.ts`, que reprova o acento em
+ * qualquer papel visual sem justificação escrita; e para o papel de sinal existe
+ * `acentoSinal`, que chega aos 3:1.
  */
 export function validarTema(entrada: Partial<TemaPublico>): ResultadoDeTema {
   const tema: TemaPublico = { ...TEMA_BOSSAOS, ...entrada };

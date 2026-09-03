@@ -4,7 +4,7 @@
 //   import '@bossaos/ui/estilos.css';
 
 export {
-  fichas, marca, coralDaLogo, superficie, texto, linha, estado, foco,
+  fichas, marca, acentoSinal, coralDaLogo, superficie, texto, linha, estado, foco,
   tipografia, espaco, grade, raio, movimento, alvoDeToque,
   TOKENS_TEMAVEIS, type TokenTemavel,
 } from './fichas.ts';

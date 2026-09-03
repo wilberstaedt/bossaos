@@ -13,6 +13,10 @@
   /* ── Marca ─────────────────────────────────────────────────────────────── */
   --bo-primaria: #102E35;
   --bo-acento: #F5664D;
+  /* O acento no papel de SINAL. O da marca não chega ao mínimo de 3:1 que a
+     WCAG 1.4.11 pede a indicadores de estado e a controlos; este chega, sobre as
+     três superfícies claras. Ver `acentoSinal` em fichas.ts. */
+  --bo-acento-sinal: #D85A44;
   --bo-realce: #DDEA91;
 
   /* ── Superfícies ───────────────────────────────────────────────────────── */
@@ -271,9 +275,15 @@ p { margin: 0; }
   font-family: var(--bo-fonte-corpo); font-size: 16px; font-weight: 600;
   cursor: pointer; white-space: nowrap;
 }
+/* O separador activo tem DOIS sinais, e só um deles é cor.
+   O sublinhado usa o acento-sinal (3,30:1 na pior superfície clara); o peso do
+   rótulo sobe para 700. Um par de tons entre texto secundário e primário é uma
+   pista só-cor, e não resgata um indicador que não chega ao mínimo — foi o
+   defeito que fechou o E02 à primeira revisão. */
 .bo-separadores__botao[aria-selected='true'] {
   color: var(--bo-texto-primario);
-  border-bottom-color: var(--bo-acento);
+  font-weight: 700;
+  border-bottom-color: var(--bo-acento-sinal);
 }
 .bo-separadores__painel { padding-top: var(--bo-espaco-xl); }
 

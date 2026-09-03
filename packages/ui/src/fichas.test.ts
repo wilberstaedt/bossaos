@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import {
-  alvoDeToque, espaco, estado, foco, grade, linha, marca, movimento,
+  acentoSinal, alvoDeToque, espaco, estado, foco, grade, linha, marca, movimento,
   raio, superficie, texto, tipografia,
 } from './fichas.ts';
 
@@ -33,6 +33,7 @@ function variaveisDaRaiz(): Map<string, string> {
 const CORRESPONDENCIA: Record<string, string> = {
   '--bo-primaria': marca.primaria,
   '--bo-acento': marca.acento,
+  '--bo-acento-sinal': acentoSinal,
   '--bo-realce': marca.realce,
   '--bo-superficie-base': superficie.base,
   '--bo-superficie-suave': superficie.suave,
