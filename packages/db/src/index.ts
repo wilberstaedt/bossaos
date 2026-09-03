@@ -151,3 +151,20 @@ export {
   type Canal, type FiltroDeProdutos, type DadosDeProduto,
   type ResultadoDeEdicao, type DeclaracaoParaGravar,
 } from './catalogo.ts';
+
+export {
+  montarRevisao, publicar, publicacaoActual, preverPublicacao, historicoDeRevisoes,
+  type ItemDaRevisao, type ResultadoDePublicacao,
+} from './publicacao.ts';
+
+export {
+  LIMITE_BYTES, guardarMedia, buscarPorUrl, listarMedia, ligarAoProduto, substituirConteudo,
+  type EntradaDeMedia, type ResultadoDeCarregamento, type RecusaDeBusca,
+} from './media.ts';
+
+export {
+  impressaoDoProduto, traducoesDoProduto, guardarTraducao, textoDoProduto,
+  coberturaDeTraducoes, guardarPrevia, confirmarImportacao, linhasParaGravar,
+  catalogoParaCsv, neutralizarCampo, pedirExportacao, podeDescarregar, listarExportacoes,
+  type LinhaDeTraducao,
+} from './conteudo.ts';
