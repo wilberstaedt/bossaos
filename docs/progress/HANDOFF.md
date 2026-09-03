@@ -1,10 +1,28 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E04 — autenticação, convites e permissões
-**Estado:** implementado pelo JR, **aguardando validação do sénior**.
+**Estado:** **retido na 2ª revisão**, com os quatro pontos de fecho já feitos e a etapa
+**re-declarada**. Aguarda a 3ª e última volta.
 **Próxima ação:** o sénior valida o E04 contra
-`docs/architecture/autenticacao-e-convites.md`, que escreveu no E00. O JR **não** avançou
-para E05.
+`docs/architecture/autenticacao-e-convites.md`, que escreveu no E00.
+
+**O E05 está PARADO, e existe. Como cá chegou, escrito para não ser descoberto por
+acidente** — que é o que a regra nova do `RETOMAR-JR.md` pede:
+
+Entre as 15h21 e as 17h14 o sénior esteve indisponível (sobrecarga do lado do modelo). O
+Matheus pediu-me explicitamente para assumir e seguir — *"assume o controle voce agora"*,
+*"liga voce o motor e toca ficha no bossa"* — e eu segui, com cinco commits: `f1568fe`,
+`3bf1319`, `d0ef2a8`, `adde253` e `1e9b351`. O sénior reviu a atribuição e retirou o tom de
+infracção; o que fica, e não depende de culpa, é que **a revisão do E04 teve de medir o
+commit `11515f1` em vez da árvore**, porque a árvore passou a ter código de outra etapa.
+
+**O que eu devia ter feito e não fiz:** escrever isto aqui no momento em que decidi, e não
+duas horas depois quando o revisor voltou. O trabalho adiantado não é o problema; ele ser
+descoberto por acidente é.
+
+Os commits ficam onde estão, por decisão do sénior, e o E05 será declarado e revisto como
+etapa a sério, com `ALVO-E05` escrito antes de ele o ver. **Quem retomar isto não continua
+o E05 até o E04 estar validado.**
 
 | Etapa | Estado |
 | --- | --- |
@@ -12,7 +30,8 @@ para E05.
 | E01 — repositório e verificação contínua | **validado** · `docs/reviews/E01.md` |
 | E02 — design system, responsividade e idiomas | **validado** à 2ª · `docs/reviews/E02.md`. A 1ª revisão apanhou o acento a pintar um indicador de estado a 2,77:1; corrigido com `acentoSinal` e uma guarda de lista de permissão. |
 | E03 — estrutura multi-tenant e isolamento | **validado** à 2ª · `docs/reviews/E03.md`. A 1ª revisão apanhou o verificador a dizer verde com zero medido; corrigido, e a mesma guarda aplicada às outras provas. |
-| E04 — autenticação, convites e permissões | implementado, **aguardando validação** · `docs/progress/E04.md` |
+| E04 — autenticação, convites e permissões | **reprovado à 1ª, retido à 2ª**, fechado e re-declarado · `docs/progress/E04.md` · `docs/reviews/E04.md` |
+| E05 — planos, entitlements e identidade Starter | **em curso, parado à espera do E04**. Cinco commits feitos durante a indisponibilidade do sénior; declara-se e revê-se como etapa a sério. Ver acima. |
 
 **Primeiras telas.** O E02 é a primeira etapa que toca `coverage.csv`: STATE 001-003,
 005, 007 e 016. Até aqui o medidor de telas esteve a 0 % e isso era verdade, não uma
@@ -109,7 +128,11 @@ o `ALTER DEFAULT PRIVILEGES` fazia as tabelas de sessão nascerem legíveis pelo
 de A dá 404; o **mesmo** com sessão de B dá 200. A ausência de um recurso alheio e a de uma
 organização inexistente saem **byte a byte iguais**.
 
-**91 testes unitários + 24 asserções de acesso + 4 de fuso, 0 falhas.**
+**127 asserções unitárias + 24 de acesso + 13 de recuperação e MFA + 4 de fuso, 0 falhas.**
+Por pacote, medido com `./scripts/validar-testes.sh`: domain 38 · ui 37 · i18n 16 ·
+config 14 · **auth 12** · db 5 · storage 5, mais o `worker` declarado a zero. A contagem
+anterior dizia 91 e não mencionava o `auth` — o pacote que guarda a revogação estava sem
+um único teste e saía verde por não haver nada que corresse.
 
 O achado que mais me interessa: **o Prisma lia o relógio duas horas adiantado** e por isso
 um convite expirado era aceite. Não era defeito dos convites — seria de todos os prazos,
