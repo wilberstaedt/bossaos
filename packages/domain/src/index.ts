@@ -71,3 +71,19 @@ export {
   validarGrupo, validarEscolhas,
   type GrupoDeModificadores, type ErroDeEscolha,
 } from './modificadores.ts';
+
+export {
+  neutralizarCampo, paraCsv, lerCsv, detectarSeparador,
+  type OpcoesDeEscrita, type LeituraDeCsv, type ProblemaDeLinha,
+} from './csv.ts';
+
+export {
+  classificarIp, lerIpv4, validarUrlDeBusca, algumEnderecoInterno,
+  type ClasseDeEndereco, type DecisaoDeEndereco, type RecusaDeEndereco,
+} from './enderecos.ts';
+
+export {
+  IMAGENS_PERMITIDAS, tipoPorConteudo, aceitarFicheiro,
+  type TipoDeFicheiro, type PedidoDeFicheiro, type ResultadoDeFicheiro,
+  type RecusaDeFicheiro, type Aceitacao,
+} from './ficheiros.ts';
