@@ -64,6 +64,21 @@ migração `e05` com carimbo posterior ao `e06` que dela depende parte a cadeia 
 base nova. **Medi o estado e não o caminho até ele**, que é a frase que já estava neste
 ficheiro. Escrevê-la não chegou; o que faltava era um **passo**.
 
+**8-bis. `git commit` leva tudo o que está em preparação, não só o que acabei de nomear.**
+A 2026-09-03 escrevi `git add <dois ficheiros> && git commit` e o commit `71ac09c` levou
+também **duas migrações renomeadas** — trabalho do JR a meio, que tinha ficado em preparação
+de um `git add -A` meu anterior. A CI mediu esse estado misto e reprovou a prova das
+descidas; eu diagnostiquei mal duas vezes antes de ir ver, e a prova em si estava boa (três
+corridas seguidas a zero).
+
+Duas consequências, e a segunda é pior: um commit meu contém trabalho que **eu não revi**;
+e um vermelho de CI que não corresponde a defeito nenhum ensina a ignorar vermelhos.
+
+A partir daqui: `git commit -o <caminhos>` quando quero só aqueles, ou ler
+`git diff --cached --stat` **antes** de commitar. E os instantâneos do trabalho do JR ficam
+**locais**, como já estava escrito — foi a regra que eu próprio escrevi às 14h55 e não
+apliquei.
+
 **8. Aplicar a mim a régua que acabei de dar.** Sempre, no mesmo dia. A 2026-09-03 exigi
 ao JR uma guarda contra o instrumento medir zero e, vinte minutos depois, encontrei
 exactamente o mesmo defeito no **meu** `estado.sh`: contava telas por conferir como
