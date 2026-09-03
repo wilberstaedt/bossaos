@@ -36,6 +36,7 @@ concurrency:
 jobs:
   rapido:
     name: Rápido — sem base nem navegador
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     env:
@@ -131,6 +132,7 @@ jobs:
 
   base:
     name: Base — migrações e provas
+    runs-on: ubuntu-latest
     timeout-minutes: 20
 
     services:
@@ -284,6 +286,7 @@ jobs:
 
   navegador:
     name: Navegador — inspecção visual
+    runs-on: ubuntu-latest
     timeout-minutes: 20
 
     services:
