@@ -266,6 +266,33 @@ motivo para acreditar que algo está bem, o estado honesto é NÃO MEDI** — nu
 provavelmente bem». Já tinha isto escrito para o produto; faltava aplicá-lo às minhas
 próprias assinaturas.
 
+## Uma reposição não se testa desligando-a na base que se usa
+
+A 04/09 o JR entregou um passo 9 novo — «as funções da base ficaram como as encontrei» —
+depois de descobrir que a prova do E09 **repunha a fuga** que o E09 tinha corrigido: a
+reposição replicava à mão a migração anterior ao filtro de unidade, e o passo 7 dizia
+«voltou ao verde» porque nada media a fuga.
+
+Fui fazer o que devo fazer: um instrumento novo que nunca falhou não se sabe se falha.
+Desliguei a reposição e o passo 9 apanhou-a, com o diff a mostrar a linha em falta. **A
+prova do instrumento correu bem.**
+
+**O que correu mal foi onde a fiz.** Ao desligar a reposição, os passos que plantam funções
+defeituosas deixaram-nas plantadas — e a base de desenvolvimento ficou com quatro funções
+partidas. Pior: a corrida seguinte tirou o retrato **dessa** base, por isso o passo 9 passou
+a comparar defeituoso com defeituoso e dizia verde enquanto os testes funcionais reprovavam.
+Gastei quatro tentativas a remendar migração a migração antes de fazer a coisa certa, que
+era **reconstruir da fonte de verdade**: apagar a base e reaplicar as migrações por ordem.
+
+**A regra:** um mecanismo de **reposição** testa-se numa base descartável, nunca na que
+está a ser usada — desligar uma reposição deixa por repor exactamente aquilo que ela repõe.
+O projecto já tinha o padrão certo à vista: o `provar-migracoes-do-zero.sh` cria uma
+`BASE_CTL` só para o controlo. Eu tinha-o escrito e não o apliquei quando era a minha vez.
+
+E o corolário que dói mais: **passei a noite a exigir que quem suja apanhe a sujidade, e a
+seguir sujei a base de desenvolvimento a meio do trabalho do JR.** A reparação certa não
+foi remendar — foi deitar fora e reconstruir do que é verdade.
+
 ## O que bloqueia e o que não
 
 **Bloqueia:** afirmação do handoff que não se confirma; dependência externa simulada com
