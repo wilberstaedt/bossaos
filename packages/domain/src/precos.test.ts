@@ -163,19 +163,31 @@ describe('3. Moeda não se converte, e sem preço não é zero', () => {
 
 describe('4. A origem é visível, e a base diz quem afecta', () => {
   it('cada canal traz o seu preço e a sua origem', () => {
+    // `?.ok && ?.herdado` não estreita a união: são duas leituras do mapa e o
+    // compilador não sabe que dão o mesmo. Uma função que exige o `ok` resolve
+    // isso E falha alto quando o preço não resolve, em vez de comparar
+    // `undefined` com `false` e passar por acaso.
+    const resolvido = (m: ReturnType<typeof precosPorCanal>, canal: string) => {
+      const r = m.get(canal);
+      assert.ok(r, `sem resultado para ${canal}`);
+      assert.ok(r.ok, `${canal} não resolveu: ${r.ok === false ? r.erro : ''}`);
+      return r;
+    };
+
     const mapa = precosPorCanal(
       [base(800), { id: 'take', montanteMenor: 850, moeda: 'EUR', locationId: UNIDADE, canal: 'takeaway' }],
       ['carta', 'sala', 'takeaway'], UNIDADE, 'EUR',
     );
-    assert.equal(mapa.get('carta')?.ok && mapa.get('carta')?.herdado, true);
-    assert.equal(mapa.get('takeaway')?.ok && mapa.get('takeaway')?.herdado, false);
+    assert.equal(resolvido(mapa, 'carta').herdado, true);
+    assert.equal(resolvido(mapa, 'takeaway').herdado, false);
+
     // O mesmo NÚMERO com origens diferentes é o caso que o atlas desenha: sem a
     // origem, quem edita não sabe se muda aquele canal ou a herança de todos.
     const so = precosPorCanal([base(800), { id: 'igual', montanteMenor: 800, moeda: 'EUR', locationId: UNIDADE, canal: 'sala' }],
       ['carta', 'sala'], UNIDADE, 'EUR');
-    assert.equal(so.get('carta')?.ok && so.get('carta')?.preco.montanteMenor, 800);
-    assert.equal(so.get('sala')?.ok && so.get('sala')?.preco.montanteMenor, 800);
-    assert.notEqual(so.get('carta')?.ok && so.get('carta')?.herdado, so.get('sala')?.ok && so.get('sala')?.herdado);
+    assert.equal(resolvido(so, 'carta').preco.montanteMenor, 800);
+    assert.equal(resolvido(so, 'sala').preco.montanteMenor, 800);
+    assert.notEqual(resolvido(so, 'carta').herdado, resolvido(so, 'sala').herdado);
   });
 
   it('mudar a base afecta só quem HERDA', () => {
