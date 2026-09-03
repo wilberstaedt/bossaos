@@ -75,8 +75,16 @@ suspeitava.
 - O JR tem **motor próprio**, a 20 minutos em minutos ímpares, e sobrevive à minha morte.
   Se eu desaparecer, ele continua — e a regra dele diz para fazer trabalho que **não dependa
   da etapa em revisão**. Está em `RETOMAR-JR.md`.
-- **Pendência aberta:** dividir a CI em três trabalhos paralelos. Medição, plano e o momento
-  certo estão em `docs/progress/CI-CUSTO.md`.
+- **A CI já está em três trabalhos paralelos** (`rápido`, `base`, `navegador`), feito a
+  2026-09-03 às 22h00. **Não repetir.**
+- **Pendência viva:** dividir o **`base`** em três ramos — o MFA sozinho, `acesso`+`catálogo`,
+  e as outras oito. O `base` leva **543 s dos 548 s** do relógio, e o desenho já está feito
+  com as medições em `docs/progress/CI-CUSTO.md`. Condição: **árvore parada** e validar
+  contra o **esquema** do Actions, não contra o analisador de YAML — foi assim que empurrei
+  três trabalhos sem `runs-on`.
+- **Pendência menor:** o `validar-testes.sh` corre os testes uma segunda vez só para os
+  contar. Funde-se com o trabalho dos testes quando o `base` for dividido; **não trocar um
+  pelo outro sem medir**, porque o `pnpm test` corre em paralelo e a guarda em série.
 - As seis guardas (`validar-cobertura`, `varrer-segredos`, `validar-testes`, `validar-ordem`,
   `validar-dinheiro`, `provar-migracoes-do-zero`) nasceram **todas de defeitos meus**, não
   dele. Se uma delas parecer paranóica, ler o comentário no topo antes de a enfraquecer.
