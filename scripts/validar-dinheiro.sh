@@ -50,9 +50,8 @@ echo "2. parseFloat em codigo de produto"
 # Playwright que leem CSS - opacidade, tamanho de letra, largura de borda - e esses
 # sao decimais a serio. Excluir uma pasta inteira e como as guardas ficam cegas, por
 # isso a lista e curta e cada entrada tem motivo: testes, provas, e inspeccao.
-achados=$(git ls-files '*.ts' '*.tsx' | grep -vE "\.test\.|^provas/|^inspeccao/" | while IFS= read -r f; do
-  sed -E 's|//.*$||; s|^[[:space:]]*\*.*$||' "$f" | grep -nE "parseFloat" | sed "s|^|${f}:|"
-done)
+achados=$(git ls-files '*.ts' '*.tsx' | grep -vE "\.test\.|^provas/|^inspeccao/" \
+  | xargs python3 scripts/sem-comentarios.py 2>/dev/null | grep -E "parseFloat" || true)
 if [ -n "$achados" ]; then
   erro "parseFloat em codigo de produto:"
   printf '%s\n' "$achados" | head -5 | sed 's/^/          /'

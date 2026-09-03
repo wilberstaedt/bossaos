@@ -55,9 +55,9 @@ echo "3. Ausencia nunca vira 'nao contem'"
 # Tira comentarios antes de procurar - mesma calibragem do validar-dinheiro.sh, e
 # pela mesma razao: o catalogo.ts MENCIONA `?? 'NAO_CONTEM'` para explicar que nao
 # o faz. Uma guarda que nao distingue codigo de comentario castiga quem documenta.
-queda=$(git ls-files '*.ts' '*.tsx' | grep -vE "\.test\.|^provas/" | while IFS= read -r f; do
-  sed -E 's|//.*$||; s|^[[:space:]]*\*.*$||' "$f" | grep -nE "(\?\?|\|\|)[[:space:]]*'NAO_CONTEM'|:[[:space:]]*'NAO_CONTEM'[[:space:]]*[,;)]" | sed "s|^|${f}:|"
-done)
+queda=$(git ls-files '*.ts' '*.tsx' | grep -vE "\.test\.|^provas/" \
+  | xargs python3 scripts/sem-comentarios.py 2>/dev/null \
+  | grep -E "(\?\?|\|\|)[[:space:]]*'NAO_CONTEM'|:[[:space:]]*'NAO_CONTEM'[[:space:]]*[,;)]" || true)
 if [ -n "$queda" ]; then
   erro "ausencia a cair em NAO_CONTEM:"
   printf '%s\n' "$queda" | head -4 | sed 's/^/          /'
