@@ -20,7 +20,7 @@ vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); 
 
 ler() {
   python3 - "$@" <<'PY'
-import pathlib, re, sys
+import pathlib, re, subprocess, sys
 
 css = set()
 for f in pathlib.Path('packages/ui/src').rglob('*.css'):
@@ -33,14 +33,41 @@ for raiz in raizes:
         if '.next' in f.parts:
             continue
         texto = f.read_text(encoding='utf-8')
-        # `className="a b"` e `className={'a b'}` / crases. Só cadeias literais:
-        # um nome montado em tempo de execução não se pode verificar aqui, e
-        # fingir que sim seria pior do que não olhar.
-        for m in re.findall(r'className=(?:"([^"]*)"|\{`([^`{}]*)`\}|\{\'([^\']*)\'\})', texto):
-            for pedaco in m:
-                for c in pedaco.split():
-                    if c.startswith('bo-'):
-                        usadas.setdefault(c, set()).add(str(f))
+        # A 04/09 isto ancorava em `className=` e via só três formas. Uma classe
+        # escrita como `className={a ? 'bo-x' : 'bo-y'}` — JSX corrente — era
+        # INVISÍVEL: provei-o com a mesma classe inexistente nas duas formas, e a
+        # simples reprovava enquanto a condicional dizia 0 falhas.
+        #
+        # A correcção não é acrescentar mais uma forma à expressão. Isso seria
+        # vigiar um ESTILO de escrita em vez da propriedade, que é exactamente o
+        # defeito que hoje custou uma retenção no E09 e dois buracos em guardas
+        # minhas. Passa a ler os `bo-*` de QUALQUER cadeia literal do ficheiro —
+        # aspas, plicas ou crases —, seja qual for a forma que os envolve.
+        #
+        # Comentários fora, pelo leitor comum: um `bo-*` num comentário é uma
+        # menção e não um uso, e menção não é medição.
+        limpo = subprocess.run(
+            [sys.executable, 'scripts/sem-comentarios.py', str(f)],
+            capture_output=True, text=True).stdout or texto
+        for pedaco in re.findall(r'"([^"\n]*)"|\'([^\'\n]*)\'|`([^`]*)`', limpo):
+            for parte in pedaco:
+                for bruto in parte.split():
+                    # Extrai-se o PREFIXO válido em vez de aparar pontuação caso a
+                    # caso. Aparei aspas, apareceu `bo-botao--fantasma'}`; aparar
+                    # símbolo a símbolo é perseguir a forma outra vez, que é o
+                    # defeito que ando a corrigir hoje. Um nome de classe é
+                    # [A-Za-z0-9_-]; tudo o resto é o literal à volta.
+                    #
+                    # Nome com interpolação fica de fora, e é deliberado: o sufixo
+                    # de `bo-etiqueta--${tom}` só existe em execução, e o prefixo
+                    # sozinho não é uma classe. Perder um uso é seguro nesta
+                    # guarda — ela falha por "usada sem definição", por isso o erro
+                    # conservador é ver de menos, nunca inventar de mais.
+                    if '${' in bruto:
+                        continue
+                    achado = re.match(r'bo-[A-Za-z0-9_-]*', bruto)
+                    if achado:
+                        usadas.setdefault(achado.group(0), set()).add(str(f))
 
 # Guarda de leitor cego: se o CSS não for lido, tudo "existe" por vacuidade.
 if len(css) < 100:
@@ -80,6 +107,30 @@ if grep -q '^FALTA bo-classe-que-nao-existe' <<<"$(ler)"; then
   verde "apanhou a classe inventada"
 else
   vermelho "não apanhou uma classe que não existe — o guarda não mede nada"
+fi
+cp "$COPIA" "$ALVO"
+
+echo "3. CONTROLO NEGATIVO — a mesma classe na forma CONDICIONAL"
+# Corre SEPARADO do anterior, e a razão é um erro meu de hoje: pus duas sondas no
+# mesmo ficheiro e a primeira fazia a guarda falhar sozinha, mascarando a segunda
+# — o controlo passava com o detector partido. Uma sonda que tapa outra mede a
+# sonda mais fácil e não a propriedade.
+#
+# Esta forma era INVISÍVEL até 04/09: a leitura ancorava em `className=` e via só
+# três formas, por isso `className={a ? 'bo-x' : 'bo-y'}` — JSX corrente — passava
+# sem ninguém dar por ela. Provei-o com a mesma classe inexistente nas duas
+# formas: a simples reprovava, a condicional dizia 0 falhas.
+cp "$ALVO" "$COPIA"
+python3 - "$ALVO" <<'PY'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding='utf-8')
+p.write_text(s.replace('className="bo-pagina"',
+  "className={true ? 'bo-pagina bo-condicional-inexistente' : 'bo-pagina'}", 1), encoding='utf-8')
+PY
+if grep -q '^FALTA bo-condicional-inexistente' <<<"$(ler)"; then
+  verde "apanhou a classe inventada na forma condicional"
+else
+  vermelho "a forma condicional voltou a ser invisível — a leitura está a vigiar um estilo"
 fi
 cp "$COPIA" "$ALVO"
 
