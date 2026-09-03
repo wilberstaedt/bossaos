@@ -16,7 +16,8 @@
   "dependencies": {
     "@prisma/client": "7.10.0",
     "@prisma/adapter-pg": "7.10.0",
-    "pg": "8.23.0"
+    "pg": "8.23.0",
+    "@bossaos/domain": "workspace:*"
   },
   "devDependencies": {
     "prisma": "7.10.0",

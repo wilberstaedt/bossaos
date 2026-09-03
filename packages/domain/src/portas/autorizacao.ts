@@ -1,4 +1,5 @@
 import type { ContextoDeInquilino } from '../tenant.ts';
+import { podeFazer, type Accao, type Concessao } from '../permissoes.ts';
 
 /**
  * Porta de autorização — o contrato que o E04 vai preencher.
@@ -15,8 +16,6 @@ import type { ContextoDeInquilino } from '../tenant.ts';
  * upgrade — ou, pior, o suporte concede um papel para resolver um problema de
  * plano.
  */
-export type Accao = string;
-
 export interface PedidoDeAutorizacao {
   contexto: ContextoDeInquilino;
   accao: Accao;
@@ -35,14 +34,41 @@ export interface PortaDeAutorizacao {
 }
 
 /**
- * Implementação do E03: **nega tudo**.
+ * A porta que **nega tudo**.
  *
- * Não há autenticação ainda, e uma porta que deixasse passar "enquanto não há
- * auth" é a porta que fica aberta. O E03 entrega o contrato e o comportamento
- * seguro; o E04 entrega a decisão real.
+ * Era a implementação do E03, quando ainda não havia autenticação — uma porta
+ * que deixasse passar "enquanto não há auth" é a porta que fica aberta. Continua
+ * aqui, e não como relíquia: é o valor por omissão de qualquer superfície que
+ * ainda não tenha decidido as suas permissões, e é o que um teste usa para
+ * provar que uma rota exige mesmo autorização.
  */
 export const negarTudo: PortaDeAutorizacao = {
   async decidir(pedido) {
     return { permitido: false, motivo: 'sem_permissao', accao: pedido.accao };
   },
 };
+
+/**
+ * A implementação real do E04: decide pelas concessões do actor.
+ *
+ * As outras duas verificações do CT-02 — entitlement e flag — não estão aqui
+ * porque **ainda não existem tabelas para elas**: planos são E05 e flags são
+ * E33. A porta já as devolve como motivos distintos, e é isso que impede que
+ * quando chegarem sejam achatadas num booleano com a permissão. Enquanto não
+ * existem, esta porta responde sobre permissão e mais nada — dito por extenso
+ * em vez de dado por resolvido.
+ */
+export function autorizacaoPorConcessoes(
+  concessoes: readonly Concessao[],
+): PortaDeAutorizacao {
+  return {
+    async decidir(pedido) {
+      const recurso = {
+        ...(pedido.recurso?.brandId ? { brandId: pedido.recurso.brandId } : {}),
+        ...(pedido.recurso?.locationId ? { locationId: pedido.recurso.locationId } : {}),
+      };
+      if (podeFazer(concessoes, pedido.accao, recurso)) return { permitido: true };
+      return { permitido: false, motivo: 'sem_permissao', accao: pedido.accao };
+    },
+  };
+}

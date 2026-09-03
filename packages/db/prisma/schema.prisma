@@ -64,6 +64,8 @@ model Organization {
   locations       Location[]
   memberships     Membership[]
   roleAssignments RoleAssignment[]
+  invitations     Invitation[]
+  auditEvents     AuditEvent[]
 
   @@map("organizations")
 }
@@ -82,6 +84,7 @@ model Brand {
   organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   locations       Location[]
   roleAssignments RoleAssignment[]
+  invitations     Invitation[]
 
   /// Alvo das referências compostas. Sem isto, o resto não se pode escrever.
   @@unique([organizationId, id], name: "brand_por_organizacao")
@@ -113,6 +116,7 @@ model Location {
   brand        Brand        @relation(fields: [organizationId, brandId], references: [organizationId, id], onDelete: Restrict)
 
   roleAssignments RoleAssignment[]
+  invitations     Invitation[]
 
   @@unique([organizationId, id], name: "location_por_organizacao")
   @@unique([organizationId, slug])
@@ -127,12 +131,109 @@ model User {
   id        String   @id @default(uuid()) @db.Uuid
   email     String   @unique
   nome      String
+  /// E04: a biblioteca de autenticação escreve isto. O campo dela chama-se
+  /// `name` e aponta para `nome` por configuração — a identidade continua a ser
+  /// UMA tabela, e não duas a fingir que são a mesma pessoa.
+  emailVerified Boolean @default(false) @map("email_verified")
+  image         String?
+  /// MFA. Em TODOS os planos, não num escalão acima: a segurança da conta de
+  /// quem trabalha no restaurante não é uma capacidade que se venda.
+  twoFactorEnabled Boolean @default(false) @map("two_factor_enabled")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  memberships Membership[]
+  memberships   Membership[]
+  sessions      Session[]
+  accounts      Account[]
+  twoFactors    TwoFactor[]
+  convitesFeitos Invitation[] @relation("convidadoPor")
 
   @@map("users")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E04 — sessão e credenciais.
+//
+// Estas três tabelas pertencem ao caminho de AUTENTICAÇÃO e o papel de runtime
+// não tem privilégio nenhum sobre elas. Não é zelo: uma sessão é uma credencial
+// viva, e o processo que serve o catálogo de um restaurante não precisa de
+// conseguir ler a sessão de ninguém — nem a própria.
+//
+// A forma dos campos é a que a biblioteca espera. Confirmada contra a definição
+// dela em `@better-auth/core/dist/db/get-tables.mjs`, e depois **verificada a
+// correr**: um registo e um início de sessão a sério contra esta base.
+// ═══════════════════════════════════════════════════════════════════════════
+
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  token     String   @unique
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  userId    String   @map("user_id") @db.Uuid
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(uuid()) @db.Uuid
+  issuer                String    @default("credential")
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  userId                String    @map("user_id") @db.Uuid
+  accessToken           String?   @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  idToken               String?   @map("id_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at") @db.Timestamptz(6)
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at") @db.Timestamptz(6)
+  scope                 String?
+  /// Guardada pela biblioteca, com o algoritmo dela. Nunca por nós: o E04 é
+  /// explícito em não construir criptografia nem armazenamento de senha próprios.
+  password              String?
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+/// Segundo factor. `secret` e `backupCodes` são guardados e cifrados pela
+/// biblioteca — nós não lhes tocamos, e vivem nas tabelas que o runtime não vê.
+model TwoFactor {
+  id                      String    @id @default(uuid()) @db.Uuid
+  secret                  String
+  backupCodes             String    @map("backup_codes")
+  userId                  String    @map("user_id") @db.Uuid
+  verified                Boolean   @default(true)
+  failedVerificationCount Int       @default(0) @map("failed_verification_count")
+  lockedUntil             DateTime? @map("locked_until") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([secret])
+  @@map("two_factors")
+}
+
+model Verification {
+  id         String   @id @default(uuid()) @db.Uuid
+  identifier String
+  value      String
+  expiresAt  DateTime @map("expires_at") @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([identifier])
+  @@map("verifications")
 }
 
 enum EstadoDeMembro {
@@ -210,4 +311,86 @@ model RoleAssignment {
   @@index([organizationId])
   @@index([organizationId, membershipId])
   @@map("role_assignments")
+}
+
+/// Estado de um convite. Derivado, mas guardado: o histórico de quem foi
+/// convidado e nunca aceitou é informação de gestão, não lixo.
+enum EstadoDeConvite {
+  PENDENTE
+  ACEITE
+  REVOGADO
+
+  @@map("estado_de_convite")
+}
+
+/// Convite para uma organização.
+///
+/// **Um convite é uma credencial**, e é isso que explica cada campo:
+///
+///  - `tokenHash` e não `token`: o que viaja no email é o segredo; o que fica na
+///    base é o resumo dele. Uma cópia de segurança lida por alguém não dá
+///    acesso a nada, e nem nós conseguimos reemitir o link original.
+///  - `papel`, `brandId`, `locationId` vivem AQUI. Na aceitação não se lê nada
+///    disto do corpo do pedido — se se lesse, quem foi convidado como `WAITER`
+///    aceitava-se como `OWNER`. É o defeito mais banal desta área.
+///  - `email`: o convite é da pessoa convidada, não de quem receber o link.
+///  - `expiresAt` vem de configuração, não de uma constante escolhida por quem
+///    programa.
+///  - `acceptedAt` faz o uso único: aceitar duas vezes não cria duas pertenças.
+model Invitation {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  email          String
+  papel          Papel
+  brandId        String? @map("brand_id") @db.Uuid
+  locationId     String? @map("location_id") @db.Uuid
+
+  /// SHA-256 do token. O token em claro só existe no email.
+  tokenHash String @unique @map("token_hash")
+
+  estado     EstadoDeConvite @default(PENDENTE)
+  expiresAt  DateTime        @map("expires_at") @db.Timestamptz(6)
+  acceptedAt DateTime?       @map("accepted_at") @db.Timestamptz(6)
+  revokedAt  DateTime?       @map("revoked_at") @db.Timestamptz(6)
+
+  /// Quem convidou. A concessão não pode passar o escopo desta pessoa (CT-04),
+  /// e sem o registo não há como auditar quem abriu a porta a quem.
+  convidadoPorId String @map("convidado_por_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  brand        Brand?       @relation(fields: [organizationId, brandId], references: [organizationId, id], onDelete: Restrict)
+  location     Location?    @relation(fields: [organizationId, locationId], references: [organizationId, id], onDelete: Restrict)
+  convidadoPor User         @relation("convidadoPor", fields: [convidadoPorId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@index([organizationId, email])
+  @@map("invitations")
+}
+
+/// Rasto de acções sensíveis (E04, entrega 5).
+///
+/// Concessões, revogações e acesso assistido. Sem `actor` e `motivo` não é
+/// auditoria — é um log. Append-only por gatilho na migração: uma auditoria que
+/// se pode editar não serve para o que existe.
+model AuditEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  /// Quem fez. Sem FK para User de propósito: o rasto sobrevive ao apagamento.
+  actorId        String?  @map("actor_id") @db.Uuid
+  actorEmail     String?  @map("actor_email")
+  accao          String
+  alvoTipo       String?  @map("alvo_tipo")
+  alvoId         String?  @map("alvo_id") @db.Uuid
+  motivo         String?
+  /// Detalhe estruturado. Nunca senhas, nunca tokens (CT-04).
+  detalhe        Json?
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, createdAt])
+  @@map("audit_events")
 }

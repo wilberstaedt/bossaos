@@ -33,6 +33,19 @@ const schema = z.object({
    * precisamente porque este não deve tê-la.
    */
   MIGRATION_DATABASE_URL: urlPostgres.optional(),
+  /**
+   * Credencial da AUTENTICAÇÃO GLOBAL (E04). O terceiro acesso do CT-04: vê
+   * identidades e sessões, e não vê uma linha de inquilino. Separada da de
+   * runtime de propósito — o processo que serve o catálogo de um restaurante
+   * não precisa de conseguir ler a sessão de ninguém.
+   */
+  AUTH_DATABASE_URL: urlPostgres,
+
+  /** Segredo da biblioteca de autenticação. Nunca aparece em log nem em erro. */
+  BETTER_AUTH_SECRET: z.string().min(32, 'tem de ter pelo menos 32 caracteres'),
+  BETTER_AUTH_URL: z.string().url(),
+  /** Validade de um convite, em horas. Configuração, não constante no código. */
+  CONVITE_VALIDADE_HORAS: z.coerce.number().int().positive().default(72),
 
   /** Serviço de e-mail de teste em desenvolvimento (Mailpit). */
   SMTP_HOST: z.string().min(1).default('127.0.0.1'),

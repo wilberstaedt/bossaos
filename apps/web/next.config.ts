@@ -3,6 +3,7 @@ import type { NextConfig } from 'next';
 const config: NextConfig = {
   // Os pacotes do workspace são TypeScript por compilar: o Next transpila-os.
   transpilePackages: [
+    '@bossaos/auth',
     '@bossaos/config',
     '@bossaos/db',
     '@bossaos/domain',

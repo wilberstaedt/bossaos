@@ -15,10 +15,19 @@ export {
 } from './tenant.ts';
 
 export {
-  negarTudo,
-  type PortaDeAutorizacao, type PedidoDeAutorizacao, type Decisao, type Accao,
+  negarTudo, autorizacaoPorConcessoes,
+  type PortaDeAutorizacao, type PedidoDeAutorizacao, type Decisao,
 } from './portas/autorizacao.ts';
 
 export {
   chaveDeCache, prefixoDeMedia, nomeDeEvento, chaveDeTarefa, type EscopoDeChave,
 } from './chaves.ts';
+
+export {
+  ACCOES, alcanca, podeFazer, accoesPermitidas, podeConceder, accoesDoPapel,
+  type Accao, type Papel, type Concessao, type EscopoDoRecurso,
+} from './permissoes.ts';
+
+export {
+  decidirLeitura, exigirAccao, estadoHttp, corpoDaResposta, type Resultado,
+} from './acesso.ts';

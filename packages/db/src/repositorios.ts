@@ -104,3 +104,75 @@ export function filiacoesDoUtilizador(db: ClienteComIdentidade) {
 export function euProprio(db: ClienteComIdentidade) {
   return db.user.findFirst({ select: { id: true, email: true, nome: true } });
 }
+
+// ── Pertenças e concessões (E04) ────────────────────────────────────────────
+
+/**
+ * As concessões de um actor nesta organização.
+ *
+ * É daqui que sai a resposta a "este actor pode?". Não vem da sessão, não vem
+ * da URL: vem da base, a cada pedido, com a política de linha activa. É isso que
+ * faz uma revogação notar-se ao pedido seguinte em vez de quando a sessão
+ * expirar.
+ */
+export async function concessoesDoActor(db: ClienteComEscopo, userId: string) {
+  const pertenca = await db.membership.findFirst({
+    where: { userId, estado: 'ACTIVO' },
+    select: {
+      id: true,
+      roleAssignments: { select: { papel: true, brandId: true, locationId: true } },
+    },
+  });
+  if (!pertenca) return null;
+  return {
+    membershipId: pertenca.id,
+    concessoes: pertenca.roleAssignments.map((r) => ({
+      papel: r.papel,
+      ...(r.brandId ? { brandId: r.brandId } : {}),
+      ...(r.locationId ? { locationId: r.locationId } : {}),
+    })),
+  };
+}
+
+export function pessoasEAcessos(db: ClienteComEscopo) {
+  return db.membership.findMany({
+    select: {
+      id: true,
+      estado: true,
+      user: { select: { id: true, nome: true, email: true } },
+      roleAssignments: { select: { papel: true, brandId: true, locationId: true } },
+    },
+    orderBy: { createdAt: 'asc' },
+  });
+}
+
+/**
+ * Revoga uma pertença.
+ *
+ * **Não apaga.** O histórico de quem teve acesso é obrigação, não conveniência —
+ * e apagar tornaria impossível responder a "quem podia ver isto em Março".
+ *
+ * Recusa revogar o ÚLTIMO owner: uma organização sem owner não tem quem lhe
+ * devolva o acesso, e a recuperação passa a ser um pedido de suporte.
+ */
+export async function revogarPertenca(
+  db: ClienteComEscopo,
+  membershipId: string,
+): Promise<{ ok: true; userId: string } | { ok: false; motivo: 'ultimo_owner' | 'nao_encontrado' }> {
+  const alvo = await db.membership.findFirst({
+    where: { id: membershipId },
+    select: { id: true, userId: true, roleAssignments: { select: { papel: true } } },
+  });
+  if (!alvo) return { ok: false, motivo: 'nao_encontrado' };
+
+  const eOwner = alvo.roleAssignments.some((r) => r.papel === 'OWNER');
+  if (eOwner) {
+    const owners = await db.roleAssignment.count({
+      where: { papel: 'OWNER', membership: { estado: 'ACTIVO' } },
+    });
+    if (owners <= 1) return { ok: false, motivo: 'ultimo_owner' };
+  }
+
+  await db.membership.update({ where: { id: membershipId }, data: { estado: 'REVOGADO' } });
+  return { ok: true, userId: alvo.userId };
+}

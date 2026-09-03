@@ -8,6 +8,13 @@
 #
 #   bossaos_migrate  dono do schema, faz DDL. Só os comandos de migração a usam.
 #   bossaos_app      liga-se e faz DML. NÃO pode criar, alterar nem apagar tabelas.
+#   bossaos_auth     (E04) só identidade e sessão. NÃO vê dados de inquilino.
+#
+# O terceiro é o quarto acesso que o CT-04 manda separar — migração, runtime,
+# autenticação global e leitura pública. A separação não é cerimónia: uma sessão
+# é uma credencial viva, e o processo que serve o catálogo de um restaurante não
+# precisa de conseguir ler a sessão de ninguém. E ao contrário: o processo que
+# autentica não precisa de ver uma única linha de facturação.
 #
 # Corre contra o Postgres local (Homebrew). Não usa Docker de propósito: esta
 # máquina tem 16 GB e um bug de rede do macOS que já causou kernel panics sob
@@ -18,6 +25,7 @@ DB_DEV="${DB_DEV:-bossaos_dev}"
 DB_TEST="${DB_TEST:-bossaos_test}"
 SENHA_MIG="${SENHA_MIG:-dev_migrate_local}"
 SENHA_APP="${SENHA_APP:-dev_app_local}"
+SENHA_AUTH="${SENHA_AUTH:-dev_auth_local}"
 SUPER="${PGSUPERUSER:-$(whoami)}"
 
 info() { printf '\033[1;34m==>\033[0m %s\n' "$1"; }
@@ -37,10 +45,14 @@ DO \$\$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='bossaos_app') THEN
     CREATE ROLE bossaos_app LOGIN PASSWORD '${SENHA_APP}';
   END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='bossaos_auth') THEN
+    CREATE ROLE bossaos_auth LOGIN PASSWORD '${SENHA_AUTH}';
+  END IF;
 END \$\$;
 -- Idempotente: se o papel ja existia sem CREATEDB, corrige.
 ALTER ROLE bossaos_migrate CREATEDB;
 ALTER ROLE bossaos_app NOCREATEDB NOCREATEROLE NOSUPERUSER;
+ALTER ROLE bossaos_auth NOCREATEDB NOCREATEROLE NOSUPERUSER;
 SQL
 
 for DB in "$DB_DEV" "$DB_TEST"; do
@@ -54,6 +66,14 @@ for DB in "$DB_DEV" "$DB_TEST"; do
   GRANT USAGE ON SCHEMA public TO bossaos_app;
   REVOKE CREATE ON SCHEMA public FROM bossaos_app;
   REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+
+  -- O de autenticação idem, e os privilégios POR TABELA são dados na migração
+  -- do E04, tabela a tabela. Aqui não há `GRANT ... ON ALL TABLES` para ele de
+  -- propósito: um privilégio geral tornaria o próximo `CREATE TABLE` de
+  -- inquilino legível pela autenticação sem ninguém decidir isso.
+  GRANT CONNECT ON DATABASE ${DB} TO bossaos_auth;
+  GRANT USAGE ON SCHEMA public TO bossaos_auth;
+  REVOKE CREATE ON SCHEMA public FROM bossaos_auth;
 
   -- Sobre o que já existe...
   GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO bossaos_app;
@@ -74,6 +94,7 @@ cat <<TXT
 
     DATABASE_URL="postgresql://bossaos_app:${SENHA_APP}@127.0.0.1:5432/${DB_DEV}"
     MIGRATION_DATABASE_URL="postgresql://bossaos_migrate:${SENHA_MIG}@127.0.0.1:5432/${DB_DEV}"
+    AUTH_DATABASE_URL="postgresql://bossaos_auth:${SENHA_AUTH}@127.0.0.1:5432/${DB_DEV}"
 
   E-mail de teste:  pnpm dev:mail   (interface em http://127.0.0.1:8025)
 TXT

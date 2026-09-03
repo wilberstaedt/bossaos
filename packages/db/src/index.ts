@@ -69,7 +69,19 @@ export {
   listarUnidades, obterUnidade, criarUnidade,
   papeisDaFiliacao, filiacoesDaOrganizacao,
   organizacoesDoUtilizador, filiacoesDoUtilizador, euProprio,
+  concessoesDoActor, pessoasEAcessos, revogarPertenca,
   type DadosDeMarca, type DadosDeUnidade,
 } from './repositorios.ts';
+
+export {
+  criarConvite, aceitarConvite, revogarConvite, listarConvites,
+  organizacaoDoConvite, resumoDoToken, resumosIguais,
+  type DadosDeConvite, type ResultadoDeConvite, type ResultadoDeAceitacao,
+  type FalhaAoConvidar, type FalhaAoAceitar,
+} from './convites.ts';
+
+export { registar, listarAuditoria, type EventoDeAuditoria } from './auditoria.ts';
+
+export { obterPrismaDeAutenticacao } from './autenticacao.ts';
 
 export { PrismaClient };

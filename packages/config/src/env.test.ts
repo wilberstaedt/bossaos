@@ -15,7 +15,21 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadEnv, EnvError } from './env.ts';
 
-const VALIDO = { DATABASE_URL: 'postgresql://app:x@127.0.0.1:5432/bossaos_dev' };
+/**
+ * O mínimo cresceu no E04: a autenticação global tem credencial própria e a
+ * biblioteca precisa de segredo e de URL base.
+ *
+ * Actualizar um teste porque o contrato mudou é legítimo; actualizá-lo porque
+ * ficou vermelho não é. Por isso este conjunto não foi só alargado — foram
+ * acrescentados casos que exigem que cada uma das variáveis NOVAS seja mesmo
+ * obrigatória. Se alguém as tornar opcionais para "simplificar", cai aqui.
+ */
+const VALIDO = {
+  DATABASE_URL: 'postgresql://app:x@127.0.0.1:5432/bossaos_dev',
+  AUTH_DATABASE_URL: 'postgresql://auth:x@127.0.0.1:5432/bossaos_dev',
+  BETTER_AUTH_SECRET: 'x'.repeat(32),
+  BETTER_AUTH_URL: 'http://127.0.0.1:3000',
+};
 
 describe('loadEnv', () => {
   test('aceita o minimo e aplica os valores por omissao', () => {
@@ -23,6 +37,36 @@ describe('loadEnv', () => {
     assert.equal(env.NODE_ENV, 'development');
     assert.equal(env.SMTP_PORT, 1025);
     assert.equal(env.STORAGE_DRIVER, 'local');
+  });
+
+  test('cada variavel nova do E04 e mesmo obrigatoria', () => {
+    for (const chave of ['AUTH_DATABASE_URL', 'BETTER_AUTH_SECRET', 'BETTER_AUTH_URL'] as const) {
+      const sem = { ...VALIDO };
+      delete (sem as Record<string, unknown>)[chave];
+      assert.throws(
+        () => loadEnv(sem),
+        (e: unknown) => e instanceof EnvError && e.message.includes(chave),
+        `${chave} devia ser obrigatoria e ser nomeada no erro`,
+      );
+    }
+  });
+
+  test('a credencial da AUTENTICACAO e separada da de runtime', () => {
+    // Se um dia alguem "simplificar" apontando as duas a mesma variavel, o
+    // processo que autentica passa a ver dados de inquilino e ninguem repara.
+    const env = loadEnv(VALIDO);
+    assert.notEqual(env.AUTH_DATABASE_URL, env.DATABASE_URL);
+  });
+
+  test('um segredo curto e recusado, e a mensagem nao o mostra', () => {
+    const curto = { ...VALIDO, BETTER_AUTH_SECRET: 'curto-de-mais' };
+    assert.throws(
+      () => loadEnv(curto),
+      (e: unknown) =>
+        e instanceof EnvError &&
+        e.message.includes('BETTER_AUTH_SECRET') &&
+        !e.message.includes('curto-de-mais'),
+    );
   });
 
   test('falta a base de dados -> erro que diz QUAL variavel falta', () => {
