@@ -23,6 +23,21 @@ if [[ "$NODE_ACTUAL" != "$NODE_ESPERADO" ]]; then
   exit 2
 fi
 
+# ── O fuso do PROCESSO, fixado e DIFERENTE do da unidade ───────────────────
+#
+# Sem isto, o script corria no fuso da máquina. Esta corre em CEST — o mesmo de
+# `Europe/Madrid`, que é o fuso das unidades da prova — e com os dois iguais a
+# conversão é uma NÃO-OPERAÇÃO: um defeito do tipo "usa o relógio do processo em
+# vez do da unidade" passa invisível. Na CI corre em UTC e é exercitada, mas por
+# acidente do ambiente e não por construção, que é a mesma forma de "funcionou
+# até o ambiente mudar".
+#
+# Los Angeles está NOVE horas atrás de Madrid no Verão, e isso escolhe-se: às
+# 00:30 de sábado em Madrid são 15:30 de SEXTA em Los Angeles. Muda a hora, o dia
+# da semana e a data — as três coisas que o motor tem de ir buscar ao fuso da
+# unidade e não ao seu.
+export TZ="America/Los_Angeles"
+
 GRUPOS_ESPERADOS=5
 ASSERCOES_ESPERADAS=19
 falhas=0
@@ -201,7 +216,29 @@ psql "$MIGRATION_DATABASE_URL" -q -c 'ALTER TABLE schedule_days ENABLE ROW LEVEL
 RLS_DESLIGADO=0
 
 echo
-echo "6. Reposto — tem de voltar ao verde"
+echo "6. CONTROLO NEGATIVO — o motor passa a usar o relógio do PROCESSO"
+# O defeito que o fuso fixado torna visível. `momentoLocal` deixa de olhar para o
+# fuso da unidade e usa o do processo — que é Los Angeles, nove horas atrás. As
+# asserções que atravessam a meia-noite têm de cair.
+#
+# Este controlo só funciona porque `TZ` é diferente do fuso da unidade. Com os
+# dois iguais ficaria verde, e um verde aqui diria que a conversão está certa
+# quando o que estava a acontecer era não haver conversão nenhuma.
+semear
+python3 - <<'PY'
+import io
+p = 'packages/domain/src/horarios.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "    timeZone: fuso,"
+assert antigo in s, 'o fuso não está a ser passado ao Intl onde se esperava'
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, "    // defeito plantado: ignora o fuso da unidade\n"))
+PY
+exigir_vermelho "caiu a asserção da meia-noite com o relógio errado" \
+  '20:00-01:00 mantém o sábado' /tmp/bossaos-onb-fuso.txt
+cp "$ORIG_MOTOR" "$MOTOR"
+
+echo
+echo "7. Reposto — tem de voltar ao verde"
 semear
 if correr /tmp/bossaos-onb-reposto.txt; then
   read -r grupos assercoes <<<"$(analisar /tmp/bossaos-onb-reposto.txt)"
@@ -212,7 +249,7 @@ else
 fi
 
 echo
-echo "7. A árvore ficou limpa?"
+echo "8. A árvore ficou limpa?"
 # ── A guarda que faltava, posta onde pertence ──────────────────────────────
 #
 # Esta prova cria unidades. A primeira versão limpava só as organizações, e a
