@@ -18,6 +18,7 @@ const RESTAURANT = new Set(['carta.digital', 'site.restaurante', 'reservas', 'sa
 const TUDO_FEITO: FactosDoArranque = {
   perfilCompleto: true, temMarca: true, temUnidade: true,
   unidadeConfigurada: true, diasDeHorario: 5, pessoasActivas: 3,
+  produtosNoCatalogo: 12,
 };
 const estado = (chave: string, capacidades: ReadonlySet<string>, f = TUDO_FEITO) =>
   listaDeArranque(f, capacidades).find((i) => i.chave === chave)?.estado;
@@ -83,10 +84,26 @@ describe('2. Os cinco itens que se medem hoje', () => {
 });
 
 describe('3. Por medir não bloqueia, e não finge estar feito', () => {
-  it('a carta está POR MEDIR, não pendente nem feita', () => {
+  it('a carta passou a MEDIR-SE quando o E07 trouxe o catálogo', () => {
+    // Era `por_medir` com a razão "a carta chega numa etapa posterior". Chegou.
+    // Um item que continuasse a dizer isso estaria a mentir sobre uma coisa que
+    // está no menu de navegação ao lado.
     const carta = listaDeArranque(TUDO_FEITO, STARTER).find((i) => i.chave === 'carta');
-    assert.equal(carta?.estado, 'por_medir');
-    assert.equal(carta?.razao, 'catalogo');
+    assert.equal(carta?.estado, 'feito');
+
+    // E o par: sem produtos fica PENDENTE, não "por medir". A diferença é que
+    // pendente é uma coisa que a pessoa pode ir fazer hoje.
+    const semCatalogo = listaDeArranque({ ...TUDO_FEITO, produtosNoCatalogo: 0 }, STARTER)
+      .find((i) => i.chave === 'carta');
+    assert.equal(semCatalogo?.estado, 'pendente');
+  });
+
+  it('o QR continua por medir — mas a razão é a publicação, não o catálogo', () => {
+    // A razão estava errada desde o E07: dizia que faltava o catálogo, e o
+    // catálogo já cá está. O que falta ao QR é uma carta PUBLICADA, que é E08.
+    const qr = listaDeArranque(TUDO_FEITO, STARTER).find((i) => i.chave === 'qr');
+    assert.equal(qr?.estado, 'por_medir');
+    assert.equal(qr?.razao, 'publicacao');
   });
 
   it('e por isso não entra nos pendentes', () => {

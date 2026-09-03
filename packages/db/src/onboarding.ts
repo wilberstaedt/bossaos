@@ -195,13 +195,14 @@ export async function arranqueDaOrganizacao(
   organizationId: string,
 ): Promise<{ itens: readonly ItemDeArranque[]; factos: FactosDoArranque }> {
   const perfil = await lerPerfil(db, organizationId);
-  const [marcas, unidades, pessoas, estado] = await Promise.all([
+  const [marcas, unidades, pessoas, produtos, estado] = await Promise.all([
     db.brand.count({ where: { archivedAt: null } }),
     db.location.findMany({
       where: { archivedAt: null },
       select: { id: true, moeda: true, fuso: true },
     }),
     db.membership.count({ where: { estado: 'ACTIVO' } }),
+    db.product.count({ where: { archivedAt: null } }),
     estadoComercial(db, organizationId),
   ]);
 
@@ -221,6 +222,7 @@ export async function arranqueDaOrganizacao(
     unidadeConfigurada: configuradas.length > 0,
     diasDeHorario,
     pessoasActivas: pessoas,
+    produtosNoCatalogo: produtos,
   };
 
   return {

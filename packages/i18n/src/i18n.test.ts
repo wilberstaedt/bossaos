@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path';
 import { IDIOMAS, IDIOMA_PADRAO, resolverIdioma, eIdioma } from './idiomas.ts';
 import { tradutor, textoDeProduto } from './traduzir.ts';
 import { formatarData, formatarDinheiro, formatarHora, formatarNumero } from './formato.ts';
+import { ALERGENIOS_UE, PREFERENCIAS } from '@bossaos/domain';
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
 
@@ -170,4 +171,39 @@ describe('formato regional', () => {
     assert.equal(formatarNumero(1234567.89, 'es-ES'), '1.234.567,89');
     assert.equal(formatarNumero(1234567.89, 'en'), '1,234,567.89');
   });
+});
+
+describe('alérgenos: o dicionário tem de acompanhar o domínio', () => {
+  /**
+   * Este teste existe por causa de um caminho de falha silencioso.
+   *
+   * O ecrã da ficha faz `dicionario[codigo] ?? codigo` — sem entrada, mostra o
+   * código cru. Numa tabela qualquer isso é feio; **na ficha de alérgenos é uma
+   * linha que a pessoa não lê**, e a linha que ela não lê pode ser a dela.
+   *
+   * Acrescentar um alérgeno ao domínio sem o traduzir passaria em tudo o resto:
+   * o TypeScript não vê dentro de um índice de cadeia, e a paridade de chaves só
+   * compara as três línguas **entre si** — todas erradas da mesma maneira está
+   * alinhado. Por isso a comparação é contra a LISTA DO DOMÍNIO, e não contra o
+   * espanhol.
+   */
+  for (const idioma of IDIOMAS) {
+    it(`${idioma} nomeia os catorze do Anexo II e as cinco preferências`, () => {
+      const d = carregar(idioma) as Record<string, Record<string, string>>;
+
+      const traduzidos = Object.keys(d.alergenios ?? {}).sort();
+      assert.deepEqual(traduzidos, [...ALERGENIOS_UE].sort(),
+        `${idioma}: o dicionário de alérgenos não bate certo com o domínio`);
+
+      const prefs = Object.keys(d.preferenciasAlimentares ?? {}).sort();
+      assert.deepEqual(prefs, [...PREFERENCIAS].sort(),
+        `${idioma}: o dicionário de preferências não bate certo com o domínio`);
+
+      // Nenhum nome pode ser o próprio código: seria uma entrada que existe e
+      // não traduz nada, e passaria a asserção de cima.
+      for (const [codigo, nome] of Object.entries(d.alergenios ?? {})) {
+        assert.notEqual(nome, codigo, `${idioma}: "${codigo}" ficou por traduzir`);
+      }
+    });
+  }
 });

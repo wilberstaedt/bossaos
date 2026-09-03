@@ -161,6 +161,17 @@ export function contarPessoas(db: ClienteComEscopo): Promise<number> {
 }
 
 /**
+ * Produtos que contam para a quota.
+ *
+ * Arquivado **não conta**. Um produto arquivado não se vende, e cobrar quota por
+ * ele obrigava a apagar para caber — que é a forma mais rápida de perder a ficha
+ * de alérgenos de um prato que volta na estação seguinte.
+ */
+export function contarProdutos(db: ClienteComEscopo): Promise<number> {
+  return db.product.count({ where: { archivedAt: null } });
+}
+
+/**
  * O catálogo de planos, para o selector. Leitura global, sem inquilino.
  *
  * Aceita os dois clientes marcados de propósito: `plan_definitions` não tem

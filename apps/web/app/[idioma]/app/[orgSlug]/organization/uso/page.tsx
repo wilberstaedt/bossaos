@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { Botao, Cartao } from '@bossaos/ui';
 import { formatarNumero, mensagensDe, type Idioma } from '@bossaos/i18n';
-import { contarPessoas, contarUnidades, estadoComercial } from '@bossaos/db';
+import { contarPessoas, contarProdutos, contarUnidades, estadoComercial } from '@bossaos/db';
 import { comEscopoDoPedido, resolverPedido } from '../../../../../../src/sessao.ts';
 
 export const dynamic = 'force-dynamic';
@@ -43,6 +43,7 @@ export default async function UsoELimites({
   const dados = await comEscopoDoPedido(sessao, async (db) => ({
     unidades: await contarUnidades(db),
     pessoas: await contarPessoas(db),
+    produtos: await contarProdutos(db),
     estado: await estadoComercial(db, sessao.contexto.organizationId),
   }));
 
@@ -54,9 +55,12 @@ export default async function UsoELimites({
   const medidos = [
     { rotulo: m.uso.unidades, valor: dados.unidades, quota: quotaDe('unidades'), sufixo: m.uso.contratados },
     { rotulo: m.uso.pessoas, valor: dados.pessoas, quota: quotaDe('utilizadores'), sufixo: m.uso.activas },
+    // Os produtos saíram de "ainda não medido" quando o E07 trouxe o catálogo.
+    // Um cartão que continuasse a dizer que isto chega numa etapa posterior
+    // estaria a mentir sobre uma coisa que já está no ecrã ao lado.
+    { rotulo: m.uso.produtos, valor: dados.produtos, quota: quotaDe('produtos'), sufixo: m.uso.contratados },
   ];
   const porMedir = [
-    { rotulo: m.uso.produtos, razao: m.uso.razaoProdutos },
     { rotulo: m.uso.armazenamento, razao: m.uso.razaoArmazenamento },
   ];
 

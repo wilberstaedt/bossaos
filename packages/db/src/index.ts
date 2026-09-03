@@ -101,7 +101,8 @@ export {
 export { registar, listarAuditoria, type EventoDeAuditoria } from './auditoria.ts';
 
 export {
-  estadoComercial, podeCapacidade, contarUnidades, contarPessoas, catalogoDePlanos,
+  estadoComercial, podeCapacidade, contarUnidades, contarPessoas, contarProdutos,
+  catalogoDePlanos,
   type EstadoComercial,
 } from './planos.ts';
 

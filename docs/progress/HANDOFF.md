@@ -1,8 +1,8 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E07 — catálogo, produtos, preços e opções (**18 telas, a maior até agora**)
-**Estado:** **em curso**. Os motores puros estão feitos e commitados; falta o schema, os
-serviços, as telas e a prova contra a base.
+**Estado:** implementado, **aguardando validação**. Motores puros, schema, serviços, as 18
+telas, as rotas de escrita e a prova contra a base — tudo entregue e medido.
 **Régua:** `docs/reviews/ALVO-E07.md`, escrita antes de o E06 estar declarado ·
 `docs/architecture/catalogo-e-publicacao.md` e `dinheiro.md`, do E00.
 **O JR não avança para o E08.**
@@ -43,7 +43,8 @@ desta vez a régua **não** precedeu todo o código e dizê-lo é o que a manté
 | E03 — estrutura multi-tenant e isolamento | **validado** à 2ª · `docs/reviews/E03.md`. A 1ª revisão apanhou o verificador a dizer verde com zero medido; corrigido, e a mesma guarda aplicada às outras provas. |
 | E04 — autenticação, convites e permissões | **validado à 3ª** · `docs/reviews/E04.md` |
 | E05 — planos, entitlements e identidade Starter | **validado à 1ª** · `docs/reviews/ALVO-E05.md` |
-| E06 — onboarding e configuração do restaurante | implementado, **aguardando validação** · `docs/progress/E06.md` |
+| E06 — onboarding e configuração do restaurante | **validado à 2ª** · `docs/progress/E06.md`. A 1ª validação foi retirada pela CI: a cadeia de migrações não se aplicava do zero. |
+| E07 — catálogo, produtos, preços e opções | implementado, **aguardando validação** · `docs/progress/E07.md` |
 
 **Primeiras telas.** O E02 é a primeira etapa que toca `coverage.csv`: STATE 001-003,
 005, 007 e 016. Até aqui o medidor de telas esteve a 0 % e isso era verdade, não uma
@@ -283,3 +284,44 @@ contasse, a lista nunca ficava verde e o aceite 3 era impossível.
 
 Uma prova minha deixou lixo e partiu a prova de isolamento do E03. Corrigido, com uma guarda
 no script que faz a sujidade em vez de na prova seguinte.
+
+## E07 — o que existe agora
+
+**A ausência de declaração de alérgeno vale DESCONHECIDO por TIPO, não por convenção.**
+`Declaracao.estado` só aceita `CONTEM | PODE_CONTER | NAO_CONTEM`; "não sei" é não haver
+linha. E `estadoDoAlergenio` não recebe o nome do produto nem as fotos — **inferir não é
+proibido, é impossível de escrever**. A prova cria uma "Tarta de almendra", não declara nada,
+e exige `DESCONHECIDO` para amêndoa.
+
+**A tabela `allergens` é só de leitura para o runtime** (`REVOKE ALL` + `GRANT SELECT`): os
+catorze são o Anexo II do Reg. (UE) 1169/2011, são lei e não configuração. Provado com um
+`INSERT` que devolve *permission denied*.
+
+**Empate de preços recusa.** Duas regras do mesmo nível devolvem `{erro: 'conflito', regras}`
+com os identificadores, nunca a primeira que a base devolvesse. **Dinheiro em inteiros de
+unidade mínima**, nunca `parseFloat` — medido: 1145 de 20001 valores em euros truncam para o
+cêntimo errado, o primeiro é `0,29`.
+
+**Modificadores validados por chamada directa à API**, em JSON, com os limites lidos **da
+base** e não do corpo do pedido. O ecrã mostra-os; quem valida é o servidor.
+
+**Três coisas de etapas anteriores que passaram a mentir e foram corrigidas:** o cartão de
+uso dizia que o catálogo chegava depois (agora conta produtos), o item `carta` do arranque
+estava `por_medir` (agora mede-se), e a razão do item `qr` apontava ao catálogo em vez da
+publicação.
+
+**Uma guarda nova, `validar-classes.sh`:** uma classe `bo-` que o CSS não define não dá erro
+em lado nenhum. Encontrou quatro escritas por mim no E07 e **uma quinta anterior**, no
+componente de separadores.
+
+**E `instanteNaZona`**, o inverso de `momentoLocal` que o E06 não tinha. O meu primeiro teste
+dela não media nada — passava nas duas implementações. Varri 2026 de meia em meia hora em
+quatro fusos para descobrir **onde** divergem (6 horas em Madrid, 30 em Los Angeles, 42 em
+Sydney, 0 em São Paulo), e a medição mostrou um terceiro caso que eu não tinha: a hora que
+**não existe** na madrugada em que o relógio adianta. Agora recusa em vez de devolver a mais
+próxima.
+
+**134 asserções em `domain` + 19 em `i18n` + 21 na prova do catálogo, 0 falhas.**
+`pnpm verificar` a 0 **sem `.env`**; `pnpm inspeccionar` com 69 verificações no browser,
+já com as peças do E07 no catálogo interno; `provar-migracoes-do-zero.sh` a aplicar as 13
+migrações contra uma base vazia.

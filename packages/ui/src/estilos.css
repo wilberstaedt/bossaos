@@ -693,3 +693,27 @@ p { margin: 0; }
 /* Duas acções lado a lado, com a destrutiva à direita — onde o polegar não
    passa por acidente ao voltar atrás. */
 .bo-estado__accoes { display: flex; flex-wrap: wrap; gap: var(--bo-espaco-md); margin-top: var(--bo-espaco-lg); }
+
+/* ── Catálogo (E07) ───────────────────────────────────────────────────────── */
+
+/* Uma caixa por alérgeno. O cartão é largo de propósito: nesta ficha o que
+   custa caro é ler a linha errada, e linhas altas com espaço entre elas são
+   mais difíceis de saltar do que uma grelha compacta. */
+.bo-alergenio { display: flex; flex-direction: column; gap: var(--bo-espaco-sm); }
+.bo-alergenio__cabecalho {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--bo-espaco-md);
+}
+
+/* Caixa ou rádio com a etiqueta ao lado, e a área de toque a cobrir as duas.
+   Um `<label>` que só envolvesse o texto deixava o alvo do dedo do tamanho da
+   caixa — 13 px num tablet de cozinha. */
+.bo-campo__envolvente {
+  display: flex; align-items: center; gap: var(--bo-espaco-md);
+  min-height: 44px; padding: var(--bo-espaco-xs) 0; cursor: pointer;
+}
+.bo-campo__envolvente input { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* Lista simples, sem marcadores desalinhados com o resto da página. */
+.bo-lista { margin: 0; padding-left: var(--bo-espaco-xl); display: grid; gap: var(--bo-espaco-xs); }
+.bo-lista li { line-height: 24px; }

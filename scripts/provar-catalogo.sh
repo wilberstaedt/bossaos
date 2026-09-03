@@ -32,16 +32,17 @@ falhas=0
 ALERG=packages/domain/src/alergenios.ts
 PRECOS=packages/domain/src/precos.ts
 CAT=packages/db/src/catalogo.ts
-ORIG_ALERG=$(mktemp); ORIG_PRECOS=$(mktemp); ORIG_CAT=$(mktemp)
-cp "$ALERG" "$ORIG_ALERG"; cp "$PRECOS" "$ORIG_PRECOS"; cp "$CAT" "$ORIG_CAT"
+DIC=packages/i18n/src/mensagens/en.json
+ORIG_ALERG=$(mktemp); ORIG_PRECOS=$(mktemp); ORIG_CAT=$(mktemp); ORIG_DIC=$(mktemp)
+cp "$ALERG" "$ORIG_ALERG"; cp "$PRECOS" "$ORIG_PRECOS"; cp "$CAT" "$ORIG_CAT"; cp "$DIC" "$ORIG_DIC"
 RLS_DESLIGADO=0
 
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
 restaurar() {
-  cp "$ORIG_ALERG" "$ALERG"; cp "$ORIG_PRECOS" "$PRECOS"; cp "$ORIG_CAT" "$CAT"
-  rm -f "$ORIG_ALERG" "$ORIG_PRECOS" "$ORIG_CAT"
+  cp "$ORIG_ALERG" "$ALERG"; cp "$ORIG_PRECOS" "$PRECOS"; cp "$ORIG_CAT" "$CAT"; cp "$ORIG_DIC" "$DIC"
+  rm -f "$ORIG_ALERG" "$ORIG_PRECOS" "$ORIG_CAT" "$ORIG_DIC"
   if [[ "$RLS_DESLIGADO" == "1" ]]; then
     psql "$MIGRATION_DATABASE_URL" -q -c 'ALTER TABLE products ENABLE ROW LEVEL SECURITY' >/dev/null 2>&1
     RLS_DESLIGADO=0
@@ -200,7 +201,57 @@ else
 fi
 
 echo
-echo "8. A árvore ficou limpa?"
+echo "8. O dicionário de alérgenos acompanha o domínio?"
+# ── Porque é que isto é uma asserção e não uma revisão de código ───────────
+#
+# A ficha faz `dicionario[codigo] ?? codigo`. Sem entrada, mostra o código cru —
+# "frutos-de-casca" a um cliente inglês. Numa tabela qualquer seria feio; **na
+# ficha de alérgenos é uma linha que a pessoa não lê**, e pode ser a dela.
+#
+# Nada mais o apanha: o TypeScript não vê dentro de um índice de cadeia, e a
+# paridade de chaves compara as três línguas ENTRE SI — as três erradas da mesma
+# maneira está alinhado. A comparação tem de ser contra a lista do DOMÍNIO.
+correr_i18n() { pnpm --filter @bossaos/i18n exec node --test --test-reporter=tap \
+  --experimental-strip-types "src/**/*.test.ts" >"$1" 2>&1; }
+
+if correr_i18n /tmp/bossaos-cat-i18n.txt; then
+  verde "os catorze do Anexo II estão nomeados nas três línguas"
+else
+  vermelho "o dicionário de alérgenos não bate certo com o domínio"
+  grep -E '^ *not ok' /tmp/bossaos-cat-i18n.txt | head -4
+fi
+
+echo
+echo "9. CONTROLO NEGATIVO — um alérgeno por traduzir"
+# Apaga "sesamo" do inglês, que é exactamente o que acontece quando alguém
+# acrescenta um alérgeno ao domínio e traduz só duas línguas.
+python3 - "$DIC" <<'FIM'
+import json, sys, collections
+p = sys.argv[1]
+d = json.load(open(p, encoding='utf-8'), object_pairs_hook=collections.OrderedDict)
+d['alergenios'].pop('sesamo', None)
+json.dump(d, open(p, 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
+FIM
+if correr_i18n /tmp/bossaos-cat-i18n-sem.txt; then
+  vermelho "ficou verde com um alérgeno por traduzir — a guarda não mede nada"
+else
+  if grep -qE '^ *not ok .*(nomeia os catorze|Anexo II)' /tmp/bossaos-cat-i18n-sem.txt; then
+    verde "caiu a asserção do dicionário — é ela que mede"
+  else
+    vermelho "ficou vermelho por outro motivo, não pelo dicionário"
+    grep -E '^ *not ok' /tmp/bossaos-cat-i18n-sem.txt | head -4
+  fi
+  # A paridade de chaves TAMBÉM tem de cair: apagar do inglês desalinha as três.
+  if grep -qE '^ *not ok .*mesmas chaves' /tmp/bossaos-cat-i18n-sem.txt; then
+    verde "e a paridade de chaves apanhou o desalinhamento"
+  else
+    vermelho "a paridade de chaves não viu uma chave apagada de uma língua"
+  fi
+fi
+cp "$ORIG_DIC" "$DIC"
+
+echo
+echo "10. A árvore ficou limpa?"
 # A guarda que o E06 ensinou: quem faz a sujidade é quem a tem de apanhar, não a
 # prova seguinte. Uma prova que deixa produtos para trás faz a de isolamento
 # contar os dela.

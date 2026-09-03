@@ -449,7 +449,7 @@ export default async function Catalogo({ params }: { params: Promise<{ idioma: I
             <Cartao variante="suave" className="bo-uso__cartao">
               <p className="bo-uso__rotulo">{m.uso.produtos}</p>
               <p className="bo-uso__valor bo-uso__valor--ausente">{m.uso.aindaNaoMedido}</p>
-              <p className="bo-uso__nota">{m.uso.razaoProdutos}</p>
+              <p className="bo-uso__nota">{m.uso.razaoArmazenamento}</p>
             </Cartao>
           </div>
 
@@ -541,7 +541,9 @@ export default async function Catalogo({ params }: { params: Promise<{ idioma: I
               ['itemUnidade', 'feito'],
               ['itemHorarios', 'pendente'],
               ['itemPedidoDeProva', 'naoAplicavel'],
-              ['itemCarta', 'porMedir'],
+              // `itemCarta` saiu daqui: passou a medir-se no E07. O que continua
+              // por medir é o QR, e por causa da publicação (E08).
+              ['itemQr', 'porMedir'],
             ] as const).map(([chave, estado]) => (
               <Cartao key={chave} className="bo-plataforma__linha">
                 <span className="bo-tema__rotulo">
@@ -550,6 +552,82 @@ export default async function Catalogo({ params }: { params: Promise<{ idioma: I
                 <Etiqueta tom={estado === 'feito' ? 'sucesso' : estado === 'pendente' ? 'aviso' : 'neutro'}>
                   {(m.arranque as unknown as Record<string, string>)[estado]}
                 </Etiqueta>
+              </Cartao>
+            ))}
+          </div>
+        </section>
+
+
+        {/* ── E07: a ficha de alérgenos, e porque está aqui ────────────────
+            Esta secção existe para as peças novas entrarem na varredura de
+            contraste e de alvo de toque do Playwright. Sem isto, o ecrã dos
+            alérgenos só seria medido por trás de um login, que a inspecção não
+            atravessa — e é o ecrã onde o custo de uma cor ilegível é maior. */}
+        <section style={SECCAO} aria-labelledby="s-catalogo-e07">
+          <h2 id="s-catalogo-e07">{m.catalogo.seccaoCatalogoE07}</h2>
+          <p className="bo-campo__ajuda">
+            CAT-001 a CAT-019 e CAT-022. O que importa aqui é que
+            <strong> sin declarar não é o mesmo que no contiene</strong>: são
+            QUATRO estados, e o quarto tem etiqueta própria — nunca uma caixa
+            por marcar.
+          </p>
+
+          <div className="bo-plataforma__lista">
+            {([
+              ['gluten', 'CONTEM', 'perigo'],
+              ['leite', 'PODE_CONTER', 'aviso'],
+              ['peixe', 'NAO_CONTEM', 'sucesso'],
+              ['amendoins', 'DESCONHECIDO', 'neutro'],
+            ] as const).map(([codigo, estado, tom]) => (
+              <Cartao key={codigo} className="bo-alergenio">
+                <div className="bo-alergenio__cabecalho">
+                  <span className="bo-tema__rotulo">
+                    {(m.alergenios as unknown as Record<string, string>)[codigo]}
+                  </span>
+                  {/* Texto sempre, nunca só cor: quem não distingue vermelho de
+                      verde tem de conseguir ler a diferença entre "contiene" e
+                      "no contiene". É o manual, p. 16. */}
+                  <Etiqueta tom={tom}>
+                    {(m.catalogoE07 as unknown as Record<string, string>)[`estado${estado}`]}
+                  </Etiqueta>
+                </div>
+              </Cartao>
+            ))}
+          </div>
+          <p className="bo-campo__ajuda">{m.catalogoE07.avisoNaoInferimos}</p>
+
+          {/* A origem do preço, e a recusa. O conflito é uma mensagem, não um
+              preço escolhido pela ordem da base. */}
+          <div className="bo-plataforma__lista">
+            <Cartao className="bo-plataforma__linha">
+              <span className="bo-tema__rotulo">{m.catalogoE07.precoBase}</span>
+              <Etiqueta tom="neutro">{m.catalogoE07.herdado}</Etiqueta>
+            </Cartao>
+            <Cartao className="bo-plataforma__linha">
+              <span className="bo-tema__rotulo">{m.catalogoE07.unidade}</span>
+              <Etiqueta tom="info">{m.catalogoE07.local}</Etiqueta>
+            </Cartao>
+            <Cartao className="bo-plataforma__linha">
+              <span className="bo-tema__rotulo">{m.catalogoE07.conflitoPreco}</span>
+              <Etiqueta tom="perigo">{m.catalogoE07.semPreco}</Etiqueta>
+            </Cartao>
+            <Cartao className="bo-plataforma__linha">
+              <span className="bo-tema__rotulo">{m.catalogoE07.maximo}</span>
+              {/* Sem tecto por extenso. Um campo vazio lia-se como zero. */}
+              <Etiqueta tom="neutro">{m.catalogoE07.semTecto}</Etiqueta>
+            </Cartao>
+          </div>
+
+          {/* A separação que o contrato exige, com as duas coisas lado a lado
+              para se ver que NÃO se tocam. */}
+          <p className="bo-campo__ajuda">{m.catalogoE07.notaPreferencias}</p>
+          <div className="bo-plataforma__lista">
+            {(['vegetariano', 'vegano', 'halal'] as const).map((p) => (
+              <Cartao key={p} className="bo-plataforma__linha">
+                <span className="bo-tema__rotulo">
+                  {(m.preferenciasAlimentares as unknown as Record<string, string>)[p]}
+                </span>
+                <Etiqueta tom="info">{m.catalogoE07.preferencias}</Etiqueta>
               </Cartao>
             ))}
           </div>

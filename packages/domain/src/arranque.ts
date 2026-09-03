@@ -40,6 +40,8 @@ export interface FactosDoArranque {
   unidadeConfigurada: boolean;
   diasDeHorario: number;
   pessoasActivas: number;
+  /** Produtos activos no catálogo. Mensurável desde o E07. */
+  produtosNoCatalogo: number;
 }
 
 interface Definicao {
@@ -57,9 +59,15 @@ const ITENS: readonly Definicao[] = [
   { chave: 'unidade', mede: (f) => f.temUnidade && f.unidadeConfigurada },
   { chave: 'horarios', mede: (f) => f.diasDeHorario > 0 },
   { chave: 'equipa', mede: (f) => f.pessoasActivas > 1 },
+  // O E07 trouxe o catálogo, e por isso este item saiu de `por_medir`. Deixá-lo
+  // a dizer "a carta chega numa etapa posterior" seria mentir sobre uma coisa
+  // que está no menu de navegação ao lado.
+  { chave: 'carta', mede: (f) => f.produtosNoCatalogo > 0 },
   // ── Daqui para baixo, o que o atlas desenha e ainda não existe ────────────
-  { chave: 'carta', porMedir: 'catalogo' },
-  { chave: 'qr', porMedir: 'catalogo' },
+  // O QR não depende de haver catálogo: depende de haver carta PUBLICADA, que é
+  // o E08. Trocar-lhe a razão é a correcção que faltava — dizia "catálogo" e o
+  // catálogo já cá está.
+  { chave: 'qr', porMedir: 'publicacao' },
   // O item que o aceite 3 nomeia: **no Starter não se aplica**, não fica
   // pendente. Um Starter que precisasse de um pedido de prova para publicar a
   // carta era um Starter que nunca publicava.
