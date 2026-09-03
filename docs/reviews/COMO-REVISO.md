@@ -55,6 +55,15 @@ usada. Se o detector não consegue produzir a avaria, o verde dele não prova na
 **7. Escrever a revisão** em `docs/reviews/E##.md`: o que verifiquei e **como**, onde
 discordo sem bloquear, e as pendências que aceito como declaradas.
 
+**7-bis. Se a etapa tem migrações, aplicá-las numa base VAZIA.**
+`./scripts/provar-migracoes-do-zero.sh`, e não a suite de testes. A 2026-09-03 validei o
+E06 com nove provas, quatro guardas e o `pnpm verificar` todos verdes — **contra a minha
+base local**, migrada ao longo do dia na ordem em que os ficheiros nasceram. A CI reprovou-o
+quatro minutos depois: o Prisma aplica migrações por **carimbo**, não por etapa, e uma
+migração `e05` com carimbo posterior ao `e06` que dela depende parte a cadeia em qualquer
+base nova. **Medi o estado e não o caminho até ele**, que é a frase que já estava neste
+ficheiro. Escrevê-la não chegou; o que faltava era um **passo**.
+
 **8. Aplicar a mim a régua que acabei de dar.** Sempre, no mesmo dia. A 2026-09-03 exigi
 ao JR uma guarda contra o instrumento medir zero e, vinte minutos depois, encontrei
 exactamente o mesmo defeito no **meu** `estado.sh`: contava telas por conferir como
