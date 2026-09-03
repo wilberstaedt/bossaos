@@ -9,7 +9,23 @@
 cd "$(dirname "$0")/.."
 # O denominador MEDE-SE, nao se escreve. Se a matriz passar a ter 34 ou 38 linhas,
 # um 36 fixo aqui mente em silencio e a percentagem fica errada nos dois sentidos.
-ETAPAS_TOTAL=$(grep -cE '^\| E[0-9]{2} \| ' docs/progress/ETAPAS.md 2>/dev/null || true)
+# A coluna do estado le-se NORMALIZADA: sem negrito, sem crases, sem espacos a
+# volta. A 2026-09-03 as 22h48 o JR escreveu "| E08 | **em curso** |" - disciplina
+# boa dele, e a minha leitura e que nao aguentava. Testei: com "**validado**" o
+# medidor passava a contar 6 de 36 em vez de 7, e o ATUAL RECUAVA para o E07, ou
+# seja mandava-o refazer uma etapa ja validada. Mesma familia do awk contra o CSV:
+# funcionava ate o formato mudar, e o formato mudou por um par de asteriscos.
+estados_de_etapa() { # imprime "E##<TAB>estado normalizado" por linha da matriz
+  python3 -c '
+import re, sys
+for l in open("docs/progress/ETAPAS.md", encoding="utf-8"):
+    m = re.match(r"\|\s*(E\d{2})\s*\|([^|]*)\|", l)
+    if m:
+        estado = re.sub(r"[*_`]", "", m.group(2)).strip().lower()
+        print(m.group(1) + "\t" + estado)'
+}
+
+ETAPAS_TOTAL=$(estados_de_etapa | grep -c . || true)
 ETAPAS_TOTAL=${ETAPAS_TOTAL:-0}
 # `grep -c` imprime 0 E devolve codigo 1 quando nao acha: um `|| echo 0` aqui
 # acrescentava um SEGUNDO zero e a aritmetica rebentava. Usa-se `|| true`.
@@ -17,8 +33,8 @@ ETAPAS_TOTAL=${ETAPAS_TOTAL:-0}
 # percentagem com trabalho que ainda ninguem conferiu - e foi o que aconteceu: o
 # medidor saltou para 2% antes de eu ter revisto uma linha. Quem aguarda conta a
 # parte, para se ver que existe sem se dizer que esta feito.
-ETAPAS_FEITAS=$(grep -cE '^\| E[0-9]{2} \| validado' docs/progress/ETAPAS.md 2>/dev/null || true)
-AGUARDA=$(grep -cE '^\| E[0-9]{2} \| implementado aguardando' docs/progress/ETAPAS.md 2>/dev/null || true)
+ETAPAS_FEITAS=$(estados_de_etapa | awk -F'\t' '$2=="validado"' | grep -c . || true)
+AGUARDA=$(estados_de_etapa | awk -F'\t' '$2 ~ /^implementado aguardando/' | grep -c . || true)
 AGUARDA=${AGUARDA:-0}
 ETAPAS_FEITAS=${ETAPAS_FEITAS:-0}
 # O denominador tambem se conta com o leitor de CSV. `wc -l` conta LINHAS, e um
@@ -71,9 +87,11 @@ PCT_TELA=$(( TELAS_FEITAS * 100 / TELAS_TOTAL ))
 # essa linha dizia E03 durante quase uma hora enquanto o JR trabalhava no E04:
 # depende de alguem se lembrar de a actualizar, e ninguem se lembra a meio de uma
 # etapa. Isto nao depende de ninguem.
-ATUAL=$(grep -E '^\| E[0-9]{2} \| ' docs/progress/ETAPAS.md 2>/dev/null \
-  | grep -v '^| E00 ' | grep -v '| validado |' \
-  | head -1 | awk -F'|' '{print $2}' | tr -d ' ')
+# Usa a mesma leitura normalizada da contagem. A versao anterior comparava
+# '| validado |' com os pipes e os espacos exactos, e por isso um "**validado**"
+# fazia o ATUAL RECUAR para uma etapa ja fechada - que e pior do que contar mal,
+# porque manda refazer trabalho feito.
+ATUAL=$(estados_de_etapa | awk -F'\t' '$1!="E00" && $2!="validado" {print $1; exit}')
 if [ -z "${ATUAL:-}" ]; then
   echo "ERRO: nao consegui derivar a etapa actual de docs/progress/ETAPAS.md" >&2
   exit 1
