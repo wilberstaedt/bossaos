@@ -74,6 +74,11 @@ jobs:
       - name: Cobertura íntegra (396 IDs)
         run: ./scripts/validar-cobertura.sh
 
+      # Barata como a cobertura, e a que tem pior consequencia se falhar tarde:
+      # um segredo que entra no historico nao sai de la apagando o ficheiro.
+      - name: Nenhum segredo na árvore
+        run: ./scripts/varrer-segredos.sh
+
       - name: Lint
         run: pnpm lint
 
