@@ -189,6 +189,21 @@ corrida desse commit foi cancelada só é honesto se a corrida verde for de um c
 **contém** o código do E03 — o que numa história linear é verdade, mas verifica-se com
 `gh run view --json headSha`, não se assume.
 
+**A decoração de um caso de teste pode matar a propriedade que ele testa.** A 2026-09-03,
+no E08, o JR escreveu um caso para a injecção de fórmulas em CSV e chamou ao produto
+`${PREFIXO}=HYPERLINK(...)` — o prefixo servia para a limpeza o encontrar depois. Só que
+com o prefixo à frente **o campo deixa de começar por `=`**, e um campo que não começa por
+`=` não é perigoso. A asserção passou a verificar que **um valor inofensivo sai inofensivo**.
+
+Ninguém o teria visto: o teste era verde, o código estava certo, e a ligação entre os dois
+era falsa. **Apareceu porque o controlo negativo reprovou** — com a neutralização desligada,
+a prova continuou verde, e é isso que um controlo negativo existe para dizer.
+
+A forma geral: sempre que um caso de teste leva **andaimes** — prefixo de limpeza, sufixo
+com identificador, carimbo de tempo, `Date.now()` no nome — perguntar se o andaime altera
+a propriedade. Vale sobretudo quando a propriedade depende do **início**, do **fim** ou do
+**valor exacto** da cadeia: injecção, ordenação, comparação de igualdade, unicidade.
+
 **Comparar contra a fonte, nunca entre pares.** Uma verificação que compara N coisas
 **umas com as outras** passa quando as N estão erradas da mesma maneira. A 2026-09-03 o JR
 apanhou isto no E07: os ecrãs mostravam o **código** do alérgeno (`frutos-de-casca`) em vez
