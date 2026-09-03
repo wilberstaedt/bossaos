@@ -106,6 +106,12 @@ jobs:
       - name: Todos os pacotes medidos
         run: ./scripts/validar-testes.sh
 
+      # Nenhuma etapa comeca antes de a anterior estar validada. Detector de
+      # ESTADO, nao de culpa: quando o revisor esta indisponivel a saida certa e
+      # trabalho que nao dependa da etapa em revisao, nao parar nem avancar.
+      - name: Ordem das etapas
+        run: ./scripts/validar-ordem.sh
+
       - name: Testes
         run: pnpm test
 
