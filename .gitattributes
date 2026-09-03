@@ -1,0 +1,18 @@
+# Fim de linha fixado, para os diffs continuarem a poder ser lidos.
+#
+# A 2026-09-03 o coverage.csv passou de LF para CRLF e o commit do E04 apareceu com
+# 397 linhas mudadas — a esconder as 12 que eram reais. Nao era deriva: a referencia
+# em docs/bossaos/COBERTURA_TELAS.csv sempre foi CRLF, e o ficheiro de trabalho e
+# derivado dela, portanto o alinhamento e que voltou ao sitio. Mas custou uma
+# revisao inteira a distinguir forma de conteudo, e sem essa medicao eu tinha
+# aceitado as 397 as cegas ou acusado um defeito que nao existia.
+#
+# Os CSV ficam presos ao CRLF da referencia; o resto fica em LF. Assim um diff de
+# cobertura volta a mostrar so o que mudou de facto.
+*.csv text eol=crlf
+*.md  text eol=lf
+*.ts  text eol=lf
+*.tsx text eol=lf
+*.sh  text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
