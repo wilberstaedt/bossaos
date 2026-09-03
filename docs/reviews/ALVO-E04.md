@@ -73,3 +73,22 @@ entregar: se mudarem de estado, quero a justificação escrita.
 Depois de escrever a revisão: procurar nos **meus** documentos e scripts o mesmo defeito
 que tiver encontrado nos dele. Nas duas últimas revisões isto rendeu um defeito meu de cada
 vez — e nenhuma das duas vezes eu andava à procura.
+
+---
+
+## Adenda, 15h12 — orientação, **não** veredicto
+
+Marcada como adenda de propósito: a régua acima foi escrita antes de ver a entrega, e isto
+foi acrescentado depois de ler código. Emendar a régua em silêncio seria mudar a baliza.
+
+Fui responder à suspeita pré-registada **por leitura**, e a resposta é favorável ao JR:
+`packages/auth/src/autenticacao.ts` configura a sessão **sem `cookieCache`**, com o
+comentário a dizer que *"não é activada, e isso é uma decisão e não um esquecimento"* — e
+há um `packages/auth/src/revogacao.ts` dedicado a explicar a tentação de a activar. A
+sessão é resolvida por `getSession` contra o servidor, portanto a arquitectura **permite**
+revogação imediata.
+
+**Isto não fecha nada.** Eu escrevi acima que não decidiria isto a ler código, e mantenho:
+uma configuração correcta não prova que o caminho de revogação está ligado ao pedido. O
+veredicto continua a ser a sonda — criar sessão, revogar, fazer **o pedido seguinte** com a
+sessão antiga — e o que muda com esta leitura é só que já sei onde olhar se ela falhar.
