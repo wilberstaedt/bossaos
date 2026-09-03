@@ -112,6 +112,7 @@ model Organization {
   exportacoes     ExportJob[]
   tarefas         OutboxTask[]
   consultas       MenuView[]
+  enderecos       PublicSlugOwner[]
 }
 
 /// Marca: catálogo e identidade comercial. Pertence a uma organização.
@@ -1558,4 +1559,29 @@ model MenuView {
   @@index([organizationId])
   @@index([organizationId, locationId, createdAt])
   @@map("menu_views")
+}
+
+/**
+ * Quem teve cada endereço público.
+ *
+ * O `@unique` em `Location.publicSlug` impede **dois ao mesmo tempo**; isto
+ * impede **dois em sequência**. Apagar o endereço tira-o do ar e não o devolve
+ * ao mundo — os QR de A estão impressos em mesas, e o papel não se actualiza.
+ *
+ * O runtime **lê** e não escreve: quem escreve é `reservar_endereco_publico`,
+ * que é quem decide. Uma rota que pudesse apagar a linha reclamava o endereço de
+ * outro, que é o que a tabela existe para impedir.
+ */
+model PublicSlugOwner {
+  slug           String   @id
+  organizationId String   @map("organization_id") @db.Uuid
+  locationId     String?  @map("location_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@map("public_slug_owners")
 }

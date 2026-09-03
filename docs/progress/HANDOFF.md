@@ -1,8 +1,10 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E09 — carta pública e QR de consulta (**11 telas**)
-**Estado:** implementado, **aguardando validação**. Projecção, QR próprio, chave de cache,
-a quarta porta do CT-04, as 11 telas e a prova contra a base — tudo entregue e medido.
+**Estado:** implementado, **aguardando validação** (redeclarado). Retido à 1ª por uma
+medição que via uma só forma de exportar um verbo; fechado com detector largo e o controlo
+que planta as onze. E fechada a regra nova do contrato: o endereço público não volta ao
+mundo, com o par que o distingue da regra preguiçosa.
 **Régua:** `docs/reviews/ALVO-E09.md` · `catalogo-e-publicacao.md` e
 `dados-e-accoes-sensiveis.md`, os dois do E00.
 **O JR não avança para o E10.**

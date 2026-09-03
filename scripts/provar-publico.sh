@@ -26,29 +26,31 @@ if [[ "$NODE_ACTUAL" != "$NODE_ESPERADO" ]]; then
   exit 2
 fi
 
-GRUPOS_ESPERADOS=5
-ASSERCOES_ESPERADAS=16
+GRUPOS_ESPERADOS=6
+ASSERCOES_ESPERADAS=23
 falhas=0
 
 PROJ=packages/domain/src/projeccao.ts
 CHAVES=packages/domain/src/chaves.ts
 PUBDB=packages/db/src/publicacao.ts
 PUBLICO=packages/db/src/publico.ts
+PAGINA="apps/web/app/r/[publicLocationSlug]/[locale]/menu/page.tsx"
 COPIAS=$(mktemp -d)
 # Indexada pelo CAMINHO e não pelo nome: `publicacao.ts` existe em dois pacotes,
 # e foi assim que um guarda meu do E08 escreveu um ficheiro por cima do outro.
 guardar() { cp "$1" "$COPIAS/$(echo "$1" | tr / _)"; }
 repor()   { cp "$COPIAS/$(echo "$1" | tr / _)" "$1"; }
-for f in "$PROJ" "$CHAVES" "$PUBDB" "$PUBLICO"; do guardar "$f"; done
+for f in "$PROJ" "$CHAVES" "$PUBDB" "$PUBLICO" "$PAGINA"; do guardar "$f"; done
 
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
 restaurar() {
-  for f in "$PROJ" "$CHAVES" "$PUBDB" "$PUBLICO"; do repor "$f"; done
+  for f in "$PROJ" "$CHAVES" "$PUBDB" "$PUBLICO" "$PAGINA"; do repor "$f"; done
   rm -rf "$COPIAS"
   psql "$MIGRATION_DATABASE_URL" -q >/dev/null 2>&1 <<'PY'
 UPDATE locations SET public_slug = NULL WHERE public_slug LIKE 'e09%';
+DELETE FROM public_slug_owners WHERE slug LIKE 'e09%';
 DELETE FROM menu_views WHERE revision_id IN (SELECT id FROM menu_revisions WHERE menu_id IN (SELECT id FROM menus WHERE nome LIKE 'e09-%'));
 DELETE FROM menu_publications WHERE menu_id IN (SELECT id FROM menus WHERE nome LIKE 'e09-%');
 DELETE FROM menu_revisions    WHERE menu_id IN (SELECT id FROM menus WHERE nome LIKE 'e09-%');
@@ -198,6 +200,107 @@ psql "$MIGRATION_DATABASE_URL" -q -f packages/db/prisma/migrations/2026090409100
 psql "$MIGRATION_DATABASE_URL" -q -f packages/db/prisma/migrations/20260904093000_e09_horario_por_configurar/migration.sql >/dev/null 2>&1
 
 echo
+echo "6b. CONTROLO NEGATIVO — ONZE formas de exportar um verbo de escrita"
+# ── Porque é que são onze e não uma ───────────────────────────────────────
+#
+# A primeira versão desta medição procurava `export async function POST`. Não
+# apanhava `export const POST = async () => …`, que é igualmente válido em
+# Next.js — o sénior injectou essa forma nesta página e a prova ficou VERDE, com
+# cinco grupos e dezasseis asserções.
+#
+# Era o mesmo padrão do E08: o código estava certo e a protecção não conseguia
+# falhar. Um controlo que planta UMA forma teria continuado a mentir da mesma
+# maneira, por isso planta-se cada uma.
+FORMAS=(
+  'export async function POST() { return new Response(); }'
+  'export function POST() { return new Response(); }'
+  'export const POST = async () => new Response();'
+  'export let POST = async () => new Response();'
+  'export var POST = async () => new Response();'
+  'const enc1 = async () => new Response(); export { enc1 as POST };'
+  'const POST = async () => new Response(); export { POST };'
+  'export const naoImporta = 1, POST = async () => new Response();'
+  'const enc2 = async () => new Response();
+export {
+  enc2 as POST,
+};'
+  'export async function DELETE() { return new Response(); }'
+  'export const PUT = async () => new Response();'
+)
+escaparam=0
+for forma in "${FORMAS[@]}"; do
+  repor "$PAGINA"
+  printf '\n%s\n' "$forma" >> "$PAGINA"
+  if correr /tmp/bossaos-pb-verbo.txt; then
+    vermelho "ESCAPOU: $(printf '%s' "$forma" | head -c 46)"
+    escaparam=$((escaparam + 1))
+  elif ! grep -qE '^ *not ok .*porta pública não aceita' /tmp/bossaos-pb-verbo.txt; then
+    vermelho "vermelho por outro motivo: $(printf '%s' "$forma" | head -c 46)"
+    escaparam=$((escaparam + 1))
+  fi
+done
+repor "$PAGINA"
+if (( escaparam == 0 )); then
+  verde "as ${#FORMAS[@]} formas de exportar um verbo foram todas apanhadas"
+fi
+
+echo
+echo "6c. CONTROLO NEGATIVO — o endereço largado volta ao mundo"
+# ── Dois em sequência, e não dois ao mesmo tempo ──────────────────────────
+#
+# O defeito que a regra existe para impedir: A larga `marina-centro`, B
+# reclama-o, e os QR impressos de A passam a servir a carta de B. Sem erro, sem
+# aviso, e sem ninguém do lado de A dar por isso — o papel não se actualiza.
+#
+# O `@unique` continua lá e não apanha nada disto: impede dois ao mesmo tempo.
+psql "$MIGRATION_DATABASE_URL" -q >/dev/null 2>&1 <<'SQL'
+CREATE OR REPLACE FUNCTION reservar_endereco_publico(p_organization_id uuid, p_location_id uuid, p_slug text)
+RETURNS text LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $f$
+DECLARE v_em_uso uuid;
+BEGIN
+  IF p_slug !~ '^[a-z0-9]([a-z0-9-]{1,60}[a-z0-9])?$' THEN RETURN 'invalido'; END IF;
+  SELECT organization_id INTO v_em_uso FROM locations
+   WHERE public_slug = p_slug AND id <> p_location_id;
+  IF v_em_uso IS NOT NULL THEN RETURN 'em_uso'; END IF;
+  UPDATE locations SET public_slug = p_slug
+   WHERE id = p_location_id AND organization_id = p_organization_id;
+  RETURN 'ok';
+END; $f$;
+SQL
+exigir_vermelho "caiu a asserção de B não poder reclamar" \
+  'B NÃO O PODE RECLAMAR' /tmp/bossaos-pb-reclamado.txt
+
+echo
+echo "6d. CONTROLO NEGATIVO — a regra PREGUIÇOSA: proibir todos os já usados"
+# ── O controlo que o sénior pediu por escrito ─────────────────────────────
+#
+# Uma implementação que recusasse **qualquer** endereço já usado passa no caso de
+# cima e está errada: impede o dono de voltar a publicar depois de uma pausa de
+# inverno. É por isso que o par existe — sem ele, esta versão preguiçosa era
+# indistinguível da certa.
+psql "$MIGRATION_DATABASE_URL" -q >/dev/null 2>&1 <<'SQL'
+CREATE OR REPLACE FUNCTION reservar_endereco_publico(p_organization_id uuid, p_location_id uuid, p_slug text)
+RETURNS text LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $f$
+DECLARE v_dono uuid;
+BEGIN
+  IF p_slug !~ '^[a-z0-9]([a-z0-9-]{1,60}[a-z0-9])?$' THEN RETURN 'invalido'; END IF;
+  SELECT organization_id INTO v_dono FROM public_slug_owners WHERE slug = p_slug;
+  -- O defeito: recusa a QUALQUER um, incluindo ao dono.
+  IF v_dono IS NOT NULL THEN RETURN 'reservado_por_outra_organizacao'; END IF;
+  INSERT INTO public_slug_owners (slug, organization_id, location_id, updated_at)
+  VALUES (p_slug, p_organization_id, p_location_id, now());
+  UPDATE locations SET public_slug = p_slug
+   WHERE id = p_location_id AND organization_id = p_organization_id;
+  RETURN 'ok';
+END; $f$;
+SQL
+exigir_vermelho "caiu a asserção do dono retomar — é o par que separa as duas" \
+  'A RETOMA o endereço dele' /tmp/bossaos-pb-preguicosa.txt
+
+# Repor a função verdadeira, a partir da migração.
+psql "$MIGRATION_DATABASE_URL" -q -f packages/db/prisma/migrations/20260904103000_e09_endereco_reservado/migration.sql >/dev/null 2>&1
+
+echo
 echo "7. Reposto — tem de voltar ao verde"
 node --experimental-strip-types packages/db/prisma/fixtures.ts >/dev/null 2>&1
 if correr /tmp/bossaos-pb-reposto.txt; then
@@ -213,7 +316,8 @@ echo "8. A árvore ficou limpa?"
 RESTOS=$(psql "$MIGRATION_DATABASE_URL" -tAc "SELECT
   (SELECT count(*) FROM menus WHERE nome LIKE 'e09-%')
 + (SELECT count(*) FROM products WHERE nome LIKE 'e09-%')
-+ (SELECT count(*) FROM locations WHERE public_slug LIKE 'e09%')" 2>/dev/null)
++ (SELECT count(*) FROM locations WHERE public_slug LIKE 'e09%')
++ (SELECT count(*) FROM public_slug_owners WHERE slug LIKE 'e09%')" 2>/dev/null)
 if [[ "$RESTOS" == "0" ]]; then
   verde "nada de prova ficou para trás"
 else

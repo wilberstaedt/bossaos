@@ -171,5 +171,6 @@ export {
 
 export {
   cartaPublica, horarioPublico, abertoAgora, registarConsulta,
-  type CartaServida, type HorarioPublico, type OrigemDeConsulta,
+  reservarEnderecoPublico, largarEnderecoPublico,
+  type CartaServida, type HorarioPublico, type OrigemDeConsulta, type ResultadoDaReserva,
 } from './publico.ts';

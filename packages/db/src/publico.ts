@@ -216,3 +216,66 @@ export async function registarConsulta(
     return { contou: false, erro: e instanceof Error ? e.name : 'erro desconhecido' };
   }
 }
+
+export type ResultadoDaReserva =
+  | 'ok'
+  | 'invalido'
+  | 'em_uso'
+  | 'reservado_por_outra_organizacao';
+
+/**
+ * Reserva o endereço público de uma unidade.
+ *
+ * ── O `@unique` não chega, e é fácil pensar que chega ─────────────────────
+ *
+ * `locations.public_slug` é único: impede **dois ao mesmo tempo**. Não impede
+ * **dois em sequência** — A publica com `marina-centro`, apaga-o, B reclama-o, e
+ * a partir daí todos os QR impressos de A servem a carta de B. Sem erro, sem
+ * aviso, e sem ninguém do lado de A poder dar por isso: o papel não se
+ * actualiza.
+ *
+ * São ataques diferentes e confundem-se com facilidade, porque o primeiro falha
+ * ruidosamente na base e o segundo passa por uma operação legítima.
+ *
+ * ── Porque é que a decisão está numa função da base ───────────────────────
+ *
+ * A pergunta — *"este endereço já foi de alguém?"* — atravessa inquilinos por
+ * natureza, e nenhum inquilino pode ler a resposta. Uma consulta feita aqui em
+ * TypeScript não veria as linhas de outra organização e responderia sempre
+ * "livre". A porta é `SECURITY DEFINER`, e o runtime nem sequer tem `INSERT` na
+ * tabela das reservas — se tivesse, uma rota podia apagar a reserva alheia.
+ *
+ * Devolve o MOTIVO e não um booleano: `em_uso` e
+ * `reservado_por_outra_organizacao` mandam a pessoa a sítios diferentes. Dizer
+ * "ocupado" ao segundo caso fá-la esperar que se liberte, e ele não se liberta.
+ */
+export async function reservarEnderecoPublico(
+  prisma: PrismaClient,
+  organizationId: string,
+  locationId: string,
+  slug: string,
+): Promise<ResultadoDaReserva> {
+  const linhas = await prisma.$queryRaw<{ reservar_endereco_publico: string }[]>`
+    SELECT reservar_endereco_publico(
+      ${organizationId}::uuid, ${locationId}::uuid, ${slug})`;
+  return (linhas[0]?.reservar_endereco_publico ?? 'invalido') as ResultadoDaReserva;
+}
+
+/**
+ * Larga o endereço: tira-o do ar e **não o devolve ao mundo**.
+ *
+ * A reserva fica. É a diferença entre "o link morre" — que é o que quem fecha
+ * uma unidade quer — e "o endereço volta ao mercado", que nunca é o que alguém
+ * quer ao limpar um campo.
+ */
+export async function largarEnderecoPublico(
+  prisma: PrismaClient,
+  organizationId: string,
+  locationId: string,
+): Promise<void> {
+  // `$executeRaw` e não `$queryRaw`: o Prisma 7 não sabe desserializar uma coluna
+  // de tipo `void`, e falha com "Failed to deserialize column of type 'void'".
+  // A função não devolve nada — é uma execução, não uma consulta.
+  await prisma.$executeRaw`
+    SELECT largar_endereco_publico(${organizationId}::uuid, ${locationId}::uuid)`;
+}

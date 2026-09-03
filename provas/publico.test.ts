@@ -2,8 +2,8 @@ import { after, before, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from 'pg';
 import {
-  abertoAgora, cartaPublica, comEscopo, horarioPublico, obterPrisma, publicar,
-  registarConsulta,
+  abertoAgora, cartaPublica, comEscopo, horarioPublico, largarEnderecoPublico,
+  obterPrisma, publicar, registarConsulta, reservarEnderecoPublico,
 } from '../packages/db/src/index.ts';
 import { produtoDaCarta } from '../packages/domain/src/index.ts';
 import { IDS } from '../packages/db/prisma/fixtures.ts';
@@ -38,6 +38,12 @@ const comA = <T>(fn: Parameters<typeof comEscopo<T>>[2]) =>
   comEscopo(prisma, { organizationId: IDS.orgA, userId: IDS.utilizadorA }, fn);
 const comB = <T>(fn: Parameters<typeof comEscopo<T>>[2]) =>
   comEscopo(prisma, { organizationId: IDS.orgB, userId: IDS.utilizadorB }, fn);
+
+/**
+ * Os verbos que escrevem. `GET` e `HEAD` não estão aqui de propósito: a carta
+ * pública lê-se, e ler é o que ela faz.
+ */
+const VERBOS_DE_ESCRITA = ['POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] as const;
 
 let visivelId = '';
 let ocultoId = '';
@@ -112,7 +118,10 @@ before(async () => {
 });
 
 after(async () => {
-  await sql.query(`UPDATE locations SET public_slug = NULL WHERE public_slug IN ('${SLUG_A}','${SLUG_B}')`);
+  await sql.query(`UPDATE locations SET public_slug = NULL WHERE public_slug LIKE 'e09%${marca}'`);
+  // A reserva NUNCA se apaga pelo produto. Aqui apaga-se com a credencial de
+  // migração, que é o que a regra chama "acção deliberada de plataforma".
+  await sql.query(`DELETE FROM public_slug_owners WHERE slug LIKE 'e09%${marca}'`);
   await sql.query(`DELETE FROM menu_views WHERE revision_id IN (SELECT id FROM menu_revisions WHERE menu_id IN (SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%'))`);
   await sql.query(`DELETE FROM menu_publications WHERE menu_id IN (SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%')`);
   await sql.query(`DELETE FROM menu_revisions   WHERE menu_id IN (SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%')`);
@@ -324,10 +333,27 @@ describe('4. As consultas contam, e não seguem ninguém', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 describe('5. O QR é um endereço, não uma credencial', () => {
   it('a porta pública não aceita nada além de ler', async () => {
-    // A régua: "o QR geral não concede sessão de mesa nem permissão de
-    // encomendar". Em E09 **não existe rota de pedido nenhuma** — nem para o
-    // Starter nem para os outros —, e isso é mais forte do que uma recusa: não
-    // há superfície. Mede-se pela ausência: nenhuma rota pública exporta POST.
+    // ── Esta medição já esteve errada, e o sénior provou-o ─────────────────
+    //
+    // A primeira versão procurava `export async function POST`. Isso não apanha
+    // `export const POST = async () => …`, que é igualmente válido em Next.js.
+    // Ele injectou essa forma nesta mesma pasta e o `provar-publico.sh` ficou
+    // VERDE, com cinco grupos e dezasseis asserções.
+    //
+    // Era o mesmo padrão do E08: o código estava certo e a protecção não
+    // conseguia falhar.
+    //
+    // ── Porque é que o detector é DELIBERADAMENTE largo ────────────────────
+    //
+    // Enumerar formas de exportação é uma corrida que se perde: `function`,
+    // `const`, `let`, `var`, `export { x as POST }`, listas com vírgulas, e o
+    // que a linguagem acrescentar. Em vez disso procura-se um `export` seguido,
+    // numa janela curta, do nome de um verbo.
+    //
+    // Isto tem **falsos positivos** — `export const metodo = 'POST'` também
+    // dispara — e é o lado certo para errar: um falso positivo faz alguém
+    // renomear uma constante; um falso negativo é um endpoint de encomenda que
+    // ninguém viu numa superfície pública.
     const { readFileSync, readdirSync, statSync } = await import('node:fs');
     const { join } = await import('node:path');
     const raiz = join(process.cwd(), 'apps', 'web', 'app', 'r');
@@ -341,11 +367,22 @@ describe('5. O QR é um endereço, não uma credencial', () => {
     };
     visitar(raiz);
     assert.ok(ficheiros.length > 0, 'não havia rotas públicas para medir');
+
     for (const f of ficheiros) {
-      const conteudo = readFileSync(f, 'utf8');
-      for (const verbo of ['export async function POST', 'export async function PUT',
-        'export async function PATCH', 'export async function DELETE']) {
-        assert.ok(!conteudo.includes(verbo), `${f} exporta ${verbo}`);
+      // As quebras de linha colapsam primeiro: `export {\n  x as POST,\n}` é
+      // uma exportação e não pode escapar por estar escrita em três linhas.
+      const conteudo = readFileSync(f, 'utf8').replace(/\s+/g, ' ');
+      for (const verbo of VERBOS_DE_ESCRITA) {
+        const padrao = new RegExp(
+          // `export`, opcionalmente `default`/`async`, e depois o verbo dentro
+          // de uma janela que não atravessa um `;` — que é o que impede a
+          // procura de escorregar para dentro do corpo da função.
+          String.raw`\bexport\b(?:[^;]{0,200}?)\b${verbo}\b`,
+        );
+        assert.ok(
+          !padrao.test(conteudo),
+          `${f.replace(process.cwd(), '')}: exporta ${verbo} — a carta pública é só de leitura`,
+        );
       }
     }
   });
@@ -362,5 +399,85 @@ describe('5. O QR é um endereço, não uma credencial', () => {
     await sql.query('DELETE FROM menu_publications WHERE menu_id = $1', [menu!.id]);
     assert.equal(await cartaPublica(prisma, SLUG_A, 'CARTA', 'es-ES'), null,
       'sem publicação não há carta pública');
+
+    // ── Quem faz a sujidade apanha-a, e aqui isso apareceu a correr ────────
+    //
+    // Este caso despublica para provar que sem publicação não há carta. O grupo
+    // seguinte precisa de uma carta publicada, e ficou vermelho por causa disto
+    // — não por causa do que mede. É a mesma lição do E06, agora entre grupos do
+    // mesmo ficheiro: um teste que estraga estado partilhado repõe-no.
+    const r = await comA((db) => publicar(db, IDS.orgA, {
+      menuId: menu!.id, locationId: IDS.unidadeA, canal: 'CARTA', autor: AUTOR,
+    }));
+    assert.equal(r.ok, true, 'não consegui repor a publicação para o grupo seguinte');
+    assert.ok(await cartaPublica(prisma, SLUG_A, 'CARTA', 'es-ES'), 'reposto');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+describe('6. O endereço público não volta ao mundo', () => {
+  // O `@unique` impede dois AO MESMO TEMPO. Este grupo é sobre dois EM
+  // SEQUÊNCIA — A larga, B reclama, e os QR impressos de A passam a servir a
+  // carta de B. Sem erro, sem aviso, e sem ninguém do lado de A dar por isso.
+  const RECLAMADO = `e09r-${marca}`;
+
+  it('A reserva o endereço e a carta responde nele', async () => {
+    const r = await reservarEnderecoPublico(prisma, IDS.orgA, IDS.unidadeA, RECLAMADO);
+    assert.equal(r, 'ok');
+    const servida = await cartaPublica(prisma, RECLAMADO, 'CARTA', 'es-ES');
+    assert.ok(servida, 'o endereço novo tem de servir a carta de A');
+    assert.equal(servida.organizationId, IDS.orgA);
+  });
+
+  it('A LARGA o endereço: o link morre', async () => {
+    await largarEnderecoPublico(prisma, IDS.orgA, IDS.unidadeA);
+    assert.equal(await cartaPublica(prisma, RECLAMADO, 'CARTA', 'es-ES'), null,
+      'largar tem de matar o link — quem fecha uma unidade quer isso');
+  });
+
+  it('E B NÃO O PODE RECLAMAR — é a regra inteira', async () => {
+    // Se pudesse, todos os QR impressos de A passavam a servir a carta de B.
+    const r = await reservarEnderecoPublico(prisma, IDS.orgB, IDS.unidadeB, RECLAMADO);
+    assert.equal(r, 'reservado_por_outra_organizacao');
+    // E o motivo é próprio, não um "ocupado" genérico: quem tenta um endereço
+    // reservado não está à espera de nada, porque ele não se liberta.
+    assert.notEqual(r, 'em_uso');
+    // A unidade de B continua sem esse endereço.
+    const { rows } = await sql.query(
+      'SELECT public_slug FROM locations WHERE id = $1', [IDS.unidadeB],
+    );
+    assert.notEqual((rows[0] as { public_slug: string | null }).public_slug, RECLAMADO);
+  });
+
+  it('O PAR QUE DÁ SENTIDO: A RETOMA o endereço dele', async () => {
+    // Sem este caso, a prova passava também com uma implementação preguiçosa que
+    // proibisse **todos** os endereços já usados — e essa impediria o dono de
+    // voltar a publicar depois de uma pausa de inverno.
+    const r = await reservarEnderecoPublico(prisma, IDS.orgA, IDS.unidadeA, RECLAMADO);
+    assert.equal(r, 'ok', 'o dono anterior tem de conseguir retomar');
+    const servida = await cartaPublica(prisma, RECLAMADO, 'CARTA', 'es-ES');
+    assert.ok(servida);
+    assert.equal(servida.organizationId, IDS.orgA);
+  });
+
+  it('e duas unidades da MESMA organização não partilham endereço', async () => {
+    // Reservado para A não quer dizer livre dentro de A: duas unidades não podem
+    // responder no mesmo sítio.
+    const r = await reservarEnderecoPublico(prisma, IDS.orgA, IDS.unidadeA2, RECLAMADO);
+    assert.equal(r, 'em_uso');
+  });
+
+  it('o runtime NÃO pode apagar uma reserva', async () => {
+    // Se pudesse, uma rota apagava a reserva alheia e reclamava o endereço — que
+    // é exactamente o que a tabela existe para impedir.
+    await assert.rejects(
+      () => comA((db) => db.$executeRaw`DELETE FROM public_slug_owners WHERE slug = ${RECLAMADO}`),
+      /permission denied|permissão negada/i,
+    );
+  });
+
+  it('e B não vê sequer que a reserva existe', async () => {
+    const deB = await comB((db) => db.publicSlugOwner.count({ where: { slug: RECLAMADO } }));
+    assert.equal(deB, 0);
   });
 });

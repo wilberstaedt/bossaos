@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { registar } from '@bossaos/db';
+import { largarEnderecoPublico, registar, reservarEnderecoPublico } from '@bossaos/db';
 import { corpoDaResposta, estadoHttp, exigirAccao } from '@bossaos/domain';
 import { comEscopoDoPedido, resolverPedido } from '../../../../../../../src/sessao.ts';
 import { texto, voltarPara } from '../../../../../../../src/formulario.ts';
+import { obterBase } from '../../../../../../../src/servidor.ts';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -48,27 +49,40 @@ export async function POST(
     return voltarPara(destino, { erro: 'invalido' });
   }
 
-  try {
-    await comEscopoDoPedido(sessao, async (db) => {
-      await db.location.updateMany({
-        where: { id: locationId },
-        // Vazio APAGA o endereço, e isso é uma operação real: quem fecha uma
-        // unidade quer que o link deixe de responder, e não que aponte para uma
-        // carta velha.
-        data: { publicSlug: escrito ?? null },
-      });
-      await registar(db, sessao.contexto.organizationId, {
-        accao: 'unidade.endereco-publico.guardado',
-        actorId: sessao.actor.id, actorEmail: sessao.actor.email,
-        alvoTipo: 'location', alvoId: locationId,
-        detalhe: { publicSlug: escrito ?? null },
-      });
-    });
-  } catch {
-    // O índice único da base. Não se consulta antes: duas pessoas a escolher o
-    // mesmo endereço no mesmo segundo leem ambas "está livre".
-    return voltarPara(destino, { erro: 'ocupado' });
+  const prisma = obterBase();
+
+  if (escrito === undefined) {
+    // Vazio LARGA o endereço: o link morre, e isso é uma operação real — quem
+    // fecha uma unidade quer o link morto, não uma carta velha.
+    //
+    // **Mas largar não devolve o endereço ao mundo.** A reserva fica, porque os
+    // QR de quem o teve estão impressos em mesas e o papel não se actualiza.
+    await largarEnderecoPublico(prisma, sessao.contexto.organizationId, locationId);
+    await comEscopoDoPedido(sessao, (db) => registar(db, sessao.contexto.organizationId, {
+      accao: 'unidade.endereco-publico.largado',
+      actorId: sessao.actor.id, actorEmail: sessao.actor.email,
+      alvoTipo: 'location', alvoId: locationId, detalhe: {},
+    }));
+    return voltarPara(destino, { guardado: '1' });
   }
 
+  // A decisão é da porta da base: a pergunta "este endereço já foi de alguém?"
+  // atravessa inquilinos, e uma consulta feita aqui não veria as linhas dos
+  // outros — responderia sempre "livre".
+  const r = await reservarEnderecoPublico(
+    prisma, sessao.contexto.organizationId, locationId, escrito,
+  );
+
+  await comEscopoDoPedido(sessao, (db) => registar(db, sessao.contexto.organizationId, {
+    accao: r === 'ok' ? 'unidade.endereco-publico.guardado' : 'unidade.endereco-publico.recusado',
+    actorId: sessao.actor.id, actorEmail: sessao.actor.email,
+    alvoTipo: 'location', alvoId: locationId,
+    detalhe: { publicSlug: escrito, resultado: r },
+  }));
+
+  // Motivos distintos e não um "ocupado" genérico: quem tenta um endereço
+  // reservado por outra organização não está à espera de nada — ele não se
+  // liberta —, e mandá-lo esperar era a resposta errada.
+  if (r !== 'ok') return voltarPara(destino, { erro: r });
   return voltarPara(destino, { guardado: '1' });
 }
