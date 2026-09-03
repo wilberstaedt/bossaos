@@ -585,3 +585,44 @@ p { margin: 0; }
    idênticos no mesmo ecrã de rolagem. */
 .bo-estado__accao-topo { display: none; }
 @media (min-width: 768px) { .bo-estado__accao-topo { display: block; } }
+
+/* ══ Estrutura de acesso (E04) ═════════════════════════════════════════════
+   Painel escuro à esquerda com a marca, formulário à direita. Abaixo de 1024 px
+   o painel sai: num telemóvel ele comeria o ecrã inteiro e o que interessa ali
+   é entrar. */
+.bo-auth { display: flex; min-height: 100vh; background: var(--bo-superficie-base); }
+.bo-auth__lado {
+  width: 40%; max-width: 480px; flex-shrink: 0;
+  background: var(--bo-superficie-inversa); color: var(--bo-texto-inverso);
+  padding: var(--bo-espaco-xxl);
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.bo-auth__marca { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 24px; }
+.bo-auth__lema { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 40px; line-height: 1.1; }
+/* decorativo: a segunda linha do lema é editorial e não indica estado nenhum.
+   Sobre o verde o coral dá 4,71:1, que passa texto comum. */
+.bo-auth__lema em { font-style: normal; color: var(--bo-acento); display: block; }
+.bo-auth__rodape { font-size: 16px; line-height: 1.5; opacity: 0.85; }
+.bo-auth__conteudo {
+  flex: 1; display: flex; align-items: flex-start; justify-content: center;
+  padding: var(--bo-espaco-gigante) var(--bo-espaco-xl);
+}
+.bo-auth__forma { width: 100%; max-width: 520px; display: grid; gap: var(--bo-espaco-xl); }
+@media (max-width: 1023px) {
+  .bo-auth__lado { display: none; }
+  .bo-auth__conteudo { padding: var(--bo-espaco-xl) var(--bo-espaco-lg); }
+}
+
+/* Cartões de escolha (organização, unidade). Um alvo inteiro, não um rádio. */
+.bo-escolhas { display: grid; gap: var(--bo-espaco-lg); grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.bo-escolha {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: var(--bo-espaco-lg);
+  width: 100%; text-align: left;
+  background: var(--bo-superficie-elevada); border: 1px solid transparent;
+  border-radius: var(--bo-raio-cartao); padding: var(--bo-espaco-xl);
+  min-height: var(--bo-toque-publico); cursor: pointer;
+  font-family: var(--bo-fonte-corpo); font-size: 16px; color: var(--bo-texto-primario);
+}
+.bo-escolha[aria-current='true'] { border-color: var(--bo-primaria); border-width: 2px; }
+.bo-escolha__titulo { font-weight: 700; font-family: var(--bo-fonte-titulo); font-size: 18px; }
+.bo-escolha__detalhe { color: var(--bo-texto-secundario); font-size: 14px; margin-top: 4px; }

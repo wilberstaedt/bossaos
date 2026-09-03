@@ -92,23 +92,6 @@ async function registar(email: string): Promise<string> {
   return rows[0].id;
 }
 
-async function entrar(email: string): Promise<string> {
-  let r: Response | undefined;
-  for (let tentativa = 0; tentativa < 6; tentativa++) {
-    r = await fetch(`${BASE}/api/auth/sign-in/email`, {
-      method: 'POST',
-      headers: mutacao(),
-      body: JSON.stringify({ email, password: SENHA }),
-    });
-    if (r.status !== 429) break;
-    await dormir(11_000);
-  }
-  assert.ok(r?.ok, `entrada de ${email} falhou: ${r?.status}`);
-  const cookie = (r.headers.getSetCookie?.() ?? []).map((c) => c.split(';')[0]).join('; ');
-  cookies.set(email, cookie);
-  return cookie;
-}
-
 function como(email: string): HeadersInit {
   return { cookie: cookies.get(email) ?? '', 'content-type': 'application/json', origin: BASE };
 }
