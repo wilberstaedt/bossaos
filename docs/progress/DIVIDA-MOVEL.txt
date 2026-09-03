@@ -88,3 +88,31 @@ CAT-027
 ONB-005
 ONB-006
 SET-012
+
+# E09 — E ESTA É A PIOR DÍVIDA DA LISTA, declarada 04/09
+#
+# São a CARTA PÚBLICA e o QR: lidas num telemóvel, apontadas por um código
+# impresso na mesa. Se há telas neste produto onde o móvel não é opcional, são
+# estas. Carregá-las aqui é o contrário do instinto certo, e escrevo-o para que
+# ninguém as leia como as outras 66.
+#
+# Porque não estão medidas hoje, em concreto: a prova do E09 CRIA e DESTRÓI o
+# seu próprio endereço público (`public_slug` volta a NULL no fim), por isso não
+# existe carta persistente para o navegador visitar; e a inspecção de larguras
+# não semeia base nenhuma. Medi-las exige semeadura no arnês do navegador — que
+# é o mesmo trabalho que o E10 vai precisar de fazer para os sites públicos.
+#
+# PRAZO, e é bloqueante e não desejo: saem daqui no E10, na mesma passagem em que
+# o arnês ganhar semeadura. Se o E10 fechar sem estas onze medidas, o marco E11
+# não passa — está escrito em ALVO-E11.md e em ALVO-E10.md.
+CHAN-001
+MENU-001
+MENU-002
+MENU-003
+MENU-004
+MENU-005
+MENU-019
+QR-001
+QR-003
+QR-004
+REP-001
