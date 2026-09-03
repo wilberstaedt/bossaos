@@ -23,8 +23,24 @@ export interface DadosDeUnidade {
   brandId: string;
   nome: string;
   slug: string;
-  moeda: string;
-  fuso: string;
+  /**
+   * ── E06: moeda e fuso passaram a OPCIONAIS aqui também ───────────────────
+   *
+   * A coluna deixou de ser `NOT NULL` e a assinatura tinha de acompanhar. Se
+   * ficasse `moeda: string`, o compilador continuava a obrigar quem cria uma
+   * unidade a arranjar um valor — e o valor que se arranja quando não se sabe é
+   * o da unidade anterior, ou o do servidor, ou AUD porque o produto nasceu na
+   * Austrália. **Uma unidade sem moeda não é AUD.**
+   *
+   * Aceitar `undefined` é o que torna "por configurar" alcançável. Quem precisa
+   * de moeda — cobrar, publicar preços — recusa explicitamente por ela faltar.
+   */
+  moeda?: string;
+  fuso?: string;
+  morada?: string;
+  localidade?: string;
+  contactoEmail?: string;
+  contactoTelefone?: string;
 }
 
 // ── Marca ───────────────────────────────────────────────────────────────────

@@ -37,3 +37,15 @@ export {
   type Capacidade, type TipoDeCapacidade, type Concessao as ConcessaoDeCapacidade,
   type Flag, type Intencao, type PedidoDeCapacidade, type ResultadoDeCapacidade,
 } from './capacidades.ts';
+
+export {
+  estaAberto, momentoLocal, intervaloValido, intervalosSeSobrepoem, diaAnterior,
+  diasConfigurados, paraRelogio, deRelogio, MINUTOS_POR_DIA,
+  type DiaDaSemana, type Intervalo, type EstadoDoDia, type Excepcao,
+  type Horario, type Abertura,
+} from './horarios.ts';
+
+export {
+  listaDeArranque, pendentesDoArranque, podeSeguirParaCatalogo,
+  type EstadoDoItem, type ItemDeArranque, type FactosDoArranque,
+} from './arranque.ts';

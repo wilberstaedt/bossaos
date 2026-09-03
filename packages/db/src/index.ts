@@ -126,3 +126,17 @@ export {
   type OrganizacaoDaPlataforma, type DetalheDaOrganizacao, type ConcessaoDaPlataforma,
   type FlagDaPlataforma, type Implantacao, type FaseDeImplantacao,
 } from './plataforma.ts';
+
+export {
+  lerHorario, aberturaAgora, validarDia, guardarSemana, esquecerDia,
+  guardarExcepcao, apagarExcepcao,
+  type ErroDeHorario, type ResultadoDaGravacao as ResultadoDeHorario,
+} from './horarios.ts';
+
+export {
+  comIdempotencia, criarOrganizacaoComDono, lerPerfil, guardarPerfil, perfilCompleto,
+  progressoDoArranque, marcarPasso, arranqueDaOrganizacao,
+  dependenciasDaUnidade, arquivarUnidade, desarquivarUnidade,
+  type Idempotencia, type ResultadoIdempotente, type PerfilDaOrganizacao,
+  type Dependencia, type ResultadoDeArquivo,
+} from './onboarding.ts';

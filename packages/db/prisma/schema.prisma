@@ -54,7 +54,31 @@ model Organization {
   id        String   @id @default(uuid()) @db.Uuid
   /// Namespace público. Único globalmente: é o que aparece num endereço.
   slug      String   @unique
+  /// Nome comercial. É o que aparece na interface.
   nome      String
+
+  // ── E06: perfil. TODOS opcionais, e isso é a decisão da etapa ─────────────
+  //
+  // Nenhum destes campos tem `@default`. Um `pais @default("ES")` porque a
+  // primeira fixture é espanhola, ou um `moedaPadrao @default("EUR")` porque
+  // parecia razoável, é exactamente o defeito que este modelo existe para
+  // impedir: **desconhecido é uma resposta**, e o ecrã tem de a poder mostrar.
+  //
+  // Opcional não quer dizer sem consequência: quem publica, cobra ou abre
+  // precisa deles, e recusa sem eles. O que não se faz é preenchê-los sozinho.
+
+  /// Nome legal, o da factura. Pode não estar à mão no primeiro dia.
+  nomeLegal String? @map("nome_legal")
+  /// ISO 3166-1 alpha-2. Sem omissão: o país da organização não se adivinha.
+  pais      String? @db.Char(2)
+  /// Fuso IANA da SEDE. O que conta para abrir portas é o da unidade.
+  fuso      String?
+  /// ISO 4217. É uma sugestão para novas unidades, nunca um valor herdado em
+  /// silêncio: a unidade tem a sua, e pode ser outra.
+  moedaPadrao String? @map("moeda_padrao") @db.Char(3)
+  /// Quem responde por esta organização. Texto, não FK: pode ser alguém que
+  /// ainda não tem conta.
+  responsavel String?
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
   version   Int      @default(1)
@@ -70,6 +94,10 @@ model Organization {
   entitlements    EntitlementGrant[]
   featureFlags    FeatureFlag[]
   themeRevisions  ThemeRevision[]
+  onboarding      OnboardingProgress?
+  scheduleDays    ScheduleDay[]
+  scheduleExceptions ScheduleException[]
+  scheduleIntervals  ScheduleInterval[]
 
   @@map("organizations")
 }
@@ -80,6 +108,12 @@ model Brand {
   organizationId String @map("organization_id") @db.Uuid
   nome           String
   slug           String
+  /// E06: identidade textual inicial (ONB-002). Opcionais pela mesma razão.
+  descricao      String?
+  /// Idioma principal da marca, um dos três que o E02 suporta. Sem omissão:
+  /// escolher espanhol por a primeira fixture o ser publicaria a carta de um
+  /// restaurante brasileiro em espanhol.
+  idiomaPrincipal String? @map("idioma_principal")
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   version        Int       @default(1)
@@ -106,10 +140,26 @@ model Location {
   brandId        String @map("brand_id") @db.Uuid
   nome           String
   slug           String
+  // ── E06: de obrigatórios a opcionais, e é uma decisão, não um relaxamento ─
+  //
+  // Estavam `NOT NULL`. Parece a escolha segura e é o contrário: com eles
+  // obrigatórios, quem cria uma unidade é FORÇADO a passar um valor, e o valor
+  // que se passa quando não se sabe é o da última unidade, ou o do servidor, ou
+  // AUD porque o produto nasceu na Austrália. Uma unidade sem moeda não é AUD.
+  //
+  // Opcionais, "por configurar" passa a ser representável — e as operações que
+  // precisam deles recusam explicitamente, em vez de operarem sobre um palpite.
   /// Moeda operacional, ISO 4217. O dinheiro guarda-se em unidade mínima.
-  moeda          String @db.Char(3)
-  /// Fuso IANA. As regras recorrentes precisam dele à parte do instante UTC.
-  fuso           String
+  moeda          String? @db.Char(3)
+  /// Fuso IANA. Sem ele não há pergunta a fazer sobre horários: "são 14:00" não
+  /// quer dizer nada sem saber onde.
+  fuso           String?
+  /// E06: morada e contacto (ONB-003, ORG-005). "Pendiente de confirmar" é um
+  /// estado que o atlas desenha, e é `null` — não uma cadeia vazia.
+  morada         String?
+  localidade     String?
+  contactoEmail  String? @map("contacto_email")
+  contactoTelefone String? @map("contacto_telefone")
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   version        Int       @default(1)
@@ -122,6 +172,8 @@ model Location {
   roleAssignments RoleAssignment[]
   invitations     Invitation[]
   entitlements    EntitlementGrant[]
+  scheduleDays    ScheduleDay[]
+  scheduleExceptions ScheduleException[]
 
   @@unique([organizationId, id], name: "location_por_organizacao")
   @@unique([organizationId, slug])
@@ -604,4 +656,138 @@ model PlatformStaff {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("platform_staff")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E06 — horários, onboarding e idempotência.
+
+/// Um dia da semana CONFIGURADO, para uma unidade.
+///
+/// **A ausência de linha é o terceiro estado.** Um dia sem linha está por
+/// configurar; um dia com linha e `fechado = true` está fechado porque alguém o
+/// disse. As duas coisas leem-se igual num modelo que só tenha intervalos, e é
+/// essa a diferença que faz um site anunciar que abre às nove.
+model ScheduleDay {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  /// ISO 8601: 1 = segunda … 7 = domingo. É o que o `Intl` devolve.
+  dia            Int
+  /// Declarado fechado. Sem intervalos, e é diferente de não ter linha.
+  fechado        Boolean @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  version   Int      @default(1)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  /// COMPOSTA: a unidade tem de ser da mesma organização.
+  location     Location     @relation(fields: [organizationId, locationId], references: [organizationId, id], onDelete: Cascade)
+  intervalos   ScheduleInterval[]
+
+  @@unique([organizationId, locationId, dia])
+  @@index([organizationId])
+  @@map("schedule_days")
+}
+
+/// Uma data concreta que sobrepõe a regra semanal. Feriado, evento, obras.
+model ScheduleException {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  /// Data LOCAL da unidade, `AAAA-MM-DD`. Guardada como `date` e não como
+  /// instante: um feriado é um dia no calendário de quem o vive, não um ponto
+  /// em UTC que muda de dia conforme quem o lê.
+  data           DateTime @db.Date
+  motivo         String
+  /// Fechado nesse dia, ou aberto com os intervalos abaixo.
+  fechado        Boolean  @default(true)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  version   Int      @default(1)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [organizationId, locationId], references: [organizationId, id], onDelete: Cascade)
+  intervalos   ScheduleInterval[]
+
+  @@unique([organizationId, locationId, data])
+  @@index([organizationId])
+  @@map("schedule_exceptions")
+}
+
+/// Um intervalo de serviço. Pertence a um dia da semana OU a uma excepção.
+///
+/// `fimMin` pode passar de 1440: 20:00→01:00 escreve-se 1200→1500. A alternativa
+/// — guardar 60 e tratar `fim < inicio` como caso especial — espalha esse `if`
+/// por todo o código que lê horários, e basta um sítio esquecer-se para a sexta
+/// à uma da manhã aparecer fechada.
+model ScheduleInterval {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  diaId          String? @map("dia_id") @db.Uuid
+  excepcaoId     String? @map("excepcao_id") @db.Uuid
+  inicioMin      Int     @map("inicio_min")
+  fimMin         Int     @map("fim_min")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  dia          ScheduleDay?       @relation(fields: [diaId], references: [id], onDelete: Cascade)
+  excepcao     ScheduleException? @relation(fields: [excepcaoId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([diaId])
+  @@index([excepcaoId])
+  @@map("schedule_intervals")
+}
+
+/// Em que passo do arranque está esta organização.
+///
+/// Existe para o onboarding poder ser **retomado**: quem fecha o portátil no
+/// passo 3 volta ao passo 3. O passo não é a verdade sobre o que está feito — a
+/// verdade é o que existe na base — é a última posição de quem estava a
+/// preencher.
+model OnboardingProgress {
+  organizationId String @id @map("organization_id") @db.Uuid
+  /// 1..10, como o atlas numera. Sem omissão para 10.
+  passo          Int    @default(1)
+  concluidoEm    DateTime? @map("concluido_em") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("onboarding_progress")
+}
+
+/// Uma operação já executada, guardada pela chave que quem chamou escolheu.
+///
+/// O aceite 1 do E06: *"repetir criação após timeout não duplica organização/
+/// unidade"*. Um pedido que expira no cliente pode já ter sido executado no
+/// servidor — o cliente não sabe a diferença entre "não chegou" e "chegou e a
+/// resposta perdeu-se". Repetir é a coisa certa a fazer; duplicar é o que não
+/// pode acontecer.
+///
+/// A `organizationId` é OPCIONAL de propósito: a criação da própria organização
+/// também tem de ser idempotente, e nesse momento ainda não há organização.
+model IdempotencyKey {
+  id             String  @id @default(uuid()) @db.Uuid
+  /// A chave que o cliente escolheu. Opaca para nós.
+  chave          String
+  actorId        String  @map("actor_id") @db.Uuid
+  accao          String
+  organizationId String? @map("organization_id") @db.Uuid
+  /// O que ficou feito, para se devolver o MESMO em vez de refazer.
+  resultadoTipo  String  @map("resultado_tipo")
+  resultadoId    String  @map("resultado_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  /// Por actor e acção, como o `domain-model.md` manda. A mesma chave de duas
+  /// pessoas diferentes são duas operações diferentes.
+  @@unique([chave, actorId, accao])
+  @@index([organizationId])
+  @@map("idempotency_keys")
 }
