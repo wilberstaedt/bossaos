@@ -1,0 +1,28 @@
+{
+  "name": "@bossaos/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "NODE_ENV=production next build",
+    "start": "next start",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@bossaos/config": "workspace:*",
+    "@bossaos/db": "workspace:*",
+    "@bossaos/domain": "workspace:*",
+    "@bossaos/storage": "workspace:*",
+    "@bossaos/ui": "workspace:*",
+    "next": "16.3.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.6",
+    "typescript": "5.9.3"
+  }
+}

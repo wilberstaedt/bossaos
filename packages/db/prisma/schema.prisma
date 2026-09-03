@@ -1,0 +1,33 @@
+// BossaOS — schema base (E01).
+//
+// Nesta etapa o schema é DELIBERADAMENTE mínimo. O E01 é a base executável: o
+// modelo de dados do produto entra nas etapas que o desenham (multi-tenant,
+// catálogo, reservas), e inventá-lo aqui seria decidir sem o contrato à frente.
+//
+// O que existe aqui existe por uma razão verificável: `AppMeta` é a tabela que a
+// sonda de prontidão lê. Sem ela, "a base responde" prova apenas que o Postgres
+// está de pé — não prova que ESTE schema foi migrado. São perguntas diferentes,
+// e a segunda é a que interessa depois de um deploy.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Em Prisma 7 a URL SAI do schema: as migrações lêem-na de `prisma.config.ts`
+  // e o runtime recebe a dele por adaptador, no construtor do cliente. Para nós
+  // isto é bom notícia e não obstáculo — a separação entre a credencial que
+  // altera schema e a que só o usa (E01, aceite 2) deixa de depender de
+  // disciplina e passa a estar em dois sítios diferentes do código.
+}
+
+/// Chave/valor de metadados da aplicação. Escrita pela migração, lida pela
+/// sonda de prontidão. Não é domínio: é o sinal de que o schema chegou.
+model AppMeta {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("app_meta")
+}

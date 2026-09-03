@@ -1,0 +1,19 @@
+node_modules/
+.next/
+dist/
+out/
+*.tsbuildinfo
+
+# Segredos e estado local — nunca no repositório.
+.env
+.env.*
+!.env.example
+
+# Porta de média em desenvolvimento (disco local).
+.storage/
+
+# Caixa de correio de teste.
+.mail/
+
+.DS_Store
+coverage/

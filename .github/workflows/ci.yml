@@ -1,0 +1,91 @@
+name: CI
+
+# Cada verificação é um passo com nome próprio, de propósito (E01, aceite 1).
+# Um único `pnpm verificar` seria mais curto e diria menos: quando falhasse,
+# ninguém saberia se foi o lint, os tipos, os testes ou o build sem abrir o log.
+# Aqui a linha vermelha no GitHub já diz o que partiu.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        # Base descartável: nasce e morre com o job (E01, aceite 2).
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      # Valores de CI, descartáveis, sem relação com qualquer ambiente real.
+      PGHOST: 127.0.0.1
+      PGPASSWORD: postgres
+      PGSUPERUSER: postgres
+      DATABASE_URL: postgresql://bossaos_app:dev_app_local@127.0.0.1:5432/bossaos_dev
+      MIGRATION_DATABASE_URL: postgresql://bossaos_migrate:dev_migrate_local@127.0.0.1:5432/bossaos_dev
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node fixado pelo .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: pnpm da versão declarada em packageManager
+        uses: pnpm/action-setup@v4
+
+      - name: Instalar pelo lockfile
+        # `--frozen-lockfile` falha se o lockfile não corresponder ao
+        # package.json. É o que transforma "instalou" em "instalou o mesmo".
+        run: pnpm install --frozen-lockfile
+
+      - name: Cliente PostgreSQL
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Base e papéis separados
+        run: ./scripts/dev-db.sh
+
+      - name: Migração em base descartável
+        run: pnpm db:migrate:deploy
+
+      # ── as verificações, uma a uma ────────────────────────────────────────
+      - name: Lint
+        run: pnpm lint
+
+      - name: Tipos
+        run: pnpm typecheck
+
+      - name: Testes
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      # ── as provas de comportamento, que um build verde não dá ─────────────
+      - name: Prova — o runtime não altera o schema
+        run: ./scripts/provar-separacao-de-credenciais.sh
+
+      - name: Prova — prontidão distingue base migrada, por migrar e em baixo
+        run: ./scripts/provar-prontidao.sh
+
+      - name: Migrações aplicadas e sem desvio
+        run: pnpm db:migrate:status
