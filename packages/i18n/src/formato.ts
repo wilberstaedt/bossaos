@@ -1,26 +1,18 @@
+import { escalaDaMoeda, type Dinheiro } from '@bossaos/domain';
 import type { Idioma } from './idiomas.ts';
 
 /**
  * Dinheiro em **unidades mínimas inteiras**, com código de moeda.
  *
- * Nunca vírgula flutuante: `0.1 + 0.2` não dá `0.3`, e num sistema que soma
- * comandas o dia inteiro esse cêntimo aparece. A arquitectura fixa isto (CT-11)
- * e o formatador é o sítio onde a regra encontra o ecrã — é aqui que os inteiros
- * viram texto, e só aqui.
+ * O tipo e a escala vêm do **domínio**, e não daqui. Quantas casas tem uma moeda
+ * é um facto sobre dinheiro, não sobre apresentação — e tê-lo em dois sítios era
+ * ter duas réguas: no dia em que uma mudasse, o formatador e o parser
+ * discordavam sobre o que é um cêntimo. Este ficheiro é onde os inteiros viram
+ * texto, e só isso.
  */
-export interface Dinheiro {
-  /** Cêntimos, e não euros. 1250 é 12,50 €. */
-  montanteMenor: number;
-  /** ISO 4217: EUR, BRL, GBP… */
-  moeda: string;
-}
+export type { Dinheiro };
 
-/** Moedas sem casas decimais (JPY) ou com três (TND). O resto tem duas. */
-const DIGITOS_POR_MOEDA: Record<string, number> = { JPY: 0, KRW: 0, TND: 3, BHD: 3, KWD: 3 };
-
-function digitos(moeda: string): number {
-  return DIGITOS_POR_MOEDA[moeda.toUpperCase()] ?? 2;
-}
+const digitos = escalaDaMoeda;
 
 export function formatarDinheiro(valor: Dinheiro, idioma: Idioma): string {
   if (!Number.isInteger(valor.montanteMenor)) {

@@ -9,5 +9,11 @@
     "typecheck": "tsc -p tsconfig.json",
     "test": "node --test --experimental-strip-types \"src/**/*.test.ts\""
   },
-  "devDependencies": { "typescript": "5.9.3", "@types/node": "22.20.1" }
+  "dependencies": {
+    "@bossaos/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "22.20.1"
+  }
 }

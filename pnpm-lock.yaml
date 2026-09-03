@@ -189,6 +189,10 @@ importers:
         version: 5.9.3
 
   packages/i18n:
+    dependencies:
+      '@bossaos/domain':
+        specifier: workspace:*
+        version: link:../domain
     devDependencies:
       '@types/node':
         specifier: 22.20.1

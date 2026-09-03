@@ -49,3 +49,25 @@ export {
   listaDeArranque, pendentesDoArranque, podeSeguirParaCatalogo,
   type EstadoDoItem, type ItemDeArranque, type FactosDoArranque,
 } from './arranque.ts';
+
+export {
+  escalaDaMoeda, moedaValida, deTextoParaMenor, deMenorParaTexto, somar,
+  type Dinheiro, type ErroDeSoma,
+} from './dinheiro.ts';
+
+export {
+  ALERGENIOS_UE, PREFERENCIAS, estadoDoAlergenio, fichaDeAlergenios,
+  porDeclarar, revisaoDaFicha, avisoDeSeguranca,
+  type EstadoDeclarado, type EstadoDeAlergenio, type Declaracao,
+  type LinhaDeAlergenio, type AlergenioUE, type Preferencia,
+} from './alergenios.ts';
+
+export {
+  NIVEIS, nivelDaRegra, resolverPreco, precosPorCanal, unidadesAfectadasPelaBase,
+  type Nivel, type RegraDePreco, type PedidoDePreco, type ResultadoDePreco,
+} from './precos.ts';
+
+export {
+  validarGrupo, validarEscolhas,
+  type GrupoDeModificadores, type ErroDeEscolha,
+} from './modificadores.ts';
