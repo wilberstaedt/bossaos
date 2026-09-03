@@ -84,3 +84,46 @@ sete minutos que se poupam por corrida esta noite.
 
 **Fazer quando:** no fecho do E07, com a árvore parada, antes de autorizar o E08. Se ao
 chegar lá a duração já tiver passado dos 900 s, fazer primeiro e autorizar depois.
+
+
+---
+
+# Medido depois de dividir — 22h20
+
+| | |
+| --- | --- |
+| **Antes**, um trabalho em série | **649 s** |
+| **Depois**, três em paralelo | **548 s** |
+
+```
+✓ Rápido — sem base nem navegador     2m03s   123 s
+✓ Navegador — inspecção visual        2m27s   147 s
+✓ Base — migrações e provas           9m03s   543 s   ← o encadeamento
+```
+
+## A minha previsão estava errada, e por quanto
+
+Escrevi às 20h40 que a divisão poria o relógio **"perto de 200 s"**. Pôs em **548 s** —
+uma melhoria de **15 %**, não de três vezes.
+
+**Onde errei:** assumi que o tempo estava espalhado pelas três categorias. Não está. O
+`base` sozinho leva **543 s**, porque as onze provas correm **em série dentro dele**, e
+eram elas que já valiam 41 % do total. Tirar as guardas rápidas e o navegador do caminho
+crítico removeu cerca de cem segundos — o resto do problema continua inteiro, só que agora
+concentrado num sítio em vez de disperso.
+
+O que se ganhou não é desprezável e não é só tempo: o `rápido` dá resposta em **dois
+minutos**, portanto lint, tipos, guardas e build passam a falhar cedo em vez de esperar
+pelas provas de base. Mas chamar-lhe "a CI ficou três vezes mais rápida" seria falso.
+
+## O passo seguinte, que é onde está o tempo a sério
+
+**Dividir o próprio `base`.** As onze provas são independentes entre si: cada uma semeia o
+que precisa e limpa atrás de si — foi por isso que o JR pôs `ROLLBACK` no `finally` e que
+o controlo negativo das descidas repõe o que desliga. Uma matriz com uma prova por trabalho
+poria o relógio no tempo da mais longa, que é a do MFA a 167 s.
+
+**Quando:** no fecho do E08, árvore parada — a mesma condição que respeitei desta vez e que
+funcionou. E com a lição de há vinte minutos aplicada: **validar contra o esquema do
+Actions e não contra o analisador de YAML**, que foi o que me deixou empurrar três trabalhos
+sem `runs-on`.
