@@ -32,6 +32,17 @@ export default defineConfig({
 
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 
+  /**
+   * A base é semeada ANTES de o navegador arrancar.
+   *
+   * Sem isto não havia carta pública persistente para visitar — a prova do E09
+   * cria e destrói o seu próprio endereço —, e as onze telas mais dependentes de
+   * telemóvel do produto ficavam sem medição de móvel. Está escrito em
+   * `docs/progress/DIVIDA-MOVEL.txt`, e é o mesmo trabalho que o E10 precisa
+   * para os sites públicos.
+   */
+  globalSetup: './inspeccao/semear.ts',
+
   webServer: {
     command: `pnpm build && pnpm --filter @bossaos/web exec next start -p ${PORTA}`,
     url: `http://127.0.0.1:${PORTA}/api/health`,

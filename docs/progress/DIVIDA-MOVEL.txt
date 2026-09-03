@@ -105,13 +105,24 @@ SET-012
 # PRAZO, e é bloqueante e não desejo: saem daqui no E10, na mesma passagem em que
 # o arnês ganhar semeadura. Se o E10 fechar sem estas onze medidas, o marco E11
 # não passa — está escrito em ALVO-E11.md e em ALVO-E10.md.
+#
+# 04/09 — SEIS SAÍRAM. O arnês ganhou semeadura (`inspeccao/semear.ts` +
+# `packages/db/prisma/semente-inspeccao.ts`) e as seis telas PÚBLICAS estão
+# medidas em `inspeccao/publico.spec.ts`: cinco larguras, transbordo, elementos
+# fora do ecrã, alvos de toque a 44 px, contraste, e os catorze alérgenos a caber
+# num ecrã de 360 px.
+#
+# A primeira passagem encontrou um defeito a sério: o `/r/` está fora de
+# `app/[idioma]/` e **não tinha moldura**, logo a carta pública era servida sem
+# folha de estilos. O sintoma foi um alvo de toque de 18 px onde o CSS declara
+# 44. `pnpm build` verde, `validar-classes.sh` verde — as classes existiam, o
+# ficheiro é que não chegava à página.
+#
+# AS CINCO QUE FICAM exigem SESSÃO no navegador (CHAN-001, QR-001/003/004,
+# REP-001). O arnês não autentica hoje, e isso é trabalho próprio: cookie real
+# emitido pela biblioteca, como a prova de acesso do E04 faz por HTTP. Continua
+# a ser bloqueante para o E11 e continua com o mesmo prazo — o E10.
 CHAN-001
-MENU-001
-MENU-002
-MENU-003
-MENU-004
-MENU-005
-MENU-019
 QR-001
 QR-003
 QR-004
