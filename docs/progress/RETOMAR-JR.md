@@ -46,6 +46,16 @@ existe no atlas, não que exista no produto.
 
 ### O que corre, e o que cada coisa mede
 
+**`fnm exec --using=22.23.2 ./scripts/provar-tudo.sh`** corre **tudo** — todas as guardas e
+todas as provas — e diz o que correu. **Descobre em vez de listar**: acrescentar um
+`provar-*.sh` ou um `validar-*.sh` passa a bastar.
+
+Foi escrito a 2026-09-03 às 21h40 porque este ficheiro tinha uma lista **à mão** de seis
+scripts quando `scripts/` já tinha vinte e quatro. Derivou em seis horas — e um documento de
+emergência só é lido na emergência, que é o pior momento para descobrir que está
+desactualizado.
+
+
 ```
 fnm exec --using=22.23.2 pnpm verificar     cobertura + segredos + lint + tipos + testes + build
 fnm exec --using=22.23.2 pnpm inspeccionar  Playwright: larguras, contraste, foco, alvos

@@ -30,6 +30,16 @@ durar mais do que isso desde que correm builds, e empilhavam chamadas.
 
 ### O que já não se descobre outra vez
 
+**`fnm exec --using=22.23.2 ./scripts/provar-tudo.sh`** corre **tudo** — todas as guardas e
+todas as provas — e diz o que correu. **Descobre em vez de listar**: acrescentar um
+`provar-*.sh` ou um `validar-*.sh` passa a bastar.
+
+Foi escrito a 2026-09-03 às 21h40 porque este ficheiro tinha uma lista **à mão** de seis
+scripts quando `scripts/` já tinha vinte e quatro. Derivou em seis horas — e um documento de
+emergência só é lido na emergência, que é o pior momento para descobrir que está
+desactualizado.
+
+
 - **`fnm exec --using=22.23.2`** para tudo o que corra Node.
 - **Carregar o `.env`** antes de qualquer prova (`set -a && . ./.env && set +a`). Sem ele o
   build falha em `/api/auth/[...all]` e parece defeito da etapa. Já me enganou duas vezes.
