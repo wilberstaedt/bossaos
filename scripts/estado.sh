@@ -27,8 +27,21 @@ TELAS_TOTAL=$(tail -n +2 docs/progress/coverage.csv | wc -l | tr -d ' ')
 # contem as DUAS palavras - ou seja contava como entregue exactamente aquilo que eu
 # tinha dito ter corrigido do lado das etapas. Estava adormecido so porque as seis
 # telas de agora estao todas validadas. Agora e igualdade exacta, como em cima.
-TELAS_FEITAS=$(tail -n +2 docs/progress/coverage.csv | awk -F, '$(NF-2)=="validado"' | wc -l | tr -d ' ')
-TELAS_AGUARDA=$(tail -n +2 docs/progress/coverage.csv | awk -F, '$(NF-2)=="implementado aguardando validação"' | wc -l | tr -d ' ')
+# Leitor de CSV a serio, nao `awk -F,`. Um campo com virgula dentro de aspas faz o
+# awk contar um campo a mais, e `$(NF-2)` passa a apontar para outra coluna - a
+# 2026-09-03 uma nota do E05 com virgula fez isto contar 11 telas a aguardar onde
+# eram 12, e a percentagem que eu reporto sai daqui. O mesmo defeito estava no
+# validar-cobertura.sh e foi o LUMEN JR que o encontrou e corrigiu la; eu so o
+# descobri aqui por reproduzir o awk a mao e ver os dois discordarem.
+contar_telas() { # $1 = estado exacto
+  python3 -c '
+import csv, io, sys
+linhas = list(csv.reader(io.open("docs/progress/coverage.csv", encoding="utf-8-sig", newline="")))
+col = len(linhas[0]) - 3
+print(sum(1 for l in linhas[1:] if l and l[col] == sys.argv[1]))' "$1"
+}
+TELAS_FEITAS=$(contar_telas "validado")
+TELAS_AGUARDA=$(contar_telas "implementado aguardando validação")
 TELAS_FEITAS=${TELAS_FEITAS:-0}
 TELAS_AGUARDA=${TELAS_AGUARDA:-0}
 # A guarda que exigi ao JR no E03, aplicada a mim: um leitor que nao le nada devolve
