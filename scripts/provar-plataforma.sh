@@ -23,7 +23,7 @@ fi
 GRUPOS_ESPERADOS=3
 ASSERCOES_ESPERADAS=10
 falhas=0
-SQL_PLATAFORMA=packages/db/prisma/migrations/20260903190000_e05_plataforma/migration.sql
+SQL_PLATAFORMA=packages/db/prisma/migrations/20260903152000_e05_plataforma/migration.sql
 PORTA_ABERTA=0
 
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }

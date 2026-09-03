@@ -83,6 +83,18 @@ jobs:
       - name: Migração em base descartável
         run: pnpm db:migrate:deploy
 
+      - name: Prova — a cadeia de migrações aplica-se DO ZERO
+        # Nasceu de o E06 ter sido validado e reprovado pela CI quatro minutos
+        # depois: a `e06` usava `platform_staff` e a `e05_plataforma`, que a
+        # cria, tinha carimbo posterior. O Prisma aplica por carimbo, não por
+        # etapa. Passou nas duas máquinas porque as duas bases já a tinham.
+        #
+        # A CI já apanhava isto por começar do nada; isto dá o mesmo alcance a
+        # quem está a escrever, e traz um controlo negativo que planta o defeito
+        # de volta e exige que a cadeia parta — em `platform_staff`, e não por
+        # outra razão qualquer.
+        run: ./scripts/provar-migracoes-do-zero.sh
+
       # ── as verificações, uma a uma ────────────────────────────────────────
       # A cobertura primeiro: é a mais barata e a que invalida tudo o resto.
       # Um ID perdido significa que o mapa deixou de descrever o produto, e não

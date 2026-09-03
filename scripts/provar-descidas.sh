@@ -32,7 +32,7 @@ ASSERCOES_ESPERADAS=14
 falhas=0
 PLANOS=packages/db/src/planos.ts
 DESCIDAS=packages/db/src/descidas.ts
-SQL_APLICAR=packages/db/prisma/migrations/20260903180000_e05_descida_agendada/migration.sql
+SQL_APLICAR=packages/db/prisma/migrations/20260903150000_e05_descida_agendada/migration.sql
 ORIG_PLANOS=$(mktemp); ORIG_DESCIDAS=$(mktemp)
 cp "$PLANOS" "$ORIG_PLANOS"; cp "$DESCIDAS" "$ORIG_DESCIDAS"
 FUNCAO_ABERTA=0
