@@ -2,10 +2,11 @@ import { after, before, beforeEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from 'pg';
 import {
-  comEscopo, contarUnidades, estadoComercial, guardarTema, obterPrisma,
+  catalogoDePlanos, comEscopo, contarUnidades, estadoComercial, guardarTema, obterPrisma,
   podeCapacidade, previaDeDescida, reverterAoPadrao, temaActivo,
 } from '../packages/db/src/index.ts';
 import { IDS } from '../packages/db/prisma/fixtures.ts';
+import { DESTAQUES } from '../apps/web/src/componentes/planos.ts';
 
 /**
  * A prova do E05.
@@ -264,5 +265,45 @@ describe('validade, flags e a regra do dinheiro', () => {
       podeCapacidade(await estadoComercial(db, IDS.orgB), { capacidade: 'kds', intencao: 'usar' }));
     assert.ok(!starter.permitido, 'Starter não inclui KDS');
     assert.ok(pro.permitido, 'Pro inclui');
+  });
+});
+
+describe('4. O cartão não promete o que o plano não concede', () => {
+  it('cada destaque de cada plano está coberto pelo catálogo REAL', async () => {
+    // Os destaques são copy do atlas — "Reservas, sala y KDS" é uma linha de
+    // venda, não um código de capacidade. Guardá-los só como texto bastava para
+    // os desenhar e não para os manter verdadeiros: no dia em que o catálogo
+    // mudar, o cartão continua a prometer.
+    //
+    // Um cartão que vende o que o portão recusa é uma devolução de dinheiro com
+    // a nossa cara nela. Isto compara as duas listas, e o catálogo é o da base.
+    const catalogo = await comA((db) => catalogoDePlanos(db));
+    assert.ok(catalogo.length >= 3, `só ${catalogo.length} planos — o catálogo está por semear?`);
+
+    const faltas: string[] = [];
+    for (const plano of catalogo) {
+      const concede = new Set(plano.capacidades.map((c) => c.capacidade));
+      for (const destaque of DESTAQUES[plano.codigo] ?? []) {
+        for (const prometida of destaque.promete) {
+          if (!concede.has(prometida)) faltas.push(`${plano.codigo}: promete ${prometida} e não a concede`);
+        }
+      }
+    }
+    assert.deepEqual(faltas, []);
+  });
+
+  it('CONTROLO NEGATIVO: uma promessa a mais é apanhada', async () => {
+    // Sem isto, o caso de cima passaria com uma tabela de destaques vazia — que
+    // é exactamente a forma de esta guarda deixar de guardar sem nada ficar
+    // vermelho.
+    const catalogo = await comA((db) => catalogoDePlanos(db));
+    const starter = catalogo.find((p) => p.codigo === 'STARTER');
+    assert.ok(starter, 'sem o Starter no catálogo não há nada que medir');
+    const concede = new Set(starter.capacidades.map((c) => c.capacidade));
+    assert.ok(!concede.has('tpv'), 'o Starter concede TPV — a fixação deste teste mudou');
+    assert.ok(
+      (DESTAQUES.STARTER ?? []).length > 0,
+      'a tabela de destaques do Starter está vazia: o teste de cima não mede nada',
+    );
   });
 });

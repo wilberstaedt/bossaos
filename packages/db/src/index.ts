@@ -119,3 +119,10 @@ export {
   pendenciasQueBloqueiamDescida, registarDetectorDePendencia, detectoresRegistados,
   type Pendencia, type DetectorDePendencia, type ResultadoDaDescida,
 } from './descidas.ts';
+
+export {
+  ePlataforma, organizacoesDaPlataforma, organizacaoDaPlataforma,
+  concessoesDaPlataforma, flagsDaPlataforma, implantacoes,
+  type OrganizacaoDaPlataforma, type DetalheDaOrganizacao, type ConcessaoDaPlataforma,
+  type FlagDaPlataforma, type Implantacao, type FaseDeImplantacao,
+} from './plataforma.ts';

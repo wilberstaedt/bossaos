@@ -5,7 +5,44 @@ import {
   alvoDeToque, espaco, estado as fichaEstado, marca, razaoArredondada, superficie,
   texto as fichaTexto, tipografia, validarTema,
 } from '@bossaos/ui';
+import { decidirCapacidade } from '@bossaos/domain';
 import { DemoInteractiva } from '../../../../src/componentes/DemoInteractiva.tsx';
+import { BloqueioDePlano } from '../../../../src/componentes/BloqueioDePlano.tsx';
+import { CartoesDePlano, type PlanoDoCatalogo } from '../../../../src/componentes/CartoesDePlano.tsx';
+
+/**
+ * Planos de AMOSTRA, e é por isso que não vêm da base.
+ *
+ * O catálogo é uma página estática de inspecção: ir à base daqui obrigaria a
+ * varredura do Playwright a ter uma base viva para medir uma cor. As
+ * capacidades são as mesmas do catálogo real — se divergirem, a prova
+ * `provas/planos.test.ts` apanha-o, porque compara os destaques com o que os
+ * planos concedem de facto.
+ */
+const PLANOS_DE_AMOSTRA: readonly PlanoDoCatalogo[] = [
+  { codigo: 'STARTER', nome: 'Starter', promessa: 'Publica bien', capacidades: [
+    { capacidade: 'carta.digital', quota: null }, { capacidade: 'site.restaurante', quota: null }] },
+  { codigo: 'RESTAURANT', nome: 'Restaurant', promessa: 'Conecta el servicio', capacidades: [
+    { capacidade: 'carta.digital', quota: null }, { capacidade: 'site.restaurante', quota: null },
+    { capacidade: 'reservas', quota: null }, { capacidade: 'sala', quota: null },
+    { capacidade: 'kds', quota: null }, { capacidade: 'tema.coresProprias', quota: null }] },
+  { codigo: 'PRO', nome: 'Pro', promessa: 'Amplía tu gestión', capacidades: [
+    { capacidade: 'carta.digital', quota: null }, { capacidade: 'site.restaurante', quota: null },
+    { capacidade: 'reservas', quota: null }, { capacidade: 'sala', quota: null },
+    { capacidade: 'kds', quota: null }, { capacidade: 'tema.coresProprias', quota: null },
+    { capacidade: 'tpv', quota: null }, { capacidade: 'stock', quota: null }] },
+];
+
+/**
+ * A recusa do STATE-006 sai do MOTOR, não de texto escrito à mão.
+ *
+ * `decidirCapacidade` com zero concessões devolve `sem_plano`, e é esse objecto
+ * que o bloco desenha. Um estado ilustrado com texto fixo continuaria bonito no
+ * dia em que o motor deixasse de recusar.
+ */
+const RECUSA_DE_AMOSTRA = decidirCapacidade({
+  capacidade: 'stock', intencao: 'usar', concessoes: [],
+}) as Extract<ReturnType<typeof decidirCapacidade>, { permitido: false }>;
 
 export const dynamic = 'force-static';
 
@@ -382,6 +419,76 @@ export default async function Catalogo({ params }: { params: Promise<{ idioma: I
         </section>
 
         {/* ── Idiomas e formato ─────────────────────────────────────────── */}
+        {/* ── E05 ──────────────────────────────────────────────────────────
+            Os componentes comerciais entram aqui pela mesma razão que os
+            estados do E02: é esta a página que a inspecção do Playwright
+            atravessa nas cinco larguras e nos três idiomas, medindo contraste
+            no DOM. As páginas de planos exigem sessão e organização, e uma
+            varredura que tivesse de autenticar-se para medir uma cor acabaria
+            por não medir nenhuma. */}
+        <section style={SECCAO} aria-labelledby="s-planos">
+          <h2 id="s-planos">{m.catalogo.seccaoPlanos}</h2>
+          <p className="bo-campo__ajuda">
+            ONB-004, ORG-010/013/014, STATE-006 e THEME-001. Os planos aqui são
+            <strong> exemplos de forma</strong>, não o catálogo da base — e continuam sem preço,
+            porque o preço não existe em lado nenhum do produto.
+          </p>
+
+          <CartoesDePlano idioma={idioma} catalogo={PLANOS_DE_AMOSTRA} planoActual="RESTAURANT" />
+
+          <div className="bo-uso">
+            <Cartao className="bo-uso__cartao">
+              <p className="bo-uso__rotulo">{m.uso.unidades}</p>
+              <p className="bo-uso__valor">{m.uso.deQuota.replace('{uso}', '1').replace('{quota}', '3')}</p>
+            </Cartao>
+            <Cartao className="bo-uso__cartao">
+              <p className="bo-uso__rotulo">{m.uso.pessoas}</p>
+              <p className="bo-uso__valor">{m.uso.activas.replace('{n}', '8')}</p>
+              <p className="bo-uso__nota">{m.uso.porContratar}</p>
+            </Cartao>
+            <Cartao variante="suave" className="bo-uso__cartao">
+              <p className="bo-uso__rotulo">{m.uso.produtos}</p>
+              <p className="bo-uso__valor bo-uso__valor--ausente">{m.uso.aindaNaoMedido}</p>
+              <p className="bo-uso__nota">{m.uso.razaoProdutos}</p>
+            </Cartao>
+          </div>
+
+          <div className="bo-tema">
+            <div className="bo-tema__ficha">
+              {[
+                { rotulo: m.tema.primaria, cor: '#102E35' },
+                { rotulo: m.tema.acento, cor: '#F5664D' },
+                { rotulo: m.tema.fundo, cor: '#F7F4EC' },
+              ].map((a) => (
+                <div key={a.rotulo} className="bo-tema__cor">
+                  <span className="bo-tema__amostra" style={{ background: a.cor }} aria-hidden="true" />
+                  <span>
+                    <span className="bo-tema__rotulo">{a.rotulo}</span>
+                    <code className="bo-tema__valor">{a.cor}</code>
+                  </span>
+                </div>
+              ))}
+            </div>
+            <Cartao className="bo-tema__previa">
+              <h3 className="bo-tema__nome">La Societat 1927</h3>
+              <p className="bo-tema__legenda">{m.tema.carta}</p>
+              <div className="bo-tema__imagem" style={{ background: '#F7F4EC' }} aria-hidden="true" />
+            </Cartao>
+          </div>
+
+          {/* STATE-006 com uma recusa REAL do motor, não com texto escrito à mão:
+              é `decidirCapacidade` a devolver `sem_plano` que gera este bloco. */}
+          <Cartao variante="contornado">
+            <BloqueioDePlano
+              idioma={idioma}
+              resultado={RECUSA_DE_AMOSTRA}
+              catalogo={PLANOS_DE_AMOSTRA}
+              planoActual="Restaurant"
+              hrefPlanos="#"
+            />
+          </Cartao>
+        </section>
+
         <section style={SECCAO} aria-labelledby="s-idiomas">
           <h2 id="s-idiomas">{m.catalogo.seccaoIdiomas}</h2>
           <Tabela

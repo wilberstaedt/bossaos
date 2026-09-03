@@ -35,6 +35,12 @@ export const IDS = {
   utilizadorAmbas: 'cccc3333-3333-4333-8333-333333333333',
   filiacaoA: 'dddd1111-1111-4111-8111-111111111111',
   filiacaoB: 'dddd2222-2222-4222-8222-222222222222',
+  /**
+   * Quem é da plataforma. Existe para a prova ter o PAR: sem uma pessoa
+   * autorizada, "a plataforma recusa" passaria num sistema que recusa a toda a
+   * gente — que é a armadilha do caso 3 da prova de isolamento, outra vez.
+   */
+  utilizadorPlataforma: 'cccc4444-4444-4444-8444-444444444444',
 } as const;
 
 /**
@@ -90,9 +96,19 @@ const INSTRUCOES: readonly Instrucao[] = [
     `INSERT INTO users (id, email, nome, updated_at) VALUES
        ($1, 'ana@marina-oropesa.example',     'Ana',   now()),
        ($2, 'bruno@marina-barcelona.example', 'Bruno', now()),
-       ($3, 'carla@exemplo.example',          'Carla', now())
+       ($3, 'carla@exemplo.example',          'Carla', now()),
+       ($4, 'diogo@bossaos.example',           'Diogo', now())
      ON CONFLICT (id) DO UPDATE SET nome = EXCLUDED.nome, updated_at = now()`,
-    [I.utilizadorA, I.utilizadorB, I.utilizadorAmbas],
+    [I.utilizadorA, I.utilizadorB, I.utilizadorAmbas, I.utilizadorPlataforma],
+  ],
+  [
+    // Diogo é da plataforma e **não é membro de organização nenhuma**. É de
+    // propósito: quem opera a plataforma não tem de ser cliente, e ter-lhe dado
+    // uma filiação faria a prova não distinguir "vê porque é da plataforma" de
+    // "vê porque pertence àquela organização".
+    `INSERT INTO platform_staff (user_id, motivo) VALUES ($1, 'fixtures: operação do piloto')
+     ON CONFLICT (user_id) DO UPDATE SET motivo = EXCLUDED.motivo`,
+    [I.utilizadorPlataforma],
   ],
   [
     `INSERT INTO memberships (id, organization_id, user_id, estado, updated_at) VALUES

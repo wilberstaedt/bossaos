@@ -626,3 +626,57 @@ p { margin: 0; }
 .bo-escolha[aria-current='true'] { border-color: var(--bo-primaria); border-width: 2px; }
 .bo-escolha__titulo { font-weight: 700; font-family: var(--bo-fonte-titulo); font-size: 18px; }
 .bo-escolha__detalhe { color: var(--bo-texto-secundario); font-size: 14px; margin-top: 4px; }
+
+/* ── E05 · planos, uso e tema ─────────────────────────────────────────────── */
+
+/* Moldura comum das páginas do E05. O `max-width` é o mesmo do catálogo: uma
+   linha de texto que atravessa 1440 px lê-se mal, e o atlas desenha em 1100. */
+.bo-pagina { max-width: 1100px; margin: 0 auto; padding: var(--bo-espaco-xxl) var(--bo-margem-secretaria) var(--bo-espaco-xxxl); display: grid; gap: var(--bo-espaco-xxl); }
+@media (max-width: 767px) { .bo-pagina { padding: var(--bo-espaco-xl) var(--bo-margem-movel) var(--bo-espaco-xxl); gap: var(--bo-espaco-xl); } }
+
+/* Os três cartões de plano. `auto-fit` e não três colunas fixas: em 768 px o
+   atlas mostra-os empilhados, e uma grelha de três que encolhe até 200 px por
+   cartão corta os nomes dos planos. */
+.bo-planos { display: grid; gap: var(--bo-espaco-lg); grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.bo-planos__cartao { display: grid; gap: var(--bo-espaco-md); align-content: start; }
+.bo-planos__destaque { margin: 0 0 var(--bo-espaco-xs); }
+.bo-planos__nome { font-family: var(--bo-fonte-titulo); font-size: 30px; line-height: 1.1; margin: 0; }
+.bo-planos__promessa { color: var(--bo-texto-secundario); margin: 0; }
+.bo-planos__lista { list-style: none; margin: var(--bo-espaco-sm) 0 0; padding: 0; display: grid; gap: var(--bo-espaco-md); }
+.bo-planos__item { display: flex; align-items: flex-start; gap: var(--bo-espaco-md); }
+/* O visto é `aria-hidden` no componente: a linha inteira já se lê sem ele. */
+.bo-planos__visto { color: var(--bo-estado-sucesso); font-weight: 700; }
+.bo-planos__preco { color: var(--bo-texto-secundario); font-size: 14px; margin: var(--bo-espaco-sm) 0 0; }
+.bo-planos__nota { background: var(--bo-superficie-suave); border-radius: var(--bo-raio-cartao); padding: var(--bo-espaco-lg); color: var(--bo-texto-secundario); margin: 0; }
+.bo-planos__actual { margin: 0; color: var(--bo-texto-secundario); }
+
+/* Uso e limites. Quatro cartões, e dois deles dizem que não há número. */
+.bo-uso { display: grid; gap: var(--bo-espaco-lg); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.bo-uso__cartao { display: grid; gap: var(--bo-espaco-xs); align-content: start; }
+.bo-uso__rotulo { color: var(--bo-texto-secundario); font-size: 14px; margin: 0; }
+.bo-uso__valor { font-family: var(--bo-fonte-titulo); font-size: 28px; line-height: 1.15; margin: 0; font-variant-numeric: tabular-nums; }
+/* "Aún no medido" não é um número, e não se lhe dá o peso de um. */
+.bo-uso__valor--ausente { font-size: 18px; color: var(--bo-texto-secundario); }
+.bo-uso__nota { color: var(--bo-texto-secundario); font-size: 13px; margin: 0; }
+
+/* Tema por plano. */
+.bo-tema { display: grid; gap: var(--bo-espaco-xxl); grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr); align-items: start; }
+@media (max-width: 767px) { .bo-tema { grid-template-columns: 1fr; gap: var(--bo-espaco-xl); } }
+.bo-tema__ficha { display: grid; gap: var(--bo-espaco-lg); }
+.bo-tema__cor { display: flex; align-items: center; gap: var(--bo-espaco-lg); }
+/* A borda existe para o branco do fundo não desaparecer sobre a areia — uma
+   amostra invisível é uma amostra que não mostra nada. */
+.bo-tema__amostra { width: 56px; height: 56px; border-radius: var(--bo-raio-controlo); border: 1px solid var(--bo-borda); flex: 0 0 auto; }
+.bo-tema__rotulo { display: block; font-weight: 700; }
+.bo-tema__valor { font-size: 14px; color: var(--bo-texto-secundario); }
+.bo-tema__previa { display: grid; gap: var(--bo-espaco-md); }
+.bo-tema__nome { font-family: var(--bo-fonte-titulo); font-size: 26px; margin: 0; }
+.bo-tema__legenda { color: var(--bo-texto-secundario); margin: 0; }
+.bo-tema__imagem { border-radius: var(--bo-raio-cartao); border: 1px solid var(--bo-borda); aspect-ratio: 16 / 9; }
+
+/* Superfície interna de plataforma (PLAT-002 a 011). */
+.bo-plataforma__banner { background: var(--bo-superficie-inversa); color: var(--bo-texto-inverso); }
+.bo-plataforma__banner-titulo { font-weight: 700; margin: 0; }
+.bo-plataforma__banner-detalhe { margin: 4px 0 0; opacity: 0.85; }
+.bo-plataforma__lista { display: grid; gap: var(--bo-espaco-md); }
+.bo-plataforma__linha { display: flex; align-items: center; justify-content: space-between; gap: var(--bo-espaco-lg); }

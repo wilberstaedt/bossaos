@@ -178,6 +178,13 @@ jobs:
         # quem bloqueava era a autorização e a prova não media nada.
         run: ./scripts/provar-planos.sh
 
+      - name: Prova — a superfície interna de plataforma
+        # A única leitura do produto que atravessa inquilinos de propósito. O par
+        # decide: o staff vê as duas organizações, a dona de uma delas rebenta.
+        # O controlo negativo tira a verificação de staff da função e exige que
+        # caia o lado da RECUSA e que o lado positivo continue verde.
+        run: ./scripts/provar-plataforma.sh
+
       - name: Prova — larguras, contraste, foco e alvos de toque
         # Aceites 1 e 2 do E02: 360/390/768/1280/1440 px, zoom, três idiomas,
         # contraste medido no DOM, armadilha de foco e regresso ao accionador.

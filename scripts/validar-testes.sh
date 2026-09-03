@@ -21,7 +21,11 @@ cd "$(dirname "$0")/.."
 # nao tem `declare -A`. Escrevi-o com array a primeira e rebentou aqui - mas
 # TERIA PASSADO NA CI, que corre bash 5. E a mesma familia do shebang zsh de hoje
 # as 13h30, ao contrario: dessa vez passava aqui e falhava la.
-PERMITIDOS="worker:andaime do E01; sem logica propria ate haver trabalho assincrono (E14)"
+# Vazia desde o E05: o `worker` deixou de ser andaime quando ganhou o varrimento
+# de descidas, e a declaracao "sem logica propria" passou a ser falsa. Uma lista
+# de excepcoes que ninguem revisita e uma lista que protege o que ja nao precisa
+# de proteccao - e esconde o que passou a precisar.
+PERMITIDOS=""
 
 motivo_de() { # $1 = nome do pacote; imprime o motivo, ou nada
   echo "$PERMITIDOS" | tr ' ' '\n' >/dev/null 2>&1

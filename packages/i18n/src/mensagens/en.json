@@ -105,7 +105,8 @@
     "colunaCanal": "Channel",
     "colunaPreco": "Price",
     "colunaEstado": "Status",
-    "exemploKdsAccao": "Mark ready"
+    "exemploKdsAccao": "Mark ready",
+    "seccaoPlanos": "Plans and limits (E05)"
   },
   "marca": {
     "tagline1": "Your whole restaurant.",

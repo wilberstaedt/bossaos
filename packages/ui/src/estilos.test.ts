@@ -77,3 +77,37 @@ describe('folha de estilos', () => {
     assert.equal(apagados.length, 0, 'há um `outline: none` na folha de estilos');
   });
 });
+
+/**
+ * Tokens usados e nunca declarados — a imagem ao espelho das classes órfãs.
+ *
+ * Escrevi `var(--bo-primaria-texto)` no banner da plataforma. O token chama-se
+ * `--bo-texto-inverso`; aquele não existe em lado nenhum. O CSS não dá erro: a
+ * propriedade fica sem valor, a cor herda `--bo-texto-primario` (#102E35) e o
+ * texto ficava a #102E35 sobre um fundo #102E35. Contraste 1:1 — invisível, e
+ * verde em todos os testes que existiam.
+ *
+ * A varredura de classes órfãs apanha o declarado e não usado. Faltava a
+ * direcção contrária, que é a que apaga texto.
+ */
+describe('tokens de cor', () => {
+  const declarados = new Set([...CSS.matchAll(/(--bo-[a-z0-9-]+)\s*:/g)].map((m) => m[1]!));
+  const usados = [...CSS.matchAll(/var\((--bo-[a-z0-9-]+)/g)].map((m) => m[1]!);
+
+  it('todo o `var(--bo-…)` aponta para um token que existe', () => {
+    const inexistentes = [...new Set(usados.filter((t) => !declarados.has(t)))].sort();
+    assert.deepEqual(
+      inexistentes,
+      [],
+      `usados e nunca declarados — o CSS fica sem valor e a cor herda:\n  ${inexistentes.join('\n  ')}`,
+    );
+  });
+
+  it('CONTROLO NEGATIVO: a varredura encontra mesmo tokens', () => {
+    // Sem isto, uma expressão regular partida devolveria zero usados e zero
+    // inexistentes — verde sobre população zero, outra vez.
+    assert.ok(declarados.size > 20, `só ${declarados.size} tokens declarados — a leitura partiu-se?`);
+    assert.ok(usados.length > 50, `só ${usados.length} usos — a leitura partiu-se?`);
+    assert.ok(!declarados.has('--bo-token-que-nao-existe'));
+  });
+});

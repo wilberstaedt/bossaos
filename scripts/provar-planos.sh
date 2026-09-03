@@ -82,8 +82,10 @@ if correr /tmp/bossaos-planos-ligado.txt; then
     vermelho "VERDE COM ZERO MEDIDO: $grupos grupos, $assercoes asserções."
     exit 1
   fi
-  if (( grupos < 3 )) || (( assercoes < 15 )); then
-    vermelho "medido a menos: $grupos grupos (esperados 3), $assercoes asserções (esperadas 15)"
+  # Exacto, não mínimo. Um mínimo aceita que um grupo desapareça desde que
+  # outro cresça — foi a lição do E03, e o sénior nomeou-a na validação.
+  if (( grupos != 4 )) || (( assercoes != 17 )); then
+    vermelho "medido diferente do esperado: $grupos grupos (esperados 4), $assercoes asserções (esperadas 17)"
     exit 1
   fi
   verde "$grupos grupos, $assercoes asserções"

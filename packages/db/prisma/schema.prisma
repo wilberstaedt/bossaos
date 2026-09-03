@@ -152,6 +152,7 @@ model User {
   accounts      Account[]
   twoFactors    TwoFactor[]
   convitesFeitos Invitation[] @relation("convidadoPor")
+  plataforma     PlatformStaff?
 
   @@map("users")
 }
@@ -584,4 +585,23 @@ model ThemeRevision {
 
   @@index([organizationId, activa])
   @@map("theme_revisions")
+}
+
+/// Quem é da plataforma BossaOS.
+///
+/// Escrita **só pela credencial de migração**, como o catálogo de planos e pela
+/// mesma razão: uma tabela de "quem tem acesso interno" que o processo do
+/// restaurante pode escrever é um restaurante a dar-se acesso interno. O runtime
+/// nem sequer tem SELECT — lê-a apenas através das funções `plataforma_*`, que a
+/// consultam por ele e verificam elas próprias quem chama.
+model PlatformStaff {
+  userId    String   @id @map("user_id") @db.Uuid
+  /// Porquê. Um acesso interno sem motivo escrito é um acesso que ninguém
+  /// consegue rever daqui a seis meses.
+  motivo    String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("platform_staff")
 }

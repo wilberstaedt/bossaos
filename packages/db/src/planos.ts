@@ -6,7 +6,7 @@ import {
   type Intencao,
   type ResultadoDeCapacidade,
 } from '@bossaos/domain';
-import type { ClienteComEscopo } from './escopo.ts';
+import type { ClienteComEscopo, ClienteComIdentidade } from './escopo.ts';
 
 /**
  * Resolução de plano, concessões e flags.
@@ -160,8 +160,16 @@ export function contarPessoas(db: ClienteComEscopo): Promise<number> {
   return db.membership.count({ where: { estado: 'ACTIVO' } });
 }
 
-/** O catálogo de planos, para o selector. Leitura global, sem inquilino. */
-export function catalogoDePlanos(db: ClienteComEscopo) {
+/**
+ * O catálogo de planos, para o selector. Leitura global, sem inquilino.
+ *
+ * Aceita os dois clientes marcados de propósito: `plan_definitions` não tem
+ * coluna de organização nem política de linha, e quem está no arranque a
+ * escolher plano pode ainda não ter organização nenhuma. Exigir escopo aqui
+ * obrigava esse caminho a fabricar um — que é precisamente o hábito que a marca
+ * de tipo existe para impedir.
+ */
+export function catalogoDePlanos(db: ClienteComEscopo | ClienteComIdentidade) {
   return db.planDefinition.findMany({
     where: { publico: true },
     orderBy: { ordem: 'asc' },
