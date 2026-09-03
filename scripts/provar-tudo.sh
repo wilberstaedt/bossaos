@@ -19,6 +19,24 @@ cd "$(dirname "$0")/.."
 
 [ -f .env ] && { set -a; . ./.env; set +a; }
 
+# AVISO DE ARVORE SUJA. A 2026-09-03 as 15h15 escrevi no protocolo que medir uma
+# arvore que outro esta a escrever nao e medicao - um teste deu vermelho e verde em
+# trinta segundos sem eu tocar em nada. As 23h15 repeti o erro: corri isto com sete
+# ficheiros do JR a meio, o build nao compilou de um estado parcial, e eu fui
+# investigar uma "falha" que era so o relogio.
+#
+# Escrever a licao nao me impediu de a repetir. Um aviso no proprio comando talvez
+# impeca - e nao BLOQUEIA, porque medir a meio e legitimo para orientar; o que nao
+# e legitimo e concluir a partir disso.
+sujos=$(git status --porcelain 2>/dev/null | grep -c . || true)
+if [ "${sujos:-0}" -gt 0 ]; then
+  echo "AVISO: ${sujos} ficheiro(s) por versionar."
+  echo "  Se for outro agente a escrever, isto ORIENTA mas nao CONCLUI - um vermelho"
+  echo "  pode ser o relogio e um verde pode nao valer nada. A medicao que conta e a"
+  echo "  de depois da declaracao, com a arvore parada."
+  echo
+fi
+
 falhados=""
 n=0
 echo "GUARDAS (rapidas, sem base)"
