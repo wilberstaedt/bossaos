@@ -69,6 +69,30 @@ não correste vão em listas **separadas**.
 
 **Não avances para a etapa seguinte.** Declara e pára.
 
+### E se o sénior não aparecer
+
+Acrescentado a 2026-09-03, depois de o sénior estar duas horas indisponível e o JR ter
+continuado — o que foi razoável, porque nada aqui dizia o contrário.
+
+Ficar parado é desperdício. Avançar para a etapa seguinte cria um problema real: a revisão
+deixa de poder medir a árvore, e se a etapa em revisão for reprovada, o que se construiu
+por cima assenta numa base reprovada.
+
+**A saída certa é a terceira: trabalho que não depende da etapa em revisão.** Por exemplo:
+
+- **testes e provas** para o que já está entregue — sempre há mais superfície do que
+  coberta;
+- **controlos negativos** que faltam a provas existentes;
+- **contratos e documentação** de etapas futuras, que não tocam código;
+- **auditoria adversarial** ao que já foi validado, contra as cinco regras do
+  `docs/architecture/README.md` — foi assim que o sénior encontrou o comentário mentiroso
+  do `prisma.config.ts`, que estava no E01 validado;
+- **pendências declaradas** de etapas anteriores que não dependam do que está em revisão.
+
+Se mesmo assim avançares para a etapa seguinte — e pode ser a decisão certa, se a espera
+for longa — **diz no handoff que o fizeste e porquê**. O que dói não é o trabalho adiantado:
+é o revisor descobri-lo por acidente e ter de reconstituir o que aconteceu.
+
 ## Fim do prompt
 
 ---
