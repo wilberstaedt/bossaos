@@ -15,9 +15,122 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Tres trabalhos em PARALELO, e nao um em serie. Medido a 2026-09-03: a CI passou
+# de ~180 s de manha para ~640 s a noite, e as duas provas de ponta a ponta eram 41 %
+# disso. Trinta etapas por fazer, cada uma com provas novas - uma CI de trinta
+# minutos deixa de ser verificacao e passa a ser um imposto que se aprende a
+# contornar. Com `cancel-in-progress`, quanto mais lenta, maior a janela em que um
+# push cancela a corrida do anterior sem ninguem reparar.
+#
+# A divisao segue o que cada verificacao PRECISA, nao o que ela mede:
+#   rapido     nada alem do repositorio - guardas, lint, tipos, testes, build
+#   base       Postgres e Mailpit - migracoes e as onze provas
+#   navegador  Postgres e um Chromium - a inspeccao visual
+#
+# O relogio passa a ser o do encadeamento mais longo, nao a soma.
+#
+# Os passos de arranque repetem-se nos tres de proposito: o GitHub Actions nao
+# aplica ancoras de YAML de forma fiavel, e um `setup` partilhado por composicao
+# custaria mais em indirecao do que estas quinze linhas custam em repeticao.
+
 jobs:
-  verificar:
-    runs-on: ubuntu-latest
+  rapido:
+    name: Rápido — sem base nem navegador
+    timeout-minutes: 10
+
+    env:
+      # Valores de CI, descartáveis, sem relação com qualquer ambiente real.
+      PGHOST: 127.0.0.1
+      PGPASSWORD: postgres
+      PGSUPERUSER: postgres
+      DATABASE_URL: postgresql://bossaos_app:dev_app_local@127.0.0.1:5432/bossaos_dev
+      MIGRATION_DATABASE_URL: postgresql://bossaos_migrate:dev_migrate_local@127.0.0.1:5432/bossaos_dev
+      # Terceiro acesso (E04): identidade e sessão, zero dados de inquilino.
+      AUTH_DATABASE_URL: postgresql://bossaos_auth:dev_auth_local@127.0.0.1:5432/bossaos_dev
+      BETTER_AUTH_SECRET: segredo-de-ci-descartavel-com-32-caracteres
+      BETTER_AUTH_URL: http://127.0.0.1:3000
+      CONVITE_VALIDADE_HORAS: '72'
+      SMTP_HOST: 127.0.0.1
+      SMTP_PORT: '1025'
+      MAIL_FROM: bossaos@ci.local
+      MAILPIT_URL: http://127.0.0.1:8025
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node fixado pelo .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: pnpm da versão declarada em packageManager
+        uses: pnpm/action-setup@v4
+
+      - name: Instalar pelo lockfile
+        # `--frozen-lockfile` falha se o lockfile não corresponder ao
+        # package.json. É o que transforma "instalou" em "instalou o mesmo".
+        run: pnpm install --frozen-lockfile
+
+      - name: Cobertura íntegra (396 IDs)
+        run: ./scripts/validar-cobertura.sh
+
+      # Barata como a cobertura, e a que tem pior consequencia se falhar tarde:
+      # um segredo que entra no historico nao sai de la apagando o ficheiro.
+      - name: Nenhum segredo na árvore
+        run: ./scripts/varrer-segredos.sh
+
+      - name: Ordem das etapas
+        run: ./scripts/validar-ordem.sh
+
+      # Dinheiro em inteiros de unidade minima. Barata, e o E22-E24 vao encher o
+      # schema de campos de dinheiro - e la que esta guarda paga.
+      - name: Dinheiro em inteiros
+        run: ./scripts/validar-dinheiro.sh
+
+      # A regra mais seria do produto, trancada por estrutura: alergeno desconhecido
+      # nao e alergeno ausente, e inferir a partir do nome tem de ser IMPOSSIVEL e
+      # nao apenas proibido. E a regra que alguem vai querer "melhorar".
+      - name: A distinção dos alérgenos
+        run: ./scripts/validar-alergenios.sh
+
+      # Uma classe `bo-` que o CSS nao define nao da erro em lado nenhum: o
+      # elemento aparece sem estilo, o `tsc` nao ve dentro de uma cadeia, e o
+      # teste de contraste le a cor herdada do pai, que passa. Encontrou quatro
+      # escritas por mim no E07 e uma anterior no componente dos separadores.
+      - name: Classes CSS que existem
+        run: ./scripts/validar-classes.sh
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Tipos
+        run: pnpm typecheck
+
+      # Antes dos testes: nenhum pacote pode desaparecer da medicao em silencio.
+      # Nasceu do E04 - packages/auth tinha zero ficheiros de teste e saia a 0.
+      - name: Todos os pacotes medidos
+        run: ./scripts/validar-testes.sh
+
+      # Nenhuma etapa comeca antes de a anterior estar validada. Detector de
+      # ESTADO, nao de culpa: quando o revisor esta indisponivel a saida certa e
+      # trabalho que nao dependa da etapa em revisao, nao parar nem avancar.
+      - name: Testes
+        run: pnpm test
+
+      - name: Build sem segredos nenhuns
+        # O `env -u` tira as variáveis do ambiente do job DE PROPÓSITO. Um build
+        # que precisa do segredo e das URLs de base de dados para compilar é um
+        # build que só passa onde alguém já os exportou — em CI ficava verde e na
+        # shell limpa de quem chegava a seguir ficava vermelho, sem dizer porquê.
+        # Aqui, se alguém voltar a ler o ambiente no topo de um módulo, o vermelho
+        # aparece neste passo e não na máquina dele.
+        run: >-
+          env -u DATABASE_URL -u AUTH_DATABASE_URL -u MIGRATION_DATABASE_URL
+          -u BETTER_AUTH_SECRET -u BETTER_AUTH_URL
+          pnpm build
+
+  base:
+    name: Base — migrações e provas
     timeout-minutes: 20
 
     services:
@@ -99,70 +212,6 @@ jobs:
       # A cobertura primeiro: é a mais barata e a que invalida tudo o resto.
       # Um ID perdido significa que o mapa deixou de descrever o produto, e não
       # vale a pena saber se o que sobrou compila.
-      - name: Cobertura íntegra (396 IDs)
-        run: ./scripts/validar-cobertura.sh
-
-      # Barata como a cobertura, e a que tem pior consequencia se falhar tarde:
-      # um segredo que entra no historico nao sai de la apagando o ficheiro.
-      - name: Nenhum segredo na árvore
-        run: ./scripts/varrer-segredos.sh
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Tipos
-        run: pnpm typecheck
-
-      # Antes dos testes: nenhum pacote pode desaparecer da medicao em silencio.
-      # Nasceu do E04 - packages/auth tinha zero ficheiros de teste e saia a 0.
-      - name: Todos os pacotes medidos
-        run: ./scripts/validar-testes.sh
-
-      # Nenhuma etapa comeca antes de a anterior estar validada. Detector de
-      # ESTADO, nao de culpa: quando o revisor esta indisponivel a saida certa e
-      # trabalho que nao dependa da etapa em revisao, nao parar nem avancar.
-      - name: Ordem das etapas
-        run: ./scripts/validar-ordem.sh
-
-      # Dinheiro em inteiros de unidade minima. Barata, e o E22-E24 vao encher o
-      # schema de campos de dinheiro - e la que esta guarda paga.
-      - name: Dinheiro em inteiros
-        run: ./scripts/validar-dinheiro.sh
-
-      # A regra mais seria do produto, trancada por estrutura: alergeno desconhecido
-      # nao e alergeno ausente, e inferir a partir do nome tem de ser IMPOSSIVEL e
-      # nao apenas proibido. E a regra que alguem vai querer "melhorar".
-      - name: A distinção dos alérgenos
-        run: ./scripts/validar-alergenios.sh
-
-      # Uma classe `bo-` que o CSS nao define nao da erro em lado nenhum: o
-      # elemento aparece sem estilo, o `tsc` nao ve dentro de uma cadeia, e o
-      # teste de contraste le a cor herdada do pai, que passa. Encontrou quatro
-      # escritas por mim no E07 e uma anterior no componente dos separadores.
-      - name: Classes CSS que existem
-        run: ./scripts/validar-classes.sh
-
-      - name: Testes
-        run: pnpm test
-
-      - name: Build sem segredos nenhuns
-        # O `env -u` tira as variáveis do ambiente do job DE PROPÓSITO. Um build
-        # que precisa do segredo e das URLs de base de dados para compilar é um
-        # build que só passa onde alguém já os exportou — em CI ficava verde e na
-        # shell limpa de quem chegava a seguir ficava vermelho, sem dizer porquê.
-        # Aqui, se alguém voltar a ler o ambiente no topo de um módulo, o vermelho
-        # aparece neste passo e não na máquina dele.
-        run: >-
-          env -u DATABASE_URL -u AUTH_DATABASE_URL -u MIGRATION_DATABASE_URL
-          -u BETTER_AUTH_SECRET -u BETTER_AUTH_URL
-          pnpm build
-
-      - name: Navegador para a inspecção
-        # Só o Chromium: os outros dois motores triplicariam o tempo do job para
-        # responder a perguntas que o E02 não faz.
-        run: pnpm exec playwright install --with-deps chromium
-
-      # ── as provas de comportamento, que um build verde não dá ─────────────
       - name: Prova — o runtime não altera o schema
         run: ./scripts/provar-separacao-de-credenciais.sh
 
@@ -230,10 +279,85 @@ jobs:
         # Cinco controlos negativos, um por camada, mais a guarda de limpeza.
         run: ./scripts/provar-catalogo.sh
 
+      - name: Migrações aplicadas e sem desvio
+        run: pnpm db:migrate:status
+
+  navegador:
+    name: Navegador — inspecção visual
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        # Base descartável: nasce e morre com o job (E01, aceite 2).
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+      mailpit:
+        # Caixa de correio descartável. A prova da recuperação de acesso LÊ a
+        # caixa — não se contenta com o 200 do envio — e sem este serviço ela
+        # falha alto, de propósito, em vez de se saltar a si própria.
+        image: axllent/mailpit:latest
+        ports: ['1025:1025', '8025:8025']
+
+    env:
+      # Valores de CI, descartáveis, sem relação com qualquer ambiente real.
+      PGHOST: 127.0.0.1
+      PGPASSWORD: postgres
+      PGSUPERUSER: postgres
+      DATABASE_URL: postgresql://bossaos_app:dev_app_local@127.0.0.1:5432/bossaos_dev
+      MIGRATION_DATABASE_URL: postgresql://bossaos_migrate:dev_migrate_local@127.0.0.1:5432/bossaos_dev
+      # Terceiro acesso (E04): identidade e sessão, zero dados de inquilino.
+      AUTH_DATABASE_URL: postgresql://bossaos_auth:dev_auth_local@127.0.0.1:5432/bossaos_dev
+      BETTER_AUTH_SECRET: segredo-de-ci-descartavel-com-32-caracteres
+      BETTER_AUTH_URL: http://127.0.0.1:3000
+      CONVITE_VALIDADE_HORAS: '72'
+      SMTP_HOST: 127.0.0.1
+      SMTP_PORT: '1025'
+      MAIL_FROM: bossaos@ci.local
+      MAILPIT_URL: http://127.0.0.1:8025
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node fixado pelo .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: pnpm da versão declarada em packageManager
+        uses: pnpm/action-setup@v4
+
+      - name: Instalar pelo lockfile
+        # `--frozen-lockfile` falha se o lockfile não corresponder ao
+        # package.json. É o que transforma "instalou" em "instalou o mesmo".
+        run: pnpm install --frozen-lockfile
+
+      - name: Cliente PostgreSQL
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Base e papéis separados
+        run: ./scripts/dev-db.sh
+
+      - name: Migração em base descartável
+        run: pnpm db:migrate:deploy
+
+      - name: Navegador para a inspecção
+        # Só o Chromium: os outros dois motores triplicariam o tempo do job para
+        # responder a perguntas que o E02 não faz.
+        run: pnpm exec playwright install --with-deps chromium
+
+      # ── as provas de comportamento, que um build verde não dá ─────────────
       - name: Prova — larguras, contraste, foco e alvos de toque
         # Aceites 1 e 2 do E02: 360/390/768/1280/1440 px, zoom, três idiomas,
         # contraste medido no DOM, armadilha de foco e regresso ao accionador.
         run: pnpm inspeccionar
 
-      - name: Migrações aplicadas e sem desvio
-        run: pnpm db:migrate:status
+
