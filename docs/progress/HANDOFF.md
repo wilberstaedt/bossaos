@@ -1,16 +1,17 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E03 — estrutura multi-tenant e isolamento de dados
-**Estado:** implementado pelo JR, **aguardando validação do sénior**.
-**Próxima ação:** o sénior valida o E03 contra `docs/architecture/prova-de-isolamento.md`,
-que escreveu no E00, antes desta etapa começar. O JR **não** avançou para E04.
+**Estado:** segunda declaração do JR, **aguardando validação do sénior**.
+**Próxima ação:** o sénior revalida o E03. A 1ª revisão não o validou — o isolamento
+estava certo, o **verificador** é que conseguia dizer verde sem ter medido. Fechado, e a
+mesma guarda aplicada às outras duas provas. O JR **não** avançou para E04.
 
 | Etapa | Estado |
 | --- | --- |
 | E00 — contrato e leitura das fontes | implementado, **aguardando validação**. Sete documentos em `docs/architecture`. Quem os escreveu não os valida: a prova vem no E11, quando se vir se o E02-E10 se construíram a partir deles. |
 | E01 — repositório e verificação contínua | **validado** · `docs/reviews/E01.md` |
 | E02 — design system, responsividade e idiomas | **validado** à 2ª · `docs/reviews/E02.md`. A 1ª revisão apanhou o acento a pintar um indicador de estado a 2,77:1; corrigido com `acentoSinal` e uma guarda de lista de permissão. |
-| E03 — estrutura multi-tenant e isolamento | implementado, **aguardando validação** · `docs/progress/E03.md` |
+| E03 — estrutura multi-tenant e isolamento | 1ª revisão: **não validado** (`docs/reviews/E03.md`) — o verificador dizia verde com zero medido. Corrigido; 2ª declaração · `docs/progress/E03.md` |
 
 **Primeiras telas.** O E02 é a primeira etapa que toca `coverage.csv`: STATE 001-003,
 005, 007 e 016. Até aqui o medidor de telas esteve a 0 % e isso era verdade, não uma
@@ -69,6 +70,17 @@ compila. Provado enfraquecendo o tipo e vendo o `tsc` ficar vermelho.
 
 **85 testes unitários + 28 asserções de isolamento, 0 falhas.** `coverage.csv` **não mexeu**,
 que é o correcto numa etapa sem telas, e há uma verificação no fim do varrimento que o diz.
+
+**A CI já correu e está verde** (commit `ff48eb4`, máquina limpa, base do zero, 3m10, com o
+passo do isolamento). A pendência que arrastei do E01 ao E03 deixou de ser verdade.
+
+**O que a 1ª revisão apanhou:** o `provar-isolamento.sh` olhava para o código de saída e
+imprimia as contagens sem nunca exigir que fossem maiores que zero — num Node cujo relator
+é `spec` e não TAP, dizia "0 grupos verdes" **em verde**. Fechado com três coisas: o passo
+1 exige 7 grupos e 28 asserções, o formato passa a ser pedido explicitamente (e a versão do
+Node verificada à cabeça), e há um controlo negativo do próprio controlo negativo com cinco
+verificações. A mesma guarda foi aplicada às outras duas provas, que contavam falhas e não
+verificações.
 
 Três achados que mudaram código, dos seis em `E03.md`:
 

@@ -26,10 +26,23 @@ cd "$(dirname "$0")/.."
 if [[ -f .env ]]; then set -a; . ./.env; set +a; fi
 PORTA="${PORTA_PROVA:-3999}"
 falhas=0
+# Quantas verificações correram de facto.
+#
+# Acrescentado depois de o verificador do E03 conseguir dizer verde sem ter
+# medido nada. Um contador de FALHAS a zero só diz que nada correu mal; não diz
+# que alguma coisa correu. São perguntas diferentes, e é sempre a segunda que
+# falta.
+verificacoes=0
+# O mínimo vive numa variável só. Ao provar que este portão dispara, vi a
+# mensagem dizer "esperadas 8" enquanto a comparação usava outro número: tinha o
+# valor escrito duas vezes. Uma régua que se descreve a si própria de forma
+# diferente da que aplica é uma régua que ninguém pode acreditar.
+MINIMO_VERIFICACOES=10
+
 PID=""
 
-verde()  { printf '  \033[32mok\033[0m    %s\n' "$1"; }
-vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
+verde()  { printf '  \033[32mok\033[0m    %s\n' "$1"; verificacoes=$((verificacoes + 1)); }
+vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); verificacoes=$((verificacoes + 1)); }
 
 # Matar o PID pode não chegar: `pnpm exec` é um invólucro e o `next start` que
 # ele lança pode sobreviver ao pai. Confirma-se pela PORTA — que é o que se pode
@@ -143,6 +156,13 @@ else
 fi
 
 echo
+if (( verificacoes < MINIMO_VERIFICACOES )); then
+  echo
+  echo "VERDE COM ZERO MEDIDO: só $verificacoes verificações correram, esperadas $MINIMO_VERIFICACOES."
+  echo "A prova não correu inteira — não conclua nada dela."
+  exit 1
+fi
+
 if (( falhas == 0 )); then echo "Prontidão provada: 0 falhas."; else
   echo "Prontidão NÃO provada: $falhas falha(s)."; echo "--- log ---"; tail -20 /tmp/bossaos-prova.log; exit 1
 fi

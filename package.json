@@ -1,6 +1,7 @@
 {
   "name": "bossaos",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@10.15.0",
   "engines": {
     "node": ">=20.9.0 <25"

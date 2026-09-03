@@ -17,8 +17,21 @@ if [[ -f .env ]]; then set -a; . ./.env; set +a; fi
 : "${MIGRATION_DATABASE_URL:?MIGRATION_DATABASE_URL em falta}"
 
 falhas=0
-verde() { printf '  \033[32mok\033[0m   %s\n' "$1"; }
-vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
+# Quantas verificações correram de facto.
+#
+# Acrescentado depois de o verificador do E03 conseguir dizer verde sem ter
+# medido nada. Um contador de FALHAS a zero só diz que nada correu mal; não diz
+# que alguma coisa correu. São perguntas diferentes, e é sempre a segunda que
+# falta.
+verificacoes=0
+# O mínimo vive numa variável só. Ao provar que este portão dispara, vi a
+# mensagem dizer "esperadas 8" enquanto a comparação usava outro número: tinha o
+# valor escrito duas vezes. Uma régua que se descreve a si própria de forma
+# diferente da que aplica é uma régua que ninguém pode acreditar.
+MINIMO_VERIFICACOES=8
+
+verde() { printf '  \033[32mok\033[0m   %s\n' "$1"; verificacoes=$((verificacoes + 1)); }
+vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); verificacoes=$((verificacoes + 1)); }
 
 # Corre SQL com a credencial do runtime. Devolve 0 se o Postgres aceitou.
 runtime() { psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -c "$1" >/dev/null 2>&1; }
@@ -69,6 +82,13 @@ fi
 psql "$DATABASE_URL" -q -c "DELETE FROM app_meta WHERE key = 'prova_runtime'" >/dev/null 2>&1
 
 echo
+if (( verificacoes < MINIMO_VERIFICACOES )); then
+  echo
+  echo "VERDE COM ZERO MEDIDO: só $verificacoes verificações correram, esperadas $MINIMO_VERIFICACOES."
+  echo "A prova não correu inteira — não conclua nada dela."
+  exit 1
+fi
+
 if (( falhas == 0 )); then
   echo "Separação de credenciais provada: $falhas falhas."
 else
