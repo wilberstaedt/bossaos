@@ -633,6 +633,83 @@ export default async function Catalogo({ params }: { params: Promise<{ idioma: I
           </div>
         </section>
 
+
+        {/* ── E08: os estados que se apresentam como sucesso ────────────────
+            Esta secção existe para as peças novas entrarem na varredura de
+            contraste e de alvo de toque do Playwright. As três armadilhas do
+            CT-14 produzem ecrãs que PARECEM correr bem — uma exportação que
+            abre, um ficheiro que aparece, um link que responde — e é por isso
+            que os estados de recusa precisam de ser tão legíveis como os de
+            sucesso. */}
+        <section style={SECCAO} aria-labelledby="s-publicacao-e08">
+          <h2 id="s-publicacao-e08">{m.catalogo.seccaoPublicacaoE08}</h2>
+          <p className="bo-campo__ajuda">
+            CAT-014/015, 023-027; ONB-005/006; SET-012. O que importa aqui é que
+            <strong> uma tradução obsoleta não é uma tradução pendente</strong>: a
+            primeira foi confirmada e depois o original mudou, e por isso tem
+            assinatura e data — parece verificada.
+          </p>
+
+          <div className="bo-plataforma__lista">
+            {([
+              ['estadoRevisada', 'sucesso'],
+              ['estadoPendente', 'info'],
+              ['estadoObsoleta', 'aviso'],
+              ['semTraducao', 'neutro'],
+            ] as const).map(([chave, tom]) => (
+              <Cartao key={chave} className="bo-plataforma__linha">
+                <span className="bo-tema__rotulo">
+                  {(m.publicacaoE08 as unknown as Record<string, string>)[chave]}
+                </span>
+                <Etiqueta tom={tom}>
+                  {(m.publicacaoE08 as unknown as Record<string, string>)[chave]}
+                </Etiqueta>
+              </Cartao>
+            ))}
+          </div>
+          <p className="bo-campo__ajuda">{m.publicacaoE08.notaObsoleta}</p>
+
+          {/* As três mudanças de uma publicação. `removido` tem tom próprio: é a
+              que mais custa a notar numa lista de cinquenta, e a que um cliente
+              encontra primeiro. */}
+          <div className="bo-plataforma__lista">
+            {([
+              ['mudancaAcrescentado', 'sucesso'],
+              ['mudancaAlterado', 'info'],
+              ['mudancaRemovido', 'aviso'],
+            ] as const).map(([chave, tom]) => (
+              <Cartao key={chave} className="bo-plataforma__linha">
+                <span className="bo-tema__rotulo">
+                  {(m.publicacaoE08 as unknown as Record<string, string>)[chave]}
+                </span>
+                <Etiqueta tom={tom}>{m.publicacaoE08.tituloPublicar}</Etiqueta>
+              </Cartao>
+            ))}
+          </div>
+
+          {/* Os bloqueios, e a frase que impede a correcção rápida de inventar
+              um preço para o portão abrir. */}
+          <div className="bo-plataforma__lista">
+            {([
+              'motivoSemPreco', 'motivoConflitoPreco', 'motivoAlergenosPorDeclarar',
+            ] as const).map((chave) => (
+              <Cartao key={chave} className="bo-plataforma__linha">
+                <span className="bo-tema__rotulo">
+                  {(m.publicacaoE08 as unknown as Record<string, string>)[chave]}
+                </span>
+                <Etiqueta tom="perigo">{m.publicacaoE08.bloqueios}</Etiqueta>
+              </Cartao>
+            ))}
+          </div>
+          <p className="bo-campo__ajuda">{m.publicacaoE08.notaBloqueios}</p>
+
+          {/* As duas notas que são o ecrã da exportação inteiro. */}
+          <p className="bo-campo__ajuda">{m.publicacaoE08.notaExportacao}</p>
+          <p className="bo-campo__ajuda">{m.publicacaoE08.notaFormula}</p>
+          <p className="bo-campo__ajuda">{m.publicacaoE08.notaSvg}</p>
+          <p className="bo-campo__ajuda">{m.publicacaoE08.notaEstrategia}</p>
+        </section>
+
         <section style={SECCAO} aria-labelledby="s-idiomas">
           <h2 id="s-idiomas">{m.catalogo.seccaoIdiomas}</h2>
           <Tabela

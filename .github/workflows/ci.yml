@@ -281,6 +281,18 @@ jobs:
         # Cinco controlos negativos, um por camada, mais a guarda de limpeza.
         run: ./scripts/provar-catalogo.sh
 
+      - name: Prova — publicação atómica, traduções, importação e exportação
+        # O aceite 1 do E08: uma falha a MEIO da publicação deixa a revisão
+        # anterior inteira. A prova injecta uma falha real depois de a revisão
+        # estar escrita e o ponteiro trocado, e exige que nem uma nem outro
+        # tenham ficado — e testa o outro lado, que a publicação que corre até
+        # ao fim troca mesmo.
+        #
+        # Mais as três armadilhas do CT-14, que se apresentam todas como
+        # sucesso: o CSV que abre no Excel, o SVG que aparece na página, o link
+        # que ainda responde. Dez controlos negativos.
+        run: ./scripts/provar-publicacao.sh
+
       - name: Migrações aplicadas e sem desvio
         run: pnpm db:migrate:status
 

@@ -1,10 +1,10 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E08 — média, traduções, importação e publicação (**10 telas**)
-**Estado:** **em curso**. Os sete motores puros estão feitos e commitados, com 23 controlos
-negativos; falta o schema, os serviços, as 10 telas, as rotas e a prova contra a base.
-**Régua:** `docs/architecture/catalogo-e-publicacao.md` e **`dados-e-accoes-sensiveis.md`**,
-os dois do E00. O `ALVO-E08.md` está a ser escrito pelo sénior.
+**Estado:** implementado, **aguardando validação**. Sete motores puros, o schema com oito
+tabelas, os serviços, as 10 telas, as rotas e a prova contra a base — tudo entregue e medido.
+**Régua:** `docs/reviews/ALVO-E08.md` · `docs/architecture/catalogo-e-publicacao.md` e
+**`dados-e-accoes-sensiveis.md`**, os dois do E00.
 **O JR não avança para o E09.**
 
 **E07 validado à primeira** — a maior das 36 e a terceira seguida a passar sem segunda
@@ -48,7 +48,7 @@ desta vez a régua **não** precedeu todo o código e dizê-lo é o que a manté
 | E05 — planos, entitlements e identidade Starter | **validado à 1ª** · `docs/reviews/ALVO-E05.md` |
 | E06 — onboarding e configuração do restaurante | **validado à 2ª** · `docs/progress/E06.md`. A 1ª validação foi retirada pela CI: a cadeia de migrações não se aplicava do zero. |
 | E07 — catálogo, produtos, preços e opções | **validado à 1ª** · `docs/reviews/E07.md` |
-| E08 — média, traduções, importação e publicação | **em curso** · `docs/progress/E08.md` |
+| E08 — média, traduções, importação e publicação | implementado, **aguardando validação** · `docs/progress/E08.md` |
 
 **Primeiras telas.** O E02 é a primeira etapa que toca `coverage.csv`: STATE 001-003,
 005, 007 e 016. Até aqui o medidor de telas esteve a 0 % e isso era verdade, não uma
@@ -337,3 +337,39 @@ migrações contra uma base vazia.
 **Aviso de custo para o fecho do E07:** o `provar-catalogo.sh` passou a fazer **dois builds**
 (o segundo para o controlo negativo da rota correr contra código compilado). Junta-se ao que
 o `CI-CUSTO.md` já dizia — a restruturação em trabalhos paralelos ganha mais um argumento.
+
+## E08 — o que existe agora
+
+**A primeira etapa que aceita ficheiros de estranhos**, e as três armadilhas do CT-14 são
+todas defeitos que se apresentam como sucesso: um CSV que abre no Excel, um logótipo que
+aparece na página, um link que ainda responde.
+
+**Publicar é atómico por construção.** A revisão nasce e o ponteiro troca no mesmo `COMMIT`,
+dentro da transacção que o `comEscopo` já abriu. A prova injecta uma falha REAL depois de as
+duas escritas e exige que nem uma nem outra tenham ficado — e mede o outro lado, que a
+publicação que corre até ao fim troca mesmo o que está no ar. **A revisão é imutável**, e é
+a base que o garante: `REVOKE UPDATE, DELETE ON menu_revisions`.
+
+**CSV neutralizado** — e aspas não protegem, e um número negativo não é uma fórmula.
+**Buscar por URL tem três portas**: a forma, o endereço resolvido, e `redirect: 'manual'` —
+um destino público que responda 302 para `169.254.169.254` passa pelas duas primeiras.
+**O tipo do ficheiro vem dos bytes**, e a recusa vem antes de escrever no armazenamento.
+
+**Nome igual não é chave de identidade**: a estratégia de importação é obrigatória sem valor
+por omissão, e não existe no ficheiro nenhum índice por nome.
+
+**A exportação verifica a permissão duas vezes**, com as concessões lidas outra vez no
+descarregamento.
+
+**Mexi numa coisa do E07 que já estava validada:** `ProductTranslation.origemVersao` era a
+`version` do produto; passou a ser a impressão do TEXTO. A versão avança com o preço, e
+marcar a tradução inglesa como obsoleta por causa do preço é um falso positivo — e falsos
+positivos ensinam toda a gente a ignorar o aviso. Nenhum código lia a coluna.
+
+**221 asserções no domínio + 32 na prova contra a base, 0 falhas**, com 33 controlos
+negativos ao todo. `pnpm verificar` a 0 sem `.env`; `pnpm inspeccionar` com 69 verificações.
+
+**Toquei no `ci.yml`** para acrescentar um passo (`provar-publicacao.sh`) ao trabalho `base`,
+depois de a divisão em três estar commitada. Verifiquei a forma dos 41 passos — cada um tem
+`run` ou `uses` — mas **não contra o esquema do Actions**, que é o que a régua pede: não há
+`pyyaml` nesta máquina. Fica para quem valida.
