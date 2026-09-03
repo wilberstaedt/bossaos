@@ -59,6 +59,70 @@ else
   ok "nenhum parseFloat fora de comentarios e testes"
 fi
 
+# ── as OUTRAS portas para a virgula flutuante ───────────────────────────────
+#
+# A 04/09 medi o que esta guarda apanha e o que deixa passar. So o parseFloat era
+# apanhado - em qualquer grafia, porque a busca e por subcadeia e Number.parseFloat
+# contem-no. Passavam: Number(t), +t, parseInt(t, 10) e t * 1.
+#
+# Number('8.07') * 100 da o MESMO 806.9999999999999 que motivou esta guarda. A
+# propriedade nunca foi "nao escrever parseFloat", foi "dinheiro nao passa por
+# virgula flutuante" - e eu estava a vigiar uma grafia.
+#
+# Mas banir Number( em todo o codigo seria ruidoso ao ponto de a guarda ser
+# desligada: Number(pagina) e legitimo. Por isso a proibicao alarga-se apenas onde
+# o ARGUMENTO tem nome de dinheiro, que a guarda ja sabe reconhecer. Number(preco)
+# e apanhado, Number(pagina) nao.
+#
+# O QUE CONTINUA SEM SER VISTO, dito sem arredondar: uma conversao cujo argumento
+# nao tenha nome de dinheiro - `const n = Number(bruto)` seguido de uso monetario -
+# escapa. Nao ha analise de tipos aqui, e inventar heuristica sobre o nome da
+# variavel seguinte trocaria um falso negativo silencioso por ruido. Esta guarda
+# apanha o descuido, nao o disfarce.
+#
+# E ha uma excepcao que NAO e conveniencia: um nome que declara a unidade minima -
+# totalEmCentimos, precoCents - e inteiro por construcao, e Number() sobre um
+# inteiro e exacto. Acusa-lo seria um falso positivo, e um falso positivo gasta o
+# credito da guarda tao depressa como um buraco. A propria dinheiro.md manda essa
+# convencao de nomes; aqui ela paga.
+outras=$(git ls-files '*.ts' '*.tsx' | grep -vE "\.test\.|^provas/|^inspeccao/" \
+  | xargs python3 scripts/sem-comentarios.py 2>/dev/null \
+  | grep -E "(Number|parseInt)\s*\(\s*[A-Za-z_$.]*(${NOME_DINHEIRO})" \
+  | grep -vEi "centimos|centavos|cents|minor|emUnidadeMinima" || true)
+if [ -n "$outras" ]; then
+  erro "conversao para virgula flutuante sobre nome de dinheiro:"
+  printf '%s\n' "$outras" | head -5 | sed 's/^/          /'
+else
+  ok "nenhuma conversao Number/parseInt sobre nome de dinheiro"
+fi
+
+# ── controlo negativo ───────────────────────────────────────────────────────
+# Esta guarda nasceu a 03/09 sobre codigo limpo e nunca tinha provado que reprova.
+# Agora prova-o em CADA corrida, e nas duas direccoes - porque uma guarda que so
+# mostra que acusa podia estar a acusar tudo.
+#
+# Uma expressao de cada vez, em ficheiros separados: a 04/09 pus duas sondas no
+# mesmo ficheiro noutra guarda e a primeira mascarou a segunda, e o controlo
+# passava com o detector partido.
+echo
+SONDA="$(mktemp -d)"; trap 'rm -rf "$SONDA"' EXIT
+ve() { printf 'export const f = (x: any) => %s;\n' "$1" > "$SONDA/s.ts"
+       python3 scripts/sem-comentarios.py "$SONDA/s.ts" 2>/dev/null \
+         | grep -E "parseFloat|(Number|parseInt)\s*\(\s*[A-Za-z_$.]*(${NOME_DINHEIRO})" \
+         | grep -vEi "centimos|centavos|cents|minor|emUnidadeMinima" | grep -q . ; }
+c_falha=0
+for mau in 'parseFloat(t)' 'Number(precoTexto)' 'parseInt(valorBruto, 10)'; do
+  ve "$mau" || { echo "  FALHA controlo: deixou passar $mau"; c_falha=1; }
+done
+for bom in 'Number(pagina)' 'Number(totalEmCentimos)' 'parseInt(idDaLinha, 10)'; do
+  ve "$bom" && { echo "  FALHA controlo: acusou $bom, que e legitimo"; c_falha=1; }
+done
+if [ "$c_falha" -eq 0 ]; then
+  ok "controlo negativo: apanha as tres conversoes de dinheiro e nao acusa as tres legitimas"
+else
+  falhas=$((falhas+1))
+fi
+
 echo
 [ "$falhas" -eq 0 ] && echo "  Dinheiro em inteiros: 0 falhas." || echo "  $falhas FALHA(S)."
 exit "$falhas"
