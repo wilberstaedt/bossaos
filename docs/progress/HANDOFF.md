@@ -1,9 +1,18 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E01
-**Estado:** implementado pelo JR, aguardando validação do sénior
-**Próxima ação:** o sénior valida o E01 (registo e provas em `docs/progress/E01.md`).
-O JR **não** avançou para E02, por instrução.
+**Etapa atual:** E02 — design system, responsividade e idiomas
+**Estado:** entregue ao JR.
+**Próxima ação:** o JR implementa; o sénior revê quando ele declarar pronto.
+
+| Etapa | Estado |
+| --- | --- |
+| E00 — contrato e leitura das fontes | implementado, **aguardando validação**. Sete documentos em `docs/architecture`. Quem os escreveu não os valida: a prova vem no E11, quando se vir se o E02-E10 se construíram a partir deles. |
+| E01 — repositório e verificação contínua | **validado** · `docs/reviews/E01.md` |
+| E02 — design system, responsividade e idiomas | em execução |
+
+**Primeiras telas.** O E02 é a primeira etapa que toca `coverage.csv`: STATE 001-003,
+005, 007 e 016. Até aqui o medidor de telas esteve a 0 % e isso era verdade, não uma
+avaria — E00 a E01 são transversais e não entregam vista nenhuma.
 
 ## Divisão de trabalho
 
