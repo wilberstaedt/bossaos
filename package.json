@@ -41,6 +41,8 @@
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.62.1",
     "pg": "8.23.0",
-    "@types/pg": "8.23.1"
+    "@types/pg": "8.23.1",
+    "@prisma/client": "7.10.0",
+    "@prisma/adapter-pg": "7.10.0"
   }
 }

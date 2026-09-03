@@ -17,7 +17,7 @@ let cliente: PrismaClient | undefined;
 
 export function obterPrismaDeAutenticacao(authDatabaseUrl: string): PrismaClient {
   cliente ??= new PrismaClient({
-    adapter: new PrismaPg({ connectionString: authDatabaseUrl }),
+    adapter: new PrismaPg({ connectionString: authDatabaseUrl, options: '-c timezone=UTC' }),
   });
   return cliente;
 }

@@ -19,8 +19,26 @@ import { PrismaPg } from '@prisma/adapter-pg';
 let cliente: PrismaClient | undefined;
 
 export function obterPrisma(databaseUrl: string): PrismaClient {
+/**
+   * `options: '-c timezone=UTC'` não é preferência — é uma correcção.
+   *
+   * Medido: com a sessão em `Europe/Madrid`, `SELECT now()` devolvia
+   * `12:57:56Z` pelo `pg` e **`14:57:56Z` pelo Prisma** — duas horas, exactamente
+   * o desvio do fuso. O adaptador lê a renderização local do `timestamptz` e
+   * rotula-a como UTC.
+   *
+   * Apareceu num convite expirado que era aceite: a base dizia
+   * `expires_at <= now()` e o código lia uma data duas horas no futuro. Mas o
+   * defeito não era dos convites — seria de **todos** os prazos, reservas, turnos
+   * e carimbos de auditoria, e num produto de restauração isso é uma mesa
+   * reservada à hora errada.
+   *
+   * Com a sessão em UTC a renderização local É UTC e o desvio desaparece. Está
+   * provado em `packages/db/src/fuso.test.ts`, que compara `now()` do Prisma com
+   * o relógio do processo e falha se divergirem mais de cinco segundos.
+   */
   cliente ??= new PrismaClient({
-    adapter: new PrismaPg({ connectionString: databaseUrl }),
+    adapter: new PrismaPg({ connectionString: databaseUrl, options: '-c timezone=UTC' }),
   });
   return cliente;
 }

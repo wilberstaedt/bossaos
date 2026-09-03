@@ -35,9 +35,9 @@ export BASE_URL="http://127.0.0.1:$PORTA"
 export BETTER_AUTH_URL="$BASE_URL"
 falhas=0
 verificacoes=0
-MINIMO_VERIFICACOES=6
+MINIMO_VERIFICACOES=7
 PID=""
-ALTERADO=0
+POLITICA_A_MAIS=0
 
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; verificacoes=$((verificacoes + 1)); }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); verificacoes=$((verificacoes + 1)); }
@@ -56,12 +56,16 @@ parar() {
 # Repor SEMPRE o ficheiro que o controlo negativo altera. Um script que morra a
 # meio com a verificação de escopo desligada deixa o repositório com um defeito
 # de segurança dentro — e é o tipo de coisa que sobrevive a um commit distraído.
+# Uma política a mais deixada para trás é um furo de isolamento a viver no
+# repositório. Cai-se sempre por aqui, mesmo com o script morto a meio.
 restaurar() {
   parar
-  if [[ "$ALTERADO" == "1" ]]; then
-    cp /tmp/bossaos-tenant.bom packages/domain/src/tenant.ts
-    ALTERADO=0
-    printf '  (verificação de escopo reposta)\n'
+  if [[ "${POLITICA_A_MAIS:-0}" == "1" ]]; then
+    psql "$MIGRATION_DATABASE_URL" -q \
+      -c "DROP POLICY IF EXISTS sonda_de_mais ON organizations" \
+      -c "DROP POLICY IF EXISTS sonda_de_mais ON brands" >/dev/null 2>&1
+    POLITICA_A_MAIS=0
+    printf '  (política a mais removida)\n'
   fi
   rm -rf apps/web/.next
 }
@@ -106,6 +110,18 @@ else
 fi
 
 echo
+echo "0b. O relógio da base e o do processo dizem o mesmo?"
+# Antes de medir prazos, confirmar que se sabe que horas são. Um convite
+# expirado era aceite porque o Prisma lia duas horas no futuro.
+if node --test --test-reporter=tap --experimental-strip-types provas/fuso.test.ts >/tmp/bossaos-fuso.txt 2>&1; then
+  verde "sem desvio ($(grep -m1 -oE '^# pass [0-9]+' /tmp/bossaos-fuso.txt | grep -oE '[0-9]+') asserções)"
+else
+  vermelho "há desvio de fuso — nenhum prazo desta prova é de confiança"
+  grep -E 'not ok|horas de desvio' /tmp/bossaos-fuso.txt | head -5
+  exit 1
+fi
+
+echo
 echo "1. Com a verificação de escopo LIGADA"
 if ! construir_e_subir; then vermelho "a aplicação não subiu"; exit 1; fi
 
@@ -131,50 +147,67 @@ else
 fi
 
 echo
-echo "2. CONTROLO NEGATIVO — a URL passa a autenticar, e o par tem de colapsar"
-cp packages/domain/src/tenant.ts /tmp/bossaos-tenant.bom
-ALTERADO=1
-python3 - <<'PY'
-p='packages/domain/src/tenant.ts'; s=open(p,encoding='utf-8').read()
-# O defeito exacto que o contrato proíbe: a URL deixa de SELECCIONAR e passa a
-# AUTENTICAR. Qualquer organização pedida resolve, com as concessões de quem
-# pediu — que é como se escreve isto por engano quando se está com pressa.
-s = s.replace("""  const filiacao = filiacoes.find((f) => f.organizationSlug === alvo.organizationSlug);
-  if (!filiacao) return { ok: false, recusa: { tipo: 'sem_filiacao' } };""",
-"""  const filiacao =
-    filiacoes.find((f) => f.organizationSlug === alvo.organizationSlug) ?? filiacoes[0];
-  if (!filiacao) return { ok: false, recusa: { tipo: 'sem_filiacao' } };""")
-open(p,'w',encoding='utf-8').write(s)
-PY
-parar
-if ! construir_e_subir; then vermelho "não subiu com o defeito plantado"; else
-  if correr /tmp/bossaos-acesso-defeito.txt; then
-    vermelho "a prova PASSOU com a verificação de escopo desligada — não é isso que ela mede"
+echo "2. CONTROLO NEGATIVO — o par tem de colapsar"
+#
+# A primeira versão deste controlo desligava a verificação de contexto em
+# `tenant.ts`, fazendo a URL autenticar. **Não colapsou o par** — e isso não foi
+# uma falha do controlo, foi informação: com a política de linha por baixo, partir
+# só a resolução de contexto não vaza. A dona de A pedia a organização de B,
+# ficava com o contexto de A, e o RLS devolvia vazio na mesma. As camadas fazem o
+# que dizem.
+#
+# Para o par colapsar é preciso atacar a camada que produz a DIFERENÇA: a leitura
+# com escopo. E há uma forma realista de o fazer, que é precisamente o risco que
+# a revisão do E03 foi verificar — no PostgreSQL as políticas permissivas
+# somam-se por **OR**, por isso uma política de leitura a mais alarga o acesso
+# sem aparecer em teste nenhum.
+#
+# Acrescenta-se uma. É SQL, não precisa de rebuild, e é o defeito que alguém
+# escreveria a sério a tentar resolver um "não vejo as minhas organizações".
+psql "$MIGRATION_DATABASE_URL" -q \
+  -c "CREATE POLICY sonda_de_mais ON organizations FOR SELECT USING (true)" \
+  -c "CREATE POLICY sonda_de_mais ON brands FOR SELECT USING (true)" >/dev/null 2>&1
+POLITICA_A_MAIS=1
+
+if correr /tmp/bossaos-acesso-defeito.txt; then
+  vermelho "a prova PASSOU com uma política de leitura a mais — não é o escopo que ela mede"
+else
+  if ! analisar /tmp/bossaos-acesso-defeito.txt >/dev/null; then
+    vermelho "o relatório do controlo negativo não é TAP legível"
   else
-    if ! analisar /tmp/bossaos-acesso-defeito.txt >/dev/null; then
-      vermelho "o relatório do controlo negativo não é TAP legível"
+    verde "a prova ficou vermelha, como tem de ficar"
+    if grep -q '^not ok .*O PAR' /tmp/bossaos-acesso-defeito.txt; then
+      verde "foi O PAR que caiu (é ele que mede o escopo)"
     else
-      verde "a prova ficou vermelha, como tem de ficar"
-      if grep -q '^not ok .*O PAR' /tmp/bossaos-acesso-defeito.txt; then
-        verde "foi O PAR que caiu (é ele que mede o escopo)"
-      else
-        vermelho "o par continuou verde sem verificação de escopo — não estava a medir"
-      fi
+      vermelho "o par continuou verde com o escopo alargado — não estava a medir"
     fi
   fi
 fi
 
-# E o discriminador directo: com o defeito, o identificador de B tem de devolver
-# 200 a quem tem sessão de A. Perguntado sem passar por teste nenhum.
-echo "   (medição directa do colapso, adiante)"
+# E o discriminador directo, sem passar por teste nenhum: com a política a mais,
+# a marca de B tem de ser visível a partir do contexto de A.
+# `tail -1` apanhava a linha "COMMIT" e o `-ge` tentava avaliá-la como
+# aritmética — com `set -u` isso mata o script e ele saía a zero na mesma. O
+# número extrai-se pelo formato, não pela posição.
+vista=$(psql "$DATABASE_URL" -tAc "
+  BEGIN;
+  SELECT set_config('app.organization_id','11111111-1111-4111-8111-111111111111',true);
+  SELECT count(*) FROM brands;
+  COMMIT;" 2>/dev/null | grep -E '^[0-9]+$' | tail -1)
+if [[ "$vista" =~ ^[0-9]+$ ]] && (( vista >= 2 )); then
+  verde "com a política a mais, o contexto de A vê $vista marcas (devia ver 1)"
+else
+  vermelho "a política a mais não alargou nada — o controlo não demonstrou o defeito"
+fi
 
-parar
-cp /tmp/bossaos-tenant.bom packages/domain/src/tenant.ts
-ALTERADO=0
+psql "$MIGRATION_DATABASE_URL" -q \
+  -c "DROP POLICY IF EXISTS sonda_de_mais ON organizations" \
+  -c "DROP POLICY IF EXISTS sonda_de_mais ON brands" >/dev/null 2>&1
+POLITICA_A_MAIS=0
 
 echo
 echo "3. Reposta — tem de voltar ao verde"
-if ! construir_e_subir; then vermelho "não subiu depois de repor"; else
+if true; then
   if correr /tmp/bossaos-acesso-religado.txt; then
     verde "de volta ao verde"
   else

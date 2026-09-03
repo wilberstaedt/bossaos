@@ -145,16 +145,20 @@ before(async () => {
 
 after(async () => {
   // Limpa só o que esta corrida criou. As fixtures ficam intactas.
+  // Ordem importa: `invitations.convidado_por_id` aponta para `users`. Apagar a
+  // pessoa antes dos convites dela viola a chave estrangeira — e a chave está
+  // certa: quem convidou faz parte do rasto.
+  await sql.query("DELETE FROM invitations WHERE email LIKE '%@exemplo.example'");
   for (const email of Object.values(CONTAS)) {
     const id = ids.get(email);
     if (!id) continue;
+    await sql.query('DELETE FROM invitations WHERE convidado_por_id = $1', [id]);
     await sql.query('DELETE FROM role_assignments WHERE membership_id IN (SELECT id FROM memberships WHERE user_id = $1)', [id]);
     await sql.query('DELETE FROM memberships WHERE user_id = $1', [id]);
     await sql.query('DELETE FROM sessions WHERE user_id = $1', [id]);
     await sql.query('DELETE FROM accounts WHERE user_id = $1', [id]);
     await sql.query('DELETE FROM users WHERE id = $1', [id]);
   }
-  await sql.query("DELETE FROM invitations WHERE email LIKE '%@exemplo.example'");
   await sql.end();
 });
 
@@ -454,6 +458,23 @@ describe('revogação — as sessões que JÁ EXISTEM param', () => {
   });
 
   it('o último owner não se revoga a si próprio', async () => {
+    // Escrevi este teste a assumir que a dona era a única `OWNER` e ele deu 200.
+    // Não era defeito do produto: as fixtures já trazem uma dona, e com DUAS a
+    // protecção não tem porque disparar — e não disparou, correctamente.
+    //
+    // Para medir a regra é preciso que haja mesmo uma só. Suspende-se a outra
+    // primeiro, e aí sim.
+    const { rows: outros } = await sql.query(
+      `SELECT m.id FROM memberships m
+       JOIN role_assignments ra ON ra.membership_id = m.id
+       JOIN users u ON u.id = m.user_id
+       WHERE ra.papel = 'OWNER' AND m.organization_id = $1 AND u.email <> $2 AND m.estado = 'ACTIVO'`,
+      [IDS.orgA, CONTAS.donaA],
+    );
+    for (const o of outros) {
+      await sql.query("UPDATE memberships SET estado='SUSPENSO' WHERE id=$1", [o.id]);
+    }
+
     const { rows } = await sql.query(
       `SELECT m.id FROM memberships m JOIN users u ON u.id = m.user_id
        WHERE u.email = $1`, [CONTAS.donaA],
@@ -461,6 +482,12 @@ describe('revogação — as sessões que JÁ EXISTEM param', () => {
     const r = await fetch(`${BASE}/api/org/marina-oropesa/pessoas/${rows[0].id}/revogar`, {
       method: 'POST', headers: como(CONTAS.donaA), body: JSON.stringify({ motivo: 'engano' }),
     });
+
+    // Repor antes de asseverar, para uma falha não deixar as fixtures partidas.
+    for (const o of outros) {
+      await sql.query("UPDATE memberships SET estado='ACTIVO' WHERE id=$1", [o.id]);
+    }
+
     assert.equal(r.status, 409);
     assert.equal((await r.json()).erro, 'ultimo_owner');
   });
