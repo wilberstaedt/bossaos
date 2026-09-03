@@ -189,6 +189,17 @@ corrida desse commit foi cancelada só é honesto se a corrida verde for de um c
 **contém** o código do E03 — o que numa história linear é verdade, mas verifica-se com
 `gh run view --json headSha`, não se assume.
 
+**Comparar contra a fonte, nunca entre pares.** Uma verificação que compara N coisas
+**umas com as outras** passa quando as N estão erradas da mesma maneira. A 2026-09-03 o JR
+apanhou isto no E07: os ecrãs mostravam o **código** do alérgeno (`frutos-de-casca`) em vez
+do nome, e o teste de paridade de traduções não viu — comparava `es-ES`, `pt-BR` e `en`
+**entre si**, e as três estavam igualmente erradas, portanto estavam alinhadas. O `tsc`
+também não vê, porque não olha para dentro de um índice de cadeia.
+
+A correcção dele é a forma geral: comparar contra a **lista do domínio**, que é a fonte, e
+não contra os outros idiomas, que são pares. Vale para traduções, para fixtures espelhadas,
+para snapshots, e para qualquer sítio onde a resposta certa exista num lado só.
+
 **Exigir o par, nunca o caso sozinho.** "O pedido de A ao recurso de B devolve vazio" é
 compatível com um sistema em que *tudo* devolve vazio. A prova é a **diferença**: o mesmo
 identificador, com a sessão certa, tem de devolver a coisa. Vale para isolamento, para
