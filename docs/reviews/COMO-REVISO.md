@@ -129,6 +129,12 @@ concluir.**
 segundos depois sem eu tocar em nada. O falso vermelho faz barulho; o falso **verde** não,
 e esse eu guardava como prova.
 
+**7. Cifrões numa mensagem de commit entre aspas duplas.** No commit `85b2d6c` escrevi
+`awk -F, com $(NF-2) conta um campo a mais` e o zsh **executou** o `$(NF-2)`: a mensagem foi
+para o repositório sem o símbolo, a dizer *"awk -F, com  conta um campo a mais"*. Já estava
+empurrada, e eu não faço `force-push` — fica corrigida aqui. Mensagens com `$`, crases ou
+`!` vão por ficheiro (`git commit -F`) ou com aspas simples.
+
 **6. Esquecer o passo que não é técnico.** Validei uma etapa e não autorizei a seguinte — o
 JR ficou nove minutos parado. Validar e entregar fecham no **mesmo** tick.
 
