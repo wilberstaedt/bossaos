@@ -29,7 +29,7 @@ if [[ "$NODE_ACTUAL" != "$NODE_ESPERADO" ]]; then
 fi
 
 GRUPOS_ESPERADOS=8
-ASSERCOES_ESPERADAS=35
+ASSERCOES_ESPERADAS=36
 falhas=0
 
 CSV=packages/domain/src/csv.ts
@@ -84,6 +84,7 @@ DELETE FROM export_jobs WHERE formato LIKE 'e08-%';
 DELETE FROM product_media  WHERE media_id IN (SELECT id FROM media_assets WHERE chave LIKE 'e08-%');
 DELETE FROM media_assets   WHERE chave LIKE 'e08-%';
 DELETE FROM product_translations WHERE product_id IN (SELECT id FROM products WHERE nome LIKE '%e08-%');
+DELETE FROM product_channels WHERE product_id IN (SELECT id FROM products WHERE nome LIKE '%e08-%');
 DELETE FROM price_rules WHERE product_id IN (SELECT id FROM products WHERE nome LIKE '%e08-%');
 DELETE FROM products    WHERE nome LIKE '%e08-%';
 DELETE FROM categories  WHERE nome LIKE 'e08-%';
@@ -319,6 +320,22 @@ else
   verde "o destino publico sem redireccionamento continuou a entrar"
 fi
 repor "$MED"
+
+echo
+echo "9e. CONTROLO NEGATIVO - a revisao deixa de olhar para a visibilidade do canal"
+# O buraco que o E09 fez encontrar: a revisao da CARTA levava produtos escondidos
+# da CARTA. Enquanto a carta era interna era um bug; com a carta na internet
+# aberta e exposicao.
+python3 - "$PUBDB" <<'FIMPY'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding='utf-8')
+alvo = "        canais: { some: { canal, visivel: true } },"
+assert alvo in s, 'o alvo do controlo negativo mudou de forma'
+p.write_text(s.replace(alvo, ''), encoding='utf-8')
+FIMPY
+exigir_vermelho "caiu a assercao do produto oculto" \
+  'PRODUTO OCULTO NO CANAL' /tmp/bossaos-pub-oculto.txt
+repor "$PUBDB"
 
 echo
 echo "10. Reposto — tem de voltar ao verde"

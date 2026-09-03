@@ -18,6 +18,7 @@
  */
 
 export type MotivoDeBloqueio =
+  | 'carta_vazia'
   | 'sem_preco'
   | 'moeda_incompativel'
   | 'conflito_de_preco'
@@ -75,6 +76,12 @@ export function bloqueiosDePublicacao(
   politica: PoliticaDePublicacao = {},
 ): readonly Bloqueio[] {
   const bloqueios: Bloqueio[] = [];
+  // Uma carta sem produtos é uma página em branco na internet aberta. Acontece
+  // por engano — nenhum produto visível no canal que se está a publicar — e sem
+  // isto publicava-se em silêncio, com o ecrã a dizer "nada mudou".
+  if (itens.length === 0) {
+    return [{ productId: '', nome: '', motivo: 'carta_vazia' }];
+  }
   for (const i of itens) {
     const base = { productId: i.productId, nome: i.nome };
     if (i.erroDePreco === 'conflito') {

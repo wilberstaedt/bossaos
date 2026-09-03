@@ -4,6 +4,7 @@ import { Client } from 'pg';
 import {
   buscarPorUrl, catalogoParaCsv, coberturaDeTraducoes, comEscopo, confirmarImportacao,
   guardarMedia, guardarPrevia, guardarTraducao, historicoDeRevisoes, ligarAoProduto,
+  montarRevisao,
   listarExportacoes, obterPrisma, pedirExportacao, podeDescarregar, preverPublicacao,
   publicacaoActual, publicar, substituirConteudo, textoDoProduto, traducoesDoProduto,
 } from '../packages/db/src/index.ts';
@@ -82,6 +83,12 @@ before(async () => {
     produtoId = p.id;
     await db.priceRule.create({
       data: { organizationId: IDS.orgA, productId: p.id, montanteMenor: 850, moeda: 'EUR' },
+    });
+    // Sem esta linha o produto NÃO entra na revisão da CARTA. A ausência conta
+    // como oculto — é a regra do produto (por configurar significa negado), e
+    // numa superfície pública é a única leitura segura de "ninguém disse".
+    await db.productChannel.create({
+      data: { organizationId: IDS.orgA, productId: p.id, canal: 'CARTA', visivel: true },
     });
     const m = await db.menu.create({
       data: { organizationId: IDS.orgA, brandId: IDS.marcaA, nome: `${PREFIXO} carta`, estado: 'ACTIVO' },
@@ -176,7 +183,45 @@ describe('1. Uma falha a meio da publicação deixa a anterior INTEIRA', () => {
     assert.ok(conteudo.some((i) => i.nome.includes('de jamón')), 'a carta no ar tem de ser a nova');
   });
 
-  it('a revisão publicada é IMUTÁVEL — o runtime não a pode reescrever', async () => {
+it('UM PRODUTO OCULTO NO CANAL NAO ENTRA NA REVISAO', async () => {
+    // O buraco que o E09 me fez encontrar: a revisao da CARTA levava produtos
+    // escondidos da CARTA. Enquanto a carta era interna isso era um bug; com a
+    // carta na internet aberta e exposicao.
+    const oculto = await comA(async (db) => {
+      const p = await db.product.create({
+        data: {
+          organizationId: IDS.orgA, brandId: IDS.marcaA, categoryId: categoriaId,
+          nome: `${PREFIXO} prato oculto`, estado: 'ACTIVO',
+        },
+        select: { id: true },
+      });
+      await db.priceRule.create({
+        data: { organizationId: IDS.orgA, productId: p.id, montanteMenor: 1200, moeda: 'EUR' },
+      });
+      // Existe, tem preco, esta ACTIVO — e esta escondido da CARTA.
+      await db.productChannel.create({
+        data: { organizationId: IDS.orgA, productId: p.id, canal: 'CARTA', visivel: false },
+      });
+      return p.id;
+    });
+
+    const itens = await comA((db) => montarRevisao(db, menuId, IDS.unidadeA, 'CARTA'));
+    assert.ok(!itens.some((i) => i.productId === oculto), 'o oculto entrou na revisao');
+    // E o par: o produto visivel continua a entrar. Sem isto, um filtro que
+    // deitasse tudo fora passava na assercao de cima.
+    assert.ok(itens.some((i) => i.productId === produtoId), 'o visivel tem de entrar');
+
+    // E noutro canal, onde nao ha linha nenhuma, tambem nao entra: a AUSENCIA
+    // conta como oculto, e nao como visivel.
+    const noTpv = await comA((db) => montarRevisao(db, menuId, IDS.unidadeA, 'TPV'));
+    assert.equal(noTpv.length, 0, 'sem linha de canal, nada entra');
+
+    await comA((db) => db.productChannel.deleteMany({ where: { productId: oculto } }));
+    await comA((db) => db.priceRule.deleteMany({ where: { productId: oculto } }));
+    await comA((db) => db.product.deleteMany({ where: { id: oculto } }));
+  });
+
+    it('a revisão publicada é IMUTÁVEL — o runtime não a pode reescrever', async () => {
     // `REVOKE UPDATE, DELETE ON menu_revisions FROM bossaos_app`. Sem isto,
     // "o que estava publicado no dia 4" deixava de ter resposta.
     await assert.rejects(
@@ -195,6 +240,13 @@ describe('1. Uma falha a meio da publicação deixa a anterior INTEIRA', () => {
         },
         select: { id: true },
       });
+      // Tem de estar VISÍVEL no canal para bloquear: um produto escondido da
+      // CARTA não entra na revisão da CARTA, logo não impede a sua publicação.
+      // A interacção é a certa — o bloqueio é sobre o que vai para o ar — e foi
+      // este caso a ficar vermelho que a mostrou.
+      await db.productChannel.create({
+        data: { organizationId: IDS.orgA, productId: p.id, canal: 'CARTA', visivel: true },
+      });
       return p.id;
     });
     const r = await comA((db) => publicar(db, IDS.orgA, {
@@ -205,6 +257,7 @@ describe('1. Uma falha a meio da publicação deixa a anterior INTEIRA', () => {
 
     const depois = await comA((db) => historicoDeRevisoes(db, menuId));
     assert.equal(depois.length, antes.length, 'uma publicação bloqueada não escreve');
+    await comA((db) => db.productChannel.deleteMany({ where: { productId: semPreco } }));
     await comA((db) => db.product.deleteMany({ where: { id: semPreco } }));
   });
 });

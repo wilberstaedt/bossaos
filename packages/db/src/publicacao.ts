@@ -62,7 +62,21 @@ export async function montarRevisao(
   const itens: ItemDaRevisao[] = [];
   for (const s of seccoes) {
     const produtos = await db.product.findMany({
-      where: { categoryId: s.category.id, archivedAt: null, estado: 'ACTIVO' },
+      where: {
+        categoryId: s.category.id, archivedAt: null, estado: 'ACTIVO',
+        // ── Catálogo oculto não entra na revisão ────────────────────────────
+        //
+        // Isto faltava, e era um buraco do E08: um produto escondido do canal
+        // CARTA entrava na revisão da CARTA e ia parar à carta pública. O E09 põe
+        // essa carta na internet aberta, e aí deixa de ser um bug e passa a ser
+        // exposição.
+        //
+        // **A ausência de linha conta como oculto**, e não como visível. É o que
+        // o CAT-016 já mostra (`visiveis.get(canal) ?? false`) e é a regra do
+        // produto inteiro: por configurar significa negado. Numa superfície
+        // pública, o lado seguro do "ninguém disse" é não mostrar.
+        canais: { some: { canal, visivel: true } },
+      },
       select: {
         id: true, nome: true, descricao: true,
         variantes: {

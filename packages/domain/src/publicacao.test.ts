@@ -51,6 +51,14 @@ describe('1. O que impede publicar', () => {
     ]);
   });
 
+  it('UMA CARTA VAZIA é um bloqueio, não uma página em branco', () => {
+    // Acontece por engano: nenhum produto visível no canal que se publica. Sem
+    // isto publicava-se em silêncio, e o ecrã dizia "nada mudou" sobre uma
+    // página em branco na internet aberta.
+    const b = bloqueiosDePublicacao([]);
+    assert.deepEqual(b.map((x) => x.motivo), ['carta_vazia']);
+  });
+
   it('uma carta inteira e válida não tem bloqueios — é o par', () => {
     // Sem isto, uma implementação que bloqueasse tudo passava em todos os casos
     // de cima e nada seria publicável.
