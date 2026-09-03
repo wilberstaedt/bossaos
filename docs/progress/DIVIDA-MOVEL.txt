@@ -1,0 +1,90 @@
+# Dívida de prova de móvel — declarada a 2026-09-04
+#
+# Estes IDs estão assinados como `validado` e o atlas diz que o móvel é
+# obrigatório neles, mas nenhuma evidência afirma que o móvel foi medido.
+# Foram assinados por mim com prova de desktop. Não são defeitos conhecidos:
+# são medições que NÃO ACONTECERAM, e por isso não se diz que estão bem.
+#
+# Estão aqui para que a dívida seja contada em vez de invisível, e para que a
+# guarda `scripts/validar-movel.sh` possa reprovar dívida NOVA sem reprovar 66
+# vezes por dia — que é como as guardas acabam desligadas.
+#
+# Sai daqui quem for medido: mede-se, escreve-se na evidência, apaga-se a linha.
+# A guarda avisa quando uma linha deixa de ser precisa.
+#
+
+# E04
+AUTH-001
+AUTH-003
+AUTH-004
+AUTH-005
+AUTH-006
+AUTH-007
+AUTH-008
+AUTH-009
+ONB-009
+ORG-007
+ORG-008
+STATE-014
+
+# E05
+ONB-004
+ORG-010
+ORG-013
+ORG-014
+PLAT-002
+PLAT-003
+PLAT-004
+PLAT-006
+PLAT-010
+PLAT-011
+STATE-006
+THEME-001
+
+# E06
+ONB-001
+ONB-002
+ONB-003
+ONB-010
+ORG-001
+ORG-002
+ORG-003
+ORG-004
+ORG-005
+ORG-006
+ORG-015
+SET-001
+SET-002
+STATE-013
+
+# E07
+CAT-001
+CAT-002
+CAT-003
+CAT-004
+CAT-005
+CAT-006
+CAT-007
+CAT-008
+CAT-009
+CAT-010
+CAT-011
+CAT-012
+CAT-013
+CAT-016
+CAT-017
+CAT-018
+CAT-019
+CAT-022
+
+# E08
+CAT-014
+CAT-015
+CAT-023
+CAT-024
+CAT-025
+CAT-026
+CAT-027
+ONB-005
+ONB-006
+SET-012
