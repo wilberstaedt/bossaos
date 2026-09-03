@@ -331,6 +331,17 @@ export function percursoDeDados(versao: number, reservados: Matriz): Array<[numb
   return caminho;
 }
 
+/**
+ * A penalidade de uma matriz, pelas quatro regras da norma.
+ *
+ * Exportada para a **escolha** da máscara poder ser medida. A ida e volta passa
+ * com qualquer máscara — a penalidade é o que separa um código que uma câmara lê
+ * de um que ela hesita a ler, e é uma propriedade do código, não da câmara.
+ */
+export function penalidadeDosModulos(modulos: readonly (readonly boolean[])[]): number {
+  return penalidade(modulos.map((l) => [...l]) as Matriz);
+}
+
 function penalidade(m: Matriz): number {
   const n = m.length;
   const v = (l: number, c: number) => m[l]![c] === true;
@@ -582,4 +593,46 @@ export function paraSvg(codigo: Codigo, opcoes: { margem?: number; tamanho?: num
     `<path fill="#000" d="${partes.join('')}"/>`,
     `</svg>`,
   ].join('');
+}
+
+/** A fracção de módulos escuros. A norma quere-a perto de metade. */
+export function densidade(codigo: Codigo): number {
+  let escuros = 0;
+  for (const linha of codigo.modulos) for (const v of linha) if (v) escuros++;
+  const total = codigo.modulos.length ** 2;
+  return escuros / total;
+}
+
+/**
+ * A mesma carga com cada uma das oito máscaras, para se poder comparar.
+ *
+ * Existe só para o teste: é a forma de exigir que `codificar` escolha a de menor
+ * penalidade em vez de a primeira que calhar.
+ */
+export function penalidadePorMascara(texto: string, nivel: NivelDeCorreccao = 'M'): number[] {
+  const base = codificar(texto, nivel);
+  const saida: number[] = [];
+  for (let mascara = 0; mascara < 8; mascara++) {
+    saida.push(penalidadeDosModulos(comMascara(base, mascara).modulos));
+  }
+  return saida;
+}
+
+/** O mesmo código com outra máscara. Só para comparação. */
+function comMascara(codigo: Codigo, mascara: number): Codigo {
+  const versao = codigo.versao;
+  const reservados = matrizVazia(versao);
+  porPadrao(reservados, versao);
+  const caminho = percursoDeDados(versao, reservados);
+  const antiga = MASCARAS[codigo.mascara]!;
+  const nova = MASCARAS[mascara]!;
+  const m = reservados.map((l) => [...l]);
+  for (const [l, c] of caminho) {
+    const pintado = codigo.modulos[l]![c]!;
+    // Desfaz a máscara antiga e aplica a nova.
+    const bit = antiga(l, c) ? !pintado : pintado;
+    m[l]![c] = nova(l, c) ? !bit : bit;
+  }
+  porFormato(m, codigo.nivel, mascara);
+  return { ...codigo, mascara, modulos: m.map((l) => l.map((v) => v === true)) };
 }

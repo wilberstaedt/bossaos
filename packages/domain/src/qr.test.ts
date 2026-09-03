@@ -4,7 +4,8 @@ import {
   VERSAO_MAXIMA, capacidadeEmDados, codificar, correccao, descodificar,
   estruturaDeBlocos, infoDeFormato, infoDeVersao, lado, modulosDeDadosDaVersao,
   palavrasTotais,
-  paraSvg, percursoDeDados, sindromes, versaoParaBytes,
+  densidade, paraSvg, penalidadeDosModulos, penalidadePorMascara,
+  percursoDeDados, sindromes, versaoParaBytes,
   type NivelDeCorreccao,
 } from './qr.ts';
 
@@ -319,5 +320,49 @@ describe('6. A forma do código e o SVG', () => {
     const svg = paraSvg(codificar(URL, 'M'));
     assert.equal((svg.match(/<path/g) ?? []).length, 1);
     assert.equal((svg.match(/<rect/g) ?? []).length, 1, 'só o fundo');
+  });
+});
+
+describe('7. A escolha da máscara — o que se pode medir sem uma câmara', () => {
+  it('A MÁSCARA ESCOLHIDA É A DE MENOR PENALIDADE', () => {
+    // O sénior apontou que a ida e volta não mede a máscara, e tem razão: passa
+    // com qualquer uma. O que se pode medir é a ESCOLHA — que é uma propriedade
+    // do código, não da câmara.
+    for (const nivel of NIVEIS) {
+      const todas = penalidadePorMascara(URL, nivel);
+      const escolhida = codificar(URL, nivel);
+      const minima = Math.min(...todas);
+      assert.equal(
+        todas[escolhida.mascara], minima,
+        `nível ${nivel}: escolheu a máscara ${escolhida.mascara} (${todas[escolhida.mascara]}) ` +
+        `havendo uma de ${minima}`,
+      );
+    }
+  });
+
+  it('e as oito máscaras dão penalidades DIFERENTES — senão não há escolha', () => {
+    // Sem isto, uma implementação que aplicasse sempre a máscara 0 passava no
+    // caso de cima: todas as penalidades seriam iguais e a mínima seria a dela.
+    const todas = penalidadePorMascara(URL, 'M');
+    assert.ok(new Set(todas).size > 1, `todas as máscaras deram ${todas[0]}`);
+  });
+
+  it('a densidade de módulos escuros fica perto de metade', () => {
+    // É a quarta regra de penalidade, isolada. Um código muito claro ou muito
+    // escuro é o que faz uma câmara hesitar com pouca luz.
+    for (const nivel of NIVEIS) {
+      const d = densidade(codificar(URL, nivel));
+      assert.ok(d > 0.35 && d < 0.65, `nível ${nivel}: densidade ${d.toFixed(3)}`);
+    }
+  });
+
+  it('e a penalidade de um código a sério é muito menor que a de um tudo-escuro', () => {
+    // Uma âncora para a própria função de penalidade: se ela devolvesse sempre o
+    // mesmo número, os dois casos de cima passavam sem medir nada.
+    const real = penalidadeDosModulos(codificar(URL, 'M').modulos);
+    const n = codificar(URL, 'M').modulos.length;
+    const tudoEscuro = Array.from({ length: n }, () => new Array<boolean>(n).fill(true));
+    assert.ok(penalidadeDosModulos(tudoEscuro) > real * 2,
+      `real ${real}, tudo escuro ${penalidadeDosModulos(tudoEscuro)}`);
   });
 });

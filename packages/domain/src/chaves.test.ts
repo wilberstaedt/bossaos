@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { chaveDeCache, chaveDeTarefa, nomeDeEvento, prefixoDeMedia } from './chaves.ts';
+import { chaveDeCache, chaveDeTarefa, nomeDeEvento, prefixoDeMedia, chaveDaCartaPublica,
+} from './chaves.ts';
 
 const A = '11111111-1111-4111-8111-111111111111';
 const B = '22222222-2222-4222-8222-222222222222';
@@ -69,5 +70,66 @@ describe('chaves com inquilino', () => {
   it('recusa partes vazias em vez de as ignorar', () => {
     assert.throws(() => chaveDeCache({ organizationId: A }, ''), /vazia/);
     assert.throws(() => chaveDeCache({ organizationId: A }), /sem partes/);
+  });
+});
+
+describe('a chave da carta pública (E09)', () => {
+  const A = '11111111-1111-4111-8111-111111111111';
+  const B = '22222222-2222-4222-8222-222222222222';
+  const UNI_A = 'aaaa1111-1111-4111-8111-111111111111';
+  const UNI_B = 'bbbb2222-2222-4222-8222-222222222222';
+  const R1 = 'cccc1111-1111-4111-8111-111111111111';
+  const R2 = 'dddd2222-2222-4222-8222-222222222222';
+
+  it('DOIS INQUILINOS COM O MESMO SLUG dão chaves diferentes', () => {
+    // O slug nem sequer entra na chave: dois restaurantes podem chamar-se
+    // `la-societat`, e uma chave com o slug lá dentro serviria a carta de um ao
+    // cliente do outro. O slug é o endereço; o identificador é a identidade.
+    const deA = chaveDaCartaPublica({ organizationId: A, locationId: UNI_A }, R1, 'es-ES', 'CARTA');
+    const deB = chaveDaCartaPublica({ organizationId: B, locationId: UNI_B }, R1, 'es-ES', 'CARTA');
+    assert.notEqual(deA, deB);
+    assert.ok(deA.includes(A));
+    assert.ok(!deA.includes(B));
+  });
+
+  it('A PUBLICAÇÃO ENTRA NA CHAVE — senão a carta velha sobrevive', () => {
+    // É o aceite 1 do E08 a falhar por outra porta: a transacção fica certa e o
+    // que o cliente vê fica velho.
+    const antes = chaveDaCartaPublica({ organizationId: A, locationId: UNI_A }, R1, 'es-ES', 'CARTA');
+    const depois = chaveDaCartaPublica({ organizationId: A, locationId: UNI_A }, R2, 'es-ES', 'CARTA');
+    assert.notEqual(antes, depois);
+  });
+
+  it('o idioma e o canal também', () => {
+    const base = { organizationId: A, locationId: UNI_A };
+    const es = chaveDaCartaPublica(base, R1, 'es-ES', 'CARTA');
+    const en = chaveDaCartaPublica(base, R1, 'en', 'CARTA');
+    const kiosk = chaveDaCartaPublica(base, R1, 'es-ES', 'KIOSK');
+    assert.equal(new Set([es, en, kiosk]).size, 3);
+  });
+
+  it('a mesma unidade, revisão, idioma e canal dão a MESMA chave — é o par', () => {
+    // Sem isto, uma chave que levasse o relógio lá dentro passava em tudo o que
+    // está acima e a cache nunca acertava.
+    const base = { organizationId: A, locationId: UNI_A };
+    assert.equal(
+      chaveDaCartaPublica(base, R1, 'es-ES', 'CARTA'),
+      chaveDaCartaPublica(base, R1, 'es-ES', 'CARTA'),
+    );
+  });
+
+  it('unidades diferentes do MESMO inquilino não se misturam', () => {
+    const um = chaveDaCartaPublica({ organizationId: A, locationId: UNI_A }, R1, 'es-ES', 'CARTA');
+    const outro = chaveDaCartaPublica({ organizationId: A, locationId: UNI_B }, R1, 'es-ES', 'CARTA');
+    assert.notEqual(um, outro);
+  });
+
+  it('uma revisão que não é UUID é recusada', () => {
+    // O sintoma de uma chave que não distingue publicações é uma carta velha
+    // depois de publicar — a coisa mais difícil de ligar à causa.
+    assert.throws(
+      () => chaveDaCartaPublica({ organizationId: A, locationId: UNI_A }, 'ultima', 'es-ES', 'CARTA'),
+      /revisionId/,
+    );
   });
 });

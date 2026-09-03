@@ -85,3 +85,37 @@ export function chaveDeTarefa(
 ): string {
   return chaveDeCache(escopo, 'job', tarefa, ...partes);
 }
+
+/**
+ * A chave da carta pública (E09).
+ *
+ * ── Quatro coisas na chave, e cada uma por um motivo diferente ─────────────
+ *
+ * > *"Cache inclui unidade, publicação, idioma e canal. Não misture conteúdo de
+ * > tenants com nomes iguais."*
+ *
+ * - **inquilino e unidade** — vêm de `chaveDeCache`, que os exige e os valida
+ *   como UUID. É por isso que a chave **não se constrói a partir do `slug`**:
+ *   dois restaurantes podem chamar-se `la-societat`, e uma chave com o slug lá
+ *   dentro serviria a carta de um ao cliente do outro. O slug é o endereço; o
+ *   identificador é a identidade;
+ * - **publicação** — a revisão que está no ar. Sem ela, uma carta antiga
+ *   sobrevive a uma publicação nova, e o aceite 1 do E08 falha por outra porta:
+ *   a transacção fica certa e o que o cliente vê fica velho;
+ * - **idioma** — a mesma carta em espanhol e em inglês são conteúdos diferentes;
+ * - **canal** — a carta digital e o quiosque não mostram o mesmo catálogo.
+ */
+export function chaveDaCartaPublica(
+  escopo: EscopoDeChave & { locationId: string },
+  revisionId: string,
+  idioma: string,
+  canal: string,
+): string {
+  if (!UUID.test(revisionId)) {
+    // Uma revisão inválida daria uma chave que não distingue publicações — e o
+    // sintoma seria uma carta velha servida depois de publicar, que é a coisa
+    // mais difícil de ligar à causa.
+    throw new Error('revisionId não é um UUID');
+  }
+  return chaveDeCache(escopo, 'carta', revisionId, idioma, canal);
+}
