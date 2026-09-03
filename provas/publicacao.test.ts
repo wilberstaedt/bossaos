@@ -2,10 +2,10 @@ import { after, before, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from 'pg';
 import {
-  catalogoParaCsv, coberturaDeTraducoes, comEscopo, confirmarImportacao, guardarMedia,
-  guardarPrevia, guardarTraducao, historicoDeRevisoes, listarExportacoes, obterPrisma,
-  pedirExportacao, podeDescarregar, preverPublicacao, publicacaoActual, publicar,
-  textoDoProduto, traducoesDoProduto,
+  buscarPorUrl, catalogoParaCsv, coberturaDeTraducoes, comEscopo, confirmarImportacao,
+  guardarMedia, guardarPrevia, guardarTraducao, historicoDeRevisoes, ligarAoProduto,
+  listarExportacoes, obterPrisma, pedirExportacao, podeDescarregar, preverPublicacao,
+  publicacaoActual, publicar, substituirConteudo, textoDoProduto, traducoesDoProduto,
 } from '../packages/db/src/index.ts';
 import { IDS } from '../packages/db/prisma/fixtures.ts';
 import type { PortaDeMedia } from '@bossaos/domain';
@@ -155,13 +155,25 @@ describe('1. Uma falha a meio da publicação deixa a anterior INTEIRA', () => {
       'e com o autor anterior, não o da tentativa falhada');
   });
 
-  it('a segunda publicação a sério avança o número e diz o que mudou', async () => {
-    await comA((db) => db.product.updateMany({ where: { id: produtoId }, data: { nome: `${PREFIXO} croquetas de jamón` } }));
+  it('E O OUTRO LADO: a que corre até ao fim TROCA MESMO', async () => {
+    // Sem este caso, passa um sistema que nunca publica: a asserção da falha a
+    // meio ficaria verde num produto onde publicar não faz nada.
+    const antes = await comA((db) => publicacaoActual(db, menuId, 'CARTA'));
+    await comA((db) => db.product.updateMany({
+      where: { id: produtoId }, data: { nome: `${PREFIXO} croquetas de jamón` },
+    }));
     const r = await comA((db) => publicar(db, IDS.orgA, {
       menuId, locationId: IDS.unidadeA, canal: 'CARTA', autor: AUTOR,
     }));
     assert.equal(r.ok && r.numero, 2);
     assert.deepEqual(r.ok ? r.mudancas.map((m) => m.tipo) : [], ['alterado']);
+
+    const depois = await comA((db) => publicacaoActual(db, menuId, 'CARTA'));
+    assert.notEqual(depois?.revisao.id, antes?.revisao.id, 'o ponteiro tinha de ter trocado');
+    assert.equal(depois?.revisao.id, r.ok ? r.revisionId : '', 'e para a revisão nova');
+    // E o que está no ar é o texto novo — a carta servida mudou, não só a linha.
+    const conteudo = depois?.revisao.conteudo as unknown as Array<{ nome: string }>;
+    assert.ok(conteudo.some((i) => i.nome.includes('de jamón')), 'a carta no ar tem de ser a nova');
   });
 
   it('a revisão publicada é IMUTÁVEL — o runtime não a pode reescrever', async () => {
@@ -352,6 +364,82 @@ describe('4. Média: o SVG não entra, e o ficheiro tem dono', () => {
     assert.ok(deA > 0);
     const deB = await comB((db) => db.mediaAsset.count({ where: { brandId: IDS.marcaA } }));
     assert.equal(deB, 0, 'a política de linha tem de esconder o ficheiro de outro inquilino');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+describe('4b. Buscar por URL: os três endereços que a régua nomeia', () => {
+  // O resolvedor é injectado para o caso do NOME público que resolve para
+  // dentro poder ser medido — sem ele, essa porta ficava por provar.
+  const resolve = async (nome: string): Promise<readonly string[]> =>
+    nome === 'interno.exemplo.example' ? ['10.0.0.5'] : ['93.184.216.34'];
+
+  it('127.0.0.1, 169.254.169.254 e um endereço privado — recusa nos três', async () => {
+    // "Um destes três a passar é o mesmo que nenhum estar guardado."
+    for (const url of [
+      'http://127.0.0.1/logo.png',
+      'http://169.254.169.254/latest/meta-data/',
+      'http://10.0.0.5/logo.png',
+    ]) {
+      const r = await buscarPorUrl(url, resolve);
+      assert.equal(r.ok, false, `${url} passou`);
+      assert.equal(!r.ok && r.erro, 'destino_interno', url);
+    }
+  });
+
+  it('e as formas de os escrever sem os escrever', async () => {
+    for (const url of ['http://2130706433/x.png', 'http://0177.0.0.1/x.png', 'http://[::1]/x.png']) {
+      assert.equal((await buscarPorUrl(url, resolve)).ok, false, url);
+    }
+  });
+
+  it('um NOME público que resolve para dentro também é recusado', async () => {
+    // A porta que a forma do URL não consegue ver.
+    const r = await buscarPorUrl('https://interno.exemplo.example/logo.png', resolve);
+    assert.equal(!r.ok && r.erro, 'destino_interno');
+  });
+
+  it('e `file:` nem chega a resolver-se', async () => {
+    const r = await buscarPorUrl('file:///etc/passwd', resolve);
+    assert.equal(!r.ok && r.erro, 'esquema_nao_permitido');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+describe('4c. Substituir média não quebra a carta publicada', () => {
+  it('a revisão no ar continua a apontar para a chave ANTIGA', async () => {
+    const media = await comA((db) => guardarMedia(db, IDS.orgA, PORTA, {
+      brandId: IDS.marcaA, conteudo: new Uint8Array([...PNG, 9, 9]),
+      tipoDeclarado: 'image/png', textoAlternativo: 'Croquetas', autor: AUTOR,
+    }));
+    assert.equal(media.ok, true);
+    const mediaId = media.ok ? media.mediaId : '';
+    const chaveAntiga = media.ok ? media.chave : '';
+    await comA((db) => ligarAoProduto(db, IDS.orgA, produtoId, mediaId, true));
+
+    const pub = await comA((db) => publicar(db, IDS.orgA, {
+      menuId, locationId: IDS.unidadeA, canal: 'CARTA', autor: AUTOR,
+    }));
+    assert.equal(pub.ok, true);
+
+    // Trocar o conteúdo do ficheiro. A ligação produto↔média não se mexe.
+    const nova = await comA((db) => substituirConteudo(
+      db, PORTA, mediaId, new Uint8Array([...PNG, 7, 7, 7]), 'image/png',
+    ));
+    assert.equal(nova.ok, true);
+    assert.notEqual(nova.ok ? nova.chave : '', chaveAntiga, 'a chave tinha de mudar');
+
+    const noAr = await comA((db) => publicacaoActual(db, menuId, 'CARTA'));
+    const itens = noAr?.revisao.conteudo as unknown as Array<{ media: Array<{ chave: string }> }>;
+    const chaves = itens.flatMap((i) => i.media.map((m) => m.chave));
+    // A carta de ontem continua a mostrar a foto de ontem: a revisão guardou a
+    // CHAVE, não o identificador. É o retrato a fazer o seu trabalho.
+    assert.ok(chaves.includes(chaveAntiga), 'a revisão publicada tem de manter a chave antiga');
+    assert.ok(!chaves.includes(nova.ok ? nova.chave : 'x'), 'e não pode ter apanhado a nova');
+
+    // E a ligação continua lá — substituir não desliga o ficheiro do produto.
+    const ligacoes = await comA((db) => db.productMedia.count({ where: { productId: produtoId } }));
+    assert.equal(ligacoes, 1);
   });
 });
 

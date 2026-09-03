@@ -28,8 +28,8 @@ if [[ "$NODE_ACTUAL" != "$NODE_ESPERADO" ]]; then
   exit 2
 fi
 
-GRUPOS_ESPERADOS=6
-ASSERCOES_ESPERADAS=27
+GRUPOS_ESPERADOS=8
+ASSERCOES_ESPERADAS=32
 falhas=0
 
 CSV=packages/domain/src/csv.ts
@@ -39,9 +39,22 @@ IMP=packages/domain/src/importacao.ts
 PUB=packages/domain/src/publicacao.ts
 EXP=packages/domain/src/exportacao.ts
 ESC=packages/db/src/escopo.ts
+MED=packages/db/src/media.ts
+PUBDB=packages/db/src/publicacao.ts
 COPIAS=$(mktemp -d)
-for f in "$CSV" "$FICH" "$TRAD" "$IMP" "$PUB" "$EXP" "$ESC"; do
-  cp "$f" "$COPIAS/$(basename "$f")"
+# ── A cópia guarda-se pelo CAMINHO, não pelo nome do ficheiro ─────────────
+#
+# `packages/domain/src/publicacao.ts` e `packages/db/src/publicacao.ts` têm o
+# mesmo `basename`. Com `$COPIAS/$(basename ...)` a segunda cópia esmagava a
+# primeira, e a reposição escrevia o ficheiro da base POR CIMA do do domínio —
+# que foi o que aconteceu: a partir do controlo 4 a prova morria em
+# `Cannot find package '@bossaos/domain'`, e o guarda dizia "vermelho por outro
+# motivo", que é exactamente o que ele existe para dizer.
+guardar()  { cp "$1" "$COPIAS/$(echo "$1" | tr / _)"; }
+repor()    { cp "$COPIAS/$(echo "$1" | tr / _)" "$1"; }
+
+for f in "$CSV" "$FICH" "$TRAD" "$IMP" "$PUB" "$EXP" "$ESC" "$MED" "$PUBDB"; do
+  guardar "$f"
 done
 RLS_DESLIGADO=0
 
@@ -49,8 +62,8 @@ verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
 restaurar() {
-  for f in "$CSV" "$FICH" "$TRAD" "$IMP" "$PUB" "$EXP" "$ESC"; do
-    cp "$COPIAS/$(basename "$f")" "$f"
+  for f in "$CSV" "$FICH" "$TRAD" "$IMP" "$PUB" "$EXP" "$ESC" "$MED" "$PUBDB"; do
+    repor "$f"
   done
   rm -rf "$COPIAS"
   if [[ "$RLS_DESLIGADO" == "1" ]]; then
@@ -154,7 +167,7 @@ p.write_text(s, encoding='utf-8')
 PY
 exigir_vermelho "caiu a asserção da falha a meio — é ela que mede a atomicidade" \
   'A FALHA A MEIO' /tmp/bossaos-pub-sem-tx.txt
-cp "$COPIAS/escopo.ts" "$ESC"
+repor "$ESC"
 
 echo
 echo "3. CONTROLO NEGATIVO — publicar deixa de olhar para os bloqueios"
@@ -167,7 +180,7 @@ p.write_text(s, encoding='utf-8')
 PY
 exigir_vermelho "caiu a asserção do produto sem preço" \
   'SEM PREÇO devolve bloqueio' /tmp/bossaos-pub-sem-bloqueio.txt
-cp "$COPIAS/publicacao.ts" "$PUB"
+repor "$PUB"
 
 echo
 echo "4. CONTROLO NEGATIVO — a tradução deixa de envelhecer"
@@ -179,7 +192,7 @@ p.write_text(s, encoding='utf-8')
 PY
 exigir_vermelho "caiu a asserção da tradução obsoleta" \
   'MUDAR O TEXTO DE ORIGEM' /tmp/bossaos-pub-sem-obsoleta.txt
-cp "$COPIAS/traducoes.ts" "$TRAD"
+repor "$TRAD"
 
 echo
 echo "5. CONTROLO NEGATIVO — a importação passa a procurar pelo nome"
@@ -193,7 +206,7 @@ p.write_text(s, encoding='utf-8')
 PY
 exigir_vermelho "caiu a asserção do nome igual — dois 'gazpacho' voltaram a ser um" \
   'NOME IGUAL' /tmp/bossaos-pub-funde.txt
-cp "$COPIAS/importacao.ts" "$IMP"
+repor "$IMP"
 
 echo
 echo "6. CONTROLO NEGATIVO — o SVG passa a ser uma imagem"
@@ -206,7 +219,7 @@ p.write_text(s, encoding='utf-8')
 PY
 exigir_vermelho "caiu a asserção do SVG renomeado" \
   'SVG RENOMEADO' /tmp/bossaos-pub-svg.txt
-cp "$COPIAS/ficheiros.ts" "$FICH"
+repor "$FICH"
 
 echo
 echo "7. CONTROLO NEGATIVO — o CSV sai sem neutralização"
@@ -218,7 +231,7 @@ p.write_text(s, encoding='utf-8')
 PY
 exigir_vermelho "caiu a asserção da fórmula — o campo saiu como fórmula" \
   '=1\+1 SAI NEUTRALIZADO' /tmp/bossaos-pub-csv.txt
-cp "$COPIAS/csv.ts" "$CSV"
+repor "$CSV"
 
 echo
 echo "8. CONTROLO NEGATIVO — a permissão só se verifica no pedido"
@@ -232,7 +245,7 @@ p.write_text(s, encoding='utf-8')
 PY
 exigir_vermelho "caiu a asserção do segundo ponto de verificação" \
   'QUEM PERDEU O DIREITO' /tmp/bossaos-pub-exp.txt
-cp "$COPIAS/exportacao.ts" "$EXP"
+repor "$EXP"
 
 echo
 echo "9. CONTROLO NEGATIVO — a política de linha da média desligada"
@@ -242,6 +255,40 @@ exigir_vermelho "caiu a asserção do isolamento da média" \
   'ficheiro de A não é visível a B' /tmp/bossaos-pub-sem-rls.txt
 psql "$MIGRATION_DATABASE_URL" -q -c 'ALTER TABLE media_assets ENABLE ROW LEVEL SECURITY' >/dev/null 2>&1
 RLS_DESLIGADO=0
+
+echo
+echo "9b. CONTROLO NEGATIVO - publicar cria a revisao e NAO troca o ponteiro"
+# O outro lado do aceite 1. Sem este, passava um sistema que nunca publica: a
+# assercao da falha a meio ficava verde num produto onde publicar nao faz nada.
+python3 - "$PUBDB" <<'FIMPY'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding='utf-8')
+alvo = """    await db.menuPublication.update({
+      where: { id: publicacao.id },
+      data: { revisionId: revisao.id, publicadaPor: entrada.autor, publicadaEm: agora },
+    });"""
+assert alvo in s, 'o alvo do controlo negativo mudou de forma'
+p.write_text(s.replace(alvo, ''), encoding='utf-8')
+FIMPY
+exigir_vermelho "caiu a assercao da troca do ponteiro" \
+  'O OUTRO LADO' /tmp/bossaos-pub-sem-troca.txt
+repor "$PUBDB"
+
+echo
+echo "9c. CONTROLO NEGATIVO - buscar por URL nao reclassifica o endereco resolvido"
+# A porta que a forma do URL nao consegue ver: um nome publico que resolve para
+# 127.0.0.1. E a que fica de fora de quase todas as implementacoes.
+python3 - "$MED" <<'FIMPY'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding='utf-8')
+alvo = """    const interno = algumEnderecoInterno(enderecos);
+    if (interno.interno) return { ok: false, erro: 'destino_interno', detalhe: interno.classe };"""
+assert alvo in s, 'o alvo do controlo negativo mudou de forma'
+p.write_text(s.replace(alvo, ''), encoding='utf-8')
+FIMPY
+exigir_vermelho "caiu a assercao do nome que resolve para dentro" \
+  'NOME público que resolve para dentro' /tmp/bossaos-pub-ssrf.txt
+repor "$MED"
 
 echo
 echo "10. Reposto — tem de voltar ao verde"
