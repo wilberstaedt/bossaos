@@ -90,3 +90,29 @@ importação.
 Copiar um menu **dentro** da marca reutiliza o mesmo `Product`. Clonar para outra marca
 cria IDs novos, com pré-visualização e autoria. Produtos partilhados entre marcas não
 nascem de coincidência de nome nem de SKU.
+
+## O endereço público não se liberta — o QR está impresso
+
+O endereço público de uma unidade (`Location.publicSlug`) é único no mundo e
+**anulável**: apagá-lo faz o link deixar de responder, e isso é uma operação real
+— quem fecha uma unidade quer o link morto, não uma carta velha.
+
+**Mas apagar não pode devolver a cadeia ao mundo.** O QR de uma unidade codifica
+`/r/{publicSlug}/…` e vai impresso em mesas, montras e cartas de papel. Se `marina-centro`
+ficar livre quando A o larga, e B o reclamar depois, **todos os códigos impressos de A
+passam a servir a carta de B** — sem erro, sem aviso, e sem ninguém do lado de A poder dar
+por isso. O papel não se actualiza.
+
+A protecção pela unicidade não cobre isto: `@unique` impede **dois ao mesmo tempo**, não
+**dois em sequência**. São ataques diferentes e é fácil confundi-los, porque o primeiro
+falha ruidosamente na base e o segundo passa por uma operação perfeitamente legítima.
+
+**A regra:** um endereço que **alguma vez** esteve publicado fica reservado à organização
+que o teve. Apagar tira-o do ar; não o devolve ao mundo. Quem o quiser de volta é o dono
+anterior. Libertar mesmo é uma acção deliberada, de administração da plataforma, com o
+prazo à vista e registada — nunca um efeito lateral de limpar um campo.
+
+**Como se prova:** A publica com um endereço, A apaga-o, B tenta reclamá-lo e **é recusado**
+com um motivo que não seja "ocupado" genérico. E o controlo negativo que dá sentido ao
+teste: a mesma organização A tem de conseguir retomá-lo, senão a prova passaria também com
+uma implementação que simplesmente proibisse todos os endereços já usados.

@@ -75,3 +75,18 @@ CHAN-001; MENU-001 a 005, 019; QR-001, 003, 004; REP-001. Contados com leitor de
 
 Aplicar-me a régua. E os dois alvos herdados continuam de pé: **dividir o `base`** (desenho
 e medições em `CI-CUSTO.md`) e a **fusão do `validar-testes`**, esta só depois de medir.
+
+## O buraco que esta régua não tinha, e passa a ter
+
+Escrevi acima o ataque de **dois inquilinos ao mesmo tempo** com o mesmo endereço. Faltava
+o de **dois em sequência**, que é o que acontece na vida real: A larga o endereço, B
+reclama-o, e os QR impressos nas mesas de A passam a servir a carta de B.
+
+Não é defeito do executor — o contrato não dizia nada sobre isto até agora, e o código que
+apaga o endereço está bem escrito e bem explicado. É buraco meu, do E00, e está fechado em
+`docs/architecture/catalogo-e-publicacao.md`.
+
+**Passa a ser exigido no fecho do E09:** um endereço alguma vez publicado fica reservado a
+quem o teve; apagar tira-o do ar sem o devolver ao mundo. Com o controlo negativo que
+distingue a regra certa da regra preguiçosa: **A tem de conseguir retomar o seu**, senão a
+prova passaria também com uma implementação que proibisse todos os endereços já usados.
