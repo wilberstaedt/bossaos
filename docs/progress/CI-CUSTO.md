@@ -127,3 +127,52 @@ poria o relógio no tempo da mais longa, que é a do MFA a 167 s.
 funcionou. E com a lição de há vinte minutos aplicada: **validar contra o esquema do
 Actions e não contra o analisador de YAML**, que foi o que me deixou empurrar três trabalhos
 sem `runs-on`.
+
+
+---
+
+# O desenho da divisão do `base`, agora com medições — 22h25
+
+Antes de propor a matriz, fui medir passo a passo o trabalho `base` da corrida verde.
+**Desta vez medi antes de projectar**, que foi exactamente o que não fiz às 20h40.
+
+**Arranque, pago por cada trabalho:** `Set up job` 2 s + contentores 18 s + checkout e Node
+3 s + `pnpm install` 17 s + cliente PostgreSQL 12 s + papéis 0 s + migração 4 s = **56 s**.
+
+**As provas, e são muito desiguais:**
+
+```
+210 s  recuperação e segundo factor      ← sozinha, 44 % das provas
+106 s  acesso, convites e revogação
+ 83 s  catálogo, alérgenos e preços
+ 38 s  prontidão
+ 14 s  migrações do zero
+ 11 s  onboarding
+  6 s  descidas
+  5 s  isolamento
+  3 s  planos      3 s  plataforma      1 s  credenciais
+```
+
+## Porque é que a matriz de onze ramos é o desenho errado
+
+Cada ramo paga **56 s de arranque**. Onze ramos = **616 s de tempo de máquina** só a
+instalar dependências e a levantar contentores, para ganhar zero no relógio — porque o
+relógio fica preso na prova mais longa de qualquer maneira.
+
+## O desenho certo: três ramos equilibrados
+
+| Ramo | Provas | Arranque + provas |
+| --- | --- | --- |
+| A | recuperação e MFA | 56 + 210 = **266 s** |
+| B | acesso + catálogo | 56 + 189 = **245 s** |
+| C | as outras oito | 56 + 81 = **137 s** |
+
+**Relógio previsto: ~266 s**, contra os 543 s de hoje. E o total da CI passaria de 548 s
+para **~266 s** — porque o `rápido` (123 s) e o `navegador` (147 s) já são mais curtos.
+
+Três ramos em vez de onze: **o mesmo relógio, com um terço do desperdício de arranque.**
+
+**Isto é uma projecção, não uma medição** — e escrevo-o assim porque a última vez que
+projectei sem o dizer, escrevi 200 s e saíram 548 s. Confirma-se a correr.
+
+**Quando:** fecho do E08, árvore parada, e validado contra o **esquema** do Actions.
