@@ -47,6 +47,7 @@ export async function estadoComercial(
         validoAte: true,
         descerEm: true,
         plan: { select: { codigo: true, nome: true, capacidades: { select: { capacidade: true, quota: true } } } },
+        descerParaPlano: { select: { codigo: true, nome: true } },
       },
     }),
     db.entitlementGrant.findMany({
@@ -84,7 +85,10 @@ export async function estadoComercial(
     planoNome: subscricao?.plan.nome ?? null,
     estadoSubscricao: subscricao?.estado ?? null,
     validoAte: subscricao?.validoAte ?? null,
-    descerParaPlano: null,
+    // Estava `null` fixo aqui, e nunca lia a coluna: o ecrã de mudar de plano
+    // dizia "nenhuma mudança agendada" a quem tinha uma agendada. Apanhado a
+    // escrever o trabalho de fundo, que precisa do mesmo valor.
+    descerParaPlano: subscricao?.descerParaPlano?.codigo ?? null,
     descerEm: subscricao?.descerEm ?? null,
     concessoes: [...doPlano, ...explicitas],
     flags: mapa,
@@ -107,9 +111,35 @@ export function podeCapacidade(
     flag?: string;
   },
 ): ResultadoDeCapacidade {
-  const flag: Flag | undefined = pedido.flag
-    ? { nome: pedido.flag, ligada: estado.flags.get(pedido.flag) ?? false }
-    : undefined;
+  // ── A flag aplica-se por CONVENÇÃO DE NOME, e isso é a correcção de um defeito
+  //
+  // Estava assim: a flag só era consultada se quem chamasse se lembrasse de a
+  // passar. Nenhum sítio se lembrou — nem `guardarTema`, nem as três rotas — e o
+  // resultado era uma terceira verificação que existia no domínio, tinha testes
+  // no domínio, e **nunca disparava no produto**. Uma organização com o módulo
+  // pago e a flag desligada gravava cores à mesma.
+  //
+  // É a mesma família do aviso do E02 que avisava e não impedia: um portão que
+  // depende de quem passa se lembrar de o abrir não é um portão.
+  //
+  // Agora o nome por omissão é o da própria capacidade. Uma linha em
+  // `feature_flags` chamada `tema.coresProprias` fecha essa capacidade em todo o
+  // lado, sem ninguém ter de a mencionar. Sem linha, não há portão de
+  // lançamento — o que é o certo: a maior parte das capacidades não está a ser
+  // lançada por fases.
+  //
+  // A excepção é quando o nome é passado à mão. Aí, **não haver linha significa
+  // não lançado**: quem escreve `flag: 'fiscal.pt'` está a dizer que aquilo
+  // depende de um lançamento, e um lançamento que ninguém registou ainda não
+  // aconteceu.
+  const nomeDaFlag = pedido.flag ?? pedido.capacidade;
+  const registada = estado.flags.get(nomeDaFlag);
+  const flag: Flag | undefined =
+    pedido.flag !== undefined
+      ? { nome: pedido.flag, ligada: registada ?? false }
+      : registada === undefined
+        ? undefined
+        : { nome: nomeDaFlag, ligada: registada };
 
   return decidirCapacidade({
     capacidade: pedido.capacidade,

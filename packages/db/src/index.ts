@@ -113,3 +113,9 @@ export {
 export { obterPrismaDeAutenticacao } from './autenticacao.ts';
 
 export { PrismaClient };
+
+export {
+  aplicarDescidaAgendada, descidasDevidas, previaDeDescidaParaPlano, estadoComercialSeFosse,
+  pendenciasQueBloqueiamDescida, registarDetectorDePendencia, detectoresRegistados,
+  type Pendencia, type DetectorDePendencia, type ResultadoDaDescida,
+} from './descidas.ts';

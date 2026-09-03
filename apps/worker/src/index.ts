@@ -1,15 +1,17 @@
 import { randomUUID } from 'node:crypto';
 import { criarLogger, loadEnv, EnvError } from '@bossaos/config';
 import { obterPrisma, verificarBase } from '@bossaos/db';
+import { varrerDescidas } from './descidas.ts';
 
 /**
  * Processo de fundo do BossaOS.
  *
- * Nesta etapa não processa nada: não há fila nem trabalho de domínio definido, e
- * inventá-los aqui seria escrever para deitar fora. O que ele faz é o que a base
- * executável precisa de ter provado antes de haver trabalho — arrancar com a
- * configuração validada, ligar-se à base com a credencial de EXECUÇÃO, e
- * dizer em voz alta, com `request_id`, se está apto.
+ * **E05: passou a processar.** Até aqui era andaime declarado — não havia fila
+ * nem trabalho de domínio, e inventá-los seria escrever para deitar fora. Agora
+ * há um: efectivar as descidas de plano que chegaram à data, que tem de correr
+ * fora de um pedido porque nenhuma pessoa está acordada à meia-noite a carregar
+ * num botão. O resto mantém-se: arranca com a configuração validada, liga-se com
+ * a credencial de EXECUÇÃO, e diz em voz alta, com `request_id`, se está apto.
  *
  * Se a configuração faltar, sai com código diferente de zero. Um processo de
  * fundo que arranca sem base de dados e fica em silêncio é pior que um que não
@@ -52,6 +54,11 @@ async function principal(): Promise<void> {
       ciclo.warn('worker: schema por migrar');
     } else {
       ciclo.debug('worker: apto', { schema_version: estado.schemaVersion });
+      // O primeiro trabalho real. Só corre com a base migrada — aplicar uma
+      // descida de plano contra um schema por migrar é a definição de escrever
+      // no escuro.
+      const resumo = await varrerDescidas(prisma, ciclo);
+      if (resumo.encontradas > 0) ciclo.info('worker: descidas', resumo as unknown as Record<string, unknown>);
     }
 
     await new Promise((r) => setTimeout(r, CICLO_MS));

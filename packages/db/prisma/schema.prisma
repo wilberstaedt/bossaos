@@ -437,6 +437,11 @@ model PlanDefinition {
 
   capacidades   PlanCapability[]
   subscriptions Subscription[]
+  /// As subscrições que têm uma descida agendada PARA este plano. Sem esta
+  /// relação a coluna existia e não se podia ler o destino pelo nome — o
+  /// `estadoComercial` devolvia `descerParaPlano: null` fixo e o ecrã de mudar
+  /// de plano dizia "nenhuma mudança agendada" a quem tinha uma.
+  descidasAgendadas Subscription[] @relation("DescerPara")
 
   @@map("plan_definitions")
 }
@@ -489,7 +494,8 @@ model Subscription {
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
   version   Int      @default(1)
 
-  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  descerParaPlano PlanDefinition? @relation("DescerPara", fields: [descerParaPlanoId], references: [id], onDelete: Restrict)
   plan         PlanDefinition @relation(fields: [planId], references: [id], onDelete: Restrict)
 
   @@map("subscriptions")

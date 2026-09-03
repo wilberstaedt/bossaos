@@ -156,6 +156,13 @@ jobs:
         # aparecer em teste nenhum.
         run: ./scripts/provar-acesso.sh
 
+      - name: Prova — descer de plano, no trabalho de fundo
+        # Aceite 2 do E05: a resposta certa "inclusive em job e rota direta". O
+        # par mede as DUAS superfícies com o mesmo direito expirado, e os quatro
+        # controlos negativos desligam uma camada de cada vez — a flag, as
+        # pendências, e a verificação de inquilino dentro da função da base.
+        run: ./scripts/provar-descidas.sh
+
       - name: Prova — recuperação e segundo factor, ponta a ponta
         # Aceite 3 do E04. Gera o código TOTP com uma implementação PRÓPRIA de
         # RFC 6238 (usar a da biblioteca faria um defeito partilhado cancelar-se)
