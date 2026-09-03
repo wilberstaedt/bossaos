@@ -110,3 +110,9 @@ export {
   VALIDADE_PADRAO_MS, decidirDescarregamento, expiraEm, identificadorAdivinhavel,
   type Exportacao, type DecisaoDeDescarregamento, type RecusaDeDescarregamento,
 } from './exportacao.ts';
+
+export {
+  CAMPOS_DE_PRODUTO, CAMPOS_DE_CATEGORIA, CAMPOS_DE_CARTA,
+  projectarCarta, produtoDaCarta, procurarNaCarta,
+  type CartaPublica, type CategoriaPublica, type ProdutoPublico, type PedidoDeProjeccao,
+} from './projeccao.ts';
