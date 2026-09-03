@@ -36,11 +36,51 @@ DIC=packages/i18n/src/mensagens/en.json
 ORIG_ALERG=$(mktemp); ORIG_PRECOS=$(mktemp); ORIG_CAT=$(mktemp); ORIG_DIC=$(mktemp)
 cp "$ALERG" "$ORIG_ALERG"; cp "$PRECOS" "$ORIG_PRECOS"; cp "$CAT" "$ORIG_CAT"; cp "$DIC" "$ORIG_DIC"
 RLS_DESLIGADO=0
+PORTA="${PORTA_PROVA:-3012}"
+export BASE_URL="http://127.0.0.1:$PORTA"
+# Sem isto a biblioteca recusa as mutações com "Invalid origin": a origem de
+# confiança sai de `BETTER_AUTH_URL`, e o `.env` aponta ao porto de
+# desenvolvimento. A prova de acesso do E04 faz o mesmo.
+export BETTER_AUTH_URL="$BASE_URL"
+PID_APP=""
+ROTA="apps/web/app/api/org/[orgSlug]/produtos/[productId]/opcoes/route.ts"
+ORIG_ROTA=$(mktemp); cp "$ROTA" "$ORIG_ROTA"
 
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+parar_app() {
+  if [[ -n "$PID_APP" ]]; then kill "$PID_APP" 2>/dev/null || true; wait "$PID_APP" 2>/dev/null || true; PID_APP=""; fi
+  local restantes; restantes=$(lsof -ti ":$PORTA" 2>/dev/null || true)
+  [[ -n "$restantes" ]] && kill -9 $restantes 2>/dev/null || true
+}
+
+construir_e_subir() {
+  rm -rf apps/web/.next
+  if ! pnpm build >/tmp/bossaos-cat-build.log 2>&1; then
+    vermelho "o build falhou — a prova por HTTP não tem o que interrogar"
+    tail -12 /tmp/bossaos-cat-build.log
+    return 1
+  fi
+  pnpm --filter @bossaos/web exec next start -p "$PORTA" >/tmp/bossaos-cat-app.log 2>&1 &
+  PID_APP=$!
+  for _ in $(seq 1 60); do
+    curl -fsS "$BASE_URL/api/health" >/dev/null 2>&1 && return 0
+    kill -0 "$PID_APP" 2>/dev/null || return 1
+    sleep 0.5
+  done
+  return 1
+}
+
+# `--test-timeout`: uma prova que pendura é pior do que uma que falha — não dá
+# diagnóstico nenhum e come a corrida inteira da CI.
+correr_http() { node --test --test-timeout=180000 --test-reporter=tap \
+  --experimental-strip-types provas/catalogo-http.test.ts >"$1" 2>&1; }
+
 restaurar() {
+  parar_app
+  cp "$ORIG_ROTA" "$ROTA"; rm -f "$ORIG_ROTA"
+  rm -rf apps/web/.next
   cp "$ORIG_ALERG" "$ALERG"; cp "$ORIG_PRECOS" "$PRECOS"; cp "$ORIG_CAT" "$CAT"; cp "$ORIG_DIC" "$DIC"
   rm -f "$ORIG_ALERG" "$ORIG_PRECOS" "$ORIG_CAT" "$ORIG_DIC"
   if [[ "$RLS_DESLIGADO" == "1" ]]; then
@@ -51,8 +91,16 @@ restaurar() {
   # O que esta prova cria sai sempre, mesmo que ela morra a meio. Foi lixo de uma
   # prova minha que partiu a prova de isolamento do E03 durante o E06.
   psql "$MIGRATION_DATABASE_URL" -q >/dev/null 2>&1 <<'PY'
-DELETE FROM products        WHERE nome LIKE 'e07-%';
-DELETE FROM modifier_groups WHERE nome LIKE 'e07-%';
+DELETE FROM product_modifier_groups WHERE product_id IN (SELECT id FROM products WHERE nome LIKE 'e07%');
+DELETE FROM modifier_options WHERE group_id IN (SELECT id FROM modifier_groups WHERE nome LIKE 'e07%');
+DELETE FROM products        WHERE nome LIKE 'e07%';
+DELETE FROM modifier_groups WHERE nome LIKE 'e07%';
+DELETE FROM role_assignments WHERE membership_id IN (
+  SELECT id FROM memberships WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'dona-cat-%@exemplo.example'));
+DELETE FROM memberships WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'dona-cat-%@exemplo.example');
+DELETE FROM sessions    WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'dona-cat-%@exemplo.example');
+DELETE FROM accounts    WHERE user_id IN (SELECT id FROM users WHERE email LIKE 'dona-cat-%@exemplo.example');
+DELETE FROM users       WHERE email LIKE 'dona-cat-%@exemplo.example';
 PY
 }
 trap restaurar EXIT INT TERM
@@ -251,15 +299,78 @@ fi
 cp "$ORIG_DIC" "$DIC"
 
 echo
-echo "10. A árvore ficou limpa?"
+echo "10. Por HTTP: a rota valida modificadores, com sessão real"
+# ── Porque é que a prova de cima não bastava ───────────────────────────────
+#
+# `catalogo.test.ts` chama `validarEscolhasDoProduto` — a FUNÇÃO. Isso mostra
+# que o motor está certo; não mostra que a ROTA o usa. O sénior pediu
+# *"validados também por chamada direta da API"*, e no E04 essa exigência
+# significou HTTP com sessões a sério. Significa o mesmo aqui.
+if construir_e_subir; then
+  if correr_http /tmp/bossaos-cat-http.txt; then
+    verde "$(grep -m1 -oE '^# pass [0-9]+' /tmp/bossaos-cat-http.txt | grep -oE '[0-9]+') asserções por HTTP"
+  else
+    vermelho "a prova por HTTP falhou"
+    grep -E '^ *not ok' /tmp/bossaos-cat-http.txt | head -6
+  fi
+else
+  vermelho "não foi possível subir a aplicação para a prova por HTTP"
+fi
+
+echo
+echo "11. CONTROLO NEGATIVO — a rota passa a acreditar nos limites do corpo"
+# O defeito que o aceite 2 existe para proibir, escrito como alguém o escreveria
+# a partir do formulário: os grupos vêm no pedido, e a rota valida contra eles.
+parar_app
+python3 - "$ROTA" <<'FIM'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding='utf-8')
+s = s.replace("""  const problemas = await comEscopoDoPedido(sessao, (db) =>
+    validarEscolhasDoProduto(db, productId, escolhas),
+  );""",
+"""  const doCorpo = (corpo as { grupos?: unknown })?.grupos;
+  const problemas = Array.isArray(doCorpo)
+    ? validarEscolhas(doCorpo as never, escolhas)
+    : await comEscopoDoPedido(sessao, (db) => validarEscolhasDoProduto(db, productId, escolhas));""")
+s = s.replace("import { corpoDaResposta, estadoHttp, exigirAccao } from '@bossaos/domain';",
+              "import { corpoDaResposta, estadoHttp, exigirAccao, validarEscolhas } from '@bossaos/domain';")
+p.write_text(s, encoding='utf-8')
+FIM
+if construir_e_subir; then
+  if correr_http /tmp/bossaos-cat-http-mau.txt; then
+    vermelho "ficou verde com a rota a acreditar no corpo — a prova não mede o aceite"
+  else
+    if grep -qE '^ *not ok .*limites do corpo são ignorados' /tmp/bossaos-cat-http-mau.txt; then
+      verde "caiu a asserção dos limites do corpo — é ela que carrega o aceite"
+    else
+      vermelho "ficou vermelho por outro motivo, não pelos limites"
+      grep -E '^ *not ok' /tmp/bossaos-cat-http-mau.txt | head -4
+    fi
+    if grep -qE '^ *not ok .*uma escolha válida passa' /tmp/bossaos-cat-http-mau.txt; then
+      vermelho "o lado positivo também caiu — não é o par que separa os dois"
+    else
+      verde "o lado positivo continuou verde: caiu a origem dos limites, não a rota"
+    fi
+  fi
+else
+  vermelho "não foi possível subir a aplicação com o defeito plantado"
+fi
+parar_app
+cp "$ORIG_ROTA" "$ROTA"
+
+echo
+echo "12. A árvore ficou limpa?"
 # A guarda que o E06 ensinou: quem faz a sujidade é quem a tem de apanhar, não a
 # prova seguinte. Uma prova que deixa produtos para trás faz a de isolamento
 # contar os dela.
-RESTOS=$(psql "$MIGRATION_DATABASE_URL" -tAc "SELECT count(*) FROM products WHERE nome LIKE 'e07-%'" 2>/dev/null)
+RESTOS=$(psql "$MIGRATION_DATABASE_URL" -tAc "SELECT
+  (SELECT count(*) FROM products WHERE nome LIKE 'e07%')
++ (SELECT count(*) FROM modifier_groups WHERE nome LIKE 'e07%')
++ (SELECT count(*) FROM users WHERE email LIKE 'dona-cat-%@exemplo.example')" 2>/dev/null)
 if [[ "$RESTOS" == "0" ]]; then
-  verde "nenhum produto de prova ficou para trás"
+  verde "nada de prova ficou para trás (produtos, grupos e contas)"
 else
-  vermelho "ficaram $RESTOS produtos de prova — a próxima prova vai medir outra coisa"
+  vermelho "ficaram $RESTOS linhas de prova — a próxima prova vai medir outra coisa"
 fi
 
 echo

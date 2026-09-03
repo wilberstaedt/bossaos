@@ -303,7 +303,10 @@ unidade mínima**, nunca `parseFloat` — medido: 1145 de 20001 valores em euros
 cêntimo errado, o primeiro é `0,29`.
 
 **Modificadores validados por chamada directa à API**, em JSON, com os limites lidos **da
-base** e não do corpo do pedido. O ecrã mostra-os; quem valida é o servidor.
+base** e não do corpo do pedido. Medido em dois níveis: a função, e a **rota por HTTP** com
+sessão real — chamar a função mostra que o motor está certo, não que a rota o usa. O caso
+que carrega o aceite manda os limites no corpo (`grupos: [{obrigatorio: false, maximo: 3}]`)
+e continua a receber 422, porque a rota vai buscá-los à base.
 
 **Três coisas de etapas anteriores que passaram a mentir e foram corrigidas:** o cartão de
 uso dizia que o catálogo chegava depois (agora conta produtos), o item `carta` do arranque
@@ -321,7 +324,12 @@ Sydney, 0 em São Paulo), e a medição mostrou um terceiro caso que eu não tin
 **não existe** na madrugada em que o relógio adianta. Agora recusa em vez de devolver a mais
 próxima.
 
-**134 asserções em `domain` + 19 em `i18n` + 21 na prova do catálogo, 0 falhas.**
+**134 asserções em `domain` + 19 em `i18n` + 21 na prova do catálogo + 6 por HTTP, 0
+falhas.**
 `pnpm verificar` a 0 **sem `.env`**; `pnpm inspeccionar` com 69 verificações no browser,
 já com as peças do E07 no catálogo interno; `provar-migracoes-do-zero.sh` a aplicar as 13
 migrações contra uma base vazia.
+
+**Aviso de custo para o fecho do E07:** o `provar-catalogo.sh` passou a fazer **dois builds**
+(o segundo para o controlo negativo da rota correr contra código compilado). Junta-se ao que
+o `CI-CUSTO.md` já dizia — a restruturação em trabalhos paralelos ganha mais um argumento.
