@@ -135,6 +135,13 @@ jobs:
       - name: A distinção dos alérgenos
         run: ./scripts/validar-alergenios.sh
 
+      # Uma classe `bo-` que o CSS nao define nao da erro em lado nenhum: o
+      # elemento aparece sem estilo, o `tsc` nao ve dentro de uma cadeia, e o
+      # teste de contraste le a cor herdada do pai, que passa. Encontrou quatro
+      # escritas por mim no E07 e uma anterior no componente dos separadores.
+      - name: Classes CSS que existem
+        run: ./scripts/validar-classes.sh
+
       - name: Testes
         run: pnpm test
 

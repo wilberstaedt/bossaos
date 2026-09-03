@@ -61,8 +61,12 @@ export function Separadores({ etiqueta, separadores, inicial }: SeparadoresProps
     }
   }
 
+  // O envolvente não leva classe: nada o estiliza, e um nome que o CSS não
+  // define é um gancho que só parece existir. Encontrou-o o
+  // `scripts/validar-classes.sh`, escrito no E07. Quando houver regra para o
+  // bloco, o nome volta com ela.
   return (
-    <div className="bo-separadores">
+    <div>
       <div className="bo-separadores__lista" role="tablist" aria-label={etiqueta}>
         {separadores.map((s) => {
           const seleccionado = s.chave === activo;

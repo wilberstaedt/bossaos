@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   deRelogio, diaAnterior, diasConfigurados, estaAberto, intervaloValido,
-  intervalosSeSobrepoem, momentoLocal, paraRelogio,
+  intervalosSeSobrepoem, momentoLocal, instanteNaZona, paraRelogio,
   type Horario, type Intervalo,
 } from './horarios.ts';
 
@@ -239,5 +239,73 @@ describe('5. A forma dos intervalos', () => {
     assert.equal(deRelogio(''), null);
     assert.equal(deRelogio('25:00'), null);
     assert.equal(deRelogio('9:00'), null, 'sem zero à esquerda é entrada ambígua');
+  });
+});
+
+describe('instanteNaZona: a hora escrita é a hora do sítio', () => {
+  it('a mesma hora de parede dá instantes diferentes em sítios diferentes', () => {
+    const madrid = instanteNaZona('2026-09-04T23:30', 'Europe/Madrid');
+    const brisbane = instanteNaZona('2026-09-04T23:30', 'Australia/Brisbane');
+    assert.ok(madrid && brisbane);
+    // Setembro: Madrid está em UTC+2, Brisbane em UTC+10. Oito horas de
+    // diferença — que é exactamente o erro que um `new Date()` cometeria.
+    assert.equal((brisbane.getTime() - madrid.getTime()) / 3_600_000, -8);
+    assert.equal(madrid.toISOString(), '2026-09-04T21:30:00.000Z');
+    assert.equal(brisbane.toISOString(), '2026-09-04T13:30:00.000Z');
+  });
+
+  it('acerta nas horas de parede onde uma só medição erra', () => {
+    // ── Estes quatro casos foram MEDIDOS, não escolhidos ───────────────────
+    //
+    // Uma implementação de uma só medição (assumir UTC, medir o desvio aí,
+    // subtrair) acerta em quase todo o ano. Varri 2026 de meia em meia hora em
+    // quatro fusos a comparar as duas: **divergem em 6 horas de parede em
+    // Madrid, 30 em Los Angeles e 42 em Sydney** — as horas à volta da mudança
+    // de relógio. Em São Paulo, que já não muda a hora, divergem em zero.
+    //
+    // São estas. Um teste escrito na madrugada de Outubro passava nas duas
+    // implementações — foi o que me aconteceu à primeira, e o controlo negativo
+    // é que o disse.
+    const casos: ReadonlyArray<[string, string]> = [
+      ['Europe/Madrid', '2026-03-29T01:00'],
+      ['Europe/Madrid', '2026-03-29T01:30'],
+      ['Australia/Sydney', '2026-04-04T16:00'],
+      ['America/Los_Angeles', '2026-03-08T04:00'],
+    ];
+    for (const [fuso, escrito] of casos) {
+      const instante = instanteNaZona(escrito, fuso);
+      assert.ok(instante, `${fuso} ${escrito}: não converteu`);
+      // A asserção é a IDA E VOLTA, e é ela que separa as duas implementações:
+      // com uma só medição, pedir 01:00 em Madrid devolve um instante que em
+      // Madrid são 00:00 — uma hora antes da que a pessoa escreveu.
+      const volta = momentoLocal(instante, fuso);
+      const [data, hora] = escrito.split('T') as [string, string];
+      const [hh, mm] = hora.split(':').map(Number) as [number, number];
+      assert.equal(volta.data, data, `${fuso} ${escrito}: dia errado`);
+      assert.equal(volta.minutos, hh * 60 + mm, `${fuso} ${escrito}: hora errada`);
+    }
+  });
+
+  it('uma hora que não existe é ausência, não a mais próxima', () => {
+    // A 8 de Março de 2026, em Los Angeles, das 02:00 salta-se para as 03:00.
+    // Nenhum instante é lá 02:30. Devolver o mais próximo (01:30) fazia um
+    // bloqueio "até às 02:30" acabar uma hora antes, sem ninguém saber.
+    assert.equal(instanteNaZona('2026-03-08T02:30', 'America/Los_Angeles'), null);
+    // Meia hora antes e uma hora depois existem, e continuam a funcionar.
+    assert.ok(instanteNaZona('2026-03-08T01:30', 'America/Los_Angeles'));
+    assert.ok(instanteNaZona('2026-03-08T03:30', 'America/Los_Angeles'));
+  });
+
+  it('é o inverso de momentoLocal', () => {
+    const instante = instanteNaZona('2026-03-15T14:05', 'America/Sao_Paulo');
+    assert.ok(instante);
+    const volta = momentoLocal(instante, 'America/Sao_Paulo');
+    assert.equal(volta.data, '2026-03-15');
+    assert.equal(volta.minutos, 14 * 60 + 5);
+  });
+
+  it('devolve null para o que não é uma hora, em vez de uma data inválida', () => {
+    assert.equal(instanteNaZona('', 'Europe/Madrid'), null);
+    assert.equal(instanteNaZona('ontem à noite', 'Europe/Madrid'), null);
   });
 });

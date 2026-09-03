@@ -39,7 +39,7 @@ export {
 } from './capacidades.ts';
 
 export {
-  estaAberto, momentoLocal, intervaloValido, intervalosSeSobrepoem, diaAnterior,
+  estaAberto, momentoLocal, instanteNaZona, intervaloValido, intervalosSeSobrepoem, diaAnterior,
   diasConfigurados, paraRelogio, deRelogio, MINUTOS_POR_DIA,
   type DiaDaSemana, type Intervalo, type EstadoDoDia, type Excepcao,
   type Horario, type Abertura,

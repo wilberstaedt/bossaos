@@ -144,6 +144,72 @@ export function momentoLocal(instante: Date, fuso: string): MomentoLocal {
   };
 }
 
+/**
+ * O inverso de `momentoLocal`: uma hora de parede, no fuso do sítio → instante.
+ *
+ * ── Porque é que isto não é `new Date(texto)` ──────────────────────────────
+ *
+ * Um `datetime-local` manda `2026-09-04T23:30`, **sem fuso**. `new Date` dessa
+ * cadeia interpreta-a no fuso de quem corre o processo — o servidor. Um bloqueio
+ * "até às 23h30" posto por uma unidade em Brisbane expirava dez horas ao lado, e
+ * o prato voltava à carta a meio do serviço.
+ *
+ * ── E porque é que se mede duas vezes ──────────────────────────────────────
+ *
+ * O desvio de um fuso depende do instante, e o instante é o que estamos a
+ * calcular. Resolve-se por aproximação: assume-se UTC, mede-se o desvio que essa
+ * data teria naquele sítio, corrige-se — e **mede-se outra vez**, porque a
+ * correcção pode ter atravessado a mudança de hora. Nas duas madrugadas do ano
+ * em que o relógio salta, a primeira medição é a do lado errado da fronteira.
+ *
+ * Somar horas fixas funciona onze meses por ano, que é o pior tipo de defeito.
+ */
+export function instanteNaZona(horaLocal: string, fuso: string): Date | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/.exec(horaLocal.trim());
+  if (!m) return null;
+  const [, ano, mes, dia, hora, minuto] = m.map(Number) as unknown as number[];
+  const comoUtc = Date.UTC(ano!, mes! - 1, dia!, hora!, minuto!);
+  if (!Number.isFinite(comoUtc)) return null;
+
+  const desvio = (instante: number): number => {
+    const p = new Intl.DateTimeFormat('en-CA', {
+      timeZone: fuso, year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+    }).formatToParts(new Date(instante));
+    const v = (t: string) => Number(p.find((x) => x.type === t)?.value ?? NaN);
+    // `hour12: false` dá "24" à meia-noite em alguns motores. 24:00 é 00:00.
+    const lido = Date.UTC(v('year'), v('month') - 1, v('day'), v('hour') % 24, v('minute'), v('second'));
+    return lido - instante;
+  };
+
+  const primeiro = desvio(comoUtc);
+  if (!Number.isFinite(primeiro)) return null;
+  const candidato = comoUtc - primeiro;
+  const segundo = desvio(candidato);
+  const instante = new Date(comoUtc - segundo);
+
+  // ── E há uma terceira hipótese: a hora escrita não EXISTE ────────────────
+  //
+  // Na madrugada em que o relógio adianta, uma hora desaparece do dia. Em Los
+  // Angeles, a 8 de Março de 2026, das 02:00 salta-se para as 03:00: nenhum
+  // instante do universo é lá 02:30. Sem esta verificação, a função devolvia o
+  // instante mais próximo — 01:30 — e um bloqueio "até às 02:30" acabava uma
+  // hora antes, em silêncio.
+  //
+  // Confirma-se lendo o resultado de volta. Se o que sai não é o que se pediu,
+  // o que se pediu não existe, e a resposta é ausência — que é a mesma regra do
+  // resto do produto: **não se adivinha, recusa-se**.
+  //
+  // A hora AMBÍGUA (a que na madrugada de recuo acontece duas vezes) passa esta
+  // verificação e devolve a primeira das duas. É o comportamento certo: existe,
+  // e escolher a primeira é uma decisão defensável — devolver `null` a uma hora
+  // que existe não seria.
+  const volta = momentoLocal(instante, fuso);
+  const esperado = `${m[1]}-${m[2]}-${m[3]}`;
+  if (volta.data !== esperado || volta.minutos !== hora! * 60 + minuto!) return null;
+  return instante;
+}
+
 /** O estado de um dia, com a excepção dessa data a vencer a regra semanal. */
 function estadoDoDia(horario: Horario, data: string, dia: DiaDaSemana): {
   estado: EstadoDoDia; excepcao?: string;
