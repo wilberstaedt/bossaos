@@ -5,7 +5,7 @@ Os PDFs, contratos e prompts estão preparados. Nenhuma etapa de implementação
 | Etapa | Status | Evidência |
 | --- | --- | --- |
 | E00 | planejado |  |
-| E01 | planejado |  |
+| E01 | implementado aguardando validação | docs/progress/E01.md · 16 testes · provar-separacao-de-credenciais.sh e provar-prontidao.sh a 0 falhas |
 | E02 | planejado |  |
 | E03 | planejado |  |
 | E04 | planejado |  |
