@@ -100,6 +100,16 @@ export {
 
 export { registar, listarAuditoria, type EventoDeAuditoria } from './auditoria.ts';
 
+export {
+  estadoComercial, podeCapacidade, contarUnidades, contarPessoas, catalogoDePlanos,
+  type EstadoComercial,
+} from './planos.ts';
+
+export {
+  CAPACIDADE_DO_TEMA, temaActivo, guardarTema, reverterAoPadrao, previaDeDescida,
+  type ResultadoDeGravacao,
+} from './tema.ts';
+
 export { obterPrismaDeAutenticacao } from './autenticacao.ts';
 
 export { PrismaClient };

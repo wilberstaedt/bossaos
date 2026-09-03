@@ -153,6 +153,9 @@ importers:
       '@bossaos/domain':
         specifier: workspace:*
         version: link:../domain
+      '@bossaos/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@prisma/adapter-pg':
         specifier: 7.10.0
         version: 7.10.0

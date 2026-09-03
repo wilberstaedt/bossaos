@@ -12,7 +12,7 @@
     "test": "pnpm -r --if-present test",
     "build": "pnpm --filter @bossaos/web build",
     "db:generate": "pnpm --filter @bossaos/db generate",
-    "db:migrate": "pnpm --filter @bossaos/db migrate",
+    "db:migrate": "pnpm --filter @bossaos/db migrate && pnpm --filter @bossaos/db generate",
     "db:migrate:deploy": "pnpm --filter @bossaos/db migrate:deploy",
     "dev:db": "./scripts/dev-db.sh",
     "dev:mail": "mailpit --smtp 0.0.0.0:1025 --listen 0.0.0.0:8025",

@@ -17,7 +17,8 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./estilos.css": "./src/estilos.css"
+    "./estilos.css": "./src/estilos.css",
+    "./regras": "./src/regras.ts"
   },
   "peerDependencies": {
     "react": "^19.0.0"
