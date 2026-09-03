@@ -21,7 +21,15 @@ ETAPAS_FEITAS=$(grep -cE '^\| E[0-9]{2} \| validado' docs/progress/ETAPAS.md 2>/
 AGUARDA=$(grep -cE '^\| E[0-9]{2} \| implementado aguardando' docs/progress/ETAPAS.md 2>/dev/null || true)
 AGUARDA=${AGUARDA:-0}
 ETAPAS_FEITAS=${ETAPAS_FEITAS:-0}
-TELAS_TOTAL=$(tail -n +2 docs/progress/coverage.csv | wc -l | tr -d ' ')
+# O denominador tambem se conta com o leitor de CSV. `wc -l` conta LINHAS, e um
+# campo com quebra de linha dentro de aspas vale duas - o denominador inflava e a
+# percentagem descia sozinha, sem ninguem dar por ela. Hoje bate (396 = 396), mas
+# batia por acidente dos dados e nao por construcao, que e a forma exacta do
+# defeito do `awk -F,` que me apanhou uma hora antes: funcionou ate um campo
+# ganhar uma virgula.
+TELAS_TOTAL=$(python3 -c '
+import csv, io
+print(len(list(csv.reader(io.open("docs/progress/coverage.csv", encoding="utf-8-sig", newline="")))) - 1)')
 # DEFEITO MEU, apanhado a 2026-09-03 ao auditar-me com a regua que exigi ao JR:
 # isto era `grep -cE 'validado|implementado'`, e "implementado aguardando validacao"
 # contem as DUAS palavras - ou seja contava como entregue exactamente aquilo que eu
