@@ -93,8 +93,9 @@ export async function cartaPublica(
 }
 
 interface LinhaDeHorario {
-  dia: number;
-  fechado: boolean;
+  /** `null` quando a unidade existe e não tem um único dia configurado. */
+  dia: number | null;
+  fechado: boolean | null;
   inicio_min: number | null;
   fim_min: number | null;
   fuso: string | null;
@@ -124,12 +125,17 @@ export async function horarioPublico(
 ): Promise<HorarioPublico | null> {
   const linhas = await prisma.$queryRaw<LinhaDeHorario[]>`
     SELECT * FROM publico_horario(${slug})`;
+  // Zero linhas quer dizer **não há unidade neste endereço**, e mais nada. Uma
+  // unidade que existe e não configurou nada devolve uma linha com `dia` nulo —
+  // é a distinção do E06, e sem ela o ecrã público não consegue dizer se o
+  // restaurante não existe ou se ninguém preencheu os horários.
   if (linhas.length === 0) return null;
 
   const porDia = new Map<DiaDaSemana, Intervalo[] | 'fechado'>();
   for (const l of linhas) {
+    if (l.dia === null) continue;
     const dia = l.dia as DiaDaSemana;
-    if (l.fechado) { porDia.set(dia, 'fechado'); continue; }
+    if (l.fechado === true) { porDia.set(dia, 'fechado'); continue; }
     if (l.inicio_min === null || l.fim_min === null) continue;
     const actual = porDia.get(dia);
     const intervalo: Intervalo = { inicioMin: l.inicio_min, fimMin: l.fim_min };

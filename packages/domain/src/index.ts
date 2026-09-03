@@ -118,7 +118,8 @@ export {
 } from './projeccao.ts';
 
 export {
-  VERSAO_MAXIMA, codificar, descodificar, paraSvg, versaoParaBytes,
+  VERSAO_MAXIMA, codificar, descodificar, paraSvg, versaoParaBytes, densidade,
+  penalidadeDosModulos, penalidadePorMascara,
   capacidadeEmDados, palavrasTotais, estruturaDeBlocos, lado,
   correccao, sindromes, infoDeFormato, infoDeVersao,
   modulosDeDadosDaVersao, percursoDeDados,

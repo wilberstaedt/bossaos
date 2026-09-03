@@ -1,9 +1,8 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E09 — carta pública e QR de consulta (**11 telas**)
-**Estado:** **em curso**. A projecção pública está feita e provada, com lista de permissão; e
-o buraco do E08 que ela fez aparecer está fechado. Falta o QR, a chave de cache, o schema, os
-serviços, as 11 telas e a prova contra a base.
+**Estado:** implementado, **aguardando validação**. Projecção, QR próprio, chave de cache,
+a quarta porta do CT-04, as 11 telas e a prova contra a base — tudo entregue e medido.
 **Régua:** `docs/reviews/ALVO-E09.md` · `catalogo-e-publicacao.md` e
 `dados-e-accoes-sensiveis.md`, os dois do E00.
 **O JR não avança para o E10.**
@@ -53,7 +52,7 @@ desta vez a régua **não** precedeu todo o código e dizê-lo é o que a manté
 | E06 — onboarding e configuração do restaurante | **validado à 2ª** · `docs/progress/E06.md`. A 1ª validação foi retirada pela CI: a cadeia de migrações não se aplicava do zero. |
 | E07 — catálogo, produtos, preços e opções | **validado à 1ª** · `docs/reviews/E07.md` |
 | E08 — média, traduções, importação e publicação | **validado à 2ª** · `docs/reviews/E08.md` |
-| E09 — carta pública e QR de consulta | **em curso** · `docs/progress/E09.md` |
+| E09 — carta pública e QR de consulta | implementado, **aguardando validação** · `docs/progress/E09.md` |
 
 **Primeiras telas.** O E02 é a primeira etapa que toca `coverage.csv`: STATE 001-003,
 005, 007 e 016. Até aqui o medidor de telas esteve a 0 % e isso era verdade, não uma

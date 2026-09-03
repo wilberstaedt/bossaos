@@ -36,6 +36,28 @@ const EXCEPCOES = new Map<string, string>([
   ],
 ]);
 
+/**
+ * A carta pública (E09) — a segunda forma de excepção, e mais apertada.
+ *
+ * Estas rotas **não têm sessão por definição**: um cliente com o telemóvel na
+ * mesa não entrou em lado nenhum. Pô-las na lista de cima seria dizer "confia",
+ * e uma excepção sem verificação é uma porta.
+ *
+ * Por isso a excepção não as liberta: **troca a exigência**. Em vez de
+ * `resolverPedido`, exige-se que só cheguem à base pelas três portas estreitas
+ * do público — que são funções `SECURITY DEFINER` que devolvem apenas o que está
+ * publicado, e não aceitam um identificador de organização.
+ *
+ * O efeito prático: uma rota pública que amanhã importe `comEscopo` ou
+ * `obterPrisma` para fazer uma consulta própria fica **vermelha**. É a mesma
+ * distinção do E04 — não se verifica que a autorização está certa, verifica-se
+ * que ela existe.
+ */
+const PORTAS_DO_PUBLICO = ['cartaPublica', 'horarioPublico', 'registarConsulta', 'abertoAgora'];
+const SO_PELO_PUBLICO = /^app\/r\//;
+/** O que uma rota pública NÃO pode tocar: são os caminhos que exigem inquilino. */
+const PROIBIDO_NO_PUBLICO = ['comEscopo', 'comIdentidade', 'obterPrisma'];
+
 const TOCA_NA_BASE = ['@bossaos/db', 'obterPrisma', 'obterBase', 'comEscopo'];
 const ATRAVESSA_A_PORTA = ['resolverPedido', 'actorDoPedido', 'comEscopoDoPedido'];
 
@@ -57,11 +79,20 @@ function ficheirosDaWeb(): string[] {
 function semPorta(): string[] {
   const maus: string[] = [];
   for (const ficheiro of ficheirosDaWeb()) {
-    const relativo = relative(WEB, ficheiro);
+    const relativo = relative(WEB, ficheiro).split('\\').join('/');
     if (EXCEPCOES.has(relativo)) continue;
     const conteudo = readFileSync(ficheiro, 'utf8');
     const toca = TOCA_NA_BASE.some((m) => conteudo.includes(m));
     if (!toca) continue;
+
+    if (SO_PELO_PUBLICO.test(relativo)) {
+      // Não têm sessão; têm de ir pelas portas estreitas e por mais nada.
+      const pelasPortas = PORTAS_DO_PUBLICO.some((m) => conteudo.includes(m));
+      const pelaPortaErrada = PROIBIDO_NO_PUBLICO.some((m) => conteudo.includes(m));
+      if (!pelasPortas || pelaPortaErrada) maus.push(relativo);
+      continue;
+    }
+
     const atravessa = ATRAVESSA_A_PORTA.some((m) => conteudo.includes(m));
     if (!atravessa) maus.push(relativo);
   }
@@ -124,5 +155,30 @@ describe('rotas: dados de inquilino só através da porta', () => {
     const marcas = readFileSync(join(WEB, 'app/api/org/[orgSlug]/marcas/[id]/route.ts'), 'utf8');
     assert.ok(TOCA_NA_BASE.some((m) => marcas.includes(m)), 'a rota de marcas toca mesmo na base');
     assert.ok(ATRAVESSA_A_PORTA.some((m) => marcas.includes(m)), 'e atravessa mesmo a porta');
+  });
+});
+
+describe('a carta pública tem a sua própria exigência, não uma dispensa', () => {
+  it('as rotas de /r/ chegam à base pelas portas estreitas', () => {
+    // Se a excepção fosse uma dispensa, bastava uma rota pública nova para
+    // aparecer uma consulta directa a `menu_revisions` sem filtro de publicação.
+    const publicas = ficheirosDaWeb()
+      .map((f) => relative(WEB, f).split('\\').join('/'))
+      .filter((f) => SO_PELO_PUBLICO.test(f));
+    assert.ok(publicas.length > 0, 'não havia rotas públicas para medir');
+    for (const f of publicas) {
+      const conteudo = readFileSync(join(WEB, f), 'utf8');
+      if (!TOCA_NA_BASE.some((m) => conteudo.includes(m))) continue;
+      assert.ok(
+        PORTAS_DO_PUBLICO.some((m) => conteudo.includes(m)),
+        `${f}: toca na base sem passar por uma porta pública`,
+      );
+      for (const proibido of PROIBIDO_NO_PUBLICO) {
+        assert.ok(
+          !conteudo.includes(proibido),
+          `${f}: usa \`${proibido}\`, que exige inquilino e não existe num pedido público`,
+        );
+      }
+    }
   });
 });

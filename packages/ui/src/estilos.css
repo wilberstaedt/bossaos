@@ -717,3 +717,102 @@ p { margin: 0; }
 /* Lista simples, sem marcadores desalinhados com o resto da página. */
 .bo-lista { margin: 0; padding-left: var(--bo-espaco-xl); display: grid; gap: var(--bo-espaco-xs); }
 .bo-lista li { line-height: 24px; }
+
+/* ── Carta pública (E09) ──────────────────────────────────────────────────────
+   A primeira superfície que um estranho vê, e a única que se lê a uma mão, com
+   uma só barra de rede, em pé, com o telemóvel a 30 cm da mesa. Por isso:
+   corpo maior do que no painel, alvos de toque generosos, e nenhuma coluna. */
+
+.bo-publico {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--bo-espaco-xl) var(--bo-espaco-lg) var(--bo-espaco-xxl);
+  display: grid;
+  gap: var(--bo-espaco-xl);
+  font-size: 17px;
+  line-height: 26px;
+}
+.bo-publico h1 { margin: 0; }
+.bo-publico h2 { margin: 0 0 var(--bo-espaco-md); font-size: 20px; }
+
+.bo-publico__cabecalho { display: grid; gap: var(--bo-espaco-sm); justify-items: start; }
+
+/* Fora de horas a carta continua toda aqui — isto é um aviso, não uma cortina. */
+.bo-publico__fechado {
+  width: 100%;
+  padding: var(--bo-espaco-lg);
+  background: var(--bo-superficie-suave);
+  border-radius: var(--bo-raio-cartao);
+}
+.bo-publico__fechado h2 { margin-bottom: var(--bo-espaco-xs); }
+.bo-publico__fechado p { margin: 0; color: var(--bo-texto-secundario); }
+
+/* Idiomas e categorias são LIGAÇÕES: funcionam sem JavaScript e o endereço fica
+   partilhável. Rolam na horizontal em vez de dobrar — uma carta com dezoito
+   categorias não pode empurrar os pratos para fora do ecrã. */
+.bo-publico__idiomas,
+.bo-publico__categorias {
+  display: flex; gap: var(--bo-espaco-sm);
+  overflow-x: auto; padding-bottom: var(--bo-espaco-xs);
+}
+.bo-publico__idiomas a,
+.bo-publico__categorias a {
+  flex-shrink: 0;
+  min-height: 44px; display: inline-flex; align-items: center;
+  padding: 0 var(--bo-espaco-lg);
+  border: 1px solid var(--bo-borda); border-radius: 999px;
+  color: var(--bo-texto-primario); text-decoration: none;
+}
+.bo-publico__idiomas a[aria-current='page'],
+.bo-publico__categorias a[aria-current='page'] {
+  /* Dois sinais e não só a cor: fundo E peso. É a regra do E02. */
+  background: var(--bo-superficie-elevada); font-weight: 700;
+  border-color: var(--bo-texto-primario);
+}
+
+.bo-publico__busca { display: flex; gap: var(--bo-espaco-sm); }
+.bo-publico__busca input { flex: 1; }
+
+.bo-publico__lista { list-style: none; margin: 0; padding: 0; display: grid; }
+.bo-publico__produto { border-bottom: 1px solid var(--bo-borda); }
+.bo-publico__produto:last-child { border-bottom: 0; }
+.bo-publico__produto > a {
+  display: flex; gap: var(--bo-espaco-lg); justify-content: space-between;
+  /* 48 px: isto lê-se de pé, com uma mão. */
+  min-height: 48px; align-items: center;
+  padding: var(--bo-espaco-md) 0;
+  color: var(--bo-texto-primario); text-decoration: none;
+}
+.bo-publico__nome { font-weight: 600; }
+.bo-publico__preco { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bo-publico__descricao {
+  margin: 0 0 var(--bo-espaco-md); color: var(--bo-texto-secundario); font-size: 15px;
+}
+.bo-publico__vazio { color: var(--bo-texto-secundario); }
+.bo-publico__voltar a { color: var(--bo-texto-secundario); }
+
+/* Os alérgenos, à frente de quem vai comer: uma linha por alérgeno, com o estado
+   em texto ao lado. Nunca uma grelha de ícones — um símbolo sozinho não diz a
+   diferença entre "não contém" e "ninguém declarou". */
+.bo-publico__alergenos { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--bo-espaco-sm); }
+.bo-publico__alergenos li {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: var(--bo-espaco-lg); min-height: 40px;
+}
+.bo-publico__aviso {
+  padding: var(--bo-espaco-lg);
+  background: var(--bo-superficie-suave);
+  border-radius: var(--bo-raio-cartao);
+  color: var(--bo-texto-primario);
+}
+
+.bo-publico__rodape {
+  border-top: 1px solid var(--bo-borda); padding-top: var(--bo-espaco-lg);
+  color: var(--bo-texto-secundario); font-size: 14px;
+}
+
+/* O QR: fundo branco sempre, mesmo em tema escuro. Um QR sobre fundo escuro
+   invertido não lê na maior parte das câmaras. */
+.bo-qr { background: #fff; padding: var(--bo-espaco-lg); border-radius: var(--bo-raio-cartao); width: fit-content; }
+.bo-qr svg { display: block; }
+.bo-qr__endereco { word-break: break-all; font-size: 14px; color: var(--bo-texto-secundario); }
