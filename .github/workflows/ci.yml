@@ -290,7 +290,9 @@ jobs:
         #
         # Mais as três armadilhas do CT-14, que se apresentam todas como
         # sucesso: o CSV que abre no Excel, o SVG que aparece na página, o link
-        # que ainda responde. Dez controlos negativos.
+        # que ainda responde — e o 302 para a rede interna, que passa pelas
+        # duas primeiras camadas de defesa e só o `redirect: 'manual'` impede.
+        # Onze controlos negativos.
         run: ./scripts/provar-publicacao.sh
 
       - name: Migrações aplicadas e sem desvio

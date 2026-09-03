@@ -29,7 +29,7 @@ if [[ "$NODE_ACTUAL" != "$NODE_ESPERADO" ]]; then
 fi
 
 GRUPOS_ESPERADOS=8
-ASSERCOES_ESPERADAS=32
+ASSERCOES_ESPERADAS=35
 falhas=0
 
 CSV=packages/domain/src/csv.ts
@@ -288,6 +288,36 @@ p.write_text(s.replace(alvo, ''), encoding='utf-8')
 FIMPY
 exigir_vermelho "caiu a assercao do nome que resolve para dentro" \
   'NOME público que resolve para dentro' /tmp/bossaos-pub-ssrf.txt
+repor "$MED"
+
+echo
+echo "9d. CONTROLO NEGATIVO - o redireccionamento passa a ser seguido"
+# ── A camada que derrota as outras duas, e que nao tinha vigia ─────────────
+#
+# Um endereco publico passa a forma do URL e passa a resolucao, e depois responde
+# 302 para 169.254.169.254. As duas primeiras camadas nao veem isso: a decisao ja
+# foi tomada quando o redireccionamento chega.
+#
+# Quem impede e uma palavra — `redirect: 'manual'` — e ate o E08 ser retido
+# nenhum teste do repositorio a mencionava. O senior trocou-a por `follow` e tudo
+# continuou verde. O CT-14 pede "nao fornecer um proxy aberto para rede interna",
+# e o que o garantia era uma palavra que ninguem vigiava.
+python3 - "$MED" <<'FIMPY'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding='utf-8')
+alvo = "redirect: 'manual',"
+assert alvo in s, 'o alvo do controlo negativo mudou de forma'
+p.write_text(s.replace(alvo, "redirect: 'follow',"), encoding='utf-8')
+FIMPY
+exigir_vermelho "caiu a assercao do 302 para dentro" \
+  '302 PARA UM ENDERECO INTERNO' /tmp/bossaos-pub-302.txt
+# E o par tem de continuar verde: uma implementacao que recusasse TUDO passava no
+# caso de cima e a busca por URL deixava de servir para nada.
+if grep -qE '^ *not ok .*sem redireccionamento, um destino publico entra' /tmp/bossaos-pub-302.txt; then
+  vermelho "o lado positivo tambem caiu — nao e o par que separa os dois"
+else
+  verde "o destino publico sem redireccionamento continuou a entrar"
+fi
 repor "$MED"
 
 echo

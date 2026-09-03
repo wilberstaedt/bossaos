@@ -130,6 +130,12 @@ export async function buscarPorUrl(
       // Um destino público que responda 302 para `http://169.254.169.254/` passa
       // por todas as verificações de cima. `manual` faz o redireccionamento
       // chegar aqui como uma resposta 3xx em vez de ser seguido às escondidas.
+      //
+      // **Esta palavra é vigiada.** O E08 foi retido por ela: o código estava
+      // certo e nenhum teste a mencionava — trocar `manual` por `follow` deixava
+      // tudo verde. Uma protecção que não consegue falhar não está provada.
+      // Quem a mede é `provas/publicacao.test.ts`, grupo 4b, e o passo 9d do
+      // `provar-publicacao.sh` faz a troca e exige que a asserção caia.
       redirect: 'manual',
       headers: { accept: 'image/*' },
     });

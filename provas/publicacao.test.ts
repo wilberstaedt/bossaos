@@ -399,6 +399,108 @@ describe('4b. Buscar por URL: os três endereços que a régua nomeia', () => {
     assert.equal(!r.ok && r.erro, 'destino_interno');
   });
 
+
+  it('UM 302 PARA UM ENDERECO INTERNO E RECUSADO', async () => {
+    // ── A terceira camada, e a unica que derrota as outras duas ────────────
+    //
+    // `cdn.exemplo.example` passa a forma do URL (nome publico) e passa a
+    // resolucao (93.184.216.34, publico). E depois responde **302 para
+    // 169.254.169.254**. As duas primeiras camadas nao veem isto: a decisao ja
+    // foi tomada quando o redireccionamento chega.
+    //
+    // Quem impede e `redirect: 'manual'` — uma palavra que, ate agora, nenhum
+    // teste vigiava. O senior trocou-a por `follow` e tudo continuou verde.
+    //
+    // ── Porque e que o duplo do `fetch` honra o `redirect` ─────────────────
+    //
+    // Um duplo que devolvesse sempre o 302 passaria com `manual` E com `follow`,
+    // e o controlo negativo nao discriminava — seria o mesmo verde vazio que
+    // este caso existe para fechar. Por isso o duplo MODELA o comportamento
+    // documentado da plataforma: com `follow` (ou por omissao) segue o
+    // redireccionamento ele proprio e devolve a resposta final; com `manual`
+    // devolve o 3xx tal como veio.
+    //
+    // A prova de que o modelo discrimina nao esta neste comentario: esta no
+    // passo 9d do `provar-publicacao.sh`, que troca a palavra no codigo e exige
+    // que esta assercao caia.
+    const original = globalThis.fetch;
+    const visitados: string[] = [];
+    globalThis.fetch = (async (entrada: RequestInfo | URL, init?: RequestInit) => {
+      const alvo = String(entrada);
+      visitados.push(alvo);
+      const paraOndeRedirecciona = 'http://169.254.169.254/latest/meta-data/';
+
+      if (alvo.startsWith('https://cdn.exemplo.example')) {
+        const trezentos = new Response(null, {
+          status: 302, headers: { location: paraOndeRedirecciona },
+        });
+        if (init?.redirect === 'manual') return trezentos;
+        // `follow` e o comportamento por omissao: o `fetch` real vai la buscar
+        // sozinho, e quem chamou nunca ve o 302.
+        return globalThis.fetch(paraOndeRedirecciona, init);
+      }
+      // O destino interno responde uma imagem a serio. Se chegarmos aqui, o
+      // proxy para a rede interna existe.
+      return new Response(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), {
+        status: 200, headers: { 'content-type': 'image/png' },
+      });
+    }) as typeof globalThis.fetch;
+
+    try {
+      const r = await buscarPorUrl('https://cdn.exemplo.example/logo.png', resolve);
+      assert.equal(r.ok, false, 'o redireccionamento para dentro tem de ser recusado');
+      assert.equal(!r.ok && r.erro, 'destino_interno');
+      assert.equal(!r.ok && r.detalhe, 'redireccionamento',
+        'e com o motivo certo: nao foi a forma nem a resolucao que o apanhou');
+      // O par: se o endereco interno tivesse sido visitado, ja tinhamos sido o
+      // proxy — mesmo que a resposta acabasse por ser deitada fora.
+      assert.deepEqual(visitados, ['https://cdn.exemplo.example/logo.png'],
+        'o nosso servidor nao pode ter chegado a bater ao endereco interno');
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+
+  it('e um 302 para um endereco PUBLICO tambem nao e seguido — sem excepcoes', async () => {
+    // Sem este, uma implementacao que recusasse so os 3xx cujo `location` fosse
+    // interno passaria no caso de cima — e teria de resolver o `location` para
+    // decidir, que e mais uma porta por onde entrar. Recusa-se o 3xx, ponto: um
+    // destino que redirecciona diz-se com o endereco final.
+    const original = globalThis.fetch;
+    globalThis.fetch = (async (_entrada: RequestInfo | URL, init?: RequestInit) => {
+      const trezentos = new Response(null, {
+        status: 301, headers: { location: 'https://outro.exemplo.example/logo.png' },
+      });
+      if (init?.redirect === 'manual') return trezentos;
+      return new Response(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), {
+        status: 200, headers: { 'content-type': 'image/png' },
+      });
+    }) as typeof globalThis.fetch;
+    try {
+      const r = await buscarPorUrl('https://cdn.exemplo.example/logo.png', resolve);
+      assert.equal(!r.ok && r.detalhe, 'redireccionamento');
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+
+  it('e o PAR: sem redireccionamento, um destino publico entra', async () => {
+    // Sem isto, uma implementacao que recusasse TUDO passava nos dois casos de
+    // cima e a busca por URL nao servia para nada.
+    const original = globalThis.fetch;
+    globalThis.fetch = (async () => new Response(
+      new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]),
+      { status: 200, headers: { 'content-type': 'image/png' } },
+    )) as typeof globalThis.fetch;
+    try {
+      const r = await buscarPorUrl('https://cdn.exemplo.example/logo.png', resolve);
+      assert.equal(r.ok, true, 'um destino publico sem redireccionamento tem de passar');
+      assert.equal(r.ok && r.tipoDeclarado, 'image/png');
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+
   it('e `file:` nem chega a resolver-se', async () => {
     const r = await buscarPorUrl('file:///etc/passwd', resolve);
     assert.equal(!r.ok && r.erro, 'esquema_nao_permitido');

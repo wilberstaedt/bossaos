@@ -353,6 +353,9 @@ a base que o garante: `REVOKE UPDATE, DELETE ON menu_revisions`.
 **CSV neutralizado** — e aspas não protegem, e um número negativo não é uma fórmula.
 **Buscar por URL tem três portas**: a forma, o endereço resolvido, e `redirect: 'manual'` —
 um destino público que responda 302 para `169.254.169.254` passa pelas duas primeiras.
+**A terceira não tinha vigia, e foi por isso que o E08 foi retido à primeira:** o sénior
+trocou `manual` por `follow` e tudo ficou verde. O código estava certo; era uma protecção
+que não conseguia falhar. Fechada com três casos e o controlo negativo 9d.
 **O tipo do ficheiro vem dos bytes**, e a recusa vem antes de escrever no armazenamento.
 
 **Nome igual não é chave de identidade**: a estratégia de importação é obrigatória sem valor
@@ -366,7 +369,7 @@ descarregamento.
 marcar a tradução inglesa como obsoleta por causa do preço é um falso positivo — e falsos
 positivos ensinam toda a gente a ignorar o aviso. Nenhum código lia a coluna.
 
-**221 asserções no domínio + 32 na prova contra a base, 0 falhas**, com 33 controlos
+**221 asserções no domínio + 35 na prova contra a base, 0 falhas**, com 34 controlos
 negativos ao todo. `pnpm verificar` a 0 sem `.env`; `pnpm inspeccionar` com 69 verificações.
 
 **Toquei no `ci.yml`** para acrescentar um passo (`provar-publicacao.sh`) ao trabalho `base`,
