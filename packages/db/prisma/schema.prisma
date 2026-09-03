@@ -87,6 +87,11 @@ model Organization {
   brands          Brand[]
   locations       Location[]
   memberships     Membership[]
+  menus           Menu[]
+  categorias      Category[]
+  produtos        Product[]
+  gruposDeOpcoes  ModifierGroup[]
+  regrasDePreco   PriceRule[]
   roleAssignments RoleAssignment[]
   invitations     Invitation[]
   auditEvents     AuditEvent[]
@@ -123,6 +128,10 @@ model Brand {
   locations       Location[]
   roleAssignments RoleAssignment[]
   invitations     Invitation[]
+  menus           Menu[]
+  categorias      Category[]
+  produtos        Product[]
+  gruposDeOpcoes  ModifierGroup[]
 
   /// Alvo das referências compostas. Sem isto, o resto não se pode escrever.
   @@unique([organizationId, id], name: "brand_por_organizacao")
@@ -174,6 +183,9 @@ model Location {
   entitlements    EntitlementGrant[]
   scheduleDays    ScheduleDay[]
   scheduleExceptions ScheduleException[]
+  menus           Menu[]
+  regrasDePreco   PriceRule[]
+  disponibilidades ProductAvailability[]
 
   @@unique([organizationId, id], name: "location_por_organizacao")
   @@unique([organizationId, slug])
@@ -790,4 +802,439 @@ model IdempotencyKey {
   @@unique([chave, actorId, accao])
   @@index([organizationId])
   @@map("idempotency_keys")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E07 — catálogo, produtos, preços e opções.
+//
+// **Um produto é da MARCA e é referenciado pelos canais.** O prompt proíbe pelo
+// nome o erro clássico desta área: "não crie tabelas independentes de produtos
+// para menu, Staff ou TPV". Cada superfície com a sua cópia significa que o
+// preço da carta e o preço do TPV divergem sem ninguém saber qual é o certo.
+// Aqui há um `Product`, e o que varia por canal são as REGRAS que lhe apontam.
+
+/// O que é editável é RASCUNHO. Publicar é E08, e cria revisão imutável.
+enum EstadoDeCatalogo {
+  RASCUNHO
+  ACTIVO
+  ARQUIVADO
+}
+
+/// Os canais onde um catálogo se vende (CAT-016).
+enum Canal {
+  CARTA
+  SITE
+  SALA
+  TPV
+  TAKEAWAY
+  KIOSK
+}
+
+/// Contém, pode conter, não contém.
+///
+/// **`DESCONHECIDO` não está aqui, e é a decisão que decide a etapa.** É a
+/// AUSÊNCIA de linha em `ProductAllergen`. Um estado guardável para "não se
+/// sabe" daria duas maneiras de o representar — a linha ausente e a linha com
+/// `DESCONHECIDO` — e duas maneiras de representar a mesma coisa é uma maneira
+/// de as ler diferente.
+enum EstadoDeAlergenio {
+  CONTEM
+  PODE_CONTER
+  NAO_CONTEM
+}
+
+model Menu {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  brandId        String  @map("brand_id") @db.Uuid
+  /// Âmbito: `null` = a marca inteira; preenchido = só esta unidade (CAT-002).
+  locationId     String? @map("location_id") @db.Uuid
+  nome           String
+  descricao      String?
+  /// Período de vigência. Ausente dos dois lados = todo o ano.
+  periodoDe      DateTime? @map("periodo_de") @db.Timestamptz(6)
+  periodoAte     DateTime? @map("periodo_ate") @db.Timestamptz(6)
+  estado         EstadoDeCatalogo @default(RASCUNHO)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  version   Int       @default(1)
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  brand        Brand        @relation(fields: [organizationId, brandId], references: [organizationId, id], onDelete: Restrict)
+  location     Location?    @relation(fields: [organizationId, locationId], references: [organizationId, id], onDelete: Restrict)
+  canais       MenuChannel[]
+  seccoes      MenuCategory[]
+
+  @@unique([organizationId, id], name: "menu_por_organizacao")
+  @@index([organizationId])
+  @@index([organizationId, brandId])
+  @@map("menus")
+}
+
+model MenuChannel {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  menuId         String @map("menu_id") @db.Uuid
+  canal          Canal
+
+  menu Menu @relation(fields: [organizationId, menuId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, menuId, canal])
+  @@index([organizationId])
+  @@map("menu_channels")
+}
+
+model Category {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  brandId        String  @map("brand_id") @db.Uuid
+  nome           String
+  descricao      String?
+  /// Ordem na carta. Inteiro e explícito — a ordenação por arrastar do CAT-004
+  /// escreve aqui, e sem JavaScript escreve-se o número à mão.
+  ordem          Int     @default(1)
+  visivel        Boolean @default(true)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  version   Int       @default(1)
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  brand        Brand        @relation(fields: [organizationId, brandId], references: [organizationId, id], onDelete: Restrict)
+  produtos     Product[]
+  emMenus      MenuCategory[]
+
+  @@unique([organizationId, id], name: "categoria_por_organizacao")
+  @@index([organizationId])
+  @@index([organizationId, brandId])
+  @@map("categories")
+}
+
+/// Que secções entram em que menu, e por que ordem.
+model MenuCategory {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  menuId         String @map("menu_id") @db.Uuid
+  categoryId     String @map("category_id") @db.Uuid
+  ordem          Int    @default(1)
+
+  menu     Menu     @relation(fields: [organizationId, menuId], references: [organizationId, id], onDelete: Cascade)
+  category Category @relation(fields: [organizationId, categoryId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, menuId, categoryId])
+  @@index([organizationId])
+  @@map("menu_categories")
+}
+
+model Product {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  brandId        String  @map("brand_id") @db.Uuid
+  categoryId     String? @map("category_id") @db.Uuid
+  nome           String
+  descricao      String?
+  /// Referência interna. **Nome igual não é chave de identidade** e um SKU vazio
+  /// não autoriza fundir linhas — dois "Café" não são o mesmo produto.
+  sku            String?
+  estado         EstadoDeCatalogo @default(RASCUNHO)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  version   Int       @default(1)
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  brand        Brand        @relation(fields: [organizationId, brandId], references: [organizationId, id], onDelete: Restrict)
+  category     Category?    @relation(fields: [organizationId, categoryId], references: [organizationId, id], onDelete: Restrict)
+
+  traducoes      ProductTranslation[]
+  variantes      ProductVariant[]
+  precos         PriceRule[]
+  gruposDeOpcoes ProductModifierGroup[]
+  alergenios     ProductAllergen[]
+  preferencias   ProductDietaryTag[]
+  canais         ProductChannel[]
+  disponibilidades ProductAvailability[]
+
+  /// SKU único POR MARCA, e só quando preenchido. Vários `NULL` não colidem no
+  /// PostgreSQL, que é exactamente o que se quer: nem todo o produto tem SKU.
+  @@unique([organizationId, brandId, sku])
+  @@unique([organizationId, id], name: "produto_por_organizacao")
+  @@index([organizationId])
+  @@index([organizationId, brandId])
+  @@index([organizationId, categoryId])
+  @@map("products")
+}
+
+/// Nome e descrição noutro idioma.
+///
+/// *"Texto de origem alterado torna a tradução pendente de revisão."* Sem isso,
+/// mudar a descrição em espanhol deixa a inglesa a afirmar o antigo, e ninguém
+/// repara porque a página inglesa continua a existir e a parecer completa.
+model ProductTranslation {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  productId      String @map("product_id") @db.Uuid
+  /// `es-ES`, `pt-BR`, `en` — os três que o E02 fixou.
+  locale         String
+  nome           String
+  descricao      String?
+  /// A `version` do produto quando esta tradução foi escrita. Se o produto
+  /// avançou, a tradução está por rever — e o ecrã di-lo.
+  origemVersao   Int    @map("origem_versao")
+  revistoEm      DateTime? @map("revisto_em") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  product Product @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, productId, locale])
+  @@index([organizationId])
+  @@map("product_translations")
+}
+
+/// Tamanho, porção, tipo — com preços diferenciais (CAT-011).
+model ProductVariant {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  productId      String  @map("product_id") @db.Uuid
+  nome           String
+  ordem          Int     @default(1)
+  predefinida    Boolean @default(false)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  version   Int       @default(1)
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
+
+  product Product     @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Cascade)
+  precos  PriceRule[]
+
+  @@unique([organizationId, id], name: "variante_por_organizacao")
+  @@index([organizationId])
+  @@index([organizationId, productId])
+  @@map("product_variants")
+}
+
+/// Uma regra de preço. O nível sai da FORMA — que campos estão preenchidos.
+///
+/// **Unidades mínimas inteiras, sempre.** `Int` e não `Decimal`: 10,00 € é
+/// `1000` + `EUR`. E a moeda vai na linha, porque uma organização pode ter
+/// unidades em moedas diferentes e converter exigiria uma taxa que não existe.
+model PriceRule {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  productId      String  @map("product_id") @db.Uuid
+  /// Ausente = vale para todas as variantes.
+  variantId      String? @map("variant_id") @db.Uuid
+  /// Ausente = base da marca (o "Heredado" do CAT-010).
+  locationId     String? @map("location_id") @db.Uuid
+  /// Ausente = todos os canais.
+  canal          Canal?
+  deQuando       DateTime? @map("de_quando") @db.Timestamptz(6)
+  ateQuando      DateTime? @map("ate_quando") @db.Timestamptz(6)
+
+  montanteMenor  Int    @map("montante_menor")
+  moeda          String @db.Char(3)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  version   Int      @default(1)
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  product      Product         @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Cascade)
+  variant      ProductVariant? @relation(fields: [organizationId, variantId], references: [organizationId, id], onDelete: Cascade)
+  location     Location?       @relation(fields: [organizationId, locationId], references: [organizationId, id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@index([organizationId, productId])
+  @@map("price_rules")
+}
+
+/// Biblioteca reutilizável de extras (CAT-018, CAT-019).
+model ModifierGroup {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  brandId        String  @map("brand_id") @db.Uuid
+  nome           String
+  obrigatorio    Boolean @default(false)
+  minimo         Int     @default(0)
+  /// Ausente = sem tecto.
+  maximo         Int?
+  /// Para onde vai na cozinha. É E16 quem o usa; guarda-se aqui porque é do
+  /// grupo e não do KDS, e criá-lo depois obrigava a reescrever fichas.
+  destino        String?
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  version   Int       @default(1)
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  brand        Brand        @relation(fields: [organizationId, brandId], references: [organizationId, id], onDelete: Restrict)
+  opcoes       ModifierOption[]
+  emProdutos   ProductModifierGroup[]
+
+  @@unique([organizationId, id], name: "grupo_por_organizacao")
+  @@index([organizationId])
+  @@index([organizationId, brandId])
+  @@map("modifier_groups")
+}
+
+model ModifierOption {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  groupId        String  @map("group_id") @db.Uuid
+  nome           String
+  ordem          Int     @default(1)
+  /// Acréscimo. Em unidades mínimas, e `null` quando não acrescenta nada —
+  /// que é diferente de acrescentar zero.
+  precoMenor     Int?    @map("preco_menor")
+  moeda          String? @db.Char(3)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
+
+  group ModifierGroup @relation(fields: [organizationId, groupId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, id], name: "opcao_por_organizacao")
+  @@index([organizationId])
+  @@index([organizationId, groupId])
+  @@map("modifier_options")
+}
+
+/// O mesmo grupo, em vários produtos. É a "biblioteca" a sério.
+model ProductModifierGroup {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  productId      String @map("product_id") @db.Uuid
+  groupId        String @map("group_id") @db.Uuid
+  ordem          Int    @default(1)
+
+  product Product       @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Cascade)
+  group   ModifierGroup @relation(fields: [organizationId, groupId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, productId, groupId])
+  @@index([organizationId])
+  @@map("product_modifier_groups")
+}
+
+/// A biblioteca de alérgenos (CAT-022).
+///
+/// **Global e não por inquilino**: os catorze do anexo II do 1169/2011 são a
+/// mesma lista para toda a gente na UE, e uma cópia por organização seria
+/// catorze cópias que divergem quando a lei mudar. A `regiao` existe porque
+/// outras jurisdições têm outras listas.
+model Allergen {
+  id       String @id @default(uuid()) @db.Uuid
+  codigo   String @unique
+  /// `UE`, `AU`, `BR`… A lista aplicável sai da região da organização.
+  regiao   String @default("UE")
+  ordem    Int    @default(1)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  emProdutos ProductAllergen[]
+
+  @@map("allergens")
+}
+
+/// A declaração de um alérgeno num produto.
+///
+/// **A ausência de linha é `DESCONHECIDO`.** Não há estado guardável para "não
+/// se sabe": ninguém escreve desconhecido, escreve-se uma das três ou não se
+/// escreve nada.
+model ProductAllergen {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  productId      String @map("product_id") @db.Uuid
+  allergenId     String @map("allergen_id") @db.Uuid
+  estado         EstadoDeAlergenio
+  /// Quem assinou. **Uma declaração sem responsável não é uma declaração**, e
+  /// por isso a ficha só está revista quando todas o têm.
+  revistoPor     String? @map("revisto_por")
+  revistoEm      DateTime? @map("revisto_em") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  product  Product  @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Cascade)
+  allergen Allergen @relation(fields: [allergenId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, productId, allergenId])
+  @@index([organizationId])
+  @@map("product_allergens")
+}
+
+/// Preferência alimentar. **NÃO é declaração de segurança.**
+///
+/// Tabela separada de propósito, sem partilhar vocabulário com os alérgenos.
+/// "Contém amendoim" é segurança: quem a lê pode morrer se estiver errada.
+/// "Vegetariano" é preferência: quem a lê fica aborrecido. Misturá-las num campo
+/// é o defeito que transforma uma preferência num risco, porque a partir daí
+/// ninguém sabe qual das duas está a ler.
+model ProductDietaryTag {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  productId      String @map("product_id") @db.Uuid
+  codigo         String
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  product Product @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, productId, codigo])
+  @@index([organizationId])
+  @@map("product_dietary_tags")
+}
+
+/// Onde é que este produto se vende (CAT-016).
+model ProductChannel {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  productId      String  @map("product_id") @db.Uuid
+  canal          Canal
+  visivel        Boolean @default(true)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  product Product @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, productId, canal])
+  @@index([organizationId])
+  @@map("product_channels")
+}
+
+/// O bloqueio operacional (CAT-017).
+///
+/// A disponibilidade tem **duas camadas** e esta é a de baixo: "acabou o polvo",
+/// imediato, sem republicar a carta. Um restaurante que tenha de refazer a
+/// publicação para o dizer vai deixar de o dizer.
+model ProductAvailability {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  productId      String  @map("product_id") @db.Uuid
+  /// `null` = em todas as unidades. Preenchido = só nesta.
+  locationId     String? @map("location_id") @db.Uuid
+  bloqueado      Boolean @default(true)
+  /// Até quando. `null` = até alguém desbloquear; o atlas mostra "hasta próximo
+  /// servicio", que é uma data e não uma promessa vaga.
+  ate            DateTime? @db.Timestamptz(6)
+  motivo         String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  product  Product   @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Cascade)
+  location Location? @relation(fields: [organizationId, locationId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, productId, locationId])
+  @@index([organizationId])
+  @@map("product_availability")
 }

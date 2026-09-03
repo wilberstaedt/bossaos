@@ -1,10 +1,15 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E06 — onboarding e configuração do restaurante
-**Estado:** implementado, **aguardando validação**. `docs/progress/E06.md`.
-**Próxima ação:** o sénior valida contra `docs/architecture/domain-model.md` e
-`permissions.md`, os dois escritos no E00, e contra o `ALVO-E06` que escreveu em paralelo.
-**O JR não avança para o E07.**
+**Etapa atual:** E07 — catálogo, produtos, preços e opções (**18 telas, a maior até agora**)
+**Estado:** **em curso**. Os motores puros estão feitos e commitados; falta o schema, os
+serviços, as telas e a prova contra a base.
+**Régua:** `docs/reviews/ALVO-E07.md`, escrita antes de o E06 estar declarado ·
+`docs/architecture/catalogo-e-publicacao.md` e `dinheiro.md`, do E00.
+**O JR não avança para o E08.**
+
+**E06 validado à 2ª** — a 1ª validação foi **retirada pela CI**: a cadeia de migrações não
+se aplicava do zero, porque uma migração E05 tinha carimbo posterior a uma E06 que dela
+dependia. Corrigido renomeando, com `provar-migracoes-do-zero.sh` na CI.
 
 **E05 validado à primeira** — a primeira etapa a passar sem segunda volta.
 

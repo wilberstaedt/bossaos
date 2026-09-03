@@ -140,3 +140,13 @@ export {
   type Idempotencia, type ResultadoIdempotente, type PerfilDaOrganizacao,
   type Dependencia, type ResultadoDeArquivo,
 } from './onboarding.ts';
+
+export {
+  CANAIS, listarProdutos, obterProduto, guardarProduto,
+  precoEfectivo, precosDoProduto,
+  fichaDeAlergeniosDoProduto, guardarAlergenios,
+  gruposDoProduto, validarEscolhasDoProduto, guardarGrupo,
+  bloquearProduto, desbloquearProduto, estaDisponivel,
+  type Canal, type FiltroDeProdutos, type DadosDeProduto,
+  type ResultadoDeEdicao, type DeclaracaoParaGravar,
+} from './catalogo.ts';
