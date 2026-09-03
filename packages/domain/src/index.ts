@@ -20,7 +20,7 @@ export {
 } from './portas/autorizacao.ts';
 
 export {
-  chaveDeCache, prefixoDeMedia, nomeDeEvento, chaveDeTarefa, type EscopoDeChave,
+  chaveDeCache, chaveDaCartaPublica, prefixoDeMedia, nomeDeEvento, chaveDeTarefa, type EscopoDeChave,
 } from './chaves.ts';
 
 export {

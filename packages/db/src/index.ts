@@ -168,3 +168,8 @@ export {
   catalogoParaCsv, neutralizarCampo, pedirExportacao, podeDescarregar, listarExportacoes,
   type LinhaDeTraducao,
 } from './conteudo.ts';
+
+export {
+  cartaPublica, horarioPublico, abertoAgora, registarConsulta,
+  type CartaServida, type HorarioPublico, type OrigemDeConsulta,
+} from './publico.ts';

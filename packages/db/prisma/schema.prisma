@@ -111,6 +111,7 @@ model Organization {
   importacoes     ImportJob[]
   exportacoes     ExportJob[]
   tarefas         OutboxTask[]
+  consultas       MenuView[]
 }
 
 /// Marca: catálogo e identidade comercial. Pertence a uma organização.
@@ -157,6 +158,15 @@ model Location {
   brandId        String @map("brand_id") @db.Uuid
   nome           String
   slug           String
+  /// O endereço PÚBLICO da carta. Global, e por isso diferente do `slug`.
+  ///
+  /// O `slug` é único DENTRO da organização: dois restaurantes diferentes podem
+  /// ambos ter uma unidade `centro`. Este vai para um URL na internet aberta e
+  /// tem de ser único no mundo — senão dois inquilinos disputam o mesmo endereço
+  /// e quem ganha é quem a consulta encontrar primeiro.
+  ///
+  /// Anulável: uma unidade só precisa dele quando publica.
+  publicSlug     String?  @unique @map("public_slug")
   // ── E06: de obrigatórios a opcionais, e é uma decisão, não um relaxamento ─
   //
   // Estavam `NOT NULL`. Parece a escolha segura e é o contrário: com eles
@@ -194,6 +204,7 @@ model Location {
   menus           Menu[]
   regrasDePreco   PriceRule[]
   disponibilidades ProductAvailability[]
+  consultas       MenuView[]
 
   @@unique([organizationId, id], name: "location_por_organizacao")
   @@unique([organizationId, slug])
@@ -1508,4 +1519,43 @@ model OutboxTask {
   @@index([organizationId])
   @@index([estado, proximaEm])
   @@map("outbox_tasks")
+}
+
+/**
+ * Uma consulta da carta pública (REP-001).
+ *
+ * ── O que NÃO está aqui é a decisão ────────────────────────────────────────
+ *
+ * O `dados-e-accoes-sensiveis.md` pede minimização, e a régua do E09 di-lo por
+ * extenso: *"unidade, idioma e origem chegam; um identificador que siga a
+ * pessoa, não."*
+ *
+ * Por isso não há aqui endereço IP, nem agente do navegador, nem cookie, nem
+ * identificador de sessão, nem nada que ligue duas consultas à mesma pessoa. Uma
+ * linha destas responde a "quantos vêem a carta em inglês ao domingo" e **não
+ * responde** a "o que é que aquela pessoa viu" — e a segunda pergunta não é para
+ * ter resposta.
+ *
+ * `origem` é a categoria de onde veio (`qr`, `link`, `directo`), não o `Referer`
+ * completo: o endereço de proveniência é ele próprio um dado sobre a pessoa.
+ */
+model MenuView {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  /// A revisão que estava no ar. Sem isto, um pico de consultas não se consegue
+  /// ligar à publicação que o causou.
+  revisionId     String @map("revision_id") @db.Uuid
+  idioma         String
+  canal          Canal
+  origem         String
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [organizationId, locationId], references: [organizationId, id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([organizationId, locationId, createdAt])
+  @@map("menu_views")
 }
