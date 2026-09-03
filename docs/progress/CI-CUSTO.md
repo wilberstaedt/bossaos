@@ -176,3 +176,41 @@ Três ramos em vez de onze: **o mesmo relógio, com um terço do desperdício de
 projectei sem o dizer, escrevi 200 s e saíram 548 s. Confirma-se a correr.
 
 **Quando:** fecho do E08, árvore parada, e validado contra o **esquema** do Actions.
+
+
+---
+
+# O `base` dividido, medido — 23h50
+
+| | |
+| --- | --- |
+| De manhã, um trabalho, 9 passos | **649 s** |
+| Três trabalhos | **548 s** |
+| **Cinco trabalhos** | **369 s** |
+
+```
+✓ Rápido — sem base nem navegador       2m00s
+✓ Navegador — inspecção visual          2m33s
+✓ Base — as restantes provas            2m41s
+✓ Base — acesso e catálogo              4m09s
+✓ Base — recuperação e segundo factor   5m23s   ← o chão
+```
+
+**43 % mais rápido do que de manhã**, e o caminho crítico é agora uma única prova.
+
+## Errei outra vez, e por menos
+
+Projectei **289 s**; saíram **369 s** — 22 % abaixo. Da vez anterior tinha projectado 200 s
+para 548 s, 63 % abaixo. **Melhor, e ainda errado.**
+
+A causa mede-se: a prova do MFA levou **233 s** numa corrida e **210 s** noutra, e agora o
+ramo inteiro levou 323 s contra os 289 previstos. Eu usei um número de uma medição única
+como se fosse estável, e ele varia uns 10 %. **Uma medição não é uma distribuição** — e para
+projectar um caminho crítico, o que interessa é o pior caso e não o único caso que vi.
+
+## O chão, e o que o baixaria
+
+O ramo do MFA é 5m23s e não desce dividindo mais: é **uma prova**. Baixá-lo exige mexer na
+prova — ela espera pelo Mailpit, e essa espera pode ser evento em vez de sondagem. Não é
+para hoje, e **não é urgente**: 369 s dá resposta em menos de seis minutos, e o `rápido`
+continua a falhar em dois quando o erro é de lint, tipos ou guarda.
