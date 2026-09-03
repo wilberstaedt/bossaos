@@ -17,6 +17,7 @@
 | **E06** onboarding | [domain-model](./domain-model.md) · [permissions](./permissions.md) | de quem é cada dado |
 | **E07–E08** catálogo | [catalogo-e-publicacao](./catalogo-e-publicacao.md) | alérgeno vazio é **desconhecido**; publicar é versão |
 | **E09–E10** público | [dados-e-accoes-sensiveis](./dados-e-accoes-sensiveis.md) | SVG, proxy por URL, dados pessoais em URLs |
+| **E10** domínios | [dominios-e-enderecos](./dominios-e-enderecos.md) | prova de controlo, reverificação, e o nome que não volta ao mundo |
 | **E12** temas | [adr/0001-foundation](./adr/0001-foundation.md) | os tokens temáveis e os fixos |
 | **E13–E15** sala e PWA | [offline-e-fila-local](./offline-e-fila-local.md) | o tablet é **partilhado**: fila por org+unidade+utilizador |
 | **E14** pedidos | [state-machines](./state-machines.md) · [api-contracts](./api-contracts.md) | idempotência e outbox |
