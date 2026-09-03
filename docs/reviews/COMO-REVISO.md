@@ -81,6 +81,25 @@ As perguntas, a somar às do passo 6:
 - **Conta o que correu, ou o que não correu mal?** Um contador de falhas a zero só diz que
   nada rebentou. Não diz que alguma coisa aconteceu.
 
+## Shell: escrever para o ambiente mais estrito
+
+Duas falhas minhas no mesmo dia, em direcções opostas, resolvem-se numa regra.
+
+- Às 13h30 dois scripts meus tinham `#!/bin/zsh`. Corriam aqui e davam **127 na CI**, que
+  é Ubuntu e não tem `zsh`. Passavam localmente e falhavam lá.
+- Às 17h25 escrevi uma guarda com um *array* associativo do bash. Rebentou aqui, no bash
+  **3.2** do macOS — e **teria passado na CI**, que corre bash 5. Falhava localmente e
+  passava lá.
+
+A regra que cobre as duas: **escrever para o mais estrito dos dois ambientes e testar
+nele.** Para versões de bash, o mais estrito é o local (3.2 < 5), por isso correr aqui
+basta. Para *qual* shell existe, o mais estrito é o runner, por isso o interpretador é
+sempre `#!/usr/bin/env bash`.
+
+Terceira diferença, auditada a 2026-09-03 e **limpa** nos sete scripts: nenhum usa
+`sed -i` sem sufixo, `grep -P`, `readlink -f`, `date -d` nem `stat -c` — flags que existem
+nos dois sistemas e fazem coisas diferentes, que é pior do que não existirem.
+
 ## Duas verificações que valem por muitas
 
 **Ler a forma, não só o comportamento.** No E03 fui ao `pg_policies` confirmar que as
