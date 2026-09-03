@@ -13,6 +13,20 @@ No E01 isso valeu: corri os quatro comandos outra vez e a primeira tentativa dev
 **código de saída vazio**, porque o `| tail` o come. É a armadilha que na véspera me fez
 commitar por cima de um teste falhado noutro projecto.
 
+## Passo 0 — a régua escreve-se ANTES de ver a entrega
+
+Acrescentado a 2026-09-03, depois de resultar duas vezes.
+
+Uma lista de verificação tirada daquilo que a entrega calhou de fazer não é uma revisão, é
+uma justificação. Antes de o `E##.md` existir, escrevo `ALVO-E##.md`: o que vou medir, de
+onde vem cada critério, e **as suspeitas pré-registadas** — as coisas que vi de relance e
+quero confirmar antes de saber a conclusão.
+
+No E02 a suspeita pré-registada era *"ele alterou o teste depois de o teste encontrar um
+defeito"*. **Não se confirmou** — e é isso que a torna útil: escrita antes, sobrevive a
+estar errada sem envergonhar ninguém. No E03 a régua era a `prova-de-isolamento.md`,
+escrita no E00, semanas de trabalho antes de a etapa começar.
+
 ## Os sete passos, por esta ordem
 
 **1. Ler o handoff inteiro antes de correr nada.** Anotar as afirmações verificáveis. Uma
@@ -40,6 +54,45 @@ usada. Se o detector não consegue produzir a avaria, o verde dele não prova na
 
 **7. Escrever a revisão** em `docs/reviews/E##.md`: o que verifiquei e **como**, onde
 discordo sem bloquear, e as pendências que aceito como declaradas.
+
+**8. Aplicar a mim a régua que acabei de dar.** Sempre, no mesmo dia. A 2026-09-03 exigi
+ao JR uma guarda contra o instrumento medir zero e, vinte minutos depois, encontrei
+exactamente o mesmo defeito no **meu** `estado.sh`: contava telas por conferir como
+entregues. Não apareceu por eu procurar defeitos meus — apareceu por aplicar a mim o que
+tinha acabado de aplicar a outro. É o passo com melhor retorno dos oito.
+
+## O instrumento também é entrega
+
+Metade dos defeitos que encontrei até agora não estavam no produto: estavam no aparelho que
+o mede. Um verificador defeituoso é pior do que nenhum, porque produz confiança.
+
+As perguntas, a somar às do passo 6:
+
+- **Falha quando deve falhar?** Partir o produto e ver o verificador acender.
+- **Falha quando não consegue medir?** É diferente da anterior e é a que escapa. O
+  `provar-isolamento.sh` do E03 imprimia `ok 0 grupos verdes` — verde, com zero medido —
+  porque só olhava para o código de saída. Um corredor de testes que não encontra testes
+  sai a zero.
+- **Depende de alguma coisa que não está fixada?** Aquele mesmo script partia-se com uma
+  versão de Node diferente, porque o formato do relatório muda e a contagem deixa de
+  encontrar o que procura. Ambiente não fixado é uma dependência escondida.
+- **A régua descreve-se como aquilo que aplica?** O JR apanhou uma mensagem sua que dizia
+  *"esperadas 8"* enquanto comparava com outro valor.
+- **Conta o que correu, ou o que não correu mal?** Um contador de falhas a zero só diz que
+  nada rebentou. Não diz que alguma coisa aconteceu.
+
+## Duas verificações que valem por muitas
+
+**Ler a forma, não só o comportamento.** No E03 fui ao `pg_policies` confirmar que as
+políticas `ALL` tinham `USING` **e** `WITH CHECK` — porque uma política só com `USING` lê
+bem e deixa **escrever** para outro inquilino, e nenhum teste de leitura o mostraria. E li
+o `qual` das políticas `SELECT` extra, porque no PostgreSQL as permissivas somam-se por
+**OR** e uma leitura a mais alarga o acesso sem aparecer em teste nenhum.
+
+**Exigir o par, nunca o caso sozinho.** "O pedido de A ao recurso de B devolve vazio" é
+compatível com um sistema em que *tudo* devolve vazio. A prova é a **diferença**: o mesmo
+identificador, com a sessão certa, tem de devolver a coisa. Vale para isolamento, para
+autorização, para filtros e para qualquer recusa.
 
 ## O que bloqueia e o que não
 
