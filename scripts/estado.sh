@@ -44,5 +44,17 @@ if [ "$TELAS_TOTAL" -lt 300 ]; then
 fi
 PCT_ETAPA=$(( ETAPAS_FEITAS * 100 / ETAPAS_TOTAL ))
 PCT_TELA=$(( TELAS_FEITAS * 100 / TELAS_TOTAL ))
-ATUAL=$(grep -m1 -oE '^\*\*Etapa atual:\*\* .*' docs/progress/HANDOFF.md 2>/dev/null | sed 's/\*\*Etapa atual:\*\* //' || echo "E00")
+# A etapa actual DERIVA-SE da matriz: e a primeira que ainda nao esta validada,
+# saltando o E00 (que so se valida no E11, por desenho - quem escreve os contratos
+# nao os valida). Antes vinha de uma linha em prosa do HANDOFF.md, e a 2026-09-03
+# essa linha dizia E03 durante quase uma hora enquanto o JR trabalhava no E04:
+# depende de alguem se lembrar de a actualizar, e ninguem se lembra a meio de uma
+# etapa. Isto nao depende de ninguem.
+ATUAL=$(grep -E '^\| E[0-9]{2} \| ' docs/progress/ETAPAS.md 2>/dev/null \
+  | grep -v '^| E00 ' | grep -v '| validado |' \
+  | head -1 | awk -F'|' '{print $2}' | tr -d ' ')
+if [ -z "${ATUAL:-}" ]; then
+  echo "ERRO: nao consegui derivar a etapa actual de docs/progress/ETAPAS.md" >&2
+  exit 1
+fi
 echo "PCT_ETAPA=$PCT_ETAPA ETAPAS=$ETAPAS_FEITAS/$ETAPAS_TOTAL AGUARDA=$AGUARDA PCT_TELA=$PCT_TELA TELAS=$TELAS_FEITAS/$TELAS_TOTAL TELAS_AGUARDA=$TELAS_AGUARDA ATUAL=$ATUAL"
