@@ -90,6 +90,16 @@ não correste vão em listas **separadas**.
   meio de ser escrito, e a CI ficou **vermelha numa coisa que não é uma regressão**.
   Uma CI vermelha que não significa nada é pior do que nenhuma: ensina a ignorar o
   vermelho. A regra: **commit local protege; `push` é para o que está declarado.**
+- **Não correr a verificação enquanto o JR escreve.** A 2026-09-03, às 15h15, o
+  `pnpm verificar` deu vermelho em `rotas-com-porta.test.ts` — e o mesmo teste, corrido
+  isolado trinta segundos depois, deu verde com as cinco asserções, sem eu ter mudado
+  nada. A explicação mais provável é a óbvia: eu estava a ler ficheiros que ele estava a
+  escrever.
+  Qualquer que seja a causa, a conclusão é a mesma e é mais forte do que o diagnóstico:
+  **um resultado que muda em trinta segundos sem eu tocar em nada não é uma medição.** E
+  o corolário incomoda mais do que o falso vermelho — um **verde** obtido a meio de uma
+  etapa também não vale nada, e esse não faz barulho nenhum a passar.
+  A verificação que conta é a de **depois da declaração**, com a árvore parada.
 - Antes de empurrar, `pnpm verificar` e ler o código de saída — e o `&&` tem de estar
   **na verificação**, não no `git add`. Foi assim que empurrei por cima de um vermelho
   nesse mesmo dia, com o resultado à minha frente.
