@@ -1,0 +1,24 @@
+{
+  "document_version": "1.0",
+  "date": "2026-09-02",
+  "sources": [
+    {
+      "filename": "Mapa_Completo_Telas_Restaurant_OS_v1.pdf",
+      "pages": 25,
+      "bytes": 1327937,
+      "sha256": "4c996e7b73457e51db38885760bdf8d2bef4a7c0f54c92ca73a1244dfbc5cbf4"
+    },
+    {
+      "filename": "BossaOS_Manual_de_Marca_e_Estrategia_v1.pdf",
+      "pages": 39,
+      "bytes": 165569,
+      "sha256": "b004c7135b9098bf8c67b44c2cb7ea188e43f5ed3a3321cc70dc85f92473fa91"
+    },
+    {
+      "filename": "BossaOS_Atlas_Completo_Desktop_Mobile_v1.pdf",
+      "pages": 421,
+      "bytes": 3068907,
+      "sha256": "d99cb500c3b626747d2fb023bc09d79acd667936481f9b0568f893a75230708d"
+    }
+  ]
+}

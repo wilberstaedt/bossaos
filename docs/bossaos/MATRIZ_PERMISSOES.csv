@@ -1,0 +1,33 @@
+﻿acao,papeis_base,escopo,regra
+catalog.read,"owner,brand_manager,venue_manager,waiter,kitchen,bartender,marketing",brand/location inherited scope,Operational roles receive only fields needed for service.
+catalog.write,"owner,brand_manager,venue_manager",brand; venue edits allowed local override,Venue cannot silently edit global base across locations.
+catalog.publish,"owner,brand_manager,venue_manager",all destinations must be authorized,Show affected destinations and version.
+catalog.translate,"owner,brand_manager,venue_manager,marketing",authorized brand/content,Allergen review requires assigned responsible reviewer.
+catalog.import,"owner,brand_manager,venue_manager",authorized brand/location,Preview + confirmation; no production overwrite by name guessing.
+media.write,"owner,brand_manager,venue_manager,marketing",authorized brand/location,Safe upload and scoped attachment.
+availability.write,"owner,venue_manager,floor_manager,kitchen,bartender",location/station product scope,Station operator only blocks relevant products when policy grants it.
+website.write,"owner,brand_manager,venue_manager,marketing",authorized public content scope,No access to billing secrets.
+website.publish,"owner,brand_manager,venue_manager,marketing",authorized destination,Publishing permission can be separated from editing.
+website.domains,"owner,brand_manager",brand/location,Proof of control before binding.
+theme.write,"owner,brand_manager,venue_manager,marketing",public destination + Restaurant/Pro,No Starter bypass; no operational tokens.
+members.invite,"owner,brand_manager,venue_manager",scope and authority no greater than actor,Protect last owner; no role escalation.
+members.manage,"owner,brand_manager,venue_manager",bounded scope,Only owner changes ownership and organization-level privileged grants.
+brands.manage,owner,organization + configured quota,"Brand manager edits assigned brand, not new unrelated brands."
+locations.manage,"owner,brand_manager",organization/assigned brand + quota,Additional units require explicit grant.
+subscription.read,owner,organization,Authorized billing delegate may be configured explicitly.
+subscription.manage,owner,organization,Review effect and existing transactions.
+orders.submit,"owner,venue_manager,floor_manager,waiter",location + active service,Guest uses separate limited session capability.
+orders.cancel_before_prep,"owner,venue_manager,floor_manager,waiter",location; own item where applicable,Reason and version required.
+orders.cancel_in_prep,"owner,venue_manager,floor_manager",location + policy,Waiter requests manager authorization.
+production.update,"owner,venue_manager,kitchen,bartender,expo",assigned station,Only allowed transitions; record actor.
+reservations.manage,"owner,venue_manager,floor_manager,host",location,Cannot bypass capacity silently.
+payments.take,"owner,venue_manager,cashier",location + Pro,Waiter can receive only with explicit additional grant.
+payments.refund,"owner,venue_manager,cashier",location + Pro + configured limit,No configured limit for cashier means request manager; do not invent numeric threshold.
+cash.close_difference,"owner,venue_manager",location + Pro,Reason and evidence of count required.
+inventory.manage,"owner,venue_manager,inventory",location + Pro,Transfer requires scope on source and destination.
+campaigns.send,"owner,marketing",authorized audience + Pro,Consent checked again at dispatch; external authorization/configuration.
+employee.self,employee,own profile/time entries,Do not expose peer records.
+finance.read,"owner,finance",granted organization/locations + Pro,No cross-organization consolidation.
+data.export,owner,explicit data scope,Other roles require named export permission and field policy.
+support.assist,platform_support,time-bound tenant-approved session,No implicit owner; actor retained in audit.
+platform.manage,platform_admin,platform function scope,Tenant business access is still separately authorized.
