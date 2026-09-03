@@ -130,8 +130,179 @@ jobs:
           -u BETTER_AUTH_SECRET -u BETTER_AUTH_URL
           pnpm build
 
-  base:
-    name: Base — migrações e provas
+  # O `base` era um trabalho so, com 543 s dos 548 do relogio. Medido a 2026-09-03:
+  # a prova do MFA leva 233 s sozinha, acesso 113, catalogo 95, e todas as outras
+  # juntas nao chegam a 100. Correr isso em serie era esperar pela soma quando bastava
+  # esperar pela maior.
+  #
+  # Tres ramos e nao onze: cada ramo paga 56 s de arranque, portanto uma matriz por
+  # prova gastaria 616 s de maquina para ganhar ZERO no relogio - que fica preso na
+  # prova mais longa de qualquer maneira. Equilibrados pela medicao, nao pelo numero.
+  base_mfa:
+    name: Base — recuperação e segundo factor
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        # Base descartável: nasce e morre com o job (E01, aceite 2).
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+      mailpit:
+        # Caixa de correio descartável. A prova da recuperação de acesso LÊ a
+        # caixa — não se contenta com o 200 do envio — e sem este serviço ela
+        # falha alto, de propósito, em vez de se saltar a si própria.
+        image: axllent/mailpit:latest
+        ports: ['1025:1025', '8025:8025']
+
+    env:
+      # Valores de CI, descartáveis, sem relação com qualquer ambiente real.
+      PGHOST: 127.0.0.1
+      PGPASSWORD: postgres
+      PGSUPERUSER: postgres
+      DATABASE_URL: postgresql://bossaos_app:dev_app_local@127.0.0.1:5432/bossaos_dev
+      MIGRATION_DATABASE_URL: postgresql://bossaos_migrate:dev_migrate_local@127.0.0.1:5432/bossaos_dev
+      # Terceiro acesso (E04): identidade e sessão, zero dados de inquilino.
+      AUTH_DATABASE_URL: postgresql://bossaos_auth:dev_auth_local@127.0.0.1:5432/bossaos_dev
+      BETTER_AUTH_SECRET: segredo-de-ci-descartavel-com-32-caracteres
+      BETTER_AUTH_URL: http://127.0.0.1:3000
+      CONVITE_VALIDADE_HORAS: '72'
+      SMTP_HOST: 127.0.0.1
+      SMTP_PORT: '1025'
+      MAIL_FROM: bossaos@ci.local
+      MAILPIT_URL: http://127.0.0.1:8025
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node fixado pelo .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: pnpm da versão declarada em packageManager
+        uses: pnpm/action-setup@v4
+
+      - name: Instalar pelo lockfile
+        # `--frozen-lockfile` falha se o lockfile não corresponder ao
+        # package.json. É o que transforma "instalou" em "instalou o mesmo".
+        run: pnpm install --frozen-lockfile
+
+      - name: Cliente PostgreSQL
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Base e papéis separados
+        run: ./scripts/dev-db.sh
+
+      - name: Migração em base descartável
+        run: pnpm db:migrate:deploy
+
+      - name: Prova — recuperação e segundo factor, ponta a ponta
+        # Aceite 3 do E04. Gera o código TOTP com uma implementação PRÓPRIA de
+        # RFC 6238 (usar a da biblioteca faria um defeito partilhado cancelar-se)
+        # e LÊ a caixa do Mailpit para tirar a ligação de recuperação de dentro.
+        # Três controlos negativos: sem a revogação no reset, sem caixa alcançável,
+        # e a reposição a exigir o verde de volta.
+        run: ./scripts/provar-recuperacao-e-mfa.sh
+
+
+  base_longas:
+    name: Base — acesso e catálogo
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        # Base descartável: nasce e morre com o job (E01, aceite 2).
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+      mailpit:
+        # Caixa de correio descartável. A prova da recuperação de acesso LÊ a
+        # caixa — não se contenta com o 200 do envio — e sem este serviço ela
+        # falha alto, de propósito, em vez de se saltar a si própria.
+        image: axllent/mailpit:latest
+        ports: ['1025:1025', '8025:8025']
+
+    env:
+      # Valores de CI, descartáveis, sem relação com qualquer ambiente real.
+      PGHOST: 127.0.0.1
+      PGPASSWORD: postgres
+      PGSUPERUSER: postgres
+      DATABASE_URL: postgresql://bossaos_app:dev_app_local@127.0.0.1:5432/bossaos_dev
+      MIGRATION_DATABASE_URL: postgresql://bossaos_migrate:dev_migrate_local@127.0.0.1:5432/bossaos_dev
+      # Terceiro acesso (E04): identidade e sessão, zero dados de inquilino.
+      AUTH_DATABASE_URL: postgresql://bossaos_auth:dev_auth_local@127.0.0.1:5432/bossaos_dev
+      BETTER_AUTH_SECRET: segredo-de-ci-descartavel-com-32-caracteres
+      BETTER_AUTH_URL: http://127.0.0.1:3000
+      CONVITE_VALIDADE_HORAS: '72'
+      SMTP_HOST: 127.0.0.1
+      SMTP_PORT: '1025'
+      MAIL_FROM: bossaos@ci.local
+      MAILPIT_URL: http://127.0.0.1:8025
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node fixado pelo .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: pnpm da versão declarada em packageManager
+        uses: pnpm/action-setup@v4
+
+      - name: Instalar pelo lockfile
+        # `--frozen-lockfile` falha se o lockfile não corresponder ao
+        # package.json. É o que transforma "instalou" em "instalou o mesmo".
+        run: pnpm install --frozen-lockfile
+
+      - name: Cliente PostgreSQL
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Base e papéis separados
+        run: ./scripts/dev-db.sh
+
+      - name: Migração em base descartável
+        run: pnpm db:migrate:deploy
+
+      - name: Prova — acesso, convites e revogação
+        # O par (1)/(2): o identificador de B com sessão de A dá ausência, o
+        # MESMO identificador com sessão de B dá 200. Só o primeiro passaria num
+        # sistema em que tudo devolve ausência. O controlo negativo acrescenta
+        # uma política de leitura a mais e exige que o par COLAPSE — as
+        # permissivas somam-se por OR, e é assim que um escopo se alarga sem
+        # aparecer em teste nenhum.
+        run: ./scripts/provar-acesso.sh
+
+      - name: Prova — catálogo, alérgenos, preços e modificadores
+        # A regra do produto inteiro onde o erro tem consequência física:
+        # ausência de dados sobre alérgenos não significa ausência de alérgenos.
+        # O par mede-o contra a base — não declarado dá DESCONHECIDO, declarado
+        # ausente dá NAO_CONTEM, e há uma asserção a exigir que sejam diferentes.
+        # Cinco controlos negativos, um por camada, mais a guarda de limpeza.
+        run: ./scripts/provar-catalogo.sh
+
+
+  base_curtas:
+    name: Base — as restantes provas
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -228,29 +399,12 @@ jobs:
         # escrito no E00, antes desta etapa.
         run: ./scripts/provar-isolamento.sh
 
-      - name: Prova — acesso, convites e revogação
-        # O par (1)/(2): o identificador de B com sessão de A dá ausência, o
-        # MESMO identificador com sessão de B dá 200. Só o primeiro passaria num
-        # sistema em que tudo devolve ausência. O controlo negativo acrescenta
-        # uma política de leitura a mais e exige que o par COLAPSE — as
-        # permissivas somam-se por OR, e é assim que um escopo se alarga sem
-        # aparecer em teste nenhum.
-        run: ./scripts/provar-acesso.sh
-
       - name: Prova — descer de plano, no trabalho de fundo
         # Aceite 2 do E05: a resposta certa "inclusive em job e rota direta". O
         # par mede as DUAS superfícies com o mesmo direito expirado, e os quatro
         # controlos negativos desligam uma camada de cada vez — a flag, as
         # pendências, e a verificação de inquilino dentro da função da base.
         run: ./scripts/provar-descidas.sh
-
-      - name: Prova — recuperação e segundo factor, ponta a ponta
-        # Aceite 3 do E04. Gera o código TOTP com uma implementação PRÓPRIA de
-        # RFC 6238 (usar a da biblioteca faria um defeito partilhado cancelar-se)
-        # e LÊ a caixa do Mailpit para tirar a ligação de recuperação de dentro.
-        # Três controlos negativos: sem a revogação no reset, sem caixa alcançável,
-        # e a reposição a exigir o verde de volta.
-        run: ./scripts/provar-recuperacao-e-mfa.sh
 
       - name: Prova — plano, quotas e tema Starter
         # Aceite 1 do E05. Corre os três grupos com a credencial REAL de runtime
@@ -273,14 +427,6 @@ jobs:
         # caia o lado da RECUSA e que o lado positivo continue verde.
         run: ./scripts/provar-plataforma.sh
 
-      - name: Prova — catálogo, alérgenos, preços e modificadores
-        # A regra do produto inteiro onde o erro tem consequência física:
-        # ausência de dados sobre alérgenos não significa ausência de alérgenos.
-        # O par mede-o contra a base — não declarado dá DESCONHECIDO, declarado
-        # ausente dá NAO_CONTEM, e há uma asserção a exigir que sejam diferentes.
-        # Cinco controlos negativos, um por camada, mais a guarda de limpeza.
-        run: ./scripts/provar-catalogo.sh
-
       - name: Prova — publicação atómica, traduções, importação e exportação
         # O aceite 1 do E08: uma falha a MEIO da publicação deixa a revisão
         # anterior inteira. A prova injecta uma falha real depois de a revisão
@@ -297,6 +443,7 @@ jobs:
 
       - name: Migrações aplicadas e sem desvio
         run: pnpm db:migrate:status
+
 
   navegador:
     name: Navegador — inspecção visual
