@@ -8,7 +8,7 @@ Os PDFs, contratos e prompts estão preparados. Nenhuma etapa de implementação
 | E01 | validado | docs/progress/E01.md · 16 testes · provar-separacao-de-credenciais.sh e provar-prontidao.sh a 0 falhas |
 | E02 | validado | docs/progress/E02.md · 2ª declaração após docs/reviews/E02.md · 69 testes unitários + 69 no browser · 12 capturas · STATE-001/002/003/005/007/016 |
 | E03 | validado | docs/progress/E03.md · 2ª declaração após docs/reviews/E03.md · 85 testes + 28 asserções de isolamento + 12 verificações no provar-isolamento.sh (inclui autoteste do verificador) · zero telas, coverage intacto |
-| E04 | implementado aguardando validação | docs/progress/E04.md · 3 migrações · **127 asserções unitárias** (domain 38 · ui 37 · i18n 16 · config 14 · auth 12 · db 5 · storage 5; worker declarado a zero) + 24 de acesso por HTTP + 13 de recuperação e MFA + 4 de fuso · provar-acesso.sh a 0 com o par a colapsar e provar-recuperacao-e-mfa.sh a 0 com três controlos negativos · 12 telas |
+| E04 | validado | docs/progress/E04.md · 3 migrações · **127 asserções unitárias** (domain 38 · ui 37 · i18n 16 · config 14 · auth 12 · db 5 · storage 5; worker declarado a zero) + 24 de acesso por HTTP + 13 de recuperação e MFA + 4 de fuso · provar-acesso.sh a 0 com o par a colapsar e provar-recuperacao-e-mfa.sh a 0 com três controlos negativos · 12 telas |
 | E05 | planejado |  |
 | E06 | planejado |  |
 | E07 | planejado |  |
