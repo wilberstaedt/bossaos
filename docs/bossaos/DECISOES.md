@@ -4,7 +4,7 @@ Versão 1.0 - 02/09/2026. "Confirmado" vem da conversa; "Default proposto" é um
 
 | ID | Estado | Decisão | Efeito |
 | --- | --- | --- | --- |
-| D01 | Confirmado | Marca BossaOS; logo por símbolo em aberto | Usar wordmark; não tratar símbolo anterior como aprovado. |
+| D01 | **Resolvido 03/09** | Marca BossaOS; símbolo e wordmark entregues | `brand/logoicon.png` em espaço quadrado/pequeno; `brand/logoname.png` onde há largura. A regra antiga de "usar só o wordmark" deixou de valer — ver ADR 0001. |
 | D02 | Confirmado | Tema público Starter fixo; Restaurant/Pro com cores | Sem personalização de admin, estados, tipografia ou grid. |
 | D03 | Confirmado | Multi-tenant desde o início e catálogo compartilhado | Manter Organization > Brand > Location em todos os planos. |
 | D04 | Default proposto | Monólito modular + Next.js/PostgreSQL/Drizzle/Better Auth | E00 verifica versões e repositório; registrar ADR antes do scaffold. |
