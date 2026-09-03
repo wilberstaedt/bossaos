@@ -120,6 +120,19 @@ nele.** Para versões de bash, o mais estrito é o local (3.2 < 5), por isso cor
 basta. Para *qual* shell existe, o mais estrito é o runner, por isso o interpretador é
 sempre `#!/usr/bin/env bash`.
 
+**Os quatro eixos de ambiente, e o estado de cada um.** Hoje três apanharam-nos, e por
+isso fui procurar o quarto:
+
+| Eixo | Como está guardado |
+| --- | --- |
+| **Versão do Node** | `fnm exec --using=22.23.2`, e a prova de isolamento **recusa correr** noutra |
+| **Fuso do processo** | `TZ=America/Los_Angeles` fixo na prova de onboarding — diferente da unidade, desta máquina **e** do runner |
+| **Estado da base** | `provar-migracoes-do-zero.sh`, base descartável, do nada |
+| **Locale do processo** | **procurado a 2026-09-03 e não é um risco**: as cinco chamadas a `Intl` em `formato.ts` passam locale explícito, e não há um único `toLocaleString()` sem argumento em código de produto. E se o ICU faltasse, `es-ES` cairia para inglês em silêncio — mas os testes do `i18n` afirmam `"12,50 €"` com o espaço inquebrável, portanto o defeito faz barulho. Verificado: `12,50 €`, ICU completo. |
+
+O padrão de todos: **funcionava até o ambiente mudar**. Um resultado que depende de onde
+corre não é um resultado — é uma coincidência com sorte.
+
 Terceira diferença, auditada a 2026-09-03 e **limpa** nos sete scripts: nenhum usa
 `sed -i` sem sufixo, `grep -P`, `readlink -f`, `date -d` nem `stat -c` — flags que existem
 nos dois sistemas e fazem coisas diferentes, que é pior do que não existirem.
