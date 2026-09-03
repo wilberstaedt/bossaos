@@ -44,6 +44,14 @@ n_atual=$(echo "$atual" | tr -dc '0-9')
 ok "etapa autorizada: $atual"
 
 # Commits de etapa usam o prefixo "E##:" por convencao. Olha aos ultimos 40.
+#
+# PONTO CEGO, dito em voz alta a 2026-09-03: isto depende do PREFIXO EXACTO. O
+# commit d270b18 chama-se "E07 PARADO: o motor de alergenos" - e trabalho de E07
+# a serio, e esta guarda NAO o apanhou, porque "E07 PARADO:" nao casa com "E07:".
+# Deu a resposta certa (aquele commit era o JR a parar como eu pedi, nao a avancar)
+# mas deu-a pelo motivo errado. Nao aperto o padrao porque apanhar os commits de
+# paragem limpa seria um falso positivo pior do que o buraco - mas quem confiar
+# nesta guarda tem de saber que ela le uma convencao, nao le codigo.
 echo
 adiantados=$(git log -40 --format='%h %s' 2>/dev/null \
   | grep -E '^[0-9a-f]+ E[0-9]{2}:' \

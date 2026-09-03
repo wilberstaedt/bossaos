@@ -10,7 +10,7 @@ Os PDFs, contratos e prompts estão preparados. Nenhuma etapa de implementação
 | E03 | validado | docs/progress/E03.md · 2ª declaração após docs/reviews/E03.md · 85 testes + 28 asserções de isolamento + 12 verificações no provar-isolamento.sh (inclui autoteste do verificador) · zero telas, coverage intacto |
 | E04 | validado | docs/progress/E04.md · 3 migrações · **127 asserções unitárias à data da validação** (domain 38 · ui 37 · i18n 16 · config 14 · auth 12 · db 5 · storage 5; worker declarado a zero) + 24 de acesso por HTTP + 13 de recuperação e MFA + 4 de fuso · provar-acesso.sh a 0 com o par a colapsar e provar-recuperacao-e-mfa.sh a 0 com três controlos negativos · 12 telas |
 | E05 | validado | docs/progress/E05.md · 3 migrações (planos, descida agendada, plataforma) · **133 asserções unitárias** (domain 38 · ui 39 · i18n 16 · config 14 · auth 12 · db 5 · storage 5 · worker 4; **nenhum pacote declarado a zero**) + 17 de planos + 14 de descidas + 10 de plataforma · provar-planos.sh, provar-descidas.sh e provar-plataforma.sh a 0, com nove controlos negativos ao todo · 12 telas |
-| E06 | implementado aguardando validação | docs/progress/E06.md · 4 migrações (onboarding, criar organização, quota de marcas) · **motor de horários com três respostas** e lista de arranque com quatro estados · provar-onboarding.sh a 0 com 4 controlos negativos + guarda de limpeza · 14 telas |
+| E06 | validado | docs/progress/E06.md · 4 migrações (onboarding, criar organização, quota de marcas) · **motor de horários com três respostas** e lista de arranque com quatro estados · provar-onboarding.sh a 0 com 4 controlos negativos + guarda de limpeza · 14 telas |
 | E07 | planejado |  |
 | E08 | planejado |  |
 | E09 | planejado |  |
