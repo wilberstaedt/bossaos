@@ -21,7 +21,9 @@
     "verificar": "./scripts/validar-cobertura.sh && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "postinstall": "pnpm --filter @bossaos/db generate",
     "inspeccionar": "playwright test --grep-invert @capturas",
-    "capturas": "playwright test --grep @capturas"
+    "capturas": "playwright test --grep @capturas",
+    "db:fixtures": "node --experimental-strip-types packages/db/prisma/fixtures.ts",
+    "provar:isolamento": "./scripts/provar-isolamento.sh"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -36,6 +38,8 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.69.0",
     "@eslint/js": "10.0.1",
-    "@playwright/test": "1.62.1"
+    "@playwright/test": "1.62.1",
+    "pg": "8.23.0",
+    "@types/pg": "8.23.1"
   }
 }

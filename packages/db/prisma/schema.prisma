@@ -31,3 +31,183 @@ model AppMeta {
 
   @@map("app_meta")
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E03 — núcleo multi-inquilino
+//
+// Três camadas de isolamento, e nenhuma substitui as outras (domain-model.md):
+//   1. a credencial     — o runtime não é dono das tabelas, não é superuser,
+//                         não tem BYPASSRLS. Provado em E01.
+//   2. a política       — RLS com USING **e** WITH CHECK, em migração SQL à mão
+//                         (o Prisma não gere políticas).
+//   3. o escopo         — marca, unidade, estação e acção são filtro de serviço.
+//                         O RLS protege a ORGANIZAÇÃO e mais nada.
+//
+// As referências são COMPOSTAS. Uma FK simples de `location_id` deixaria apontar
+// para a unidade de outra organização com o `organization_id` da linha a parecer
+// certo. `@@unique([organizationId, id])` no alvo é o que torna isso impossível
+// na base, e não no formulário.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Fronteira do inquilino. O `id` desta linha é o `organization_id` de tudo o resto.
+model Organization {
+  id        String   @id @default(uuid()) @db.Uuid
+  /// Namespace público. Único globalmente: é o que aparece num endereço.
+  slug      String   @unique
+  nome      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  version   Int      @default(1)
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
+
+  brands          Brand[]
+  locations       Location[]
+  memberships     Membership[]
+  roleAssignments RoleAssignment[]
+
+  @@map("organizations")
+}
+
+/// Marca: catálogo e identidade comercial. Pertence a uma organização.
+model Brand {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  nome           String
+  slug           String
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  version        Int       @default(1)
+  archivedAt     DateTime? @map("archived_at") @db.Timestamptz(6)
+
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  locations       Location[]
+  roleAssignments RoleAssignment[]
+
+  /// Alvo das referências compostas. Sem isto, o resto não se pode escrever.
+  @@unique([organizationId, id], name: "brand_por_organizacao")
+  /// Slug único DENTRO da marca-mãe, não globalmente: dois restaurantes
+  /// diferentes podem chamar-se "marina" sem colidir.
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@map("brands")
+}
+
+/// Unidade: serviço, mesas, dispositivos, moeda operacional e stock.
+model Location {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  brandId        String @map("brand_id") @db.Uuid
+  nome           String
+  slug           String
+  /// Moeda operacional, ISO 4217. O dinheiro guarda-se em unidade mínima.
+  moeda          String @db.Char(3)
+  /// Fuso IANA. As regras recorrentes precisam dele à parte do instante UTC.
+  fuso           String
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  version        Int       @default(1)
+  archivedAt     DateTime? @map("archived_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  /// COMPOSTA: a marca tem de ser da mesma organização. É a base que recusa.
+  brand        Brand        @relation(fields: [organizationId, brandId], references: [organizationId, id], onDelete: Restrict)
+
+  roleAssignments RoleAssignment[]
+
+  @@unique([organizationId, id], name: "location_por_organizacao")
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([organizationId, brandId])
+  @@map("locations")
+}
+
+/// Identidade GLOBAL. Excepção documentada (CT-04): não leva `organization_id`,
+/// porque a mesma pessoa trabalha em mais do que uma organização.
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  nome      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  memberships Membership[]
+
+  @@map("users")
+}
+
+enum EstadoDeMembro {
+  ACTIVO
+  SUSPENSO
+  REVOGADO
+
+  @@map("estado_de_membro")
+}
+
+/// A ponte entre a identidade global e o inquilino.
+model Membership {
+  id             String         @id @default(uuid()) @db.Uuid
+  organizationId String         @map("organization_id") @db.Uuid
+  userId         String         @map("user_id") @db.Uuid
+  estado         EstadoDeMembro @default(ACTIVO)
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+  version        Int            @default(1)
+
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  user            User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  roleAssignments RoleAssignment[]
+
+  @@unique([organizationId, id], name: "membership_por_organizacao")
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("memberships")
+}
+
+/// Papéis do CT-04. O nome fica em maiúsculas porque é vocabulário do contrato.
+enum Papel {
+  OWNER
+  ORG_ADMIN
+  BRAND_MANAGER
+  VENUE_MANAGER
+  FLOOR_MANAGER
+  HOST
+  WAITER
+  KITCHEN
+  BARTENDER
+  EXPO
+  CASHIER
+  FINANCE
+  INVENTORY
+  MARKETING
+  EMPLOYEE
+
+  @@map("papel")
+}
+
+/// Concessão de papel, com o seu escopo.
+///
+/// `brandId` e `locationId` são opcionais e é isso que define o alcance: uma
+/// concessão de marca abrange as unidades dela; uma de unidade não amplia para o
+/// resto da organização (CT-04). Nenhum dos dois preenchido = alcance da
+/// organização inteira, e só os papéis de topo o devem ter.
+model RoleAssignment {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  membershipId   String  @map("membership_id") @db.Uuid
+  papel          Papel
+  brandId        String? @map("brand_id") @db.Uuid
+  locationId     String? @map("location_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  version   Int      @default(1)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  membership   Membership   @relation(fields: [organizationId, membershipId], references: [organizationId, id], onDelete: Cascade)
+  brand        Brand?       @relation(fields: [organizationId, brandId], references: [organizationId, id], onDelete: Restrict)
+  location     Location?    @relation(fields: [organizationId, locationId], references: [organizationId, id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@index([organizationId, membershipId])
+  @@map("role_assignments")
+}

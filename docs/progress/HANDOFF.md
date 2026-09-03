@@ -89,7 +89,7 @@ Duas provas executáveis que um build verde não dá, ambas na CI:
   `schema_por_migrar` (503) e `base_indisponivel` (503), com `/api/health` a
   responder 200 nos três. CT-03 provado no caminho, não na peça.
 
-**A CI nunca correu** — o ficheiro é válido e os comandos correm todos
+**A CI já correu, e passa** (verde a 2026-09-03, 17 passos, 3m03) — o ficheiro é válido e os comandos correm todos
 localmente, mas só o primeiro *push* prova. É a primeira coisa a olhar.
 
 Achado que mudou o desenho: **Prisma 7 tirou a URL do schema.** As migrações

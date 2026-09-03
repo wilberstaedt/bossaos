@@ -1,7 +1,24 @@
 // Domínio partilhado do BossaOS.
 //
-// Nesta etapa contém apenas as PORTAS — os contratos que o domínio impõe ao
-// mundo exterior. As entidades do produto entram nas etapas que as desenham;
-// inventá-las aqui seria decidir o modelo de dados sem o contrato à frente, que
-// é exactamente o que o E01 manda não fazer.
+// Portas, o contexto de inquilino e as chaves que o levam para fora da base.
+// As entidades do produto continuam a entrar nas etapas que as desenham — não se
+// criam tabelas nem tipos vazios para o futuro.
+//
+// Zero React e zero Prisma aqui dentro, como o `overview.md` manda: este pacote
+// define o que o mundo tem de cumprir, não como o cumpre.
 export type { PortaDeMedia, FicheiroGuardado } from './portas/media.ts';
+
+export {
+  resolverContexto,
+  type Filiacao, type Alvo, type ContextoDeInquilino,
+  type RecusaDeContexto, type ResolucaoDeContexto,
+} from './tenant.ts';
+
+export {
+  negarTudo,
+  type PortaDeAutorizacao, type PedidoDeAutorizacao, type Decisao, type Accao,
+} from './portas/autorizacao.ts';
+
+export {
+  chaveDeCache, prefixoDeMedia, nomeDeEvento, chaveDeTarefa, type EscopoDeChave,
+} from './chaves.ts';
