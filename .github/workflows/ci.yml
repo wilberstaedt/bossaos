@@ -204,6 +204,14 @@ jobs:
         # caia o lado da RECUSA e que o lado positivo continue verde.
         run: ./scripts/provar-plataforma.sh
 
+      - name: Prova — catálogo, alérgenos, preços e modificadores
+        # A regra do produto inteiro onde o erro tem consequência física:
+        # ausência de dados sobre alérgenos não significa ausência de alérgenos.
+        # O par mede-o contra a base — não declarado dá DESCONHECIDO, declarado
+        # ausente dá NAO_CONTEM, e há uma asserção a exigir que sejam diferentes.
+        # Cinco controlos negativos, um por camada, mais a guarda de limpeza.
+        run: ./scripts/provar-catalogo.sh
+
       - name: Prova — larguras, contraste, foco e alvos de toque
         # Aceites 1 e 2 do E02: 360/390/768/1280/1440 px, zoom, três idiomas,
         # contraste medido no DOM, armadilha de foco e regresso ao accionador.

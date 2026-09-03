@@ -332,16 +332,27 @@ export async function guardarGrupo(
   if (problema) {
     return { ok: false, detalhe: 'detalhe' in problema ? problema.detalhe : problema.erro };
   }
+  // Duas escritas e não uma criação aninhada: a relação `ModifierOption →
+  // ModifierGroup` é COMPOSTA por `(organizationId, groupId)`, e num `create`
+  // aninhado o Prisma quer preencher a relação inteira sozinho — passar-lhe o
+  // `organizationId` colide com isso. É o preço da referência composta do E03,
+  // que é o que impede uma opção de apontar para um grupo de outro inquilino.
+  //
+  // As duas correm dentro da transacção que o `comEscopo` já abriu, portanto ou
+  // ficam as duas ou não fica nenhuma — um grupo sem opções é um grupo que
+  // ninguém pode satisfazer.
   const criado = await db.modifierGroup.create({
     data: {
       organizationId, brandId: grupo.brandId, nome: grupo.nome,
       obrigatorio: grupo.obrigatorio, minimo: grupo.minimo,
       ...(grupo.maximo !== undefined ? { maximo: grupo.maximo } : {}),
-      opcoes: {
-        create: grupo.opcoes.map((o, i) => ({ organizationId, nome: o.nome, ordem: i + 1 })),
-      },
     },
     select: { id: true },
+  });
+  await db.modifierOption.createMany({
+    data: grupo.opcoes.map((o, i) => ({
+      organizationId, groupId: criado.id, nome: o.nome, ordem: i + 1,
+    })),
   });
   return { ok: true, id: criado.id };
 }
