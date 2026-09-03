@@ -81,3 +81,36 @@ concreto herdado deste tick: o `awk -F,` que me enganou vive em mais sítios? J�
 `estado.sh`; o `validar-cobertura.sh` foi o JR que corrigiu. **Varrer os sete scripts por
 `awk -F,` e `cut -d,` sobre CSV** — se um deles ainda lá estiver, mede outra coluna sem
 avisar ninguém.
+
+---
+
+## Adenda, 19h20 — observado no código já commitado, **antes** da declaração
+
+Marcada como adenda, como no E04: a régua acima é anterior a qualquer linha, e isto veio
+depois, de ler dois commits que ele já fez (`4bfd2d5`, `51d8b86`). **Não é veredicto** — a
+etapa não está declarada.
+
+**O que está bem, e é o ponto principal da régua:** o commit chama-se literalmente *"o motor
+de horários, e **'por configurar' como terceira resposta**"*. E a nota que ele pôs na CI diz
+*"o mesmo instante dá `desconhecido` com o dia por configurar e `fechado` com o dia declarado
+fechado"* — que é a distinção exacta que eu tinha nomeado, entre não saber e saber que está
+fechado. Não é um valor por omissão disfarçado.
+
+**O que vou levantar quando declarar:** o `scripts/provar-onboarding.sh` **não fixa o fuso do
+processo**, e a unidade das provas é `Europe/Madrid`. Esta máquina corre em **CEST**, ou seja
+**o mesmo fuso da unidade** — e com os dois iguais a conversão é uma não-operação. Um defeito
+do tipo *"usa o fuso do processo em vez do da unidade"* passa invisível aqui.
+
+Na CI corre em UTC, portanto **lá** a conversão é exercitada — mas **por acidente do
+ambiente, não por construção**, que é exactamente a forma do meu próprio defeito do `wc -l`
+duas horas antes: funcionou até o ambiente mudar.
+
+Há um caso com `America/New_York` no `horarios.test.ts:177`, e apanha o erro grosseiro. Mas
+as asserções que atravessam a meia-noite — as 23:30, as 00:30 — correm todas em Madrid.
+
+**O que peço:** `TZ` explícito e **diferente** do da unidade no script da prova, e um
+controlo negativo que reprove se o código usar o relógio do processo. Uma prova de fuso onde
+os dois fusos coincidem mede que o teste correu, não que a conversão está certa.
+
+**Não lho disse ainda:** está a 31 minutos e a trabalhar, e a regra é não interromper. Vai
+com a revisão.
