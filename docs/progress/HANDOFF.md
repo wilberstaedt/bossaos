@@ -1,11 +1,14 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E07 — catálogo, produtos, preços e opções (**18 telas, a maior até agora**)
-**Estado:** implementado, **aguardando validação**. Motores puros, schema, serviços, as 18
-telas, as rotas de escrita e a prova contra a base — tudo entregue e medido.
-**Régua:** `docs/reviews/ALVO-E07.md`, escrita antes de o E06 estar declarado ·
-`docs/architecture/catalogo-e-publicacao.md` e `dinheiro.md`, do E00.
-**O JR não avança para o E08.**
+**Etapa atual:** E08 — média, traduções, importação e publicação (**10 telas**)
+**Estado:** **em curso**. Os sete motores puros estão feitos e commitados, com 23 controlos
+negativos; falta o schema, os serviços, as 10 telas, as rotas e a prova contra a base.
+**Régua:** `docs/architecture/catalogo-e-publicacao.md` e **`dados-e-accoes-sensiveis.md`**,
+os dois do E00. O `ALVO-E08.md` está a ser escrito pelo sénior.
+**O JR não avança para o E09.**
+
+**E07 validado à primeira** — a maior das 36 e a terceira seguida a passar sem segunda
+volta. `docs/reviews/E07.md`.
 
 **E06 validado à 2ª** — a 1ª validação foi **retirada pela CI**: a cadeia de migrações não
 se aplicava do zero, porque uma migração E05 tinha carimbo posterior a uma E06 que dela
@@ -44,7 +47,8 @@ desta vez a régua **não** precedeu todo o código e dizê-lo é o que a manté
 | E04 — autenticação, convites e permissões | **validado à 3ª** · `docs/reviews/E04.md` |
 | E05 — planos, entitlements e identidade Starter | **validado à 1ª** · `docs/reviews/ALVO-E05.md` |
 | E06 — onboarding e configuração do restaurante | **validado à 2ª** · `docs/progress/E06.md`. A 1ª validação foi retirada pela CI: a cadeia de migrações não se aplicava do zero. |
-| E07 — catálogo, produtos, preços e opções | implementado, **aguardando validação** · `docs/progress/E07.md` |
+| E07 — catálogo, produtos, preços e opções | **validado à 1ª** · `docs/reviews/E07.md` |
+| E08 — média, traduções, importação e publicação | **em curso** · `docs/progress/E08.md` |
 
 **Primeiras telas.** O E02 é a primeira etapa que toca `coverage.csv`: STATE 001-003,
 005, 007 e 016. Até aqui o medidor de telas esteve a 0 % e isso era verdade, não uma

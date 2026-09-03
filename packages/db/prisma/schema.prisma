@@ -91,6 +91,7 @@ model Organization {
   categorias      Category[]
   produtos        Product[]
   gruposDeOpcoes  ModifierGroup[]
+  ficheiros       MediaAsset[]
   regrasDePreco   PriceRule[]
   roleAssignments RoleAssignment[]
   invitations     Invitation[]
@@ -105,6 +106,11 @@ model Organization {
   scheduleIntervals  ScheduleInterval[]
 
   @@map("organizations")
+  revisoes        MenuRevision[]
+  publicacoes     MenuPublication[]
+  importacoes     ImportJob[]
+  exportacoes     ExportJob[]
+  tarefas         OutboxTask[]
 }
 
 /// Marca: catálogo e identidade comercial. Pertence a uma organização.
@@ -132,6 +138,8 @@ model Brand {
   categorias      Category[]
   produtos        Product[]
   gruposDeOpcoes  ModifierGroup[]
+  ficheiros       MediaAsset[]
+  importacoes     ImportJob[]
 
   /// Alvo das referências compostas. Sem isto, o resto não se pode escrever.
   @@unique([organizationId, id], name: "brand_por_organizacao")
@@ -866,6 +874,8 @@ model Menu {
   location     Location?    @relation(fields: [organizationId, locationId], references: [organizationId, id], onDelete: Restrict)
   canais       MenuChannel[]
   seccoes      MenuCategory[]
+  revisoes     MenuRevision[]
+  publicacoes  MenuPublication[]
 
   @@unique([organizationId, id], name: "menu_por_organizacao")
   @@index([organizationId])
@@ -958,6 +968,7 @@ model Product {
   preferencias   ProductDietaryTag[]
   canais         ProductChannel[]
   disponibilidades ProductAvailability[]
+  media            ProductMedia[]
 
   /// SKU único POR MARCA, e só quando preenchido. Vários `NULL` não colidem no
   /// PostgreSQL, que é exactamente o que se quer: nem todo o produto tem SKU.
@@ -982,9 +993,17 @@ model ProductTranslation {
   locale         String
   nome           String
   descricao      String?
-  /// A `version` do produto quando esta tradução foi escrita. Se o produto
-  /// avançou, a tradução está por rever — e o ecrã di-lo.
-  origemVersao   Int    @map("origem_versao")
+  /// A impressão do TEXTO de origem quando esta tradução foi escrita ou revista.
+  ///
+  /// Substituiu `origemVersao` no E08, e a razão é uma correcção: a `version` do
+  /// produto avança em QUALQUER edição — mudar o preço, mudar a categoria — e
+  /// marcar a tradução como obsoleta por causa do preço é um falso positivo.
+  /// Falsos positivos são o que ensina toda a gente a ignorar o aviso, e o E00
+  /// diz "texto de origem alterado", não "produto alterado".
+  impressaoDaOrigem String @map("impressao_da_origem")
+  /// Quem reviu. Sem responsável, a tradução está PENDENTE e não revista — a
+  /// mesma regra da ficha de alérgenos do E07.
+  revistoPor     String?   @map("revisto_por")
   revistoEm      DateTime? @map("revisto_em") @db.Timestamptz(6)
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -1237,4 +1256,256 @@ model ProductAvailability {
   @@unique([organizationId, productId, locationId])
   @@index([organizationId])
   @@map("product_availability")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E08 — média, traduções, importação e publicação
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Estado de uma importação. `PREVISTA` é o dry-run que ainda não escreveu nada.
+enum EstadoDeImportacao {
+  PREVISTA
+  CONFIRMADA
+  CANCELADA
+}
+
+/// O que uma linha da importação faria. Espelha `AccaoDaLinha` do domínio.
+enum AccaoDaLinha {
+  CRIAR
+  ACTUALIZAR
+  IGNORAR
+  ERRO
+}
+
+enum EstadoDeTarefa {
+  PENDENTE
+  A_CORRER
+  CONCLUIDA
+  FALHADA
+}
+
+/// Um ficheiro que alguém carregou. **Sempre com dono**: um ficheiro sem
+/// inquilino é um ficheiro de toda a gente (CT-14).
+model MediaAsset {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  brandId        String @map("brand_id") @db.Uuid
+  /// A chave no armazenamento. Gerada por quem guarda, **nunca** o nome que veio
+  /// de fora — nome de ficheiro externo é travessia de caminho (`../../.env`).
+  chave          String @unique
+  /// O tipo calculado dos BYTES. O declarado no pedido não decide nada.
+  tipo           String
+  tipoMime       String @map("tipo_mime")
+  bytes          Int
+  /// SHA-256 do conteúdo. Serve para não guardar o mesmo ficheiro duas vezes e
+  /// para provar que a substituição do CAT-023 trocou mesmo o conteúdo.
+  digest         String
+  /// O nome que a pessoa deu, como METADADO. Não é caminho nem chave.
+  nomeOriginal   String? @map("nome_original")
+  /// Exigido nas imagens de carta. Uma foto sem alternativa é uma foto que não
+  /// existe para quem usa leitor de ecrã.
+  textoAlternativo String? @map("texto_alternativo")
+  criadoPor      String  @map("criado_por")
+
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  brand        Brand        @relation(fields: [organizationId, brandId], references: [organizationId, id], onDelete: Restrict)
+  emProdutos   ProductMedia[]
+
+  @@unique([organizationId, id], name: "media_por_organizacao")
+  @@index([organizationId])
+  @@index([organizationId, brandId])
+  @@index([organizationId, digest])
+  @@map("media_assets")
+}
+
+/// Ligação produto ↔ ficheiro. A substituição do ficheiro não quebra isto: quem
+/// muda é o `MediaAsset`, e as referências publicadas apontam à REVISÃO, que
+/// guarda o retrato.
+model ProductMedia {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  productId      String @map("product_id") @db.Uuid
+  mediaId        String @map("media_id") @db.Uuid
+  ordem          Int    @default(1)
+  /// Uma só principal por produto — garantido por índice parcial na migração.
+  principal      Boolean @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  product Product    @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Cascade)
+  media   MediaAsset @relation(fields: [organizationId, mediaId], references: [organizationId, id], onDelete: Restrict)
+
+  @@unique([organizationId, productId, mediaId])
+  @@index([organizationId])
+  @@map("product_media")
+}
+
+/// Uma revisão publicada da carta. **Imutável**: nada a altera depois de criada.
+///
+/// `conteudo` é o RETRATO — nome, preço, moeda, opções, alérgenos — e não uma
+/// lista de referências. É o mesmo princípio do pedido do E00: actualizar o
+/// catálogo não pode reescrever o que já foi publicado.
+model MenuRevision {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  menuId         String @map("menu_id") @db.Uuid
+  numero         Int
+  conteudo       Json
+  /// Preenchido quando esta revisão nasceu de restaurar outra. Restaurar cria
+  /// revisão nova; o número nunca recua.
+  restauraDeId   String? @map("restaura_de_id") @db.Uuid
+  criadaPor      String  @map("criada_por")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  menu         Menu         @relation(fields: [organizationId, menuId], references: [organizationId, id], onDelete: Cascade)
+  restauraDe   MenuRevision? @relation("restauro", fields: [organizationId, restauraDeId], references: [organizationId, id], onDelete: Restrict)
+  restauros    MenuRevision[] @relation("restauro")
+  publicacoes  MenuPublication[]
+
+  @@unique([organizationId, menuId, numero])
+  @@unique([organizationId, id], name: "revisao_por_organizacao")
+  @@index([organizationId])
+  @@map("menu_revisions")
+}
+
+/// **A referência do destino.** Uma linha por (menu, canal), a apontar para a
+/// revisão que está no ar.
+///
+/// A troca é um `UPDATE` desta linha dentro da transacção que cria a revisão: ou
+/// muda o ponteiro e a revisão existe, ou não muda nenhum dos dois. É isto que
+/// faz "uma falha a meio deixa a revisão anterior inteira" ser verdade por
+/// construção, e não por cuidado de quem escreve.
+model MenuPublication {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  menuId         String @map("menu_id") @db.Uuid
+  canal          Canal
+  revisionId     String @map("revision_id") @db.Uuid
+  publicadaPor   String @map("publicada_por")
+  publicadaEm    DateTime @default(now()) @map("publicada_em") @db.Timestamptz(6)
+  /// Publicação agendada: a linha existe com a data e o ponteiro só troca lá.
+  agendadaPara   DateTime? @map("agendada_para") @db.Timestamptz(6)
+
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  menu         Menu         @relation(fields: [organizationId, menuId], references: [organizationId, id], onDelete: Cascade)
+  revisao      MenuRevision @relation(fields: [organizationId, revisionId], references: [organizationId, id], onDelete: Restrict)
+
+  @@unique([organizationId, menuId, canal])
+  @@index([organizationId])
+  @@map("menu_publications")
+}
+
+/// Uma importação. Nasce PREVISTA — o dry-run — e só escreve ao confirmar.
+model ImportJob {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  brandId        String @map("brand_id") @db.Uuid
+  estado         EstadoDeImportacao @default(PREVISTA)
+  ficheiroNome   String  @map("ficheiro_nome")
+  separador      String  @db.Char(1)
+  /// Coluna do ficheiro → campo do produto. Explícito, nunca adivinhado.
+  mapeamento     Json
+  /// `criar_apenas` ou `actualizar_por_sku`. **Sem valor por omissão**: um
+  /// `?? 'actualizar'` escrito por conveniência funde as cartas de toda a gente.
+  estrategia     String
+  resumo         Json?
+  criadoPor      String  @map("criado_por")
+  confirmadoPor  String? @map("confirmado_por")
+  confirmadoEm   DateTime? @map("confirmado_em") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  brand        Brand        @relation(fields: [organizationId, brandId], references: [organizationId, id], onDelete: Restrict)
+  linhas       ImportRow[]
+
+  @@unique([organizationId, id], name: "importacao_por_organizacao")
+  @@index([organizationId])
+  @@map("import_jobs")
+}
+
+/// Uma linha da prévia. Guarda-se **antes** de confirmar, para o que a pessoa
+/// aprovou ser o que se escreve — e não uma segunda leitura do ficheiro, que
+/// podia dar outro resultado.
+model ImportRow {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  jobId          String @map("job_id") @db.Uuid
+  /// A linha como a pessoa a vê no Excel: o cabeçalho é 1.
+  linha          Int
+  accao          AccaoDaLinha
+  erro           String?
+  dados          Json
+  /// Em ACTUALIZAR: o produto tocado. Em CRIAR: preenchido ao confirmar.
+  productId      String? @map("product_id") @db.Uuid
+
+  job ImportJob @relation(fields: [organizationId, jobId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, jobId, linha])
+  @@index([organizationId])
+  @@map("import_rows")
+}
+
+/// Uma exportação pedida. O ficheiro existe; o direito de o descarregar
+/// verifica-se **outra vez** no descarregamento.
+model ExportJob {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  /// Quem pediu. O descarregamento é dele e de mais ninguém.
+  actorId        String @map("actor_id")
+  /// A acção exigida, guardada na linha: se o vocabulário mudar, esta exportação
+  /// continua a saber o que era preciso para a pedir.
+  accaoExigida   String @map("accao_exigida")
+  formato        String
+  chave          String? @unique
+  bytes          Int?
+  expiraEm       DateTime  @map("expira_em") @db.Timestamptz(6)
+  revogadaEm     DateTime? @map("revogada_em") @db.Timestamptz(6)
+  descarregadaEm DateTime? @map("descarregada_em") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, id], name: "exportacao_por_organizacao")
+  @@index([organizationId])
+  @@index([organizationId, actorId])
+  @@map("export_jobs")
+}
+
+/// A caixa de saída do trabalho de fundo: publicação agendada, conversão de
+/// média, sugestão de tradução.
+///
+/// Uma tabela e não uma fila externa, pela mesma razão do E05: a tarefa nasce
+/// **na mesma transacção** que o facto que a origina. Uma fila fora da base
+/// aceita a tarefa e perde-a quando a transacção reverte, e o resultado é uma
+/// publicação agendada para uma revisão que nunca existiu.
+model OutboxTask {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  tipo           String
+  payload        Json
+  estado         EstadoDeTarefa @default(PENDENTE)
+  tentativas     Int      @default(0)
+  proximaEm      DateTime @default(now()) @map("proxima_em") @db.Timestamptz(6)
+  ultimoErro     String?  @map("ultimo_erro")
+  concluidaEm    DateTime? @map("concluida_em") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@index([estado, proximaEm])
+  @@map("outbox_tasks")
 }
