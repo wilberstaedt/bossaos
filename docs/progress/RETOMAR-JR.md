@@ -83,3 +83,13 @@ não correste vão em listas **separadas**.
   trabalhar.
 - Se ele reiniciar a meio de uma etapa, a primeira coisa a verificar é o trabalho não
   versionado: já esteve com 30 caminhos por commitar.
+- **Commitar por segurança e empurrar são coisas diferentes, e eu confundi-as a
+  2026-09-03.** Guardei os 30 caminhos do JR a meio do E04 — certo, o Mac tem histórico
+  de kernel panic — e depois empurrei-os com um commit meu por cima. O `eslint` apanhou
+  um `'entrar' is defined but never used` no `provas/acesso.test.ts` dele, que estava a
+  meio de ser escrito, e a CI ficou **vermelha numa coisa que não é uma regressão**.
+  Uma CI vermelha que não significa nada é pior do que nenhuma: ensina a ignorar o
+  vermelho. A regra: **commit local protege; `push` é para o que está declarado.**
+- Antes de empurrar, `pnpm verificar` e ler o código de saída — e o `&&` tem de estar
+  **na verificação**, não no `git add`. Foi assim que empurrei por cima de um vermelho
+  nesse mesmo dia, com o resultado à minha frente.
