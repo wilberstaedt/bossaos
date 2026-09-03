@@ -1,17 +1,18 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E03 — estrutura multi-tenant e isolamento de dados
-**Estado:** segunda declaração do JR, **aguardando validação do sénior**.
-**Próxima ação:** o sénior revalida o E03. A 1ª revisão não o validou — o isolamento
-estava certo, o **verificador** é que conseguia dizer verde sem ter medido. Fechado, e a
-mesma guarda aplicada às outras duas provas. O JR **não** avançou para E04.
+**Etapa atual:** E04 — autenticação, convites e permissões
+**Estado:** implementado pelo JR, **aguardando validação do sénior**.
+**Próxima ação:** o sénior valida o E04 contra
+`docs/architecture/autenticacao-e-convites.md`, que escreveu no E00. O JR **não** avançou
+para E05.
 
 | Etapa | Estado |
 | --- | --- |
 | E00 — contrato e leitura das fontes | implementado, **aguardando validação**. Sete documentos em `docs/architecture`. Quem os escreveu não os valida: a prova vem no E11, quando se vir se o E02-E10 se construíram a partir deles. |
 | E01 — repositório e verificação contínua | **validado** · `docs/reviews/E01.md` |
 | E02 — design system, responsividade e idiomas | **validado** à 2ª · `docs/reviews/E02.md`. A 1ª revisão apanhou o acento a pintar um indicador de estado a 2,77:1; corrigido com `acentoSinal` e uma guarda de lista de permissão. |
-| E03 — estrutura multi-tenant e isolamento | 1ª revisão: **não validado** (`docs/reviews/E03.md`) — o verificador dizia verde com zero medido. Corrigido; 2ª declaração · `docs/progress/E03.md` |
+| E03 — estrutura multi-tenant e isolamento | **validado** à 2ª · `docs/reviews/E03.md`. A 1ª revisão apanhou o verificador a dizer verde com zero medido; corrigido, e a mesma guarda aplicada às outras provas. |
+| E04 — autenticação, convites e permissões | implementado, **aguardando validação** · `docs/progress/E04.md` |
 
 **Primeiras telas.** O E02 é a primeira etapa que toca `coverage.csv`: STATE 001-003,
 005, 007 e 016. Até aqui o medidor de telas esteve a 0 % e isso era verdade, não uma
@@ -93,6 +94,31 @@ Três achados que mudaram código, dos seis em `E03.md`:
   `COMMIT` posterior grava o que o teste provava não poder acontecer.
 - **A guarda de rotas apanhou a raiz de composição** e, ao declará-la como excepção, mostrou
   a porta lateral que ela abria: qualquer rota podia importar o `obterBase` dela.
+
+## E04 — o que existe agora
+
+Acesso real. Entrar, sair, recuperar, segundo factor, convites de uso único, permissões por
+acção e escopo, revogação que **faz parar as sessões que já existem**, e auditoria
+append-only. **12 telas**, e é a segunda etapa a mexer no `coverage.csv`.
+
+**O quarto acesso do CT-04 existe:** um papel `bossaos_auth` que vê identidades e sessões e
+**não vê uma linha de inquilino**. Medido nos dois sentidos. E fechou uma armadilha do E01 —
+o `ALTER DEFAULT PRIVILEGES` fazia as tabelas de sessão nascerem legíveis pelo runtime.
+
+**O par (1)/(2) está provado por HTTP**, com sessões reais: o identificador de B com sessão
+de A dá 404; o **mesmo** com sessão de B dá 200. A ausência de um recurso alheio e a de uma
+organização inexistente saem **byte a byte iguais**.
+
+**91 testes unitários + 24 asserções de acesso + 4 de fuso, 0 falhas.**
+
+O achado que mais me interessa: **o Prisma lia o relógio duas horas adiantado** e por isso
+um convite expirado era aceite. Não era defeito dos convites — seria de todos os prazos,
+reservas e turnos. `-c timezone=UTC` nas ligações, com prova e controlo negativo próprios.
+
+E o controlo negativo do acesso **falhou à primeira, e isso foi informação**: desligar a
+resolução de contexto não colapsou o par, porque a política de linha do E03 aguentou. Para
+o colapsar foi preciso acrescentar uma política de leitura a mais — que é precisamente o
+risco do OR entre permissivas que a revisão do E03 foi verificar.
 
 ## Divisão de trabalho
 

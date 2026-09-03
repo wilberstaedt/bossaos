@@ -29,6 +29,11 @@ const EXCEPCOES = new Map<string, string>([
   ['src/servidor.ts', 'raiz de composição: segura a ligação num sítio só'],
   ['src/sessao.ts', 'é a própria porta — não pode exigir-se a si mesma'],
   ['app/api/auth/[...all]/route.ts', 'a biblioteca de autenticação, com a credencial que não vê inquilinos'],
+  [
+    'app/api/convites/[token]/route.ts',
+    'leitura de um convite antes de haver conta: a credencial é o token, ' +
+      'e sem ela a tela AUTH-006 pediria para aceitar às cegas',
+  ],
 ]);
 
 const TOCA_NA_BASE = ['@bossaos/db', 'obterPrisma', 'obterBase', 'comEscopo'];
@@ -90,7 +95,26 @@ describe('rotas: dados de inquilino só através da porta', () => {
       assert.ok(razao.length > 20, `a excepção de ${caminho} precisa de uma razão escrita`);
     }
     // Uma excepção a mais é uma porta a mais: obriga a olhar.
-    assert.equal(EXCEPCOES.size, 4, 'cada excepção nova tem de ser justificada aqui');
+    assert.equal(EXCEPCOES.size, 5, 'cada excepção nova tem de ser justificada aqui');
+  });
+
+  it('a rota sem sessão valida mesmo o token — a excepção não é um cheque em branco', () => {
+    // Isentar uma rota da porta não a isenta de ter uma credencial. Aqui a
+    // credencial é o token do convite, e a rota tem de o resolver pela interface
+    // mínima (`organizacao_do_convite`) antes de ler o que quer que seja.
+    const conteudo = readFileSync(join(WEB, 'app/api/convites/[token]/route.ts'), 'utf8');
+    assert.ok(
+      conteudo.includes('organizacaoDoConvite'),
+      'a leitura do convite tem de passar pela interface mínima do token',
+    );
+    assert.ok(
+      conteudo.includes('comEscopo('),
+      'e o resto tem de ser lido com escopo de inquilino, com a política activa',
+    );
+    // E não pode devolver o email convidado: daria a qualquer portador do link
+    // o endereço de outra pessoa.
+    const devolve = conteudo.slice(conteudo.lastIndexOf('NextResponse.json({'));
+    assert.ok(!/\bemail\b/.test(devolve), 'a resposta não pode incluir o email convidado');
   });
 
   it('CONTROLO NEGATIVO: a varredura distingue mesmo com porta de sem porta', () => {

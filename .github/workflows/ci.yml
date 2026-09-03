@@ -41,6 +41,11 @@ jobs:
       PGSUPERUSER: postgres
       DATABASE_URL: postgresql://bossaos_app:dev_app_local@127.0.0.1:5432/bossaos_dev
       MIGRATION_DATABASE_URL: postgresql://bossaos_migrate:dev_migrate_local@127.0.0.1:5432/bossaos_dev
+      # Terceiro acesso (E04): identidade e sessão, zero dados de inquilino.
+      AUTH_DATABASE_URL: postgresql://bossaos_auth:dev_auth_local@127.0.0.1:5432/bossaos_dev
+      BETTER_AUTH_SECRET: segredo-de-ci-descartavel-com-32-caracteres
+      BETTER_AUTH_URL: http://127.0.0.1:3000
+      CONVITE_VALIDADE_HORAS: '72'
 
     steps:
       - uses: actions/checkout@v4
@@ -110,6 +115,15 @@ jobs:
         # está a medir o RLS. Alvo em docs/architecture/prova-de-isolamento.md,
         # escrito no E00, antes desta etapa.
         run: ./scripts/provar-isolamento.sh
+
+      - name: Prova — acesso, convites e revogação
+        # O par (1)/(2): o identificador de B com sessão de A dá ausência, o
+        # MESMO identificador com sessão de B dá 200. Só o primeiro passaria num
+        # sistema em que tudo devolve ausência. O controlo negativo acrescenta
+        # uma política de leitura a mais e exige que o par COLAPSE — as
+        # permissivas somam-se por OR, e é assim que um escopo se alarga sem
+        # aparecer em teste nenhum.
+        run: ./scripts/provar-acesso.sh
 
       - name: Prova — larguras, contraste, foco e alvos de toque
         # Aceites 1 e 2 do E02: 360/390/768/1280/1440 px, zoom, três idiomas,
