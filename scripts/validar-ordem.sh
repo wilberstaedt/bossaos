@@ -43,32 +43,101 @@ fi
 n_atual=$(echo "$atual" | tr -dc '0-9')
 ok "etapa autorizada: $atual"
 
-# Commits de etapa usam o prefixo "E##:" por convencao. Olha aos ultimos 40.
+# ── o que mede mesmo: FICHEIROS, nao o assunto do commit ─────────────────────
 #
-# PONTO CEGO, dito em voz alta a 2026-09-03: isto depende do PREFIXO EXACTO. O
-# commit d270b18 chama-se "E07 PARADO: o motor de alergenos" - e trabalho de E07
-# a serio, e esta guarda NAO o apanhou, porque "E07 PARADO:" nao casa com "E07:".
-# Deu a resposta certa (aquele commit era o JR a parar como eu pedi, nao a avancar)
-# mas deu-a pelo motivo errado. Nao aperto o padrao porque apanhar os commits de
-# paragem limpa seria um falso positivo pior do que o buraco - mas quem confiar
-# nesta guarda tem de saber que ela le uma convencao, nao le codigo.
+# A primeira versao lia o prefixo "E##:" do assunto. Ponto cego dito em voz alta a
+# 03/09: o commit d270b18 chama-se "E07 PARADO: ..." e escapava, porque nao casa
+# com "E07:". Na altura deixei o buraco aberto com o argumento de que apertar o
+# padrao apanharia commits de paragem limpa.
+#
+# O argumento estava errado, e a 04/09 percebi porque: o problema nao e o padrao,
+# e a FONTE. Um assunto de commit e prosa que nos proprios escrevemos, e uma
+# guarda que le prosa mede a disciplina de quem a escreve, nao a propriedade.
+# Passei a semana a apanhar esta familia nos outros e em mim - um detector que
+# casa "movel" numa nota a dizer que o movel NAO foi medido e o mesmo erro.
+#
+# O que define trabalho adiantado sao os FICHEIROS tocados. Um commit que mexe em
+# docs/progress/E12.md ou numa migracao e12_* enquanto a autorizada e a E10 e
+# trabalho a frente, chame-se ele como se chamar.
+#
+# EXCEPCAO deliberada: escrever a REGUA ou o CONTRATO de uma etapa futura e o meu
+# trabalho de E00 e tem o melhor historico do projecto - as tres etapas que
+# passaram a primeira foram as tres em que a regua existia antes do codigo. Por
+# isso docs/reviews/ALVO-E##.md e docs/architecture/ nao contam como avanco.
+etapa_dos_ficheiros() {
+  printf '%s\n' "$@" \
+    | grep -vE '^docs/reviews/ALVO-E[0-9]{2}\.md$|^docs/architecture/' \
+    | grep -oE 'E[0-9]{2}\.md$|/e[0-9]{2}_|_e[0-9]{2}_' \
+    | grep -oE '[0-9]{2}' | sort -rn | head -1
+}
+
 echo
-adiantados=$(git log -40 --format='%h %s' 2>/dev/null \
+adiantados=$(git log -40 --format='%h' 2>/dev/null | while read -r sha; do
+  ficheiros=$(git show --name-only --format= "$sha" 2>/dev/null)
+  [ -z "$ficheiros" ] && continue
+  # shellcheck disable=SC2086
+  n=$(etapa_dos_ficheiros $ficheiros)
+  [ -n "$n" ] && [ "$((10#$n))" -gt "$((10#$n_atual))" ] && \
+    echo "$sha toca ficheiros da E$n"
+done)
+
+# O sinal da PROSA volta como complemento, nao como substituto: apanha um assunto
+# "E12: ..." mesmo quando os ficheiros nao trazem marca de etapa. Dois sinais
+# fracos e diferentes cobrem mais do que um sozinho, e falham por motivos
+# diferentes - que e a unica coisa que faz uma redundancia valer alguma coisa.
+por_prosa=$(git log -40 --format='%h %s' 2>/dev/null \
   | grep -E '^[0-9a-f]+ E[0-9]{2}:' \
   | while read -r sha resto; do
       n=$(echo "$resto" | sed -E 's/^E([0-9]{2}):.*/\1/')
-      [ "$((10#$n))" -gt "$((10#$n_atual))" ] && echo "$sha E$n"
+      [ "$((10#$n))" -gt "$((10#$n_atual))" ] && echo "$sha diz E$n no assunto"
     done)
+adiantados=$(printf '%s\n%s' "$adiantados" "$por_prosa" | grep -v '^$' || true)
 
 if [ -n "$adiantados" ]; then
-  erro "ha commits de etapas a frente da autorizada ($atual):"
+  erro "ha commits com ficheiros de etapas a frente da autorizada ($atual):"
   echo "$adiantados" | sed 's/^/          /'
   echo "        Nao desfazer: o trabalho fica e entra na revisao da etapa certa."
   echo "        Se o revisor estiver indisponivel, a saida certa nao e parar nem"
   echo "        avancar por cima: e trabalho que NAO dependa da etapa em revisao."
 else
-  ok "nenhum commit a frente de $atual"
+  ok "nenhum commit com ficheiros a frente de $atual"
 fi
+
+# ── controlo negativo ───────────────────────────────────────────────────────
+# Alimenta-se o classificador com caminhos sinteticos, em vez de plantar commits
+# no historico - uma guarda nao deve escrever no repositorio para se testar.
+echo
+c_falha=0
+[ "$(etapa_dos_ficheiros 'docs/progress/E12.md')" = "12" ] || { echo "  FALHA controlo: nao viu docs/progress/E12.md"; c_falha=1; }
+[ "$(etapa_dos_ficheiros 'packages/db/prisma/migrations/20260904_e12_temas/migration.sql')" = "12" ] || { echo "  FALHA controlo: nao viu a migracao e12_"; c_falha=1; }
+[ -z "$(etapa_dos_ficheiros 'docs/reviews/ALVO-E12.md')" ] || { echo "  FALHA controlo: acusou a REGUA de uma etapa futura, que e trabalho de E00"; c_falha=1; }
+[ -z "$(etapa_dos_ficheiros 'docs/architecture/dominios-e-enderecos.md')" ] || { echo "  FALHA controlo: acusou um contrato de arquitectura"; c_falha=1; }
+[ -z "$(etapa_dos_ficheiros 'packages/domain/src/precos.ts')" ] || { echo "  FALHA controlo: acusou um ficheiro sem etapa no nome"; c_falha=1; }
+if [ "$c_falha" -eq 0 ]; then
+  ok "controlo negativo: ve E12.md e a migracao e12_, e nao acusa regua, contrato nem codigo comum"
+else
+  falhas=$((falhas+1))
+fi
+
+# ── O QUE ESTA GUARDA NAO VE, dito sem arredondar ────────────────────────────
+#
+# Motivei a mudanca de 04/09 com o commit d270b18 ("E07 PARADO: o motor de
+# alergenos"), que escapava ao padrao do assunto. Fui verificar se a versao nova o
+# apanha: NAO APANHA. Os ficheiros dele sao packages/domain/src/alergenios.ts e o
+# teste ao lado - codigo comum, sem marca de etapa no nome.
+#
+# Ou seja, troquei um ponto cego por outro melhor, e nao fechei o caso que citei.
+# Digo-o aqui porque a alternativa era deixar a redaccao nova sugerir uma
+# cobertura que nao existe, e isso e pior do que o buraco.
+#
+# O que ela ve: documentos de etapa (E##.md), migracoes com e##_ no nome, e
+# assuntos de commit com o prefixo E##:.
+# O que NAO ve: codigo comum escrito para uma etapa futura. Nao ha mapa de
+# ficheiro para etapa neste projecto, e inventar um por heuristica trocaria um
+# falso negativo silencioso por falsos positivos ruidosos.
+#
+# Quem confiar nesta guarda tem de saber isto: ela apanha o avanco DECLARADO,
+# nao o avanco disfarcado.
 
 echo
 [ "$falhas" -eq 0 ] && echo "  Ordem respeitada: 0 falhas." || echo "  $falhas FALHA(S)."
