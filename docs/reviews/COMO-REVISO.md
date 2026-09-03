@@ -89,6 +89,12 @@ bem e deixa **escrever** para outro inquilino, e nenhum teste de leitura o mostr
 o `qual` das políticas `SELECT` extra, porque no PostgreSQL as permissivas somam-se por
 **OR** e uma leitura a mais alarga o acesso sem aparecer em teste nenhum.
 
+**Ver qual foi o commit que a CI verificou.** A `ci.yml` tem `cancel-in-progress: true`,
+por isso um push novo cancela a corrida do anterior. Dizer "a CI passou no E03" quando a
+corrida desse commit foi cancelada só é honesto se a corrida verde for de um commit que
+**contém** o código do E03 — o que numa história linear é verdade, mas verifica-se com
+`gh run view --json headSha`, não se assume.
+
 **Exigir o par, nunca o caso sozinho.** "O pedido de A ao recurso de B devolve vazio" é
 compatível com um sistema em que *tudo* devolve vazio. A prova é a **diferença**: o mesmo
 identificador, com a sessão certa, tem de devolver a coisa. Vale para isolamento, para
