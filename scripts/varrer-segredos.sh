@@ -25,8 +25,35 @@ PADROES=(
   "chave da AWS:AKIA[0-9A-Z]{16}"
   "chave da OpenAI:sk-[A-Za-z0-9]{32,}"
   "chave da Stripe:[sr]k_live_[A-Za-z0-9]{16,}"
+  # Segredo de nome generico com valor literal longo. Faltava, e foi encontrado a
+  # 2026-09-03 a LER O REGISTO DA CI: o BETTER_AUTH_SECRET aparecia em claro no
+  # ci.yml enquanto a DATABASE_URL vinha mascarada, e esta varredura dizia
+  # "nenhum segredo na arvore". Eu so lhe tinha ensinado cinco formas de
+  # fornecedor - e a forma mais comum num ficheiro de configuracao e esta.
+  "segredo de nome generico:(SECRET|TOKEN|PASSWORD|PASSWD|API_?KEY)[\"']?[[:space:]]*[:=][[:space:]]*[\"']?[A-Za-z0-9_.@/+-]{16,}"
   "senha em ligacao:postgres(ql)?://[^:@/[:space:]]+:[^@/$$\{[:space:]]{8,}@"
 )
+
+# Valores literais que PODEM ficar, com o motivo escrito. Um segredo declarado e
+# uma decisao; um segredo em silencio e um defeito. Mesma forma da lista de
+# scripts/validar-testes.sh.
+DECLARADOS="segredo-de-ci-descartavel-com-32-caracteres:valor da CI, descartavel e sem valor fora do runner - o nome di-lo"
+
+declarado() { # $1 = linha; devolve 0 se a linha contem um valor declarado
+  # Here-doc e nao cano: um `while` dentro de um cano corre numa SUBSHELL, e um
+  # `exit 0` la dentro sai da subshell em vez de devolver da funcao - a primeira
+  # versao disto devolvia sempre 1 e o filtro nunca filtrava nada. Apanhado a
+  # 2026-09-03 por a varredura acusar um valor que estava na lista.
+  local linha="$1" par valor
+  while IFS= read -r par; do
+    [ -z "$par" ] && continue
+    valor="${par%%:*}"
+    case "$linha" in *"$valor"*) return 0 ;; esac
+  done <<FIMDECL
+$DECLARADOS
+FIMDECL
+  return 1
+}
 
 # O .env.example e documentacao: valores descartaveis e comentados, e e suposto
 # estar versionado. Tudo o resto e alvo.
@@ -49,6 +76,7 @@ varrer() { # $1 = ficheiro unico; vazio = arvore versionada. Devolve nr de padro
       [ -n "$casos" ] && { echo "$nome"; achados=$((achados+1)); }
     else
       casos=$(echo "$ALVOS" | xargs grep -nIE -e "$padrao" 2>/dev/null | grep -vE "$LOCAIS" || true)
+      casos=$(printf '%s\n' "$casos" | while IFS= read -r l; do [ -n "$l" ] && ! declarado "$l" && printf '%s\n' "$l"; done)
       [ -n "$casos" ] && { erro "$nome: $(echo "$casos" | head -3 | tr '\n' ' ')"; achados=$((achados+1)); }
     fi
   done
