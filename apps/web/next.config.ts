@@ -6,6 +6,7 @@ const config: NextConfig = {
     '@bossaos/config',
     '@bossaos/db',
     '@bossaos/domain',
+    '@bossaos/i18n',
     '@bossaos/storage',
     '@bossaos/ui',
   ],

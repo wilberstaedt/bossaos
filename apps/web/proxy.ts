@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { IDIOMAS, resolverIdioma } from '@bossaos/i18n';
 
 /** Cabeçalho onde viaja o identificador do pedido, ida e volta. */
 export const CABECALHO_REQUEST_ID = 'x-request-id';
@@ -16,7 +17,24 @@ export const CABECALHO_REQUEST_ID = 'x-request-id';
  */
 const ACEITAVEL = /^[A-Za-z0-9._-]{8,128}$/;
 
+/** Um endereço já tem idioma quando começa por `/es-ES`, `/pt-BR` ou `/en`. */
+function temIdioma(caminho: string): boolean {
+  return IDIOMAS.some((i) => caminho === `/${i}` || caminho.startsWith(`/${i}/`));
+}
+
 export function proxy(pedido: NextRequest) {
+  const caminho = pedido.nextUrl.pathname;
+
+  // Endereço sem idioma: negoceia-se pelo `Accept-Language` e redirecciona-se.
+  // As rotas de API ficam de fora — uma sonda de saúde não fala línguas, e um
+  // 307 numa sonda faria o orquestrador ler "vivo" onde só houve um desvio.
+  if (!caminho.startsWith('/api/') && !temIdioma(caminho)) {
+    const idioma = resolverIdioma(pedido.headers.get('accept-language'));
+    const destino = new URL(`/${idioma}${caminho === '/' ? '' : caminho}`, pedido.url);
+    destino.search = pedido.nextUrl.search;
+    return NextResponse.redirect(destino);
+  }
+
   const recebido = pedido.headers.get(CABECALHO_REQUEST_ID);
   const requestId = recebido && ACEITAVEL.test(recebido) ? recebido : crypto.randomUUID();
 

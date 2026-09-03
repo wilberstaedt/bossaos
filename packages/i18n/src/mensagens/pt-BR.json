@@ -1,0 +1,110 @@
+{
+  "comum": {
+    "saltarParaConteudo": "Pular para o conteúdo",
+    "abrirMenu": "Abrir o menu de navegação",
+    "trocarUnidade": "Trocar de unidade",
+    "fechar": "Fechar",
+    "voltar": "Voltar",
+    "guardar": "Salvar",
+    "cancelar": "Cancelar",
+    "datosDemostracion": "Dados de demonstração",
+    "enLinea": "On-line",
+    "ayudaSoporte": "Ajuda e suporte",
+    "asinatura": "Feito com BossaOS"
+  },
+  "navegacao": {
+    "inicio": "Início",
+    "catalogo": "Cardápio",
+    "reservas": "Reservas",
+    "salaPedidos": "Salão e pedidos",
+    "caixa": "Caixa",
+    "inventario": "Estoque",
+    "clientes": "Clientes",
+    "equipa": "Equipe",
+    "relatorios": "Relatórios",
+    "configuracao": "Configurações",
+    "trabalho": "Trabalho",
+    "mais": "Mais"
+  },
+  "estado": {
+    "carga": {
+      "sobrancelha": "Carregando",
+      "titulo": "Carregando o cardápio",
+      "accao": "Aguardar",
+      "nota": "Carregando os produtos do seu restaurante…"
+    },
+    "vazio": {
+      "sobrancelha": "Vazio",
+      "titulo": "Seu primeiro cardápio começa aqui",
+      "situacaoTitulo": "Situação da sua solicitação",
+      "situacaoDetalhe": "Informação atualizada",
+      "rotuloContexto": "Contexto",
+      "rotuloProximoPasso": "Próximo passo",
+      "rotuloAjuda": "Ajuda",
+      "accao": "Criar primeiro produto"
+    },
+    "erroAoGuardar": {
+      "sobrancelha": "Erro",
+      "titulo": "Não foi possível salvar as alterações",
+      "situacaoTitulo": "Precisa de atenção",
+      "situacaoDetalhe": "Informação atualizada",
+      "rotuloRascunho": "Rascunho",
+      "rotuloCausa": "Causa",
+      "rotuloProximoPasso": "Próximo passo",
+      "rotuloAccaoSecundaria": "Ação secundária",
+      "accao": "Tentar salvar de novo"
+    },
+    "semAcesso": {
+      "sobrancelha": "Permissões",
+      "titulo": "Você não tem acesso a esta ação",
+      "situacaoTitulo": "Precisa de atenção",
+      "situacaoDetalhe": "Informação atualizada",
+      "rotuloAccao": "Ação",
+      "rotuloFuncao": "Sua função",
+      "rotuloAcessoNecessario": "Acesso necessário",
+      "rotuloPedir": "Solicitar",
+      "accao": "Voltar às minhas mesas"
+    },
+    "porGuardar": {
+      "sobrancelha": "Rascunho",
+      "titulo": "Você tem alterações não salvas",
+      "rotuloProduto": "Produto",
+      "rotuloAlteracao": "Alteração",
+      "rotuloGuardar": "Salvar",
+      "rotuloDescartar": "Descartar",
+      "accao": "Salvar antes de sair"
+    },
+    "arquivar": {
+      "sobrancelha": "Ação sensível",
+      "titulo": "Arquive com rastreabilidade",
+      "rotuloElemento": "Item",
+      "rotuloEfeito": "Efeito",
+      "rotuloHistorial": "Histórico",
+      "rotuloMotivo": "Motivo",
+      "rotuloConfirmacao": "Confirmação",
+      "accao": "Confirmar arquivamento"
+    }
+  },
+  "catalogo": {
+    "titulo": "Catálogo de componentes",
+    "descricao": "Peças do sistema BossaOS para inspeção. Não é uma tela do produto.",
+    "avisoDemo": "Superfície interna de inspeção. Os valores são de demonstração e não representam dados reais.",
+    "seccaoFundacoes": "Fundações",
+    "seccaoComponentes": "Componentes",
+    "seccaoEstados": "Estados transversais",
+    "seccaoEstruturas": "Estruturas",
+    "seccaoIdiomas": "Idiomas e formato",
+    "abrirDialogo": "Abrir diálogo",
+    "abrirGaveta": "Abrir painel lateral",
+    "exemploDialogoTitulo": "Confirmar a mudança de preço",
+    "exemploDialogoCorpo": "O preço será aplicado ao cardápio digital e aos canais ativos.",
+    "exemploGavetaTitulo": "Detalhe do pedido",
+    "exemploGavetaCorpo": "Painel lateral em tela larga; no celular sobe de baixo.",
+    "exemploNotificacao": "Alterações salvas",
+    "colunaProduto": "Produto",
+    "colunaCanal": "Canal",
+    "colunaPreco": "Preço",
+    "colunaEstado": "Situação",
+    "exemploKdsAccao": "Marcar pronto"
+  }
+}

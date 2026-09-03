@@ -1,0 +1,577 @@
+/*
+ * Sistema visual da BossaOS.
+ *
+ * As variáveis abaixo são a MESMA informação que está em `fichas.ts`, e essa
+ * duplicação é deliberada — o CSS precisa dos valores em tempo de folha de
+ * estilo, o TypeScript precisa deles em tempo de servidor (para calcular
+ * contraste). O que impede as duas cópias de divergirem é um teste:
+ * `fichas.test.ts` lê este ficheiro e compara token a token. Se alguém mudar um
+ * valor num sítio e não no outro, o teste falha e diz qual.
+ */
+
+:root {
+  /* ── Marca ─────────────────────────────────────────────────────────────── */
+  --bo-primaria: #102E35;
+  --bo-acento: #F5664D;
+  --bo-realce: #DDEA91;
+
+  /* ── Superfícies ───────────────────────────────────────────────────────── */
+  --bo-superficie-base: #F7F4EC;
+  --bo-superficie-suave: #E9EFEC;
+  --bo-superficie-elevada: #FFFFFF;
+  --bo-superficie-inversa: #102E35;
+
+  /* ── Texto e linha ─────────────────────────────────────────────────────── */
+  --bo-texto-primario: #102E35;
+  --bo-texto-secundario: #51666A;
+  --bo-texto-inverso: #FFFFFF;
+  --bo-borda: #D7DEDA;
+
+  /* ── Estados operacionais — FIXOS, não seguem o tema do cliente ────────── */
+  --bo-estado-sucesso: #276442;
+  --bo-estado-aviso: #8A5100;
+  --bo-estado-perigo: #B32635;
+  --bo-estado-info: #175A8A;
+
+  /* ── Foco — acessibilidade, não decoração ──────────────────────────────── */
+  --bo-foco-cor: #102E35;
+  --bo-foco-espessura: 2px;
+  --bo-foco-afastamento: 2px;
+
+  /* ── Tipografia ────────────────────────────────────────────────────────── */
+  --bo-fonte-titulo: var(--fonte-rubik), Arial, sans-serif;
+  --bo-fonte-corpo: var(--fonte-noto), Arial, sans-serif;
+
+  /* ── Espaço (grade de 4) ───────────────────────────────────────────────── */
+  --bo-espaco-xs: 4px;
+  --bo-espaco-sm: 8px;
+  --bo-espaco-md: 12px;
+  --bo-espaco-lg: 16px;
+  --bo-espaco-xl: 24px;
+  --bo-espaco-xxl: 32px;
+  --bo-espaco-xxxl: 48px;
+  --bo-espaco-gigante: 64px;
+
+  /* ── Forma ─────────────────────────────────────────────────────────────── */
+  --bo-raio-cartao: 16px;
+  --bo-raio-controlo: 10px;
+  --bo-raio-capsula: 999px;
+
+  /* ── Movimento ─────────────────────────────────────────────────────────── */
+  --bo-movimento-rapido: 160ms;
+  --bo-movimento-base: 200ms;
+  --bo-movimento-lento: 240ms;
+
+  /* ── Alvo de toque ─────────────────────────────────────────────────────── */
+  --bo-toque-publico: 44px;
+  --bo-toque-operacao: 48px;
+
+  /* ── Grade ─────────────────────────────────────────────────────────────── */
+  --bo-largura-maxima: 1200px;
+  --bo-margem-movel: 24px;
+  --bo-margem-secretaria: 64px;
+
+  /* Superfícies PÚBLICAS: sobrescritas pelo tema do restaurante quando existe.
+     Só estas cinco. Ver `variaveisDoTema` em tema.ts. */
+  --bo-publico-primaria: var(--bo-primaria);
+  --bo-publico-primaria-texto: var(--bo-texto-inverso);
+  --bo-publico-acento: var(--bo-acento);
+  --bo-publico-fundo: var(--bo-superficie-base);
+  --bo-publico-texto: var(--bo-texto-primario);
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bo-superficie-base);
+  color: var(--bo-texto-primario);
+  font-family: var(--bo-fonte-corpo);
+  font-size: 16px;
+  line-height: 24px;
+  /* O manual pede acentos e € legíveis em três idiomas: sem isto o navegador
+     escolhe substituições que estragam o ritmo do texto em espanhol. */
+  font-synthesis-weight: none;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--bo-fonte-titulo);
+  font-weight: 700;
+  margin: 0;
+  /* "Máximo de três linhas" no título principal (manual p. 17) é uma regra de
+     composição; aqui garante-se que não parte palavras longas em ES/PT. */
+  overflow-wrap: break-word;
+}
+
+h1 { font-size: 32px; line-height: 36px; }
+@media (min-width: 768px) { h1 { font-size: 48px; line-height: 52px; } }
+h2 { font-size: 24px; line-height: 30px; }
+@media (min-width: 768px) { h2 { font-size: 32px; line-height: 38px; } }
+h3 { font-size: 20px; line-height: 28px; }
+
+p { margin: 0; }
+
+/* Foco visível em tudo o que recebe teclado. Uma regra, sem excepções: a
+   primeira coisa que desaparece num sistema de design é o anel de foco, e quem
+   dá por isso é quem navega sem rato. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: var(--bo-foco-espessura) solid var(--bo-foco-cor);
+  outline-offset: var(--bo-foco-afastamento);
+  border-radius: var(--bo-raio-controlo);
+}
+
+/* Sobre superfície escura o anel escuro desaparece. */
+.bo-inverso :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline-color: var(--bo-realce);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Só para leitores de ecrã. Usado em rótulos que o desenho mostra por posição. */
+.bo-so-leitor {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Saltar para o conteúdo: aparece ao receber foco. */
+.bo-saltar {
+  position: absolute;
+  left: var(--bo-espaco-lg);
+  top: -100px;
+  z-index: 100;
+  background: var(--bo-superficie-elevada);
+  color: var(--bo-texto-primario);
+  padding: var(--bo-espaco-md) var(--bo-espaco-lg);
+  border-radius: var(--bo-raio-controlo);
+  transition: top var(--bo-movimento-rapido) ease;
+}
+.bo-saltar:focus { top: var(--bo-espaco-lg); }
+
+/* ══ Componentes ═══════════════════════════════════════════════════════════ */
+
+/* ── Botão ────────────────────────────────────────────────────────────────
+   Altura mínima por PADRÃO INTERNO: 44 px no público, 48 px na operação. É mais
+   exigente que os 24 px da WCAG 2.2, e é de propósito — quem toca no TPV tem as
+   mãos ocupadas. A altura vive aqui e não em cada ecrã. */
+.bo-botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bo-espaco-sm);
+  min-height: var(--bo-toque-publico);
+  min-width: var(--bo-toque-publico);
+  padding: 0 var(--bo-espaco-xl);
+  border: 1px solid transparent;
+  border-radius: var(--bo-raio-controlo);
+  font-family: var(--bo-fonte-corpo);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color var(--bo-movimento-rapido) ease,
+              border-color var(--bo-movimento-rapido) ease;
+}
+.bo-botao--operacao { min-height: var(--bo-toque-operacao); min-width: var(--bo-toque-operacao); font-size: 18px; }
+.bo-botao--largo { width: 100%; }
+
+.bo-botao--primario { background: var(--bo-primaria); color: var(--bo-texto-inverso); }
+.bo-botao--primario:hover:not(:disabled) { background: #17414b; }
+
+.bo-botao--secundario { background: var(--bo-superficie-suave); color: var(--bo-texto-primario); }
+.bo-botao--secundario:hover:not(:disabled) { background: #dbe5e0; }
+
+/* Perigo usa o token de ESTADO, que não segue o tema do cliente. */
+.bo-botao--perigo { background: var(--bo-estado-perigo); color: var(--bo-texto-inverso); }
+.bo-botao--perigo:hover:not(:disabled) { background: #97202d; }
+
+.bo-botao--fantasma { background: transparent; color: var(--bo-texto-primario); border-color: var(--bo-borda); }
+.bo-botao--fantasma:hover:not(:disabled) { background: var(--bo-superficie-suave); }
+
+.bo-botao:disabled { opacity: 0.5; cursor: not-allowed; }
+.bo-botao[aria-busy='true'] { cursor: progress; }
+
+/* ── Etiqueta (cápsula) ──────────────────────────────────────────────────── */
+.bo-etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bo-espaco-xs);
+  padding: 2px var(--bo-espaco-md);
+  border-radius: var(--bo-raio-capsula);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  background: var(--bo-superficie-suave);
+  color: var(--bo-texto-primario);
+}
+/* Cor nunca sozinha: os componentes acrescentam sempre texto ou ícone. */
+.bo-etiqueta--sucesso { background: #e2efe7; color: var(--bo-estado-sucesso); }
+.bo-etiqueta--aviso   { background: #f6ece0; color: var(--bo-estado-aviso); }
+.bo-etiqueta--perigo  { background: #f7e3e5; color: var(--bo-estado-perigo); }
+.bo-etiqueta--info    { background: #e2ecf4; color: var(--bo-estado-info); }
+.bo-etiqueta--realce  { background: var(--bo-realce); color: var(--bo-primaria); }
+
+/* ── Campo ───────────────────────────────────────────────────────────────── */
+.bo-campo { display: flex; flex-direction: column; gap: var(--bo-espaco-sm); }
+.bo-campo__rotulo { font-size: 14px; font-weight: 600; line-height: 20px; }
+.bo-campo__controlo {
+  min-height: var(--bo-toque-publico);
+  padding: var(--bo-espaco-md) var(--bo-espaco-lg);
+  border: 1px solid var(--bo-borda);
+  border-radius: var(--bo-raio-controlo);
+  background: var(--bo-superficie-elevada);
+  color: var(--bo-texto-primario);
+  font-family: var(--bo-fonte-corpo);
+  /* 16 px também evita que o iOS aproxime o ecrã ao focar o campo — aproximar
+     desloca o formulário e faz perder o sítio. */
+  font-size: 16px;
+  line-height: 24px;
+  width: 100%;
+}
+.bo-campo__controlo:disabled { background: var(--bo-superficie-suave); opacity: 0.7; }
+.bo-campo__ajuda { font-size: 14px; line-height: 20px; color: var(--bo-texto-secundario); }
+.bo-campo__erro {
+  font-size: 14px; line-height: 20px; font-weight: 600;
+  color: var(--bo-estado-perigo);
+  display: flex; align-items: flex-start; gap: var(--bo-espaco-xs);
+}
+.bo-campo--invalido .bo-campo__controlo { border-color: var(--bo-estado-perigo); border-width: 2px; }
+
+/* ── Separadores (tabs) ──────────────────────────────────────────────────── */
+.bo-separadores__lista {
+  display: flex; gap: var(--bo-espaco-xs);
+  border-bottom: 1px solid var(--bo-borda);
+  /* Conteúdo extenso resolve-se com rolagem, nunca encolhendo tudo (E02). */
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.bo-separadores__botao {
+  min-height: var(--bo-toque-publico);
+  padding: 0 var(--bo-espaco-lg);
+  border: 0; border-bottom: 3px solid transparent;
+  background: transparent; color: var(--bo-texto-secundario);
+  font-family: var(--bo-fonte-corpo); font-size: 16px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+}
+.bo-separadores__botao[aria-selected='true'] {
+  color: var(--bo-texto-primario);
+  border-bottom-color: var(--bo-acento);
+}
+.bo-separadores__painel { padding-top: var(--bo-espaco-xl); }
+
+/* ── Cartão ──────────────────────────────────────────────────────────────── */
+.bo-cartao {
+  background: var(--bo-superficie-elevada);
+  border-radius: var(--bo-raio-cartao);
+  padding: var(--bo-espaco-xl);
+  border: 1px solid transparent;
+}
+.bo-cartao--contornado { border-color: var(--bo-borda); }
+.bo-cartao--suave { background: var(--bo-superficie-suave); }
+.bo-cartao__titulo { font-size: 20px; line-height: 28px; margin-bottom: var(--bo-espaco-sm); }
+
+/* ── Tabela adaptável ─────────────────────────────────────────────────────
+   Em ecrã largo é uma tabela. Abaixo de 768 px cada linha vira um cartão com o
+   rótulo à frente do valor — a hierarquia reorganiza-se, e é isso que o CT-13
+   quer dizer com "não reduz uma tela inteira por escala". */
+.bo-tabela__envolvente { overflow-x: auto; }
+.bo-tabela { width: 100%; border-collapse: collapse; font-size: 16px; }
+.bo-tabela th, .bo-tabela td {
+  text-align: left; padding: var(--bo-espaco-md) var(--bo-espaco-lg);
+  border-bottom: 1px solid var(--bo-borda);
+}
+.bo-tabela th { font-weight: 600; font-size: 14px; color: var(--bo-texto-secundario); }
+.bo-tabela__numero { text-align: right; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 767px) {
+  .bo-tabela--adaptavel thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .bo-tabela--adaptavel tr {
+    display: block; background: var(--bo-superficie-elevada);
+    border-radius: var(--bo-raio-cartao); padding: var(--bo-espaco-lg);
+    margin-bottom: var(--bo-espaco-md);
+  }
+  .bo-tabela--adaptavel td {
+    display: flex; justify-content: space-between; gap: var(--bo-espaco-lg);
+    border-bottom: 0; padding: var(--bo-espaco-xs) 0; text-align: left;
+  }
+  .bo-tabela--adaptavel td::before {
+    content: attr(data-rotulo);
+    font-size: 14px; font-weight: 600; color: var(--bo-texto-secundario);
+    flex-shrink: 0;
+  }
+  .bo-tabela--adaptavel .bo-tabela__numero { text-align: right; }
+}
+
+/* ── Aviso ───────────────────────────────────────────────────────────────── */
+.bo-aviso {
+  display: flex; gap: var(--bo-espaco-lg);
+  padding: var(--bo-espaco-lg) var(--bo-espaco-xl);
+  border-radius: var(--bo-raio-cartao);
+  background: var(--bo-superficie-suave);
+  border-left: 4px solid var(--bo-estado-info);
+}
+.bo-aviso--sucesso { border-left-color: var(--bo-estado-sucesso); }
+.bo-aviso--aviso   { border-left-color: var(--bo-estado-aviso); }
+.bo-aviso--perigo  { border-left-color: var(--bo-estado-perigo); background: var(--bo-superficie-elevada); border: 1px solid var(--bo-estado-perigo); border-left-width: 4px; }
+.bo-aviso__titulo { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 18px; line-height: 26px; }
+.bo-aviso--sucesso .bo-aviso__titulo { color: var(--bo-estado-sucesso); }
+.bo-aviso--aviso .bo-aviso__titulo   { color: var(--bo-estado-aviso); }
+.bo-aviso--perigo .bo-aviso__titulo  { color: var(--bo-estado-perigo); }
+.bo-aviso--info .bo-aviso__titulo    { color: var(--bo-texto-primario); }
+.bo-aviso__corpo { color: var(--bo-texto-secundario); }
+
+/* ── Diálogo ─────────────────────────────────────────────────────────────── */
+.bo-dialogo::backdrop { background: rgba(16, 46, 53, 0.55); }
+.bo-dialogo {
+  border: 0; padding: 0;
+  border-radius: var(--bo-raio-cartao);
+  background: var(--bo-superficie-elevada);
+  color: var(--bo-texto-primario);
+  width: min(560px, calc(100vw - 2 * var(--bo-espaco-xl)));
+  max-height: calc(100vh - 2 * var(--bo-espaco-xl));
+  overflow: auto;
+}
+.bo-dialogo__corpo { padding: var(--bo-espaco-xl); display: flex; flex-direction: column; gap: var(--bo-espaco-lg); }
+.bo-dialogo__accoes { display: flex; gap: var(--bo-espaco-md); flex-wrap: wrap; justify-content: flex-end; }
+
+/* ── Gaveta ──────────────────────────────────────────────────────────────── */
+.bo-gaveta::backdrop { background: rgba(16, 46, 53, 0.55); }
+.bo-gaveta {
+  border: 0; padding: 0;
+  background: var(--bo-superficie-elevada);
+  color: var(--bo-texto-primario);
+  margin: 0 0 0 auto;
+  height: 100vh;
+  max-height: 100vh;
+  width: min(420px, 100vw);
+  border-radius: var(--bo-raio-cartao) 0 0 var(--bo-raio-cartao);
+  overflow: auto;
+}
+@media (max-width: 767px) {
+  /* No telemóvel a gaveta sobe de baixo: alcançável com o polegar. */
+  .bo-gaveta {
+    margin: auto 0 0 0; width: 100vw; height: auto; max-height: 85vh;
+    border-radius: var(--bo-raio-cartao) var(--bo-raio-cartao) 0 0;
+  }
+}
+.bo-gaveta__corpo { padding: var(--bo-espaco-xl); display: flex; flex-direction: column; gap: var(--bo-espaco-lg); }
+
+/* ── Notificação ─────────────────────────────────────────────────────────── */
+.bo-notificacoes {
+  position: fixed; z-index: 60;
+  bottom: var(--bo-espaco-xl); right: var(--bo-espaco-xl);
+  display: flex; flex-direction: column; gap: var(--bo-espaco-md);
+  width: min(380px, calc(100vw - 2 * var(--bo-espaco-lg)));
+}
+@media (max-width: 767px) { .bo-notificacoes { left: var(--bo-espaco-lg); right: var(--bo-espaco-lg); width: auto; } }
+.bo-notificacao {
+  display: flex; gap: var(--bo-espaco-md); align-items: flex-start;
+  background: var(--bo-superficie-inversa); color: var(--bo-texto-inverso);
+  padding: var(--bo-espaco-lg); border-radius: var(--bo-raio-controlo);
+}
+.bo-notificacao__fechar { background: transparent; border: 0; color: inherit; cursor: pointer; min-width: var(--bo-toque-publico); min-height: var(--bo-toque-publico); }
+
+/* ── Estado transversal ──────────────────────────────────────────────────── */
+.bo-estado { display: flex; flex-direction: column; gap: var(--bo-espaco-xl); }
+.bo-estado__sobrancelha {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--bo-texto-secundario);
+}
+.bo-estado__cabecalho { display: flex; gap: var(--bo-espaco-xl); align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+.bo-estado__factos { display: grid; gap: var(--bo-espaco-lg); margin: 0; }
+.bo-estado__rotulo { font-size: 14px; font-weight: 600; color: var(--bo-texto-secundario); }
+.bo-estado__valor { font-size: 16px; line-height: 24px; margin: 0; }
+.bo-estado__accoes { display: flex; gap: var(--bo-espaco-md); flex-wrap: wrap; }
+
+/* Esqueleto de carregamento. Anima, mas pára com movimento reduzido. */
+.bo-esqueleto {
+  background: var(--bo-superficie-suave);
+  border-radius: var(--bo-raio-capsula);
+  height: 12px;
+  animation: bo-pulsar 1.4s ease-in-out infinite;
+}
+@keyframes bo-pulsar { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+
+/* ══ Estruturas ════════════════════════════════════════════════════════════
+   Cinco superfícies, cinco formas. Partilham componentes e fichas; o que muda é
+   a moldura, porque quem está à frente delas está a fazer coisas diferentes.
+   Nenhuma delas contém regra de negócio — isso vive no domínio. */
+
+/* ── Administração ──────────────────────────────────────────────────────── */
+.bo-admin { display: flex; min-height: 100vh; background: var(--bo-superficie-base); }
+.bo-admin__lateral {
+  width: 260px; flex-shrink: 0;
+  background: var(--bo-superficie-inversa); color: var(--bo-texto-inverso);
+  padding: var(--bo-espaco-xl) var(--bo-espaco-lg);
+  display: flex; flex-direction: column; gap: var(--bo-espaco-xl);
+}
+.bo-admin__marca { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 24px; }
+.bo-admin__unidade {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: var(--bo-raio-controlo);
+  padding: var(--bo-espaco-md) var(--bo-espaco-lg);
+  color: inherit; text-align: left; width: 100%;
+  min-height: var(--bo-toque-publico); cursor: pointer;
+  font-family: var(--bo-fonte-corpo);
+}
+.bo-admin__unidade strong { display: block; font-size: 16px; }
+.bo-admin__unidade span { font-size: 14px; opacity: 0.75; }
+.bo-admin__navegacao { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.bo-admin__ligacao {
+  display: flex; align-items: center; gap: var(--bo-espaco-md);
+  min-height: var(--bo-toque-publico);
+  padding: 0 var(--bo-espaco-lg);
+  border-radius: var(--bo-raio-controlo);
+  color: inherit; text-decoration: none; font-size: 16px;
+}
+.bo-admin__ligacao:hover { background: rgba(255,255,255,0.08); }
+.bo-admin__ligacao[aria-current='page'] { background: var(--bo-realce); color: var(--bo-primaria); font-weight: 600; }
+.bo-admin__rodape { display: flex; flex-direction: column; gap: var(--bo-espaco-md); font-size: 14px; }
+.bo-admin__principal { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.bo-admin__topo {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--bo-espaco-lg);
+  padding: var(--bo-espaco-lg) var(--bo-espaco-xl);
+  background: var(--bo-superficie-elevada);
+  border-bottom: 1px solid var(--bo-borda);
+  flex-wrap: wrap;
+}
+.bo-admin__conteudo { padding: var(--bo-espaco-xl); flex: 1; }
+.bo-admin__abrir { display: none; }
+
+@media (max-width: 1023px) {
+  /* A lateral vira gaveta: abaixo de 1024 px ela comeria metade do ecrã. */
+  .bo-admin { flex-direction: column; }
+  .bo-admin__lateral { display: none; }
+  .bo-admin--aberta .bo-admin__lateral {
+    display: flex; position: fixed; inset: 0 auto 0 0; z-index: 50; width: min(300px, 88vw);
+  }
+  .bo-admin__abrir { display: inline-flex; }
+  .bo-admin__conteudo { padding: var(--bo-espaco-lg); }
+  .bo-admin__inferior {
+    position: sticky; bottom: 0;
+    display: flex; justify-content: space-around;
+    background: var(--bo-superficie-elevada);
+    border-top: 1px solid var(--bo-borda);
+  }
+  .bo-admin__inferior a {
+    flex: 1; text-align: center; text-decoration: none; color: var(--bo-texto-primario);
+    min-height: var(--bo-toque-publico); display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600;
+  }
+}
+@media (min-width: 1024px) { .bo-admin__inferior { display: none; } }
+
+/* ── Público (LP e jornadas do cliente) ─────────────────────────────────────
+   A única estrutura que segue o tema do restaurante. */
+.bo-publico {
+  background: var(--bo-publico-fundo);
+  color: var(--bo-publico-texto);
+  min-height: 100vh;
+}
+.bo-publico__cabecalho {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--bo-espaco-lg);
+  padding: var(--bo-espaco-lg) var(--bo-margem-movel);
+  max-width: var(--bo-largura-maxima); margin: 0 auto;
+}
+.bo-publico__conteudo {
+  max-width: var(--bo-largura-maxima); margin: 0 auto;
+  padding: var(--bo-espaco-xxl) var(--bo-margem-movel) var(--bo-espaco-gigante);
+}
+.bo-publico__rodape {
+  border-top: 1px solid var(--bo-borda);
+  padding: var(--bo-espaco-xl) var(--bo-margem-movel);
+  max-width: var(--bo-largura-maxima); margin: 0 auto;
+  font-size: 14px; color: var(--bo-texto-secundario);
+  display: flex; justify-content: space-between; gap: var(--bo-espaco-lg); flex-wrap: wrap;
+}
+@media (min-width: 1280px) {
+  .bo-publico__cabecalho,
+  .bo-publico__conteudo,
+  .bo-publico__rodape { padding-left: var(--bo-margem-secretaria); padding-right: var(--bo-margem-secretaria); }
+}
+/* A acção primária pública usa o tema; o texto vem calculado do servidor. */
+.bo-publico .bo-botao--primario {
+  background: var(--bo-publico-primaria);
+  color: var(--bo-publico-primaria-texto);
+}
+
+/* ── Staff (sala) ───────────────────────────────────────────────────────────
+   Alvos de operação, uma coluna, sem barra lateral: usa-se em pé. */
+.bo-staff { min-height: 100vh; display: flex; flex-direction: column; background: var(--bo-superficie-base); }
+.bo-staff__topo {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--bo-espaco-lg);
+  padding: var(--bo-espaco-lg); background: var(--bo-superficie-inversa); color: var(--bo-texto-inverso);
+}
+.bo-staff__conteudo { flex: 1; padding: var(--bo-espaco-lg); display: flex; flex-direction: column; gap: var(--bo-espaco-lg); }
+.bo-staff .bo-botao { min-height: var(--bo-toque-operacao); }
+
+/* ── KDS / TPV ──────────────────────────────────────────────────────────────
+   Lê-se a um metro e meio, com as mãos ocupadas: fundo escuro, corpo maior,
+   alvos de operação. O manual manda inspeccionar isto à distância real de uso;
+   isso é uma verificação humana e está declarada como pendência no E02. */
+.bo-kds {
+  min-height: 100vh; background: var(--bo-superficie-inversa); color: var(--bo-texto-inverso);
+  display: flex; flex-direction: column; font-size: 18px;
+}
+.bo-kds__topo {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--bo-espaco-lg);
+  padding: var(--bo-espaco-lg) var(--bo-espaco-xl);
+  border-bottom: 1px solid rgba(255,255,255,0.16);
+}
+.bo-kds__grelha {
+  flex: 1; padding: var(--bo-espaco-lg);
+  display: grid; gap: var(--bo-espaco-lg);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  align-content: start;
+}
+.bo-kds .bo-cartao { background: rgba(255,255,255,0.06); color: var(--bo-texto-inverso); }
+.bo-kds .bo-botao { min-height: var(--bo-toque-operacao); font-size: 18px; }
+.bo-kds__numero { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 24px; font-variant-numeric: tabular-nums; }
+
+/* Glifo de navegação: os quatro quadrados que o atlas desenha. Não é a família
+   de ícones do produto — essa não existe ainda e está declarada como pendência. */
+.bo-admin__glifo {
+  display: grid; grid-template-columns: repeat(2, 5px); gap: 3px; flex-shrink: 0;
+}
+.bo-admin__glifo i { width: 5px; height: 5px; background: currentColor; border-radius: 1px; }
+
+.bo-admin__utilizador { display: flex; align-items: center; gap: var(--bo-espaco-sm); }
+.bo-admin__iniciais {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: var(--bo-raio-capsula);
+  background: rgba(255,255,255,0.14); font-size: 12px; font-weight: 700;
+}
+
+/* O cabeçalho móvel mostra marca e unidade; em ecrã largo isso já está na
+   lateral e o topo mostra a migalha. */
+.bo-admin__movel { display: none; flex-direction: column; line-height: 1.2; }
+.bo-admin__larga { display: inline; }
+@media (max-width: 1023px) {
+  .bo-admin__movel { display: flex; }
+  .bo-admin__larga { display: none; }
+}
+
+/* A acção repetida no topo só existe em ecrã largo. No telemóvel o atlas
+   desenha-a uma vez, em baixo — repeti-la a 390 px punha dois botões primários
+   idênticos no mesmo ecrã de rolagem. */
+.bo-estado__accao-topo { display: none; }
+@media (min-width: 768px) { .bo-estado__accao-topo { display: block; } }

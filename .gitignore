@@ -17,3 +17,9 @@ out/
 
 .DS_Store
 coverage/
+
+# Artefactos da inspecção. As CAPTURAS ficam versionadas (são a prova do aceite
+# 3); os relatórios e os vestígios de execução, não.
+inspeccao/.resultados/
+playwright-report/
+test-results/

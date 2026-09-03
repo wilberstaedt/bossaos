@@ -1,18 +1,44 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E02 — design system, responsividade e idiomas
-**Estado:** entregue ao JR.
-**Próxima ação:** o JR implementa; o sénior revê quando ele declarar pronto.
+**Estado:** implementado pelo JR, **aguardando validação do sénior**.
+**Próxima ação:** o sénior valida o E02 (`docs/progress/E02.md`, capturas em
+`docs/progress/capturas/E02/`). O JR **não** avançou para E03.
 
 | Etapa | Estado |
 | --- | --- |
 | E00 — contrato e leitura das fontes | implementado, **aguardando validação**. Sete documentos em `docs/architecture`. Quem os escreveu não os valida: a prova vem no E11, quando se vir se o E02-E10 se construíram a partir deles. |
 | E01 — repositório e verificação contínua | **validado** · `docs/reviews/E01.md` |
-| E02 — design system, responsividade e idiomas | em execução |
+| E02 — design system, responsividade e idiomas | implementado, **aguardando validação** · `docs/progress/E02.md` |
 
 **Primeiras telas.** O E02 é a primeira etapa que toca `coverage.csv`: STATE 001-003,
 005, 007 e 016. Até aqui o medidor de telas esteve a 0 % e isso era verdade, não uma
-avaria — E00 a E01 são transversais e não entregam vista nenhuma.
+avaria — E00 a E01 são transversais e não entregam vista nenhuma. Estão agora a
+`implementado aguardando validação`; `scripts/validar-cobertura.sh` diz "Cobertura íntegra".
+
+## E02 — o que existe agora
+
+`packages/ui` (fichas medidas, contraste WCAG, validação de tema no servidor, 11
+componentes, 5 estruturas) e `packages/i18n` (es-ES · pt-BR · en, moeda em unidades
+mínimas inteiras). Catálogo de inspecção em `/[idioma]/interno/catalogo`, fora das rotas
+comerciais; as cinco molduras em `/[idioma]/interno/estruturas/[qual]`.
+
+**62 testes unitários + 62 verificações no browser, 0 falhas.** A inspecção (Playwright,
+só Chromium) corre as cinco larguras do aceite, mede contraste no DOM e prova a armadilha
+de foco e o regresso ao accionador. Entrou na CI.
+
+Três achados que mudaram código, dos nove em `E02.md`:
+
+- **A minha regra de contraste reprovava a paleta da própria BossaOS.** O Coral Bossa
+  sobre a areia dá 2,77 — está publicado no manual. Passou a aviso: a WCAG pede 3:1 a
+  gráficos que carregam informação, não a decoração editorial.
+- **As fichas de cor do E01 estavam escritas de memória** e seis das oito estavam erradas.
+  Há agora um teste que compara o CSS com o TypeScript token a token.
+- **CSS que nenhum componente rende não dá erro nenhum** — a barra inferior do telemóvel
+  estava escrita e invisível. Escrevi a guarda que apanha classes órfãs e provei-a.
+
+**A comparação com o atlas rendeu quatro correcções** e uma divergência mantida de
+propósito (a acção repetida no topo só existe acima de 768 px, como o atlas móvel).
 
 ## Divisão de trabalho
 
@@ -70,3 +96,10 @@ incomunicáveis do código.
 - **Conflito de contrato por resolver (não é do JR):** o CT-03 continua a dizer
   "Drizzle ORM" enquanto o ADR 0001 diz Prisma. Implementado em Prisma, como
   mandado. O texto do contrato devia ser corrigido por quem o assina.
+- **Família de ícones** (manual p. 18): não existe. Reproduzi só o glifo de 2×2 pontos que
+  o atlas desenha na navegação; inventar um conjunto agora seria trabalho para deitar fora.
+- **KDS à distância real de uso:** verificação humana num ecrã de cozinha, por fazer.
+- **`eslint-plugin-import` pede `eslint ^9`** e temos a 10.9.1 — aviso de par não
+  satisfeito. O lint corre e apanha erros (provado plantando uma violação).
+- **Playwright só com Chromium:** diferenças de composição no WebKit e no Firefox não
+  estão a ser vistas.

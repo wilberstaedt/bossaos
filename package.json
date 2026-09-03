@@ -19,7 +19,9 @@
     "db:migrate:status": "pnpm --filter @bossaos/db migrate:status",
     "provar:credenciais": "./scripts/provar-separacao-de-credenciais.sh",
     "verificar": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-    "postinstall": "pnpm --filter @bossaos/db generate"
+    "postinstall": "pnpm --filter @bossaos/db generate",
+    "inspeccionar": "playwright test --grep-invert @capturas",
+    "capturas": "playwright test --grep @capturas"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -33,6 +35,7 @@
     "eslint-config-next": "16.3.4",
     "typescript": "5.9.3",
     "typescript-eslint": "8.69.0",
-    "@eslint/js": "10.0.1"
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.62.1"
   }
 }

@@ -6,7 +6,7 @@ Os PDFs, contratos e prompts estão preparados. Nenhuma etapa de implementação
 | --- | --- | --- |
 | E00 | implementado aguardando validação | 7 documentos em docs/architecture; validação real vem do E11, quando se vir se o E02-E10 se construíram a partir deles |
 | E01 | validado | docs/progress/E01.md · 16 testes · provar-separacao-de-credenciais.sh e provar-prontidao.sh a 0 falhas |
-| E02 | planejado |  |
+| E02 | implementado aguardando validação | docs/progress/E02.md · 62 testes unitários + 62 verificações no browser · 12 capturas · STATE-001/002/003/005/007/016 |
 | E03 | planejado |  |
 | E04 | planejado |  |
 | E05 | planejado |  |

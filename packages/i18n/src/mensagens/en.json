@@ -1,0 +1,110 @@
+{
+  "comum": {
+    "saltarParaConteudo": "Skip to content",
+    "abrirMenu": "Open the navigation menu",
+    "trocarUnidade": "Switch location",
+    "fechar": "Close",
+    "voltar": "Back",
+    "guardar": "Save",
+    "cancelar": "Cancel",
+    "datosDemostracion": "Demo data",
+    "enLinea": "Online",
+    "ayudaSoporte": "Help and support",
+    "asinatura": "Made with BossaOS"
+  },
+  "navegacao": {
+    "inicio": "Home",
+    "catalogo": "Menu",
+    "reservas": "Bookings",
+    "salaPedidos": "Floor and orders",
+    "caixa": "Till",
+    "inventario": "Inventory",
+    "clientes": "Customers",
+    "equipa": "Team",
+    "relatorios": "Reports",
+    "configuracao": "Settings",
+    "trabalho": "Work",
+    "mais": "More"
+  },
+  "estado": {
+    "carga": {
+      "sobrancelha": "Loading",
+      "titulo": "Loading the menu",
+      "accao": "Wait",
+      "nota": "Loading your restaurant's products…"
+    },
+    "vazio": {
+      "sobrancelha": "Empty",
+      "titulo": "Your first menu starts here",
+      "situacaoTitulo": "Your request status",
+      "situacaoDetalhe": "Information up to date",
+      "rotuloContexto": "Context",
+      "rotuloProximoPasso": "Next step",
+      "rotuloAjuda": "Help",
+      "accao": "Create first product"
+    },
+    "erroAoGuardar": {
+      "sobrancelha": "Error",
+      "titulo": "Your changes could not be saved",
+      "situacaoTitulo": "Needs attention",
+      "situacaoDetalhe": "Information up to date",
+      "rotuloRascunho": "Draft",
+      "rotuloCausa": "Cause",
+      "rotuloProximoPasso": "Next step",
+      "rotuloAccaoSecundaria": "Secondary action",
+      "accao": "Retry saving"
+    },
+    "semAcesso": {
+      "sobrancelha": "Permissions",
+      "titulo": "You don't have access to this action",
+      "situacaoTitulo": "Needs attention",
+      "situacaoDetalhe": "Information up to date",
+      "rotuloAccao": "Action",
+      "rotuloFuncao": "Your role",
+      "rotuloAcessoNecessario": "Access required",
+      "rotuloPedir": "Request",
+      "accao": "Back to my tables"
+    },
+    "porGuardar": {
+      "sobrancelha": "Draft",
+      "titulo": "You have unsaved changes",
+      "rotuloProduto": "Product",
+      "rotuloAlteracao": "Change",
+      "rotuloGuardar": "Save",
+      "rotuloDescartar": "Discard",
+      "accao": "Save before leaving"
+    },
+    "arquivar": {
+      "sobrancelha": "Sensitive action",
+      "titulo": "Archive with traceability",
+      "rotuloElemento": "Item",
+      "rotuloEfeito": "Effect",
+      "rotuloHistorial": "History",
+      "rotuloMotivo": "Reason",
+      "rotuloConfirmacao": "Confirmation",
+      "accao": "Confirm archive"
+    }
+  },
+  "catalogo": {
+    "titulo": "Component catalogue",
+    "descricao": "BossaOS system parts, for inspection. This is not a product screen.",
+    "avisoDemo": "Internal inspection surface. Values are demo data and do not represent real records.",
+    "seccaoFundacoes": "Foundations",
+    "seccaoComponentes": "Components",
+    "seccaoEstados": "Cross-cutting states",
+    "seccaoEstruturas": "Shells",
+    "seccaoIdiomas": "Languages and formatting",
+    "abrirDialogo": "Open dialog",
+    "abrirGaveta": "Open side panel",
+    "exemploDialogoTitulo": "Confirm the price change",
+    "exemploDialogoCorpo": "The price will apply to the digital menu and the active channels.",
+    "exemploGavetaTitulo": "Order detail",
+    "exemploGavetaCorpo": "Side panel on wide screens; on mobile it slides up from the bottom.",
+    "exemploNotificacao": "Changes saved",
+    "colunaProduto": "Product",
+    "colunaCanal": "Channel",
+    "colunaPreco": "Price",
+    "colunaEstado": "Status",
+    "exemploKdsAccao": "Mark ready"
+  }
+}
