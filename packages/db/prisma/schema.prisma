@@ -66,6 +66,10 @@ model Organization {
   roleAssignments RoleAssignment[]
   invitations     Invitation[]
   auditEvents     AuditEvent[]
+  subscription    Subscription?
+  entitlements    EntitlementGrant[]
+  featureFlags    FeatureFlag[]
+  themeRevisions  ThemeRevision[]
 
   @@map("organizations")
 }
@@ -117,6 +121,7 @@ model Location {
 
   roleAssignments RoleAssignment[]
   invitations     Invitation[]
+  entitlements    EntitlementGrant[]
 
   @@unique([organizationId, id], name: "location_por_organizacao")
   @@unique([organizationId, slug])
@@ -393,4 +398,184 @@ model AuditEvent {
 
   @@index([organizationId, createdAt])
   @@map("audit_events")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E05 — planos, entitlements e flags
+//
+// Três catálogos, e a separação entre eles é do contrato, não estética:
+//
+//   PlanDefinition   o que se VENDE. Global, não pertence a inquilino nenhum.
+//   EntitlementGrant o que uma organização TEM. De inquilino, com política.
+//   FeatureFlag      o que está CONSTRUÍDO e libertado. Global ou por org.
+//
+// Misturar capacidades com flags faz um "ainda não existe" ler-se como "compra
+// o plano acima", e o dono do restaurante paga por algo que não está feito.
+//
+// **Nenhum número comercial vive aqui.** Preços, mensalidades e limites são
+// configuração, decididos pelo Matheus. O que o código traz é a estrutura — a
+// quota, a leitura, a recusa e a mensagem. Escrever `MAX_PRODUTOS = 500` porque
+// parecia razoável é como o número acaba em três sítios e nenhum é o certo.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Um plano vendável. **Global**: o catálogo é o mesmo para todos.
+///
+/// Sem preço. O atlas (ORG-010) diz "Precio según propuesta" e é isso que fica:
+/// o preço é uma proposta comercial, não uma constante do produto.
+model PlanDefinition {
+  id        String   @id @default(uuid()) @db.Uuid
+  /// STARTER, RESTAURANT, PRO. Estável: é o que as concessões referenciam.
+  codigo    String   @unique
+  nome      String
+  /// A frase do atlas: "Publica bien", "Conecta el servicio", "Amplía tu gestión".
+  promessa  String
+  ordem     Int
+  /// Aparece no selector de planos? Um plano de piloto pode não aparecer.
+  publico   Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  capacidades   PlanCapability[]
+  subscriptions Subscription[]
+
+  @@map("plan_definitions")
+}
+
+/// O que um plano inclui.
+///
+/// `quota` nula numa capacidade quantitativa significa **por configurar**, e o
+/// motor nega. Não é ilimitado — nunca. É o CT-02 na direcção certa.
+model PlanCapability {
+  id         String  @id @default(uuid()) @db.Uuid
+  planId     String  @map("plan_id") @db.Uuid
+  /// Chave do catálogo em `packages/domain/src/capacidades.ts`.
+  capacidade String
+  quota      Int?
+
+  plan PlanDefinition @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, capacidade])
+  @@map("plan_capabilities")
+}
+
+enum EstadoDeSubscricao {
+  ACTIVA
+  SUSPENSA
+  CANCELADA
+
+  @@map("estado_de_subscricao")
+}
+
+/// A assinatura de uma organização. Assenta na `Organization` do E03.
+model Subscription {
+  id             String             @id @default(uuid()) @db.Uuid
+  organizationId String             @unique @map("organization_id") @db.Uuid
+  planId         String             @map("plan_id") @db.Uuid
+  estado         EstadoDeSubscricao @default(ACTIVA)
+  validoDe       DateTime           @default(now()) @map("valido_de") @db.Timestamptz(6)
+  validoAte      DateTime?          @map("valido_ate") @db.Timestamptz(6)
+
+  /// Descida agendada. Guardar o plano de destino e a data **antes** de
+  /// efectivar é o que permite mostrar a prévia e avisar com antecedência —
+  /// e o que permite não efectivar enquanto houver caixa aberta.
+  descerParaPlanoId String?   @map("descer_para_plano_id") @db.Uuid
+  descerEm          DateTime? @map("descer_em") @db.Timestamptz(6)
+
+  /// Tolerância por incumprimento: política configurável, não uma data
+  /// escolhida por quem programa.
+  toleranciaAte DateTime? @map("tolerancia_ate") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  version   Int      @default(1)
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  plan         PlanDefinition @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@map("subscriptions")
+}
+
+enum OrigemDeConcessao {
+  /// Vem do plano contratado.
+  PLANO
+  /// Add-on comprado à parte. Não liberta os módulos operacionais todos.
+  ADICIONAL
+  /// Piloto provisionado por nós, auditado. Nunca simula cobrança.
+  PILOTO
+
+  @@map("origem_de_concessao")
+}
+
+/// O que uma organização TEM. **A ausência de uma linha significa negado.**
+model EntitlementGrant {
+  id             String            @id @default(uuid()) @db.Uuid
+  organizationId String            @map("organization_id") @db.Uuid
+  capacidade     String
+  /// Nula numa quantitativa = por configurar = NEGADO. Ver `capacidades.ts`.
+  quota          Int?
+  /// Presente = a concessão só vale nesta unidade, e não amplia para o resto.
+  locationId     String?           @map("location_id") @db.Uuid
+  validoAte      DateTime?         @map("valido_ate") @db.Timestamptz(6)
+  origem         OrigemDeConcessao @default(PLANO)
+  /// Por que existe esta concessão. Obrigatório em PILOTO e ADICIONAL: uma
+  /// concessão sem motivo é impossível de auditar seis meses depois.
+  motivo         String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location?    @relation(fields: [organizationId, locationId], references: [organizationId, id], onDelete: Restrict)
+
+  @@unique([organizationId, capacidade, locationId])
+  @@index([organizationId])
+  @@map("entitlement_grants")
+}
+
+/// Flag de lançamento. **Catálogo separado do de capacidades.**
+///
+/// Uma flag responde a "está construído e libertado?". Sem `organizationId` é
+/// global; com ele é uma libertação controlada a um inquilino — que é como se
+/// põe um módulo novo em produção com um cliente antes de todos.
+model FeatureFlag {
+  id             String   @id @default(uuid()) @db.Uuid
+  nome           String
+  ligada         Boolean  @default(false)
+  descricao      String?
+  organizationId String?  @map("organization_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([nome, organizationId])
+  @@index([nome])
+  @@map("feature_flags")
+}
+
+/// Tema público de um restaurante.
+///
+/// O plano Starter usa a paleta BossaOS e **não a pode editar** — pode mudar
+/// nome, logo, fotos e conteúdo. Restaurant e Pro escolhem cores próprias, e
+/// têm o mesmo direito: o editor completo é do E12.
+///
+/// Guardar o tema ANTERIOR é o que permite uma descida de plano reverter ao
+/// padrão sem perder o que o cliente escolheu — se ele voltar a subir, está lá.
+model ThemeRevision {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  /// Os três únicos tokens temáveis (E02, `TOKENS_TEMAVEIS`).
+  primaria       String
+  acento         String
+  fundo          String
+  /// Verdadeiro quando é a paleta BossaOS por omissão, não uma escolha.
+  padrao         Boolean  @default(false)
+  /// Activa agora? Só uma por organização.
+  activa         Boolean  @default(false)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, activa])
+  @@map("theme_revisions")
 }
