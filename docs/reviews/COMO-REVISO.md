@@ -234,6 +234,38 @@ compatível com um sistema em que *tudo* devolve vazio. A prova é a **diferenç
 identificador, com a sessão certa, tem de devolver a coisa. Vale para isolamento, para
 autorização, para filtros e para qualquer recusa.
 
+## Uma etapa com telas não se assina sem prova de navegador
+
+Escrevo isto porque **assinei o E09 com dois defeitos reais lá dentro**, e ambos
+apareceram uma hora depois, quando a prova de navegador finalmente correu:
+
+1. **A carta pública era servida sem folha de estilos.** O `/r/` fica fora de
+   `app/[idioma]/` e não tinha moldura — nenhum `<html>`, nenhuma fonte, nenhum token.
+   O sintoma real: um alvo de toque que o CSS declara a 44 px a render a **18 px**.
+2. **A consulta pública servia o menu de outra unidade**, por juntar `menus` pela marca e
+   ignorar `menus.location_id`. Numa página **pública**, num produto **multi-inquilino**.
+
+Nenhum dos dois é subtil. Passaram porque a minha prova do E09 era toda de base e domínio:
+`provar-publico.sh` corre `node --test` contra o PostgreSQL. **A página nunca foi
+renderizada.** `pnpm build` verde e `validar-classes.sh` verde não os viam — as classes
+existiam, o ficheiro é que não chegava à página.
+
+**E o pior é o que eu tinha escrito uma hora antes.** Ao declarar as onze telas na dívida
+de móvel, escrevi que *«é provável que muita coisa esteja bem»*. Estava errado, e da pior
+maneira: a dívida não era contabilidade neutra — **estava a esconder uma fuga de dados
+entre unidades numa página aberta ao público**.
+
+**A regra que fica:** uma etapa que entrega **telas** não se assina com provas de base e
+domínio. Ou a tela foi renderizada e medida, ou a etapa fica **parcialmente assinada** —
+com os IDs medidos validados e os outros retidos. Não é o mesmo que declarar dívida: a
+dívida diz «sei que não medi»; assinar diz «medi». Eu disse a segunda coisa tendo feito a
+primeira.
+
+E o corolário, que é o que torna isto accionável: **quando uma medição em falta é o único
+motivo para acreditar que algo está bem, o estado honesto é NÃO MEDI** — nunca «está
+provavelmente bem». Já tinha isto escrito para o produto; faltava aplicá-lo às minhas
+próprias assinaturas.
+
 ## O que bloqueia e o que não
 
 **Bloqueia:** afirmação do handoff que não se confirma; dependência externa simulada com
