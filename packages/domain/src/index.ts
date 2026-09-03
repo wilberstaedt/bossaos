@@ -87,3 +87,26 @@ export {
   type TipoDeFicheiro, type PedidoDeFicheiro, type ResultadoDeFicheiro,
   type RecusaDeFicheiro, type Aceitacao,
 } from './ficheiros.ts';
+
+export {
+  IDIOMAS_DE_CONTEUDO, impressaoDoTexto, estadoDaTraducao, resolverTexto, coberturaPorIdioma,
+  type IdiomaDeConteudo, type EstadoDaTraducao, type Traducao,
+  type TextoResolvido, type OrigemDoTexto, type CoberturaDeIdioma,
+} from './traducoes.ts';
+
+export {
+  bloqueiosDePublicacao, compararRevisoes, proximaRevisao,
+  type ItemParaPublicar, type Bloqueio, type MotivoDeBloqueio,
+  type Mudanca, type TipoDeMudanca, type Revisao, type PoliticaDePublicacao,
+} from './publicacao.ts';
+
+export {
+  preverImportacao, linhasParaGravar,
+  type Estrategia, type ColunasMapeadas, type Previa, type LinhaDaPrevia,
+  type AccaoDaLinha, type ErroDeImportacao, type Existente,
+} from './importacao.ts';
+
+export {
+  VALIDADE_PADRAO_MS, decidirDescarregamento, expiraEm, identificadorAdivinhavel,
+  type Exportacao, type DecisaoDeDescarregamento, type RecusaDeDescarregamento,
+} from './exportacao.ts';
