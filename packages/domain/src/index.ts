@@ -31,3 +31,9 @@ export {
 export {
   decidirLeitura, exigirAccao, estadoHttp, corpoDaResposta, type Resultado,
 } from './acesso.ts';
+
+export {
+  CAPACIDADES, tipoDaCapacidade, decidirCapacidade, estadoHttpDeCapacidade,
+  type Capacidade, type TipoDeCapacidade, type Concessao as ConcessaoDeCapacidade,
+  type Flag, type Intencao, type PedidoDeCapacidade, type ResultadoDeCapacidade,
+} from './capacidades.ts';
