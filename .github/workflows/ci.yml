@@ -178,6 +178,13 @@ jobs:
         # quem bloqueava era a autorização e a prova não media nada.
         run: ./scripts/provar-planos.sh
 
+      - name: Prova — onboarding, horários e idempotência
+        # Aceites 1 e 2 do E06. O par decide duas vezes: a mesma chave cria uma
+        # organização e chaves diferentes criam duas; e o mesmo instante dá
+        # `desconhecido` com o dia por configurar e `fechado` com o dia declarado
+        # fechado. Quatro controlos negativos, um por camada.
+        run: ./scripts/provar-onboarding.sh
+
       - name: Prova — a superfície interna de plataforma
         # A única leitura do produto que atravessa inquilinos de propósito. O par
         # decide: o staff vê as duas organizações, a dona de uma delas rebenta.
