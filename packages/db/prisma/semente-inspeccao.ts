@@ -23,38 +23,19 @@
  * consoante a ordem por que se correram os comandos.
  */
 
-import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
 import { IDS } from './fixtures.ts';
+import { abrirPrisma, limpar, PREFIXO, SLUG_DE_INSPECCAO } from './inspeccao-comum.ts';
 
-/** O endereço público que o navegador visita. Estável, para as rotas serem fixas. */
-export const SLUG_DE_INSPECCAO = 'insp-marina-oropesa';
-const PREFIXO = 'insp-';
+export { SLUG_DE_INSPECCAO };
 
 async function principal(): Promise<void> {
-  const url = process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL;
-  if (!url) throw new Error('MIGRATION_DATABASE_URL ou DATABASE_URL em falta');
-
-  const prisma = new PrismaClient({
-    adapter: new PrismaPg({ connectionString: url, options: '-c timezone=UTC' }),
-  });
+  const prisma = abrirPrisma();
 
   try {
     // Limpa a passagem anterior. Sem isto, cada corrida acrescentava uma carta e
-    // a inspecção passava a medir uma página que cresce.
-    await prisma.$executeRawUnsafe(
-      `UPDATE locations SET public_slug = NULL WHERE public_slug = '${SLUG_DE_INSPECCAO}'`);
-    await prisma.$executeRawUnsafe(`
-      DELETE FROM menu_publications WHERE menu_id IN (SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%');
-      DELETE FROM menu_revisions    WHERE menu_id IN (SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%');
-      DELETE FROM menu_categories   WHERE menu_id IN (SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%');
-      DELETE FROM menus             WHERE nome LIKE '${PREFIXO}%';
-      DELETE FROM product_channels WHERE product_id IN (SELECT id FROM products WHERE nome LIKE '${PREFIXO}%');
-      DELETE FROM product_allergens WHERE product_id IN (SELECT id FROM products WHERE nome LIKE '${PREFIXO}%');
-      DELETE FROM price_rules      WHERE product_id IN (SELECT id FROM products WHERE nome LIKE '${PREFIXO}%');
-      DELETE FROM products         WHERE nome LIKE '${PREFIXO}%';
-      DELETE FROM categories       WHERE nome LIKE '${PREFIXO}%';
-    `);
+    // a inspecção passava a medir uma página que cresce. A lista do que se apaga
+    // vive em `inspeccao-comum.ts`, partilhada com o fecho.
+    await limpar(prisma);
 
     const cat = await prisma.category.create({
       data: {

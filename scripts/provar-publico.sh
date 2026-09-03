@@ -26,8 +26,14 @@ if [[ "$NODE_ACTUAL" != "$NODE_ESPERADO" ]]; then
   exit 2
 fi
 
-GRUPOS_ESPERADOS=6
-ASSERCOES_ESPERADAS=23
+GRUPOS_ESPERADOS=7
+# ── Chamava-se ASSERCOES_ESPERADAS e contava outra coisa ──────────────────
+#
+# `# pass` do relator TAP conta CASOS (`it`), não asserções. Com o nome antigo,
+# apagar asserções de dentro de um caso não mexia no número — a guarda dizia
+# vigiar asserções e não via nenhuma desaparecer. O número está certo; o nome é
+# que prometia mais do que mede.
+CASOS_ESPERADOS=26
 falhas=0
 
 PROJ=packages/domain/src/projeccao.ts
@@ -42,11 +48,41 @@ guardar() { cp "$1" "$COPIAS/$(echo "$1" | tr / _)"; }
 repor()   { cp "$COPIAS/$(echo "$1" | tr / _)" "$1"; }
 for f in "$PROJ" "$CHAVES" "$PUBDB" "$PUBLICO" "$PAGINA"; do guardar "$f"; done
 
+# ── O retrato das FUNÇÕES, pela mesma razão que o dos ficheiros ───────────
+#
+# Os controlos negativos daqui para baixo substituem funções da base. A versão
+# anterior repunha-as **replicando migrações escolhidas à mão** — e a lista
+# ficou para trás: o passo 6 repunha a `20260904091000`, que define a
+# `publico_carta` SEM o filtro de unidade que a `20260904113000` acrescentou.
+#
+# O efeito era o pior possível: a prova deixava na base a versão **com a fuga
+# entre unidades**, e o passo 7 dizia "voltou ao verde" — porque nada media a
+# fuga. Encontrei-o porque a semeadura do arnês do navegador é o primeiro
+# cenário com duas unidades na mesma marca, e a prova ficou vermelha ao correr
+# por cima dela. Foi por acidente, e uma lista à mão volta a derivar.
+#
+# Agora o retrato sai da BASE VIVA, imediatamente antes de se plantar o que quer
+# que seja. Não há lista para envelhecer: o que está aqui é o que lá estava.
+FUNCOES="$COPIAS/funcoes.sql"
+psql "$MIGRATION_DATABASE_URL" -tAc "SELECT string_agg(pg_get_functiondef(p.oid), E';\n' ORDER BY p.oid) || ';'
+  FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+ WHERE n.nspname = 'public' AND p.prokind = 'f'" > "$FUNCOES"
+if [[ ! -s "$FUNCOES" ]] || ! grep -q 'CREATE OR REPLACE FUNCTION' "$FUNCOES"; then
+  echo "ERRO: não consegui retratar as funções da base — sem retrato não há reposição." >&2
+  exit 2
+fi
+
+# `CREATE OR REPLACE` preserva dono e concessões, por isso o corpo basta.
+repor_funcoes() { psql "$MIGRATION_DATABASE_URL" -q -v ON_ERROR_STOP=1 -f "$FUNCOES" >/dev/null; }
+
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
 restaurar() {
   for f in "$PROJ" "$CHAVES" "$PUBDB" "$PUBLICO" "$PAGINA"; do repor "$f"; done
+  # As funções primeiro: se a prova morrer a meio de um controlo negativo, o que
+  # fica na base é a versão plantada. Já aconteceu, e ninguém deu por isso.
+  repor_funcoes || echo "AVISO: não consegui repor as funções da base" >&2
   rm -rf "$COPIAS"
   psql "$MIGRATION_DATABASE_URL" -q >/dev/null 2>&1 <<'PY'
 UPDATE locations SET public_slug = NULL WHERE public_slug LIKE 'e09%';
@@ -70,12 +106,12 @@ correr() {
 }
 
 analisar() {
-  local f="$1" grupos assercoes
+  local f="$1" grupos casos
   grep -q '^TAP version' "$f" || return 2
   grupos=$(grep -c '^ok ' "$f" || true)
-  assercoes=$(grep -m1 -oE '^# pass [0-9]+' "$f" | grep -oE '[0-9]+' || true)
-  [[ -n "$assercoes" ]] || return 2
-  echo "$grupos $assercoes"
+  casos=$(grep -m1 -oE '^# pass [0-9]+' "$f" | grep -oE '[0-9]+' || true)
+  [[ -n "$casos" ]] || return 2
+  echo "$grupos $casos"
 }
 
 exigir_vermelho() {
@@ -102,11 +138,11 @@ fi
 echo
 echo "1. Com tudo ligado"
 if correr /tmp/bossaos-pb.txt; then
-  read -r grupos assercoes <<<"$(analisar /tmp/bossaos-pb.txt)"
-  if [[ "$grupos" == "$GRUPOS_ESPERADOS" && "$assercoes" == "$ASSERCOES_ESPERADAS" ]]; then
-    verde "$grupos grupos verdes, $assercoes asserções"
+  read -r grupos casos <<<"$(analisar /tmp/bossaos-pb.txt)"
+  if [[ "$grupos" == "$GRUPOS_ESPERADOS" && "$casos" == "$CASOS_ESPERADOS" ]]; then
+    verde "$grupos grupos verdes, $casos casos"
   else
-    vermelho "contagem inesperada: $grupos / $assercoes (esperava $GRUPOS_ESPERADOS / $ASSERCOES_ESPERADAS)"
+    vermelho "contagem inesperada: $grupos / $casos (esperava $GRUPOS_ESPERADOS / $CASOS_ESPERADOS)"
   fi
 else
   vermelho "a prova falhou com tudo ligado"
@@ -195,9 +231,8 @@ $f$;
 SQL
 exigir_vermelho "caiu a asserção do que está publicado" \
   'só devolve o que está publicado' /tmp/bossaos-pb-sem-publicacao.txt
-# Repor a função verdadeira, a partir da migração.
-psql "$MIGRATION_DATABASE_URL" -q -f packages/db/prisma/migrations/20260904091000_e09_porta_publica/migration.sql >/dev/null 2>&1
-psql "$MIGRATION_DATABASE_URL" -q -f packages/db/prisma/migrations/20260904093000_e09_horario_por_configurar/migration.sql >/dev/null 2>&1
+# Repor as funções verdadeiras, a partir do retrato tirado à base viva.
+repor_funcoes
 
 echo
 echo "6b. CONTROLO NEGATIVO — ONZE formas de exportar um verbo de escrita"
@@ -297,15 +332,49 @@ SQL
 exigir_vermelho "caiu a asserção do dono retomar — é o par que separa as duas" \
   'A RETOMA o endereço dele' /tmp/bossaos-pb-preguicosa.txt
 
-# Repor a função verdadeira, a partir da migração.
-psql "$MIGRATION_DATABASE_URL" -q -f packages/db/prisma/migrations/20260904103000_e09_endereco_reservado/migration.sql >/dev/null 2>&1
+# Repor as funções verdadeiras, a partir do retrato tirado à base viva.
+repor_funcoes
+
+echo
+echo "6e. CONTROLO NEGATIVO — a porta pública volta a juntar menus só pela MARCA"
+# ── O defeito que esteve em produção e passou uma validação ───────────────
+#
+# `publico_carta` juntava `menus` pela marca e ignorava `menus.location_id`: o
+# endereço público de uma unidade servia a carta de OUTRA. Numa página aberta ao
+# público, num produto multi-inquilino.
+#
+# Foi corrigido — e ficou **sem detector nenhum**. Só apareceu porque a semeadura
+# do arnês do navegador é o primeiro cenário do projecto com duas unidades na
+# mesma marca. Sem este controlo, a correcção era outra vez uma protecção que não
+# consegue falhar, que é o padrão que já reteve o E08.
+#
+# Planta-se a partir da função VIVA, tirando-lhe a linha do filtro: um controlo
+# que colasse SQL escrito à mão deixava de medir o produto no dia em que a função
+# mudasse por outro motivo.
+python3 - "$MIGRATION_DATABASE_URL" <<'FIMPY'
+import subprocess, sys
+url = sys.argv[1]
+defn = subprocess.run(
+    ['psql', url, '-tAc',
+     "SELECT pg_get_functiondef(oid) FROM pg_proc WHERE proname = 'publico_carta'"],
+    capture_output=True, text=True, check=True).stdout
+linhas = defn.splitlines()
+sem = [l for l in linhas if 'm.location_id' not in l]
+assert len(sem) == len(linhas) - 1, 'o alvo do controlo negativo mudou de forma'
+subprocess.run(['psql', url, '-q', '-v', 'ON_ERROR_STOP=1'],
+               input='\n'.join(sem) + ';\n', text=True, check=True,
+               stdout=subprocess.DEVNULL)
+FIMPY
+exigir_vermelho "caiu a asserção do endereço que servia a carta de outra unidade" \
+  'não serve nada da segunda' /tmp/bossaos-pb-fuga.txt
+repor_funcoes
 
 echo
 echo "7. Reposto — tem de voltar ao verde"
 node --experimental-strip-types packages/db/prisma/fixtures.ts >/dev/null 2>&1
 if correr /tmp/bossaos-pb-reposto.txt; then
-  read -r grupos assercoes <<<"$(analisar /tmp/bossaos-pb-reposto.txt)"
-  verde "reposto: $grupos grupos, $assercoes asserções"
+  read -r grupos casos <<<"$(analisar /tmp/bossaos-pb-reposto.txt)"
+  verde "reposto: $grupos grupos, $casos casos"
 else
   vermelho "não voltou ao verde depois de repor"
   grep -E '^ *not ok' /tmp/bossaos-pb-reposto.txt | head -6
@@ -323,6 +392,26 @@ if [[ "$RESTOS" == "0" ]]; then
 else
   vermelho "ficaram $RESTOS linhas de prova"
 fi
+
+echo
+echo "9. As funções da base ficaram como as encontrei?"
+# ── Porque é que a prova se verifica a si própria ─────────────────────────
+#
+# Esta prova substitui funções da base seis vezes. Durante um dia inteiro repôs
+# a versão errada de uma delas e ninguém deu por isso: a reposição era silenciosa
+# e nada media o que ela repunha. Uma prova que deixa a base pior do que a
+# encontrou é uma prova que faz mal.
+DEPOIS=$(mktemp)
+psql "$MIGRATION_DATABASE_URL" -tAc "SELECT string_agg(pg_get_functiondef(p.oid), E';\n' ORDER BY p.oid) || ';'
+  FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+ WHERE n.nspname = 'public' AND p.prokind = 'f'" > "$DEPOIS"
+if diff -q "$FUNCOES" "$DEPOIS" >/dev/null 2>&1; then
+  verde "as $(grep -c 'CREATE OR REPLACE FUNCTION' "$FUNCOES") funções estão como estavam"
+else
+  vermelho "a prova deixou funções diferentes das que encontrou"
+  diff "$FUNCOES" "$DEPOIS" | head -20
+fi
+rm -f "$DEPOIS"
 
 echo
 if (( falhas == 0 )); then printf '\033[32m%s\033[0m\n' "0 falhas"

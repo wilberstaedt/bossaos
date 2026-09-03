@@ -481,3 +481,142 @@ describe('6. O endereço público não volta ao mundo', () => {
     assert.equal(deB, 0);
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+describe('7. O endereço de uma unidade não serve o menu de OUTRA', () => {
+  // ── Porque é que este grupo existe, e porque é que chegou tarde ──────────
+  //
+  // A `publico_carta` juntava `menus` pela MARCA e ignorava `menus.location_id`.
+  // Uma cadeia com duas unidades servia, no endereço de uma, a carta da outra —
+  // numa página **pública**, num produto **multi-inquilino**. Foi corrigido na
+  // migração `20260904113000_e09_menu_da_unidade`.
+  //
+  // O que **não** foi feito, e é a razão de este grupo existir: a correcção
+  // ficou sem um único teste a vigiá-la. O defeito só apareceu porque a
+  // semeadura do arnês do navegador é o primeiro cenário do projecto com duas
+  // unidades na mesma marca — foi encontrado **por acidente**.
+  //
+  // É o mesmo padrão que reteve o E08: uma protecção que não consegue falhar. E
+  // mediu-se o custo de não a ter: a reposição do `provar-publico.sh` repunha a
+  // versão ANTERIOR da função, e a etapa 7 dizia "voltou ao verde" com a fuga
+  // outra vez lá dentro. Com este grupo, essa reposição errada fica vermelha.
+  //
+  // Os menus dos outros grupos nascem sem unidade (`location_id IS NULL`), que é
+  // o menu da marca inteira e continua legítimo. Por isso nenhum deles apanhava
+  // isto: é preciso um menu PRESO a uma unidade.
+  // ── Endereços PRÓPRIOS, e a razão de não reaproveitar o SLUG_A ──────────
+  //
+  // O grupo 6 reserva um endereço novo para a primeira unidade e **não repõe** o
+  // anterior — o `SLUG_A` deixa de existir a partir dali. Um grupo que dependa
+  // dele passa a medir uma unidade sem endereço e devolve `null` nos dois
+  // sentidos, que é o falso verde clássico: a fuga e a ausência ficam iguais.
+  //
+  // Este grupo reserva os dois endereços de que precisa.
+  const SLUG_U1 = `e09v-${marca}`;
+  const SLUG_A2 = `e09u-${marca}`;
+  let menuDaSegunda = '';
+  let produtoDaSegunda = '';
+
+  before(async () => {
+    const daPrimeira = await reservarEnderecoPublico(prisma, IDS.orgA, IDS.unidadeA, SLUG_U1);
+    assert.equal(daPrimeira, 'ok', 'não consegui dar endereço à primeira unidade');
+
+    const feito = await comA(async (db) => {
+      const cat = await db.category.create({
+        data: { organizationId: IDS.orgA, brandId: IDS.marcaA, nome: `${PREFIXO} u2`, ordem: 9 },
+        select: { id: true },
+      });
+      const p = await db.product.create({
+        data: {
+          organizationId: IDS.orgA, brandId: IDS.marcaA, categoryId: cat.id,
+          nome: `${PREFIXO} SO DA SEGUNDA UNIDADE`, estado: 'ACTIVO',
+        },
+        select: { id: true },
+      });
+      await db.priceRule.create({
+        data: { organizationId: IDS.orgA, productId: p.id, montanteMenor: 1234, moeda: 'EUR' },
+      });
+      await db.productChannel.create({
+        data: { organizationId: IDS.orgA, productId: p.id, canal: 'CARTA', visivel: true },
+      });
+      // A diferença que faz o grupo: o menu é DESTA unidade, não da marca.
+      const menu = await db.menu.create({
+        data: {
+          organizationId: IDS.orgA, brandId: IDS.marcaA, locationId: IDS.unidadeA2,
+          nome: `${PREFIXO} u2 carta`, estado: 'ACTIVO',
+        },
+        select: { id: true },
+      });
+      await db.menuCategory.create({
+        data: { organizationId: IDS.orgA, menuId: menu.id, categoryId: cat.id, ordem: 1 },
+      });
+      const r = await publicar(db, IDS.orgA, {
+        menuId: menu.id, locationId: IDS.unidadeA2, canal: 'CARTA', autor: AUTOR,
+      });
+      assert.equal(r.ok, true, `publicar na segunda unidade: ${JSON.stringify(!r.ok ? r.bloqueios : '')}`);
+      return { menuId: menu.id, produtoId: p.id };
+    });
+    menuDaSegunda = feito.menuId;
+    produtoDaSegunda = feito.produtoId;
+
+    const daSegunda = await reservarEnderecoPublico(prisma, IDS.orgA, IDS.unidadeA2, SLUG_A2);
+    assert.equal(daSegunda, 'ok', 'não consegui dar endereço à segunda unidade');
+  });
+
+  it('a segunda unidade serve a carta DELA no endereço DELA', async () => {
+    // O par primeiro. Sem ele, uma porta que devolvesse `null` a toda a gente
+    // passava no caso seguinte e não servia nada a ninguém.
+    const servida = await cartaPublica(prisma, SLUG_A2, 'CARTA', 'es-ES');
+    assert.ok(servida, 'a segunda unidade tinha de responder no endereço dela');
+    assert.equal(servida.locationId, IDS.unidadeA2);
+    const p = produtoDaCarta(servida.carta, produtoDaSegunda);
+    assert.ok(p, 'o produto da segunda unidade tinha de estar na carta dela');
+    assert.deepEqual(p.preco, { montanteMenor: 1234, moeda: 'EUR' });
+  });
+
+  it('e o endereço da PRIMEIRA não serve nada da segunda — a fuga', async () => {
+    const servida = await cartaPublica(prisma, SLUG_U1, 'CARTA', 'es-ES');
+    assert.ok(servida, 'a primeira unidade tinha de continuar a responder');
+
+    // ── Uma asserção que eu escrevi aqui e tive de APAGAR ─────────────────
+    //
+    // Escrevi `assert.equal(servida.locationId, IDS.unidadeA)` a pensar que era
+    // a afirmação forte. É vácua: `publico_carta` devolve `l.id`, e `l` é a
+    // linha encontrada **pelo endereço**. Vem sempre a unidade pedida, com fuga
+    // ou sem ela. O controlo negativo mostrou-o — quem ficou vermelho foi a
+    // asserção do conteúdo, e aquela nunca teria hipótese de acender.
+    //
+    // Fica escrito porque a versão vácua parecia a mais convincente das três.
+    //
+    // O que mede a fuga é o CORPO: o produto da outra unidade não está lá, nem
+    // pelo identificador nem pelo nome — o defeito "vem e não se mostra" que o
+    // grupo 1 persegue.
+    assert.equal(produtoDaCarta(servida.carta, produtoDaSegunda), null);
+    const corpo = JSON.stringify(servida.carta);
+    assert.ok(!corpo.includes(produtoDaSegunda), 'o identificador da outra unidade saiu no corpo');
+    assert.ok(!corpo.includes('SO DA SEGUNDA UNIDADE'), 'o produto da outra unidade saiu na carta');
+  });
+
+  it('e o menu SEM unidade continua a servir a marca inteira', async () => {
+    // O par que separa a regra certa da regra preguiçosa, como no grupo 6.
+    //
+    // Uma correcção que exigisse `m.location_id = l.id` e mais nada passava no
+    // caso de cima e partia o produto: o menu da marca — `location_id IS NULL`,
+    // que é como as cadeias trabalham — deixava de aparecer em unidade nenhuma.
+    // Sem este caso, essa versão era indistinguível da certa.
+    const daPrimeira = await cartaPublica(prisma, SLUG_U1, 'CARTA', 'es-ES');
+    assert.ok(daPrimeira, 'o menu da marca tinha de continuar a servir a primeira unidade');
+    assert.ok(produtoDaCarta(daPrimeira.carta, visivelId),
+      'o produto do menu da marca desapareceu da unidade que não tem menu próprio');
+  });
+
+  after(async () => {
+    await sql.query(`UPDATE locations SET public_slug = NULL WHERE id = ANY($1)`, [[IDS.unidadeA, IDS.unidadeA2]]);
+    await sql.query(`DELETE FROM public_slug_owners WHERE slug = ANY($1)`, [[SLUG_U1, SLUG_A2]]);
+    await sql.query(`DELETE FROM menu_views WHERE revision_id IN (SELECT id FROM menu_revisions WHERE menu_id = $1)`, [menuDaSegunda]);
+    await sql.query(`DELETE FROM menu_publications WHERE menu_id = $1`, [menuDaSegunda]);
+    await sql.query(`DELETE FROM menu_revisions WHERE menu_id = $1`, [menuDaSegunda]);
+    await sql.query(`DELETE FROM menu_categories WHERE menu_id = $1`, [menuDaSegunda]);
+    await sql.query(`DELETE FROM menus WHERE id = $1`, [menuDaSegunda]);
+  });
+});

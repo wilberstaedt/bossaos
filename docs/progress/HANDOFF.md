@@ -4,7 +4,36 @@
 **Estado:** autorizado 04/09. O JR começou pela **dívida de móvel**, que é a ordem certa:
 semeadura de base no arnês do navegador (`inspeccao/semear.ts`,
 `packages/db/prisma/semente-inspeccao.ts`, `inspeccao/publico.spec.ts`) **antes** de
-acrescentar 29 telas novas.
+acrescentar 29 telas novas. **As 29 telas continuam por começar.**
+
+**As duas pendências do arnês fecharam — e nenhuma era o que estava escrito.**
+`docs/progress/E10.md` tem o detalhe. Em resumo, porque muda o que se pode acreditar:
+
+- O `provar-publico.sh` **repunha a versão errada da `publico_carta`**: o passo 6 replicava
+  à mão a migração `20260904091000`, anterior ao filtro de unidade da `20260904113000`.
+  Cada passagem da prova deixava na base a **fuga entre unidades** — e o passo 7 dizia
+  «voltou ao verde», porque nada media a fuga. A semeadura não era a sujidade: era o
+  **detector**, o primeiro cenário com duas unidades na mesma marca. A reposição passou a
+  sair de um retrato da **base viva**, e o passo 9 verifica que a prova devolve a base como
+  a encontrou.
+- **A correcção da fuga não tinha um único teste.** `provas/publico.test.ts` ganhou o
+  **grupo 7** (3 casos, com o par que o separa da regra preguiçosa) e o script ganhou o
+  controlo negativo **6e**, que planta a fuga a partir da função viva e exige vermelho.
+- As **três verificações vermelhas não eram layout**: `publico.spec.ts` importava
+  `semente-inspeccao.ts`, que tem `await principal()` no topo — cada worker do Playwright
+  corria a semeadura outra vez, em paralelo, sobre as linhas que o navegador lia. Provado
+  nos dois sentidos: com o import de efeito, 4 falhas com violação de chave estrangeira;
+  sem ele, 103 verificações e 0 falhas.
+- O `globalTeardown` está feito, com a lista do que se apaga num sítio só e contagem de
+  restos no fim (8 linhas depois de semear, 0 depois do fecho).
+
+**Medido nesta passagem:** `pnpm verificar` a 0 (363 testes unitários) · `pnpm inspeccionar`
+103 verificações, 0 falhas · `provar-publico.sh` **com a inspecção semeada** a 0 falhas, 7
+grupos, 26 casos, 10 controlos negativos. **Não corri** o resto do `provar-tudo.sh`.
+
+**Continua declarada e bloqueante para o E11:** as **cinco telas internas** da dívida
+(CHAN-001, QR-001, QR-003, QR-004, REP-001) exigem sessão no navegador, e o arnês não
+autentica.
 **Régua:** `docs/reviews/ALVO-E10.md`, escrita antes de existir código · contratos
 `dominios-e-enderecos.md` e `catalogo-e-publicacao.md` (E00).
 

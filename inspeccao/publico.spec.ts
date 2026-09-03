@@ -4,7 +4,16 @@ import {
   alvosPequenos, elementosForaDoEcra, indicadoresDeEstadoComPoucoContraste,
   textosComPoucoContraste, transbordaNaHorizontal,
 } from './ajudas.ts';
-import { SLUG_DE_INSPECCAO } from '../packages/db/prisma/semente-inspeccao.ts';
+// ── De onde vem esta constante, e porque NÃO vem da semeadura ─────────────
+//
+// Vinha de `semente-inspeccao.ts`, que tem `await principal()` no topo: importar
+// o nome do endereço **corria a semeadura inteira dentro do processo do
+// navegador**, com a credencial de MIGRAÇÃO — a mesma que o `semear.ts` explica
+// em comentário que o arnês não deve carregar. Fazia-o em silêncio, porque
+// semear duas vezes é idempotente e o sintoma nunca aparecia.
+//
+// `inspeccao-comum.ts` só tem constantes e funções. Importá-lo não faz nada.
+import { SLUG_DE_INSPECCAO } from '../packages/db/prisma/inspeccao-comum.ts';
 
 /**
  * As onze telas do E09, medidas no navegador — a pior dívida da lista.

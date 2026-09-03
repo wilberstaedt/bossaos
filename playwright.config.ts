@@ -43,6 +43,13 @@ export default defineConfig({
    */
   globalSetup: './inspeccao/semear.ts',
 
+  /**
+   * E apaga-a no fim. A semeadura limpava só a passagem anterior, e o cenário
+   * que ficava na base punha `provar-publico.sh` a correr sobre uma carta
+   * publicada que ele não espera. Quem faz a sujidade apanha-a.
+   */
+  globalTeardown: './inspeccao/limpar.ts',
+
   webServer: {
     command: `pnpm build && pnpm --filter @bossaos/web exec next start -p ${PORTA}`,
     url: `http://127.0.0.1:${PORTA}/api/health`,
