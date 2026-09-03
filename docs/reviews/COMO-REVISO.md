@@ -175,7 +175,21 @@ empurrada, e eu não faço `force-push` — fica corrigida aqui. Mensagens com `
 **6. Esquecer o passo que não é técnico.** Validei uma etapa e não autorizei a seguinte — o
 JR ficou nove minutos parado. Validar e entregar fecham no **mesmo** tick.
 
-## Duas verificações que valem por muitas
+## Três verificações que valem por muitas
+
+**A régua da etapa seguinte audita a etapa anterior.** Escrevi a régua do E09 e ela
+encontrou um defeito no **E08, que eu já tinha validado**: `montarRevisao` não olhava para
+`ProductChannel.visivel`, portanto um produto escondido da CARTA entrava na revisão da
+CARTA, e publicar um canal sem nada visível publicava uma página em branco em silêncio.
+
+Não é acaso, e por isso passa a passo. Uma régua para a etapa N+1 tem de perguntar **o que
+essa etapa recebe** — e a resposta é a saída da etapa N. Ao descrever a entrada, olho para
+a etapa anterior com olhos novos e **sem o alívio de já a ter dado por fechada**. É a única
+auditoria que tenho da minha própria assinatura.
+
+Explícito: ao escrever `ALVO-E##.md`, um parágrafo para o que a etapa **consome**,
+verificado contra o código e não contra a minha memória do que validei. Havendo diferença,
+a etapa anterior **reabre**. Validada não é imutável — é apenas assinada.
 
 **Ler a forma, não só o comportamento.** No E03 fui ao `pg_policies` confirmar que as
 políticas `ALL` tinham `USING` **e** `WITH CHECK` — porque uma política só com `USING` lê
