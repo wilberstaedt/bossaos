@@ -1,4 +1,5 @@
-#!/bin/zsh
+#!/usr/bin/env bash
+# bash, nao zsh: o runner do GitHub nao tem zsh e o shebang dava 127.
 # O estado da BossaOS, medido e nao estimado.
 #
 # Duas percentagens porque uma sozinha mente: as etapas dizem onde vamos no

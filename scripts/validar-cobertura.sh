@@ -1,4 +1,5 @@
-#!/bin/zsh
+#!/usr/bin/env bash
+# bash, nao zsh: o runner do GitHub nao tem zsh e o shebang dava 127.
 # A matriz de cobertura nao pode perder um ID nem ganhar um estado inventado.
 #
 # CT-20 e CT-15 dizem que as fontes nao desaparecem por reagrupamento: um ID pode
@@ -10,8 +11,8 @@ REF="docs/bossaos/COBERTURA_TELAS.csv"      # referencia, nunca se edita
 TRAB="docs/progress/coverage.csv"           # copia de trabalho
 ESTADOS="planejado|em execução|implementado aguardando validação|validado|bloqueado por dependência"
 falhas=0
-erro() { echo "  FALHA $1"; falhas=$((falhas+1)) }
-ok()   { echo "  ok    $1" }
+erro() { echo "  FALHA $1"; falhas=$((falhas+1)); }
+ok()   { echo "  ok    $1"; }
 
 ids_ref=$(tail -n +2 "$REF"  | cut -d, -f1 | sort)
 ids_tra=$(tail -n +2 "$TRAB" | cut -d, -f1 | sort)
