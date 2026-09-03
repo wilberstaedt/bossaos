@@ -68,6 +68,12 @@ jobs:
         run: pnpm db:migrate:deploy
 
       # ── as verificações, uma a uma ────────────────────────────────────────
+      # A cobertura primeiro: é a mais barata e a que invalida tudo o resto.
+      # Um ID perdido significa que o mapa deixou de descrever o produto, e não
+      # vale a pena saber se o que sobrou compila.
+      - name: Cobertura íntegra (396 IDs)
+        run: ./scripts/validar-cobertura.sh
+
       - name: Lint
         run: pnpm lint
 
