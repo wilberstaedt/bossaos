@@ -129,6 +129,12 @@ jobs:
       - name: Dinheiro em inteiros
         run: ./scripts/validar-dinheiro.sh
 
+      # A regra mais seria do produto, trancada por estrutura: alergeno desconhecido
+      # nao e alergeno ausente, e inferir a partir do nome tem de ser IMPOSSIVEL e
+      # nao apenas proibido. E a regra que alguem vai querer "melhorar".
+      - name: A distinção dos alérgenos
+        run: ./scripts/validar-alergenios.sh
+
       - name: Testes
         run: pnpm test
 
