@@ -75,7 +75,7 @@ export function criarAutenticacao(opcoes: OpcoesDeAutenticacao) {
       // resolve exactamente nada, e resolve-o de forma convincente.
       //
       // A sessão de quem acabou de repor sobrevive — é ele que está a repô-la.
-      
+      revokeSessionsOnPasswordReset: true,
       async sendResetPassword({ user, url }) {
         await opcoes.correio.enviar({
           para: user.email,

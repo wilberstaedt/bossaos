@@ -75,7 +75,11 @@ exigir_vermelho() {
     vermelho "$nome: ficou VERDE com o defeito plantado"
     return
   fi
-  if grep -q "$marcador" "$ficheiro"; then
+  # `not ok`, e não só o marcador. O nome do teste aparece na linha `ok` E na
+  # linha `not ok` — procurar só o marcador dava verde a uma execução que ficou
+  # vermelha por OUTRO motivo com esta asserção a passar. Apanhei-o a auditar o
+  # meu próprio script, que é onde ele tinha de ser apanhado.
+  if grep -qE "^ *not ok .*$marcador" "$ficheiro"; then
     verde "$nome"
   else
     vermelho "$nome: ficou vermelha, mas não foi a asserção esperada"

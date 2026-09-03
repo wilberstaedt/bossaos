@@ -1,13 +1,17 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E04 — autenticação, convites e permissões
-**Estado:** **retido na 2ª revisão**, com os quatro pontos de fecho já feitos e a etapa
-**re-declarada**. Aguarda a 3ª e última volta.
-**Próxima ação:** o sénior valida o E04 contra
-`docs/architecture/autenticacao-e-convites.md`, que escreveu no E00.
+**Etapa atual:** E05 — planos, entitlements e identidade Starter
+**Estado:** implementado, **aguardando validação**. `docs/progress/E05.md`.
+**Próxima ação:** o sénior valida contra `docs/reviews/ALVO-E05.md` e
+`docs/architecture/planos-e-limites.md`, os dois escritos antes da entrega.
+**O JR não avança para o E06.**
 
-**O E05 está PARADO, e existe. Como cá chegou, escrito para não ser descoberto por
-acidente** — que é o que a regra nova do `RETOMAR-JR.md` pede:
+**E04 validado às 17h45**, à 3ª volta. Reprovado à 1ª (o aceite 3 declarado e não
+demonstrado; `packages/auth` a zero sem declaração), retido à 2ª (o registo contradizia-se e
+a contagem dizia 91 em vez de 127). Fechado em `370251c`.
+
+**Como o E05 começou antes de ser autorizado, escrito para não ser descoberto por
+acidente** — que é o que a regra do `RETOMAR-JR.md` pede:
 
 Entre as 15h21 e as 17h14 o sénior esteve indisponível (sobrecarga do lado do modelo). O
 Matheus pediu-me explicitamente para assumir e seguir — *"assume o controle voce agora"*,
@@ -20,9 +24,9 @@ commit `11515f1` em vez da árvore**, porque a árvore passou a ter código de o
 duas horas depois quando o revisor voltou. O trabalho adiantado não é o problema; ele ser
 descoberto por acidente é.
 
-Os commits ficam onde estão, por decisão do sénior, e o E05 será declarado e revisto como
-etapa a sério, com `ALVO-E05` escrito antes de ele o ver. **Quem retomar isto não continua
-o E05 até o E04 estar validado.**
+Os commits ficaram onde estavam, por decisão do sénior. O E05 foi autorizado às 17h45, com
+o `ALVO-E05.md` escrito antes — e com uma declaração de honestidade à cabeça dele, porque
+desta vez a régua **não** precedeu todo o código e dizê-lo é o que a mantém útil.
 
 | Etapa | Estado |
 | --- | --- |
@@ -30,8 +34,8 @@ o E05 até o E04 estar validado.**
 | E01 — repositório e verificação contínua | **validado** · `docs/reviews/E01.md` |
 | E02 — design system, responsividade e idiomas | **validado** à 2ª · `docs/reviews/E02.md`. A 1ª revisão apanhou o acento a pintar um indicador de estado a 2,77:1; corrigido com `acentoSinal` e uma guarda de lista de permissão. |
 | E03 — estrutura multi-tenant e isolamento | **validado** à 2ª · `docs/reviews/E03.md`. A 1ª revisão apanhou o verificador a dizer verde com zero medido; corrigido, e a mesma guarda aplicada às outras provas. |
-| E04 — autenticação, convites e permissões | **reprovado à 1ª, retido à 2ª**, fechado e re-declarado · `docs/progress/E04.md` · `docs/reviews/E04.md` |
-| E05 — planos, entitlements e identidade Starter | **em curso, parado à espera do E04**. Cinco commits feitos durante a indisponibilidade do sénior; declara-se e revê-se como etapa a sério. Ver acima. |
+| E04 — autenticação, convites e permissões | **validado à 3ª** · `docs/reviews/E04.md` |
+| E05 — planos, entitlements e identidade Starter | implementado, **aguardando validação** · `docs/progress/E05.md` · `docs/reviews/ALVO-E05.md` |
 
 **Primeiras telas.** O E02 é a primeira etapa que toca `coverage.csv`: STATE 001-003,
 005, 007 e 016. Até aqui o medidor de telas esteve a 0 % e isso era verdade, não uma
@@ -206,3 +210,41 @@ incomunicáveis do código.
   satisfeito. O lint corre e apanha erros (provado plantando uma violação).
 - **Playwright só com Chromium:** diferenças de composição no WebKit e no Firefox não
   estão a ser vistas.
+
+## E05 — o que existe agora
+
+**Um motor de entitlements** (`packages/domain/src/capacidades.ts`) com a regra na direcção
+certa: **quota por configurar significa NEGADO**, não ilimitado. Três motivos separados onde
+um sistema descuidado teria um — `sem_plano` (nunca comprou), `quota_por_configurar`
+(comprou, falta o número), `quota_esgotada` (comprou zero, e zero é um número) — porque
+`null` lido como infinito oferece o produto inteiro e lido como zero bloqueia quem pagou.
+
+**Três verificações independentes, com três códigos**: plano **402**, autorização **403**,
+flag **404**. Um 403 a quem paga manda-o pedir permissões a si próprio.
+
+**O defeito que esta etapa apanhou**: a flag só era consultada se quem chamasse se lembrasse
+de a passar, e ninguém se lembrava. A terceira verificação do CT-02 existia no domínio e
+**nunca disparava no produto**. Passou a aplicar-se por convenção de nome.
+
+**Um trabalho de fundo a sério** — o `worker` deixou de ser andaime. Efectiva as descidas
+agendadas, uma organização por transacção, e não efectiva por cima de operações abertas (o
+registo de detectores está vazio porque caixas são E13/E19; o mecanismo está provado com um
+detector injectado). A prévia que o ecrã mostra **é a mesma chamada** que o job usa.
+
+**A superfície interna de plataforma**, seis ecrãs que lêem através de inquilinos — a
+pergunta que o E03 existe para recusar. Não se desligou a política de linha nem se criou um
+quinto papel: funções `SECURITY DEFINER` que devolvem o que cada ecrã mostra e verificam
+elas próprias quem chama. `platform_staff` é escrita só pela migração e o runtime nem tem
+`SELECT`.
+
+**Controlo interno do piloto**: `scripts/plataforma.mjs`, com a credencial de migração e
+tudo auditado, `--motivo` obrigatório. A interface de escrita é E33 — e os ecrãs dizem-no em
+vez de terem botões que não fazem nada.
+
+**133 asserções unitárias, 0 falhas**, e **nenhum pacote declarado a zero** pela primeira
+vez. `pnpm verificar` a 0 **sem `.env`**.
+
+Duas guardas ganharam defeito corrigido: o `validar-cobertura.sh` lia a coluna errada quando
+um campo tinha vírgula entre aspas — e o estado real desse ID nunca chegava a ser verificado
+—, e faltava um teste que apanhasse `var(--bo-token-que-não-existe)`, que é como se apaga
+texto sem nada ficar vermelho.
