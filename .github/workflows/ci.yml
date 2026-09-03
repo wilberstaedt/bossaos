@@ -124,6 +124,11 @@ jobs:
       - name: Ordem das etapas
         run: ./scripts/validar-ordem.sh
 
+      # Dinheiro em inteiros de unidade minima. Barata, e o E22-E24 vao encher o
+      # schema de campos de dinheiro - e la que esta guarda paga.
+      - name: Dinheiro em inteiros
+        run: ./scripts/validar-dinheiro.sh
+
       - name: Testes
         run: pnpm test
 
