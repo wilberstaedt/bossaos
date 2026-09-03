@@ -107,6 +107,26 @@ for longa — **diz no handoff que o fizeste e porquê**. O que dói não é o t
 
 ---
 
+
+## O que aterrou a 04/09 e uma sessão nova não pode ignorar
+
+Aponta-se, não se copia: um documento lido só na emergência envelhece sem ninguém dar por
+isso — já aconteceu com o prompt do sénior a 03/09, que listava como pendente uma coisa
+feita há uma hora.
+
+- **`docs/progress/DIVIDA-MOVEL.txt`** — o móvel é obrigatório no atlas em todas as telas
+  até ao marco, e 77 estão assinadas sem essa prova. A guarda `validar-movel.sh` reprova
+  dívida **nova**: uma tela nova ou se mede em móvel, ou entra ali com o motivo. As onze do
+  E09 têm **prazo bloqueante no E10** — são a carta pública e o QR, lidos ao telemóvel.
+- **`docs/architecture/catalogo-e-publicacao.md`** e **`dominios-e-enderecos.md`** — o
+  endereço público e o domínio **não voltam ao mundo** quando se largam. `@unique` impede
+  dois ao mesmo tempo, não dois em sequência, e o QR está impresso.
+- **A lição das guardas, que vale para o código e para os instrumentos:** casar *texto de
+  código* obriga a cobrir **todas** as formas válidas de o escrever. `export async function
+  POST` e `export const POST` são a mesma coisa; `'NAO_CONTEM'` e `"NAO_CONTEM"` também.
+  Uma guarda que vigia um **estilo** em vez de uma **propriedade** está verde por acaso.
+  Custou uma retenção no E09 e um defeito igual numa guarda do sénior no mesmo dia.
+
 ## Notas para o sénior (não colar)
 
 - O terminal do JR é `F17A8F91-337F-428E-A6C6-438922559E0C`; o boot normal dele é
