@@ -1,10 +1,12 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E05 — planos, entitlements e identidade Starter
-**Estado:** implementado, **aguardando validação**. `docs/progress/E05.md`.
-**Próxima ação:** o sénior valida contra `docs/reviews/ALVO-E05.md` e
-`docs/architecture/planos-e-limites.md`, os dois escritos antes da entrega.
-**O JR não avança para o E06.**
+**Etapa atual:** E06 — onboarding e configuração do restaurante
+**Estado:** implementado, **aguardando validação**. `docs/progress/E06.md`.
+**Próxima ação:** o sénior valida contra `docs/architecture/domain-model.md` e
+`permissions.md`, os dois escritos no E00, e contra o `ALVO-E06` que escreveu em paralelo.
+**O JR não avança para o E07.**
+
+**E05 validado à primeira** — a primeira etapa a passar sem segunda volta.
 
 **E04 validado às 17h45**, à 3ª volta. Reprovado à 1ª (o aceite 3 declarado e não
 demonstrado; `packages/auth` a zero sem declaração), retido à 2ª (o registo contradizia-se e
@@ -35,7 +37,8 @@ desta vez a régua **não** precedeu todo o código e dizê-lo é o que a manté
 | E02 — design system, responsividade e idiomas | **validado** à 2ª · `docs/reviews/E02.md`. A 1ª revisão apanhou o acento a pintar um indicador de estado a 2,77:1; corrigido com `acentoSinal` e uma guarda de lista de permissão. |
 | E03 — estrutura multi-tenant e isolamento | **validado** à 2ª · `docs/reviews/E03.md`. A 1ª revisão apanhou o verificador a dizer verde com zero medido; corrigido, e a mesma guarda aplicada às outras provas. |
 | E04 — autenticação, convites e permissões | **validado à 3ª** · `docs/reviews/E04.md` |
-| E05 — planos, entitlements e identidade Starter | implementado, **aguardando validação** · `docs/progress/E05.md` · `docs/reviews/ALVO-E05.md` |
+| E05 — planos, entitlements e identidade Starter | **validado à 1ª** · `docs/reviews/ALVO-E05.md` |
+| E06 — onboarding e configuração do restaurante | implementado, **aguardando validação** · `docs/progress/E06.md` |
 
 **Primeiras telas.** O E02 é a primeira etapa que toca `coverage.csv`: STATE 001-003,
 005, 007 e 016. Até aqui o medidor de telas esteve a 0 % e isso era verdade, não uma
@@ -248,3 +251,30 @@ Duas guardas ganharam defeito corrigido: o `validar-cobertura.sh` lia a coluna e
 um campo tinha vírgula entre aspas — e o estado real desse ID nunca chegava a ser verificado
 —, e faltava um teste que apanhasse `var(--bo-token-que-não-existe)`, que é como se apaga
 texto sem nada ficar vermelho.
+
+## E06 — o que existe agora
+
+**Um motor de horários com TRÊS respostas** — aberto, fechado e **desconhecido**. Um sistema
+booleano aqui obriga quem chama a escolher entre mentir a dizer que está aberto e mentir a
+dizer que está fechado. Um dia sem linha em `schedule_days` está por configurar; um dia com
+linha e `fechado = true` está fechado porque alguém o disse.
+
+**20:00→01:00 é um intervalo, guardado 1200→1500.** A consequência — consultar também o dia
+anterior — está num sítio só, em vez de um `if (fim < inicio)` espalhado por todo o código
+que lê horários. O fuso é o da unidade, com `Intl`, que é o que acerta em Março e Outubro.
+
+**Moeda e fuso deixaram de ser `NOT NULL`**, e nenhum campo novo tem `@default`. Com eles
+obrigatórios, quem cria uma unidade é forçado a arranjar um valor — e o valor que se arranja
+quando não se sabe é o da unidade anterior. E `CampoPorEscolher` garante que nenhum
+`<select>` do produto pode escolher sozinho a primeira opção da lista.
+
+**Criar não duplica.** A chave de idempotência decide-se na restrição única da base, não num
+`if` em TypeScript: duas repetições simultâneas leem as duas "não existe" e criam as duas.
+A porta `criar_organizacao_com_dono` cria quatro linhas ou nenhuma, e garante que **não se
+cria uma organização a que não se pertence**.
+
+**A lista de arranque tem quatro estados**, e `por_medir` não conta como pendente — se
+contasse, a lista nunca ficava verde e o aceite 3 era impossível.
+
+Uma prova minha deixou lixo e partiu a prova de isolamento do E03. Corrigido, com uma guarda
+no script que faz a sujidade em vez de na prova seguinte.

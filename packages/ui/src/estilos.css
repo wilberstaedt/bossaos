@@ -680,3 +680,16 @@ p { margin: 0; }
 .bo-plataforma__banner-detalhe { margin: 4px 0 0; opacity: 0.85; }
 .bo-plataforma__lista { display: grid; gap: var(--bo-espaco-md); }
 .bo-plataforma__linha { display: flex; align-items: center; justify-content: space-between; gap: var(--bo-espaco-lg); }
+
+/* E06 · formulários de configuração e a grelha de horários. */
+.bo-forma { display: grid; gap: var(--bo-espaco-xxl); }
+.bo-forma__grelha { display: grid; gap: var(--bo-espaco-lg); grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.bo-horario__dia { display: grid; gap: var(--bo-espaco-md); }
+.bo-horario__cabecalho { display: flex; align-items: center; justify-content: space-between; gap: var(--bo-espaco-md); }
+.bo-horario__intervalos { display: grid; gap: var(--bo-espaco-md); }
+/* Dois campos por serviço. Abaixo de 480 px empilham: "Desde" e "Hasta" lado a
+   lado num telemóvel dão dois campos de 60 px, que ninguém acerta com o polegar. */
+.bo-horario__par { display: grid; gap: var(--bo-espaco-md); grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+/* Duas acções lado a lado, com a destrutiva à direita — onde o polegar não
+   passa por acidente ao voltar atrás. */
+.bo-estado__accoes { display: flex; flex-wrap: wrap; gap: var(--bo-espaco-md); margin-top: var(--bo-espaco-lg); }

@@ -1,0 +1,85 @@
+import { notFound, redirect } from 'next/navigation';
+import { Aviso, Botao, Campo } from '@bossaos/ui';
+import { formatarData, mensagensDe, type Idioma } from '@bossaos/i18n';
+import { listarUnidades } from '@bossaos/db';
+import { comEscopoDoPedido, resolverPedido } from '../../../../../../src/sessao.ts';
+import { CampoPorEscolher } from '../../../../../../src/componentes/CampoPorEscolher.tsx';
+import { fusos, MOEDAS } from '../../../../../../src/componentes/opcoes.ts';
+
+export const dynamic = 'force-dynamic';
+
+/**
+ * SET-001 · "Preferencias del restaurante" (atlas p. 341)
+ *
+ * O atlas põe cinco campos: idioma, moeda, zona horaria, formato de fecha e
+ * unidad. Quatro são desta tela; o **formato de data não é um campo**, e essa é
+ * a única divergência que vale explicar.
+ *
+ * O formato sai do idioma, pelo `Intl` — `DD/MM/AAAA` em espanhol e português,
+ * `MM/DD/YYYY` em inglês americano. Dar um selector separado cria dois sítios
+ * onde a mesma decisão vive, e o dia em que discordarem é o dia em que uma
+ * factura tem a data trocada. Mostra-se o formato **resultante**, com um exemplo
+ * de hoje, para não ser magia.
+ */
+export default async function PreferenciasDaUnidade({
+  params, searchParams,
+}: {
+  params: Promise<{ idioma: Idioma; orgSlug: string; locationSlug: string }>;
+  searchParams: Promise<{ guardado?: string }>;
+}) {
+  const { idioma, orgSlug, locationSlug } = await params;
+  const { guardado } = await searchParams;
+  const m = mensagensDe(idioma);
+  const p = m.preferencias;
+
+  const sessao = await resolverPedido(orgSlug);
+  if (!sessao.ok) redirect(`/${idioma}/auth/organizations`);
+
+  const unidade = await comEscopoDoPedido(sessao, async (db) => {
+    const todas = await listarUnidades(db);
+    const encontrada = todas.find((u) => u.slug === locationSlug);
+    if (!encontrada) return null;
+    return db.location.findFirst({
+      where: { id: encontrada.id },
+      select: { id: true, nome: true, moeda: true, fuso: true, localidade: true, contactoEmail: true },
+    });
+  });
+  if (!unidade) notFound();
+
+  return (
+    <div className="bo-pagina">
+      <form method="post" action={`/api/org/${orgSlug}/unidades/${unidade.id}/preferencias`} className="bo-forma">
+        <input type="hidden" name="idioma" value={idioma} />
+        <input type="hidden" name="locationSlug" value={locationSlug} />
+
+        <div className="bo-estado__cabecalho">
+          <div>
+            <p className="bo-estado__sobrancelha">{p.sobrancelha}</p>
+            <h1>{p.titulo}</h1>
+          </div>
+          <Botao type="submit">{p.accao}</Botao>
+        </div>
+
+        {guardado ? <Aviso tom="sucesso" titulo={m.comum.guardado} /> : null}
+
+        <div className="bo-forma__grelha">
+          <Campo rotulo={p.unidade} defaultValue={unidade.nome} readOnly />
+          <CampoPorEscolher rotulo={p.moeda} name="moeda" opcoes={MOEDAS}
+                            valor={unidade.moeda} rotuloVazio={m.arranque.porEscolher}
+                            ajuda={p.moedaNaoRetroactiva} />
+          <CampoPorEscolher rotulo={p.fuso} name="fuso" opcoes={fusos()}
+                            valor={unidade.fuso} rotuloVazio={m.arranque.porEscolher}
+                            ajuda={p.fusoNaoReinterpreta} />
+          <Campo rotulo={m.unidades.localidade} name="localidade" defaultValue={unidade.localidade ?? ''} />
+          <Campo rotulo={m.unidades.contacto} name="contactoEmail" type="email"
+                 defaultValue={unidade.contactoEmail ?? ''} />
+          {/* Derivado, não escolhido: um só sítio onde a decisão vive. */}
+          <Campo rotulo={p.formatoData} defaultValue={formatarData(new Date(), idioma)} readOnly
+                 ajuda={p.formatoDerivado} />
+        </div>
+
+        <p className="bo-planos__nota">{m.arranque.guardadoNoAmbito}</p>
+      </form>
+    </div>
+  );
+}

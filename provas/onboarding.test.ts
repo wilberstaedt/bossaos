@@ -52,8 +52,27 @@ before(async () => {
 });
 
 after(async () => {
-  // As organizações criadas aqui saem daqui. Uma prova que deixa lixo faz a
-  // seguinte medir outra coisa.
+  // ── Tudo o que esta prova cria sai daqui ─────────────────────────────────
+  //
+  // A primeira versão limpava só as organizações e deixava as UNIDADES. A prova
+  // de isolamento do E03 conta "a organização A tem duas unidades" e passou a
+  // ver cento e quarenta — uma prova de outra etapa partida por lixo desta.
+  //
+  // O padrão de slug é a rede de segurança: mesmo que um caso rebente antes de
+  // registar o que criou, o que ele criou tem um nome que este apagamento
+  // apanha. Um `criadas.push` esquecido não pode custar a prova de isolamento.
+  await sql.query(`
+    DELETE FROM schedule_intervals WHERE dia_id IN (
+      SELECT id FROM schedule_days WHERE location_id IN (
+        SELECT id FROM locations WHERE slug ~ '^(horarios|sem-fuso|arquivar|isolada|prova)-'))`);
+  await sql.query(`
+    DELETE FROM schedule_intervals WHERE excepcao_id IN (
+      SELECT id FROM schedule_exceptions WHERE location_id IN (
+        SELECT id FROM locations WHERE slug ~ '^(horarios|sem-fuso|arquivar|isolada|prova)-'))`);
+  await sql.query("DELETE FROM schedule_days       WHERE location_id IN (SELECT id FROM locations WHERE slug ~ '^(horarios|sem-fuso|arquivar|isolada|prova)-')");
+  await sql.query("DELETE FROM schedule_exceptions WHERE location_id IN (SELECT id FROM locations WHERE slug ~ '^(horarios|sem-fuso|arquivar|isolada|prova)-')");
+  await sql.query("DELETE FROM locations           WHERE slug ~ '^(horarios|sem-fuso|arquivar|isolada|prova)-'");
+
   for (const id of criadas) {
     await sql.query('DELETE FROM idempotency_keys WHERE organization_id = $1', [id]);
     await sql.query('DELETE FROM onboarding_progress WHERE organization_id = $1', [id]);

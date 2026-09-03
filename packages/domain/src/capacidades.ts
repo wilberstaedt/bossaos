@@ -34,6 +34,10 @@ export const CAPACIDADES = {
   'pagamentos': 'booleana',
   'kiosk': 'booleana',
   // Quantitativas: precisam de um número, e o número vem de configuração.
+  // E06: a estrutura multimarca existe em todos os planos; o que a limita é a
+  // quota concedida, tal como nas unidades. Sem concessão, fica a marca do
+  // piloto — que é o que o CT-02 manda: **por configurar significa negado**.
+  'marcas': 'quantitativa',
   'unidades': 'quantitativa',
   'utilizadores': 'quantitativa',
   'produtos': 'quantitativa',

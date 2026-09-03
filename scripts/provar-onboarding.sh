@@ -48,8 +48,15 @@ restaurar() {
     psql "$MIGRATION_DATABASE_URL" -q -c 'ALTER TABLE schedule_days ENABLE ROW LEVEL SECURITY' >/dev/null 2>&1
     RLS_DESLIGADO=0; printf '  (a política de linha foi religada)\n'
   fi
-  # As organizações de prova saem sempre, mesmo que a prova morra a meio.
+  # As organizações E AS UNIDADES de prova saem sempre, mesmo que a prova morra
+  # a meio. Sem as unidades, a prova de isolamento do E03 passa a contar as
+  # minhas — e foi assim que ela ficou vermelha por lixo meu.
   psql "$MIGRATION_DATABASE_URL" -q >/dev/null 2>&1 <<'PY'
+DELETE FROM schedule_intervals WHERE dia_id IN (SELECT id FROM schedule_days WHERE location_id IN (SELECT id FROM locations WHERE slug ~ '^(horarios|sem-fuso|arquivar|isolada|prova)-'));
+DELETE FROM schedule_intervals WHERE excepcao_id IN (SELECT id FROM schedule_exceptions WHERE location_id IN (SELECT id FROM locations WHERE slug ~ '^(horarios|sem-fuso|arquivar|isolada|prova)-'));
+DELETE FROM schedule_days       WHERE location_id IN (SELECT id FROM locations WHERE slug ~ '^(horarios|sem-fuso|arquivar|isolada|prova)-');
+DELETE FROM schedule_exceptions WHERE location_id IN (SELECT id FROM locations WHERE slug ~ '^(horarios|sem-fuso|arquivar|isolada|prova)-');
+DELETE FROM locations           WHERE slug ~ '^(horarios|sem-fuso|arquivar|isolada|prova)-';
 DELETE FROM role_assignments WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'prova-%');
 DELETE FROM memberships      WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'prova-%');
 DELETE FROM onboarding_progress WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'prova-%');
@@ -202,6 +209,26 @@ if correr /tmp/bossaos-onb-reposto.txt; then
 else
   vermelho "não voltou ao verde depois de repor"
   grep -E '^ *not ok' /tmp/bossaos-onb-reposto.txt | head -6
+fi
+
+echo
+echo "7. A árvore ficou limpa?"
+# ── A guarda que faltava, posta onde pertence ──────────────────────────────
+#
+# Esta prova cria unidades. A primeira versão limpava só as organizações, e a
+# prova de ISOLAMENTO do E03 — que conta "a organização A tem duas unidades" —
+# passou a ver cento e quarenta e ficou vermelha. Uma etapa validada há três dias
+# a falhar por lixo de uma prova nova.
+#
+# O sítio certo para apanhar isso não é a prova seguinte: é esta, que faz a
+# sujidade. Se o número não voltar ao das fixtures, o problema é aqui e diz-se
+# aqui, em vez de aparecer noutro sítio a acusar outra coisa.
+UNIDADES_A=$(psql "$MIGRATION_DATABASE_URL" -tAc \
+  "SELECT count(*) FROM locations WHERE organization_id = '11111111-1111-4111-8111-111111111111'" 2>/dev/null)
+if [[ "$UNIDADES_A" == "2" ]]; then
+  verde "a organização A ficou com as 2 unidades das fixtures"
+else
+  vermelho "a organização A ficou com $UNIDADES_A unidades — esta prova deixou lixo, e a próxima vai medir outra coisa"
 fi
 
 echo

@@ -489,6 +489,72 @@ export default async function Catalogo({ params }: { params: Promise<{ idioma: I
           </Cartao>
         </section>
 
+        {/* ── E06 ──────────────────────────────────────────────────────────
+            Os três estados de um dia, e a lista de arranque com os quatro dela.
+            Estão aqui pela mesma razão dos componentes do E05: as telas de
+            configuração exigem sessão e organização, e é esta página que a
+            varredura do Playwright atravessa nas cinco larguras a medir
+            contraste no DOM. Uma etiqueta de estado que não chegasse a 4,5:1
+            passaria despercebida se só existisse atrás de um login. */}
+        <section style={SECCAO} aria-labelledby="s-horarios">
+          <h2 id="s-horarios">{m.catalogo.seccaoHorarios}</h2>
+          <p className="bo-campo__ajuda">
+            ONB-001/002/003/010, ORG-001 a 006 e SET-001/002. O que importa aqui é que
+            <strong> um dia por configurar não é um dia fechado</strong>: são três estados, e o
+            terceiro tem etiqueta própria.
+          </p>
+
+          <div className="bo-plataforma__lista">
+            {([
+              ['dia1', 'por_configurar'],
+              ['dia2', 'fechado'],
+              ['dia5', 'aberto'],
+            ] as const).map(([chave, tipo]) => (
+              <Cartao key={chave} className="bo-horario__dia">
+                <div className="bo-horario__cabecalho">
+                  <span className="bo-tema__rotulo">
+                    {(m.horarios as unknown as Record<string, string>)[chave]}
+                  </span>
+                  <Etiqueta tom={tipo === 'aberto' ? 'sucesso' : tipo === 'fechado' ? 'neutro' : 'aviso'}>
+                    {tipo === 'aberto' ? m.horarios.aberto
+                      : tipo === 'fechado' ? m.horarios.fechado
+                      : m.horarios.porConfigurar}
+                  </Etiqueta>
+                </div>
+                {tipo === 'aberto' ? (
+                  <div className="bo-horario__par">
+                    <Campo rotulo={`${m.horarios.de} 1`} defaultValue="13:00" readOnly />
+                    <Campo rotulo={`${m.horarios.ate} 1`} defaultValue="16:00" readOnly />
+                    <Campo rotulo={`${m.horarios.de} 2`} defaultValue="20:00" readOnly />
+                    {/* 01:00 do dia seguinte. É o caso que o motor guarda como 1500. */}
+                    <Campo rotulo={`${m.horarios.ate} 2`} defaultValue="01:00" readOnly />
+                  </div>
+                ) : null}
+              </Cartao>
+            ))}
+          </div>
+
+          <p className="bo-campo__ajuda">{m.horarios.nota}</p>
+
+          <div className="bo-plataforma__lista">
+            {([
+              ['itemUnidade', 'feito'],
+              ['itemHorarios', 'pendente'],
+              ['itemPedidoDeProva', 'naoAplicavel'],
+              ['itemCarta', 'porMedir'],
+            ] as const).map(([chave, estado]) => (
+              <Cartao key={chave} className="bo-plataforma__linha">
+                <span className="bo-tema__rotulo">
+                  {(m.arranque as unknown as Record<string, string>)[chave]}
+                </span>
+                <Etiqueta tom={estado === 'feito' ? 'sucesso' : estado === 'pendente' ? 'aviso' : 'neutro'}>
+                  {(m.arranque as unknown as Record<string, string>)[estado]}
+                </Etiqueta>
+              </Cartao>
+            ))}
+          </div>
+        </section>
+
         <section style={SECCAO} aria-labelledby="s-idiomas">
           <h2 id="s-idiomas">{m.catalogo.seccaoIdiomas}</h2>
           <Tabela
