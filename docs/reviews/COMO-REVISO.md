@@ -100,6 +100,38 @@ Terceira diferença, auditada a 2026-09-03 e **limpa** nos sete scripts: nenhum 
 `sed -i` sem sufixo, `grep -P`, `readlink -f`, `date -d` nem `stat -c` — flags que existem
 nos dois sistemas e fazem coisas diferentes, que é pior do que não existirem.
 
+## As minhas armadilhas, por forma
+
+Escrito a 2026-09-03, ao fim de um dia em que quase todos os defeitos que encontrei
+estavam no **meu** procedimento e não no produto. Não é auto-flagelação: é uma lista de
+verificação, porque estas repetem-se e são reconhecíveis à vista.
+
+**1. Correr uma prova sem o ambiente que ela precisa.** Duas vezes no mesmo dia: `pnpm
+verificar` sem `.env` → "a etapa não compila"; um `.test.ts` corrido nu quando havia um
+script que levanta o servidor → "a sonda decisiva reprova". Antes de acusar: *este comando
+tem tudo o que precisa, ou estou eu a medir a minha shell?*
+
+**2. Escrever a ferramenta e confiar nela antes de a partir.** O padrão da chave privada
+nunca correu (o `grep` lia `-----BEGIN` como opção). O filtro de declarados devolvia sempre
+falso (`while` dentro de um cano corre em subshell). Um regex meu estragou três expansões
+`${VAR:-0}` e o script correu **verde** por o caminho por omissão nunca ser usado. Regra:
+**a ferramenta prova-se partindo-a, e o controlo negativo também se prova.**
+
+**3. Presumir o ambiente em vez de o fixar.** `#!/bin/zsh` passava aqui e dava 127 na CI;
+um *array* associativo rebentava aqui e passaria na CI. Ver a secção acima.
+
+**4. Ler um fragmento e inferir a causa.** O `vitest` a dizer `Tests no tests` quando os
+testes correram; `# pass 0` do `auth` que não era a causa do vermelho; o grep que não
+encontrou a saída de uma guarda e me fez suspeitar dela. **Ler a saída inteira antes de
+concluir.**
+
+**5. Medir uma árvore que outro está a escrever.** Um teste vermelho que ficou verde trinta
+segundos depois sem eu tocar em nada. O falso vermelho faz barulho; o falso **verde** não,
+e esse eu guardava como prova.
+
+**6. Esquecer o passo que não é técnico.** Validei uma etapa e não autorizei a seguinte — o
+JR ficou nove minutos parado. Validar e entregar fecham no **mesmo** tick.
+
 ## Duas verificações que valem por muitas
 
 **Ler a forma, não só o comportamento.** No E03 fui ao `pg_policies` confirmar que as

@@ -30,6 +30,10 @@ PADROES=(
   # ci.yml enquanto a DATABASE_URL vinha mascarada, e esta varredura dizia
   # "nenhum segredo na arvore". Eu so lhe tinha ensinado cinco formas de
   # fornecedor - e a forma mais comum num ficheiro de configuracao e esta.
+  # Precisao MEDIDA a 2026-09-03, nao presumida: 11 sitios em codigo de produto
+  # mencionam SECRET/TOKEN/KEY e nenhum tem valor literal - todos leem do ambiente
+  # ou sao nomes de tipo. O padrao dispara so sobre literais, que e a forma de um
+  # segredo escrito a mao. Um detector que grita por tudo acaba desligado.
   "segredo de nome generico:(SECRET|TOKEN|PASSWORD|PASSWD|API_?KEY)[\"']?[[:space:]]*[:=][[:space:]]*[\"']?[A-Za-z0-9_.@/+-]{16,}"
   "senha em ligacao:postgres(ql)?://[^:@/[:space:]]+:[^@/$$\{[:space:]]{8,}@"
 )
