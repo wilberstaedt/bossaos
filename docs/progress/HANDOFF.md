@@ -1,13 +1,25 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E09 — carta pública e QR de consulta (**11 telas**)
-**Estado:** implementado, **aguardando validação** (redeclarado). Retido à 1ª por uma
-medição que via uma só forma de exportar um verbo; fechado com detector largo e o controlo
-que planta as onze. E fechada a regra nova do contrato: o endereço público não volta ao
-mundo, com o par que o distingue da regra preguiçosa.
-**Régua:** `docs/reviews/ALVO-E09.md` · `catalogo-e-publicacao.md` e
-`dados-e-accoes-sensiveis.md`, os dois do E00.
-**O JR não avança para o E10.**
+**Etapa atual:** E10 — sites dos restaurantes e landing page (**29 telas**, a maior até agora)
+**Estado:** autorizado 04/09. O JR começou pela **dívida de móvel**, que é a ordem certa:
+semeadura de base no arnês do navegador (`inspeccao/semear.ts`,
+`packages/db/prisma/semente-inspeccao.ts`, `inspeccao/publico.spec.ts`) **antes** de
+acrescentar 29 telas novas.
+**Régua:** `docs/reviews/ALVO-E10.md`, escrita antes de existir código · contratos
+`dominios-e-enderecos.md` e `catalogo-e-publicacao.md` (E00).
+
+**Duas condições não negociáveis do E10:**
+1. As 29 telas nascem com prova de fluxo nas **duas** superfícies, e na mesma passagem
+   saem da dívida as **11 telas do E09** (`docs/progress/DIVIDA-MOVEL.txt`). **Se o E10
+   fechar sem elas, o marco E11 não passa.**
+2. Aceite 2: falha real não mostra mensagem de sucesso. O ataque é **partir a gravação do
+   lead de propósito** — é o defeito mais caro dos três, porque perde dinheiro sem barulho.
+
+**E09 VALIDADO à 2ª** — 04/09. Retido por uma medição que via uma só forma de exportar um
+verbo; fechado com detector largo, e os **três ataques independentes do sénior** (sem
+espaços, `export { h as POST }`, `satisfies`) apanhados. E a regra nova do contrato: o
+endereço público não volta ao mundo, com o par que o distingue da regra preguiçosa.
+`docs/progress/E09.md`. **Pendência declarada:** as 11 telas sem prova de móvel.
 
 **E08 validado à 2ª** — retido por uma protecção que não conseguia falhar (`redirect:
 'manual'` sem um único teste a vigiá-la). `docs/reviews/E08.md`.
