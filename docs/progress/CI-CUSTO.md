@@ -37,6 +37,34 @@ aconteceu hoje**, e tive de ir confirmar por SHA qual commit é que a corrida ve
 Uma CI de trinta minutos deixa de ser verificação e passa a ser um imposto que se aprende a
 contornar.
 
+## Quanto custam as guardas — medido a 20h10, depois de eu as ter acrescentado
+
+Documentei o custo às 20h40 e a seguir acrescentei **dois passos**. Fui verificar a
+incoerência em vez de assumir que eram baratas:
+
+```
+ 8 s  Todos os pacotes medidos
+ 6 s  Prova — a cadeia de migrações aplica-se DO ZERO
+ 1 s  Cobertura íntegra (396 IDs)
+ 1 s  Dinheiro em inteiros
+ 0 s  Nenhum segredo na árvore
+ 0 s  Ordem das etapas
+```
+
+**~16 s de 640 — 2,5 %.** A incoerência era menor do que eu temia, mas verificar era o
+mínimo depois de a apontar.
+
+### Uma duplicação que encontrei ao contar
+
+O `validar-testes.sh` leva 8 s porque **corre os testes de cada pacote outra vez**, só para
+os contar — e o passo `Testes` corre-os logo a seguir. Hoje são 8 s; **cresce linearmente
+com a suite**, que é justamente a coisa que mais cresce.
+
+Não o mudo agora, e a razão é a mesma da divisão em trabalhos: mexer no `ci.yml` enquanto o
+JR lhe acrescenta passos dá conflito. **Ao dividir em trabalhos paralelos, o
+`validar-testes` funde-se com o trabalho dos testes** em vez de os repetir — a contagem sai
+da mesma corrida que já acontece. Fica no mesmo lote de trabalho, no fecho do E07.
+
 ## O que fazer, e porque não agora
 
 **Dividir em trabalhos paralelos.** Três grupos que não dependem uns dos outros:
