@@ -65,6 +65,17 @@ export function criarAutenticacao(opcoes: OpcoesDeAutenticacao) {
       // A verificação de email não bloqueia a entrada de quem aceitou um
       // convite: o convite JÁ prova o endereço — foi para lá que ele foi.
       requireEmailVerification: false,
+      // Recuperar a senha FECHA as sessões que já existem.
+      //
+      // O `revogacao.ts` escreve que "uma senha mudada com quem já entrou a
+      // continuar lá dentro parece resolvido e não está" — e durante o E04 isso
+      // esteve escrito e não estava ligado. Quem recupera o acesso está a
+      // responder a uma suspeita: perdeu o portátil, partilhou a senha, foi-lhe
+      // aberta a conta. Trocar a senha e deixar a sessão do outro lado viva
+      // resolve exactamente nada, e resolve-o de forma convincente.
+      //
+      // A sessão de quem acabou de repor sobrevive — é ele que está a repô-la.
+      revokeSessionsOnPasswordReset: true,
       async sendResetPassword({ user, url }) {
         await opcoes.correio.enviar({
           para: user.email,

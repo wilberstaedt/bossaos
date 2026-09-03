@@ -25,18 +25,32 @@ export interface Revogacao {
   sessoesFechadas: number;
 }
 
+/**
+ * O filtro do apagamento, isolado de propósito.
+ *
+ * Está fora da função que apaga para poder ser **medido sem uma base de dados**.
+ * O defeito catastrófico de uma função de revogação não é apagar de menos: é
+ * apagar de mais. Um `where` que perca o `userId` — numa refactorização, num
+ * spread mal colocado — apaga as sessões de TODA a gente do produto, e por fora,
+ * por HTTP, isso lê-se exactamente como uma revogação bem sucedida: a pessoa
+ * certa deixou de entrar. O sinal só aparece nos outros restaurantes.
+ */
+export function filtroDeRevogacao(userId: string, opcoes: { excepto?: string } = {}) {
+  return {
+    userId,
+    // `excepto` vazio não vira "excepto nada": cai para revogar tudo, incluindo
+    // a sessão de quem pediu. Falhar para o lado fechado é o lado certo aqui.
+    ...(opcoes.excepto ? { NOT: { token: opcoes.excepto } } : {}),
+  };
+}
+
 export async function revogarSessoesDoUtilizador(
   authDatabaseUrl: string,
   userId: string,
   opcoes: { excepto?: string } = {},
 ): Promise<Revogacao> {
   const prisma = obterPrismaDeAutenticacao(authDatabaseUrl);
-  const r = await prisma.session.deleteMany({
-    where: {
-      userId,
-      ...(opcoes.excepto ? { NOT: { token: opcoes.excepto } } : {}),
-    },
-  });
+  const r = await prisma.session.deleteMany({ where: filtroDeRevogacao(userId, opcoes) });
   return { sessoesFechadas: r.count };
 }
 
