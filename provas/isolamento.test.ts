@@ -1,4 +1,4 @@
-import { after, before, describe, it } from 'node:test';
+import { after, before, beforeEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from 'pg';
 import { IDS } from '../packages/db/prisma/fixtures.ts';
@@ -76,7 +76,25 @@ before(async () => {
   assert.equal(rows[0].rolbypassrls, false, 'o papel de runtime não pode ter BYPASSRLS');
 });
 
+/**
+ * Cada teste começa com a ligação limpa.
+ *
+ * Isto não é higiene teórica. Quando um `assert.rejects` falha — que é
+ * exactamente o que acontece no controlo negativo, com a política desligada —
+ * ele **atira**, e o `ROLLBACK` da linha seguinte nunca corre. A transacção fica
+ * aberta, e o `COMMIT` de um teste posterior grava a escrita que este teste
+ * estava a provar que não pode acontecer.
+ *
+ * Foi assim que o controlo negativo semeou uma marca "Intrusa" na base sem
+ * ninguém dar por isso. Um `ROLLBACK` fora de transacção é um aviso, não um
+ * erro: custa nada e fecha o buraco.
+ */
+beforeEach(async () => {
+  await cliente.query('ROLLBACK').catch(() => undefined);
+});
+
 after(async () => {
+  await cliente.query('ROLLBACK').catch(() => undefined);
   await cliente.end();
 });
 
@@ -171,16 +189,21 @@ describe('caso 3 — SEM CONTEXTO: nega, e nega para o positivo também', () => 
 
   it('escrever sem contexto também é recusado', async () => {
     await cliente.query('BEGIN');
-    await assert.rejects(
-      () =>
-        cliente.query(
-          `INSERT INTO brands (id, organization_id, nome, slug, updated_at)
-           VALUES (gen_random_uuid(), $1, 'Sem contexto', 'sem-contexto', now())`,
-          [IDS.orgA],
-        ),
-      /row-level security|violates/i,
-    );
-    await cliente.query('ROLLBACK');
+    try {
+      await assert.rejects(
+        () =>
+          cliente.query(
+            `INSERT INTO brands (id, organization_id, nome, slug, updated_at)
+             VALUES (gen_random_uuid(), $1, 'Sem contexto', 'sem-contexto', now())`,
+            [IDS.orgA],
+          ),
+        /row-level security|violates/i,
+      );
+    } finally {
+      // No `finally` de propósito: se a asserção falhar, é precisamente quando
+      // a escrita passou e é precisamente quando desfazer importa.
+      await cliente.query('ROLLBACK');
+    }
   });
 
   it('um contexto VAZIO nega, e não rebenta', async () => {

@@ -1,17 +1,16 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E02 — design system, responsividade e idiomas
-**Estado:** segunda declaração do JR, **aguardando validação do sénior**.
-**Próxima ação:** o sénior revalida o E02. A primeira revisão
-(`docs/reviews/E02.md`) não o validou: um defeito medido e uma guarda em falta. Os dois
-estão fechados — ver "Segunda declaração" em `docs/progress/E02.md`. O JR **não** avançou
-para E03.
+**Etapa atual:** E03 — estrutura multi-tenant e isolamento de dados
+**Estado:** implementado pelo JR, **aguardando validação do sénior**.
+**Próxima ação:** o sénior valida o E03 contra `docs/architecture/prova-de-isolamento.md`,
+que escreveu no E00, antes desta etapa começar. O JR **não** avançou para E04.
 
 | Etapa | Estado |
 | --- | --- |
 | E00 — contrato e leitura das fontes | implementado, **aguardando validação**. Sete documentos em `docs/architecture`. Quem os escreveu não os valida: a prova vem no E11, quando se vir se o E02-E10 se construíram a partir deles. |
 | E01 — repositório e verificação contínua | **validado** · `docs/reviews/E01.md` |
-| E02 — design system, responsividade e idiomas | 1ª revisão: **não validado** (`docs/reviews/E02.md`). Corrigido; segunda declaração, aguardando validação · `docs/progress/E02.md` |
+| E02 — design system, responsividade e idiomas | **validado** à 2ª · `docs/reviews/E02.md`. A 1ª revisão apanhou o acento a pintar um indicador de estado a 2,77:1; corrigido com `acentoSinal` e uma guarda de lista de permissão. |
+| E03 — estrutura multi-tenant e isolamento | implementado, **aguardando validação** · `docs/progress/E03.md` |
 
 **Primeiras telas.** O E02 é a primeira etapa que toca `coverage.csv`: STATE 001-003,
 005, 007 e 016. Até aqui o medidor de telas esteve a 0 % e isso era verdade, não uma
@@ -52,6 +51,36 @@ Três achados que mudaram código, dos nove em `E02.md`:
 
 **A comparação com o atlas rendeu quatro correcções** e uma divergência mantida de
 propósito (a acção repetida no topo só existe acima de 768 px, como o atlas móvel).
+
+## E03 — o que existe agora
+
+Seis tabelas (`organizations`, `brands`, `locations`, `users`, `memberships`,
+`role_assignments`) com **referências compostas** — a base recusa apontar para a unidade de
+outra organização — e políticas de linha com `USING` **e** `WITH CHECK`.
+
+**A prova está a 0 falhas, e o controlo negativo funciona**: desligadas as políticas, os
+casos 2 e 3 ficam vermelhos e o caso 3 passa a ver as duas marcas. `./scripts/provar-isolamento.sh`,
+com o papel real de runtime (`rolsuper=false`, `rolbypassrls=false`, confirmado no arranque)
+e também pelo Prisma, porque uma política certa com um ajudante errado vaza na mesma.
+
+O contexto não é convenção, é **tipo**: `comEscopo()` é o único sítio que fabrica um
+`ClienteComEscopo` e os repositórios só aceitam esse — passar o `PrismaClient` solto não
+compila. Provado enfraquecendo o tipo e vendo o `tsc` ficar vermelho.
+
+**85 testes unitários + 28 asserções de isolamento, 0 falhas.** `coverage.csv` **não mexeu**,
+que é o correcto numa etapa sem telas, e há uma verificação no fim do varrimento que o diz.
+
+Três achados que mudaram código, dos seis em `E03.md`:
+
+- **Depois do COMMIT o contexto volta a cadeia VAZIA, não a NULL** — e `''::uuid` rebenta.
+  O `NULLIF` que eu tinha posto por precaução é o que impede um erro duro em todas as
+  consultas seguintes de uma ligação de pool já usada.
+- **O controlo negativo corrompeu as fixtures**: com a política desligada, as escritas
+  passaram e moveram a marca de A para B. Causa de fundo: um `assert.rejects` que falha
+  **atira**, e o `ROLLBACK` da linha seguinte nunca corre — a transacção fica aberta e um
+  `COMMIT` posterior grava o que o teste provava não poder acontecer.
+- **A guarda de rotas apanhou a raiz de composição** e, ao declará-la como excepção, mostrou
+  a porta lateral que ela abria: qualquer rota podia importar o `obterBase` dela.
 
 ## Divisão de trabalho
 

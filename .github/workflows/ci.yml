@@ -98,6 +98,14 @@ jobs:
       - name: Prova — prontidão distingue base migrada, por migrar e em baixo
         run: ./scripts/provar-prontidao.sh
 
+      - name: Prova — isolamento entre inquilinos
+        # A mais perigosa do produto. Corre os quatro casos com o papel REAL de
+        # runtime e depois DESLIGA as políticas para exigir que os casos 2 e 3
+        # fiquem vermelhos: uma prova que passa com o RLS ligado e desligado não
+        # está a medir o RLS. Alvo em docs/architecture/prova-de-isolamento.md,
+        # escrito no E00, antes desta etapa.
+        run: ./scripts/provar-isolamento.sh
+
       - name: Prova — larguras, contraste, foco e alvos de toque
         # Aceites 1 e 2 do E02: 360/390/768/1280/1440 px, zoom, três idiomas,
         # contraste medido no DOM, armadilha de foco e regresso ao accionador.
