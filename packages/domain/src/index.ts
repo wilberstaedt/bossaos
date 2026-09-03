@@ -116,3 +116,11 @@ export {
   projectarCarta, produtoDaCarta, procurarNaCarta,
   type CartaPublica, type CategoriaPublica, type ProdutoPublico, type PedidoDeProjeccao,
 } from './projeccao.ts';
+
+export {
+  VERSAO_MAXIMA, codificar, descodificar, paraSvg, versaoParaBytes,
+  capacidadeEmDados, palavrasTotais, estruturaDeBlocos, lado,
+  correccao, sindromes, infoDeFormato, infoDeVersao,
+  modulosDeDadosDaVersao, percursoDeDados,
+  type NivelDeCorreccao, type Codigo,
+} from './qr.ts';
