@@ -1,12 +1,15 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E17 — Pedido por QR e atendimento do cliente (**16 telas**).
-**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** Declarado pelo JR; não
-assinado — ninguém assina a revisão do próprio código.
-**Régua:** `docs/reviews/ALVO-E17.md` — não chegou antes da entrega. Construído
-contra o contrato, e a entrega mede os quatro controlos que ele numera.
-**Contratos que mandam:** `qr-da-mesa-e-o-visitante.md` (escrito para esta etapa:
-**rodar não é revogar**) e `autenticacao-e-convites.md` (escopo do convidado).
+**Etapa atual:** E18 — Motor de reservas e capacidade concorrente (**6 telas**).
+**Estado:** autorizada.
+**Régua:** `docs/reviews/ALVO-E18.md` — a escrever.
+**Contrato que manda:** `capacidade-e-reservas.md` (E00) — já decide o lock, o
+isolamento `serializable`, o retry com chave idempotente, **e o controlo negativo
+obrigatório**: desligar o lock e ver o teste de concorrência ficar vermelho.
+
+**O E17 ficou VALIDADO** a 04/09 no commit `3f49f29` — 16 telas, prova **local**,
+com **17 controlos negativos** entre as duas provas. Foi retido uma vez e a segunda
+entrega fechou-o. Detalhe em `docs/reviews/E17.md`.
 **Detalhe e achados:** `docs/progress/E17.md`.
 
 **Segunda entrega, depois de RETIDO pelo sénior no ponto 4** — «chamar equipa e
