@@ -573,3 +573,31 @@ Fui ver as **197 telas validadas**:
 Nada a corrigir. Fica registado para que a diferença de formato não seja lida
 como buraco por quem varrer isto a seguir — **um falso alarme documentado custa
 menos do que o mesmo susto outra vez.**
+
+## O índice do git também é estado partilhado — 04/09
+
+Separámos o porto, a base de dados, a árvore e vigiámos o CPU. **Faltava o
+índice.**
+
+Ao investigar o achado da porta pública, o `git log` disse que a rota fora movida
+no commit `4d06161` — que é **meu**, e devia ter só o contrato do E20. Tinha
+dois ficheiros: o meu documento e uma mudança de nome dele, com zero linhas.
+
+**Como aconteceu:** eu escrevo `git add -A docs/architecture/ && git commit -m …`.
+O `add` é limitado ao caminho, mas o **`commit` leva tudo o que está no índice** —
+e o JR tinha ficheiros preparados. O meu commit engoliu trabalho dele e pôs a
+minha mensagem por cima.
+
+**Varri os últimos 30 commits:** é o único contaminado. Mas quase concluí que não
+havia nenhum, porque o meu primeiro detector procurava linhas começadas por
+`apps/` e uma linha de renomeação começa por `...`. **O detector estava cego à
+forma exacta do caso que eu procurava** — outra vez.
+
+**A regra que fica:** commitar por caminho explícito, `git commit -- <caminhos>`,
+e nunca `git commit` a seco depois de um `add` limitado. Numa árvore com duas
+pessoas, o índice não é meu.
+
+E o efeito colateral que interessa: **a história ficou a mentir sobre quem fez o
+quê.** Nenhuma linha de código mudou, mas uma decisão de arquitectura dele — mover
+a porta do visitante para dentro da pasta pública — aparece assinada por um
+commit meu sobre pedidos futuros.
