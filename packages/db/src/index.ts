@@ -78,7 +78,7 @@ export async function verificarBase(prisma: PrismaClient): Promise<EstadoBase> {
 }
 
 export {
-  comEscopo, comIdentidade, identidadePorEmail,
+  comEscopo, comEscopoSerializavel, comIdentidade, identidadePorEmail,
   type ClienteComEscopo, type ClienteComIdentidade, type Escopo,
 } from './escopo.ts';
 
@@ -242,3 +242,18 @@ export {
   type ResultadoDaRotacao, type VisitanteAberto, type VisitanteActivo,
   type TipoDeChamada, type ChamadaDaMesa, type ChamadaVista,
 } from './visitante.ts';
+
+// ── E18 · reservas e capacidade concorrente ──
+export {
+  TENTATIVAS_DE_SERIALIZACAO,
+  lerDefinicoes, guardarDefinicoes,
+  ocupacaoNoIntervalo, mesasBloqueadas, disponibilidade, comensaisPorZona,
+  confirmarReserva, reagendar, cancelar, registarNaoCompareceu, sentar,
+  registarMensagem, mensagensDaReserva,
+  entrarNaEspera, oferecerVaga, varrerRetencoesExpiradas,
+  listarTurnos, listarCapacidades, listarBloqueios, listarReservas,
+  resolverHoraLocal, agoraDaBase, segredoDeGestao,
+  type DefinicoesDeReserva, type Ocupacao, type Disponibilidade,
+  type PedidoDeReserva, type ResultadoDaConfirmacao, type ResultadoDoReagendamento,
+  type MotivoDeRecusa,
+} from './reservas.ts';

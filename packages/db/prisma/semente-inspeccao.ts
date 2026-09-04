@@ -769,6 +769,62 @@ async function principal(): Promise<void> {
     }
     void expo;
 
+    // ── E18 · reservas: uma linha em cada lista, e nenhuma vazia ──────────
+    //
+    // As seis telas desta etapa são listas. Uma lista vazia mede o estado
+    // «ainda não configurou», que é um ecrã real mas é o ecrã FÁCIL: cabe em
+    // qualquer largura, não tem contraste para medir e não tem alvos de toque.
+    // Cinco larguras verdes sobre três frases é verde sobre nada.
+    //
+    // Por isso semeia-se **uma linha de cada tipo** — um turno, um tecto de
+    // zona, um bloqueio — e as definições ficam LIGADAS, senão o SET-007 mostrava
+    // sempre o mesmo estado e o par ligado/desligado nunca se via.
+    // Uma costura: a prova de navegador desliga isto para verificar que a sua
+    // própria guarda de população acende. Sem a costura, o defeito teria de ser
+    // plantado na base — e a passagem semeia antes de medir, por isso repunha-o.
+    const SEMEAR_RESERVAS = true;
+    if (SEMEAR_RESERVAS) {
+      await prisma.reservationSettings.upsert({
+        where: { locationId: IDS.unidadeA2 },
+        update: { activo: true },
+        create: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          activo: true, duracaoPadraoMin: 90, bufferMin: 15,
+        },
+      });
+      const turnoInsp = await prisma.serviceWindow.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          nome: `${PREFIXO}Cena de sábado`, diaDaSemana: 6,
+          // Acaba ANTES de começar: é o serviço que atravessa a meia-noite, e sem
+          // ele a tela media só turnos que cabem dentro do dia.
+          horaInicio: '20:30', horaFim: '00:30',
+        },
+        select: { id: true },
+      });
+      await prisma.capacityRule.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          areaId: zona.id, windowId: turnoInsp.id, maxComensais: 40,
+        },
+      });
+      // Um tecto da UNIDADE inteira, sem zona: a tela tem de saber dizer «toda a
+      // unidade» em vez de mostrar uma célula vazia.
+      await prisma.capacityRule.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2, maxComensais: 90,
+        },
+      });
+      await prisma.reservationBlock.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          areaId: zona.id,
+          inicio: new Date('2027-01-06T10:00:00Z'), fim: new Date('2027-01-07T02:00:00Z'),
+          motivo: `${PREFIXO}Cena privada de empresa`,
+        },
+      });
+    }
+
     // ── O SITE do restaurante (E10), publicado ────────────────────────────
     //
     // Sem isto, as telas públicas do E10 mediam a página de "não encontrado" e

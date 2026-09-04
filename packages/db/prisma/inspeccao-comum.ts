@@ -111,8 +111,19 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     DELETE FROM order_lines          WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example');
     DELETE FROM order_submissions    WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example');
     DELETE FROM orders               WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example';
+    DELETE FROM reservation_allocations WHERE location_id IN (SELECT id FROM locations WHERE slug LIKE '${PREFIXO}%') OR table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%');
+    DELETE FROM reservations         WHERE criada_por LIKE '%@inspeccao.example';
+    DELETE FROM reservation_settings WHERE location_id IN (SELECT id FROM locations WHERE slug LIKE '${PREFIXO}%');
     DELETE FROM routing_rules        WHERE station_id IN (SELECT id FROM production_stations WHERE nome LIKE '${PREFIXO}%');
     DELETE FROM production_stations  WHERE nome LIKE '${PREFIXO}%';
+
+    -- ── E18 · reservas ──
+    DELETE FROM waitlist_entries    WHERE location_id IN (SELECT id FROM locations WHERE slug LIKE '${PREFIXO}%') OR nome LIKE '${PREFIXO}%';
+    DELETE FROM reservation_messages WHERE reservation_id IN (SELECT id FROM reservations WHERE criada_por LIKE '%@inspeccao.example');
+    DELETE FROM reservation_blocks  WHERE motivo LIKE '${PREFIXO}%';
+    DELETE FROM capacity_rules      WHERE window_id IN (SELECT id FROM service_windows WHERE nome LIKE '${PREFIXO}%')
+                                       OR area_id IN (SELECT id FROM service_areas WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM service_windows     WHERE nome LIKE '${PREFIXO}%';
 
     DELETE FROM public_slug_owners WHERE slug LIKE '${PREFIXO}%';
     DELETE FROM table_session_events WHERE session_id IN (SELECT id FROM table_sessions WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%'));
@@ -179,6 +190,9 @@ export async function restos(prisma: PrismaClient): Promise<number> {
     + (SELECT count(*) FROM production_stations WHERE nome LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM production_tasks    WHERE station_id IN (SELECT id FROM production_stations WHERE nome LIKE '${PREFIXO}%'))
     + (SELECT count(*) FROM service_tables      WHERE codigo LIKE '${PREFIXO}%')
+    + (SELECT count(*) FROM service_windows     WHERE nome LIKE '${PREFIXO}%')
+    + (SELECT count(*) FROM reservations        WHERE criada_por LIKE '%@inspeccao.example')
+    + (SELECT count(*) FROM reservation_blocks  WHERE motivo LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM guest_sessions      WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%'))
   ) AS total`);
   return Number(r[0]?.total ?? 0);

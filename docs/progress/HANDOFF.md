@@ -1,94 +1,87 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E18 — Motor de reservas e capacidade concorrente (**6 telas**).
-**Estado:** autorizada.
-**Régua:** `docs/reviews/ALVO-E18.md` — a escrever.
-**Contrato que manda:** `capacidade-e-reservas.md` (E00) — já decide o lock, o
-isolamento `serializable`, o retry com chave idempotente, **e o controlo negativo
-obrigatório**: desligar o lock e ver o teste de concorrência ficar vermelho.
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** Declarado pelo JR; não
+assinado — ninguém assina a revisão do próprio código.
+**Contrato que manda:** `docs/architecture/capacidade-e-reservas.md` (E00, escrito
+antes desta etapa) e o CT-10. Não foi preciso contrato novo.
+**Régua:** `docs/reviews/ALVO-E18.md` — anunciada pelo sénior, chega antes da
+validação.
+**Detalhe e achados:** `docs/progress/E18.md`.
 
-**O E17 ficou VALIDADO** a 04/09 no commit `3f49f29` — 16 telas, prova **local**,
-com **17 controlos negativos** entre as duas provas. Foi retido uma vez e a segunda
-entrega fechou-o. Detalhe em `docs/reviews/E17.md`.
-**Detalhe e achados:** `docs/progress/E17.md`.
+**As garantias vivem em três sítios, e saber qual é qual decide as provas:**
 
-**Segunda entrega, depois de RETIDO pelo sénior no ponto 4** — «chamar equipa e
-pedir conta com limites de frequência, deduplicação e confirmação de
-atendimento». As três faltavam: o ramo `chamar`/`conta` registava e devolvia.
+1. **A base**, na exclusão `uma_mesa_um_intervalo` com `tstzrange(inicio, fim,
+   '[)')`. O `'[)'` **é** a regra do intervalo semiaberto — escrita ali, não pode
+   ser escrita ao contrário noutro sítio, porque não existe outro sítio.
+2. **A forma da alocação: uma linha por MESA.** Uma combinação 3+4 escreve duas
+   linhas, uma por componente, e por isso «3+4 e depois só a 3» bate na mesma
+   exclusão que qualquer outra sobreposição — sem caso especial em lado nenhum.
+3. **O lock por unidade**, para o que nenhuma restrição exprime: a **contagem** de
+   comensais por zona. Duas confirmações em mesas diferentes passam ambas na
+   exclusão e lêem ambas a mesma soma antiga.
 
-**Limite e deduplicação são a MESMA janela**, vista de dois lados, e a janela é
-por **MESA**, não por telemóvel — uma fotografia do QR abre telemóveis sem conta,
-e um limite por aparelho não limita nada. Vive na porta `chamar_a_sala`, em
-plpgsql com `FOR UPDATE`, porque um limite em memória do processo não é um
-limite. A confirmação fecha o ciclo: quem chamou vê **três respostas
-distintas** — «avisámos agora», «já tínhamos avisado», «alguém vem a caminho» — e
-a sala atende no STAFF-013. Sem a terceira, quem chamou volta a carregar.
+**O controlo obrigatório mudou, e mudou por MEDIÇÃO.** O contrato manda desligar
+o lock e ver o teste de concorrência ficar vermelho. Medi as quatro combinações,
+oito corridas cada:
 
-O par que a régua pedia está provado: duas chamadas seguidas dão uma, **e** uma
-chamada legítima depois da janela passa. Sem a segunda metade, «ignora tudo»
-passaria o teste.
+| 2 hosts | com lock | sem lock |
+| --- | --- | --- |
+| `serializable` | 1 aceite | **1 aceite** |
+| `read committed` | 1 aceite | **2 aceites** |
+
+Sem o lock mas com `serializable`, o teste fica verde **com razão** — o SSI apanha
+o mesmo desvio e o retry transforma o aborto numa resposta de negócio. São duas
+propriedades colapsadas numa. O controlo desliga por isso a **serialização
+inteira**, e é isso que acende. As duas ficam na produção: a diferença é que com
+o lock quem chega em segundo ouve «não há capacidade» em vez de um `40001`.
+
+**E o cenário do teste estava errado antes disso:** dois grupos de 4 escolhiam a
+MESMA mesa, a exclusão separava-os, e o teste media a exclusão a chamar-lhe
+contagem. Agora pede 2 e 4, que caem em mesas diferentes.
+
+**A guarda mais forte era a que nada alcançava.** Larguei a exclusão e não caiu
+teste nenhum: com o lock ligado, o motor nunca tenta escrever uma sobreposição.
+Há agora dois casos que escrevem **directamente na base**, como uma importação ou
+uma correcção à mão fariam — um exige que ela recuse a sobreposição, outro que
+aceite o encosto. Sem o segundo, «recusa tudo» passava o primeiro.
+
+**A retenção expira por RELÓGIO.** `oferta_expira_em > now()` na leitura da
+ocupação: a mesa fica livre sem que ninguém abra ecrã nenhum. O varredor existe
+por higiene — se nunca correr, a resposta continua certa.
 
 **O que está pronto para medir** — códigos de saída lidos directamente, sem canos:
-`pnpm verificar` (**0**) · `./scripts/provar-visitante.sh` (5 grupos, **21 casos,
-9 defeitos plantados**, 0) · `./scripts/provar-visitante-no-navegador.sh` (**22
-casos, 8 defeitos plantados**, 0) · `provar-kds-no-navegador.sh` (19 casos, 8
-plantados, 0) · `provar-staff-no-navegador.sh` (31 casos, **11** plantados, 0) ·
-`provar-pedidos.sh` · `provar-producao.sh` · `provar-migracoes-do-zero.sh` ·
-`pnpm inspeccionar` (**440 casos verdes**).
+`pnpm verificar` (**0**) · `./scripts/provar-reservas.sh` (12 grupos, **35 casos,
+10 defeitos plantados**, 0) · `./scripts/provar-reservas-no-navegador.sh` (**19
+casos, 6 defeitos plantados**, 0) · `provar-migracoes-do-zero.sh` (0) · `pnpm inspeccionar` (456 verdes, 0 — e a
+corrida do achado acima fê-lo cair uma vez em três; as três corridas estão
+escritas no `E18.md`, incluindo a que falhou).
 
-**Uma correcção de arnês que não é do E17 e vale mais do que ele.** O fecho da
-semeadura reconhece o seu lixo por um prefixo no nome. Os **pedidos** não podem
-levar prefixo — entram pela porta real e o número vem da sequência do domínio.
-Ficaram 398 na base, desde `A04001`, a prender as estações da inspecção por chave
-estrangeira; quem estoirava era a limpeza da prova SEGUINTE, e por isso o
-vermelho aparecia sempre na prova errada. E o fecho **verifica-se a si próprio**,
-mas contava com o mesmo crachá que a limpeza usava — um detector calibrado pelo
-critério que verifica confirma o critério, não o resultado. Disse «nada ficou
-para trás» de cada vez. O crachá honesto estava na coluna ao lado: `aberto_por`
-= `painel@inspeccao.example`. Preso pelo controlo 11 do `provar-staff`, e está lá
-porque na prova do visitante ficou verde **com razão** — aquela passagem nunca
-submete um pedido, e não havia população que o defeito pudesse sujar.
+**Fica declarado como NÃO feito:** nenhuma reserva foi feita por um cliente — as
+telas desta etapa são de configuração, e a reserva pública, o host e a lista de
+espera são o E19; o envio de email não existe (a separação está provada, o
+transporte não); `ultimaEntradaMin` está no modelo e não tem ecrã, porque o
+contrato não decide como se apresenta.
 
-**A regra do contrato está na FORMA:** `guest_sessions` **não guarda a geração do
-QR**. Sem esse campo, a comparação que faria a rotação expulsar gente da mesa não
-tem o que comparar — é preciso uma migração para a escrever, e uma migração é
-revista. Três portas estreitas encerram o resto: `visitante_activo` (activa **e**
-mesa por fechar), `mesa_do_qr` (só devolve linha com sessão de mesa ABERTA — é
-aqui que a fotografia do QR perde valor) e `abrir_visitante`.
+**UM ACHADO QUE NÃO É DESTA ETAPA, e é o mais importante para quem vier a
+seguir.** A carga da suite completa fez cair um caso do E15 (`staff.spec.ts:90`),
+e a causa está no registo do servidor: `Unique constraint failed on
+orders_location_id_numero_key`, em `prisma.order.create()`. O `proximoNumero`
+(`packages/db/src/pedidos.ts:362`) lê o maior número do dia e soma um, sem
+serialização — duas submissões simultâneas na mesma unidade escrevem o mesmo
+número. É **a mesma classe de defeito que o E18 existe para impedir**, uma etapa
+acima. O caso passa sozinho (18/18) e só cai sob carga, que é o sintoma de uma
+corrida. **Não lhe toquei** — é do E14 e a etapa autorizada era esta. Enquanto
+existir, `pnpm inspeccionar` não é um portão fiável sob carga.
 
-**E a separação vive também no ECRÃ.** O QR-005 tem dois formulários, com
-palavras diferentes, e o número das sessões que caem **antes** de confirmar. Um
-botão só teria a regra da base certa e o produto errado — e quem decide nunca
-saberia que havia duas coisas.
+**A prova foi LOCAL.** A CI continua trancada por facturação do GitHub.
 
-**O controlo obrigatório verifica também o que NÃO devia cair.** Plantar o
-colapso faz cair o caso da rotação; se fizesse cair o da revogação, o detector
-estaria a medir «alguma coisa parou» em vez da distinção entre os dois actos.
-
-**Um defeito real do produto, que só o navegador viu.** A bolacha do visitante
-tinha `path=/r/<slug>` e a porta estava em `/api/publico/mesa`: o navegador nunca
-a enviava, e **todos** os POST do visitante caíam em silêncio no
-`?sessao=terminou`. A porta mudou-se para dentro do endereço do restaurante. Não
-alarguei a bolacha para `/`, que era mais barato e mandaria a credencial da mesa
-5 para os outros restaurantes do mesmo domínio. Preso pelo controlo 8.
-
-**E declaro um erro meu de método:** no comité em que declarei o E17 escrevi
-«`pnpm verificar` — 0 falhas», e era falso. Corri-o com `| grep` e perdi o código
-de saída; a guarda `rotas-com-porta.test.ts` estava vermelha desde antes da
-declaração. É a armadilha que o `RETOMAR-JR.md` nomeia. Todas as medições acima
-foram refeitas a ler `$?`.
-
-**Dois achados meus:** um controlo negativo derrubava o grupo inteiro, porque a
-primeira rotação é o que dá segredo à mesa — um defeito que derruba tudo não
-prova que a asserção certa funciona. E o arnês quase teve um falso verde: sem a
-bolacha do visitante, as sete telas da visita redireccionam para o STATE-009, e a
-asserção do **caminho final** é a única coisa que separa medir a tela de medir o
-desvio. O controlo 7 planta essa cegueira.
-
-**Fica declarado como NÃO feito:** as opções do prato no MENU-006 (o catálogo tem
-grupos de opções desde o E07; ligá-los ao pedido do visitante não está em
-contrato nenhum, e não invento a regra), uma fila de avisos por estação, e a
-leitura do QR em aparelho real — verificação humana declarada desde o E09.
+**O E17 ficou VALIDADO** a 04/09 — 16 telas, prova **local**, 17 controlos
+negativos, e com ele passámos metade das telas do produto: 213 de 396. Levou
+consigo uma correcção de arnês transversal: o fecho da semeadura reconhecia o seu
+lixo pelo nome, os **pedidos** entram pela porta real com número da sequência, e
+398 ficaram na base a prender as estações — com a auto-verificação, calibrada
+pelo mesmo crachá, a dizer «nada ficou para trás» de cada vez.
 
 **O E16 ficou VALIDADO** a 04/09 no commit `69fe63b` — 20 telas, prova **local**,
 com **17 controlos negativos** entre as duas provas. Detalhe em `docs/reviews/E16.md`.

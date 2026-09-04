@@ -162,3 +162,9 @@ export {
 } from './kds.ts';
 
 export { estadoDerivado, totalDoPedido } from './pedido-puro.ts';
+
+export {
+  sobrepoe, intervaloEfectivo, antecedencia, opcoesDeAlocacao,
+  type IntervaloDeReserva, type RecusaDeAntecedencia,
+  type MesaDisponivel, type CombinacaoDisponivel,
+} from './reservas.ts';

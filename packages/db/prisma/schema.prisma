@@ -138,6 +138,16 @@ model Organization {
   eventosDeProducao  ProductionEvent[]
   visitantes GuestSession[]
   chamadas GuestCall[]
+
+  // ── E18 ──
+  definicoesDeReserva ReservationSettings[]
+  turnos              ServiceWindow[]
+  capacidades         CapacityRule[]
+  bloqueiosDeReserva  ReservationBlock[]
+  reservas            Reservation[]
+  alocacoes           ReservationAllocation[]
+  mensagensDeReserva  ReservationMessage[]
+  esperas             WaitlistEntry[]
   @@map("organizations")
   revisoes        MenuRevision[]
   publicacoes     MenuPublication[]
@@ -260,6 +270,15 @@ model Location {
   tarefasDeProducao  ProductionTask[]
   visitantes GuestSession[]
   chamadas GuestCall[]
+
+  // ── E18 ──
+  definicoesDeReserva ReservationSettings[]
+  turnosDeReserva     ServiceWindow[]
+  capacidades         CapacityRule[]
+  bloqueiosDeReserva  ReservationBlock[]
+  reservas            Reservation[]
+  alocacoes           ReservationAllocation[]
+  esperas             WaitlistEntry[]
   @@unique([organizationId, id], name: "location_por_organizacao")
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -2061,6 +2080,10 @@ model ServiceArea {
   location     Location      @relation(fields: [locationId], references: [id], onDelete: Restrict)
   mesas        ServiceTable[]
 
+  // ── E18 ──
+  capacidades        CapacityRule[]
+  bloqueiosDeReserva ReservationBlock[]
+
   @@unique([organizationId, id], name: "zona_por_organizacao")
   @@index([organizationId, locationId])
   @@map("service_areas")
@@ -2127,6 +2150,11 @@ model ServiceTable {
   visitantes   GuestSession[]
 
   chamadas GuestCall[]
+
+  // ── E18 ──
+  alocacoes          ReservationAllocation[]
+  bloqueiosDeReserva ReservationBlock[]
+  esperas            WaitlistEntry[]
   @@unique([organizationId, id], name: "mesa_por_organizacao")
   @@unique([locationId, codigo], name: "codigo_de_mesa_por_unidade")
   @@index([organizationId, locationId])
@@ -2969,4 +2997,379 @@ model GuestCall {
   @@index([organizationId, locationId, atendidaEm])
   @@index([tableSessionId, tipo, pedidaEm])
   @@map("guest_calls")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// E18 · Motor de reservas e capacidade concorrente
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Definições de reserva da unidade. Uma linha por unidade, e três telas editam
+/// grupos diferentes de colunas.
+///
+/// ── Porque é UMA tabela e não três ─────────────────────────────────────────
+///
+/// SET-007 («preferências»), RES-B-012 («quando aceitar») e RES-B-016
+/// («políticas») são três ecrãs, mas a cardinalidade é a mesma: uma linha por
+/// unidade. Três tabelas de uma linha cada dariam três sítios onde a mesma
+/// pergunta — «esta unidade aceita reservas?» — podia ter respostas diferentes,
+/// e o dia em que discordassem seria o dia em que ninguém saberia qual manda.
+///
+/// Ecrãs e tabelas não têm de ser um-para-um. O que tem de ser um-para-um é a
+/// decisão e o sítio onde ela vive.
+model ReservationSettings {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @unique @map("location_id") @db.Uuid
+
+  // ── SET-007 · preferências ──
+  /// O interruptor. Desligado, a unidade não aceita reservas nenhumas — e é
+  /// diferente de «não tem turnos configurados», que é não saber quando aceitar.
+  activo          Boolean @default(false)
+  duracaoPadraoMin Int    @default(90) @map("duracao_padrao_min")
+  /// ── O buffer entra ANTES da conta ──────────────────────────────────────
+  ///
+  /// «Com buffer de 15 minutos, o fim efectivo é o fim mais 15. Aplicá-lo depois
+  /// da verificação é o mesmo que não o ter.» Vive aqui e não no cálculo, para
+  /// que a conta o leia sempre da mesma fonte.
+  bufferMin       Int     @default(15) @map("buffer_min")
+
+  // ── RES-B-012 · quando aceitar ──
+  /// Antecedência mínima, em minutos: reservar para daqui a dez minutos não é
+  /// uma reserva, é uma chegada.
+  antecedenciaMinMin Int @default(60) @map("antecedencia_min_min")
+  antecedenciaMaxDias Int @default(90) @map("antecedencia_max_dias")
+  minPessoas          Int @default(1) @map("min_pessoas")
+  maxPessoas          Int @default(12) @map("max_pessoas")
+  /// Combinar mesas para grupos é uma escolha da casa, não uma capacidade do
+  /// software: há salas onde ninguém quer as mesas juntas.
+  permiteCombinacoes Boolean @default(true) @map("permite_combinacoes")
+
+  // ── RES-B-016 · políticas ──
+  cancelamentoAteMin Int @default(120) @map("cancelamento_ate_min")
+  /// Quanto dura uma oferta de vaga da lista de espera. É o número que a
+  /// expiração por RELÓGIO usa.
+  retencaoMin        Int @default(15) @map("retencao_min")
+  /// Minutos de tolerância antes de a casa PODER libertar uma reserva atrasada.
+  /// «Libertar uma reserva atrasada é política e acção do host, nunca uma
+  /// limpeza automática silenciosa» — por isso isto é um número que o ecrã
+  /// mostra a quem decide, e não um varredor.
+  toleranciaAtrasoMin Int @default(15) @map("tolerancia_atraso_min")
+  /// ── Desligado por DECISÃO, e não por falta ─────────────────────────────
+  ///
+  /// «Depósito de reserva fica desligado até existir política comercial,
+  /// pagamento e tratamento de cancelamento.» Existe como coluna para que a
+  /// decisão seja legível no modelo — e não há caminho que a ligue.
+  depositoLigado Boolean @default(false) @map("deposito_ligado")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, id], name: "definicoes_de_reserva_por_organizacao")
+  @@map("reservation_settings")
+}
+
+/// RES-B-014 · um turno de reserva. Hora LOCAL, e o fuso é o da unidade.
+///
+/// «Instantes em UTC; regras recorrentes em fuso IANA.» Um turno é uma regra
+/// recorrente: as 20h de sábado são as 20h de sábado em Março e em Novembro,
+/// mesmo que o instante UTC mude entre os dois.
+model ServiceWindow {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  nome           String
+  /// 0 = domingo, como o `dow` do Postgres. Igual ao E05 dos horários.
+  diaDaSemana Int @map("dia_da_semana")
+  /// `HH:MM` local. Texto e não `time`, pela mesma razão do E05: um `time` num
+  /// `timestamptz` convida a uma conversão silenciosa.
+  horaInicio String @map("hora_inicio")
+  horaFim    String @map("hora_fim")
+  /// ── Serviço depois da meia-noite ───────────────────────────────────────
+  ///
+  /// «O turno de sexta acaba no sábado.» Com `horaFim` menor que `horaInicio`,
+  /// o turno atravessa o dia — e o dia a que pertence continua a ser sexta.
+  /// Sem esta coluna derivada, o relatório de sexta perdia o fim do serviço.
+  ultimaEntradaMin Int @default(0) @map("ultima_entrada_min")
+  activo           Boolean @default(true)
+
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  capacidades  CapacityRule[]
+
+  @@unique([organizationId, id], name: "turno_por_organizacao")
+  @@index([organizationId, locationId, diaDaSemana])
+  @@map("service_windows")
+}
+
+/// RES-B-013 · o tecto de comensais de uma zona num turno.
+///
+/// ── É esta a regra que o LOCK guarda ───────────────────────────────────────
+///
+/// A exclusão por mesa impede a mesma mesa duas vezes, e não precisa de lock
+/// nenhum: é uma restrição da base. Isto é outra coisa — uma CONTAGEM. Duas
+/// confirmações em mesas DIFERENTES passam ambas na exclusão, lêem ambas a mesma
+/// soma antiga, e a zona acaba com mais gente do que cabe.
+///
+/// É o desvio de escrita clássico, e é exactamente o que o isolamento
+/// `serializable` mais o lock por unidade existem para impedir. Um teste de
+/// concorrência sobre a MESMA mesa fica verde sem o lock, porque quem o segura é
+/// a restrição; um teste sobre esta contagem, não.
+model CapacityRule {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  locationId     String  @map("location_id") @db.Uuid
+  /// `null` = a unidade inteira.
+  areaId         String? @map("area_id") @db.Uuid
+  /// `null` = todos os turnos.
+  windowId       String? @map("window_id") @db.Uuid
+
+  maxComensais Int @map("max_comensais")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location      @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  zona         ServiceArea?  @relation(fields: [organizationId, areaId], references: [organizationId, id], onDelete: Restrict)
+  turno        ServiceWindow? @relation(fields: [organizationId, windowId], references: [organizationId, id], onDelete: Restrict)
+
+  @@unique([organizationId, id], name: "capacidade_por_organizacao")
+  @@index([organizationId, locationId])
+  @@map("capacity_rules")
+}
+
+/// RES-B-015 · um bloqueio. Fecha capacidade num intervalo — a unidade toda, uma
+/// zona, ou uma mesa.
+model ReservationBlock {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  locationId     String  @map("location_id") @db.Uuid
+  areaId         String? @map("area_id") @db.Uuid
+  tableId        String? @map("table_id") @db.Uuid
+
+  inicio DateTime @db.Timestamptz(6)
+  fim    DateTime @db.Timestamptz(6)
+  motivo String
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location      @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  zona         ServiceArea?  @relation(fields: [organizationId, areaId], references: [organizationId, id], onDelete: Restrict)
+  mesa         ServiceTable? @relation(fields: [organizationId, tableId], references: [organizationId, id], onDelete: Restrict)
+
+  @@unique([organizationId, id], name: "bloqueio_por_organizacao")
+  @@index([organizationId, locationId, inicio])
+  @@map("reservation_blocks")
+}
+
+enum EstadoDeReserva {
+  CONFIRMADA
+  CANCELADA
+  NAO_COMPARECEU
+  SENTADA
+
+  @@map("estado_de_reserva")
+}
+
+enum OrigemDeReserva {
+  HOST
+  PUBLICO
+  ESPERA
+
+  @@map("origem_de_reserva")
+}
+
+/// A reserva. O que ocupa capacidade não é ela — são as ALOCAÇÕES.
+model Reservation {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+
+  estado EstadoDeReserva @default(CONFIRMADA)
+  origem OrigemDeReserva @default(HOST)
+
+  pessoas Int
+  /// UTC, sempre. A hora local é apresentação.
+  inicio  DateTime @db.Timestamptz(6)
+  fim     DateTime @db.Timestamptz(6)
+
+  nome     String
+  contacto String
+  notas    String?
+  /// ── Marketing é separado do contacto necessário à reserva ──────────────
+  ///
+  /// Sem esta coluna, aceitar a reserva era aceitar o marketing por omissão. É
+  /// um `false` que tem de ser escrito por quem consente.
+  aceitaMarketing Boolean @default(false) @map("aceita_marketing")
+
+  /// ── O token de gestão é uma credencial, e por isso é um RESUMO ─────────
+  ///
+  /// «Tokens de gestão: limitados, revogáveis, não enumeráveis.» O que viaja no
+  /// email é o segredo; o que fica na base é o resumo. E não é sequencial — um
+  /// número a subir deixa ver a reserva do vizinho.
+  gestaoTokenHash String?   @unique @map("gestao_token_hash")
+  gestaoExpiraEm  DateTime? @map("gestao_expira_em") @db.Timestamptz(6)
+
+  /// ── A chave idempotente, sem a qual o retry é a segunda reserva ────────
+  ///
+  /// O isolamento `serializable` aborta e manda tentar outra vez. Uma repetição
+  /// sem chave cria uma reserva nova, e o cliente fica com duas mesas — que é
+  /// exactamente o defeito que o retry existia para evitar.
+  chaveIdempotente String @map("chave_idempotente")
+
+  canceladaEm  DateTime? @map("cancelada_em") @db.Timestamptz(6)
+  canceladaPor String?   @map("cancelada_por")
+  noShowEm     DateTime? @map("no_show_em") @db.Timestamptz(6)
+  sentadaEm    DateTime? @map("sentada_em") @db.Timestamptz(6)
+
+  criadaPor String   @map("criada_por")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  alocacoes    ReservationAllocation[]
+  mensagens    ReservationMessage[]
+  esperas      WaitlistEntry[]
+
+  @@unique([organizationId, id], name: "reserva_por_organizacao")
+  @@unique([locationId, chaveIdempotente], name: "chave_idempotente_por_unidade")
+  @@index([organizationId, locationId, inicio])
+  @@index([organizationId, locationId, estado])
+  @@map("reservations")
+}
+
+/// A ocupação de UMA mesa por UM intervalo.
+///
+/// ── A unidade de alocação é a MESA, nunca a combinação ─────────────────────
+///
+/// «Juntar a 3 e a 4 para oito pessoas não cria uma mesa nova com capacidade
+/// própria: ocupa a 3 **e** a 4.» Uma reserva de combinação escreve DUAS linhas
+/// aqui, uma por componente. Não há caso especial em lado nenhum: reservar a
+/// combinação 3+4 e depois só a 3 bate na mesma exclusão que qualquer outra
+/// sobreposição.
+///
+/// Se a combinação tivesse linha própria, a soma até batia certo — e essa é a
+/// pior espécie de erro, porque o relatório confirma o que o corredor desmente.
+model ReservationAllocation {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  reservationId  String @map("reservation_id") @db.Uuid
+  tableId        String @map("table_id") @db.Uuid
+
+  /// ── O intervalo já traz o buffer ───────────────────────────────────────
+  ///
+  /// É o intervalo EFECTIVO, com o buffer somado ao fim. A exclusão compara isto
+  /// com isto, e por isso o buffer não pode ser esquecido por quem consulta: não
+  /// há sítio onde ele possa ser aplicado tarde.
+  inicio DateTime @db.Timestamptz(6)
+  fim    DateTime @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  reserva      Reservation  @relation(fields: [organizationId, reservationId], references: [organizationId, id], onDelete: Cascade)
+  mesa         ServiceTable @relation(fields: [organizationId, tableId], references: [organizationId, id], onDelete: Restrict)
+
+  @@unique([organizationId, id], name: "alocacao_por_organizacao")
+  @@index([tableId, inicio])
+  @@map("reservation_allocations")
+}
+
+enum EstadoDaMensagem {
+  ENVIADA
+  FALHADA
+
+  @@map("estado_da_mensagem")
+}
+
+/// O envio, que é um resultado SEPARADO da reserva.
+///
+/// «Uma reserva confirmada com email por enviar continua confirmada. Falha de
+/// envio não desfaz a reserva, e sucesso de envio não a confirma.» São duas
+/// linhas em duas tabelas, e a UI diz as duas — a mesma regra do indeterminado
+/// no dinheiro.
+model ReservationMessage {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  reservationId  String @map("reservation_id") @db.Uuid
+
+  tipo   String
+  estado EstadoDaMensagem
+  erro   String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  reserva      Reservation  @relation(fields: [organizationId, reservationId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, id], name: "mensagem_de_reserva_por_organizacao")
+  @@index([organizationId, reservationId])
+  @@map("reservation_messages")
+}
+
+enum EstadoDaEspera {
+  A_ESPERA
+  COM_OFERTA
+  ACEITE
+  DESISTIU
+
+  @@map("estado_da_espera")
+}
+
+/// A lista de espera. **Não reserva nada por existir.**
+///
+/// ── A retenção expira por RELÓGIO, e não por evento ────────────────────────
+///
+/// Uma oferta de vaga consome capacidade enquanto dura. O que se esquece é o
+/// fim: se a capacidade só for libertada quando alguém abre o ecrã, uma retenção
+/// esquecida bloqueia uma mesa a noite inteira — e ninguém sabe porquê, porque
+/// do lado do software não correu nada mal.
+///
+/// Por isso `ofertaExpiraEm` é um instante, e a ocupação lê-o contra o relógio
+/// da BASE. Não há acção que precise de acontecer para a mesa voltar a estar
+/// livre. O varredor existe por higiene, não por correcção: se ele nunca correr,
+/// a resposta continua certa.
+model WaitlistEntry {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+
+  estado   EstadoDaEspera @default(A_ESPERA)
+  nome     String
+  contacto String
+  pessoas  Int
+
+  /// A oferta, quando existe.
+  ofertaTableId  String?   @map("oferta_table_id") @db.Uuid
+  ofertaInicio   DateTime? @map("oferta_inicio") @db.Timestamptz(6)
+  ofertaFim      DateTime? @map("oferta_fim") @db.Timestamptz(6)
+  ofertaExpiraEm DateTime? @map("oferta_expira_em") @db.Timestamptz(6)
+
+  /// A reserva que a oferta virou, se foi aceite.
+  reservationId String? @map("reservation_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location      @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  mesaOferecida ServiceTable? @relation(fields: [organizationId, ofertaTableId], references: [organizationId, id], onDelete: Restrict)
+  reserva       Reservation?  @relation(fields: [organizationId, reservationId], references: [organizationId, id], onDelete: Restrict)
+
+  @@unique([organizationId, id], name: "espera_por_organizacao")
+  @@index([organizationId, locationId, estado])
+  @@index([ofertaTableId, ofertaExpiraEm])
+  @@map("waitlist_entries")
 }

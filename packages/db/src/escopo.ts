@@ -85,6 +85,51 @@ export async function comEscopo<T>(
 }
 
 /**
+ * O mesmo, mas a **serializar as alterações de capacidade** de uma unidade.
+ *
+ * ── Duas coisas diferentes, e é por isso que são duas ──────────────────────
+ *
+ * O `serializable` faz o Postgres abortar transações cujo resultado não podia
+ * sair de nenhuma ordem sequencial. O `pg_advisory_xact_lock` faz a segunda
+ * ESPERAR pela primeira. A diferença aparece no que o cliente recebe:
+ *
+ *  - com o lock, quem chega em segundo lê o mundo já com a primeira reserva lá
+ *    dentro, e recebe uma resposta de negócio — «não há capacidade»;
+ *  - sem o lock, quem chega em segundo recebe um `40001`, que é uma resposta
+ *    sobre a base de dados. É preciso repetir para a transformar numa resposta.
+ *
+ * O lock é por UNIDADE e não por mesa. É a granularidade grossa que o contrato
+ * escolheu para o piloto — «optimizar granularidade somente após medir
+ * contenção» — e é a certa: o que precisa de serializar é a CONTAGEM da zona,
+ * que atravessa mesas.
+ *
+ * O `hashtext` é estável dentro de uma versão do Postgres, que é o que aqui
+ * interessa: dois processos a falar com a MESMA base têm de calhar no mesmo
+ * número. Não é para persistir.
+ */
+export async function comEscopoSerializavel<T>(
+  prisma: PrismaClient,
+  escopo: Escopo,
+  chaveDeSerializacao: string,
+  fn: (db: ClienteComEscopo) => Promise<T>,
+  opcoes: { comLock?: boolean } = {},
+): Promise<T> {
+  exigirUuid('organizationId', escopo.organizationId);
+  const comLock = opcoes.comLock !== false;
+
+  return prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT set_config('app.organization_id', ${escopo.organizationId}, true)`;
+    if (escopo.userId !== undefined) {
+      await tx.$executeRaw`SELECT set_config('app.user_id', ${escopo.userId}, true)`;
+    }
+    if (comLock) {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${chaveDeSerializacao}))`;
+    }
+    return fn(tx as unknown as ClienteComEscopo);
+  }, { isolationLevel: 'Serializable' });
+}
+
+/**
  * Caminho de IDENTIDADE: `app.user_id` sem organização.
  *
  * Serve para a única pergunta que se faz antes de haver inquilino — "em que
