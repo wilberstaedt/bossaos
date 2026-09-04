@@ -67,6 +67,26 @@ echo "  $n scripts corridos"
 
 if [ -n "$falhados" ]; then
   echo "  FALHARAM:$falhados"
+
+  # ── O AVISO TEM DE ESTAR AO PE DA CONCLUSAO, NAO NO PRINCIPIO ─────────────
+  #
+  # O aviso de arvore suja ja existia - na LINHA 1. A 04/09 corri isto com o JR
+  # a escrever o E15 e li onze vermelhos no fim de um log de duzentas linhas. O
+  # aviso estava la, duzentas linhas acima, e eu nao o vi. Uma delas nao
+  # compilava: `carregar-staff.ts` a meio. A aplicacao nao subia, e por isso
+  # TODA a prova que precisa dela caiu - nenhuma era regressao.
+  #
+  # Nao mudei o aviso do topo nem passei a bloquear: medir a meio continua a ser
+  # legitimo para orientar. O que nao e' legitimo e' CONCLUIR - e a conclusao le-se
+  # aqui em baixo. Por isso o aviso passa a viajar com ela.
+  sujos=$(git status --porcelain 2>/dev/null | wc -l | tr -d " ")
+  if [ "${sujos:-0}" -gt 0 ]; then
+    echo
+    echo "  ATENCAO: $sujos ficheiro(s) por versionar QUANDO ISTO CORREU."
+    echo "  Estes vermelhos podem nao ser do produto. Um so ficheiro que nao"
+    echo "  compila derruba todas as provas que precisam da aplicacao de pe."
+    echo "  Antes de chamar regressao a isto: arvore limpa, e correr outra vez."
+  fi
   echo
   echo "  Correr o que falhou a mao para ver a saida inteira."
   exit 1
