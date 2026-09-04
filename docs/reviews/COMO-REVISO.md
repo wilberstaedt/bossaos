@@ -321,6 +321,32 @@ provar-se a si próprias antes de julgar — e a ausência de prova passou de
 com saída zero é verde sobre população zero com outro nome, e fui eu que a escrevi
 assim.
 
+## Aplicar a técnica dele às minhas guardas — e três medições falhadas a fazê-lo
+
+A técnica que ele usou para me apanhar não foi plantar uma sonda que casa o
+padrão: foi **degradar o artefacto real** e ver se a guarda nota. Uma sonda testa
+o detector; degradar o artefacto testa se o detector está **apontado ao sítio
+certo**. Foi a segunda coisa que o meu índice falhava.
+
+Apliquei-a e duas guardas passam: a do preço vigia o ficheiro que o **produto
+importa mesmo** (`packages/domain/src/precificacao.ts` faz `import` do JSON), e o
+corredor descobre as 16 guardas e as 23 provas **excluindo-se a si próprio** —
+suspeitei de recursão e verifiquei em vez de a reportar.
+
+**E fiz três medições erradas a fazer isto**, todas do mesmo tipo — afirmar sem
+olhar:
+
+1. Passei `--listar` a um corredor que não tem essa opção, e corri a suíte inteira
+   por engano até esgotar o tempo.
+2. Contei globs com aspas, portanto não expandiram, e li «0 ficheiros» onde havia
+   39.
+3. Imprimi «(vazio = …)» debaixo de uma saída que não estava vazia — um hábito de
+   reportar que afirma a conclusão antes de ver o resultado.
+
+Nenhuma delas chegou a um commit, porque olhei para os números antes de os usar. O
+padrão é o mesmo que estou a caçar nos instrumentos, aplicado à minha própria
+leitura: **a conclusão escrita antes da medição.**
+
 ## O que bloqueia e o que não
 
 **Bloqueia:** afirmação do handoff que não se confirma; dependência externa simulada com
