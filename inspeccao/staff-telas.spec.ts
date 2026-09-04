@@ -343,7 +343,7 @@ test.describe('todas as telas do Staff têm caminho de navegação', () => {
     await page.waitForLoadState('networkidle');
 
     // Da barra do topo chega-se ao índice; do índice, a todas.
-    await page.locator('[data-teste="navegacao"] a[data-tela="STAFF-022"]').click();
+    await page.locator('[data-teste="navegacao"] a[data-seccao="STAFF-022"]').click();
     await page.waitForLoadState('networkidle');
     await expect(page.locator('[data-tela="STAFF-022"]').first()).toBeVisible();
 

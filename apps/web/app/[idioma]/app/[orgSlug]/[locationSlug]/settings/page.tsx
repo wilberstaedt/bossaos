@@ -87,13 +87,16 @@ export default async function PreferenciasDaUnidade({
           acrescentar o SET-008 e ter de decidir onde o pendurar — uma tela que
           só responde a quem sabe o endereço de cor está tão morta como uma que
           não existe, com a diferença de que ninguém repara. */}
+      {/* `data-seccao` e nao `data-tela` nas ligacoes: uma LIGACAO para uma
+          pagina nao e a pagina, e o marcador que a prova usa para afirmar
+          «cheguei ao SET-008» existia tambem aqui. */}
       <nav className="bo-publico__seccoes" aria-label={p.titulo} data-teste="mais-configuracao">
         <a href={`/${idioma}/app/${orgSlug}/${locationSlug}/settings/servicos`}>
           {m.salaE13.tiposDeServico}
         </a>
         <a href={`/${idioma}/app/${orgSlug}/${locationSlug}/settings/pedidos`}>{m.pedidosE14.regras}</a>
         <a href={`/${idioma}/app/${orgSlug}/${locationSlug}/settings/idiomas`}>{p.tituloIdiomas}</a>
-        <a href={`/${idioma}/app/${orgSlug}/${locationSlug}/settings/avisos`} data-tela="SET-008">
+        <a href={`/${idioma}/app/${orgSlug}/${locationSlug}/settings/avisos`} data-seccao="SET-008">
           {m.staffE15.quemRecebe}
         </a>
       </nav>

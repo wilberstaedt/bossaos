@@ -1,7 +1,7 @@
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { carregarStaff, primeiroProduto } from '../../../../src/staff/carregar-staff.ts';
 import { PainelDaFila } from '../../../../src/staff/PainelDaFila.tsx';
-import { NavegacaoDoStaff } from '../../../../src/staff/NavegacaoDoStaff.tsx';
+import { CabecalhoDoStaff } from '../../../../src/staff/PecasDoStaff.tsx';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,14 +34,14 @@ export default async function TurnoDoStaff({
 
   return (
     <div className="bo-pagina">
-      <div className="bo-estado__cabecalho">
-        <div>
-          <p className="bo-estado__sobrancelha">{unidade.nome}</p>
-          <h1>{s.turno}</h1>
-        </div>
-      </div>
-
-      <NavegacaoDoStaff idioma={idioma} locationId={locationId} actual="" />
+      {/* ── Esta tela NUNCA teve marcador próprio ────────────────────────
+          Tinha um `<h1>` à mão, sem `data-tela`, e a prova passava na mesma —
+          porque a navegação escrevia `data-tela` de todas as secções em todas
+          as páginas. Quando o atributo da barra passou a `data-seccao`, esta
+          foi a primeira a acender. Passa a usar o cabeçalho comum, que é onde a
+          identidade da página vive num sítio só. */}
+      <CabecalhoDoStaff idioma={idioma} locationId={locationId} unidade={unidade.nome}
+                        titulo={s.turno} tela="STAFF-001" actual="" />
 
       <p className="bo-campo__ajuda" data-teste="operador">{actor.email}</p>
 

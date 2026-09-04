@@ -126,13 +126,13 @@ export default async function ProcurarDoStaff({
         <ul className="bo-lista" data-teste="todas-as-telas">
           {SECCOES_DO_STAFF.map((x) => (
             <li key={x.rota}>
-              <a href={`${base}${x.rota}`} data-tela={x.id}>{porChave(s, x.chave) ?? x.id}</a>
+              <a href={`${base}${x.rota}`} data-seccao={x.id}>{porChave(s, x.chave) ?? x.id}</a>
             </li>
           ))}
           {/* As duas com identificador entram pela lista, e não por endereço
               fixo: um `[sessionId]` escrito à mão apontava para nada. */}
           {TELAS_COM_IDENTIFICADOR.map((x) => (
-            <li key={x.rota} data-teste="tela-com-identificador" data-tela={x.id}>
+            <li key={x.rota} data-teste="tela-com-identificador" data-seccao={x.id}>
               {porChave(s, x.chave) ?? x.id}
             </li>
           ))}

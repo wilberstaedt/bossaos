@@ -52,6 +52,25 @@ export const TELAS_COM_IDENTIFICADOR = [
   { rota: '/catalogo/[produtoId]', chave: 'detalhe', id: 'STAFF-007' },
 ] as const;
 
+/**
+ * ── `data-seccao`, e NÃO `data-tela` ─────────────────────────────────────
+ *
+ * As ligações desta barra escreviam `data-tela` com o id da secção. Como a barra
+ * aparece em **todas** as páginas do Staff, o marcador de qualquer tela existia
+ * em todas elas — e a prova que afirma «cheguei a esta tela» era satisfeita pela
+ * navegação, em qualquer tela. Degradar o cabeçalho de uma página deixava-a
+ * verde.
+ *
+ * Encontrou-o o sénior, degradando o marcador em duas telas e vendo a prova
+ * aguentar. A ironia está no comentário por cima do próprio `h1`: *«sem ele, uma
+ * rota que desviasse mediria outra tela e dizia verde cinco vezes»* — e era esta
+ * barra que tornava essa protecção inerte.
+ *
+ * A correcção é no **nome** e não no selector da prova: `data-tela` passa a
+ * querer dizer *esta página identifica-se a si própria*, e uma ligação para uma
+ * página não é a página. Corrigir o selector deixava o atributo a significar
+ * duas coisas — e a próxima prova a escrevê-lo caía no mesmo buraco.
+ */
 export function NavegacaoDoStaff({
   idioma, locationId, actual,
 }: {
@@ -62,7 +81,7 @@ export function NavegacaoDoStaff({
   return (
     <nav className="bo-publico__seccoes" aria-label={s.turno} data-teste="navegacao">
       {SECCOES_DO_STAFF.filter((x) => x.principal).map((x) => (
-        <a key={x.rota} href={`${base}${x.rota}`} data-tela={x.id}
+        <a key={x.rota} href={`${base}${x.rota}`} data-seccao={x.id}
            aria-current={actual === x.rota ? 'page' : undefined}>
           {s[x.chave] ?? x.id}
         </a>

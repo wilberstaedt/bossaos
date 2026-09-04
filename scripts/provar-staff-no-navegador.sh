@@ -273,7 +273,35 @@ exigir_vermelho "caiu a declaracao: o numero deixou de chegar a quem revoga" \
 cp "$ORIG_DISPOS" "$DISPOS"; rm -f "$ORIG_DISPOS"
 
 echo
-echo "9. Reposto — tem de voltar ao verde"
+echo "9. CONTROLO NEGATIVO — o marcador da tela deixa de existir"
+# ── O defeito que o senior encontrou, e que eu nao podia ter visto ─────────
+#
+# A prova exige um marcador `[data-tela=...]` por tela. A NAVEGACAO escrevia
+# `data-tela` com o id de cada seccao — e a navegacao aparece em todas as
+# paginas do Staff. Logo o marcador de qualquer tela existia em TODAS elas: a
+# assercao que afirma «cheguei a esta tela» era satisfeita pela barra, sempre.
+#
+# Ele encontrou-o degradando o marcador em duas telas a mao e vendo a prova
+# aguentar. Este controlo e' esse trabalho automatizado, para o buraco nao voltar
+# sem barulho: tira o `data-tela` do cabecalho e exige que a prova acenda.
+PECAS=apps/web/src/staff/PecasDoStaff.tsx
+ORIG_PECAS=$(mktemp); cp "$PECAS" "$ORIG_PECAS"
+python3 - <<'PYMARCA'
+import io
+p = 'apps/web/src/staff/PecasDoStaff.tsx'
+s = io.open(p, encoding='utf-8').read()
+antigo = "          <h1 data-tela={tela}>{titulo}</h1>"
+assert antigo in s, 'o marcador do cabecalho nao esta onde se esperava'
+# `tela` continua usada (fica no atributo de dados generico), logo compila.
+novo = "          <h1 data-titulo-de={tela}>{titulo}</h1>"
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, novo))
+PYMARCA
+exigir_vermelho "caiu o marcador: uma tela sem cabecalho proprio deixou de passar" \
+  '23 telas' /tmp/bossaos-staff-nav-marcador.txt
+cp "$ORIG_PECAS" "$PECAS"; rm -f "$ORIG_PECAS"
+
+echo
+echo "10. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-staff-nav-reposto.txt; then
   passou=$(grep -oE '[0-9]+ passed' /tmp/bossaos-staff-nav-reposto.txt | grep -oE '[0-9]+' || echo 0)
   if (( passou < CASOS_MINIMOS )); then
