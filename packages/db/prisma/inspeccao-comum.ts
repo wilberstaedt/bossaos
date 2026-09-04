@@ -81,6 +81,10 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     UPDATE theme_revisions SET restaura_de_id = NULL WHERE organization_id IN (${FIXTURES});
     DELETE FROM theme_revisions WHERE organization_id IN (${FIXTURES});
     DELETE FROM theme_drafts    WHERE organization_id IN (${FIXTURES});
+    -- A subscrição é do CENÁRIO do arnês desde 04/09 (ver a semeadura). Quem faz
+    -- a sujidade apanha-a: deixá-la para trás era o que fazia as provas de base
+    -- e a inspecção herdarem estado uma da outra.
+    DELETE FROM subscriptions   WHERE organization_id IN (${FIXTURES});
   `);
   await prisma.$executeRawUnsafe(`
     DELETE FROM public_slug_owners WHERE slug LIKE '${PREFIXO}%';

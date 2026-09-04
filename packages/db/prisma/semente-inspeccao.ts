@@ -349,6 +349,42 @@ async function principal(): Promise<void> {
               '${PREFIXO}Marina Cerrada', 'insp-cerrada', 'EUR', 'Europe/Madrid', now(), now())
       ON CONFLICT (id) DO UPDATE SET archived_at = now(), updated_at = now()`);
 
+    // ── O PLANO das duas organizações, ESTABELECIDO e não herdado ─────────
+    //
+    // A prova de tema do E12 exige que a organização B seja **Pro** — está
+    // escrito no cabeçalho do `tema.spec.ts` — e as fixtures não criam
+    // subscrição nenhuma. Localmente isso passou despercebido porque as provas
+    // de base (`provas/tema.test.ts`, `planos`, `descidas`) assinam as duas
+    // organizações e **deixam a subscrição para trás**: o arnês do navegador
+    // herdava o plano de quem tinha corrido antes.
+    //
+    // Numa base fresca — a da CI — não há nada para herdar. O portão do plano
+    // dispara antes do contraste, como tem de disparar, e a rota devolve 402
+    // `sem_plano` onde a prova esperava `erro=contraste`. Três corridas iguais,
+    // e a assinatura do E12 retirada por isso.
+    //
+    // **Uma prova que herda estado mede a base, não o produto.** Aqui o estado
+    // comercial passa a fazer parte do cenário, como as mesas e a carta.
+    for (const [organizationId, codigo] of [
+      [IDS.orgA, 'STARTER'], [IDS.orgB, 'PRO'],
+    ] as const) {
+      await prisma.$executeRawUnsafe(`
+        INSERT INTO subscriptions (id, organization_id, plan_id, estado, updated_at)
+        SELECT gen_random_uuid(), '${organizationId}', p.id, 'ACTIVA', now()
+          FROM plan_definitions p WHERE p.codigo = '${codigo}'
+        ON CONFLICT (organization_id) DO UPDATE
+          SET plan_id = (SELECT id FROM plan_definitions WHERE codigo = '${codigo}'),
+              estado = 'ACTIVA', valido_ate = NULL,
+              descer_para_plano_id = NULL, descer_em = NULL, updated_at = now()`);
+    }
+    // E confirma que ficou, em vez de assumir. Uma semeadura que falha em
+    // silêncio devolve o problema à prova, que o reporta no sítio errado.
+    const planos = await prisma.$queryRawUnsafe<{ n: bigint }[]>(
+      `SELECT count(*) AS n FROM subscriptions WHERE organization_id IN ('${IDS.orgA}', '${IDS.orgB}')`);
+    if (Number(planos[0]?.n ?? 0) !== 2) {
+      throw new Error('a semeadura não conseguiu assinar as duas organizações');
+    }
+
     // ── A SALA (E13), para as dezassete telas terem o que medir ───────────
     //
     // Zonas, mesas, uma sessão ABERTA e dois dispositivos. Sem isto, as telas

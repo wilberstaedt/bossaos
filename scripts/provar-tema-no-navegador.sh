@@ -30,8 +30,10 @@ fi
 CARTA='apps/web/app/r/[publicLocationSlug]/[locale]/menu/page.tsx'
 MOLDURA='apps/web/src/componentes/SitePublico.tsx'
 TEMA_UI='packages/ui/src/tema.ts'
-ORIG_CARTA=$(mktemp); ORIG_MOLDURA=$(mktemp); ORIG_UI=$(mktemp)
+SEMENTE='packages/db/prisma/semente-inspeccao.ts'
+ORIG_CARTA=$(mktemp); ORIG_MOLDURA=$(mktemp); ORIG_UI=$(mktemp); ORIG_SEMENTE=$(mktemp)
 cp "$CARTA" "$ORIG_CARTA"; cp "$MOLDURA" "$ORIG_MOLDURA"; cp "$TEMA_UI" "$ORIG_UI"
+cp "$SEMENTE" "$ORIG_SEMENTE"
 falhas=0
 
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
@@ -39,7 +41,8 @@ vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); 
 
 restaurar() {
   cp "$ORIG_CARTA" "$CARTA"; cp "$ORIG_MOLDURA" "$MOLDURA"; cp "$ORIG_UI" "$TEMA_UI"
-  rm -f "$ORIG_CARTA" "$ORIG_MOLDURA" "$ORIG_UI"
+  cp "$ORIG_SEMENTE" "$SEMENTE"
+  rm -f "$ORIG_CARTA" "$ORIG_MOLDURA" "$ORIG_UI" "$ORIG_SEMENTE"
 }
 trap restaurar EXIT INT TERM
 
@@ -66,10 +69,17 @@ exigir_vermelho() {
   fi
 }
 
-echo "1. Com tudo ligado"
+# ── A base arranca como a da CI: SEM subscrição nenhuma ──────────────────
+#
+# É a condição que retirou a assinatura do E12. Medir sobre uma base que já tem o
+# plano deixado por uma prova anterior é medir a base e não o produto — e foi
+# assim que 21 casos verdes aqui conviveram com três reprovações na CI.
+psql "$MIGRATION_DATABASE_URL" -q -c 'DELETE FROM subscriptions;' >/dev/null 2>&1
+
+echo "1. Com tudo ligado (base SEM plano, como a da CI)"
 if correr /tmp/bossaos-tema-nav-ligado.txt; then
   passou=$(grep -oE '[0-9]+ passed' /tmp/bossaos-tema-nav-ligado.txt | grep -oE '[0-9]+' || echo 0)
-  if (( passou < 21 )); then
+  if (( passou < 22 )); then
     vermelho "VERDE COM POUCO MEDIDO: só $passou casos"; exit 1
   fi
   verde "$passou casos de navegador verdes"
@@ -141,7 +151,33 @@ exigir_vermelho "caiu a asserção dos sete tokens fixos" \
 cp "$ORIG_UI" "$TEMA_UI"
 
 echo
-echo "5. Reposto — tem de voltar ao verde"
+echo "5. CONTROLO NEGATIVO — a semeadura deixa de estabelecer o PLANO"
+# É o defeito que retirou a assinatura do E12: a prova herdava o plano do que por
+# acaso estava na base — deixado lá pelas provas de base — e numa base fresca o
+# portão do plano disparava antes do contraste. Três corridas iguais na CI.
+#
+# Com o plano fora da semeadura, quem tem de falhar é a GUARDA DO PLANO, e com a
+# frase que nomeia a causa. Se em vez dela caísse a asserção do contraste, a prova
+# continuava a mandar quem a lê procurar no sítio errado.
+python3 - <<'PYPLANO'
+import io
+p = 'packages/db/prisma/semente-inspeccao.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "    for (const [organizationId, codigo] of ["
+assert antigo in s, 'o bloco do plano nao esta onde se esperava'
+fim = "      throw new Error('a semeadura nao conseguiu assinar as duas organizacoes');\n    }\n"
+fim_real = [l for l in s.split('\n') if 'assinar as duas' in l]
+assert fim_real, 'nao encontrei o fim do bloco do plano'
+i = s.index(antigo)
+j = s.index(fim_real[0]) + len(fim_real[0]) + len('\n    }\n')
+io.open(p, 'w', encoding='utf-8').write(s[:i] + s[j:])
+PYPLANO
+exigir_vermelho "caiu a guarda do plano, e nao a do contraste" \
+  'PODE mesmo editar cores' /tmp/bossaos-tema-nav-plano.txt
+cp "$ORIG_SEMENTE" "$SEMENTE"
+
+echo
+echo "6. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-tema-nav-reposto.txt; then
   passou=$(grep -oE '[0-9]+ passed' /tmp/bossaos-tema-nav-reposto.txt | grep -oE '[0-9]+' || echo 0)
   verde "reposto: $passou casos"

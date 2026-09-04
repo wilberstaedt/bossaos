@@ -18,6 +18,46 @@ organização calhava ter o plano certo.
 **estabelecer** o plano de que depende, em vez de o herdar. Uma prova que só passa
 numa máquina não é uma medição.
 
+---
+
+## CONFIRMADA por reprodução, e corrigida — 04/09
+
+Apaguei as subscrições da base local (é o estado de uma base fresca: as fixtures
+não criam nenhuma) e as **duas** falhas apareceram com as **mesmas duas frases** da
+CI. O mecanismo, medido e não deduzido:
+
+```
+POST /api/org/marina-barcelona/tema/rascunho
+→ 402  {"erro":"sem_plano","capacidade":"tema.coresProprias"}
+```
+
+O portão do plano dispara antes do contraste, como tem de disparar. **O produto
+não está partido.** São **dois** defeitos do instrumento, os dois meus:
+
+1. **A prova herdava o plano.** As provas de base assinam as organizações e
+   deixam a subscrição para trás; o arnês do navegador herdava-a. Corrigido: a
+   semeadura **estabelece** STARTER em A e PRO em B, verifica que ficou, e a
+   limpeza apaga-as no fim.
+2. **`waitForURL(/\/website\/theme/)` não esperava por nada** — resolve de
+   imediato porque a página do editor já casa com o padrão. Foi ela que
+   transformou uma recusa por plano na frase «o servidor aceitou um par ilegível».
+   Corrigido: espera-se pela RESPOSTA do POST, e 402 e 303 passam a ler-se
+   diferente, com a mensagem a nomear a causa.
+
+**E ficou guardado contra a repetição:** `tema.spec.ts` afirma o plano antes de
+medir seja o que for (é «verde sobre plano errado», a mesma família do «verde
+sobre tema por omissão»), e `provar-tema-no-navegador.sh` **apaga as subscrições
+ao arrancar** — mede na condição da CI — e ganhou um quinto controlo negativo que
+tira o plano da semeadura e exige que caia a guarda do plano, não a do contraste.
+
+**Medido depois da correcção:** 22 casos do tema e **379 casos de navegador**
+verdes numa base com **zero subscrições**; `provar-tema-no-navegador.sh` a 0
+falhas com cinco controlos; `provar-tema.sh` a 0 com sete grupos, 29 casos e seis
+controlos.
+
+**O E13 fica onde estava**, no commit que o acompanha e marcado como pausado. A
+régua dele não mudou, e a próxima acção é a validação do E12.
+
 **E13 — 16 telas, em pausa.** `docs/reviews/ALVO-E13.md` continua válida.
 
 **E11 — MARCO DO STARTER APROVADO à 2ª.** Reprovado à 1ª com seis falhas, todas de

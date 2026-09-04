@@ -61,6 +61,30 @@ const NOVAS = { primaria: '#3d1f6b', acento: '#a05a2c', fundo: '#f4f0fa' };
 /** Cinzento sobre cinzento: o par que a WCAG reprova, e o servidor também. */
 const ILEGIVEL = { primaria: '#858585', acento: '#858585', fundo: '#858585' };
 
+/**
+ * O plano de que esta prova DEPENDE, verificado antes de medir seja o que for.
+ *
+ * A régua do E12 reprova «verde sobre tema por omissão»; isto é a mesma família
+ * com outro nome — **verde sobre plano errado**. Sem Restaurant ou Pro, o portão
+ * do plano dispara antes do contraste e as sete telas medem o ecrã de bloqueio em
+ * vez do editor. Se a semeadura deixar de estabelecer o plano, a falha aparece
+ * aqui, numa linha, em vez de sair mais à frente como uma recusa de contraste que
+ * não aconteceu.
+ */
+async function exigirPlanoComCores(
+  pedido: import('@playwright/test').APIRequestContext,
+): Promise<void> {
+  const r = await pedido.get(`/api/org/${ORG_B}/tema`);
+  expect(r.status(), 'não consegui ler o plano do inquilino de prova').toBeLessThan(400);
+  const corpo = await r.json() as { podeEditar?: boolean; plano?: string | null };
+  expect(
+    corpo.podeEditar,
+    `o inquilino de prova está no plano ${corpo.plano ?? '(nenhum)'} e não pode editar cores. ` +
+    'A semeadura da inspecção tem de o pôr em Restaurant ou Pro — herdar o plano do ' +
+    'que por acaso está na base mede a base, não o produto.',
+  ).toBe(true);
+}
+
 const rgb = (hex: string) => {
   const n = parseInt(hex.slice(1), 16);
   return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
@@ -80,7 +104,25 @@ async function corCalculada(
   );
 }
 
-/** Preenche e submete o formulário de cores. Devolve o endereço onde caiu. */
+/**
+ * Preenche e submete o formulário de cores. Devolve o endereço onde caiu.
+ *
+ * ── A espera anterior não esperava por nada ──────────────────────────────
+ *
+ * Estava `waitForURL(/\/website\/theme/)`, e o `waitForURL` **resolve de
+ * imediato quando o endereço actual já casa**. A página do editor É
+ * `…/website/theme/editar`, portanto a espera casava com a página onde já
+ * estávamos e devolvia o controlo antes de haver navegação nenhuma. Uma espera
+ * que não pode falhar não é uma espera.
+ *
+ * O preço apareceu na CI: com o servidor a recusar por PLANO (402, sem
+ * redireccionamento), esta função devolvia o endereço da API e a asserção
+ * seguinte dizia «o servidor aceitou um par ilegível» — uma frase falsa sobre uma
+ * recusa correcta, e a etapa foi assinada e desassinada por causa dela.
+ *
+ * Agora espera-se pela RESPOSTA do POST, e a resposta distingue as duas recusas:
+ * 402 é o plano, 303 é o produto a mandar a pessoa de volta ao ecrã.
+ */
 async function guardarCores(
   pagina: import('@playwright/test').Page,
   cores: { primaria: string; acento: string; fundo: string },
@@ -89,16 +131,45 @@ async function guardarCores(
   for (const [campo, valor] of Object.entries(cores)) {
     await pagina.fill(`#${campo}`, valor);
   }
-  await Promise.all([
-    pagina.waitForURL(/\/website\/theme/),
-    pagina.getByRole('button', { name: /Guardar/i }).click(),
-  ]);
+  const resposta = pagina.waitForResponse(
+    (r) => r.url().includes('/tema/rascunho') && r.request().method() === 'POST');
+  await pagina.getByRole('button', { name: /Guardar/i }).click();
+  const r = await resposta;
+
+  // A mensagem NOMEIA a causa em vez de a esconder atrás de outra. Uma prova que
+  // lê «recusado por plano» como «aceitou cores ilegíveis» manda quem a lê
+  // procurar no sítio errado — e foi exactamente o que aconteceu.
+  //
+  // O corpo só se lê quando há corpo: um 303 é uma resposta de redireccionamento
+  // e o Playwright recusa-lhe o `text()`. A primeira versão desta mensagem lia-o
+  // sempre e rebentava no caminho FELIZ — uma mensagem de erro que só funciona
+  // quando não é precisa.
+  if (r.status() === 402) {
+    const corpo = await r.text().catch(() => '');
+    expect(
+      r.status(),
+      `o servidor recusou com 402 (${corpo.slice(0, 80)}). É o portão do PLANO a ` +
+      'disparar antes do contraste: o inquilino de prova não é Restaurant/Pro, e a ' +
+      'semeadura tem de ESTABELECER o plano em vez de o herdar do que estiver na base.',
+    ).not.toBe(402);
+  }
+
+  await pagina.waitForLoadState('networkidle');
   return pagina.url();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 test.describe.serial('a cor publicada chega à rota pública', () => {
   test.use({ storageState: FICHEIRO_DE_SESSAO_B, viewport: { width: 1280, height: 900 } });
+
+  test.beforeAll(async ({ browser }) => {
+    const contexto = await browser.newContext({ storageState: FICHEIRO_DE_SESSAO_B });
+    try {
+      await exigirPlanoComCores(contexto.request);
+    } finally {
+      await contexto.close();
+    }
+  });
 
   let antesFundo = '';
   let antesBotao = '';
@@ -242,6 +313,12 @@ test.describe.serial('a cor publicada chega à rota pública', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 test.describe('o contraste é recusado pelo SERVIDOR, e a recusa vê-se', () => {
   test.use({ storageState: FICHEIRO_DE_SESSAO_B, viewport: { width: 1280, height: 900 } });
+
+  test('primeiro: o inquilino de prova PODE mesmo editar cores', async ({ request }) => {
+    // Sem isto, «o servidor recusou» e «o servidor recusou por outro motivo» leem-se
+    // igual — e foi assim que uma recusa por plano passou por uma de contraste.
+    await exigirPlanoComCores(request);
+  });
 
   test('THEME-004 · o par ilegível volta com o número medido no ecrã', async ({ page }) => {
     const caiu = await guardarCores(page, ILEGIVEL);
