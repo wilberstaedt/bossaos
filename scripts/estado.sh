@@ -57,15 +57,50 @@ print(len(list(csv.reader(io.open("docs/progress/coverage.csv", encoding="utf-8-
 # eram 12, e a percentagem que eu reporto sai daqui. O mesmo defeito estava no
 # validar-cobertura.sh e foi o LUMEN JR que o encontrou e corrigiu la; eu so o
 # descobri aqui por reproduzir o awk a mao e ver os dois discordarem.
+# A coluna acha-se pelo NOME e nao pela posicao. Ate 04/09 isto era
+# `col = len(linhas[0]) - 3`, a terceira a contar do fim - e uma coluna nova em
+# qualquer sitio do CSV fazia o medidor dizer 0 de 396 em vez de 78. Testei-o:
+# acrescentei uma coluna e o numero caiu a zero.
+#
+# Falhar para ZERO parece o lado seguro e nao e, porque falha em SILENCIO: um
+# medidor que diz zero quando nao consegue medir e indistinguivel de zero
+# progresso a serio, e este numero e o que eu mando ao Matheus em cada tick. Sem
+# coluna, agora rebenta com mensagem em vez de adivinhar.
+# O caminho e configuravel para as sondas nao terem de mexer no ficheiro de
+# verdade. A 04/09 testei este medidor a reescrever o coverage.csv enquanto o JR
+# ESCREVIA nele, e so nao lhe comi trabalho por sorte de temporizacao - a mesma
+# licao que ja tinha escrito horas antes sobre a base de dados e que nao apliquei
+# quando era a minha vez. Uma sonda destrutiva vai numa COPIA:
+#
+#   COBERTURA=/tmp/copia.csv bash scripts/estado.sh
+COBERTURA="${COBERTURA:-docs/progress/coverage.csv}"
+
 contar_telas() { # $1 = estado exacto
   python3 -c '
 import csv, io, sys
-linhas = list(csv.reader(io.open("docs/progress/coverage.csv", encoding="utf-8-sig", newline="")))
-col = len(linhas[0]) - 3
-print(sum(1 for l in linhas[1:] if l and l[col] == sys.argv[1]))' "$1"
+f = io.open(sys.argv[2], encoding="utf-8-sig", newline="")
+linhas = list(csv.reader(f))
+cabecalho = linhas[0]
+if "status" not in cabecalho:
+    sys.stderr.write("ERRO: coverage.csv nao tem coluna `status` - o medidor nao pode medir\n")
+    raise SystemExit(2)
+col = cabecalho.index("status")
+print(sum(1 for l in linhas[1:] if len(l) > col and l[col] == sys.argv[1]))' "$1" "$COBERTURA"
 }
-TELAS_FEITAS=$(contar_telas "validado")
-TELAS_AGUARDA=$(contar_telas "implementado aguardando validação")
+# O erro do contador tem de PARAR o medidor, nao so aparecer ao lado dele. Na
+# primeira versao desta correccao a mensagem saia no stderr e o script publicava
+# `TELAS=0/396` a seguir - e a ultima linha e exactamente o que eu leio e mando ao
+# Matheus em cada tick. Um medidor que nao consegue medir nao publica um numero:
+# "nao medi" e uma resposta, zero e outra, e trocar uma pela outra e a forma mais
+# barata de mentir com verdade tecnica.
+if ! TELAS_FEITAS=$(contar_telas "validado"); then
+  echo "ERRO: nao consegui contar as telas - o medidor nao publica numero adivinhado." >&2
+  exit 2
+fi
+if ! TELAS_AGUARDA=$(contar_telas "implementado aguardando validação"); then
+  echo "ERRO: nao consegui contar as telas em espera." >&2
+  exit 2
+fi
 TELAS_FEITAS=${TELAS_FEITAS:-0}
 TELAS_AGUARDA=${TELAS_AGUARDA:-0}
 # A guarda que exigi ao JR no E03, aplicada a mim: um leitor que nao le nada devolve
