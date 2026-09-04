@@ -393,7 +393,11 @@ export function listarMesas(db: ClienteComEscopo, locationId: string) {
  * dois instantes, e numa sala a mudar é assim que um ecrã mostra uma mesa livre
  * que acabou de abrir.
  */
-export async function salaAgora(db: ClienteComEscopo, locationId: string) {
+export async function salaAgora(
+  db: ClienteComEscopo,
+  locationId: string,
+  organizationId: string,
+) {
   const mesas = await db.serviceTable.findMany({
     where: { locationId, archivedAt: null },
     orderBy: { codigo: 'asc' },
@@ -403,18 +407,54 @@ export async function salaAgora(db: ClienteComEscopo, locationId: string) {
         where: { estado: { not: 'FECHADA' } },
         select: {
           id: true, estado: true, comensais: true, abertaEm: true, abertaPor: true,
-          responsavel: { select: { id: true, user: { select: { nome: true, email: true } } } },
+          // ── O identificador da PERTENÇA, e nunca a junção a `users` ─────
+          //
+          // Estava `responsavel: { select: { id, user: { ... } } }`, e é o mesmo
+          // defeito do ORG-007 pela TERCEIRA vez no projecto — a segunda neste
+          // ficheiro. O runtime não lê `users`: a política `identidade_propria`
+          // limita-o à linha dele próprio, e o Prisma devolve `user: null` **sem
+          // se queixar** sempre que o responsável é outra pessoa — que é o caso
+          // normal numa sala.
+          //
+          // O nome vem da porta, mais abaixo. Duas coisas que isto NÃO faz, de
+          // propósito: não põe um `?.` a mais — isso esconde a causa e devolve um
+          // ecrã sem nome onde devia estar uma pessoa — e não dá privilégio ao
+          // runtime, que trocava um ecrã partido por um buraco de segurança.
+          responsavelId: true,
         },
       },
     },
   });
-  return mesas.map((m) => ({
-    ...m,
-    // O índice único garante que esta lista tem no máximo um elemento. Devolver
-    // um array aqui obrigaria cada ecrã a decidir o que fazer com dois — e a
-    // decisão certa é que dois não existem.
-    sessao: m.sessoes[0] ?? null,
-  }));
+
+  // Uma consulta à porta para a sala toda, e não uma por mesa: `N+1` numa sala
+  // cheia é o ecrã que toda a gente tem aberto a noite inteira.
+  const identidades = await db.$queryRaw<{ id: string; email: string; nome: string | null }[]>`
+    SELECT * FROM identidades_da_organizacao(${organizationId}::uuid)`;
+  const porUtilizador = new Map(identidades.map((i) => [i.id, i]));
+
+  const pertencas = await db.membership.findMany({ select: { id: true, userId: true } });
+  const porPertenca = new Map(pertencas.map((m) => [m.id, m.userId]));
+
+  return mesas.map((m) => {
+    const sessao = m.sessoes[0] ?? null;
+    return {
+      ...m,
+      // O índice único garante que esta lista tem no máximo um elemento. Devolver
+      // um array aqui obrigaria cada ecrã a decidir o que fazer com dois — e a
+      // decisão certa é que dois não existem.
+      sessao: sessao === null ? null : {
+        ...sessao,
+        // Ausência é ausência: sem responsável é `null`, e um responsável que a
+        // porta não devolve fica com o nome a `null` e o email vazio — nunca com
+        // o identificador a fazer de nome.
+        responsavel: sessao.responsavelId === null ? null : {
+          id: sessao.responsavelId,
+          nome: porUtilizador.get(porPertenca.get(sessao.responsavelId) ?? '')?.nome ?? null,
+          email: porUtilizador.get(porPertenca.get(sessao.responsavelId) ?? '')?.email ?? '',
+        },
+      },
+    };
+  });
 }
 
 export function historicoDaSessao(db: ClienteComEscopo, sessionId: string) {

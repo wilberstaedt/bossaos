@@ -32,7 +32,7 @@ export default async function SalaEmTempoReal({
   const m = mensagensDe(idioma);
   const s = m.salaE13;
   const { sessao, unidade } = await carregarSala(idioma, orgSlug, locationSlug);
-  const mesas = await comEscopoDoPedido(sessao, (db) => salaAgora(db, unidade.id));
+  const mesas = await comEscopoDoPedido(sessao, (db) => salaAgora(db, unidade.id, sessao.contexto.organizationId));
   const base = `/${idioma}/app/${orgSlug}/${locationSlug}/floor`;
 
   const abertas = mesas.filter((x) => x.sessao).length;

@@ -33,7 +33,7 @@ export default async function AbrirMesa({
   const m = mensagensDe(idioma);
   const s = m.salaE13;
   const { sessao, unidade } = await carregarSala(idioma, orgSlug, locationSlug);
-  const mesas = await comEscopoDoPedido(sessao, (db) => salaAgora(db, unidade.id));
+  const mesas = await comEscopoDoPedido(sessao, (db) => salaAgora(db, unidade.id, sessao.contexto.organizationId));
   const livres = mesas.filter((x) => !x.sessao);
   const escolhida = typeof busca.mesa === 'string' ? busca.mesa : undefined;
 

@@ -418,10 +418,27 @@ async function principal(): Promise<void> {
 
     const primeiraMesa = mesas[0];
     if (!primeiraMesa) throw new Error('a semeadura da sala não criou mesas');
+    // ── A sessão tem RESPONSÁVEL, e é OUTRA pessoa que não a do arnês ────
+    //
+    // Sem responsável atribuído, as telas da sala nunca liam um nome — e o
+    // defeito do ORG-007 escondeu-se por isso. A junção a `users` pelo cliente
+    // com escopo devolve `null` **só quando o responsável é outra pessoa**, que é
+    // o caso normal numa sala e não era o caso do cenário.
+    //
+    // Com o responsável na pertença do utilizador das fixtures, a ficha da sessão
+    // desreferencia um nome que o runtime não consegue ler — e o 500 aparece.
+    const pertencaDoDono = await prisma.membership.findFirst({
+      where: { organizationId: IDS.orgA, userId: IDS.utilizadorA },
+      select: { id: true },
+    });
+    if (!pertencaDoDono) {
+      throw new Error('a semeadura não encontrou a pertença do dono para responsabilizar a mesa');
+    }
     const sessaoDeMesa = await prisma.tableSession.create({
       data: {
         organizationId: IDS.orgA, locationId: IDS.unidadeA2, tableId: primeiraMesa.id,
         estado: 'ABERTA', comensais: 3, abertaPor: 'inspeccao@exemplo.example',
+        responsavelId: pertencaDoDono.id,
       },
       select: { id: true },
     });

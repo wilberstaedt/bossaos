@@ -109,7 +109,76 @@ fi
 cp "$ORIG_SALA" "$SALA"
 
 echo
-echo "3. CONTROLO NEGATIVO — a lista de telas encolhe"
+echo "3. CONTROLO NEGATIVO — o salaAgora volta a juntar-se a users"
+# A TERCEIRA ocorrencia do mesmo defeito, e a segunda no mesmo ficheiro. Foi o
+# revisor que a encontrou depois de eu declarar a primeira fechada: o responsavel
+# da sessao vinha de `responsavel: { select: { id, user: {...} } }`, e o runtime
+# nao le `users`.
+#
+# Este controlo so morde porque a semeadura passou a atribuir um responsavel que
+# NAO e a conta do arnes: a juncao devolve null exactamente quando o responsavel
+# e outra pessoa, que e o caso normal numa sala e nao era o caso do cenario. Um
+# controlo negativo sobre um cenario que nao exercita o caminho nao mede nada.
+# O defeito tem de COMPILAR. A primeira versao trocava so a consulta e deixava o
+# resto a ler `responsavelId`, o build partia, e um build partido le-se aqui
+# exactamente como um ecra que rebenta - que nao e a mesma coisa. E a mesma licao
+# dos controlos do E12.
+python3 - <<'PYSALA'
+import io
+p = 'packages/db/src/sala.ts'
+s = io.open(p, encoding='utf-8').read()
+i = s.index('export async function salaAgora')
+j = s.index('export function historicoDaSessao')
+plantado = '''export async function salaAgora(
+  db: ClienteComEscopo,
+  locationId: string,
+  organizationId: string,
+) {
+  void organizationId;
+  const mesas = await db.serviceTable.findMany({
+    where: { locationId, archivedAt: null },
+    orderBy: { codigo: 'asc' },
+    include: {
+      area: { select: { id: true, nome: true, tipo: true } },
+      sessoes: {
+        where: { estado: { not: 'FECHADA' } },
+        select: {
+          id: true, estado: true, comensais: true, abertaEm: true, abertaPor: true,
+          responsavel: { select: { id: true, user: { select: { nome: true, email: true } } } },
+        },
+      },
+    },
+  });
+  return mesas.map((m) => {
+    const sessao = m.sessoes[0] ?? null;
+    return {
+      ...m,
+      sessao: sessao === null ? null : {
+        ...sessao,
+        responsavel: sessao.responsavel === null ? null : {
+          id: sessao.responsavel.id,
+          nome: sessao.responsavel.user!.nome,
+          email: sessao.responsavel.user!.email,
+        },
+      },
+    };
+  });
+}
+
+'''
+io.open(p, 'w', encoding='utf-8').write(s[:i] + plantado + s[j:])
+PYSALA
+exigir_vermelho "caiu a visita as telas da sala com responsavel atribuido" \
+  'não transbordam a 360 px' /tmp/bossaos-sala-nav-salaagora.txt
+if grep -q '500' /tmp/bossaos-sala-nav-salaagora.txt; then
+  verde "e a falha e um 500 - o mesmo ORG-007, na sala em tempo real"
+else
+  vermelho "ficou vermelha sem 500: o defeito plantado nao e o que se pensava"
+fi
+cp "$ORIG_SALA" "$SALA"
+
+echo
+echo "4. CONTROLO NEGATIVO — a lista de telas encolhe"
 # O anti-verde-vazio desta prova. Uma lista que encolhesse — por um erro de
 # edição, por um `filter` distraído — deixava telas por medir e os casos de
 # largura continuavam todos verdes.
@@ -126,7 +195,7 @@ exigir_vermelho "caiu o contador das dezassete" \
 cp "$ORIG_SPEC" "$SPEC"
 
 echo
-echo "4. Reposto — tem de voltar ao verde"
+echo "5. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-sala-nav-reposto.txt; then
   passou=$(grep -oE '[0-9]+ passed' /tmp/bossaos-sala-nav-reposto.txt | grep -oE '[0-9]+' || echo 0)
   verde "reposto: $passou casos"

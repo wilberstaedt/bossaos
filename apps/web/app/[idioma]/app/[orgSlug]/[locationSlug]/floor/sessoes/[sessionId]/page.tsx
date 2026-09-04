@@ -28,7 +28,7 @@ export default async function FichaDaSessao({
   const { sessao, unidade } = await carregarSala(idioma, orgSlug, locationSlug);
 
   const { mesa, historico, pessoas } = await comEscopoDoPedido(sessao, async (db) => {
-    const mesas = await salaAgora(db, unidade.id);
+    const mesas = await salaAgora(db, unidade.id, sessao.contexto.organizationId);
     return {
       mesa: mesas.find((x) => x.sessao?.id === sessionId) ?? null,
       historico: await historicoDaSessao(db, sessionId),
@@ -80,7 +80,16 @@ export default async function FichaDaSessao({
           <dt>{s.abertaEm}</dt>
           <dd>{formatarHora(activa.abertaEm, idioma)} · {activa.abertaPor}</dd>
           <dt>{s.responsavel}</dt>
-          <dd>{activa.responsavel?.user.nome ?? activa.responsavel?.user.email ?? s.semResponsavel}</dd>
+          <dd>
+            {/* O nome vem da porta `identidades_da_organizacao`, não de uma junção
+                a `users` — o runtime não a consegue fazer. E não há um `?.` a
+                mais: `responsavel` é `null` quando ninguém foi atribuído, e isso
+                é ausência a sério, não uma protecção contra um `null` que não
+                devia existir. */}
+            {activa.responsavel === null
+              ? s.semResponsavel
+              : (activa.responsavel.nome ?? activa.responsavel.email) || s.semResponsavel}
+          </dd>
         </dl>
       </Cartao>
 
