@@ -61,7 +61,27 @@ FIMDECL
 
 # O .env.example e documentacao: valores descartaveis e comentados, e e suposto
 # estar versionado. Tudo o resto e alvo.
-ALVOS=$(git ls-files | grep -vE '^\.env\.example$|^pnpm-lock\.yaml$|^scripts/varrer-segredos\.sh$|\.png$')
+#
+# E os POR RASTREAR tambem, desde 04/09. Provei que o mesmo ficheiro com o mesmo
+# segredo era invisivel por rastrear e apanhado depois de rastreado - e o risco
+# real nao e o ficheiro estar solto, e o `git add .` que vem a seguir. Varrer so
+# o que ja esta versionado avisa DEPOIS de o segredo entrar; varrer o que esta
+# prestes a entrar avisa a tempo.
+#
+# --exclude-standard mantem os ignorados de fora, e isso e deliberado: um
+# ficheiro que o .gitignore cobre nao pode ser adicionado por acidente, e varre-lo
+# encheria isto de ruido de node_modules e artefactos de build.
+# FUNCAO e nao variavel, para o controlo de alcance poder chama-la depois de
+# criar a sonda. Escrita como variavel, o controlo tinha de reimplementar a lista
+# a mao - e foi o que fiz primeiro: media a MINHA COPIA da logica em vez da que a
+# guarda usa, por isso passava mesmo com o alcance estreitado de volta. Um
+# controlo que reimplementa o que devia medir mede-se a si proprio.
+alvos() {
+  { git ls-files; git ls-files --others --exclude-standard; } \
+    | grep -vE '^\.env\.example$|^pnpm-lock\.yaml$|^scripts/varrer-segredos\.sh$|\.png$' \
+    | sort -u
+}
+ALVOS=$(alvos)
 
 # Hospedeiros que nao sao um endpoint real: local, ou um nome sem ponto nenhum
 # (docker, fixtures, exemplos). Uma ligacao a 127.0.0.1 com senha de dev nao e um
@@ -114,8 +134,34 @@ else
   ok "$n_alvos ficheiros versionados sob varredura"
 fi
 
+# ── controlo do ALCANCE, e nao so dos padroes ──────────────────────────────
+# O controlo 1 prova que os PADROES encontram. Este prova que a varredura CHEGA
+# aos ficheiros certos - que e outra propriedade e falhava sozinha ate 04/09: um
+# ficheiro por rastrear com um segredo era invisivel, e so aparecia depois de
+# `git add`. Ou seja, a varredura avisava DEPOIS de o segredo entrar.
+#
+# Corre separado do controlo 1 de proposito: se as duas sondas partilhassem a
+# mesma passagem, a que falha mais cedo mascarava a outra e o controlo passava com
+# metade da guarda partida. Ja me aconteceu hoje noutra guarda.
 echo
-echo "3. A arvore versionada"
+echo "2b. CONTROLO — o alcance: por rastrear entra, ignorado nao"
+SONDA_DIR="packages/db/src/__controlo_alcance"
+mkdir -p "$SONDA_DIR"
+printf "export const K = { API_KEY: 'sk_live_CONTROLO_0000000000' };\n" > "$SONDA_DIR/x.ts"
+if alvos | grep -q "^$SONDA_DIR/x.ts$"; then
+  ok "um ficheiro por rastrear entra na lista de alvos"
+else
+  erro "um ficheiro por rastrear NAO entra na lista - a varredura avisa tarde demais"
+fi
+rm -rf "$SONDA_DIR"
+if alvos | grep -q '^node_modules/'; then
+  erro "ficheiros ignorados entraram na lista - isto vai encher-se de ruido"
+else
+  ok "os ignorados ficam de fora, como devem"
+fi
+
+echo
+echo "3. A arvore versionada E o que esta prestes a entrar"
 varrer || true
 [ "$falhas" -eq 0 ] && ok "nenhum segredo na arvore"
 
