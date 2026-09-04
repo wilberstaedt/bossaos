@@ -38,6 +38,24 @@ if ! command -v gh >/dev/null 2>&1; then
   exit 0
 fi
 
+# ── Antes de ler o semaforo: ele cobre o que eu tenho? ──────────────────────
+#
+# A 04/09 li a CI vermelha durante tres ticks e a correccao ja existia - estava
+# COMMITADA e por empurrar. O semaforo falava de um passado que ja nao era o
+# presente, e eu tratava a leitura como actual.
+#
+# Um verde que nao inclui o meu trabalho nao me diz nada sobre ele; um vermelho
+# tambem nao. As duas leituras sao NAO MEDI enquanto houver commits por empurrar.
+a_frente=$(git rev-list --count '@{upstream}..HEAD' 2>/dev/null || true)
+a_frente=${a_frente:-0}
+if [ "$a_frente" -gt 0 ] 2>/dev/null; then
+  pend "ha $a_frente commit(s) por empurrar — o semaforo nao os viu"
+  echo "           Empurra antes de o ler: a corrida que existe fala de outro codigo."
+  echo
+  echo "  NAO MEDI o que interessa."
+  exit 0
+fi
+
 # A corrida mais recente do ramo. Nao filtro pelo SHA de proposito: se ha uma
 # corrida vermelha mais nova do que o meu commit, o problema existe na mesma.
 estado=$(gh run list --limit 1 --json conclusion,status,displayTitle 2>/dev/null \
