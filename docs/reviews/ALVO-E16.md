@@ -89,12 +89,15 @@ ONB-008   REP-009   SET-005   SET-006   STATE-012
 navegação a seguir escreve o id das 19 secções em todas as páginas, e o selector
 ficava sempre satisfeito. Assinei porque o endereço final cobre o essencial.
 
-Aqui **não passa**. Duas coisas:
+**JÁ RESOLVIDO no fim do E15, e melhor do que eu tinha pedido** (`63cdaaf`):
+`data-tela` passa a significar *«esta página identifica-se a si própria»* e as
+ligações levam `data-seccao`. Verifiquei com o ataque que antes ficava verde e
+agora falha por asserção. Ao corrigir apareceu que o **STAFF-001 nunca teve
+marcador** — passava pela navegação.
 
-1. **Ancora o marcador ao cabeçalho** — `h1[data-tela="KDS-00N"]`, não à página.
-2. **Prova que ele consegue falhar.** Tira o marcador a **uma tela que não seja
-   índice** e mostra a asserção a ficar vermelha. Se ficar verde, o marcador é
-   decoração e é melhor não o ter do que ter um que mente.
+**Aqui só tens de não o desfazer:** as telas do KDS identificam-se pelo próprio
+cabeçalho, e o controlo negativo 9 (tirar o `data-tela` e exigir que acenda)
+cobre-as também.
 
 O segundo ponto é o que me custou três enganos a descobrir no E15 — e o meu
 próprio controlo negativo estava apontado à única tela onde a avaria não podia
