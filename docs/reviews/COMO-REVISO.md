@@ -375,3 +375,46 @@ corrigindo os comentários em vez de os apagar.
 
 Essa última é a mais rara e a que mais quero ver outra vez. Uma causa provável escrita como
 causa provada é uma armadilha para quem ler a seguir.
+
+## A base de dados de quem revê — 04/09
+
+Durante treze etapas revi contra a **mesma base onde o JR trabalha**. Custou
+duas vezes num só dia: as minhas provas semearam e truncaram por baixo dele, e
+um script meu morto a meio deixou uma função da base sem a lógica que a migração
+declarava — dois testes dele passaram a falhar por causa de algo que eu parti a
+medir. Tinha separado o porto (`PORTA_INSPECCAO`) e deixado a base partilhada,
+que é a metade que mexe em dados.
+
+`scripts/base-de-revisao.sh` cria a `bossaos_revisao`, das migrações. A
+`bossaos_test` não servia: **tem um trabalho, que é estar vazia**, e é o controlo
+negativo do `provar-prontidao.sh` — enchê-la cegava essa prova.
+
+```
+eval "$(bash scripts/base-de-revisao.sh --exportar)"
+bash scripts/provar-<o-que-for>.sh
+```
+
+### Mas a base nova não é «a melhor». São perguntas diferentes.
+
+Foi disto que quase me esqueci, e teria sido o erro mais caro dos dois:
+
+- **`bossaos_revisao` responde a comportamento.** Semear, inserir, atacar,
+  truncar. É construída das migrações, portanto é o schema **declarado**.
+- **`bossaos_dev` responde a desvio.** *O que está vivo é o que está escrito?*
+
+O defeito da idempotência de 04/09 **só era visível na segunda**: a migração
+tinha a lógica, a base viva não tinha. Uma revisão que corresse apenas contra a
+base construída das migrações nunca o teria encontrado — teria comparado a
+declaração consigo própria e chamado verde a isso. É a forma de verde vazio de
+que mais gosto de me esquecer: **o instrumento e o alvo saídos da mesma fonte.**
+
+Quem revê usa as duas, e diz em cada prova qual está a usar.
+
+### Como soube que a separação era real
+
+Não porque o script imprimiu «Pronto» — ele imprimiu «Pronto» com duas
+declarações SQL a falhar. Criei um marcador na base de revisão, confirmei que
+existia lá (`t`) e que **não existia** na base do JR (`f`), e li
+`current_database()` nas duas pontas. Uma escrita de um lado ausente do outro é
+a única coisa que prova separação; dois URLs diferentes não provam nada, porque
+podem apontar ao mesmo sítio.
