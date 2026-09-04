@@ -1,44 +1,26 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E13 — sala, sessões, dispositivos e PIN (**17 telas**, não 16).
-**Estado:** implementado, **aguardando validação** — 04/09. Declarado, não assinado.
-**Régua:** `docs/reviews/ALVO-E13.md` — não mudou. Detalhe: `docs/progress/E13.md`.
+**Etapa atual:** E14 — motor de pedidos e entrega confiável (**20 telas**)
+**Estado:** autorizado 04/09.
+**Régua:** `docs/reviews/ALVO-E14.md`, escrita antes de existir código.
 
-**Dezassete e não dezasseis:** a régua e a autorização dizem 16; a matriz tem 17
-com `etapa_principal = E13`, e estão enumeradas no `inspeccao/sala.spec.ts`. As
-dezassete têm móvel medido.
+**A primeira etapa onde um defeito cobra dinheiro duas vezes** ou faz desaparecer
+o trabalho de alguém a meio de um serviço. Os três aceites são três formas da
+mesma coisa falhar: **duas escritas que se encontram**.
 
-**O defeito mais provável tem nome, e a resposta tem duas formas.** «Concorrência
-provada em SEQUÊNCIA»: duas aberturas com `await` entre elas medem que o segundo
-pedido viu o primeiro já gravado. A prova faz as duas coisas — `Promise.all` (o
-que o produto faz) **e duas transacções demonstravelmente abertas ao mesmo
-tempo**, com o bloqueio da segunda **medido** antes do `COMMIT` da primeira. A
-unicidade vem de um **índice único PARCIAL** na base, e o par é a condição de
-estado: sem ela, o aceite 1 passa e a mesa nunca mais volta a abrir.
+- **Aceite 1** carrega em «depois do commit»: gravar, a resposta perder-se, o
+  cliente reenviar. Com o par — **duas chaves diferentes criam dois pedidos**.
+- **Aceite 2** é o que perde trabalho em silêncio: ler, juntar, gravar o pedido
+  inteiro faz a **última escrita ganhar**. E «conflito **recuperável**» é a
+  palavra: um 409 que obriga a refazer tudo cumpre a letra e falha a pessoa.
+- **Aceite 3**: esgotado rejeita-se **com o carrinho preservado**.
 
-**A `validar-concorrencia.sh` estava CEGA em dois sítios, e saía a verde.** Corri-a
-antes de declarar, como mandaste, e ela disse «ainda não há prova de concorrência»
-com a prova no repositório:
-1. a busca é sensível a maiúsculas e **«concorrência» não contém «concorrent»** —
-   a palavra mais provável no cabeçalho de uma prova de concorrência era a que o
-   padrão não apanhava;
-2. a verificação do índice casava com **`sessions_token_key` do E04** e passava
-   desde antes de o E13 existir. Medido: degradei o índice a serio para índice
-   normal e ela continuou verde.
+**A pergunta de dinheiro que trago do contrato e ainda não foi decidida:** um
+pedido escrito **offline** e aceite mais tarde cobra ao preço de quando foi
+escrito, ou de quando chegou? O aceite 3 protege linhas já aceites — ali a linha
+ainda não tinha sido aceite quando o preço mudou.
 
-Corrigida: exige um índice **UNIQUE, sobre `table_sessions`, e PARCIAL**; as duas
-verificações **provam-se a si próprias** antes de julgar; e a ausência de prova
-passa a ser **FALHA** a partir do E13, em vez de pendência. Verificada a morder em
-três degradações.
-
-**A regra 3-bis do `offline-e-fila-local` fica DECIDIDA:** a revogação **descarta**
-a fila local, e diz-se **ao revogar**, com o número de rascunhos quando o aparelho
-o declarou e «não sei» quando nunca reportou. Pendência declarada: quem preenche
-esse número é a fila local, do E15/E16.
-
-**E12 VALIDADO à 2ª.** A 1ª assinatura foi minha e foi retirada: assinei sobre um
-verde só local. A prova **herdava** o plano da base em vez de o estabelecer, e
-passava aqui por acumulação. Agora estabelece-o **e verifica-o antes de medir**.
+**E13 VALIDADO à 2ª** — 17 telas. `docs/progress/E13.md`.
 
 **E11 — MARCO DO STARTER APROVADO à 2ª.** Reprovado à 1ª com seis falhas, todas de
 medição e duas de assinatura minha. Fechadas e **reprovadas por comando**:
