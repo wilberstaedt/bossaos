@@ -293,6 +293,34 @@ E o corolário que dói mais: **passei a noite a exigir que quem suja apanhe a s
 seguir sujei a base de desenvolvimento a meio do trabalho do JR.** A reparação certa não
 foi remendar — foi deitar fora e reconstruir do que é verdade.
 
+## A guarda que eu escrevi contra o verde vazio estava verde sobre nada
+
+A 04/09 construí a `validar-concorrencia.sh` para apanhar o defeito que a régua do
+E13 nomeia — concorrência provada em sequência. O executor correu-a antes de
+declarar, como lhe pedi, e ela disse **«ainda não há prova de concorrência»** com a
+prova no repositório, saindo a **zero**. Duas cegueiras independentes, ambas a
+passar por verde.
+
+**A primeira fui eu a criá-la a corrigir outra coisa.** A busca original era
+`concorrent|concorrên|concorrenc|simultân`. Apertei-a para evitar falsos positivos
+e deixei `concorrent|simultân` — e **«concorrência» não contém «concorrent»**. A
+palavra mais provável no cabeçalho de uma prova de concorrência era precisamente a
+que eu tinha acabado de remover. Corrigi um falso positivo e criei um falso
+negativo, que é a troca pior.
+
+**A segunda nunca mediu nada.** `CREATE UNIQUE INDEX.*(sess|mesa|floor|table)`
+casava com `sessions_token_key` do E04 — um índice da tabela de sessões de
+**autenticação**, sem relação nenhuma com mesas. A verificação estava verde desde
+antes de a etapa existir. E ele não o deduziu: **degradou o índice a sério** e viu
+a guarda continuar a afirmar que havia um.
+
+**A regra que fica, e é sobre mim:** uma guarda que procura por *palavra* e valida
+por *padrão largo* é uma guarda que se auto-aprova. As duas verificações passaram a
+provar-se a si próprias antes de julgar — e a ausência de prova passou de
+«pendência que sai a zero» a **falha**, a partir da etapa que a exige. Pendência
+com saída zero é verde sobre população zero com outro nome, e fui eu que a escrevi
+assim.
+
 ## O que bloqueia e o que não
 
 **Bloqueia:** afirmação do handoff que não se confirma; dependência externa simulada com
