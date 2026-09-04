@@ -557,3 +557,19 @@ Nenhum álibi calcificado. Mas a varredura passa a fazer-se **quando não houver
 nada a validar**, e não quando alguém se lembrar: uma nota de «fica por medir» é
 honesta no dia em que se escreve e vira desculpa no mês seguinte, e a diferença
 entre as duas não está no texto — está em alguém voltar lá.
+
+## Auditoria da matriz — 04/09
+
+A percentagem é a nossa estrela polar, e ninguém tinha auditado o que a produz.
+Fui ver as **197 telas validadas**:
+
+- **Evidência curta ou vazia: zero.** Nenhuma tela está marcada validada sem
+  texto que diga com que prova.
+- **83 sem a palavra «VALIDADO» na evidência** — todas das etapas **E02 a E09**.
+  Não é lacuna: é a convenção antiga, de antes de eu passar a escrever «VALIDADO
+  a DD/MM pelo sénior». A evidência delas nomeia o script, o número de falhas e a
+  medição móvel nas cinco larguras.
+
+Nada a corrigir. Fica registado para que a diferença de formato não seja lida
+como buraco por quem varrer isto a seguir — **um falso alarme documentado custa
+menos do que o mesmo susto outra vez.**
