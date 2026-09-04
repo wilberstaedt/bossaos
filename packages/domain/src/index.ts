@@ -68,6 +68,11 @@ export {
 } from './precos.ts';
 
 export {
+  MENSALIDADES_NUM_ANO, IMPOSTOS_INCLUIDOS, MOEDA_COMERCIAL, precoDoPlano, coresPublicasDoPlano,
+  planosComAnualIncoerente, type CodigoDePlano, type PrecoDePlano,
+} from './precificacao.ts';
+
+export {
   validarGrupo, validarEscolhas,
   type GrupoDeModificadores, type ErroDeEscolha,
 } from './modificadores.ts';

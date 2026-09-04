@@ -133,13 +133,25 @@ describe('quota: o par que decide', () => {
 
 // ═══════════════════════════════════════════════════════════════════════════
 describe('tema Starter: recusa coerente E não altera dados', () => {
-  const CORES = { primaria: '#1B3A2F', acento: '#C4522E', fundo: '#FBF9F4' };
+  /**
+   * Quem publicou. `guardarTema` passou a exigi-lo no E12: um tema no ar sem
+   * responsável era a única publicação do produto sem rasto.
+   */
+  const AUTOR_DA_PROVA = 'prova@bossaos.example';
+
+  /**
+   * Em minúsculas: desde o E12 o produto **normaliza** a cor para `#rrggbb` antes
+   * de gravar. `#1B3A2F` e `#1b3a2f` são a mesma cor, e guardar as duas formas
+   * fazia a comparação «há alterações por publicar?» dizer que sim para sempre.
+   * A prova afirma a forma GUARDADA, não a que se escreveu.
+   */
+  const CORES = { primaria: '#1b3a2f', acento: '#c4522e', fundo: '#fbf9f4' };
 
   it('o Starter não grava cores próprias — e nada fica gravado', async () => {
     const antes = await comA((db) => temaActivo(db, IDS.orgA));
 
     const r = await comA(async (db) =>
-      guardarTema(db, IDS.orgA, await estadoComercial(db, IDS.orgA), CORES));
+      guardarTema(db, IDS.orgA, await estadoComercial(db, IDS.orgA), CORES, AUTOR_DA_PROVA));
 
     assert.ok(!r.ok);
     assert.equal(r.motivo, 'plano', 'nega por PLANO, não por permissão nem por contraste');
@@ -154,7 +166,7 @@ describe('tema Starter: recusa coerente E não altera dados', () => {
 
   it('o Pro grava — é o par outra vez', async () => {
     const r = await comB(async (db) =>
-      guardarTema(db, IDS.orgB, await estadoComercial(db, IDS.orgB), CORES));
+      guardarTema(db, IDS.orgB, await estadoComercial(db, IDS.orgB), CORES, AUTOR_DA_PROVA));
     assert.ok(r.ok, 'sem este caso, um sistema que nega tudo passaria no anterior');
 
     const tema = await comB((db) => temaActivo(db, IDS.orgB));
@@ -173,14 +185,14 @@ describe('tema Starter: recusa coerente E não altera dados', () => {
     const r = await comB(async (db) =>
       guardarTema(db, IDS.orgB, await estadoComercial(db, IDS.orgB), {
         primaria: '#858585', fundo: '#858585',
-      }));
+      }, AUTOR_DA_PROVA));
     assert.ok(!r.ok);
     assert.equal(r.motivo, 'contraste');
   });
 
   it('descer de plano repõe o padrão e GUARDA o tema anterior', async () => {
     await comB(async (db) =>
-      guardarTema(db, IDS.orgB, await estadoComercial(db, IDS.orgB), CORES));
+      guardarTema(db, IDS.orgB, await estadoComercial(db, IDS.orgB), CORES, AUTOR_DA_PROVA));
 
     const r = await comB((db) => reverterAoPadrao(db, IDS.orgB));
     assert.ok(r.revertido);
@@ -198,7 +210,7 @@ describe('tema Starter: recusa coerente E não altera dados', () => {
 
   it('a prévia da descida corresponde ao que vai acontecer', async () => {
     await comB(async (db) =>
-      guardarTema(db, IDS.orgB, await estadoComercial(db, IDS.orgB), CORES));
+      guardarTema(db, IDS.orgB, await estadoComercial(db, IDS.orgB), CORES, AUTOR_DA_PROVA));
 
     const previa = await comB(async (db) => {
       // O estado comercial DEPOIS: sem a capacidade de cores próprias.

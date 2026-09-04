@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
+import type { CSSProperties } from 'react';
 import type { SitePublico } from '@bossaos/domain';
+import { variaveisDoTema, type TemaPublico } from '@bossaos/ui';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 
 /**
@@ -31,6 +33,16 @@ export interface MolduraDoSiteProps {
   unidade: string;
   marca: string;
   site: SitePublico;
+  /**
+   * O tema do restaurante, já lido da porta pública.
+   *
+   * Entra por parâmetro e não é lido aqui: quem serve a página já foi à base
+   * buscar a carta ou o site, e uma segunda leitura por componente seria uma
+   * consulta por cada moldura. E entra **obrigatório** — um tema opcional acaba
+   * por ser esquecido numa das páginas, e o sintoma é o restaurante ver as cores
+   * dele em três páginas e a paleta BossaOS na quarta.
+   */
+  tema: TemaPublico;
   /** Qual das secções está aberta, para o `aria-current`. */
   actual?: 'INICIO' | 'SOBRE' | 'CONTACTO' | 'NOVIDADES' | 'CARTA';
   /**
@@ -47,7 +59,7 @@ export interface MolduraDoSiteProps {
 }
 
 export function MolduraDoSite({
-  slug, idioma, unidade, marca, site, actual, caminho = '', children,
+  slug, idioma, unidade, marca, site, tema, actual, caminho = '', children,
 }: MolduraDoSiteProps) {
   const m = mensagensDe(idioma);
   const s = m.sitioE10;
@@ -55,7 +67,7 @@ export function MolduraDoSite({
   const rotulo = { INICIO: s.inicio, SOBRE: s.sobre, CONTACTO: s.contacto } as const;
 
   return (
-    <div className="bo-publico">
+    <div className="bo-publico" style={variaveisDoTema(tema) as CSSProperties}>
       <header className="bo-publico__cabecalho">
         <p className="bo-estado__sobrancelha">{marca}</p>
         <h1>{unidade}</h1>

@@ -29,7 +29,7 @@
  *   ./scripts/plataforma.mjs conceder <orgSlug> <capacidade> [--quota N] [--ate AAAA-MM-DD] --motivo "<texto>"
  *   ./scripts/plataforma.mjs revogar <orgSlug> <capacidade> --motivo "<texto>"
  *   ./scripts/plataforma.mjs flag <nome> <ligada|desligada> [--org <orgSlug>]
- *   ./scripts/plataforma.mjs agendar-descida <orgSlug> <codigo> <AAAA-MM-DD> --motivo "<texto>"
+ *   ./scripts/plataforma.mjs agendar-descida <orgSlug> <codigo> <AAAA-MM-DD> [--unidade <slug>] --motivo "<texto>"
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -195,20 +195,72 @@ try {
     case 'agendar-descida': {
       const [, slug, codigo, quando] = argv;
       if (!slug || !codigo || !quando) {
-        console.error('uso: agendar-descida <orgSlug> <codigo> <AAAA-MM-DD> --motivo "<texto>"'); process.exit(2);
+        console.error('uso: agendar-descida <orgSlug> <codigo> <AAAA-MM-DD> [--unidade <slug>] --motivo "<texto>"'); process.exit(2);
+      }
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(quando)) {
+        console.error(`data inválida: ${quando}. Escreve AAAA-MM-DD.`); process.exit(2);
       }
       const motivo = exigirMotivo();
       const org = await orgPorSlug(slug);
-      const r = await sql.query(
-        `UPDATE subscriptions
-            SET descer_para_plano_id = (SELECT id FROM plan_definitions WHERE codigo = $2),
-                descer_em = $3, updated_at = now()
-          WHERE organization_id = $1`, [org.id, codigo, new Date(quando)]);
-      if (r.rowCount === 0) { console.error(`${org.nome} não tem subscrição`); process.exit(1); }
-      await auditar(org.id, 'plataforma.descida.agendada', { para: codigo, em: quando }, motivo);
+
+      // ── Qual é o fuso? A pergunta não tinha resposta e ninguém a fazia ────
+      //
+      // A versão anterior escrevia `new Date('2026-10-31')`, que é meia-noite
+      // UTC. Numa unidade a oeste de Greenwich isso cai no **dia anterior**, e o
+      // restaurante perdia as cores um dia antes do que lhe foi dito.
+      //
+      // Agora a data é convertida pelo fuso DA UNIDADE, e por isso é preciso
+      // saber qual. Uma organização com unidades em fusos diferentes não tem
+      // "a data" nenhuma: recusa e pede `--unidade`, em vez de escolher uma às
+      // escondidas. Ausência de resposta não é resposta.
+      const unidadeSlug = opcao('unidade');
+      const { rows: unidades } = await sql.query(
+        `SELECT id, slug, nome, fuso FROM locations
+          WHERE organization_id = $1 AND archived_at IS NULL ORDER BY slug`, [org.id]);
+      if (unidades.length === 0) {
+        console.error(`${org.nome} não tem nenhuma unidade viva`); process.exit(1);
+      }
+      let unidade;
+      if (unidadeSlug) {
+        unidade = unidades.find((u) => u.slug === unidadeSlug);
+        if (!unidade) { console.error(`unidade ${unidadeSlug} não é de ${org.nome}`); process.exit(1); }
+      } else {
+        const fusos = [...new Set(unidades.map((u) => u.fuso))];
+        if (fusos.length > 1) {
+          console.error(
+            `${org.nome} tem unidades em fusos diferentes (${fusos.join(', ')}). ` +
+            'Diz em qual: --unidade <slug>. Escolher por ti daria a data errada a uma delas.');
+          process.exit(1);
+        }
+        unidade = unidades[0];
+      }
+
+      // A conversão é da BASE (`agendar_descida`), e não daqui. Duas contas dão
+      // o mesmo resultado até ao dia em que uma delas mudar.
+      const { rows } = await sql.query(
+        'SELECT agendar_descida($1::uuid, $2::text, $3::date, $4::uuid) AS r',
+        [org.id, codigo, quando, unidade.id]);
+      const veredicto = rows[0]?.r;
+      if (veredicto !== 'agendada') {
+        const explicacao = {
+          sem_fuso: `a unidade ${unidade.slug} não tem fuso configurado, portanto não há "dia" nenhum em que isto aconteça`,
+          plano_desconhecido: `não há plano com o código ${codigo}`,
+          sem_subscricao: `${org.nome} não tem subscrição`,
+          unidade_desconhecida: `a unidade ${unidade.slug} não é desta organização`,
+        }[veredicto] ?? veredicto;
+        console.error(`não agendei: ${explicacao}`); process.exit(1);
+      }
+
+      const { rows: confirmacao } = await sql.query(
+        'SELECT descer_em FROM subscriptions WHERE organization_id = $1', [org.id]);
+      await auditar(org.id, 'plataforma.descida.agendada',
+        { para: codigo, em: quando, unidade: unidade.slug, fuso: unidade.fuso,
+          instante: confirmacao[0]?.descer_em }, motivo);
       // Quem efectiva é o trabalho de fundo, e só depois de a data chegar e de
       // não haver operações abertas. Aqui só se agenda.
-      console.log(`${org.nome}: descida para ${codigo} agendada para ${quando}. O worker efectiva-a.`);
+      console.log(
+        `${org.nome}: descida para ${codigo} agendada para ${quando} à meia-noite de ` +
+        `${unidade.fuso} (${unidade.slug}). O worker efectiva-a.`);
       break;
     }
 

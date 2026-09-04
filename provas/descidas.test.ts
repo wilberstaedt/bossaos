@@ -65,7 +65,17 @@ async function limpar(organizationId: string) {
 
 const ONTEM = () => new Date(Date.now() - 24 * 60 * 60 * 1000);
 const AMANHA = () => new Date(Date.now() + 24 * 60 * 60 * 1000);
-const CORES = { primaria: '#1B3A2F', acento: '#B4472E', fundo: '#FFFFFF' };
+/** Quem publicou. `guardarTema` passou a exigi-lo no E12: um tema no ar sem
+ * responsável era a única publicação do produto sem rasto. */
+const AUTOR_DA_PROVA = 'prova@bossaos.example';
+
+/**
+ * Em minúsculas: desde o E12 o produto **normaliza** a cor para `#rrggbb` antes
+ * de gravar. `#1B3A2F` e `#1b3a2f` são a mesma cor, e guardar as duas formas
+ * fazia a comparação «há alterações por publicar?» dizer que sim para sempre.
+ * A prova afirma a forma GUARDADA, não a que se escreveu.
+ */
+const CORES = { primaria: '#1b3a2f', acento: '#b4472e', fundo: '#ffffff' };
 
 before(async () => {
   sql = new Client({ connectionString: MIG });
@@ -100,7 +110,7 @@ describe('1. O par entre superfícies: o que a rota recusa, o job recusa', () =>
 
     const { permitidoNaRota, previa } = await comA(async (db) => {
       const estado = await estadoComercial(db, IDS.orgA);
-      const gravado = await guardarTema(db, IDS.orgA, estado, CORES);
+      const gravado = await guardarTema(db, IDS.orgA, estado, CORES, AUTOR_DA_PROVA);
       assert.equal(gravado.ok, true, 'com o direito válido, a rota tinha de gravar');
       return {
         permitidoNaRota: gravado.ok,
@@ -125,7 +135,7 @@ describe('1. O par entre superfícies: o que a rota recusa, o job recusa', () =>
     const r = await comA(async (db) => {
       const estado = await estadoComercial(db, IDS.orgA);
       return {
-        rota: await guardarTema(db, IDS.orgA, estado, CORES),
+        rota: await guardarTema(db, IDS.orgA, estado, CORES, AUTOR_DA_PROVA),
         // A MESMA leitura, no caminho que o worker percorre.
         job: podeCapacidade(estado, { capacidade: 'tema.coresProprias', intencao: 'usar' }),
       };
@@ -151,7 +161,7 @@ describe('1. O par entre superfícies: o que a rota recusa, o job recusa', () =>
       const r = await comA(async (db) => {
         const estado = await estadoComercial(db, IDS.orgA);
         return {
-          rota: await guardarTema(db, IDS.orgA, estado, CORES),
+          rota: await guardarTema(db, IDS.orgA, estado, CORES, AUTOR_DA_PROVA),
           job: podeCapacidade(estado, { capacidade: 'tema.coresProprias', intencao: 'usar' }),
         };
       });
@@ -188,7 +198,7 @@ describe('2. A descida agendada, efectivada pelo trabalho de fundo', () => {
   it('agendada para ONTEM: efectiva, reverte o tema e PRESERVA o anterior', async () => {
     await comA(async (db) => {
       const estado = await estadoComercial(db, IDS.orgA);
-      const g = await guardarTema(db, IDS.orgA, estado, CORES);
+      const g = await guardarTema(db, IDS.orgA, estado, CORES, AUTOR_DA_PROVA);
       assert.equal(g.ok, true, 'o Pro tinha de conseguir gravar cores');
     });
     await agendarDescida(IDS.orgA, 'STARTER', ONTEM());
@@ -220,7 +230,7 @@ describe('2. A descida agendada, efectivada pelo trabalho de fundo', () => {
   it('a prévia bate com o que fica aplicado, na data de teste', async () => {
     await comA(async (db) => {
       const estado = await estadoComercial(db, IDS.orgA);
-      await guardarTema(db, IDS.orgA, estado, CORES);
+      await guardarTema(db, IDS.orgA, estado, CORES, AUTOR_DA_PROVA);
     });
     const previa = await comA((db) => previaDeDescidaParaPlano(db, IDS.orgA, 'STARTER'));
     assert.equal(previa.perdeCoresProprias, true);
@@ -243,7 +253,7 @@ describe('2. A descida agendada, efectivada pelo trabalho de fundo', () => {
     await assinar(IDS.orgA, 'PRO');
     await comA(async (db) => {
       const estado = await estadoComercial(db, IDS.orgA);
-      await guardarTema(db, IDS.orgA, estado, CORES);
+      await guardarTema(db, IDS.orgA, estado, CORES, AUTOR_DA_PROVA);
     });
     await agendarDescida(IDS.orgA, 'RESTAURANT', ONTEM());
 

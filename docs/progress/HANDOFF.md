@@ -1,15 +1,32 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E12 — cores públicas e mudanças de plano (**7 telas**, `THEME 002-008`)
-**Estado:** autorizado 04/09, depois de o marco do Starter passar.
+**Estado:** **implementado, aguardando validação** — 04/09. Declarado, não assinado.
 **Régua:** `docs/reviews/ALVO-E12.md`, escrita antes de existir código · fonte dos
-planos e das cores em `docs/bossaos/PRECIFICACAO.md`.
+planos e das cores em `docs/bossaos/PRECIFICACAO.md`. Detalhe: `docs/progress/E12.md`.
 
-**As três coisas que o E12 tem de mostrar ao mesmo tempo:**
-1. Restaurant e Pro **mudam** a cor pública.
-2. O Starter **não consegue** — e não é um ecrã escondido, é o servidor a recusar.
-3. **O que não é personalizável continua a não ser**, mesmo no plano de cima:
-   tipografia, componentes e as cores dos ESTADOS não são do restaurante.
+**As três coisas que o E12 tinha de mostrar ao mesmo tempo, e onde estão:**
+1. Restaurant e Pro **mudam** a cor pública → `provar-tema.sh` grupos 1 e 7, e a cor
+   **calculada** pelo navegador na carta e no site em `provar-tema-no-navegador.sh`.
+2. O Starter **não consegue**, e é o **servidor** a recusar → a rota devolve **402** a
+   quem passe ao lado do ecrã (`tema.spec.ts`).
+3. **O que não é personalizável continua a não ser** → recusa por `motivo: 'token'`, e
+   a fronteira medida na SAÍDA: `variaveisDoTema` emite cinco variáveis, nenhuma de estado.
+
+**Aceite 3 — as três promessas.** Reverter na data (no **fuso da unidade**), preservar
+conteúdo, e **restaurar depois do upgrade**. A terceira deixou de ser intenção: o runtime
+perdeu `DELETE` e `UPDATE` em `theme_revisions` e ficou só com `UPDATE (activa)`.
+
+**Dois defeitos reais apanhados fora da etapa:**
+- `scripts/plataforma.mjs` agendava descidas à **meia-noite UTC**. A oeste de Greenwich a
+  data escrita caía no **dia anterior** — o restaurante perdia as cores um dia antes do que
+  lhe foi dito. Corrigido com `agendar_descida(...)`, que converte pelo fuso da unidade.
+- `PUT /api/org/<org>/tema` com `{"primaria":"red"}` devolvia **500**: `lerHex` atirava e
+  nenhuma prova mandava uma cor que não fosse hexadecimal. Agora é recusa com motivo.
+
+**Comandos do E12:** `./scripts/provar-tema.sh` (7 grupos, 29 casos, 6 defeitos plantados)
+e `./scripts/provar-tema-no-navegador.sh` (a cor calculada, 18 casos do tema + 2 sessões do
+arnês, 2 controlos negativos; faz três *builds* e demora alguns minutos).
 
 **E11 — MARCO DO STARTER APROVADO à 2ª.** Reprovado à 1ª com seis falhas, todas de
 medição e duas de assinatura minha. Fechadas e **reprovadas por comando**:

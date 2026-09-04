@@ -108,7 +108,10 @@ export {
 } from './planos.ts';
 
 export {
-  CAPACIDADE_DO_TEMA, temaActivo, guardarTema, reverterAoPadrao, previaDeDescida,
+  CAPACIDADE_DO_TEMA, temaActivo, temaPublico, guardarTema, reverterAoPadrao,
+  restaurarTemaAnterior, previaDeDescida, destinosPublicos, rascunhoDoTema,
+  guardarRascunho, publicarRascunho, descartarRascunho, historicoDoTema,
+  type RascunhoDoTema, type ResultadoDoRascunho, type ResultadoDaPublicacaoDeTema,
   type ResultadoDeGravacao,
 } from './tema.ts';
 

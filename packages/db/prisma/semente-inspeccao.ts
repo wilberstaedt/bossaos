@@ -26,9 +26,11 @@
 import { createHash } from 'node:crypto';
 import { projectarSite } from '@bossaos/domain';
 import { IDS } from './fixtures.ts';
-import { abrirPrisma, limpar, PREFIXO, SLUG_DE_INSPECCAO } from './inspeccao-comum.ts';
+import {
+  abrirPrisma, limpar, PREFIXO, SLUG_DE_INSPECCAO, SLUG_DE_INSPECCAO_B,
+} from './inspeccao-comum.ts';
 
-export { SLUG_DE_INSPECCAO };
+export { SLUG_DE_INSPECCAO, SLUG_DE_INSPECCAO_B };
 
 /** O convite que a tela AUTH-006 abre. Fixo, para a rota ser fixa. */
 export const TOKEN_DE_INSPECCAO = 'insp-convite-para-medir';
@@ -151,6 +153,154 @@ async function principal(): Promise<void> {
     const resultado = r[0]?.reservar_endereco_publico;
     if (resultado !== 'ok') {
       throw new Error(`não consegui reservar o endereço de inspecção: ${resultado}`);
+    }
+
+
+    // ── O SEGUNDO cenário público, no inquilino B (E12) ───────────────────
+    //
+    // A organização A é Starter e não pode ter cores próprias, portanto a rota
+    // pública dela serve sempre a paleta de origem. Medir ali a cor calculada
+    // pelo navegador dava verde contra o tema por omissão — o «verde sobre tema
+    // por omissão» que a régua do E12 reprova.
+    //
+    // A B é Pro. Este cenário é o MÍNIMO para haver uma carta no ar onde uma cor
+    // publicada se possa ver: uma categoria, um prato, uma revisão publicada e um
+    // endereço. Não se copia o cenário de A — o que interessa aqui é a cor, e uma
+    // segunda carta grande só tornava a inspecção mais lenta.
+    const catB = await prisma.category.create({
+      data: {
+        organizationId: IDS.orgB, brandId: IDS.marcaB,
+        nome: `${PREFIXO}Cocina de mercado`, ordem: 1,
+      },
+      select: { id: true },
+    });
+    const pratoB = await prisma.product.create({
+      data: {
+        organizationId: IDS.orgB, brandId: IDS.marcaB, categoryId: catB.id,
+        nome: `${PREFIXO}Arroz de sepia y alcachofas`,
+        descricao: 'Arroz seco de sepia con alcachofas de temporada, para dos personas.',
+        estado: 'ACTIVO',
+      },
+      select: { id: true },
+    });
+    await prisma.priceRule.create({
+      data: { organizationId: IDS.orgB, productId: pratoB.id, montanteMenor: 2400, moeda: 'EUR' },
+    });
+    await prisma.productChannel.create({
+      data: { organizationId: IDS.orgB, productId: pratoB.id, canal: 'CARTA', visivel: true },
+    });
+
+    const menuB = await prisma.menu.create({
+      data: {
+        organizationId: IDS.orgB, brandId: IDS.marcaB, locationId: IDS.unidadeB,
+        nome: `${PREFIXO}Carta Barcelona`, estado: 'ACTIVO',
+      },
+      select: { id: true },
+    });
+    await prisma.menuCategory.create({
+      data: { organizationId: IDS.orgB, menuId: menuB.id, categoryId: catB.id, ordem: 1 },
+    });
+    const revisaoB = await prisma.menuRevision.create({
+      data: {
+        organizationId: IDS.orgB, menuId: menuB.id, numero: 1,
+        conteudo: [{
+          productId: pratoB.id, nome: 'Arroz de sepia y alcachofas',
+          descricao: 'Arroz seco de sepia con alcachofas de temporada, para dos personas.',
+          precoMenor: 2400, moeda: 'EUR',
+          categoryId: catB.id, categoriaNome: 'Cocina de mercado',
+          alergenosPorDeclarar: 14,
+          alergenos: lista.map((a) => ({ codigo: a.codigo, estado: 'DESCONHECIDO' })),
+          variantes: [], media: [], preferencias: [],
+        }] as unknown as object,
+        criadaPor: 'inspeccao@exemplo.example',
+      },
+      select: { id: true },
+    });
+    await prisma.menuPublication.create({
+      data: {
+        organizationId: IDS.orgB, menuId: menuB.id, canal: 'CARTA',
+        revisionId: revisaoB.id, publicadaPor: 'inspeccao@exemplo.example',
+      },
+    });
+    const rB = await prisma.$queryRawUnsafe<{ reservar_endereco_publico: string }[]>(
+      `SELECT reservar_endereco_publico('${IDS.orgB}'::uuid, '${IDS.unidadeB}'::uuid, '${SLUG_DE_INSPECCAO_B}')`);
+    if (rB[0]?.reservar_endereco_publico !== 'ok') {
+      throw new Error(`não consegui reservar o endereço de B: ${rB[0]?.reservar_endereco_publico}`);
+    }
+    const cartaB = await prisma.$queryRawUnsafe<unknown[]>(
+      `SELECT * FROM publico_carta('${SLUG_DE_INSPECCAO_B}', 'CARTA'::"Canal")`);
+    if (cartaB.length === 0) {
+      throw new Error('a carta do inquilino B não responde depois de semeada');
+    }
+
+    // ── E um SITE em B, porque a cor primária não se vê na carta ──────────
+    //
+    // Medido: na carta pública não há um único elemento pintado com
+    // `--bo-publico-primaria`. O botão primário vive na home do site («Ver
+    // carta»), e é lá que a cor primária de um restaurante aparece de facto.
+    //
+    // Sem site em B, o arnês só conseguia ler o FUNDO calculado — e uma
+    // implementação que aplicasse o fundo e esquecesse a primária passava. É a
+    // mesma classe de defeito que a régua descreve: medir uma parte e dar a
+    // outra por medida.
+    const siteB = await prisma.site.upsert({
+      where: { organizationId_locationId: { organizationId: IDS.orgB, locationId: IDS.unidadeB } },
+      update: { seoTitulo: `${PREFIXO}Marina Barcelona`, estado: 'PUBLICADO' },
+      create: {
+        organizationId: IDS.orgB, locationId: IDS.unidadeB,
+        seoTitulo: `${PREFIXO}Marina Barcelona`,
+        seoDescricao: 'Cocina de mercado en la Barceloneta, con arroces al mediodía.',
+        estado: 'PUBLICADO', redes: [],
+      },
+      select: { id: true },
+    });
+    await prisma.sitePage.upsert({
+      where: {
+        organizationId_siteId_tipo: { organizationId: IDS.orgB, siteId: siteB.id, tipo: 'INICIO' },
+      },
+      update: { visivel: true },
+      create: {
+        organizationId: IDS.orgB, siteId: siteB.id, tipo: 'INICIO', visivel: true,
+        titulo: 'Marina Barcelona, arroces y producto de lonja cada mediodía',
+        corpo: 'La carta cambia con la lonja, y el arroz se encarga al llegar.',
+      },
+    });
+    const paginasB = await prisma.sitePage.findMany({
+      where: { siteId: siteB.id },
+      select: { tipo: true, visivel: true, titulo: true, corpo: true, contacto: true },
+    });
+    const conteudoB = projectarSite({
+      seoTitulo: `${PREFIXO}Marina Barcelona`,
+      seoDescricao: 'Cocina de mercado en la Barceloneta, con arroces al mediodía.',
+      redes: [],
+      paginas: paginasB.map((x) => ({
+        tipo: x.tipo as 'INICIO', visivel: x.visivel,
+        titulo: x.titulo, corpo: x.corpo, contacto: x.contacto,
+      })),
+      posts: [],
+    });
+    const ultimaB = await prisma.siteRevision.findFirst({
+      where: { siteId: siteB.id }, select: { numero: true }, orderBy: { numero: 'desc' },
+    });
+    const revisaoSiteB = await prisma.siteRevision.create({
+      data: {
+        organizationId: IDS.orgB, siteId: siteB.id, numero: (ultimaB?.numero ?? 0) + 1,
+        conteudo: conteudoB as unknown as object, criadaPor: 'inspeccao@exemplo.example',
+      },
+      select: { id: true },
+    });
+    await prisma.sitePublication.upsert({
+      where: { organizationId_siteId: { organizationId: IDS.orgB, siteId: siteB.id } },
+      update: { revisionId: revisaoSiteB.id, publicadaEm: new Date() },
+      create: {
+        organizationId: IDS.orgB, siteId: siteB.id, revisionId: revisaoSiteB.id,
+        publicadaPor: 'inspeccao@exemplo.example',
+      },
+    });
+    const doSiteB = await prisma.$queryRawUnsafe<unknown[]>(
+      `SELECT * FROM publico_site('${SLUG_DE_INSPECCAO_B}')`);
+    if (doSiteB.length === 0) {
+      throw new Error('o site do inquilino B não responde depois de semeado');
     }
 
     // ── O que as 66 telas da dívida de móvel precisam de encontrar ────────

@@ -48,7 +48,7 @@ export async function PUT(pedido: Request, ctx: { params: Promise<{ orgSlug: str
       ...(corpo.primaria ? { primaria: corpo.primaria } : {}),
       ...(corpo.acento ? { acento: corpo.acento } : {}),
       ...(corpo.fundo ? { fundo: corpo.fundo } : {}),
-    });
+    }, sessao.actor.email);
     if (gravado.ok) {
       await registar(db, sessao.contexto.organizationId, {
         accao: 'tema.publicado',

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { sitePublico } from '@bossaos/db';
+import { sitePublico, temaPublico } from '@bossaos/db';
 import { novidadeDoSite } from '@bossaos/domain';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraDoSite } from '../../../../../../src/componentes/SitePublico.tsx';
@@ -32,7 +32,11 @@ export default async function NovidadePublica({
     ? (locale as Idioma) : 'es-ES';
   const s = mensagensDe(idioma).sitioE10;
 
-  const servida = await sitePublico(obterBase(), publicLocationSlug);
+  const prisma = obterBase();
+  const servida = await sitePublico(prisma, publicLocationSlug);
+  // O tema tem de chegar à página. Ver `publico_tema` e a régua do E12: o ataque
+  // é ler a cor que o NAVEGADOR calcula, e não a que o CSS declara.
+  const tema = await temaPublico(prisma, publicLocationSlug);
   if (!servida) notFound();
 
   const novidade = novidadeDoSite(servida.site, postSlug);
@@ -41,7 +45,7 @@ export default async function NovidadePublica({
   return (
     <MolduraDoSite
       slug={publicLocationSlug} idioma={idioma} unidade={servida.unidade}
-      marca={servida.marca} site={servida.site} actual="NOVIDADES"
+      marca={servida.marca} site={servida.site} tema={tema} actual="NOVIDADES"
       caminho={`/news/${postSlug}`}
     >
       <article>

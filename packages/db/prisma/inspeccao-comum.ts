@@ -22,6 +22,22 @@ import { PrismaPg } from '@prisma/adapter-pg';
 export const SLUG_DE_INSPECCAO = 'insp-marina-oropesa';
 
 /**
+ * O SEGUNDO endereço público, no inquilino B — e é ele que torna o E12 mensurável.
+ *
+ * O cenário público inteiro vivia na organização A, que é **Starter**. Uma
+ * organização Starter não pode ter cores próprias, portanto a rota pública dela
+ * serve sempre a paleta BossaOS: medir lá a cor calculada pelo navegador daria
+ * verde contra o tema de origem e não mediria nada. É o «verde sobre tema por
+ * omissão» que a régua do E12 reprova à cabeça.
+ *
+ * A organização B é **Pro**. Com endereço público próprio, o arnês pode publicar
+ * uma cor pelo produto e voltar a ler a página — que é o ataque escrito na
+ * régua: *«leio a cor CALCULADA pelo navegador na rota pública, não a que o CSS
+ * declara»*.
+ */
+export const SLUG_DE_INSPECCAO_B = 'insp-marina-barcelona';
+
+/**
  * Prefixo só da inspecção — diferente do `e09-` das provas. Se partilhassem
  * prefixo, a limpeza de uma apagava o cenário da outra, e o sintoma seria uma
  * inspecção que falha consoante a ordem por que se correram os comandos.
@@ -48,6 +64,24 @@ export function abrirPrisma(): PrismaClient {
 export async function limpar(prisma: PrismaClient): Promise<void> {
   await prisma.$executeRawUnsafe(
     `UPDATE locations SET public_slug = NULL WHERE public_slug LIKE '${PREFIXO}%'`);
+  // ── O tema das duas organizações de fixtures ──────────────────────────
+  //
+  // A passagem do navegador PUBLICA um tema no inquilino B (é o que o E12 mede),
+  // e um tema publicado sobrevive à limpeza das outras tabelas — a organização é
+  // fixture, não leva prefixo. Sem estas linhas, a corrida seguinte encontrava a
+  // cor da anterior já lá e o «antes» do par deixava de ser o tema de origem.
+  //
+  // `restaura_de_id` primeiro: uma revisão de restauro aponta para outra, e a
+  // chave estrangeira é RESTRICT.
+  const FIXTURES = [
+    '11111111-1111-4111-8111-111111111111',
+    '22222222-2222-4222-8222-222222222222',
+  ].map((id) => `'${id}'`).join(',');
+  await prisma.$executeRawUnsafe(`
+    UPDATE theme_revisions SET restaura_de_id = NULL WHERE organization_id IN (${FIXTURES});
+    DELETE FROM theme_revisions WHERE organization_id IN (${FIXTURES});
+    DELETE FROM theme_drafts    WHERE organization_id IN (${FIXTURES});
+  `);
   await prisma.$executeRawUnsafe(`
     DELETE FROM public_slug_owners WHERE slug LIKE '${PREFIXO}%';
     DELETE FROM menu_views        WHERE revision_id IN (SELECT id FROM menu_revisions WHERE menu_id IN (SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%'));

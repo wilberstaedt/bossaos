@@ -100,6 +100,7 @@ model Organization {
   entitlements    EntitlementGrant[]
   featureFlags    FeatureFlag[]
   themeRevisions  ThemeRevision[]
+  themeDrafts     ThemeDraft[]
   onboarding      OnboardingProgress?
   scheduleDays    ScheduleDay[]
   scheduleExceptions ScheduleException[]
@@ -674,12 +675,57 @@ model ThemeRevision {
   padrao         Boolean  @default(false)
   /// Activa agora? Só uma por organização.
   activa         Boolean  @default(false)
+  /// Preenchido quando esta revisão nasceu de RESTAURAR outra, depois de uma
+  /// descida de plano ter revertido ao padrão.
+  ///
+  /// Restaurar cria revisão nova em vez de reactivar a antiga, e é de propósito:
+  /// a régua do E12 reprova «tema aplicado sem dizer de que revisão veio», e
+  /// reactivar apagava o facto de ter havido uma descida pelo meio — o histórico
+  /// passava a contar uma história que não aconteceu. Mesma decisão que o
+  /// `MenuRevision.restauraDeId` do E08.
+  restauraDeId   String?  @map("restaura_de_id") @db.Uuid
+  /// Quem pôs esta revisão no ar. As outras duas publicações do produto — carta
+  /// (E08) e site (E10) — registam-no desde que existem; a aparência era a única
+  /// que não dizia de onde veio.
+  publicadaPor   String   @default("") @map("publicada_por")
+  /// As superfícies públicas que este tema alcança, escritas quando se publica.
+  /// Não é decoração: quem lê a linha meses depois não tem como saber que a
+  /// carta e o site partilham o tema, e adivinhar isso pelo código de hoje é
+  /// adivinhar pelo código de hoje.
+  destinos       String[]
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  restauraDe   ThemeRevision?  @relation("restauroDeTema", fields: [organizationId, restauraDeId], references: [organizationId, id], onDelete: Restrict)
+  restauros    ThemeRevision[] @relation("restauroDeTema")
 
+  @@unique([organizationId, id], name: "tema_por_organizacao")
   @@index([organizationId, activa])
   @@map("theme_revisions")
+}
+
+/// O tema ainda por publicar (THEME-002, THEME-003).
+///
+/// Existe pela mesma razão que `Site` existe ao lado de `SiteRevision`: sem um
+/// sítio onde escolher cores sem as pôr na rua, "editar" e "publicar" são o
+/// mesmo acto e a prévia não tem nada para prever. Um por organização — o tema é
+/// da organização, e um rascunho por unidade prometia um override de unidade que
+/// o modelo não tem.
+model ThemeDraft {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @unique @map("organization_id") @db.Uuid
+  primaria       String
+  acento         String
+  fundo          String
+  /// Email de quem mexeu por último. O rascunho é partilhado pela equipa toda,
+  /// e sem isto ninguém sabe quem escolheu o roxo.
+  actualizadoPor String   @map("actualizado_por")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@map("theme_drafts")
 }
 
 /// Quem é da plataforma BossaOS.

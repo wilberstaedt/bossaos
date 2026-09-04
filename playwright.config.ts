@@ -52,14 +52,16 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: [/autenticar\.setup\.ts/, /painel\.spec\.ts/, /isolamento\.spec\.ts/],
+      testIgnore: [/autenticar\.setup\.ts/, /painel\.spec\.ts/, /isolamento\.spec\.ts/, /tema\.spec\.ts/],
       dependencies: ['preparar'],
     },
     {
       name: 'painel',
       // O isolamento entra aqui porque precisa das MESMAS sessões — a de A para
       // pedir, e a de B para o par que dá sentido à recusa.
-      testMatch: [/painel\.spec\.ts/, /isolamento\.spec\.ts/],
+      // E o tema do E12 pela mesma razão: precisa da sessão de A para a recusa
+      // e da de B para o par — e é em B, que é Pro, que existem cores próprias.
+      testMatch: [/painel\.spec\.ts/, /isolamento\.spec\.ts/, /tema\.spec\.ts/],
       use: { ...devices['Desktop Chrome'], storageState: FICHEIRO_DE_SESSAO },
       dependencies: ['preparar'],
     },

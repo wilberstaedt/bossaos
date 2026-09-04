@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
-import { Etiqueta } from '@bossaos/ui';
+import { Etiqueta, variaveisDoTema } from '@bossaos/ui';
 import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
-import { abertoAgora, cartaPublica, horarioPublico, registarConsulta } from '@bossaos/db';
+import { abertoAgora, cartaPublica, horarioPublico, registarConsulta, temaPublico } from '@bossaos/db';
 import { IDIOMAS_DE_CONTEUDO, procurarNaCarta, type IdiomaDeConteudo } from '@bossaos/domain';
 import { obterBase, obterLogger } from '../../../../../src/servidor.ts';
 
@@ -54,6 +54,16 @@ export default async function CartaPublica({
   // restaurante existe.
   if (!servida) notFound();
 
+  // ── O tema tem de CHEGAR aqui, e não só existir na base ────────────────
+  //
+  // A régua do E12 diz que o ataque é ler a cor que o NAVEGADOR calcula na rota
+  // pública. Até agora nenhuma rota pública aplicava tema: as cores estavam
+  // guardadas e a página servia a paleta BossaOS a toda a gente.
+  //
+  // É o mesmo defeito que o E09 escondeu — as classes existiam, o ficheiro é que
+  // não chegava à página —, com outro nome.
+  const tema = await temaPublico(prisma, publicLocationSlug);
+
   const horario = await horarioPublico(prisma, publicLocationSlug);
   const abertura = horario ? abertoAgora(horario) : null;
 
@@ -88,7 +98,7 @@ export default async function CartaPublica({
   const base = `/r/${publicLocationSlug}/${idioma}/menu`;
 
   return (
-    <div className="bo-publico">
+    <div className="bo-publico" style={variaveisDoTema(tema) as React.CSSProperties}>
       <header className="bo-publico__cabecalho">
         <p className="bo-estado__sobrancelha">{carta.marca}</p>
         <h1>{carta.unidade}</h1>

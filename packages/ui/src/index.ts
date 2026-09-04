@@ -16,6 +16,7 @@ export {
 
 export {
   TEMA_BOSSAOS, validarTema, tokensNaoPermitidos, variaveisDoTema,
+  normalizarCor, coresMalFormadas,
   type TemaPublico, type ResultadoDeTema, type VeredictoDeToken,
 } from './tema.ts';
 

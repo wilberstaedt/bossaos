@@ -1015,3 +1015,40 @@ label.bo-planos__item input[type="radio"] {
      apanhou-o na tela de equipa. */
   min-width: var(--bo-toque-publico);
 }
+
+/* ── E12 · a prévia do tema ────────────────────────────────────────────────
+   A prévia usa as classes da carta pública de propósito (ver `PreviaDoTema`).
+   O que este bloco faz é só ENQUADRAR: dar-lhe uma moldura, e no modo móvel
+   apertar a largura para os 360 px que a inspecção mede — que é onde uma cor de
+   fundo escura com texto claro se paga a sério. */
+.bo-previa {
+  border: 1px solid var(--bo-borda);
+  border-radius: var(--bo-raio-cartao);
+  overflow: hidden;
+  /* A prévia é conteúdo largo dentro de uma grelha. Sem isto estica a página e
+     ela passa a rolar na horizontal a 360 px — a mesma armadilha do E10. */
+  max-width: 100%;
+}
+.bo-previa .bo-publico {
+  /* O fundo do tema tem de pintar a moldura toda, senão a prévia mostra a cor
+     do painel à volta da cor do restaurante e quem olha compara a errada. */
+  background: var(--bo-publico-fundo);
+  color: var(--bo-publico-texto);
+  padding: var(--bo-espaco-lg);
+  gap: var(--bo-espaco-lg);
+}
+.bo-previa--movel { max-width: 360px; }
+.bo-previa--escritorio { max-width: 100%; }
+.bo-previa--escritorio .bo-publico { max-width: 100%; }
+
+.bo-previas { display: grid; gap: var(--bo-espaco-xl); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) {
+  .bo-previas { grid-template-columns: minmax(0, 360px) minmax(0, 1fr); align-items: start; }
+}
+
+/* A amostra pequena vive dentro de uma célula de tabela, ao lado do código da
+   cor. A grande (56 px) empurrava a linha para duas alturas a 360 px. */
+.bo-tema__amostra--pequena {
+  width: 20px; height: 20px; display: inline-block; vertical-align: middle;
+  margin-right: var(--bo-espaco-sm);
+}

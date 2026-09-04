@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+#
+# E12 · o ataque da régua, feito ao próprio produto.
+#
+# > *«Leio a cor CALCULADA pelo navegador na rota pública, não a que o CSS
+# > declara — foi assim que o E09 me escondeu uma carta servida sem folha de
+# > estilos.»*
+#
+# A prova de navegador (`inspeccao/tema.spec.ts`) lê `getComputedStyle` na carta
+# e no site de um inquilino Pro, antes e depois de publicar uma cor PELO PRODUTO.
+# Este script existe para responder à pergunta seguinte, que é a que interessa:
+# **e se o tema não chegasse à página, esta prova dava vermelho?**
+#
+# Dois defeitos plantados, um em cada superfície. Um instrumento que não falha
+# quando devia é um instrumento que diz verde sobre nada.
+set -uo pipefail
+cd "$(dirname "$0")/.."
+
+if [[ -f .env ]]; then set -a; . ./.env; set +a; fi
+: "${DATABASE_URL:?DATABASE_URL em falta}"
+: "${MIGRATION_DATABASE_URL:?MIGRATION_DATABASE_URL em falta}"
+
+NODE_ESPERADO="v$(tr -d ' \n' < .nvmrc)"
+NODE_ACTUAL="$(node --version)"
+if [[ "$NODE_ACTUAL" != "$NODE_ESPERADO" ]]; then
+  echo "ERRO: esta prova exige o Node do .nvmrc ($NODE_ESPERADO); em uso $NODE_ACTUAL." >&2
+  exit 2
+fi
+
+CARTA='apps/web/app/r/[publicLocationSlug]/[locale]/menu/page.tsx'
+MOLDURA='apps/web/src/componentes/SitePublico.tsx'
+ORIG_CARTA=$(mktemp); ORIG_MOLDURA=$(mktemp)
+cp "$CARTA" "$ORIG_CARTA"; cp "$MOLDURA" "$ORIG_MOLDURA"
+falhas=0
+
+verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
+vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
+
+restaurar() {
+  cp "$ORIG_CARTA" "$CARTA"; cp "$ORIG_MOLDURA" "$MOLDURA"
+  rm -f "$ORIG_CARTA" "$ORIG_MOLDURA"
+}
+trap restaurar EXIT INT TERM
+
+# O `-g` apanha os grupos do tema; o `--project=preparar` abre as duas sessões.
+correr() {
+  pnpm exec playwright test --project=preparar --project=painel \
+    -g 'tema|cor publicada|Starter não consegue|PAR da recusa|contraste é recusado' \
+    --reporter=list >"$1" 2>&1
+}
+
+# Exige vermelho E que caia a asserção certa. Um build partido lê-se aqui
+# exactamente como um tema que não chega à página, e não é a mesma coisa.
+exigir_vermelho() {
+  local nome="$1" marcador="$2" ficheiro="$3"
+  if correr "$ficheiro"; then
+    vermelho "$nome: ficou VERDE com o defeito plantado"
+    return
+  fi
+  if grep -qE "✘.*$marcador" "$ficheiro"; then
+    verde "$nome"
+  else
+    vermelho "$nome: ficou vermelha, mas não foi a asserção esperada"
+    grep -E '✘' "$ficheiro" | head -4
+  fi
+}
+
+echo "1. Com tudo ligado"
+if correr /tmp/bossaos-tema-nav-ligado.txt; then
+  passou=$(grep -oE '[0-9]+ passed' /tmp/bossaos-tema-nav-ligado.txt | grep -oE '[0-9]+' || echo 0)
+  if (( passou < 20 )); then
+    vermelho "VERDE COM POUCO MEDIDO: só $passou casos"; exit 1
+  fi
+  verde "$passou casos de navegador verdes"
+else
+  vermelho "a prova de navegador falhou com tudo ligado"
+  grep -E '✘|Error' /tmp/bossaos-tema-nav-ligado.txt | head -10
+  exit 1
+fi
+
+echo
+echo "2. CONTROLO NEGATIVO — a CARTA deixa de aplicar o tema"
+# É literalmente o defeito que o E09 escondeu do revisor: a marcação certa, a
+# página a responder 200, e o estilo a não chegar. Se a prova continuar verde, o
+# que ela mede é o CSS declarado e não a cor calculada.
+python3 - <<'PY'
+import io
+p = 'apps/web/app/r/[publicLocationSlug]/[locale]/menu/page.tsx'
+s = io.open(p, encoding='utf-8').read()
+antigo = '<div className="bo-publico" style={variaveisDoTema(tema) as React.CSSProperties}>'
+assert antigo in s, 'a carta não aplica o tema onde se esperava'
+# O tema deixa de CHEGAR ao elemento, mas a chamada e a variavel continuam
+# usadas: sem isso o `noUnusedLocals` parte o build, e um build partido le-se
+# aqui exactamente como um tema que nao chega a pagina. Nao e a mesma coisa.
+novo = '<div className="bo-publico" data-tema={Object.keys(variaveisDoTema(tema)).length}>'
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, novo))
+PY
+exigir_vermelho "caiu a leitura do fundo calculado na carta" \
+  'DEPOIS: o navegador calcula as cores novas' /tmp/bossaos-tema-nav-carta.txt
+cp "$ORIG_CARTA" "$CARTA"
+
+echo
+echo "3. CONTROLO NEGATIVO — o SITE deixa de aplicar o tema"
+# A cor primária não aparece na carta: aparece no botão da home. Sem este
+# segundo controlo, uma implementação que aplicasse o fundo e esquecesse a
+# primária passava — medir uma parte e dar a outra por medida.
+python3 - <<'PY'
+import io
+p = 'apps/web/src/componentes/SitePublico.tsx'
+s = io.open(p, encoding='utf-8').read()
+antigo = 'style={variaveisDoTema(tema) as CSSProperties}'
+assert antigo in s, 'a moldura do site não aplica o tema onde se esperava'
+# `{} as CSSProperties` mantem o tipo importado em uso — sem isso o build parte
+# por outro motivo, e um build partido nao prova nada sobre o tema.
+novo = 'style={{} as CSSProperties} data-tema={Object.keys(variaveisDoTema(tema)).length}'
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, novo, 1))
+PY
+exigir_vermelho "caiu a leitura da primária calculada no site" \
+  'DEPOIS: o navegador calcula as cores novas' /tmp/bossaos-tema-nav-site.txt
+cp "$ORIG_MOLDURA" "$MOLDURA"
+
+echo
+echo "4. Reposto — tem de voltar ao verde"
+if correr /tmp/bossaos-tema-nav-reposto.txt; then
+  passou=$(grep -oE '[0-9]+ passed' /tmp/bossaos-tema-nav-reposto.txt | grep -oE '[0-9]+' || echo 0)
+  verde "reposto: $passou casos"
+else
+  vermelho "não voltou ao verde depois de repor"
+  grep -E '✘' /tmp/bossaos-tema-nav-reposto.txt | head -6
+fi
+
+echo
+if (( falhas == 0 )); then
+  printf '\033[32m%s\033[0m\n' "0 falhas"
+else
+  printf '\033[31m%s\033[0m\n' "$falhas falhas"
+fi
+exit "$falhas"

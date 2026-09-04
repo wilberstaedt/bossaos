@@ -1,6 +1,8 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { TEMA_BOSSAOS, tokensNaoPermitidos, validarTema, variaveisDoTema } from './tema.ts';
+import {
+  TEMA_BOSSAOS, coresMalFormadas, normalizarCor, tokensNaoPermitidos, validarTema, variaveisDoTema,
+} from './tema.ts';
 import { TOKENS_TEMAVEIS, estado, foco, tipografia } from './fichas.ts';
 
 describe('tema público', () => {
@@ -64,8 +66,34 @@ describe('tema público', () => {
     assert.ok(v?.cumpre, 'passa como gráfico');
   });
 
-  it('recusa cor inválida em vez de a tratar como preto', () => {
-    assert.throws(() => validarTema({ fundo: 'azul-marinho' }), /inválida/);
+  it('recusa cor inválida em vez de a tratar como preto — e sem ATIRAR', () => {
+    // ── Porque é que isto deixou de ser um `throws` (E12, 04/09) ──────────
+    //
+    // Atirar dava a resposta certa ao sítio errado: a rota que grava temas
+    // devolvia **500** a um pedido que só estava errado, e uma recusa que se lê
+    // como avaria manda quem a recebeu procurar no sítio errado. Medido contra a
+    // rota que existia desde o E05: `{"primaria":"red"}` → 500.
+    //
+    // A intenção do teste não muda — uma cor inválida não vira preto — mas a
+    // forma sim: reprovação com motivo, e a exceção fica para o que é mesmo
+    // impossível.
+    const r = validarTema({ fundo: 'azul-marinho' });
+    assert.equal(r.aprovado, false);
+    assert.match(r.reprovacoes.join(' '), /hexadecimal/);
+    // E não mediu contraste nenhum: não havia cor para medir.
+    assert.deepEqual(r.veredictos, []);
+  });
+
+  it('normaliza a forma da cor: #ABC, abc e #aabbcc são a mesma', () => {
+    // Guardar `#1B3A2F` numa porta e `#1b3a2f` noutra fazia a comparação «há
+    // alterações por publicar?» dizer que sim para sempre.
+    assert.equal(normalizarCor('#ABC'), '#aabbcc');
+    assert.equal(normalizarCor('aabbcc'), '#aabbcc');
+    assert.equal(normalizarCor('#AABBCC'), '#aabbcc');
+    assert.equal(normalizarCor('red'), null);
+    assert.equal(normalizarCor('red;--bo-foco:transparent'), null);
+    assert.equal(normalizarCor(undefined), null);
+    assert.deepEqual(coresMalFormadas({ primaria: '#fff', fundo: 'rgb(0,0,0)' }), ['fundo']);
   });
 
   it('a lista de tokens temáveis é curta e é a lista inteira', () => {

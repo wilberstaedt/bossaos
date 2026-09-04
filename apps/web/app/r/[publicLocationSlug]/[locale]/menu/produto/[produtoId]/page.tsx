@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
-import { Etiqueta } from '@bossaos/ui';
+import { Etiqueta, variaveisDoTema } from '@bossaos/ui';
 import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
-import { cartaPublica } from '@bossaos/db';
+import { cartaPublica, temaPublico } from '@bossaos/db';
 import { IDIOMAS_DE_CONTEUDO, produtoDaCarta, type IdiomaDeConteudo } from '@bossaos/domain';
 import { obterBase } from '../../../../../../../src/servidor.ts';
 
@@ -38,7 +38,11 @@ export default async function ProdutoPublico({
   const m = mensagensDe(idioma as Idioma);
   const c = m.publicoE09;
 
-  const servida = await cartaPublica(obterBase(), publicLocationSlug, 'CARTA', idioma);
+  const prisma = obterBase();
+  const servida = await cartaPublica(prisma, publicLocationSlug, 'CARTA', idioma);
+  // O tema tem de chegar à página. Ver `publico_tema` e a régua do E12: o ataque
+  // é ler a cor que o NAVEGADOR calcula, e não a que o CSS declara.
+  const tema = await temaPublico(prisma, publicLocationSlug);
   if (!servida) notFound();
 
   const produto = produtoDaCarta(servida.carta, produtoId);
@@ -50,7 +54,7 @@ export default async function ProdutoPublico({
   const rotulo = (chave: string) => (c as unknown as Record<string, string>)[chave] ?? chave;
 
   return (
-    <div className="bo-publico">
+    <div className="bo-publico" style={variaveisDoTema(tema) as React.CSSProperties}>
       <nav className="bo-publico__voltar">
         <a href={base}>{servida.carta.unidade}</a>
       </nav>

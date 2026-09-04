@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { sitePublico } from '@bossaos/db';
+import { sitePublico, temaPublico } from '@bossaos/db';
 import { paginaDoSite } from '@bossaos/domain';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraDoSite } from '../../../../../src/componentes/SitePublico.tsx';
@@ -32,7 +32,11 @@ export default async function SobrePublica({
     ? (locale as Idioma) : 'es-ES';
   const s = mensagensDe(idioma).sitioE10;
 
-  const servida = await sitePublico(obterBase(), publicLocationSlug);
+  const prisma = obterBase();
+  const servida = await sitePublico(prisma, publicLocationSlug);
+  // O tema tem de chegar à página. Ver `publico_tema` e a régua do E12: o ataque
+  // é ler a cor que o NAVEGADOR calcula, e não a que o CSS declara.
+  const tema = await temaPublico(prisma, publicLocationSlug);
   if (!servida) notFound();
 
   const pagina = paginaDoSite(servida.site, 'SOBRE');
@@ -41,7 +45,7 @@ export default async function SobrePublica({
   return (
     <MolduraDoSite
       slug={publicLocationSlug} idioma={idioma} unidade={servida.unidade}
-      marca={servida.marca} site={servida.site} actual="SOBRE" caminho="/about"
+      marca={servida.marca} site={servida.site} tema={tema} actual="SOBRE" caminho="/about"
     >
       <section className="bo-publico__heroi">
         <h1>{pagina.titulo ?? s.sobre}</h1>

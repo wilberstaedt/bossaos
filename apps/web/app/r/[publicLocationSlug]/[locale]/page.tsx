@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { sitePublico } from '@bossaos/db';
+import { sitePublico, temaPublico } from '@bossaos/db';
 import { paginaDoSite } from '@bossaos/domain';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraDoSite } from '../../../../src/componentes/SitePublico.tsx';
@@ -35,7 +35,11 @@ export default async function HomePublica({
   const m = mensagensDe(idioma);
   const s = m.sitioE10;
 
-  const servida = await sitePublico(obterBase(), publicLocationSlug);
+  const prisma = obterBase();
+  const servida = await sitePublico(prisma, publicLocationSlug);
+  // O tema tem de chegar à página. Ver `publico_tema` e a régua do E12: o ataque
+  // é ler a cor que o NAVEGADOR calcula, e não a que o CSS declara.
+  const tema = await temaPublico(prisma, publicLocationSlug);
   if (!servida) notFound();
 
   const inicio = paginaDoSite(servida.site, 'INICIO');
@@ -44,7 +48,7 @@ export default async function HomePublica({
   return (
     <MolduraDoSite
       slug={publicLocationSlug} idioma={idioma} unidade={servida.unidade}
-      marca={servida.marca} site={servida.site} actual="INICIO" caminho=""
+      marca={servida.marca} site={servida.site} tema={tema} actual="INICIO" caminho=""
     >
       <section className="bo-publico__heroi">
         <h1>{inicio?.titulo ?? servida.unidade}</h1>

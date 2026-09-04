@@ -68,6 +68,9 @@ export default async function TemaDaUnidade({
     intencao: 'usar',
   });
 
+  const mE12 = m.temaE12;
+  const base = `/${idioma}/app/${orgSlug}/${locationSlug}/website/theme`;
+
   const amostras = [
     { rotulo: m.tema.primaria, cor: dados.tema.primaria },
     { rotulo: m.tema.acento, cor: dados.tema.acento },
@@ -81,9 +84,28 @@ export default async function TemaDaUnidade({
           <p className="bo-estado__sobrancelha">{dados.estado.planoNome ?? m.tema.sobrancelha}</p>
           <h1>{m.tema.titulo}</h1>
         </div>
-        <a className="bo-botao bo-botao--primario" href={`/${idioma}/app/${orgSlug}/organization/plano`}>
-          {m.tema.accao}
-        </a>
+        <div className="bo-estado__accoes">
+          {/* O editor tem endereço para toda a gente, e é o SERVIDOR que recusa
+              quem não tem plano. Esconder a ligação ao Starter tornaria o ecrã a
+              guarda — e o `planos-e-limites.md` diz o contrário por escrito: «o
+              ecrã esconde para não frustrar; o servidor recusa para proteger». O
+              que se esconde é o BOTÃO PRIMÁRIO, não o caminho. */}
+          <a
+            className={`bo-botao ${podeCores.permitido ? 'bo-botao--primario' : 'bo-botao--secundario'}`}
+            href={`${base}/editar`}
+          >
+            {mE12.editarAccao}
+          </a>
+          <a className="bo-botao bo-botao--secundario" href={`${base}/exemplos/brasa-norte`}>
+            {mE12.exemplos}
+          </a>
+          <a className="bo-botao bo-botao--secundario" href={`${base}/plano`}>
+            {mE12.planoTitulo}
+          </a>
+          <a className="bo-botao bo-botao--secundario" href={`/${idioma}/app/${orgSlug}/organization/plano`}>
+            {m.tema.accao}
+          </a>
+        </div>
       </div>
 
       <div className="bo-tema">
