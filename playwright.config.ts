@@ -52,12 +52,14 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: [/autenticar\.setup\.ts/, /painel\.spec\.ts/],
+      testIgnore: [/autenticar\.setup\.ts/, /painel\.spec\.ts/, /isolamento\.spec\.ts/],
       dependencies: ['preparar'],
     },
     {
       name: 'painel',
-      testMatch: /painel\.spec\.ts/,
+      // O isolamento entra aqui porque precisa das MESMAS sessões — a de A para
+      // pedir, e a de B para o par que dá sentido à recusa.
+      testMatch: [/painel\.spec\.ts/, /isolamento\.spec\.ts/],
       use: { ...devices['Desktop Chrome'], storageState: FICHEIRO_DE_SESSAO },
       dependencies: ['preparar'],
     },

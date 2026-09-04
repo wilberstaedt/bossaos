@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { Aviso, Botao, Tabela } from '@bossaos/ui';
+import { Aviso, Tabela } from '@bossaos/ui';
 import { formatarNumero, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { comIdentidade, flagsDaPlataforma, obterPrisma } from '@bossaos/db';
 import { actorDoPedido } from '../../../../src/sessao.ts';
@@ -40,7 +40,8 @@ export default async function Flags({
           <p className="bo-estado__sobrancelha">{m.plataforma.sobrancelhaFlags}</p>
           <h1>{m.plataforma.tituloFlags}</h1>
         </div>
-        <Botao>{m.plataforma.accaoCriarFlag}</Botao>
+        {/* Saiu: o aviso desta página diz, com este mesmo título, que a escrita
+            é pelo script e que a edição chega na E33. */}
       </div>
 
       <Tabela

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { Botao, Tabela } from '@bossaos/ui';
+import { Tabela } from '@bossaos/ui';
 import { formatarNumero, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { comIdentidade, obterPrisma, organizacoesDaPlataforma } from '@bossaos/db';
 import { actorDoPedido } from '../../../src/sessao.ts';
@@ -38,7 +38,8 @@ export default async function Organizacoes({
           <p className="bo-estado__sobrancelha">{m.plataforma.sobrancelhaTenants}</p>
           <h1>{m.plataforma.tituloTenants}</h1>
         </div>
-        <Botao>{m.plataforma.accaoCriar}</Botao>
+        {/* Saiu: a escrita de plataforma é pelo script auditado, e a nota desta
+            página já o diz. O botão contradizia a nota ao lado dele. */}
       </div>
 
       <Tabela

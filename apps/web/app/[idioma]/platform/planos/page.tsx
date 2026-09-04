@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { Aviso, Botao } from '@bossaos/ui';
+import { Aviso } from '@bossaos/ui';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { catalogoDePlanos, comIdentidade, obterPrisma } from '@bossaos/db';
 import { actorDoPedido } from '../../../../src/sessao.ts';
@@ -40,7 +40,7 @@ export default async function CatalogoDePlanos({
           <p className="bo-estado__sobrancelha">{m.planos.sobrancelhaCatalogo}</p>
           <h1>{m.planos.tituloCatalogo}</h1>
         </div>
-        <Botao>{m.planos.accaoCatalogo}</Botao>
+        {/* Saiu pelo mesmo motivo: o aviso abaixo já diz que a edição é E33. */}
       </div>
       <CartoesDePlano idioma={idioma} catalogo={catalogo} />
       <Aviso titulo={m.planos.accaoCatalogo}>{m.plataforma.escritaPorScript}</Aviso>

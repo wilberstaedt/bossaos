@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { Botao, Cartao } from '@bossaos/ui';
+import { Cartao } from '@bossaos/ui';
 import { formatarNumero, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { contarPessoas, contarProdutos, contarUnidades, estadoComercial } from '@bossaos/db';
 import { comEscopoDoPedido, resolverPedido } from '../../../../../../src/sessao.ts';
@@ -71,7 +71,13 @@ export default async function UsoELimites({
           <p className="bo-estado__sobrancelha">{m.uso.sobrancelha}</p>
           <h1>{m.uso.titulo}</h1>
         </div>
-        <Botao>{m.uso.accao}</Botao>
+        {/* "Ver opciones" tem destino: a comparação de planos existe e é onde
+            as opções estão. Era um <Botao> sem manipulador — prometia e não ia
+            a lado nenhum. */}
+        <a className="bo-botao bo-botao--primario"
+           href={`/${idioma}/app/${orgSlug}/organization/plano/cambiar`}>
+          {m.uso.accao}
+        </a>
       </div>
 
       <div className="bo-uso">

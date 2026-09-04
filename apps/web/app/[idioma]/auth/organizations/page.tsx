@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Botao, Cartao } from '@bossaos/ui';
+import { Cartao } from '@bossaos/ui';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { actorDoPedido, organizacoesDoActor } from '../../../../src/sessao.ts';
 
@@ -45,9 +45,9 @@ export default async function Organizacoes({ params }: { params: Promise<{ idiom
           <p className="bo-campo__ajuda">{m.organizacoes.cadaUma}</p>
         </Cartao>
       </div>
-      <div>
-        <Botao>{m.organizacoes.accao}</Botao>
-      </div>
+      {/* "Continuar" saiu: cada organização da lista JÁ é uma ligação, e o botão
+          não sabia qual delas continuar. Era uma segunda promessa para a mesma
+          acção, e a que não funcionava. */}
     </>
   );
 }

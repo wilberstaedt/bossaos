@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { Aviso, Botao, Cartao } from '@bossaos/ui';
+import { Aviso, Cartao } from '@bossaos/ui';
 import { formatarData, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { catalogoDePlanos, estadoComercial, previaDeDescidaParaPlano } from '@bossaos/db';
 import { comEscopoDoPedido, resolverPedido } from '../../../../../../../src/sessao.ts';
@@ -61,7 +61,9 @@ export default async function MudarDePlano({
           <p className="bo-estado__sobrancelha">{m.mudarPlano.sobrancelha}</p>
           <h1>{m.mudarPlano.titulo}</h1>
         </div>
-        <Botao>{m.mudarPlano.accao}</Botao>
+        {/* "Revisar cambio" saiu: `/api/org/[orgSlug]/plano` só tem GET. Esta
+            página mostra o impacto, que é real e útil; executar a mudança é da
+            plataforma, e o ecrã passa a dizê-lo em vez de o prometer. */}
       </div>
 
       {previa && estado.descerParaPlano ? (

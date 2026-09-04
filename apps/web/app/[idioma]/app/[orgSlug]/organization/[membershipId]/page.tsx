@@ -45,8 +45,11 @@ export default async function FichaDePessoa({
           <p className="bo-estado__sobrancelha">{m.pessoas.colunaUtilizador}</p>
           <h1>{pessoa.user.nome || pessoa.user.email}</h1>
         </div>
-        {podeGerir ? <Botao>{m.pessoa.accao}</Botao> : null}
+        {/* "Guardar acceso" saiu: não existe caminho que guarde a função de uma
+            pessoa. Revogar existe e funciona; guardar não. */}
       </div>
+
+      <Aviso tom="info" titulo={m.pessoa.accao}>{m.comum.papelPelaPlataforma}</Aviso>
 
       <div style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
         <Campo rotulo={m.pessoa.email} defaultValue={pessoa.user.email} readOnly />

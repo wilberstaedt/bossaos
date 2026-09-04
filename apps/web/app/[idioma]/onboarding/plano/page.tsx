@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation';
-import { Botao } from '@bossaos/ui';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { catalogoDePlanos, comIdentidade, obterPrisma } from '@bossaos/db';
 import { actorDoPedido } from '../../../../src/sessao.ts';
@@ -42,7 +41,7 @@ export default async function EscolherPlano({
           <p className="bo-estado__sobrancelha">{m.planos.sobrancelhaArranque}</p>
           <h1>{m.planos.tituloArranque}</h1>
         </div>
-        <Botao>{m.planos.accaoArranque}</Botao>
+        {/* "Seleccionar plan" saiu: não existe POST de plano. */}
       </div>
       <CartoesDePlano idioma={idioma} catalogo={catalogo} />
     </div>

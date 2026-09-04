@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { Aviso, Botao } from '@bossaos/ui';
+import { Aviso } from '@bossaos/ui';
 import { formatarData, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { catalogoDePlanos, estadoComercial } from '@bossaos/db';
 import { comEscopoDoPedido, resolverPedido } from '../../../../../../src/sessao.ts';
@@ -44,7 +44,11 @@ export default async function PlanoDaOrganizacao({
           <p className="bo-estado__sobrancelha">{m.planos.sobrancelhaSubscricao}</p>
           <h1>{m.planos.tituloSubscricao}</h1>
         </div>
-        <Botao>{m.planos.accaoSubscricao}</Botao>
+        {/* "Comparar planes" tem destino real, e é esta a página que o tem. */}
+        <a className="bo-botao bo-botao--primario"
+           href={`/${idioma}/app/${orgSlug}/organization/plano/cambiar`}>
+          {m.planos.accaoSubscricao}
+        </a>
       </div>
 
       <p className="bo-planos__actual">

@@ -12,7 +12,10 @@
     "ayudaSoporte": "Help and support",
     "asinatura": "Made with BossaOS",
     "tenteOutraVez": "Could not save. Check the fields and try again.",
-    "guardado": "Changes saved"
+    "guardado": "Changes saved",
+    "convitePorApi": "Invitations are created through the API today. The screen to send them from here comes later.",
+    "planoPelaPlataforma": "The plan change is carried out by the platform, with an audit trail. Here you see the impact before asking for it.",
+    "papelPelaPlataforma": "Changing a person's role is done through the API today. Revoking access already works from the product."
   },
   "navegacao": {
     "inicio": "Home",

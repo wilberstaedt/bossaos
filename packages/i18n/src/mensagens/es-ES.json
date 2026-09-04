@@ -12,7 +12,10 @@
     "ayudaSoporte": "Ayuda y soporte",
     "asinatura": "Hecho con BossaOS",
     "tenteOutraVez": "No se ha podido guardar. Revisa los campos e inténtalo otra vez.",
-    "guardado": "Cambios guardados"
+    "guardado": "Cambios guardados",
+    "convitePorApi": "Las invitaciones se crean hoy por la API. La pantalla para enviarlas desde aquí llega más adelante.",
+    "planoPelaPlataforma": "El cambio de plan lo ejecuta la plataforma, con registro. Aquí ves el impacto antes de pedirlo.",
+    "papelPelaPlataforma": "Cambiar la función de una persona se hace hoy por la API. Revocar el acceso ya funciona desde el producto."
   },
   "navegacao": {
     "inicio": "Inicio",

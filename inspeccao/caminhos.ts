@@ -32,3 +32,17 @@ export const FICHEIRO_DE_SESSAO = 'inspeccao/.sessao/estado.json';
 
 /** O email da conta do arnês. Do domínio da inspecção, para a limpeza o apanhar. */
 export const EMAIL_DO_ARNES = 'painel@inspeccao.example';
+
+/**
+ * A SEGUNDA sessão, no outro inquilino — e é ela que torna a prova uma prova.
+ *
+ * A revisão do marco E11 reprovou o aceite do isolamento com uma frase exacta:
+ * *«a prova de RLS mostra que a base recusa; falta mostrar que o produto
+ * recusa»*. Mostrar a recusa exige duas contas, não uma: com uma só, «o produto
+ * recusou» e «o produto recusa tudo» são indistinguíveis.
+ *
+ * Esta conta vive na organização B e serve **o par**: o mesmo recurso, pedido
+ * pelo dono, tem de aparecer.
+ */
+export const EMAIL_DO_ARNES_B = 'painel-b@inspeccao.example';
+export const FICHEIRO_DE_SESSAO_B = 'inspeccao/.sessao/estado-b.json';

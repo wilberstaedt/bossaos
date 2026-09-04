@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { Aviso, Botao, Campo, Seletor } from '@bossaos/ui';
+import { Aviso, Campo, Seletor } from '@bossaos/ui';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { actorDoPedido } from '../../../src/sessao.ts';
 
@@ -33,7 +33,8 @@ export default async function ConvidarEquipa({
           <p className="bo-estado__sobrancelha">{m.convidarEquipa.passo}</p>
           <h1>{m.convidarEquipa.titulo}</h1>
         </div>
-        <Botao>{m.convidarEquipa.accao}</Botao>
+        {/* "Enviar invitaciones" saiu: não há `<form>` nesta página e a API de
+            convites recebe JSON. O botão não tinha por onde enviar nada. */}
       </div>
 
       <div style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
@@ -48,7 +49,11 @@ export default async function ConvidarEquipa({
         <Campo rotulo={m.convidarEquipa.estado} defaultValue={m.convidarEquipa.naoEnviado} readOnly />
       </div>
 
-      <Aviso tom="info" titulo={m.convidarEquipa.nota} />
+      {/* A nota anterior dizia «Los cambios se guardan en la unidad y el ámbito
+          indicados». Não se guarda nada: esta página não tem `<form>`. Era a
+          mesma falta do botão, escrita em prosa — e a prosa engana mais, porque
+          ninguém a testa. */}
+      <Aviso tom="info" titulo={m.convidarEquipa.titulo}>{m.comum.convitePorApi}</Aviso>
     </div>
   );
 }

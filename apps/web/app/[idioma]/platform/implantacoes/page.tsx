@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { Botao, Cartao, Etiqueta } from '@bossaos/ui';
+import { Cartao, Etiqueta } from '@bossaos/ui';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import {
   comIdentidade, implantacoes, obterPrisma, organizacaoDaPlataforma, organizacoesDaPlataforma,
@@ -54,7 +54,7 @@ export default async function ImplantacoesEmCurso({
           <p className="bo-estado__sobrancelha">{m.plataforma.sobrancelhaImplantacoes}</p>
           <h1>{m.plataforma.tituloImplantacoes}</h1>
         </div>
-        <Botao>{m.plataforma.accaoChecklist}</Botao>
+        {/* Saiu: não existe ecrã de checklist para onde ir. */}
       </div>
 
       <div className="bo-planos">

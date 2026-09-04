@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Aviso, Botao, Etiqueta, Tabela } from '@bossaos/ui';
+import { Aviso, Etiqueta, Tabela } from '@bossaos/ui';
 import { formatarDataHora, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { listarConvites, pessoasEAcessos } from '@bossaos/db';
 import { exigirAccao } from '@bossaos/domain';
@@ -41,8 +41,12 @@ export default async function PessoasEAcessos({
           <p className="bo-estado__sobrancelha">{m.navegacao.equipa}</p>
           <h1>{m.pessoas.titulo}</h1>
         </div>
-        {podeGerir ? <Botao>{m.pessoas.accao}</Botao> : null}
+        {/* "Invitar persona" saiu: nenhum ecrã do produto cria um convite hoje —
+            só a API. Um botão que anuncia a acção e não a faz é pior do que a
+            ausência dele, porque quem carrega conclui que o produto avariou. */}
       </div>
+
+      <Aviso tom="info" titulo={m.pessoas.accao}>{m.comum.convitePorApi}</Aviso>
 
       <Tabela
         legenda={m.pessoas.titulo}
