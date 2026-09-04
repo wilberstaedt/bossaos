@@ -516,6 +516,16 @@ não era sobre o produto. Escrevo-as como perguntas porque é assim que se usam.
 
 ### Antes de acusar
 
+10-bis. **O controlo negativo ficou verde COM RAZÃO?** Então provavelmente
+    colapsei duas propriedades numa. O JR apanhou isto no E16: plantar o defeito
+    no *roteamento* não podia acender no navegador, porque a semeadura cria a
+    tarefa órfã directamente na base, sem passar pelo motor. São duas coisas —
+    *o roteamento não inventa estação* e *o trabalho sem estação é visível* — e
+    guardar só a primeira deixa uma tarefa existir na base e não aparecer em
+    lado nenhum, que é o mesmo que desaparecer.
+    **É o diagnóstico das minhas quatro tentativas falhadas:** eu não estava a
+    degradar mal por distracção; estava a degradar a propriedade errada das duas.
+
 11. **Degradei o que a asserção observa, ou o que era fácil de degradar?**
     Quatro tentativas até um controlo negativo válido, e as três primeiras
     falharam por isto. Uma delas apontava à única tela onde a avaria não podia
