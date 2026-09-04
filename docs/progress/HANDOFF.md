@@ -1,45 +1,26 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E10 — sites dos restaurantes e landing page (**29 telas**, a maior até agora)
-**Estado:** implementado, **aguardando validação**. `docs/progress/E10.md`.
-**Régua:** `docs/reviews/ALVO-E10.md`, escrita antes de existir código · contratos
-`dominios-e-enderecos.md` e `catalogo-e-publicacao.md` (E00).
+**Etapa atual:** E11 — revisão do Starter e primeiro marco utilizável (**0 telas novas**)
+**Estado:** autorizado 04/09. **É etapa do SÉNIOR, não do JR.** O JR fica em standby
+para as correcções delimitadas que a revisão produzir (via A02), e não abre o E12 —
+o CT-16 proíbe começar sobre uma base ainda em revisão.
+**Régua:** `docs/reviews/ALVO-E11.md`, escrita a 04/09 antes do E10 existir.
 
-**As 29 telas estão entregues e medidas no navegador nas cinco larguras.** As duas condições
-não negociáveis foram cumpridas: nasceram com prova de fluxo nas duas superfícies, e o
-ataque do aceite 2 — partir a gravação do lead a valer, retirando o `INSERT` ao runtime —
-está no `provar-sites.sh` como controlo negativo.
+**O que o marco exige, e o que disso já existe:**
+- Percorrer J01, J02 e J11 inteiros, nas duas superfícies — o arnês do navegador
+  ganhou semeadura no E10 e corre 254 casos a 360/390/768/1280/1440.
+- Um acesso cruzado entre inquilinos **negado**, visto no produto e não só na base.
+- Nenhuma falha bloqueante aberta; dependências reais (DNS) explícitas e não dadas
+  como concluídas.
 
-**A dívida de móvel do E09 fechou.** O arnês passou a autenticar (sessão real, emitida pela
-biblioteca, com o limitador respeitado em vez de desligado), e por isso CHAN-001, QR-001,
-QR-003, QR-004 e REP-001 saíram **pagas** — medidas, não desassinadas.
-`DIVIDA-MOVEL.txt`: 71 → **66**, e nenhuma linha é do E10.
+**E10 VALIDADO à primeira** — 04/09. 29 telas. `provar-sites.sh` com 11 passos, 27
+casos e **8 controlos negativos**, incluindo o `catch` largo que esconde falha real
+de gravação e a **regra preguiçosa** dos domínios. O revisor correu ele próprio os
+**254 casos de navegador** em vez de aceitar a declaração. `docs/progress/E10.md`.
 
-**A prova de navegador encontrou cinco defeitos que ninguém tinha visto**, e nenhum era do
-código novo sozinho: um item de grelha que cresce com o conteúdo em vez de o conter (`.bo-publico`
-e `.bo-pagina`, do E02); `margin: 0 auto` a desligar o esticar num item de grelha; o QR de
-320 px fixos a esticar a página a 360; um telefone a render 130×23 onde precisa de 44; e a
-landing a herdar o tubo de 640 px da carta, porque o bloco do E09 redefine `.bo-publico` e
-ganha em todas as páginas da estrutura pública.
-
-**Declarado e não resolvido por mim:** o atlas dá `/[locale]/onboarding` ao MKT-006 **e** ao
-ONB-009, que é do E04 e está validado nessa rota. Não mexo em trabalho validado para
-acomodar tela nova; o MKT-006 ficou em `/getting-started` e a correcção do atlas é de quem o
-assina.
-
-**Medido, com a árvore parada:** `provar-tudo.sh` 23 scripts todos verdes · `pnpm verificar`
-a 0 com 401 testes · `pnpm inspeccionar` 286 verificações, 0 falhas · `provar-sites.sh` 3
-grupos, 27 casos, 7 controlos negativos · `provar-publico.sh` 7 grupos, 26 casos, 10
-controlos negativos.
-
-**Antes disto, na mesma sessão**, fecharam as duas pendências que o E10 tinha em aberto — e
-nenhuma era o que estava escrito. `provar-publico.sh` repunha a versão ERRADA da
-`publico_carta` (replicava à mão uma migração anterior ao filtro de unidade), e por isso
-cada passagem da prova deixava a **fuga entre unidades** na base enquanto o passo final
-dizia «voltou ao verde». A correcção da fuga não tinha um único teste: ganhou o grupo 7 e o
-controlo negativo 6e. E as três verificações vermelhas não eram layout — o `publico.spec.ts`
-importava um módulo com `await principal()` no topo, e cada worker do Playwright corria a
-semeadura outra vez sobre as linhas que o navegador lia.
+**Dívida de móvel do E09: PAGA.** As 5 telas que tinham a assinatura retirada por
+nunca terem sido renderizadas foram medidas no navegador e a assinatura foi
+restaurada. Era a condição bloqueante do marco.
 
 **E09 VALIDADO à 2ª** — 04/09. Retido por uma medição que via uma só forma de exportar um
 verbo; fechado com detector largo, e os **três ataques independentes do sénior** (sem
