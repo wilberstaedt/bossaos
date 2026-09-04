@@ -1,21 +1,24 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E13 — sala, sessões, dispositivos e PIN (**16 telas**)
-**Estado:** autorizado 04/09.
-**Régua:** `docs/reviews/ALVO-E13.md`, escrita antes de existir código.
+**Etapa atual:** E12 — **reaberto**. A assinatura foi RETIRADA a 04/09.
+**Estado:** implementado, aguardando validação. O E13 estava a ser construído e
+**fica em pausa até isto fechar** — o CT-16 proíbe construir sobre base em revisão.
 
-**A primeira etapa em que duas pessoas mexem na mesma coisa ao mesmo tempo.** O
-defeito mais provável tem nome: **concorrência provada em sequência**. Abrir a
-mesa, esperar pela resposta e abrir outra vez não testa nada. E a unicidade vem da
-**base**, não de um `SELECT` antes do `INSERT` — que é uma corrida com janela mais
-estreita e passa a maior parte das vezes, o que é pior do que falhar sempre.
+**Porquê:** validei o E12 sobre um verde LOCAL. A CI reprova `tema.spec.ts` em
+**três corridas seguidas**, com «o servidor aceitou um par ilegível» — o aceite 2.
 
-**A pergunta em aberto está no contrato** (`offline-e-fila-local.md`, regra 3-bis):
-a revogação fecha a porta por onde a regra 2 mandava sair — os rascunhos ficam
-suspensos «até o dono se reautenticar», e num aparelho revogado o dono não volta.
-Três saídas nomeadas, nenhuma escolhida: é decisão de produto.
+**A hipótese, medida a meio e não confirmada:** o próprio spec diz na linha 331 que
+precisa de inquilino **Pro**, senão as telas medem o ecrã de bloqueio de plano. A
+semeadura **não define plano nenhum**. Na base fresca da CI o portão do plano
+dispara antes do contraste, e o teste recebe `erro=plano` onde espera
+`erro=contraste`. Na minha base, com estado acumulado de dezenas de corridas, a
+organização calhava ter o plano certo.
 
-**E12 VALIDADO à primeira** — 7 telas. `docs/progress/E12.md`.
+**A correcção é do instrumento, não necessariamente do produto:** a prova tem de
+**estabelecer** o plano de que depende, em vez de o herdar. Uma prova que só passa
+numa máquina não é uma medição.
+
+**E13 — 16 telas, em pausa.** `docs/reviews/ALVO-E13.md` continua válida.
 
 **E11 — MARCO DO STARTER APROVADO à 2ª.** Reprovado à 1ª com seis falhas, todas de
 medição e duas de assinatura minha. Fechadas e **reprovadas por comando**:
