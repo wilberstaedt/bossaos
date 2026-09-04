@@ -538,3 +538,22 @@ não era sobre o produto. Escrevo-as como perguntas porque é assim que se usam.
 13. **O que MAIS produziria este resultado?** Um verde sobre um servidor velho e
     um verde sobre um instrumento cego são idênticos no ecrã e opostos no
     significado. A diferença entre eles é acusar injustamente ou deixar passar.
+
+## Varredura dos meus próprios laços — 04/09
+
+Duas voltas seguidas sem trabalho aparente foram sinal de que eu não estava a
+procurar bem. Varri as revisões todas por «fica por medir», «por verificar» e
+«não medi», para ver quais eram laços meus por atar.
+
+**Três encontrados, três já fechados:**
+
+| deixado em | por | fechado por |
+| --- | --- | --- |
+| E16 | «duas tarefas sem estação: aparecem duas ou uma?» | eu, na consulta — sem `distinct` nem `groupBy`, voltam as duas |
+| E12 | a cor **calculada** no navegador, não a declarada | `provar-tema-no-navegador.sh` + `sonda-tema.ts` |
+| E10 | «rascunho não muda o público» — **na rota pública, não na pré-visualização, que é o mesmo processo a olhar-se ao espelho** | `provar-sites.sh`, passo 1, com controlo negativo próprio |
+
+Nenhum álibi calcificado. Mas a varredura passa a fazer-se **quando não houver
+nada a validar**, e não quando alguém se lembrar: uma nota de «fica por medir» é
+honesta no dia em que se escreve e vira desculpa no mês seguinte, e a diferença
+entre as duas não está no texto — está em alguém voltar lá.
