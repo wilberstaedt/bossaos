@@ -125,3 +125,23 @@ export {
   modulosDeDadosDaVersao, percursoDeDados,
   type NivelDeCorreccao, type Codigo,
 } from './qr.ts';
+
+export {
+  TIPOS_DE_PAGINA, REDES,
+  CAMPOS_DE_SITE, CAMPOS_DE_PAGINA, CAMPOS_DE_POST,
+  projectarSite, novidadeDoSite, paginaDoSite, ligacaoSocialValida,
+  type TipoDePagina, type Rede, type LigacaoSocial,
+  type SitePublico, type PaginaPublica, type NovidadePublica,
+  type ContactoPublico, type RascunhoDeSite,
+} from './site.ts';
+
+export {
+  ORIGENS, MAXIMO_DA_MENSAGEM, validarLead, chaveDeLead,
+  type OrigemDeLead, type LeadSubmetido, type RecusaDeLead,
+} from './leads.ts';
+
+export {
+  ESTADOS_DE_DOMINIO, PREFIXO_DA_PROVA,
+  avaliarVerificacao, serveConteudo, nomeDoRegistoDeProva, valorDoRegistoDeProva,
+  type EstadoDeDominio, type RespostaDeDns, type Veredicto,
+} from './dominios.ts';

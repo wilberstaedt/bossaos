@@ -174,3 +174,19 @@ export {
   reservarEnderecoPublico, largarEnderecoPublico,
   type CartaServida, type HorarioPublico, type OrigemDeConsulta, type ResultadoDaReserva,
 } from './publico.ts';
+
+export {
+  sitePublico, sitePublicoPorDominio, rascunhoDoSite, criarSiteSeFaltar,
+  publicarSite, retirarSite,
+  type SiteServido, type ResultadoDaPublicacao, type BloqueioDePublicacao,
+} from './sites.ts';
+
+export {
+  guardarLead, guardarLeadPublico, leadsDaUnidade, registarPedidoDeDemo,
+  type ResultadoDoLead, type ResultadoDoLeadPublico, type ResultadoDoPedidoDeDemo,
+} from './leads.ts';
+
+export {
+  gerarTokenDeProva, vincularDominio, largarDominio, dominiosDaUnidade, registarVerificacao,
+  type ResultadoDoVinculo, type DominioVinculado,
+} from './dominios.ts';

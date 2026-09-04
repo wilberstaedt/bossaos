@@ -53,8 +53,33 @@ const EXCEPCOES = new Map<string, string>([
  * distinção do E04 — não se verifica que a autorização está certa, verifica-se
  * que ela existe.
  */
-const PORTAS_DO_PUBLICO = ['cartaPublica', 'horarioPublico', 'registarConsulta', 'abertoAgora'];
-const SO_PELO_PUBLICO = /^app\/r\//;
+/**
+ * ── O E10 alargou isto, e vale a pena dizer porquê ────────────────────────
+ *
+ * O E10 trouxe duas coisas que o E09 não tinha:
+ *
+ * 1. **mais páginas públicas** — a home, o Sobre, o Contacto e as novidades —,
+ *    que chegam à base por `publico_site`, uma porta com a mesma forma da
+ *    `publico_carta`: só devolve o que está publicado e não aceita um
+ *    identificador de organização;
+ * 2. **a primeira ESCRITA pública do produto** — o formulário de contacto e o
+ *    pedido de demo.
+ *
+ * A escrita é o caso que obrigou a pensar. Ela não pode viver sob `app/r/`: o
+ * E09 mede que nenhuma rota lá debaixo exporta um verbo de escrita, porque
+ * aquele endereço vai impresso num QR e o que está impresso lê-se. Vive em
+ * `app/api/publico/`, e **herda a exigência apertada em vez de uma dispensa** —
+ * uma rota nova ali que amanhã importe `comEscopo` para fazer a sua própria
+ * consulta fica vermelha, tal como uma de `/r/`.
+ *
+ * A organização nunca vem do corpo do pedido: sai de resolver o endereço
+ * público, que é a mesma porta que serve a página.
+ */
+const PORTAS_DO_PUBLICO = [
+  'cartaPublica', 'horarioPublico', 'registarConsulta', 'abertoAgora',
+  'sitePublico', 'sitePublicoPorDominio', 'guardarLeadPublico', 'registarPedidoDeDemo',
+];
+const SO_PELO_PUBLICO = /^app\/(r|api\/publico)\//;
 /** O que uma rota pública NÃO pode tocar: são os caminhos que exigem inquilino. */
 const PROIBIDO_NO_PUBLICO = ['comEscopo', 'comIdentidade', 'obterPrisma'];
 
@@ -158,8 +183,8 @@ describe('rotas: dados de inquilino só através da porta', () => {
   });
 });
 
-describe('a carta pública tem a sua própria exigência, não uma dispensa', () => {
-  it('as rotas de /r/ chegam à base pelas portas estreitas', () => {
+describe('as rotas públicas têm exigência própria, não uma dispensa', () => {
+  it('as rotas de /r/ e /api/publico/ chegam à base pelas portas estreitas', () => {
     // Se a excepção fosse uma dispensa, bastava uma rota pública nova para
     // aparecer uma consulta directa a `menu_revisions` sem filtro de publicação.
     const publicas = ficheirosDaWeb()

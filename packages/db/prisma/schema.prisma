@@ -104,6 +104,14 @@ model Organization {
   scheduleDays    ScheduleDay[]
   scheduleExceptions ScheduleException[]
   scheduleIntervals  ScheduleInterval[]
+  sites             Site[]
+  sitePaginas       SitePage[]
+  sitePosts         SitePost[]
+  siteRevisoes      SiteRevision[]
+  sitePublicacoes   SitePublication[]
+  leads             Lead[]
+  dominios          CustomDomain[]
+  dominiosDetidos   CustomDomainOwner[]
 
   @@map("organizations")
   revisoes        MenuRevision[]
@@ -206,6 +214,9 @@ model Location {
   regrasDePreco   PriceRule[]
   disponibilidades ProductAvailability[]
   consultas       MenuView[]
+  site            Site?
+  leads           Lead[]
+  dominios        CustomDomain[]
 
   @@unique([organizationId, id], name: "location_por_organizacao")
   @@unique([organizationId, slug])
@@ -1584,4 +1595,298 @@ model PublicSlugOwner {
 
   @@index([organizationId])
   @@map("public_slug_owners")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E10 — o site do restaurante, os leads e o domínio próprio
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// O que o site é para o mundo. O aceite 1 do E10 vive nesta distinção:
+/// **rascunho não muda o site público.** Quem serve o público lê a revisão
+/// publicada; quem edita mexe no rascunho. São armazenamentos diferentes de
+/// propósito — se fossem o mesmo, "guardar" era "publicar" e nenhum aviso
+/// evitava isso.
+enum EstadoDoSite {
+  RASCUNHO
+  PUBLICADO
+  RETIRADO
+}
+
+/// As páginas que o site tem. É uma lista fechada porque cada uma tem uma rota
+/// e um desenho próprios; páginas livres seriam outro produto.
+enum TipoDePaginaDoSite {
+  INICIO
+  SOBRE
+  CONTACTO
+}
+
+/// A máquina de estados de `dominios-e-enderecos.md`, regra 2.
+///
+/// `INDETERMINADO` existe porque **um DNS que não responde não é um domínio que
+/// mudou de dono**. Perder a posse é uma conclusão que exige ver OUTRO dono —
+/// que é o que `CONTESTADO` diz. Com um booleano, quem chama era obrigado a
+/// escolher entre mentir a dizer que está bom e mentir a dizer que se perdeu.
+enum EstadoDeDominio {
+  PENDENTE
+  VERIFICADO
+  INDETERMINADO
+  CONTESTADO
+}
+
+model Site {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  /// Um site por unidade. O endereço público é da unidade (E09), e um site de
+  /// marca servido em várias unidades era a fuga que o `publico_carta` teve.
+  locationId     String @map("location_id") @db.Uuid
+
+  estado         EstadoDoSite @default(RASCUNHO)
+
+  /// SEO básico (WEB-008). Sem `@default`: o valor que se arranja quando não se
+  /// sabe é o da unidade anterior — a lição do E06.
+  seoTitulo      String? @map("seo_titulo")
+  seoDescricao   String? @map("seo_descricao")
+
+  /// Ligações sociais (WEB-007). Guardadas como URL completo e validadas no
+  /// domínio: um campo livre acaba por receber `javascript:`.
+  redes          Json?
+
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  version    Int       @default(1)
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [organizationId, locationId], references: [organizationId, id], onDelete: Cascade)
+
+  paginas     SitePage[]
+  posts       SitePost[]
+  revisoes    SiteRevision[]
+  publicacao  SitePublication?
+
+  @@unique([organizationId, id], name: "site_por_organizacao")
+  /// COMPOSTA, e é o que a relação 1:1 exige: um site por unidade, e a unidade
+  /// tem de ser da mesma organização. É a base que recusa, não o código.
+  @@unique([organizationId, locationId])
+  @@index([organizationId])
+  @@map("sites")
+}
+
+/// O conteúdo de cada página, em rascunho (WEB-003 a WEB-005).
+model SitePage {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  siteId         String @map("site_id") @db.Uuid
+  tipo           TipoDePaginaDoSite
+
+  /// `false` tira a página do site sem apagar o que lá está escrito. WEB-002.
+  visivel        Boolean @default(false)
+  titulo         String?
+  /// O texto da página. Texto simples: aceitar HTML de quem edita é aceitar
+  /// script de quem edita, e o E08 já mostrou o que custa confiar em entrada.
+  corpo          String?
+  /// Morada, telefone e email da página de contacto (WEB-005).
+  contacto       Json?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  site         Site         @relation(fields: [organizationId, siteId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, siteId, tipo])
+  @@index([organizationId])
+  @@map("site_pages")
+}
+
+/// Novidades e eventos (WEB-006, PUB-006).
+model SitePost {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  siteId         String @map("site_id") @db.Uuid
+
+  /// Segmento de URL, único no site. A forma é verificada na base, como a do
+  /// `public_slug`: sem isso alguém escreve `../` e o endereço deixa de apontar
+  /// para onde diz.
+  slug           String
+  titulo         String
+  resumo         String?
+  corpo          String?
+  publicadoEm    DateTime? @map("publicado_em") @db.Timestamptz(6)
+  visivel        Boolean   @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  site         Site         @relation(fields: [organizationId, siteId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, siteId, slug])
+  @@index([organizationId])
+  @@map("site_posts")
+}
+
+/// O retrato imutável do site. Mesma forma que `MenuRevision`, e pela mesma
+/// razão: publicar é criar uma versão, não marcar uma linha.
+///
+/// A imutabilidade é da BASE (`REVOKE UPDATE, DELETE`), não da disciplina.
+model SiteRevision {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  siteId         String @map("site_id") @db.Uuid
+  numero         Int
+  conteudo       Json
+  criadaPor      String @map("criada_por")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  site         Site         @relation(fields: [organizationId, siteId], references: [organizationId, id], onDelete: Cascade)
+  publicacoes  SitePublication[]
+
+  @@unique([organizationId, siteId, numero])
+  @@unique([organizationId, id], name: "site_revision_por_organizacao")
+  @@index([organizationId])
+  @@map("site_revisions")
+}
+
+/// O ponteiro para o que está no ar. Uma linha por site, ou nenhuma.
+///
+/// **Retirar apaga a linha.** Não põe uma bandeira: uma bandeira deixa o
+/// conteúdo alcançável por quem se esqueça de a ler, e a régua do E10 reprova
+/// exactamente isso — «a rota devolve o estado de retirado e NÃO uma página em
+/// cache com o conteúdo antigo».
+model SitePublication {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  siteId         String @map("site_id") @db.Uuid
+  revisionId     String @map("revision_id") @db.Uuid
+  publicadaPor   String @map("publicada_por")
+  publicadaEm    DateTime @default(now()) @map("publicada_em") @db.Timestamptz(6)
+
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  site         Site         @relation(fields: [organizationId, siteId], references: [organizationId, id], onDelete: Cascade)
+  revisao      SiteRevision @relation(fields: [organizationId, revisionId], references: [organizationId, id], onDelete: Restrict)
+
+  /// Uma publicação por site, no máximo. Retirar apaga a linha.
+  @@unique([organizationId, siteId])
+  @@index([organizationId])
+  @@map("site_publications")
+}
+
+/// O pedido de contacto vindo do site público (aceite 2 do E10).
+model Lead {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+
+  nome     String
+  email    String
+  telefone String?
+  mensagem String
+
+  /// De onde veio. Categoria fechada, como a `origem` das consultas do E09 —
+  /// um campo livre acabaria por receber o `Referer` inteiro.
+  origem   String @default("site")
+
+  /// **A chave que faz "guarda-se uma vez" ser da base e não de um `if`.**
+  ///
+  /// Duas submissões simultâneas lêem as duas "não existe" e gravam as duas: a
+  /// decisão tem de estar na restrição única, como a idempotência do E06. A
+  /// chave deriva do conteúdo e do dia — o duplo clique e o recarregar colapsam,
+  /// e um contacto genuíno noutro dia não é engolido.
+  chaveIdempotencia String @map("chave_idempotencia")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [organizationId, locationId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, locationId, chaveIdempotencia])
+  @@index([organizationId])
+  @@index([organizationId, locationId, createdAt])
+  @@map("leads")
+}
+
+/// O domínio próprio (WEB-009), com a máquina de estados do contrato.
+model CustomDomain {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+
+  /// Único no MUNDO: o DNS é um espaço de nomes global e não tem organizações.
+  dominio        String @unique
+
+  estado         EstadoDeDominio @default(PENDENTE)
+
+  /// O valor que NÓS geramos e que só quem controla o DNS consegue publicar.
+  /// Escrever o domínio numa caixa de texto não prova nada.
+  tokenVerificacao String @map("token_verificacao")
+
+  verificadoEm      DateTime? @map("verificado_em") @db.Timestamptz(6)
+  /// Quando se olhou pela última vez. Verificado uma vez não é verificado para
+  /// sempre — regra 2 do contrato.
+  ultimaTentativaEm DateTime? @map("ultima_tentativa_em") @db.Timestamptz(6)
+  /// Porque é que o estado é o que é. Sem isto, `INDETERMINADO` e `CONTESTADO`
+  /// ficam indistinguíveis a quem lê o ecrã.
+  motivo            String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [organizationId, locationId], references: [organizationId, id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([organizationId, locationId])
+  @@map("custom_domains")
+}
+
+/// **O nome não volta ao mundo** — regra 3 do contrato, para domínios.
+///
+/// Gémea de `PublicSlugOwner`, e existe pela mesma razão física: o domínio anda
+/// em cartões, ementas e anúncios pagos. Desvincular tira-o do ar; não o oferece
+/// ao próximo. O `@unique` do `CustomDomain` impede dois AO MESMO TEMPO e não
+/// impede dois EM SEQUÊNCIA, que é o caso real (regra 4).
+model CustomDomainOwner {
+  dominio        String   @id
+  organizationId String   @map("organization_id") @db.Uuid
+  locationId     String?  @map("location_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@map("custom_domain_owners")
+}
+
+/// MKT-007 · o pedido de demo da BossaOS.
+///
+/// **Fora do espaço de inquilino, de propósito.** Quem pede uma demo não é
+/// inquilino de ninguém, e prendê-lo a uma organização poria correio de
+/// estranhos dentro do espaço de dados de um cliente. Sem política de linha
+/// porque não há inquilino a isolar; em vez disso o runtime **não tem
+/// privilégio nenhum** sobre a tabela, e escreve por uma porta `SECURITY
+/// DEFINER` que só sabe inserir.
+model DemoRequest {
+  id          String  @id @default(uuid()) @db.Uuid
+  nome        String
+  email       String
+  restaurante String
+  telefone    String?
+  mensagem    String?
+  idioma      String
+
+  /// Do conteúdo e do dia, como a dos leads. O duplo clique e o recarregar
+  /// colapsam; um pedido genuíno noutro dia não é engolido.
+  chaveIdempotencia String @unique @map("chave_idempotencia")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([createdAt])
+  @@map("demo_requests")
 }

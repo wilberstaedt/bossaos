@@ -816,3 +816,84 @@ p { margin: 0; }
 .bo-qr { background: #fff; padding: var(--bo-espaco-lg); border-radius: var(--bo-raio-cartao); width: fit-content; }
 .bo-qr svg { display: block; }
 .bo-qr__endereco { word-break: break-all; font-size: 14px; color: var(--bo-texto-secundario); }
+
+/* ── E10 · site do restaurante (PUB) e landing (MKT) ────────────────────────
+   Escrito com 360 px como caso BASE e não como remendo: as telas do E10 nascem
+   com prova de móvel, e a régua reprova transbordo horizontal a 360. Tudo o que
+   é grelha começa numa coluna e só se abre acima de 768. */
+.bo-publico__seccoes {
+  display: flex; flex-wrap: wrap; gap: var(--bo-espaco-sm);
+  padding: 0 var(--bo-margem-movel);
+  max-width: var(--bo-largura-maxima); margin: 0 auto;
+}
+.bo-publico__seccoes a {
+  display: inline-flex; align-items: center;
+  min-height: var(--bo-toque-publico); padding: 0 var(--bo-espaco-md);
+  border: 1px solid var(--bo-borda); border-radius: var(--bo-raio-capsula);
+  color: var(--bo-publico-texto); text-decoration: none;
+}
+.bo-publico__seccoes a[aria-current='page'] { font-weight: 700; border-color: var(--bo-acento-sinal); }
+.bo-publico__heroi { display: grid; gap: var(--bo-espaco-md); }
+.bo-publico__heroi h1 { font-size: 32px; line-height: 1.15; overflow-wrap: anywhere; }
+@media (min-width: 768px) { .bo-publico__heroi h1 { font-size: 44px; } }
+/* `anywhere` e não `break-word`: um nome de prato ou um domínio sem espaços
+   estica a caixa e a página passa a rolar na horizontal a 360 px. */
+.bo-publico__texto { max-width: 68ch; overflow-wrap: anywhere; }
+.bo-publico__texto p { margin-bottom: var(--bo-espaco-md); }
+.bo-publico__contacto { display: grid; gap: var(--bo-espaco-sm); margin-top: var(--bo-espaco-lg); }
+.bo-publico__contacto dt { font-size: 14px; color: var(--bo-texto-secundario); }
+.bo-publico__contacto dd { overflow-wrap: anywhere; }
+.bo-publico__redes { display: flex; flex-wrap: wrap; gap: var(--bo-espaco-sm); margin-top: var(--bo-espaco-lg); }
+.bo-publico__redes a {
+  display: inline-flex; align-items: center;
+  min-height: var(--bo-toque-publico); padding: 0 var(--bo-espaco-md);
+  border: 1px solid var(--bo-borda); border-radius: var(--bo-raio-cartao);
+  color: var(--bo-publico-texto); overflow-wrap: anywhere;
+}
+.bo-publico__novidades { display: grid; gap: var(--bo-espaco-lg); margin-top: var(--bo-espaco-xl); }
+@media (min-width: 768px) { .bo-publico__novidades { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.bo-publico__novidade {
+  border: 1px solid var(--bo-borda); border-radius: var(--bo-raio-cartao);
+  padding: var(--bo-espaco-lg); min-width: 0;
+}
+.bo-publico__novidade h3 { overflow-wrap: anywhere; margin-bottom: var(--bo-espaco-xs); }
+.bo-publico__novidade a { display: inline-flex; align-items: center; min-height: var(--bo-toque-publico); }
+.bo-publico__data { font-size: 14px; color: var(--bo-texto-secundario); }
+.bo-publico__formulario { display: grid; gap: var(--bo-espaco-md); max-width: 46rem; margin-top: var(--bo-espaco-lg); }
+.bo-publico__formulario textarea {
+  width: 100%; min-height: 8rem; padding: var(--bo-espaco-md);
+  border: 1px solid var(--bo-borda); border-radius: var(--bo-raio-cartao);
+  font: inherit; color: inherit; background: var(--bo-superficie-elevada);
+}
+
+/* ── A landing da BossaOS (MKT) ────────────────────────────────────────────
+   Vive dentro da `bo-publico`: é a mesma superfície pública, com blocos
+   próprios. Não há paleta nova — o E02 já decidiu as cores. */
+.bo-mkt__heroi { display: grid; gap: var(--bo-espaco-lg); padding: var(--bo-espaco-xl) 0; }
+.bo-mkt__heroi h1 { font-size: 34px; line-height: 1.1; overflow-wrap: anywhere; }
+@media (min-width: 768px) { .bo-mkt__heroi h1 { font-size: 52px; max-width: 18ch; } }
+.bo-mkt__chamada { display: flex; flex-wrap: wrap; gap: var(--bo-espaco-md); }
+.bo-mkt__seccao { padding: var(--bo-espaco-xl) 0; border-top: 1px solid var(--bo-borda); }
+.bo-mkt__seccao h2 { font-size: 26px; margin-bottom: var(--bo-espaco-md); overflow-wrap: anywhere; }
+.bo-mkt__grelha { display: grid; gap: var(--bo-espaco-lg); }
+@media (min-width: 768px) { .bo-mkt__grelha { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1280px) { .bo-mkt__grelha { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.bo-mkt__cartao {
+  border: 1px solid var(--bo-borda); border-radius: var(--bo-raio-cartao);
+  padding: var(--bo-espaco-lg); min-width: 0; overflow-wrap: anywhere;
+}
+.bo-mkt__cartao h3 { margin-bottom: var(--bo-espaco-xs); }
+.bo-mkt__passos { display: grid; gap: var(--bo-espaco-lg); counter-reset: passo; }
+@media (min-width: 768px) { .bo-mkt__passos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.bo-mkt__passo { border-left: 3px solid var(--bo-acento-sinal); padding-left: var(--bo-espaco-md); min-width: 0; }
+.bo-mkt__faq { display: grid; gap: var(--bo-espaco-lg); max-width: 68ch; }
+.bo-mkt__faq h3 { margin-bottom: var(--bo-espaco-xs); overflow-wrap: anywhere; }
+.bo-mkt__tabela-envolve { overflow-x: auto; }
+/* A tabela de planos é a única coisa larga desta família. Rola DENTRO da
+   própria caixa: a régua reprova a PÁGINA a rolar na horizontal, e uma tabela
+   comprimida a 360 px deixa de se poder comparar, que é para o que ela serve. */
+.bo-mkt__tabela-envolve table { min-width: 34rem; border-collapse: collapse; width: 100%; }
+.bo-mkt__tabela-envolve th, .bo-mkt__tabela-envolve td {
+  padding: var(--bo-espaco-sm) var(--bo-espaco-md);
+  border-bottom: 1px solid var(--bo-borda); text-align: left; vertical-align: top;
+}
