@@ -25,8 +25,8 @@ perdeu `DELETE` e `UPDATE` em `theme_revisions` e ficou só com `UPDATE (activa)
   nenhuma prova mandava uma cor que não fosse hexadecimal. Agora é recusa com motivo.
 
 **Comandos do E12:** `./scripts/provar-tema.sh` (7 grupos, 29 casos, 6 defeitos plantados)
-e `./scripts/provar-tema-no-navegador.sh` (a cor calculada, 18 casos do tema + 2 sessões do
-arnês, 2 controlos negativos; faz três *builds* e demora alguns minutos).
+e `./scripts/provar-tema-no-navegador.sh` (a cor calculada, 19 casos do tema + 2 sessões do
+arnês, 3 controlos negativos; faz quatro *builds* e demora alguns minutos).
 
 **E11 — MARCO DO STARTER APROVADO à 2ª.** Reprovado à 1ª com seis falhas, todas de
 medição e duas de assinatura minha. Fechadas e **reprovadas por comando**:

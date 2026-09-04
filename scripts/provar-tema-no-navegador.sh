@@ -29,16 +29,17 @@ fi
 
 CARTA='apps/web/app/r/[publicLocationSlug]/[locale]/menu/page.tsx'
 MOLDURA='apps/web/src/componentes/SitePublico.tsx'
-ORIG_CARTA=$(mktemp); ORIG_MOLDURA=$(mktemp)
-cp "$CARTA" "$ORIG_CARTA"; cp "$MOLDURA" "$ORIG_MOLDURA"
+TEMA_UI='packages/ui/src/tema.ts'
+ORIG_CARTA=$(mktemp); ORIG_MOLDURA=$(mktemp); ORIG_UI=$(mktemp)
+cp "$CARTA" "$ORIG_CARTA"; cp "$MOLDURA" "$ORIG_MOLDURA"; cp "$TEMA_UI" "$ORIG_UI"
 falhas=0
 
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
 restaurar() {
-  cp "$ORIG_CARTA" "$CARTA"; cp "$ORIG_MOLDURA" "$MOLDURA"
-  rm -f "$ORIG_CARTA" "$ORIG_MOLDURA"
+  cp "$ORIG_CARTA" "$CARTA"; cp "$ORIG_MOLDURA" "$MOLDURA"; cp "$ORIG_UI" "$TEMA_UI"
+  rm -f "$ORIG_CARTA" "$ORIG_MOLDURA" "$ORIG_UI"
 }
 trap restaurar EXIT INT TERM
 
@@ -68,7 +69,7 @@ exigir_vermelho() {
 echo "1. Com tudo ligado"
 if correr /tmp/bossaos-tema-nav-ligado.txt; then
   passou=$(grep -oE '[0-9]+ passed' /tmp/bossaos-tema-nav-ligado.txt | grep -oE '[0-9]+' || echo 0)
-  if (( passou < 20 )); then
+  if (( passou < 21 )); then
     vermelho "VERDE COM POUCO MEDIDO: só $passou casos"; exit 1
   fi
   verde "$passou casos de navegador verdes"
@@ -120,7 +121,27 @@ exigir_vermelho "caiu a leitura da primária calculada no site" \
 cp "$ORIG_MOLDURA" "$MOLDURA"
 
 echo
-echo "4. Reposto — tem de voltar ao verde"
+echo "4. CONTROLO NEGATIVO — uma cor de ESTADO passa a ser temável"
+# «O que não é personalizável continua a não ser, mesmo no plano de cima.» Um
+# cliente que repinte o vermelho de perigo passa o aceite 1 e quebra a leitura de
+# um ecrã de operação: quem está ao balcão deixa de distinguir um aviso de um
+# erro. A fronteira está em `variaveisDoTema`, que é a única função que
+# transforma um tema em CSS — e é ali que este defeito tem de doer.
+python3 - <<'PYEST'
+import io
+p = 'packages/ui/src/tema.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "    '--bo-publico-texto': sobreFundo.cor,\n  };"
+assert antigo in s, 'as variaveis do tema nao estao onde se esperava'
+novo = "    '--bo-publico-texto': sobreFundo.cor,\n    '--bo-estado-perigo': acento,\n  };"
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, novo))
+PYEST
+exigir_vermelho "caiu a asserção dos sete tokens fixos" \
+  'os SETE fixos não mexem' /tmp/bossaos-tema-nav-estado.txt
+cp "$ORIG_UI" "$TEMA_UI"
+
+echo
+echo "5. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-tema-nav-reposto.txt; then
   passou=$(grep -oE '[0-9]+ passed' /tmp/bossaos-tema-nav-reposto.txt | grep -oE '[0-9]+' || echo 0)
   verde "reposto: $passou casos"

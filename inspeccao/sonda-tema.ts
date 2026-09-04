@@ -51,17 +51,37 @@ export const TOKENS_FIXOS = [
  * Não lê o CSS declarado nem o que a API devolve: lê o que fica de pé depois de a
  * folha carregar, a cascata resolver e o tema do inquilino entrar. É a diferença
  * entre «está escrito» e «está aplicado».
+ *
+ * ── O selector, e porque é que ele passou a existir (E12, 04/09) ──────────
+ *
+ * A sonda lia sempre `:root`, e a implementação aplica o tema **no elemento da
+ * superfície pública** (`.bo-publico`), não na raiz. Não é um pormenor de
+ * arrumação: é o que impede o tema de um restaurante de escorrer para os ecrãs de
+ * operação, que partilham o mesmo documento em nenhuma rota mas o mesmo CSS em
+ * todas.
+ *
+ * Por isso a leitura passa a dizer ONDE lê, e ler nos dois sítios prova duas
+ * coisas diferentes:
+ *   `.bo-publico` → os cinco tokens públicos MUDAM com o tema publicado;
+ *   `:root`       → e ali continuam nos valores de origem, ou seja o tema está
+ *                   contido na superfície onde devia estar.
+ *
+ * O valor por omissão continua `:root`, para o que já estava escrito não mudar de
+ * significado.
  */
 export async function tokensAplicados(
   pagina: Page,
   nomes: readonly string[],
+  seletor = ':root',
 ): Promise<Record<string, string>> {
-  return pagina.evaluate((lista) => {
-    const estilo = getComputedStyle(document.documentElement);
+  return pagina.evaluate(([lista, alvo]) => {
+    const el = document.querySelector(alvo as string);
+    if (!el) throw new Error(`não encontrei ${alvo} na página servida`);
+    const estilo = getComputedStyle(el);
     const saida: Record<string, string> = {};
-    for (const nome of lista) saida[nome] = estilo.getPropertyValue(nome).trim();
+    for (const nome of lista as string[]) saida[nome] = estilo.getPropertyValue(nome).trim();
     return saida;
-  }, [...nomes]);
+  }, [[...nomes], seletor] as const);
 }
 
 /**

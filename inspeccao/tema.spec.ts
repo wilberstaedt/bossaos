@@ -3,6 +3,13 @@ import {
   LARGURAS, alvosPequenos, elementosForaDoEcra, textosComPoucoContraste, transbordaNaHorizontal,
 } from './ajudas.ts';
 import { FICHEIRO_DE_SESSAO, FICHEIRO_DE_SESSAO_B } from './caminhos.ts';
+import {
+  TOKENS_FIXOS, TOKENS_PUBLICOS, exigirTokensLidos, tokensAplicados,
+} from './sonda-tema.ts';
+// As mesmas regras que o servidor usa para decidir. Medir contraste no arnês com
+// uma segunda conta daria duas verdades sobre contraste — que é o que a régua do
+// E12 reprova à cabeça.
+import { LIMIAR, razaoArredondada } from '../packages/ui/src/regras.ts';
 
 /**
  * E12 · a cor CALCULADA pelo navegador na rota pública.
@@ -95,6 +102,10 @@ test.describe.serial('a cor publicada chega à rota pública', () => {
 
   let antesFundo = '';
   let antesBotao = '';
+  /** Os tokens da sonda do revisor, lidos onde o tema entra e onde ele NÃO entra. */
+  let antesPublicos: Record<string, string> = {};
+  let antesFixosNaSuperficie: Record<string, string> = {};
+  let antesPublicosNaRaiz: Record<string, string> = {};
 
   test('ANTES: as páginas públicas servem a paleta de origem', async ({ page }) => {
     const carta = await page.goto(CARTA_B);
@@ -109,6 +120,21 @@ test.describe.serial('a cor publicada chega à rota pública', () => {
     expect(site?.status(), 'o site público de B não responde').toBeLessThan(400);
     antesBotao = await corCalculada(page, '.bo-publico .bo-botao--primario', 'background-color');
     expect(antesBotao).not.toBe(rgb(NOVAS.primaria));
+
+    // ── E os tokens da sonda do revisor, nos DOIS sítios ──────────────────
+    //
+    // `.bo-publico` é onde o tema entra; `:root` é onde ele não pode entrar. Ler
+    // nos dois transforma «a cor mudou» em duas afirmações diferentes: mudou
+    // onde devia, e ficou contida.
+    await page.goto(CARTA_B);
+    antesPublicos = await tokensAplicados(page, TOKENS_PUBLICOS, '.bo-publico');
+    antesFixosNaSuperficie = await tokensAplicados(page, TOKENS_FIXOS, '.bo-publico');
+    antesPublicosNaRaiz = await tokensAplicados(page, TOKENS_PUBLICOS, ':root');
+    // A guarda do próprio leitor: token vazio é folha que não chegou, e não
+    // «nada mudou». Sem ela, uma página sem estilos passaria o antes/depois.
+    exigirTokensLidos(antesPublicos);
+    exigirTokensLidos(antesFixosNaSuperficie);
+    exigirTokensLidos(antesPublicosNaRaiz);
   });
 
   test('publicar as cores pelo PRODUTO, do formulário ao botão', async ({ page }) => {
@@ -137,6 +163,68 @@ test.describe.serial('a cor publicada chega à rota pública', () => {
     // passava — e passava também se o "antes" já fosse esta cor.
     expect(fundo).not.toBe(antesFundo);
     expect(botao).not.toBe(antesBotao);
+  });
+
+  test('as TRÊS cores escolhidas mudam, as duas geradas continuam legíveis, e os SETE fixos não mexem', async ({ page }) => {
+    // ── A terceira coisa que o E12 tem de mostrar, medida no navegador ────
+    //
+    // *«A personalização preserva tipografia, componentes, legibilidade e cores
+    // dos estados»* (PRECIFICACAO.md). Um cliente que repinte o vermelho de
+    // perigo passa o aceite 1 e quebra a leitura de um ecrã de operação: quem
+    // está ao balcão deixa de distinguir um aviso de um erro.
+    //
+    // A prova de base mede isto na ENTRADA (a recusa por token não temável) e na
+    // SAÍDA (`variaveisDoTema` emite cinco). Aqui mede-se onde interessa: no que
+    // o navegador tem de pé depois de a cascata resolver.
+    await page.goto(CARTA_B);
+    const publicos = await tokensAplicados(page, TOKENS_PUBLICOS, '.bo-publico');
+    const fixos = await tokensAplicados(page, TOKENS_FIXOS, '.bo-publico');
+    const publicosNaRaiz = await tokensAplicados(page, TOKENS_PUBLICOS, ':root');
+    exigirTokensLidos(publicos);
+    exigirTokensLidos(fixos);
+
+    // ── TRÊS mudam, e não cinco. Uma correcção à premissa da sonda ───────
+    //
+    // A sonda do revisor diz «os cinco tokens públicos mudam». Medido: mudam
+    // três. Os outros dois — `--bo-publico-texto` e `--bo-publico-primaria-texto`
+    // — **não são escolhidos, são gerados**: `melhorTextoSobre` calcula-os a
+    // partir do fundo e da primária, e é de propósito. Está escrito em
+    // `packages/ui/src/tema.ts`: *«quem escolhe o fundo não devia poder escolher
+    // também o texto que vai por cima»*.
+    //
+    // Uma paleta nova escura sobre outra escura gera o MESMO branco, e exigir que
+    // ele mude seria exigir que a regra de legibilidade falhasse. Por isso os
+    // derivados provam-se de outra maneira, três linhas abaixo: pela razão de
+    // contraste contra a cor de onde vieram.
+    for (const token of ['--bo-publico-primaria', '--bo-publico-acento', '--bo-publico-fundo']) {
+      expect(publicos[token], `${token} não mudou com o tema publicado`)
+        .not.toBe(antesPublicos[token]);
+    }
+    expect(publicos['--bo-publico-primaria']?.toLowerCase()).toBe(NOVAS.primaria);
+    expect(publicos['--bo-publico-acento']?.toLowerCase()).toBe(NOVAS.acento);
+    expect(publicos['--bo-publico-fundo']?.toLowerCase()).toBe(NOVAS.fundo);
+
+    // E os DERIVADOS são derivados: cada um cumpre o mínimo de texto corrente
+    // contra a cor sobre a qual assenta. Uma implementação que os copiasse do
+    // tema anterior — ou que deixasse o cliente escolhê-los — cai aqui.
+    expect(
+      razaoArredondada(publicos['--bo-publico-fundo']!, publicos['--bo-publico-texto']!),
+      'o texto gerado não se lê sobre o fundo publicado',
+    ).toBeGreaterThanOrEqual(LIMIAR.normal);
+    expect(
+      razaoArredondada(publicos['--bo-publico-primaria']!, publicos['--bo-publico-primaria-texto']!),
+      'o rótulo do botão não se lê sobre a primária publicada',
+    ).toBeGreaterThanOrEqual(LIMIAR.normal);
+    // Os sete não mudaram — nenhum. E a comparação é com a leitura de antes, e
+    // não com uma lista de valores escrita à mão: uma lista escrita à mão
+    // envelhece e passa a comparar o tema com ela própria.
+    expect(fixos, 'o tema do restaurante tocou em tipografia, estado ou foco')
+      .toEqual(antesFixosNaSuperficie);
+    // E o tema ficou CONTIDO: na raiz do documento os tokens públicos continuam
+    // nos valores de origem. É isto que impede a cor de um restaurante de
+    // escorrer para um ecrã de operação que partilhe a mesma folha.
+    expect(publicosNaRaiz, 'o tema escapou da superfície pública para a raiz')
+      .toEqual(antesPublicosNaRaiz);
   });
 
   test('e a carta de OUTRO inquilino não muda de cor com isto', async ({ page }) => {
