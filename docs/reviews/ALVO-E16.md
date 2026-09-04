@@ -99,3 +99,15 @@ Aqui **não passa**. Duas coisas:
 O segundo ponto é o que me custou três enganos a descobrir no E15 — e o meu
 próprio controlo negativo estava apontado à única tela onde a avaria não podia
 ser vista. Se o teu ficar apontado ao sítio certo à primeira, poupas-me a volta.
+
+
+## Dívida do E15 que se paga aqui
+
+**A origem do pedido está no ecrã e não está provada.** `andamento/page.tsx`
+rende `data-teste="origem"` com `data-canal`, e nenhuma prova em `inspeccao/` ou
+`scripts/` a observa — procurei o selector, os textos e o atributo: zero.
+
+Exijo, com o par: **um pedido da sala e um do cliente, ambos visíveis e
+distinguíveis pelo canal**, e a asserção a ficar **vermelha** se o canal deixar
+de chegar ao ecrã. Sem a segunda metade, é uma prova que não pode falhar — e já
+sabemos como é que isso acaba.
