@@ -35,6 +35,36 @@ for l in linhas[1:]:
 ' "$1" "$2"
 }
 
+# ── a REFERENCIA tambem tem de ser verificada ──────────────────────────────
+#
+# O cabecalho deste ficheiro diz "referencia, nunca se edita". A 04/09 fui testar
+# se isso era verdade e nao era: tirei o MESMO ID aos dois ficheiros e a guarda
+# respondeu "Cobertura integra" com 395. A copia de trabalho estava protegida pela
+# referencia, e a referencia nao estava protegida por NADA.
+#
+# "Nunca se edita" e prosa, e prosa nao e uma verificacao - que e a licao que hoje
+# atravessou seis guardas. Pior aqui do que noutro sitio, porque o proprio
+# cabecalho diz que este script existe para o denominador nao encolher em silencio,
+# e era exactamente isso que ele deixava acontecer.
+#
+# A impressao digital e do CONJUNTO DE IDS ORDENADO e nao do ficheiro: assim nao se
+# quebra por causa de fim de linha nem da ordem das colunas, que era ruido a
+# esconder o sinal. Se um ID for acrescentado ou removido de propósito, actualiza-se
+# esta linha no mesmo commit - e af muda deliberada deixa rasto.
+IMPRESSAO_ESPERADA="19c0daf5d1ef73e1eca61b9a7841bb44b9872f6d42b6d6dfbb3a82bdf548fa15"
+IMPRESSAO_REAL=$(python3 -c "
+import csv, hashlib, sys
+ids = sorted(l['id'].strip() for l in csv.DictReader(open(sys.argv[1], encoding='utf-8-sig')))
+print(hashlib.sha256('\n'.join(ids).encode()).hexdigest())" "$REF")
+if [ "$IMPRESSAO_REAL" != "$IMPRESSAO_ESPERADA" ]; then
+  erro "a REFERENCIA mudou: os 396 IDs do atlas nao sao os mesmos."
+  echo "          esperada: $IMPRESSAO_ESPERADA"
+  echo "          real:     $IMPRESSAO_REAL"
+  echo "        Se a mudanca e deliberada, actualiza IMPRESSAO_ESPERADA no mesmo commit."
+else
+  ok "a referencia esta intacta (396 IDs, impressao confere)"
+fi
+
 ids_ref=$(coluna "$REF"  id | sort)
 ids_tra=$(coluna "$TRAB" id | sort)
 n_ref=$(echo "$ids_ref" | wc -l | tr -d ' ')
