@@ -59,11 +59,41 @@ async function abrirSessao(
   ficheiro: string,
   paraAbrir: string,
 ): Promise<void> {
-  // Tentar entrar PRIMEIRO faz a segunda passagem não gastar uma inscrição, e é
-  // a inscrição que bate no limitador.
-  let entrou = await pedido.post('/api/auth/sign-in/email', {
-    data: { email, password: SENHA }, headers: { origin: baseURL },
-  });
+  // Tentar entrar PRIMEIRO faz a segunda passagem não gastar uma inscrição.
+  //
+  // ── O 429 valia para as TRÊS chamadas, e só a do meio o tratava ──────────
+  //
+  // A inscrição já esperava pelo limitador; as duas ENTRADAS não. E foi numa
+  // entrada que a CI falhou a 04/09: «entrada de painel-b@inspeccao.example
+  // falhou: 429».
+  //
+  // A aritmética, medida no better-auth 1.7.2 e não suposta: a regra de
+  // `/sign-in*` e `/sign-up*` é **3 pedidos por janela de 10 segundos**
+  // (`dist/api/rate-limiter/index.mjs:305-308`). Uma sessão gasta até três —
+  // entrar, inscrever, entrar — e desde que a prova de isolamento trouxe o
+  // inquilino B são duas sessões seguidas: o quarto pedido apanha o limitador.
+  //
+  // A saída NÃO é desligar o limitador nos testes. Ele só liga em produção
+  // (`enabled: options.rateLimit?.enabled ?? isProduction`) e o arnês corre
+  // contra o build de produção de propósito — é a versão que vai para a rua.
+  // Desligá-lo tirava da medição uma protecção real, que é exactamente a
+  // conveniência que o marco E11 existe para apanhar.
+  //
+  // Espera fixa acima da janela, e não escalonada, pela razão que já estava
+  // escrita aqui: escalonar torna o arranque imprevisível.
+  const entrar = async () => {
+    let r;
+    for (let tentativa = 0; tentativa < 6; tentativa++) {
+      r = await pedido.post('/api/auth/sign-in/email', {
+        data: { email, password: SENHA }, headers: { origin: baseURL },
+      });
+      if (r.status() !== 429) break;
+      await dormir(11_000);
+    }
+    return r!;
+  };
+
+  let entrou = await entrar();
 
   if (!entrou.ok()) {
     let inscricao;
@@ -77,9 +107,7 @@ async function abrirSessao(
       await dormir(11_000);
     }
     expect(inscricao?.ok(), `inscrição de ${email} falhou: ${inscricao?.status()}`).toBeTruthy();
-    entrou = await pedido.post('/api/auth/sign-in/email', {
-      data: { email, password: SENHA }, headers: { origin: baseURL },
-    });
+    entrou = await entrar();
   }
   expect(entrou.ok(), `entrada de ${email} falhou: ${entrou.status()}`).toBeTruthy();
 
