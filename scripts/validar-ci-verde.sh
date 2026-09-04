@@ -48,12 +48,32 @@ fi
 # tambem nao. As duas leituras sao NAO MEDI enquanto houver commits por empurrar.
 a_frente=$(git rev-list --count '@{upstream}..HEAD' 2>/dev/null || true)
 a_frente=${a_frente:-0}
+# ── Nao mandar empurrar quando nao ha semaforo para ver ────────────────────
+#
+# A 04/09 o Matheus apanhou-me nisto. Eu empurrava a cada tick so' para calar
+# esta pendencia, e cada push criava cinco jobs que nao arrancam por facturacao.
+# Um ciclo que eu proprio fiz: a guarda chateia, eu empurro, a corrida falha, a
+# guarda chateia — e a gastar-lhe um plano que ele nem sabia que tinha.
+#
+# Empurrar so' vale quando ha semaforo. Sem ele, commita-se local e empurra-se
+# quando houver motivo: fecho de etapa, ou a CI de volta.
+trancada=$(gh run list --limit 1 --json databaseId -q '.[0].databaseId' 2>/dev/null \
+  | xargs -I{} gh api "repos/{owner}/{repo}/actions/runs/{}/jobs" -q '.jobs[0].id' 2>/dev/null \
+  | xargs -I{} gh api "repos/{owner}/{repo}/check-runs/{}/annotations" -q '.[0].message' 2>/dev/null \
+  | grep -ci "payments have failed\|spending limit" || true)
+
 if [ "$a_frente" -gt 0 ] 2>/dev/null; then
-  pend "ha $a_frente commit(s) por empurrar — o semaforo nao os viu"
-  echo "           Empurra antes de o ler: a corrida que existe fala de outro codigo."
-  echo
-  echo "  NAO MEDI o que interessa."
-  exit 0
+  if [ "${trancada:-0}" -gt 0 ] 2>/dev/null; then
+    echo "  ── $a_frente commit(s) por empurrar, e esta bem assim."
+    echo "     A CI esta trancada por facturacao: empurrar so' cria corridas que"
+    echo "     nao arrancam. Commita local; empurra no fecho da etapa."
+  else
+    pend "ha $a_frente commit(s) por empurrar — o semaforo nao os viu"
+    echo "           Empurra antes de o ler: a corrida que existe fala de outro codigo."
+    echo
+    echo "  NAO MEDI o que interessa."
+    exit 0
+  fi
 fi
 
 # A corrida mais recente do ramo. Nao filtro pelo SHA de proposito: se ha uma
