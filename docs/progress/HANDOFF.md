@@ -1,10 +1,24 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E15 — Staff PWA e funcionamento degradado (**23 telas**).
-**Estado:** **A MEIO**, com o JR. A fila local (`packages/fila`) está feita e
-provada, e as duas perdas de rede estão provadas no navegador; as telas seguem.
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** Declarado pelo JR; não
+assinado — ninguém assina a revisão do próprio código.
 **Régua:** `docs/reviews/ALVO-E15.md`, escrita antes de existir código.
-Detalhe: `docs/progress/E15.md`, escrito pelo JR ao fechar por contexto.
+**Detalhe e achados:** `docs/progress/E15.md`.
+
+**A prova foi LOCAL.** A CI continua trancada por facturação do GitHub, e nada
+desta etapa correu lá. Quem validar escreve isso.
+
+**O que está pronto para medir:**
+`pnpm verificar` (0 falhas) · `./scripts/provar-fila.sh` (11 grupos, 24 casos,
+10 defeitos plantados) · `./scripts/provar-staff-no-navegador.sh` (26 casos, 5
+defeitos plantados no artefacto real) · `pnpm inspeccionar` (398 casos verdes).
+
+**Três defeitos que só a prova de navegador viu**, e estão escritos no E15.md: as
+suspensas eram sempre zero no produto, o índice do STAFF-022 tinha alvos de
+22 px, e a recusa de pagamento não olhava à rede — com o caso de prova a dar
+verde com a rede **ligada**. Mais um na guarda `validar-classes.sh`, que não lia
+`apps/web/src/` desde o E02.
 
 **O E14 ficou VALIDADO** a 04/09 — 18 telas, e a prova foi **local**, porque a CI
 está trancada por facturação do GitHub. O resto deste ficheiro é o contexto do

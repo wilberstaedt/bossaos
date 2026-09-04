@@ -136,6 +136,88 @@ async function visitar(
     .toBeVisible();
 }
 
+/**
+ * As colunas de uma linha de CSV, respeitando aspas.
+ *
+ * ── Porque é que um `split(',')` não serve aqui ──────────────────────────
+ *
+ * Escrevi-o assim primeiro. O `titulo_atlas` do STAFF-001 é `"Tu turno, a la
+ * vista"` — vírgula dentro de aspas —, e a partir dessa linha todas as colunas
+ * andam uma casa para a direita: `etapa_principal` passava a ler o título e a
+ * comparação com `E15` não dava nada.
+ *
+ * O sintoma teria sido a guarda a encontrar zero telas na matriz. E é por isso
+ * que a asserção da contagem existe antes da comparação: sem ela, os dois
+ * conjuntos ficavam vazios e a igualdade passava por vacuidade — verde sobre
+ * nada, exactamente o que este projecto passa o tempo a fechar.
+ */
+function colunas(linha: string): string[] {
+  const saida: string[] = [];
+  let campo = '';
+  let dentroDeAspas = false;
+  for (let i = 0; i < linha.length; i += 1) {
+    const c = linha[i];
+    if (c === '"') {
+      // Duas aspas seguidas dentro de um campo são uma aspa literal.
+      if (dentroDeAspas && linha[i + 1] === '"') { campo += '"'; i += 1; }
+      else dentroDeAspas = !dentroDeAspas;
+    } else if (c === ',' && !dentroDeAspas) {
+      saida.push(campo); campo = '';
+    } else {
+      campo += c;
+    }
+  }
+  saida.push(campo);
+  return saida;
+}
+
+/**
+ * A POPULAÇÃO, afirmada antes de qualquer medição.
+ *
+ * A régua fixou-a antes da entrega: `etapa_principal = E15` são **23 telas**. E
+ * exige que a prova conte a própria população — *«sem isso, ‹as telas estão
+ * verdes› é uma frase sobre as telas que alguém se lembrou de listar»*.
+ *
+ * É a lição do E14 aplicada aqui: uma tela que caia da lista tem de **partir o
+ * teste**, e não desaparecer em silêncio. Sem esta contagem, um verde sobre
+ * vinte e duas é indistinguível de um verde sobre vinte e três — e a diferença é
+ * uma tela que ninguém voltou a olhar.
+ */
+const QUANTAS_TELAS = 23;
+
+test('a população é 23 telas, e 23 ids DISTINTOS', () => {
+  const lista = telas(alvos);
+  expect(lista.length, 'a lista de telas não tem 23 entradas').toBe(QUANTAS_TELAS);
+  // Ids distintos, e não só a contagem: vinte e três entradas com uma repetida
+  // são vinte e duas telas medidas e um número certo — que é pior do que um
+  // número errado, porque não se vê.
+  const ids = new Set(lista.map((t) => t.id));
+  expect(ids.size, `ids repetidos: ${lista.length - ids.size}`).toBe(QUANTAS_TELAS);
+});
+
+/**
+ * E a lista bate com a MATRIZ, que é a fonte — não com o que eu me lembrei.
+ *
+ * Contar 23 prova que a lista tem 23. Não prova que são **as** 23: uma tela
+ * trocada por outra dá o mesmo número. A matriz é lida do CSV, e a comparação é
+ * de conjuntos nos dois sentidos — uma a menos e uma a mais são o mesmo defeito.
+ */
+test('e são exactamente as 23 da matriz, sem faltar nem sobrar', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const csv = await readFile('docs/progress/coverage.csv', 'utf8');
+  const daMatriz = csv.split('\n').slice(1)
+    .map(colunas)
+    .filter((c) => c[6] === 'E15')
+    .map((c) => c[0]?.trim() ?? '')
+    .filter((id) => id !== '');
+  // Guarda de leitor cego: se o CSV não for lido, os dois conjuntos ficam vazios
+  // e a comparação passa por vacuidade — que é o verde sobre nada.
+  expect(daMatriz.length, 'não li a matriz — a comparação seria vazia').toBe(QUANTAS_TELAS);
+
+  const medidos = telas(alvos).map((t) => t.id).sort();
+  expect(medidos, 'a lista medida não é a da matriz').toEqual([...daMatriz].sort());
+});
+
 for (const largura of LARGURAS) {
   test.describe(`${largura} px · Staff`, () => {
     test.use({ viewport: { width: largura, height: 900 } });

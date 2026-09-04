@@ -88,12 +88,12 @@ exigir_vermelho() {
 
 # O número MEDIDO hoje, e não um mínimo folgado.
 #
-# 3 de preparação + 10 do `staff.spec.ts` + 11 do `staff-telas.spec.ts`. Um
+# 3 de preparação + 10 do `staff.spec.ts` + 13 do `staff-telas.spec.ts`. Um
 # mínimo folgado — «pelo menos 12» — deixa a suite encolher para metade sem que
 # nada acenda, e encolher em silêncio é como uma suite deixa de medir. Quando a
 # etapa entregar mais casos, este número sobe com eles; é uma linha a mudar, e a
 # alternativa é não saber.
-CASOS_MINIMOS=24
+CASOS_MINIMOS=26
 
 echo "1. Com tudo ligado"
 if correr /tmp/bossaos-staff-nav-ligado.txt; then
@@ -198,7 +198,29 @@ exigir_vermelho "caiu a alcançabilidade: dez telas ficaram sem caminho" \
 cp "$ORIG_PROCURAR" "$PROCURAR"
 
 echo
-echo "6. Reposto — tem de voltar ao verde"
+echo "6. CONTROLO NEGATIVO — uma tela DESAPARECE da lista medida"
+# A régua exige que a prova conte a própria população: «sem isso, ‹as telas estão
+# verdes› e' uma frase sobre as telas que alguem se lembrou de listar».
+#
+# Este controlo tira uma tela da lista. Sem a contagem, as 22 restantes ficavam
+# verdes e o relatorio dizia o mesmo que diz hoje — o desaparecimento nao faz
+# barulho nenhum a passar.
+TELAS_SPEC=inspeccao/staff-telas.spec.ts
+ORIG_TELAS=$(mktemp); cp "$TELAS_SPEC" "$ORIG_TELAS"
+python3 - <<'PYPOP'
+import io
+p = 'inspeccao/staff-telas.spec.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "    { id: 'STAFF-011', caminho: '/cursos', marcador: '[data-tela=\"STAFF-011\"]' },\n"
+assert antigo in s, 'a linha do STAFF-011 nao esta onde se esperava'
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, ''))
+PYPOP
+exigir_vermelho "caiu a contagem da populacao: 22 telas deixaram de ser 23" \
+  'população é 23 telas' /tmp/bossaos-staff-nav-populacao.txt
+cp "$ORIG_TELAS" "$TELAS_SPEC"; rm -f "$ORIG_TELAS"
+
+echo
+echo "7. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-staff-nav-reposto.txt; then
   passou=$(grep -oE '[0-9]+ passed' /tmp/bossaos-staff-nav-reposto.txt | grep -oE '[0-9]+' || echo 0)
   if (( passou < CASOS_MINIMOS )); then
