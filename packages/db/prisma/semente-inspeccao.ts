@@ -598,6 +598,58 @@ async function principal(): Promise<void> {
       },
     });
 
+    // ── E17 · o QR da mesa e um visitante VIVO ───────────────────────────
+    //
+    // Sem uma sessão de visitante aberta, as sete telas da visita mediam o
+    // desvio para o STATE-009 — cinco larguras verdes sobre o ecrã errado, que é
+    // o falso verde que este arnês existe para impedir.
+    //
+    // O segredo é FIXO na semeadura, e é a única vez em que isso é aceitável:
+    // a prova de navegador precisa de o poder escrever no endereço, e a base
+    // continua a guardar só o resumo. Em produção nasce de `randomBytes`.
+    const SEGREDO_DO_QR = 'insp-segredo-da-mesa-para-medir';
+    await prisma.serviceTable.update({
+      where: { id: primeiraMesa.id },
+      data: {
+        qrSegredoHash: createHash('sha256').update(SEGREDO_DO_QR, 'utf8').digest('hex'),
+        qrGeracao: 1,
+        qrRodadoEm: new Date(),
+      },
+    });
+    // Uma sessão de visitante viva, presa à sessão de mesa aberta. O token é
+    // fixo pela mesma razão: a prova põe-no na bolacha.
+    const TOKEN_DO_VISITANTE = 'insp-token-do-visitante-para-medir';
+    await prisma.guestSession.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        tableId: primeiraMesa.id, tableSessionId: sessaoDeMesa.id,
+        tokenHash: createHash('sha256').update(TOKEN_DO_VISITANTE, 'utf8').digest('hex'),
+        ultimaVezEm: new Date(),
+      },
+    });
+    // E uma REVOGADA, para o QR-006 ter os três estados que distingue. Com uma
+    // só, a tela media uma lista onde todas as linhas são iguais.
+    const mesaRevogada = mesas[1];
+    if (mesaRevogada) {
+      const sessaoExtra = await prisma.tableSession.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2, tableId: mesaRevogada.id,
+          estado: 'ABERTA', comensais: 2, abertaPor: 'inspeccao@exemplo.example',
+        },
+        select: { id: true },
+      });
+      await prisma.guestSession.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          tableId: mesaRevogada.id, tableSessionId: sessaoExtra.id,
+          tokenHash: createHash('sha256').update('insp-token-revogado', 'utf8').digest('hex'),
+          estado: 'REVOGADA', revogadaEm: new Date(),
+          revogadaPor: 'inspeccao@exemplo.example',
+          revogadaMotivo: 'una foto del QR apareció en un grupo',
+        },
+      });
+    }
+
     // ── E16 · estações, roteamento e tarefas de produção ─────────────────
     //
     // Duas estações e um prato que vai às DUAS. É o caso que parte o modelo

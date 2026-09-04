@@ -55,12 +55,27 @@ export interface Alvos {
   estacaoDeExpo: string;
   /** E16: uma tarefa concreta, para a ficha do bilhete não medir um 404. */
   tarefaDeProducao: string;
+  /** E17: a mesa com QR emitido, e o SEGREDO em claro — só a semeadura o sabe. */
+  mesaComQr: string;
+  /** E17: a sessão de visitante VIVA. Sem ela, as sete telas da visita mediam o desvio. */
+  visitanteVivo: string;
 }
 
 const PREFIXO = 'insp-';
 
 /** O convite que a tela AUTH-006 abre. Tem de bater com a semeadura. */
 export const TOKEN_DE_CONVITE = 'insp-convite-para-medir';
+
+/**
+ * E17: o segredo do QR e o token do visitante, fixos na semeadura.
+ *
+ * A prova precisa de os poder escrever — um no endereço, o outro na bolacha — e
+ * a base continua a guardar só o resumo. É a única vez em que um segredo é fixo,
+ * e existe porque a alternativa era a prova não conseguir entrar pela porta que
+ * está a medir.
+ */
+export const SEGREDO_DO_QR = 'insp-segredo-da-mesa-para-medir';
+export const TOKEN_DO_VISITANTE = 'insp-token-do-visitante-para-medir';
 
 export const ORG_A = '11111111-1111-4111-8111-111111111111';
 export const EMAIL_DO_ARNES = 'painel@inspeccao.example';
@@ -149,6 +164,19 @@ export async function resolverAlvos(): Promise<Alvos> {
           WHERE station_id IN (SELECT id FROM production_stations WHERE nome LIKE '${PREFIXO}%')
           ORDER BY criada_em LIMIT 1`,
         'uma tarefa de produção'),
+      mesaComQr: await um(
+        sql,
+        `SELECT id FROM service_tables
+          WHERE codigo LIKE '${PREFIXO}%' AND qr_segredo_hash IS NOT NULL LIMIT 1`,
+        'uma mesa com QR emitido'),
+      visitanteVivo: await um(
+        sql,
+        `SELECT g.id FROM guest_sessions g
+           JOIN table_sessions ts ON ts.id = g.table_session_id
+          WHERE g.estado = 'ACTIVA' AND ts.estado <> 'FECHADA'
+            AND g.table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%')
+          LIMIT 1`,
+        'uma sessão de visitante viva'),
     };
   } finally {
     await sql.end();

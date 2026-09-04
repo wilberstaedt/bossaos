@@ -1,10 +1,47 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E17 — Pedido por QR e atendimento do cliente (**16 telas**).
-**Estado:** autorizada.
-**Régua:** `docs/reviews/ALVO-E17.md` — a escrever.
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** Declarado pelo JR; não
+assinado — ninguém assina a revisão do próprio código.
+**Régua:** `docs/reviews/ALVO-E17.md` — não chegou antes da entrega. Construído
+contra o contrato, e a entrega mede os quatro controlos que ele numera.
 **Contratos que mandam:** `qr-da-mesa-e-o-visitante.md` (escrito para esta etapa:
 **rodar não é revogar**) e `autenticacao-e-convites.md` (escopo do convidado).
+**Detalhe e achados:** `docs/progress/E17.md`.
+
+**O que está pronto para medir:**
+`pnpm verificar` (0 falhas) · `./scripts/provar-visitante.sh` (4 grupos, 11 casos,
+**5 defeitos plantados**) · `./scripts/provar-visitante-no-navegador.sh` (19
+casos, **6 defeitos plantados**) · `provar-migracoes-do-zero.sh` ·
+`provar-isolamento.sh`.
+
+**A regra do contrato está na FORMA:** `guest_sessions` **não guarda a geração do
+QR**. Sem esse campo, a comparação que faria a rotação expulsar gente da mesa não
+tem o que comparar — é preciso uma migração para a escrever, e uma migração é
+revista. Três portas estreitas encerram o resto: `visitante_activo` (activa **e**
+mesa por fechar), `mesa_do_qr` (só devolve linha com sessão de mesa ABERTA — é
+aqui que a fotografia do QR perde valor) e `abrir_visitante`.
+
+**E a separação vive também no ECRÃ.** O QR-005 tem dois formulários, com
+palavras diferentes, e o número das sessões que caem **antes** de confirmar. Um
+botão só teria a regra da base certa e o produto errado — e quem decide nunca
+saberia que havia duas coisas.
+
+**O controlo obrigatório verifica também o que NÃO devia cair.** Plantar o
+colapso faz cair o caso da rotação; se fizesse cair o da revogação, o detector
+estaria a medir «alguma coisa parou» em vez da distinção entre os dois actos.
+
+**Dois achados meus:** um controlo negativo derrubava o grupo inteiro, porque a
+primeira rotação é o que dá segredo à mesa — um defeito que derruba tudo não
+prova que a asserção certa funciona. E o arnês quase teve um falso verde: sem a
+bolacha do visitante, as sete telas da visita redireccionam para o STATE-009, e a
+asserção do **caminho final** é a única coisa que separa medir a tela de medir o
+desvio. O controlo 7 planta essa cegueira.
+
+**Fica declarado como NÃO feito:** as opções do prato no MENU-006 (o catálogo tem
+grupos de opções desde o E07; ligá-los ao pedido do visitante não está em
+contrato nenhum, e não invento a regra), uma fila de avisos por estação, e a
+leitura do QR em aparelho real — verificação humana declarada desde o E09.
 
 **O E16 ficou VALIDADO** a 04/09 no commit `69fe63b` — 20 telas, prova **local**,
 com **17 controlos negativos** entre as duas provas. Detalhe em `docs/reviews/E16.md`.
