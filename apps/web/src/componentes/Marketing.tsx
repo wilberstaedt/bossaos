@@ -45,6 +45,7 @@ export function MolduraMkt({
       marca={<Wordmark />}
       rotuloSaltar={m.comum.saltarParaConteudo}
       assinatura={m.comum.asinatura}
+      variante="comercial"
     >
       <nav className="bo-publico__seccoes" aria-label={k.produtoPagina}>
         {PAGINAS_MKT.map((p) => (

@@ -122,8 +122,11 @@ SET-012
 # REP-001). O arnês não autentica hoje, e isso é trabalho próprio: cookie real
 # emitido pela biblioteca, como a prova de acesso do E04 faz por HTTP. Continua
 # a ser bloqueante para o E11 e continua com o mesmo prazo — o E10.
-CHAN-001
-QR-001
-QR-003
-QR-004
-REP-001
+# As cinco do E09 saíram a 04/09, e saíram PAGAS: foram medidas, não
+# desassinadas. O que as bloqueava era uma coisa só — o arnês do navegador não
+# sabia entrar —, e passou a saber. A evidência de cada uma diz o que foi medido.
+#
+# CHAN-001, QR-001, QR-003, QR-004 e REP-001 — medidas em cinco larguras, com
+# sessão real. A medição encontrou dois defeitos que ninguém tinha visto: o QR
+# de 320 px fixos esticava a página a 360, e `.bo-pagina` crescia com o conteúdo
+# em vez de o conter.

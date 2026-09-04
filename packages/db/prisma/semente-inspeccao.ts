@@ -23,6 +23,7 @@
  * consoante a ordem por que se correram os comandos.
  */
 
+import { projectarSite } from '@bossaos/domain';
 import { IDS } from './fixtures.ts';
 import { abrirPrisma, limpar, PREFIXO, SLUG_DE_INSPECCAO } from './inspeccao-comum.ts';
 
@@ -148,6 +149,112 @@ async function principal(): Promise<void> {
       throw new Error(`não consegui reservar o endereço de inspecção: ${resultado}`);
     }
 
+    // ── O SITE do restaurante (E10), publicado ────────────────────────────
+    //
+    // Sem isto, as telas públicas do E10 mediam a página de "não encontrado" e
+    // diziam verde — que é exactamente a classe de erro que este projecto passa
+    // o tempo a fechar. Os textos são longos de propósito, pela mesma razão que
+    // os nomes dos pratos: uma página com "olá" em cada campo nunca transborda
+    // a 360 px e mede uma coisa que não se parece com a real.
+    const site = await prisma.site.upsert({
+      where: { organizationId_locationId: { organizationId: IDS.orgA, locationId: IDS.unidadeA2 } },
+      update: { seoTitulo: `${PREFIXO}Marina Puerto`, estado: 'PUBLICADO' },
+      create: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        seoTitulo: `${PREFIXO}Marina Puerto`,
+        seoDescricao: 'Cocina de mercado junto al puerto, con producto de temporada.',
+        estado: 'PUBLICADO',
+        redes: [{ rede: 'instagram', url: 'https://instagram.com/marina-puerto-inspeccao' }],
+      },
+      select: { id: true },
+    });
+
+    const PAGINAS = [
+      ['INICIO', 'Bienvenidos a Marina Puerto, cocina de mercado junto al agua',
+        'Trabajamos con producto de temporada y proveedores de la comarca.\n\nLa carta cambia cada semana, y lo que no encuentras hoy probablemente vuelva el mes que viene.'],
+      ['SOBRE', 'Una mesa para encontrarnos desde mil novecientos veintisiete',
+        'La casa abrió como fonda de pescadores y sigue en la misma esquina.\n\nTres generaciones después, la cocina cambió y la costumbre de sentarse mucho rato no.'],
+      ['CONTACTO', 'Te esperamos en el puerto de Oropesa del Mar',
+        'Estamos a doscientos metros del faro, con aparcamiento en la explanada.'],
+    ] as const;
+
+    for (const [tipo, titulo, corpo] of PAGINAS) {
+      await prisma.sitePage.upsert({
+        where: {
+          organizationId_siteId_tipo: {
+            organizationId: IDS.orgA, siteId: site.id, tipo,
+          },
+        },
+        update: { titulo, corpo, visivel: true },
+        create: {
+          organizationId: IDS.orgA, siteId: site.id, tipo, titulo, corpo, visivel: true,
+          ...(tipo === 'CONTACTO' ? {
+            contacto: {
+              morada: 'Paseo del Puerto 14, 12594 Oropesa del Mar, Castellón',
+              telefone: '+34 964 000 000',
+              email: 'reservas@marina-puerto.example',
+            },
+          } : {}),
+        },
+      });
+    }
+
+    await prisma.sitePost.upsert({
+      where: {
+        organizationId_siteId_slug: {
+          organizationId: IDS.orgA, siteId: site.id, slug: 'noche-de-vinos-de-la-comarca',
+        },
+      },
+      update: { visivel: true },
+      create: {
+        organizationId: IDS.orgA, siteId: site.id, slug: 'noche-de-vinos-de-la-comarca',
+        titulo: 'Una noche para compartir los vinos de la comarca',
+        resumo: 'Seis referencias de bodegas pequeñas, con los viticultores en la sala.',
+        corpo: 'Empezamos a las ocho y media y terminamos cuando se acabe el último vino.\n\nLas plazas son limitadas porque la sala es la que es.',
+        publicadoEm: new Date('2026-08-15T18:00:00Z'), visivel: true,
+      },
+    });
+
+    // Publicar pela porta real do produto — não por SQL. A revisão que o
+    // navegador vai ver é a mesma que o botão "Publicar" produz; uma semeadura
+    // que montasse o retrato à mão media uma coisa que o produto não faz.
+    const paginasDoSite = await prisma.sitePage.findMany({
+      where: { siteId: site.id },
+      select: { tipo: true, visivel: true, titulo: true, corpo: true, contacto: true },
+    });
+    const postsDoSite = await prisma.sitePost.findMany({
+      where: { siteId: site.id },
+      select: { slug: true, titulo: true, resumo: true, corpo: true, publicadoEm: true, visivel: true },
+    });
+    const conteudoDoSite = projectarSite({
+      seoTitulo: `${PREFIXO}Marina Puerto`,
+      seoDescricao: 'Cocina de mercado junto al puerto, con producto de temporada.',
+      redes: [{ rede: 'instagram', url: 'https://instagram.com/marina-puerto-inspeccao' }],
+      paginas: paginasDoSite.map((x) => ({
+        tipo: x.tipo as 'INICIO', visivel: x.visivel,
+        titulo: x.titulo, corpo: x.corpo, contacto: x.contacto,
+      })),
+      posts: postsDoSite,
+    });
+    const ultima = await prisma.siteRevision.findFirst({
+      where: { siteId: site.id }, select: { numero: true }, orderBy: { numero: 'desc' },
+    });
+    const revisaoDoSite = await prisma.siteRevision.create({
+      data: {
+        organizationId: IDS.orgA, siteId: site.id, numero: (ultima?.numero ?? 0) + 1,
+        conteudo: conteudoDoSite as unknown as object, criadaPor: 'inspeccao@exemplo.example',
+      },
+      select: { id: true },
+    });
+    await prisma.sitePublication.upsert({
+      where: { organizationId_siteId: { organizationId: IDS.orgA, siteId: site.id } },
+      update: { revisionId: revisaoDoSite.id, publicadaEm: new Date() },
+      create: {
+        organizationId: IDS.orgA, siteId: site.id, revisionId: revisaoDoSite.id,
+        publicadaPor: 'inspeccao@exemplo.example',
+      },
+    });
+
     // Confirma que a carta responde ANTES de o navegador tentar. Sem isto, um
     // erro de semeadura aparecia como "a inspecção falhou", que manda procurar
     // no sítio errado.
@@ -156,7 +263,13 @@ async function principal(): Promise<void> {
     if (carta.length === 0) {
       throw new Error('a carta de inspecção não responde depois de semeada');
     }
-    console.log(`semeado: /r/${SLUG_DE_INSPECCAO}/<idioma>/menu com ${itens.length} produtos`);
+    const doSite = await prisma.$queryRawUnsafe<unknown[]>(
+      `SELECT * FROM publico_site('${SLUG_DE_INSPECCAO}')`);
+    if (doSite.length === 0) {
+      throw new Error('o site de inspecção não responde depois de semeado');
+    }
+    console.log(
+      `semeado: /r/${SLUG_DE_INSPECCAO}/<idioma> com ${itens.length} produtos e o site publicado`);
   } finally {
     await prisma.$disconnect();
   }

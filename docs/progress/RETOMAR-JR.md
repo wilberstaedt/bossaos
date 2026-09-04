@@ -127,6 +127,45 @@ feita há uma hora.
   Uma guarda que vigia um **estilo** em vez de uma **propriedade** está verde por acaso.
   Custou uma retenção no E09 e um defeito igual numa guarda do sénior no mesmo dia.
 
+## O que aterrou no fecho do E10, e uma sessão nova não pode ignorar
+
+- **Uma prova pode repor o defeito que a etapa corrigiu, e dizer verde.** O
+  `provar-publico.sh` repunha «a função verdadeira a partir da migração», com o nome da
+  migração escrito à mão — e a lista ficou para trás quando uma migração posterior corrigiu
+  a função. Cada passagem deixava na base a versão com a fuga entre unidades, e o passo
+  final dizia «voltou ao verde» porque nada media a fuga. **A reposição passou a ser um
+  retrato da BASE VIVA**, tirado antes de plantar seja o que for, e há um passo final que
+  compara o fim com o princípio. Se escreveres um controlo negativo que substitui algo,
+  copia esse padrão: nenhuma lista à mão sobrevive.
+
+- **Importar um nome de um módulo com efeitos corre os efeitos.** Aconteceu duas vezes no
+  mesmo dia: o `publico.spec.ts` importava o endereço de `semente-inspeccao.ts`, que tem
+  `await principal()` no topo — cada worker do Playwright semeava outra vez, em paralelo,
+  sobre as linhas que o navegador lia; e o `playwright.config.ts` importava o caminho da
+  sessão do ficheiro de setup, e recusou arrancar. **Constantes vivem em módulos sem
+  efeitos.**
+
+- **`min-width: 0` não chega num item de grelha: `margin: 0 auto` desliga o esticar.** A
+  faixa media 360 px e o item media 592 dentro dela. Foi preciso medir duas vezes.
+  Corolário mais útil do que a regra: quando a correcção óbvia não muda o número, **mede
+  outra vez em vez de acrescentar outra correcção por cima**.
+
+- **Uma etapa que entrega telas não se assina sem prova de navegador.** Está no
+  `COMO-REVISO.md` desde 04/09, e o E10 nasceu já assim: 29 telas medidas em cinco larguras.
+  A prova de navegador encontrou cinco defeitos que build verde, tipos verdes e guardas
+  verdes não viam — todos de desenho, nenhum com erro em lado nenhum.
+
+- **O arnês do navegador autentica.** `inspeccao/autenticar.setup.ts` + o projecto `painel`.
+  Sessão real, emitida pela biblioteca, com o limitador respeitado. Se precisares de medir
+  uma tela com sessão, já não é preciso construir nada — e repara que o `BETTER_AUTH_URL`
+  tem de bater certo com a porta da inspecção, senão o registo devolve 403 e o erro não diz
+  uma palavra sobre portas.
+
+- **Recusar inventar é uma entrega, não uma falta.** A página de planos do E10 não tem
+  preços porque preço nenhum está decidido em documento nenhum, e um preço publicado é uma
+  promessa a quem o leu. Ficou declarado. O contrário — pôr números plausíveis para a página
+  não ficar com um buraco — é o que a régua chama dados inventados na pior superfície.
+
 ## Notas para o sénior (não colar)
 
 - O terminal do JR é `F17A8F91-337F-428E-A6C6-438922559E0C`; o boot normal dele é

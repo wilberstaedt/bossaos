@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { FICHEIRO_DE_SESSAO } from './inspeccao/caminhos.ts';
 
 /**
  * Inspecção do E02.
@@ -30,7 +31,37 @@ export default defineConfig({
     timezoneId: 'Europe/Madrid',
   },
 
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  /**
+   * Três projectos, e a razão de não ser um só.
+   *
+   * `preparar` entra na aplicação e guarda a sessão em ficheiro. Corre PRIMEIRO,
+   * e os outros dois dependem dele — a dependência é o que garante que o
+   * servidor já está de pé quando se tenta entrar, coisa que um `globalSetup`
+   * não garante.
+   *
+   * `chromium` corre **sem sessão**, que é como um estranho chega às páginas
+   * públicas. Se corresse com sessão, uma rota pública que exigisse entrada por
+   * engano passava despercebida — mediria um ecrã que o cliente do restaurante
+   * nunca vê.
+   *
+   * `painel` corre **com** a sessão, e é o que destranca as telas de gestão do
+   * E10 e as cinco telas internas que o E09 deixou por medir.
+   */
+  projects: [
+    { name: 'preparar', testMatch: /autenticar\.setup\.ts/ },
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      testIgnore: [/autenticar\.setup\.ts/, /painel\.spec\.ts/],
+      dependencies: ['preparar'],
+    },
+    {
+      name: 'painel',
+      testMatch: /painel\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], storageState: FICHEIRO_DE_SESSAO },
+      dependencies: ['preparar'],
+    },
+  ],
 
   /**
    * A base é semeada ANTES de o navegador arrancar.
@@ -51,6 +82,18 @@ export default defineConfig({
   globalTeardown: './inspeccao/limpar.ts',
 
   webServer: {
+    /**
+     * `BETTER_AUTH_URL` tem de bater certo com a PORTA desta inspecção.
+     *
+     * O `.env` aponta ao 3000, que é o servidor de desenvolvimento; a inspecção
+     * corre no 3010. Com os dois em desacordo, a biblioteca de autenticação
+     * recusa a origem e devolve **403 ao registar** — que foi exactamente o que
+     * aconteceu à primeira, e o erro não diz uma palavra sobre portas.
+     *
+     * A prova de acesso do E04 já resolvia isto do mesmo modo, no shell. Aqui
+     * fica no arnês, para quem correr a inspecção não ter de saber.
+     */
+    env: { BETTER_AUTH_URL: `http://127.0.0.1:${PORTA}` },
     command: `pnpm build && pnpm --filter @bossaos/web exec next start -p ${PORTA}`,
     url: `http://127.0.0.1:${PORTA}/api/health`,
     reuseExistingServer: false,

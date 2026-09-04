@@ -500,16 +500,41 @@ p { margin: 0; }
 .bo-publico__cabecalho {
   display: flex; align-items: center; justify-content: space-between; gap: var(--bo-espaco-lg);
   padding: var(--bo-espaco-lg) var(--bo-margem-movel);
-  max-width: var(--bo-largura-maxima); margin: 0 auto;
+  /* `width: 100%` pelo mesmo motivo do conteúdo: margens automáticas num item
+     de grelha desligam o esticar. Aqui ainda não deu sinal — nada largo passou
+     pelo cabeçalho — e é precisamente por isso que se corrige agora. */
+  max-width: var(--bo-largura-maxima); margin: 0 auto; min-width: 0; width: 100%;
 }
 .bo-publico__conteudo {
   max-width: var(--bo-largura-maxima); margin: 0 auto;
   padding: var(--bo-espaco-xxl) var(--bo-margem-movel) var(--bo-espaco-gigante);
+  /* ── `min-width: 0`, e é uma linha que vale uma etapa ────────────────────
+     `.bo-publico` é uma GRELHA, e um item de grelha tem `min-width: auto` por
+     omissão: cresce até caber o conteúdo, em vez de o conter. Enquanto nada
+     largo entrou aqui, isto não deu sinal — o E02 e o E09 passaram por cima.
+
+     A tabela de planos do E10 (`min-width: 34rem`) esticou o `main` para 592 px
+     num ecrã de 360, e a página inteira passou a rolar na horizontal. O
+     `overflow-x: auto` da caixa da tabela não podia fazer nada: o pai já tinha
+     crescido.
+
+     Vale para qualquer coisa larga que venha a seguir — um bloco de código, um
+     domínio sem espaços, uma tabela nova.
+
+     E `min-width: 0` sozinho NÃO chegou. `margin: 0 auto` num item de grelha
+     desliga o esticar — a caixa deixa de tomar a largura da faixa e passa a
+     dimensionar-se pelo conteúdo. Foi preciso medir duas vezes para ver isto:
+     a faixa media 360 px e o item media 592 dentro dela.
+
+     `width: 100%` devolve-lhe a largura da faixa. As margens automáticas ficam
+     porque continuam a centrar quando a faixa é mais larga do que o máximo. */
+  min-width: 0;
+  width: 100%;
 }
 .bo-publico__rodape {
   border-top: 1px solid var(--bo-borda);
   padding: var(--bo-espaco-xl) var(--bo-margem-movel);
-  max-width: var(--bo-largura-maxima); margin: 0 auto;
+  max-width: var(--bo-largura-maxima); margin: 0 auto; min-width: 0; width: 100%;
   font-size: 14px; color: var(--bo-texto-secundario);
   display: flex; justify-content: space-between; gap: var(--bo-espaco-lg); flex-wrap: wrap;
 }
@@ -631,7 +656,12 @@ p { margin: 0; }
 
 /* Moldura comum das páginas do E05. O `max-width` é o mesmo do catálogo: uma
    linha de texto que atravessa 1440 px lê-se mal, e o atlas desenha em 1100. */
-.bo-pagina { max-width: 1100px; margin: 0 auto; padding: var(--bo-espaco-xxl) var(--bo-margem-secretaria) var(--bo-espaco-xxxl); display: grid; gap: var(--bo-espaco-xxl); }
+/* `minmax(0, 1fr)` e não `1fr`: um item de grelha tem `min-width: auto` por
+   omissão e CRESCE até caber o conteúdo em vez de o conter. É o mesmo defeito
+   que o `.bo-publico__conteudo` tinha, e apareceu no mesmo dia — o QR do E09
+   (320 px fixos mais o preenchimento do cartão) esticava a página inteira a
+   360 px, e nenhuma tela do painel tinha sido medida em móvel até agora. */
+.bo-pagina { max-width: 1100px; margin: 0 auto; padding: var(--bo-espaco-xxl) var(--bo-margem-secretaria) var(--bo-espaco-xxxl); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--bo-espaco-xxl); }
 @media (max-width: 767px) { .bo-pagina { padding: var(--bo-espaco-xl) var(--bo-margem-movel) var(--bo-espaco-xxl); gap: var(--bo-espaco-xl); } }
 
 /* Os três cartões de plano. `auto-fit` e não três colunas fixas: em 768 px o
@@ -728,9 +758,33 @@ p { margin: 0; }
   margin: 0 auto;
   padding: var(--bo-espaco-xl) var(--bo-espaco-lg) var(--bo-espaco-xxl);
   display: grid;
+  /* `minmax(0, 1fr)` e não a coluna automática: um item de grelha cresce até
+     caber o conteúdo em vez de o conter, e a coluna `auto` faz o mesmo. Com a
+     coluna automática, qualquer coisa larga aqui dentro — uma tabela, um domínio
+     sem espaços — estica a página inteira e ela passa a rolar na horizontal.
+     Apanhado a 360 px pela inspecção do E10. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--bo-espaco-xl);
   font-size: 17px;
   line-height: 26px;
+}
+
+/* ── E a landing comercial NÃO é a carta ──────────────────────────────────
+   Este bloco redefine `.bo-publico` para a leitura da carta: 640 px e uma
+   coluna, que é o certo para quem lê ao telemóvel apontado a um QR. Só que
+   ganha em TODAS as páginas que usam a estrutura pública — a regra é a mesma
+   classe, escrita depois — e a landing da BossaOS ficava num tubo de 640 px num
+   ecrã de 1440, com a grelha de três colunas a nunca abrir.
+
+   Não é defeito do E09 nem se corrige mexendo na carta: corrige-se dizendo qual
+   das duas superfícies se está a desenhar. A carta continua exactamente como
+   estava. */
+.bo-publico--comercial {
+  max-width: var(--bo-largura-maxima);
+  padding: 0;
+  gap: 0;
+  font-size: 16px;
+  line-height: 24px;
 }
 .bo-publico h1 { margin: 0; }
 .bo-publico h2 { margin: 0 0 var(--bo-espaco-md); font-size: 20px; }
@@ -813,8 +867,11 @@ p { margin: 0; }
 
 /* O QR: fundo branco sempre, mesmo em tema escuro. Um QR sobre fundo escuro
    invertido não lê na maior parte das câmaras. */
-.bo-qr { background: #fff; padding: var(--bo-espaco-lg); border-radius: var(--bo-raio-cartao); width: fit-content; }
-.bo-qr svg { display: block; }
+.bo-qr { background: #fff; padding: var(--bo-espaco-lg); border-radius: var(--bo-raio-cartao); width: fit-content; max-width: 100%; }
+/* O código encolhe com o ecrã. Um QR de 320 px fixos num telemóvel de 360 não
+   cabe com o preenchimento do cartão à volta — e este é precisamente o ecrã de
+   onde alguém manda imprimir o código, muitas vezes do telemóvel. */
+.bo-qr svg { display: block; max-width: 100%; height: auto; }
 .bo-qr__endereco { word-break: break-all; font-size: 14px; color: var(--bo-texto-secundario); }
 
 /* ── E10 · site do restaurante (PUB) e landing (MKT) ────────────────────────
@@ -843,6 +900,16 @@ p { margin: 0; }
 .bo-publico__contacto { display: grid; gap: var(--bo-espaco-sm); margin-top: var(--bo-espaco-lg); }
 .bo-publico__contacto dt { font-size: 14px; color: var(--bo-texto-secundario); }
 .bo-publico__contacto dd { overflow-wrap: anywhere; }
+/* Um `tel:` ou um `mailto:` numa página de contacto É um alvo de toque: alguém
+   aponta o dedo para ligar. A 44 px, como o resto — a inspecção apanhou-o a
+   render 130×23. A isenção da WCAG é para ligações dentro de texto corrido, e
+   isto não é texto corrido, é a ficha do restaurante. */
+.bo-publico__contacto dd a,
+.bo-estado__factos dd a {
+  display: inline-flex; align-items: center;
+  min-height: var(--bo-toque-publico);
+  overflow-wrap: anywhere;
+}
 .bo-publico__redes { display: flex; flex-wrap: wrap; gap: var(--bo-espaco-sm); margin-top: var(--bo-espaco-lg); }
 .bo-publico__redes a {
   display: inline-flex; align-items: center;
@@ -860,6 +927,15 @@ p { margin: 0; }
 .bo-publico__novidade a { display: inline-flex; align-items: center; min-height: var(--bo-toque-publico); }
 .bo-publico__data { font-size: 14px; color: var(--bo-texto-secundario); }
 .bo-publico__formulario { display: grid; gap: var(--bo-espaco-md); max-width: 46rem; margin-top: var(--bo-espaco-lg); }
+/* A caixa de verificação é um alvo de toque como os outros. O navegador desenha-a
+   a 13×13 px, e a inspecção apanhou-o: num telemóvel isso é um alvo que se falha
+   e se acerta por acaso, e o que ela liga aqui é uma página ficar visível no site
+   público — um clique errado publica ou esconde. */
+.bo-campo input[type="checkbox"] {
+  inline-size: var(--bo-toque-publico);
+  block-size: var(--bo-toque-publico);
+  accent-color: var(--bo-primaria);
+}
 .bo-publico__formulario textarea {
   width: 100%; min-height: 8rem; padding: var(--bo-espaco-md);
   border: 1px solid var(--bo-borda); border-radius: var(--bo-raio-cartao);
