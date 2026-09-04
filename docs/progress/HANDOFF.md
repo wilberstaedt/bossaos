@@ -9,11 +9,27 @@ contra o contrato, e a entrega mede os quatro controlos que ele numera.
 **rodar não é revogar**) e `autenticacao-e-convites.md` (escopo do convidado).
 **Detalhe e achados:** `docs/progress/E17.md`.
 
-**O que está pronto para medir:**
-`pnpm verificar` (0 falhas) · `./scripts/provar-visitante.sh` (4 grupos, 11 casos,
-**5 defeitos plantados**) · `./scripts/provar-visitante-no-navegador.sh` (19
-casos, **6 defeitos plantados**) · `provar-migracoes-do-zero.sh` ·
-`provar-isolamento.sh`.
+**Segunda entrega, depois de RETIDO pelo sénior no ponto 4** — «chamar equipa e
+pedir conta com limites de frequência, deduplicação e confirmação de
+atendimento». As três faltavam: o ramo `chamar`/`conta` registava e devolvia.
+
+**Limite e deduplicação são a MESMA janela**, vista de dois lados, e a janela é
+por **MESA**, não por telemóvel — uma fotografia do QR abre telemóveis sem conta,
+e um limite por aparelho não limita nada. Vive na porta `chamar_a_sala`, em
+plpgsql com `FOR UPDATE`, porque um limite em memória do processo não é um
+limite. A confirmação fecha o ciclo: quem chamou vê **três respostas
+distintas** — «avisámos agora», «já tínhamos avisado», «alguém vem a caminho» — e
+a sala atende no STAFF-013. Sem a terceira, quem chamou volta a carregar.
+
+O par que a régua pedia está provado: duas chamadas seguidas dão uma, **e** uma
+chamada legítima depois da janela passa. Sem a segunda metade, «ignora tudo»
+passaria o teste.
+
+**O que está pronto para medir** — códigos de saída lidos directamente, sem canos:
+`pnpm verificar` (**0**) · `./scripts/provar-visitante.sh` (5 grupos, **21 casos,
+9 defeitos plantados**, 0) · `./scripts/provar-visitante-no-navegador.sh` (**22
+casos, 8 defeitos plantados**, 0) · `provar-pedidos.sh` · `provar-producao.sh` ·
+`provar-migracoes-do-zero.sh`.
 
 **A regra do contrato está na FORMA:** `guest_sessions` **não guarda a geração do
 QR**. Sem esse campo, a comparação que faria a rotação expulsar gente da mesa não
@@ -30,6 +46,19 @@ saberia que havia duas coisas.
 **O controlo obrigatório verifica também o que NÃO devia cair.** Plantar o
 colapso faz cair o caso da rotação; se fizesse cair o da revogação, o detector
 estaria a medir «alguma coisa parou» em vez da distinção entre os dois actos.
+
+**Um defeito real do produto, que só o navegador viu.** A bolacha do visitante
+tinha `path=/r/<slug>` e a porta estava em `/api/publico/mesa`: o navegador nunca
+a enviava, e **todos** os POST do visitante caíam em silêncio no
+`?sessao=terminou`. A porta mudou-se para dentro do endereço do restaurante. Não
+alarguei a bolacha para `/`, que era mais barato e mandaria a credencial da mesa
+5 para os outros restaurantes do mesmo domínio. Preso pelo controlo 8.
+
+**E declaro um erro meu de método:** no comité em que declarei o E17 escrevi
+«`pnpm verificar` — 0 falhas», e era falso. Corri-o com `| grep` e perdi o código
+de saída; a guarda `rotas-com-porta.test.ts` estava vermelha desde antes da
+declaração. É a armadilha que o `RETOMAR-JR.md` nomeia. Todas as medições acima
+foram refeitas a ler `$?`.
 
 **Dois achados meus:** um controlo negativo derrubava o grupo inteiro, porque a
 primeira rotação é o que dá segredo à mesa — um defeito que derruba tudo não
@@ -597,3 +626,32 @@ anterior — viva ou interrompida a chegar ao fecho tarde — apaga as fixtures 
 baixo da que está a medir. Basta um `pnpm inspeccionar` esquecido. **Duas
 passagens do arnês nunca se sobrepõem**: quem revê corre na `bossaos_revisao` e
 na árvore de revisão, não na base de quem escreve.
+
+## Estado das dívidas — varrido a 04/09
+
+Varri as pendências declaradas nas etapas para ver quais já estavam fechadas sem
+ninguém o dizer. **Uma pendência resolvida que continua escrita como aberta
+confunde tanto como uma esquecida.**
+
+| declarada em | o quê | estado |
+| --- | --- | --- |
+| E13 | `devices.rascunhos_por_enviar` é `null` até a fila local nascer | **FECHADA no E15.** Verifiquei as duas metades: antes de o aparelho falar o ecrã diz que **não sabe**, depois mostra o número |
+| E14 | *«o consumidor do `command_id` é pendência do E16»* | **Fechada no E16 por outro mecanismo**, e ninguém o escreveu — ver abaixo |
+| E15 | identidade de dispositivo é etiqueta escolhida por quem tem sessão | **aberta.** Fecha quando alguma etapa fizer uma decisão *depender* do dispositivo |
+| E16/E17 | provas novas não correm na CI | **aberta, externa.** Facturação do GitHub |
+
+### O caso do E14, que vale a nota
+
+O E14 entregou ao E16 a metade do consumidor: *«entrega repetível com efeitos
+deduplicados»*. O E16 **não** o resolveu com `command_id` — resolveu-o com a
+**versão monótona** e o **cursor**, ambos com controlo negativo próprio («a
+versão volta a poder retroceder», «o buraco no cursor é ignorado»).
+
+Está cumprido. Mas **eu assinei o E16 sem verificar que a dívida do E14 fechava
+ali**, e ele não o declarou. Ficou fechado por acidente de bom desenho, não por
+alguém ter conferido — e da próxima vez que isso acontecer pode ficar aberto pelo
+mesmo motivo.
+
+**Regra que fica:** ao assinar uma etapa, verificar também as pendências que
+etapas anteriores lhe entregaram. Uma dívida passada de etapa em etapa sem
+ninguém a marcar é uma dívida que desaparece do radar sem ser paga.
