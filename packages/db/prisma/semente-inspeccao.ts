@@ -449,6 +449,40 @@ async function principal(): Promise<void> {
       },
     });
 
+    // ── Uma mesa e uma sessão SÓ do Staff ──────────────────────────────
+    //
+    // Pela mesma razão que há dois dispositivos e não um: *«com um só, a segunda
+    // visita media o ecrã de um aparelho que a primeira já tinha retirado»*.
+    //
+    // A sessão acima é a que o `sala.spec.ts` mede, e ele visita as telas de
+    // **encerrar** e **transferir** dela. Partilhá-la punha duas provas a medir
+    // a mesma linha ao mesmo tempo, em processos diferentes — e um resultado que
+    // depende de quem chega primeiro não é um resultado. A 04/09 uma passagem
+    // completa deu 404 no STAFF-005 e a seguinte deu verde sem eu tocar em nada;
+    // não cheguei a provar a causa, e é exactamente por isso que as fixtures
+    // deixam de ser partilhadas.
+    const mesaDoStaff = await prisma.serviceTable.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2, areaId: zona.id,
+        codigo: `${PREFIXO}21 del Staff`, capacidade: 4, posX: 2, posY: 1,
+      },
+      select: { id: true },
+    });
+    const sessaoDoStaff = await prisma.tableSession.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2, tableId: mesaDoStaff.id,
+        estado: 'ABERTA', comensais: 2, abertaPor: 'inspeccao@exemplo.example',
+        responsavelId: pertencaDoDono.id,
+      },
+      select: { id: true },
+    });
+    await prisma.tableSessionEvent.create({
+      data: {
+        organizationId: IDS.orgA, sessionId: sessaoDoStaff.id, accao: 'sessao.aberta',
+        actorEmail: 'inspeccao@exemplo.example',
+      },
+    });
+
     await prisma.device.createMany({
       data: [
         {

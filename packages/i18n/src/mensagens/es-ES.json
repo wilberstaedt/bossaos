@@ -1455,6 +1455,9 @@
     "aparelhoPorEscolher": "Sin elegir",
     "declarado": "Declarado al servidor",
     "semDispositivosNaUnidade": "No hay aparatos activos en esta unidad, así que no hay a cuál asociarlo.",
+    "sessaoMorreu": "Tu sesión ha caducado",
+    "sessaoMorreuAjuda": "Nada se ha enviado y nada se ha borrado. Vuelve a entrar y lo que está en este teléfono sale entonces.",
+    "accaoEntrarOutraVez": "Volver a entrar",
     "erros": {
       "mesa_ocupada": "Esa mesa ya está ocupada.",
       "mesa_desconhecida": "Esa mesa ya no existe.",

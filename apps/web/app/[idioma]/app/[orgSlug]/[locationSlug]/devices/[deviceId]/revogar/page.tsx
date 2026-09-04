@@ -70,7 +70,8 @@ export default async function RevogarDispositivo({
           descarta; descobrir depois não é. */}
       <Aviso tom="perigo" urgente titulo={s.avisoRevogar}>
         <p>{s.avisoRevogarPorque}</p>
-        <p>
+        <p data-teste="rascunhos-por-enviar"
+           data-declarado={dispositivo.rascunhosPorEnviar === null ? 'nao' : 'sim'}>
           {s.rascunhosPorEnviar}:{' '}
           {dispositivo.rascunhosPorEnviar === null
             ? s.rascunhosDesconhecidos

@@ -1455,6 +1455,9 @@
     "aparelhoPorEscolher": "Not chosen",
     "declarado": "Reported to the server",
     "semDispositivosNaUnidade": "There are no active devices in this unit, so there is none to associate it with.",
+    "sessaoMorreu": "Your session has expired",
+    "sessaoMorreuAjuda": "Nothing was sent and nothing was erased. Sign in again and what is on this phone will go out then.",
+    "accaoEntrarOutraVez": "Sign in again",
     "erros": {
       "mesa_ocupada": "That table is already taken.",
       "mesa_desconhecida": "That table no longer exists.",

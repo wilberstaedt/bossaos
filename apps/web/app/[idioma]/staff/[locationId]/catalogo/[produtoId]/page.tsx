@@ -64,6 +64,8 @@ export default async function PratoDoStaff({
           accaoSincronizar: s.accaoSincronizar, accaoCompor: s.accaoCompor,
           semRede: s.semRede, semRedeTitulo: s.semRedeTitulo,
           pagamentoNoServidor: s.pagamentoNoServidor,
+          sessaoMorreu: s.sessaoMorreu, sessaoMorreuAjuda: s.sessaoMorreuAjuda,
+          accaoEntrarOutraVez: s.accaoEntrarOutraVez,
         }}
       />
     </div>

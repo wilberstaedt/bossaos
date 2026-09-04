@@ -63,6 +63,16 @@ export default async function AndamentoDoStaff({
               {pedido.numero}{' '}
               <Etiqueta tom="neutro">{porChave(s, `pedido${pedido.estado}`) ?? pedido.estado}</Etiqueta>
             </h2>
+            {/* ── A ORIGEM conserva-se, e vê-se ─────────────────────────────
+                Aceite 2 da régua: cliente e empregado ao mesmo tempo, «origens
+                conservadas». O canal está na coluna desde o E14 e não aparecia
+                em lado nenhum — conservado na base e invisível a quem serve é
+                metade da coisa. Dois pratos iguais pedidos ao mesmo tempo pelo
+                cliente e pela sala são DOIS, e é a origem que o explica a quem
+                olha para a linha e acha que é engano. */}
+            <p data-teste="origem" data-canal={pedido.canal}>
+              {s.origem}: {pedido.canal === 'SALA' ? s.origemEmpregado : s.origemCliente}
+            </p>
             {pedido.linhas.length === 0 ? (
               <p className="bo-campo__ajuda">{s.semLinhas}</p>
             ) : (

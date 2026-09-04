@@ -41,7 +41,21 @@ function contarSuspensas(entradas: EntradaDaFila[], particao: Particao): number 
     + porEnviarNoutrasParticoes(window.localStorage, particao);
 }
 
-function portas(orgSlug: string): PortasDeRede {
+/**
+ * As portas de rede, e o sinal de sessão morta que elas levantam.
+ *
+ * ── Porque é que isto é uma caixa e não um valor devolvido ───────────────
+ *
+ * `PortasDeRede` responde sobre **um comando**: chegou, não chegou, colidiu. «A
+ * tua sessão acabou» não é sobre um comando — é sobre a sincronização inteira, e
+ * a resposta certa é parar, não marcar aquela entrada de alguma maneira.
+ *
+ * O portão existia em `sincronizar(…, sessaoValida)` **desde o primeiro dia e
+ * nada o ligava**: quem chama de dentro do produto passava sempre `true`, porque
+ * não tinha como saber. O parâmetro estava provado nos testes da lógica e morto
+ * no produto — que é a pior combinação, porque tem uma prova verde por cima.
+ */
+function portas(orgSlug: string, sinal: { morreu: boolean }): PortasDeRede {
   return {
     // A CONSULTA. É o que a régua exige ver acontecer, e não só a ausência de
     // duplicado: ao reconectar, pergunta-se ao servidor se ele já conhece o
@@ -50,6 +64,9 @@ function portas(orgSlug: string): PortasDeRede {
       const r = await fetch(
         `/api/org/${orgSlug}/pedidos?commandId=${encodeURIComponent(commandId)}`,
         { headers: { accept: 'application/json' } });
+      // 401 é sessão morta. Fica registado para quem chamou poder PARAR — sem
+      // isto a fila continuava a bater à porta com uma sessão que já não existe.
+      if (r.status === 401) { sinal.morreu = true; return { conhecido: false }; }
       if (r.status === 404) return { conhecido: false };
       if (!r.ok) return { conhecido: false };
       const corpo = await r.json() as { conhecido?: boolean };
@@ -99,6 +116,19 @@ function portas(orgSlug: string): PortasDeRede {
         if (r.status === 409) {
           return { ok: false, conflito: { versaoActual: 0, mudou: ['o pedido mudou no servidor'] } };
         }
+        // ── 401 é sessão morta, e NÃO é indeterminado ─────────────────────
+        //
+        // Um 401 não deixa dúvida nenhuma sobre o que aconteceu: o servidor não
+        // aceitou porque não sabe quem está a pedir. Tratá-lo como
+        // «indeterminado» — que era o que este `catch` largo fazia — punha a
+        // entrada em PENDENTE, e a fila voltava a tentar em ciclo com uma sessão
+        // que já não existe. Quem estava na sala não via razão nenhuma.
+        //
+        // Marca-se, e a entrada volta a «não saiu»: sabe-se que não saiu.
+        if (r.status === 401) {
+          sinal.morreu = true;
+          return { ok: false, naoSaiu: true };
+        }
         // Qualquer outra resposta é indeterminada: pode ter chegado. Marcar «não
         // enviado» aqui apagava a dúvida — e a dúvida é a informação.
         return { ok: false, indeterminado: true };
@@ -144,23 +174,56 @@ export async function compor(
   return entrada;
 }
 
-/** Sincroniza o que é desta partição. Devolve a fila como ficou. */
+/**
+ * Sincroniza o que é desta partição. Devolve a fila como ficou.
+ *
+ * ── E DUAS passagens quando a sessão morre a meio ────────────────────────
+ *
+ * A primeira passagem descobre o 401 — não há como saber antes de perguntar. As
+ * entradas que já tinham saído nessa passagem ficam como ficaram, e o resto
+ * **pára**: a segunda passagem corre com o portão fechado, e o que sobra conta-se
+ * como suspenso em vez de continuar a bater à porta.
+ *
+ * A alternativa — deixar seguir e ver o servidor recusar cada uma — é a que a
+ * régua reprova pelo nome: *«sincronizar primeiro e autenticar depois é uma porta
+ * aberta por quem já não devia lá estar»*. Aqui a porta é fechada pelo cliente
+ * **e** pelo servidor, e as duas falham por motivos diferentes.
+ */
 export async function sincronizarAgora(
-  particao: Particao, orgSlug: string, sessaoValida = true,
-): Promise<FilaViva & { resumo: Awaited<ReturnType<typeof sincronizar>>['resumo'] }> {
+  particao: Particao, orgSlug: string,
+): Promise<
+  FilaViva
+  & { resumo: Awaited<ReturnType<typeof sincronizar>>['resumo']; sessaoMorreu: boolean }
+> {
   const armazem = armazemDoNavegador(window.localStorage, particao);
   const antes = await armazem.ler();
+  const sinal = { morreu: false };
   // A gravação vai a CADA transição, e não só no fim: um envio que fique pendurado
   // tem de deixar «à espera de confirmação» no disco, e não «não enviado».
-  const { entradas, resumo } = await sincronizar(
-    antes, particao, portas(orgSlug), sessaoValida,
+  const primeira = await sincronizar(
+    antes, particao, portas(orgSlug, sinal), true,
     (parciais) => armazem.escrever([...parciais]));
+
+  let entradas = primeira.entradas;
+  let resumo = primeira.resumo;
+
+  if (sinal.morreu) {
+    // Segunda passagem com o portão FECHADO. Não reenvia nada — `paraEnviar`
+    // devolve vazio — e é ela que faz o resumo dizer «suspensas» em vez de
+    // «não saíram», que são coisas diferentes: uma pede rede, a outra pede a
+    // pessoa.
+    const segunda = await sincronizar(entradas, particao, portas(orgSlug, sinal), false);
+    entradas = segunda.entradas;
+    resumo = segunda.resumo;
+  }
+
   await armazem.escrever(entradas);
   return {
     entradas,
     suspensas: suspensas(entradas, particao),
     suspensasNoAparelho: contarSuspensas(entradas, particao),
     resumo,
+    sessaoMorreu: sinal.morreu,
   };
 }
 

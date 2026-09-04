@@ -88,12 +88,12 @@ exigir_vermelho() {
 
 # O número MEDIDO hoje, e não um mínimo folgado.
 #
-# 3 de preparação + 10 do `staff.spec.ts` + 13 do `staff-telas.spec.ts`. Um
+# 3 de preparação + 14 do `staff.spec.ts` + 13 do `staff-telas.spec.ts`. Um
 # mínimo folgado — «pelo menos 12» — deixa a suite encolher para metade sem que
 # nada acenda, e encolher em silêncio é como uma suite deixa de medir. Quando a
 # etapa entregar mais casos, este número sobe com eles; é uma linha a mudar, e a
 # alternativa é não saber.
-CASOS_MINIMOS=26
+CASOS_MINIMOS=30
 
 echo "1. Com tudo ligado"
 if correr /tmp/bossaos-staff-nav-ligado.txt; then
@@ -220,7 +220,60 @@ exigir_vermelho "caiu a contagem da populacao: 22 telas deixaram de ser 23" \
 cp "$ORIG_TELAS" "$TELAS_SPEC"; rm -f "$ORIG_TELAS"
 
 echo
-echo "7. Reposto — tem de voltar ao verde"
+echo "7. CONTROLO NEGATIVO — o portao de sessao volta a estar desligado"
+# O portao existia em `sincronizar(…, sessaoValida)` desde o primeiro dia e NADA o
+# ligava: quem chamava de dentro do produto passava sempre `true`, porque nao
+# tinha como saber. Estava provado nos testes da logica e morto no produto — a
+# pior combinacao, porque tem uma prova verde por cima.
+#
+# O defeito plantado e' o 401 voltar a ser tratado como indeterminado, que e' o
+# que o `catch` largo fazia: a entrada ficava PENDENTE e a fila voltava a tentar
+# em ciclo com uma sessao que ja' nao existe.
+FILA_NAV=apps/web/src/staff/fila-do-navegador.ts
+ORIG_FILA_NAV=$(mktemp); cp "$FILA_NAV" "$ORIG_FILA_NAV"
+python3 - <<'PYSESSAO'
+import io
+p = 'apps/web/src/staff/fila-do-navegador.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = """        if (r.status === 401) {
+          sinal.morreu = true;
+          return { ok: false, naoSaiu: true };
+        }"""
+assert antigo in s, 'a deteccao de 401 no envio nao esta onde se esperava'
+# Compila e reproduz o defeito: o 401 deixa de levantar o sinal.
+novo = """        if (r.status === 401) {
+          return { ok: false, indeterminado: true };
+        }"""
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, novo))
+PYSESSAO
+exigir_vermelho "caiu o caso da sessao morta: o ecra deixou de mandar entrar outra vez" \
+  'sem sessão' /tmp/bossaos-staff-nav-sessao.txt
+cp "$ORIG_FILA_NAV" "$FILA_NAV"; rm -f "$ORIG_FILA_NAV"
+
+echo
+echo "8. CONTROLO NEGATIVO — o aparelho volta a nao declarar o numero"
+# A pendencia que o E13 deixou escrita: o DEV-004 sabia mostrar o numero e dizer
+# que nao sabe, e faltava alguem a falar. Sem a escrita, o ecra de revogar volta
+# a dizer 'nao sei' para sempre — e a decisao de descartar deixa de ser honesta,
+# porque quem decide ja' nao sabe o que descarta.
+DISPOS=packages/db/src/dispositivos.ts
+ORIG_DISPOS=$(mktemp); cp "$DISPOS" "$ORIG_DISPOS"
+python3 - <<'PYDECL'
+import io
+p = 'packages/db/src/dispositivos.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "    data: { rascunhosPorEnviar: quantos, ultimoVistoEm: new Date() },"
+assert antigo in s, 'a escrita do numero nao esta onde se esperava'
+# So' o carimbo de vida: o numero deixa de ser escrito, e o campo fica NULL.
+novo = "    data: { ultimoVistoEm: new Date() },"
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, novo))
+PYDECL
+exigir_vermelho "caiu a declaracao: o numero deixou de chegar a quem revoga" \
+  'DEPOIS de falar' /tmp/bossaos-staff-nav-declarar.txt
+cp "$ORIG_DISPOS" "$DISPOS"; rm -f "$ORIG_DISPOS"
+
+echo
+echo "9. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-staff-nav-reposto.txt; then
   passou=$(grep -oE '[0-9]+ passed' /tmp/bossaos-staff-nav-reposto.txt | grep -oE '[0-9]+' || echo 0)
   if (( passou < CASOS_MINIMOS )); then

@@ -91,7 +91,7 @@ function telas(a: Alvos): Tela[] {
     { id: 'STAFF-004', caminho: '/mesas/nova', marcador: '[data-tela="STAFF-004"]' },
     // Com identificador: sem ele mediria a página de «não encontrado», em cinco
     // larguras, a dizer verde. É a razão de o `alvos.ts` falhar alto.
-    { id: 'STAFF-005', caminho: `/mesas/${a.sessionId}`, marcador: '[data-tela="STAFF-005"]' },
+    { id: 'STAFF-005', caminho: `/mesas/${a.sessionIdDoStaff}`, marcador: '[data-tela="STAFF-005"]' },
     { id: 'STAFF-006', caminho: '/catalogo', marcador: '[data-tela="STAFF-006"]' },
     { id: 'STAFF-007', caminho: `/catalogo/${a.productId}`, marcador: '[data-tela="STAFF-007"]' },
     { id: 'STAFF-008', caminho: '/revisao', marcador: '[data-tela="STAFF-008"]' },
@@ -114,10 +114,41 @@ function telas(a: Alvos): Tela[] {
     // que a fila exista.
     { id: 'STATE-004', caminho: '/staff/offline', absoluto: true,
       marcador: '[data-tela="STATE-004"]' },
-    { id: 'STATE-008', caminho: `/mesas/${a.sessionId}?conflito=7`,
+    { id: 'STATE-008', caminho: `/mesas/${a.sessionIdDoStaff}?conflito=7`,
       marcador: '[data-tela="STATE-008"]' },
     { id: 'STATE-015', caminho: '/avisos', marcador: '[data-tela="STATE-015"]' },
   ];
+}
+
+/**
+ * Um 404 numa rota com identificador: a linha ainda existe na base?
+ *
+ * ── Porque é que a mensagem tem de dizer isto ────────────────────────────
+ *
+ * A 04/09 uma passagem completa deu «STAFF-005 respondeu 404» e a seguinte deu
+ * verde sem ninguém tocar em nada. A mensagem dizia só o código, e distinguir
+ * «a linha desapareceu» de «a linha está lá e o produto não a serve» custou uma
+ * hora — são causas completamente diferentes e a primeira nem sequer é um
+ * defeito do produto.
+ *
+ * O diagnóstico corre **só quando já falhou**, e com a credencial de migração,
+ * que vê tudo. Não muda o veredicto: acrescenta a única coisa que quem lê o
+ * relatório vai querer saber a seguir.
+ */
+async function aLinhaExiste(tabela: string, id: string): Promise<boolean | null> {
+  const url = process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL;
+  if (!url) return null;
+  const { Client } = await import('pg');
+  const sql = new Client({ connectionString: url });
+  try {
+    await sql.connect();
+    const { rows } = await sql.query(`SELECT 1 FROM ${tabela} WHERE id = $1`, [id]);
+    return rows.length > 0;
+  } catch {
+    return null;
+  } finally {
+    await sql.end().catch(() => undefined);
+  }
 }
 
 async function visitar(
@@ -125,7 +156,16 @@ async function visitar(
 ) {
   const caminho = endereco(tela, idioma, a);
   const resposta = await pagina.goto(caminho);
-  expect(resposta?.status(), `${tela.id} · ${caminho} respondeu ${resposta?.status()}`)
+  let diagnostico = '';
+  if ((resposta?.status() ?? 0) === 404 && caminho.includes('/mesas/')) {
+    const existe = await aLinhaExiste('table_sessions', a.sessionIdDoStaff);
+    diagnostico = existe === null
+      ? ' — não consegui perguntar à base se a sessão ainda existe'
+      : existe
+        ? ' — e a sessão AINDA EXISTE na base: o produto é que não a serviu'
+        : ' — e a sessão JÁ NÃO EXISTE na base: alguém a apagou a meio da passagem';
+  }
+  expect(resposta?.status(), `${tela.id} · ${caminho} respondeu ${resposta?.status()}${diagnostico}`)
     .toBeLessThan(400);
   await pagina.waitForLoadState('networkidle');
   // O caminho FINAL, sem a busca: um desvio para a entrada media o ecrã de

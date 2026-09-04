@@ -478,3 +478,185 @@ test.describe.serial('a carta muda enquanto o rascunho está no telemóvel', () 
     }
   });
 });
+
+/**
+ * SESSÃO MORTA: a fila NÃO dispara ao reconectar.
+ *
+ * ── A régua exige ver, e o portão estava desligado ───────────────────────
+ *
+ * *«Exijo ver uma fila que NÃO dispara ao reconectar com sessão morta.
+ * Sincronizar primeiro e autenticar depois é o mesmo defeito do ORG-007 noutra
+ * roupa: uma porta aberta por quem já não devia lá estar.»*
+ *
+ * O portão existia em `sincronizar(…, sessaoValida)` **desde o primeiro dia e
+ * nada o ligava**: quem chamava de dentro do produto passava sempre `true`,
+ * porque não tinha como saber. Estava provado nos testes da lógica e morto no
+ * produto — a pior combinação, porque tem uma prova verde por cima.
+ *
+ * Aqui a sessão morre a sério: apagam-se as bolachas, que é o que uma sessão
+ * expirada é do lado do navegador. E o **par** está no caso seguinte: com a
+ * sessão de volta, o mesmo comando sai. Sem ele, isto passava com uma fila que
+ * não envia nada nunca.
+ */
+test.describe.serial('sessão morta não dispara a fila', () => {
+  test.use({ viewport: { width: 390, height: 780 } });
+
+  test('sem sessão: o comando NÃO sai, e o ecrã manda entrar outra vez', async ({ page }) => {
+    const contexto = page.context();
+    await contexto.setOffline(false);
+    await page.goto(rotaDoStaff(alvos));
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    expect(await comandosNoAparelho(page), 'o aparelho já tinha comandos').toBe(0);
+
+    // Compõe com a rede cortada: fica gravado e por enviar.
+    await contexto.setOffline(true);
+    await page.locator('[data-teste="compor"]').click();
+    await expect(page.locator('[data-teste="entrada"][data-estado="NAO_ENVIADO"]')).toHaveCount(1);
+    expect(await comandosNoAparelho(page), 'o rascunho não ficou gravado').toBe(1);
+    await contexto.setOffline(false);
+
+    // ── E agora a sessão morre. A rede está BOA ──────────────────────────
+    //
+    // É a distinção que interessa: não é falta de rede, é falta de quem. Com as
+    // duas confundidas, o ecrã dizia «sem conexão» a quem tinha conexão e a
+    // pessoa esperava por uma coisa que não ia acontecer.
+    const bolachas = await contexto.cookies();
+    await contexto.clearCookies();
+
+    const envios: string[] = [];
+    page.on('request', (r) => {
+      if (r.url().includes('/api/org/') && r.method() === 'POST') envios.push(r.url());
+    });
+
+    await page.locator('[data-teste="sincronizar"]').click();
+    await expect(page.locator('[data-teste="sessao-morreu"]'),
+      'o ecrã não disse que a sessão acabou').toBeVisible();
+
+    // O comando continua por enviar, e continua GRAVADO. Nada se apagou.
+    await expect(page.locator('[data-teste="entrada"][data-estado="CONFIRMADO"]'),
+      'confirmou um comando com a sessão morta').toHaveCount(0);
+    expect(await comandosNoAparelho(page), 'o comando foi apagado com a sessão morta').toBe(1);
+
+    // E o servidor recusou: nenhum POST passou. Um só que passasse era a porta
+    // aberta que a régua nomeia.
+    // (o cliente chega a tentar UMA vez para descobrir o 401 — não há como saber
+    // antes de perguntar — e é aí que pára. O que se exige é que nenhum seja
+    // ACEITE, e a asserção de cima mede isso: nada ficou confirmado.)
+    expect(envios.length, `reenviou em ciclo com a sessão morta: ${envios.length} POST`)
+      .toBeLessThanOrEqual(1);
+
+    await contexto.addCookies(bolachas);
+  });
+
+  test('O PAR: com a sessão de volta, o MESMO comando sai', async ({ page }) => {
+    // Sem isto, tudo acima passava com uma fila que nunca envia nada — e uma
+    // fila que nunca envia nada também «não dispara com a sessão morta».
+    await page.context().setOffline(false);
+    await page.goto(rotaDoStaff(alvos));
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    expect(await comandosNoAparelho(page)).toBe(0);
+
+    await page.context().setOffline(true);
+    await page.locator('[data-teste="compor"]').click();
+    await expect(page.locator('[data-teste="entrada"][data-estado="NAO_ENVIADO"]')).toHaveCount(1);
+
+    await page.context().setOffline(false);
+    await page.locator('[data-teste="sincronizar"]').click();
+    await expect(page.locator('[data-teste="entrada"][data-estado="CONFIRMADO"]')).toHaveCount(1);
+    await expect(page.locator('[data-teste="sessao-morreu"]'),
+      'disse que a sessão acabou com a sessão viva').toHaveCount(0);
+  });
+});
+
+/**
+ * O número que o aparelho declara chega ao ecrã de REVOGAR.
+ *
+ * ── Fecha a pendência que o E13 deixou escrita ───────────────────────────
+ *
+ * O contrato dizia, por palavras: *«`devices.rascunhos_por_enviar` é o campo que
+ * o dispositivo preenche, e quem o preenche é a fila local — que nasce no
+ * E15/E16. Até lá o valor é `null` em todos os aparelhos, e o ecrã diz o que isso
+ * quer dizer.»* O DEV-004 já sabia mostrar o número **e** dizer que não sabe;
+ * faltava alguém a falar.
+ *
+ * ── E o PAR é a metade que torna a decisão honesta ───────────────────────
+ *
+ * «Descartar é aceitável quando quem decide sabe o que está a descartar;
+ * descobrir depois não é.» Por isso o caso mede as DUAS: antes de o aparelho
+ * falar, o ecrã diz **que não sabe** — e não zero, que era um número
+ * tranquilizador que ninguém mediu. Depois de falar, diz o número.
+ *
+ * Sem a primeira metade, isto passava com um ecrã que mostrasse sempre um
+ * número — incluindo o zero por omissão que a regra proíbe.
+ */
+test.describe.serial('o aparelho declara quantos rascunhos tem', () => {
+  test.use({ viewport: { width: 390, height: 780 } });
+
+  /** Repõe o campo a `null`, que é como um aparelho que nunca falou está. */
+  async function esquecerDeclaracao(deviceId: string) {
+    const { Client } = await import('pg');
+    const url = process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL;
+    if (!url) throw new Error('MIGRATION_DATABASE_URL em falta');
+    const sql = new Client({ connectionString: url });
+    await sql.connect();
+    await sql.query('UPDATE devices SET rascunhos_por_enviar = NULL WHERE id = $1', [deviceId]);
+    await sql.end();
+  }
+
+  const revogar = (a: Alvos) =>
+    `/es-ES/app/marina-oropesa/puerto/devices/${a.deviceId}/revogar`;
+
+  test('ANTES de falar, o ecrã de revogar diz que NÃO SABE', async ({ page }) => {
+    await esquecerDeclaracao(alvos.deviceId);
+    await page.goto(revogar(alvos));
+    await page.waitForLoadState('networkidle');
+    const linha = page.locator('[data-teste="rascunhos-por-enviar"]');
+    await expect(linha).toBeVisible();
+    // Ausência é ausência. Um zero aqui dizia a quem revoga que não há nada a
+    // descartar — sobre um aparelho que nunca foi medido.
+    await expect(linha, 'inventou um número sobre um aparelho que nunca falou')
+      .toHaveAttribute('data-declarado', 'nao');
+  });
+
+  test('DEPOIS de falar, o ecrã mostra o número que ele declarou', async ({ page }) => {
+    await page.context().setOffline(false);
+    await page.goto(`${rotaDoStaff(alvos)}/perfil`);
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+
+    // Este aparelho passa a ser o tablet semeado. A escolha fica no telemóvel.
+    await page.locator('[data-teste="escolher-aparelho"]').selectOption(alvos.deviceId);
+    // Zero rascunhos é um número MEDIDO, e é diferente de «não sei» — é a
+    // distinção inteira desta prova.
+    await expect(page.locator('[data-teste="declarado"]')).toContainText('0');
+
+    // Agora compõe DOIS, sem rede, e volta ao perfil para declarar outra vez.
+    await page.goto(rotaDoStaff(alvos));
+    await page.context().setOffline(true);
+    await page.locator('[data-teste="compor"]').click();
+    await expect(page.locator('[data-teste="entrada"]')).toHaveCount(1);
+    await page.locator('[data-teste="compor"]').click();
+    await expect(page.locator('[data-teste="entrada"]')).toHaveCount(2);
+    await page.context().setOffline(false);
+
+    const quantos = await comandosNoAparelho(page);
+    expect(quantos, 'o aparelho não ficou com dois comandos').toBe(2);
+
+    await page.goto(`${rotaDoStaff(alvos)}/perfil`);
+    await expect(page.locator('[data-teste="declarado"]')).toContainText(String(quantos));
+
+    // ── E o número chega ao ecrã de quem revoga ─────────────────────────
+    await page.goto(revogar(alvos));
+    await page.waitForLoadState('networkidle');
+    const linha = page.locator('[data-teste="rascunhos-por-enviar"]');
+    await expect(linha, 'o ecrã de revogar continua a dizer que não sabe')
+      .toHaveAttribute('data-declarado', 'sim');
+    await expect(linha, `o número declarado (${quantos}) não chegou a quem revoga`)
+      .toContainText(String(quantos));
+
+    // A base fica como estava: a prova seguinte não deve herdar este número.
+    await esquecerDeclaracao(alvos.deviceId);
+  });
+});

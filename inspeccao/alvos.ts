@@ -35,6 +35,20 @@ export interface Alvos {
   orderId: string;
   /** E15: a unidade onde o Staff PWA corre. É a `puerto`, a mesma do painel. */
   unidadeDoStaff: string;
+  /**
+   * E15: a sessão de mesa **só do Staff**.
+   *
+   * Não é a `sessionId`, de propósito — e é a mesma decisão dos dois
+   * dispositivos, uma linha acima. O `sala.spec.ts` mede as telas de encerrar e
+   * transferir da `sessionId`, e partilhá-la punha duas provas a mexer na mesma
+   * linha ao mesmo tempo, em processos diferentes.
+   *
+   * A 04/09 uma passagem completa deu 404 no STAFF-005 e a seguinte deu verde
+   * sem ninguém tocar em nada. A causa não ficou provada — e é por isso que a
+   * partilha acaba: um resultado que muda sozinho não é um resultado, e a saída
+   * não é repetir até dar verde.
+   */
+  sessionIdDoStaff: string;
 }
 
 const PREFIXO = 'insp-';
@@ -106,6 +120,12 @@ export async function resolverAlvos(): Promise<Alvos> {
         `SELECT id FROM locations WHERE organization_id = '${ORG_A}'
            AND slug = 'puerto' AND archived_at IS NULL LIMIT 1`,
         'a unidade do Staff'),
+      sessionIdDoStaff: await um(
+        sql,
+        `SELECT s.id FROM table_sessions s
+           JOIN service_tables t ON t.id = s.table_id
+          WHERE s.estado <> 'FECHADA' AND t.codigo = '${PREFIXO}21 del Staff' LIMIT 1`,
+        'a sessão de mesa do Staff'),
     };
   } finally {
     await sql.end();

@@ -38,6 +38,7 @@ export interface Mensagens {
   comandos: string; semComandos: string;
   accaoSincronizar: string; accaoCompor: string;
   semRede: string; semRedeTitulo: string; pagamentoNoServidor: string;
+  sessaoMorreu: string; sessaoMorreuAjuda: string; accaoEntrarOutraVez: string;
 }
 
 export function PainelDaFila({
@@ -65,6 +66,9 @@ export function PainelDaFila({
   const [online, setOnline] = useState(true);
   const [recusa, setRecusa] = useState<string | null>(null);
   const [noServidor, setNoServidor] = useState<string | null>(null);
+  // A sessão morta é um estado do ECRÃ, e não um toast: fica enquanto durar,
+  // e a recarga volta a mostrá-lo porque a fila continua por enviar.
+  const [sessaoMorreu, setSessaoMorreu] = useState(false);
 
   const recarregar = useCallback(async () => {
     const fila = await lerFila(particao);
@@ -131,6 +135,9 @@ export function PainelDaFila({
     const fila = await sincronizarAgora(particao, orgSlug);
     setEntradas(fila.entradas);
     setSuspensas(fila.suspensasNoAparelho);
+    // Reautenticar vem ANTES de sincronizar. Com a sessão morta a fila parou, e
+    // o ecrã manda entrar outra vez em vez de continuar a tentar em silêncio.
+    setSessaoMorreu(fila.sessaoMorreu);
   };
 
   const porEnviar = entradas.filter(
@@ -172,6 +179,13 @@ export function PainelDaFila({
           {/* Contadas, nunca apagadas. Uma fila que suspende em silêncio parece
               vazia — e o dono conclui que perdeu o trabalho. */}
           {m.suspensos}: {suspensas} — {m.suspensosAjuda}
+        </p>
+      ) : null}
+
+      {sessaoMorreu ? (
+        <p className="bo-aviso bo-aviso--aviso" role="alert" data-teste="sessao-morreu">
+          <strong>{m.sessaoMorreu}</strong> — {m.sessaoMorreuAjuda}{' '}
+          <a href={`/${idioma}/auth/login`}>{m.accaoEntrarOutraVez}</a>
         </p>
       ) : null}
 

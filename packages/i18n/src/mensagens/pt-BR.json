@@ -1455,6 +1455,9 @@
     "aparelhoPorEscolher": "Por escolher",
     "declarado": "Declarado ao servidor",
     "semDispositivosNaUnidade": "Não há aparelhos activos nesta unidade, portanto não há a qual associá-lo.",
+    "sessaoMorreu": "A tua sessão expirou",
+    "sessaoMorreuAjuda": "Nada foi enviado e nada se apagou. Entra outra vez e o que está neste telemóvel sai então.",
+    "accaoEntrarOutraVez": "Entrar outra vez",
     "erros": {
       "mesa_ocupada": "Essa mesa já está ocupada.",
       "mesa_desconhecida": "Essa mesa já não existe.",
