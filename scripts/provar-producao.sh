@@ -36,10 +36,21 @@ GRUPOS_KDS=6
 CASOS_KDS=14
 falhas=0
 
+# ── O alvo MUDOU DE FICHEIRO no E17, e o script apanhou-o ─────────────────
+#
+# `estadoDerivado` e `totalDoPedido` são funções puras e mudaram-se para
+# `@bossaos/domain` — a guarda `rotas-com-porta.test.ts` mostrou porquê: uma tela
+# pública que só queria somar um total tinha de importar o pacote da base.
+#
+# O plante deixou de encontrar o alvo, o `assert` do Python rebentou, o ficheiro
+# ficou intacto e o controlo ficou VERDE. Foi o próprio ajudante que o disse —
+# «ficou VERDE com o defeito plantado» — e é exactamente para isto que ele
+# verifica as duas coisas em vez de uma.
 PRODUCAO=packages/db/src/producao.ts
+PURO=packages/domain/src/pedido-puro.ts
 KDS=packages/domain/src/kds.ts
-ORIG_PRODUCAO=$(mktemp); ORIG_KDS=$(mktemp)
-cp "$PRODUCAO" "$ORIG_PRODUCAO"; cp "$KDS" "$ORIG_KDS"
+ORIG_PRODUCAO=$(mktemp); ORIG_KDS=$(mktemp); ORIG_PURO=$(mktemp)
+cp "$PRODUCAO" "$ORIG_PRODUCAO"; cp "$KDS" "$ORIG_KDS"; cp "$PURO" "$ORIG_PURO"
 BASE_MEXIDA=0
 
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
@@ -66,8 +77,8 @@ PSQL
 }
 
 restaurar() {
-  cp "$ORIG_PRODUCAO" "$PRODUCAO"; cp "$ORIG_KDS" "$KDS"
-  rm -f "$ORIG_PRODUCAO" "$ORIG_KDS"
+  cp "$ORIG_PRODUCAO" "$PRODUCAO"; cp "$ORIG_KDS" "$KDS"; cp "$ORIG_PURO" "$PURO"
+  rm -f "$ORIG_PRODUCAO" "$ORIG_KDS" "$ORIG_PURO"
   if [[ "$BASE_MEXIDA" == "1" ]]; then
     repor_base; BASE_MEXIDA=0
     printf '  (os gatilhos da base foram repostos)\n'
@@ -192,7 +203,7 @@ echo "4. CONTROLO NEGATIVO — «pronto parcial» passa a ser pronto"
 # por um ALGUMA, que é a versão que sai de graça de quem escreve depressa.
 python3 - <<'PYPARCIAL'
 import io
-p = 'packages/db/src/producao.ts'
+p = 'packages/domain/src/pedido-puro.ts'
 s = io.open(p, encoding='utf-8').read()
 antigo = "  if (prontas === vivas.length) return { estado: 'PRONTO', prontas, total: vivas.length };"
 assert antigo in s, 'a regra do pronto nao esta onde se esperava'
@@ -201,7 +212,7 @@ io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, novo))
 PYPARCIAL
 exigir_vermelho "caiu o caso 3: o pedido ficou pronto com metade por fazer" \
   'PRONTO só quando a última estação acaba' /tmp/bossaos-producao-parcial.txt
-cp "$ORIG_PRODUCAO" "$PRODUCAO"
+cp "$ORIG_PURO" "$PURO"
 
 echo
 echo "5. CONTROLO NEGATIVO — cancelar a linha deixa tarefas ÓRFÃS nas estações"

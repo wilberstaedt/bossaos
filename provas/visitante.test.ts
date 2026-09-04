@@ -2,7 +2,8 @@ import { after, before, beforeEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from 'pg';
 import {
-  abrirVisitante, comEscopo, estadoDoVisitante, fecharSessao, obterPrisma,
+  abrirVisitante, atenderChamada, chamadasDaVisita, chamadasPorAtender, chamarASala,
+  comEscopo, estadoDoVisitante, fecharSessao, obterPrisma, visitanteFalou,
   revogarAcessoDaMesa, rodarQrDaMesa, sessoesVivasDaMesa, visitanteActivo,
   visitantesDaUnidade,
 } from '../packages/db/src/index.ts';
@@ -60,6 +61,8 @@ async function semear() {
 }
 
 async function limpar() {
+  await sql.query(`DELETE FROM guest_calls WHERE table_id IN
+     (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%')`);
   await sql.query(`DELETE FROM guest_sessions WHERE table_id IN
      (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%')`);
   await sql.query(`DELETE FROM table_session_events WHERE session_id IN
@@ -236,5 +239,184 @@ describe('4. um segredo que não existe não abre nada', () => {
     // é verdadeiro, mas depender disso era depender de uma subtileza.
     assert.equal(await entrar(''), null);
     assert.equal(await entrar('qualquer-coisa'), null);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+describe('5. chamar a sala: limite, deduplicação e confirmação', () => {
+  /** Abre uma visita e devolve o token. */
+  async function visitaAberta() {
+    const { segredo } = await rodar();
+    const v = await entrar(segredo);
+    assert.ok(v, 'o cenário não abriu visita nenhuma');
+    return v.token;
+  }
+
+  it('o cenário não está vazio: há visita aberta e nenhuma chamada ainda', async () => {
+    const token = await visitaAberta();
+    // «Verde sobre nada» outra vez: declara-se antes de afirmar.
+    assert.equal((await chamadasDaVisita(prisma, token)).length, 0,
+      'já havia chamadas: a contagem não mediria a deduplicação');
+  });
+
+  it('DUAS chamadas seguidas dão UMA', async () => {
+    // É o que a régua pede pelo nome. Quem tem o QR — e basta uma fotografia —
+    // carrega sem parar, e quem serve recebe avisos que não distingue de
+    // chamadas reais numa sala cheia.
+    const token = await visitaAberta();
+
+    const primeira = await chamarASala(prisma, { token, tipo: 'AJUDA' });
+    assert.ok(primeira);
+    assert.equal(primeira.deduplicada, false, 'a primeira chamada foi dada como repetida');
+
+    const segunda = await chamarASala(prisma, { token, tipo: 'AJUDA' });
+    assert.ok(segunda);
+    assert.equal(segunda.deduplicada, true, 'a segunda criou uma chamada nova');
+    assert.equal(segunda.callId, primeira.callId, 'a segunda não é a mesma chamada');
+
+    // E do lado de quem serve há UMA, não duas.
+    const naSala = await comA((db) => chamadasPorAtender(db, IDS.unidadeA));
+    assert.equal(naSala.length, 1, `a sala recebeu ${naSala.length} avisos para uma chamada`);
+  });
+
+  it('O PAR: uma chamada legítima DEPOIS da janela passa', async () => {
+    // Sem esta metade, «ignora tudo» passava o teste — e ignorar tudo é pior do
+    // que não limitar: quem chamou porque ninguém veio fica sem forma de o dizer.
+    const token = await visitaAberta();
+
+    const primeira = await chamarASala(prisma, { token, tipo: 'AJUDA' });
+    assert.ok(primeira);
+
+    // A janela passa. Mede-se com o carimbo do SERVIDOR, portanto empurra-se a
+    // chamada para trás na base — mudar o relógio do processo não teria efeito
+    // nenhum, e é essa a garantia.
+    await sql.query(
+      `UPDATE guest_calls SET pedida_em = now() - interval '10 minutes' WHERE id = $1`,
+      [primeira.callId]);
+
+    const depois = await chamarASala(prisma, { token, tipo: 'AJUDA' });
+    assert.ok(depois);
+    assert.equal(depois.deduplicada, false, 'a chamada depois da janela foi engolida');
+    assert.notEqual(depois.callId, primeira.callId);
+
+    // E a sala vê as DUAS: a primeira ficou por atender, e a segunda diz que
+    // ninguém foi. Colapsá-las escondia que a primeira falhou.
+    const naSala = await comA((db) => chamadasPorAtender(db, IDS.unidadeA));
+    assert.equal(naSala.length, 2);
+  });
+
+  it('a janela é por MESA, e não por telemóvel', async () => {
+    // Quem tem a fotografia do QR abre outra sessão e chama outra vez. Uma
+    // janela por sessão limitava cada telemóvel e não limitava nada.
+    const { segredo } = await rodar();
+    const um = await entrar(segredo);
+    const outro = await entrar(segredo);
+    assert.ok(um && outro);
+    assert.notEqual(um.token, outro.token, 'as duas visitas são a mesma: não mede nada');
+
+    const primeira = await chamarASala(prisma, { token: um.token, tipo: 'AJUDA' });
+    const segunda = await chamarASala(prisma, { token: outro.token, tipo: 'AJUDA' });
+    assert.ok(primeira && segunda);
+    assert.equal(segunda.deduplicada, true, 'um segundo telemóvel contornou o limite');
+    assert.equal(segunda.callId, primeira.callId);
+  });
+
+  it('AJUDA e CONTA são chamadas diferentes, e não se deduplicam uma na outra', async () => {
+    // Cada uma tem uma resposta diferente do outro lado: uma traz uma pessoa, a
+    // outra traz a conta. Colapsá-las fazia quem pediu a conta receber alguém a
+    // perguntar o que se passa.
+    const token = await visitaAberta();
+    const ajuda = await chamarASala(prisma, { token, tipo: 'AJUDA' });
+    const conta = await chamarASala(prisma, { token, tipo: 'CONTA' });
+    assert.ok(ajuda && conta);
+    assert.equal(conta.deduplicada, false, 'pedir a conta foi engolido pela chamada de ajuda');
+    assert.notEqual(conta.callId, ajuda.callId);
+  });
+
+  it('a CONFIRMAÇÃO fecha o ciclo: quem chamou fica a saber que alguém vem', async () => {
+    // «Sem ela, quem chamou não sabe se alguém vem, e volta a carregar.»
+    const token = await visitaAberta();
+    const chamada = await chamarASala(prisma, { token, tipo: 'AJUDA' });
+    assert.ok(chamada);
+    assert.equal(chamada.atendidaEm, null, 'nasceu atendida');
+
+    const r = await comA((db) => atenderChamada(db, {
+      callId: chamada.callId, actor: ACTOR,
+    }));
+    assert.ok(r.ok);
+
+    const vistas = await chamadasDaVisita(prisma, token);
+    const minha = vistas.find((c) => c.callId === chamada.callId);
+    assert.ok(minha);
+    assert.ok(minha.atendidaEm, 'o visitante não vê que alguém já foi');
+    assert.equal(minha.atendidaPor, ACTOR.email);
+
+    // E sai da lista de quem serve: uma chamada atendida que fica na fila é a
+    // mesma sala cheia de avisos que o limite existe para não criar.
+    const naSala = await comA((db) => chamadasPorAtender(db, IDS.unidadeA));
+    assert.equal(naSala.length, 0);
+  });
+
+  it('e quem carrega outra vez depois de atendida VÊ que já foi atendida', async () => {
+    // É a informação que o faz parar de carregar. Devolver «criei uma chamada»
+    // ali era mentir com boas intenções.
+    const token = await visitaAberta();
+    const chamada = await chamarASala(prisma, { token, tipo: 'AJUDA' });
+    assert.ok(chamada);
+    await comA((db) => atenderChamada(db, { callId: chamada.callId, actor: ACTOR }));
+
+    const outraVez = await chamarASala(prisma, { token, tipo: 'AJUDA' });
+    assert.ok(outraVez);
+    assert.equal(outraVez.deduplicada, true);
+    assert.ok(outraVez.atendidaEm, 'quem carregou outra vez não vê que já foi atendida');
+  });
+
+  it('atender duas vezes não reescreve quem foi lá primeiro', async () => {
+    const token = await visitaAberta();
+    const chamada = await chamarASala(prisma, { token, tipo: 'AJUDA' });
+    assert.ok(chamada);
+    await comA((db) => atenderChamada(db, { callId: chamada.callId, actor: ACTOR }));
+
+    const segunda = await comA((db) => atenderChamada(db, {
+      callId: chamada.callId, actor: { email: 'outra-pessoa@bossaos.example' },
+    }));
+    assert.equal(segunda.ok, false);
+    assert.equal(segunda.ok === false ? segunda.motivo : '', 'ja_atendida');
+
+    const vistas = await chamadasDaVisita(prisma, token);
+    assert.equal(vistas[0]?.atendidaPor, ACTOR.email, 'a segunda pessoa apagou a primeira');
+  });
+
+  it('o sinal de vida CHEGA à base — «nunca pediu nada» deixa de ser verdade', async () => {
+    // ── Esta função não era chamada por prova nenhuma ────────────────────
+    //
+    // Estava exportada e usada só pela rota. Escrevia com o cliente do runtime
+    // **sem escopo de inquilino**: a política de linha recusava, o `updateMany`
+    // devolvia zero, e o QR-006 mostrava «nunca pediu nada» sobre alguém que
+    // tinha acabado de pedir. Não estoirava — mentia.
+    //
+    // A cobertura de uma função não é ela existir: é alguém chamá-la.
+    const token = await visitaAberta();
+    const antes = await comA((db) => visitantesDaUnidade(db, IDS.unidadeA));
+    assert.equal(antes.length, 1, 'a unidade devia ter exactamente esta visita');
+    const meuAntes = antes[0]!;
+    assert.equal(meuAntes.ultimaVezEm, null, 'nasceu com sinal de vida');
+
+    await visitanteFalou(prisma, token);
+
+    const depois = await comA((db) => visitantesDaUnidade(db, IDS.unidadeA));
+    const meuDepois = depois.find((v: { id: string }) => v.id === meuAntes.id);
+    assert.ok(meuDepois?.ultimaVezEm, 'o sinal de vida não chegou à base');
+  });
+
+  it('uma credencial REVOGADA não chama', async () => {
+    // A porta é a mesma de sempre. Sem isto, revogar fechava os pedidos e
+    // deixava a campainha a tocar.
+    const token = await visitaAberta();
+    await comA((db) => revogarAcessoDaMesa(db, {
+      tableId: mesaId, motivo: 'pedidos que o cliente não fez', actor: ACTOR,
+    }));
+    assert.equal(await chamarASala(prisma, { token, tipo: 'AJUDA' }), null,
+      'uma sessão revogada continuou a poder chamar a sala');
   });
 });

@@ -160,3 +160,5 @@ export {
   type BilheteNoEcra, type EventoRecebido, type ProjeccaoDoKds,
   type ResultadoDaAplicacao, type EstadoDaTarefaNoEcra,
 } from './kds.ts';
+
+export { estadoDerivado, totalDoPedido } from './pedido-puro.ts';

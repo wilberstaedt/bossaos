@@ -1,3 +1,4 @@
+import { estadoDerivado } from '@bossaos/domain';
 import type { ClienteComEscopo } from './escopo.ts';
 
 /**
@@ -252,46 +253,6 @@ export function tarefasDaEstacao(
   });
 }
 
-/**
- * O estado de produção de um pedido, **derivado** das tarefas.
- *
- * ── Nunca escrito, e a base recusa quem tentar ────────────────────────────
- *
- * *«O estado do pedido deriva das tarefas; nunca se escreve directamente.
- * Guardar o estado em paralelo cria duas verdades, e a que o expo mostra passa a
- * depender de quem escreveu por último.»*
- *
- * ── «Pronto parcial não é pronto» ─────────────────────────────────────────
- *
- * Uma mesa com três pratos em que dois estão prontos é uma mesa que ainda não
- * sai. Mostrar «pronto» ali faz sair comida fria — e a contagem parcial é uma
- * **contagem**, não um estado novo.
- *
- * Devolve `null` quando não há tarefas nenhumas: ausência de produção não é
- * «por iniciar», é não haver o que iniciar.
- */
-export function estadoDerivado(
-  tarefas: readonly { estado: string }[],
-): { estado: 'POR_INICIAR' | 'EM_PREPARO' | 'PRONTO' | 'ENTREGUE'; prontas: number; total: number } | null {
-  // As canceladas não contam para o total: uma linha cancelada não é trabalho
-  // por fazer, e deixá-la no denominador fazia um pedido nunca ficar pronto.
-  const vivas = tarefas.filter((t) => t.estado !== 'CANCELADA');
-  if (vivas.length === 0) return null;
-
-  const prontas = vivas.filter((t) => t.estado === 'PRONTA' || t.estado === 'ENTREGUE').length;
-  const entregues = vivas.filter((t) => t.estado === 'ENTREGUE').length;
-
-  if (entregues === vivas.length) {
-    return { estado: 'ENTREGUE', prontas, total: vivas.length };
-  }
-  // TODAS, e é a palavra que carrega o aceite. Com a penúltima pronta, o pedido
-  // ainda não está.
-  if (prontas === vivas.length) return { estado: 'PRONTO', prontas, total: vivas.length };
-  if (vivas.some((t) => t.estado === 'EM_PREPARO' || t.estado === 'PRONTA')) {
-    return { estado: 'EM_PREPARO', prontas, total: vivas.length };
-  }
-  return { estado: 'POR_INICIAR', prontas, total: vivas.length };
-}
 
 /** As transições que uma tarefa aceita, e mais nenhumas. */
 const TRANSICOES: Record<EstadoDaProducao, EstadoDaProducao[]> = {
@@ -475,3 +436,7 @@ export async function cursorActual(db: ClienteComEscopo, locationId: string): Pr
   });
   return ultimo?.cursor ?? 0n;
 }
+
+// `estadoDerivado` mudou-se para `@bossaos/domain` pela mesma razão do
+// `totalDoPedido`: é pura. Reexporta-se daqui.
+export { estadoDerivado };

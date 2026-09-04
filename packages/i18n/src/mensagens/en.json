@@ -1605,6 +1605,19 @@
     "pedidoPOR_INICIAR": "Received",
     "pedidoEM_PREPARO": "Being prepared",
     "pedidoPRONTO": "Ready, on its way",
-    "pedidoENTREGUE": "At the table"
+    "pedidoENTREGUE": "At the table",
+    "avisamosAgora": "We told the team. Someone is coming.",
+    "jaTinhamosAvisado": "We already told them a moment ago. No need to press again: it is still on their screen.",
+    "jaFoiAtendida": "Someone on the team has seen it and is on the way.",
+    "chamadaPedidaEm": "Told at",
+    "chamadaAtendida": "Seen by the team",
+    "chamadaPorAtender": "Nobody has seen it yet",
+    "semChamadas": "You have not called yet.",
+    "chamadasDaMesa": "What you asked the floor for",
+    "tipoAJUDA": "Help",
+    "tipoCONTA": "The bill",
+    "accaoAtender": "On my way",
+    "chamadasPorAtender": "Tables calling",
+    "semChamadasNaSala": "No table is calling."
   }
 }

@@ -87,8 +87,36 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     DELETE FROM subscriptions   WHERE organization_id IN (${FIXTURES});
   `);
   await prisma.$executeRawUnsafe(`
+    -- ── Primeiro os PEDIDOS, e pela MESA ──────────────────────────────────
+    --
+    -- Tudo o resto aqui se reconhece por um prefixo no nome, porque o arnês é
+    -- quem escreve o nome. Os pedidos do VISITANTE não: entram pela porta real,
+    -- e o número vem da sequência do domínio (A04394), não do arnês. Um arnês
+    -- não pode escolher o número de um pedido sem deixar de medir o produto.
+    --
+    -- E a unidade também não serve de crachá: as unidades são FIXTURES,
+    -- partilhadas com pedidos legítimos da semeadura. O crachá que resta é
+    -- QUEM abriu o pedido: aberto_por, que a passagem do navegador enche com
+    -- o utilizador do arnês, no mesmo domínio @inspeccao.example que já
+    -- identifica os convites e os leads aqui em baixo.
+    --
+    -- A fuga é ANTIGA e grande: A04001 a A04398, centenas de pedidos deixados
+    -- por todas as passagens anteriores, a prender as estações da inspecção por
+    -- chave estrangeira. Quem estoirava era a LIMPEZA da prova SEGUINTE, longe
+    -- de quem a causou — e por isso o vermelho aparecia sempre na prova errada.
+    DELETE FROM guest_calls          WHERE table_session_id IN (SELECT id FROM table_sessions WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%'));
+    DELETE FROM production_events    WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example');
+    DELETE FROM production_tasks     WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example');
+    DELETE FROM order_events         WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example');
+    DELETE FROM order_lines          WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example');
+    DELETE FROM order_submissions    WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example');
+    DELETE FROM orders               WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example';
+    DELETE FROM routing_rules        WHERE station_id IN (SELECT id FROM production_stations WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM production_stations  WHERE nome LIKE '${PREFIXO}%';
+
     DELETE FROM public_slug_owners WHERE slug LIKE '${PREFIXO}%';
     DELETE FROM table_session_events WHERE session_id IN (SELECT id FROM table_sessions WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%'));
+    DELETE FROM guest_sessions       WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%');
     DELETE FROM table_sessions       WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%');
     DELETE FROM table_combination_members WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%');
     DELETE FROM table_combinations   WHERE nome LIKE '${PREFIXO}%';
@@ -98,15 +126,6 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     DELETE FROM device_pairings      WHERE device_id IN (SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%');
     DELETE FROM devices              WHERE nome LIKE '${PREFIXO}%';
     DELETE FROM service_types        WHERE nome LIKE '${PREFIXO}%';
-    DELETE FROM guest_sessions       WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%');
-    DELETE FROM production_events    WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%');
-    DELETE FROM production_tasks     WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%');
-    DELETE FROM routing_rules        WHERE station_id IN (SELECT id FROM production_stations WHERE nome LIKE '${PREFIXO}%');
-    DELETE FROM production_stations  WHERE nome LIKE '${PREFIXO}%';
-    DELETE FROM order_events         WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%');
-    DELETE FROM order_lines          WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%');
-    DELETE FROM order_submissions    WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%');
-    DELETE FROM orders               WHERE numero LIKE '${PREFIXO}%';
     DELETE FROM outbox_tasks         WHERE tipo = 'pedido.entregar';
     DELETE FROM menu_views        WHERE revision_id IN (SELECT id FROM menu_revisions WHERE menu_id IN (SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%'));
     DELETE FROM menu_publications WHERE menu_id IN (SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%');
@@ -146,6 +165,21 @@ export async function restos(prisma: PrismaClient): Promise<number> {
     + (SELECT count(*) FROM sites              WHERE seo_titulo LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM modifier_groups    WHERE nome LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM locations          WHERE slug LIKE '${PREFIXO}%')
+    -- ── A auto-verificação era CEGA ao que a limpeza não via ───────────────
+    --
+    -- Contava com o mesmo identificador que a limpeza usava — o prefixo no
+    -- nome — e por isso não podia detectar nada do que esse identificador
+    -- deixava passar. Cinco pedidos do visitante ficaram na base e o fecho
+    -- disse «nada ficou para trás», com toda a honestidade e nenhuma
+    -- utilidade. Um detector calibrado pelo critério que está a verificar
+    -- confirma o critério, não o resultado.
+    --
+    -- Conta-se agora pela UNIDADE, que é onde os restos realmente estão.
+    + (SELECT count(*) FROM orders              WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example')
+    + (SELECT count(*) FROM production_stations WHERE nome LIKE '${PREFIXO}%')
+    + (SELECT count(*) FROM production_tasks    WHERE station_id IN (SELECT id FROM production_stations WHERE nome LIKE '${PREFIXO}%'))
+    + (SELECT count(*) FROM service_tables      WHERE codigo LIKE '${PREFIXO}%')
+    + (SELECT count(*) FROM guest_sessions      WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%'))
   ) AS total`);
   return Number(r[0]?.total ?? 0);
 }

@@ -1605,6 +1605,19 @@
     "pedidoPOR_INICIAR": "Recibido",
     "pedidoEM_PREPARO": "Preparándose",
     "pedidoPRONTO": "Listo, ya sale",
-    "pedidoENTREGUE": "En la mesa"
+    "pedidoENTREGUE": "En la mesa",
+    "avisamosAgora": "Avisamos al equipo. Alguien viene.",
+    "jaTinhamosAvisado": "Ya lo habíamos avisado hace poco. No hace falta volver a pulsar: sigue en su pantalla.",
+    "jaFoiAtendida": "Alguien del equipo ya lo ha visto y viene.",
+    "chamadaPedidaEm": "Avisado",
+    "chamadaAtendida": "Visto por el equipo",
+    "chamadaPorAtender": "Todavía nadie lo ha visto",
+    "semChamadas": "Todavía no has llamado.",
+    "chamadasDaMesa": "Lo que has pedido a la sala",
+    "tipoAJUDA": "Ayuda",
+    "tipoCONTA": "La cuenta",
+    "accaoAtender": "Ya voy",
+    "chamadasPorAtender": "Mesas que llaman",
+    "semChamadasNaSala": "Ninguna mesa está llamando."
   }
 }

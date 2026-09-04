@@ -369,7 +369,68 @@ exigir_vermelho "caiu a origem: os dois pedidos deixaram de se distinguir" \
 cp "$ORIG_ANDAMENTO" "$ANDAMENTO"; rm -f "$ORIG_ANDAMENTO"
 
 echo
-echo "11. Reposto — tem de voltar ao verde"
+echo "11. CONTROLO NEGATIVO — o fecho do arnes volta a ser CEGO aos pedidos"
+# ── A fuga que a auto-verificacao nao podia ver ────────────────────────────
+#
+# O fecho da semeadura conta o que ficou para tras e sai a nao-zero se ficou
+# alguma coisa. Contava com o MESMO cracha que a limpeza usava — o prefixo no
+# nome — e por isso nao podia detectar nada do que esse cracha deixava passar.
+#
+# Os pedidos desta passagem entram pela porta REAL, e o numero vem da sequencia
+# do dominio: A04394, nunca insp-A004. Ficaram 398 na base, a prender as estacoes
+# da inspeccao por chave estrangeira, e o fecho disse «nada ficou para tras» de
+# cada vez, com toda a honestidade e nenhuma utilidade. Quem estoirava era a
+# limpeza da prova SEGUINTE — o vermelho aparecia sempre na prova errada.
+#
+# ── E este controlo esta AQUI de proposito ─────────────────────────────────
+#
+# Plantei-o primeiro na prova do visitante e ficou VERDE, com razao: aquela
+# passagem mede telas e o ciclo de chamadas, e nunca chega a submeter um pedido.
+# Nao havia populacao que o defeito pudesse sujar. Um controlo plantado onde o
+# sintoma nao pode nascer confirma a ausencia, nao a guarda. Os pedidos do arnes
+# nascem NESTA passagem, e e' aqui que a cegueira tem de acender.
+COMUM="packages/db/prisma/inspeccao-comum.ts"
+ORIG_COMUM="/tmp/bossaos-inspeccao-comum.ts"
+cp "$COMUM" "$ORIG_COMUM"
+python3 - <<'PYCEGO'
+import io
+p = 'packages/db/prisma/inspeccao-comum.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example'"
+assert s.count(antigo) == 7, 'o cracha dos pedidos do arnes nao esta onde se esperava'
+# Volta ao cracha antigo: so o nome. Nada estoira, nada avisa — e o lixo fica.
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, "numero LIKE '${PREFIXO}%'"))
+PYCEGO
+# ── A assercao e' sobre QUEM acende, nao sobre a mensagem ──────────────────
+#
+# Com o cracha cego ha DOIS finais possiveis, e os dois sao o mesmo facto: ou os
+# pedidos ficam e a contagem do fecho os ve («ficaram N linhas por apagar»), ou
+# ficam e prendem as estacoes por chave estrangeira, e a limpeza estoira antes
+# de chegar a contar. Exigir so a primeira mensagem seria exigir a ordem em que
+# o lixo aparece, que nao e' a propriedade.
+#
+# A propriedade e': acende o FECHO DO ARNES, e nao um teste do produto. Por isso
+# exige-se que nenhuma tela tenha ficado vermelha — se uma tela cai, o defeito
+# plantado mexeu no produto e este controlo mede outra coisa.
+if correr /tmp/bossaos-staff-nav-fecho.txt; then
+  vermelho "caiu o fecho: ficou VERDE com a cegueira replantada"
+elif grep -qE '✘' /tmp/bossaos-staff-nav-fecho.txt; then
+  vermelho "caiu o fecho: acendeu uma TELA, e devia ter acendido o fecho"
+  grep -E '✘' /tmp/bossaos-staff-nav-fecho.txt | head -4
+elif grep -qE 'linhas por apagar|limpar-inspeccao|violates foreign key' /tmp/bossaos-staff-nav-fecho.txt; then
+  verde "caiu o fecho: o lixo dos pedidos deixou de passar despercebido"
+else
+  vermelho "caiu o fecho: ficou vermelha, mas nao foi o fecho do arnes"
+  tail -5 /tmp/bossaos-staff-nav-fecho.txt
+fi
+cp "$ORIG_COMUM" "$COMUM"
+# O que a cegueira deixou fica na base: drena-se antes de medir o reposto, senao
+# o passo seguinte herda a sujidade deste controlo.
+set -a; . ./.env; set +a
+fnm exec --using=22.23.2 node --experimental-strip-types packages/db/prisma/limpar-inspeccao.ts >/dev/null 2>&1 || true
+
+echo
+echo "12. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-staff-nav-reposto.txt; then
   passou=$(grep -oE '[0-9]+ passed' /tmp/bossaos-staff-nav-reposto.txt | grep -oE '[0-9]+' || echo 0)
   if (( passou < CASOS_MINIMOS )); then

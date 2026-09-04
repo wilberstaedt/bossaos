@@ -59,7 +59,7 @@ export default async function AoTeuGosto({
       </p>
       {produto.descricao ? <p className="bo-publico__texto">{produto.descricao}</p> : null}
 
-      <form method="post" action="/api/publico/mesa" data-teste="juntar">
+      <form method="post" action={`/r/${publicLocationSlug}/api/mesa`} data-teste="juntar">
         <input type="hidden" name="slug" value={publicLocationSlug} />
         <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="accao" value="acrescentar" />

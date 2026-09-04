@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import {
   abrirSessao, transferirSessao, iniciarEncerramento, iniciarLimpeza,
   cancelarLinha, guardarPedido, listarUnidades, declararRascunhos, listarDispositivos,
+  atenderChamada,
 } from '@bossaos/db';
 import { corpoDaResposta, estadoHttp, exigirAccao } from '@bossaos/domain';
 import { comEscopoDoPedido, resolverPedido } from '../../../../../src/sessao.ts';
@@ -113,6 +114,20 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
       return voltarPara(`${base}/andamento`, { conflito: String(r.versaoActual), pedido: orderId });
     }
     return voltarPara(`${base}/entregar`, { erro: r.motivo });
+  }
+
+  if (accao === 'atender_chamada') {
+    // ── A confirmação de atendimento (E17, ponto 4) ────────────────────────
+    //
+    // «Sem ela, quem chamou não sabe se alguém vem, e volta a carregar.» É uma
+    // escrita idempotente: atender duas vezes não reescreve quem foi lá
+    // primeiro, e `atendidaEm: null` está na CONDIÇÃO — ler e depois escrever é
+    // a mesma corrida com a janela mais estreita.
+    const r = await comEscopoDoPedido(sessao, (db) => atenderChamada(db, {
+      callId: texto(dados, 'callId') ?? '', actor,
+    }));
+    if (!r.ok) return voltarPara(`${base}/avisos`, { erro: r.motivo });
+    return voltarPara(`${base}/avisos`, { atendida: '1' });
   }
 
   if (accao === 'declarar_rascunhos') {

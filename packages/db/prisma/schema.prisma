@@ -137,6 +137,7 @@ model Organization {
   tarefasDeProducao  ProductionTask[]
   eventosDeProducao  ProductionEvent[]
   visitantes GuestSession[]
+  chamadas GuestCall[]
   @@map("organizations")
   revisoes        MenuRevision[]
   publicacoes     MenuPublication[]
@@ -258,6 +259,7 @@ model Location {
   regrasDeRoteamento RoutingRule[]
   tarefasDeProducao  ProductionTask[]
   visitantes GuestSession[]
+  chamadas GuestCall[]
   @@unique([organizationId, id], name: "location_por_organizacao")
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -2124,6 +2126,7 @@ model ServiceTable {
   combinacoes  TableCombinationMember[]
   visitantes   GuestSession[]
 
+  chamadas GuestCall[]
   @@unique([organizationId, id], name: "mesa_por_organizacao")
   @@unique([locationId, codigo], name: "codigo_de_mesa_por_unidade")
   @@index([organizationId, locationId])
@@ -2209,6 +2212,7 @@ model TableSession {
   eventos      TableSessionEvent[]
   visitantes   GuestSession[]
 
+  chamadas GuestCall[]
   @@unique([organizationId, id], name: "sessao_por_organizacao")
   @@index([organizationId, locationId, estado])
   @@index([tableId])
@@ -2895,8 +2899,74 @@ model GuestSession {
   mesa         ServiceTable @relation(fields: [organizationId, tableId], references: [organizationId, id], onDelete: Restrict)
   sessaoDeMesa TableSession @relation(fields: [organizationId, tableSessionId], references: [organizationId, id], onDelete: Cascade)
 
+  chamadas GuestCall[]
   @@unique([organizationId, id], name: "visitante_por_organizacao")
   @@index([organizationId, locationId, estado])
   @@index([tableSessionId])
   @@map("guest_sessions")
+}
+
+
+/// O que o visitante pede à sala. Fechado, porque cada um tem uma resposta
+/// diferente do outro lado: um traz uma pessoa, o outro traz a conta.
+enum TipoDeChamada {
+  AJUDA
+  CONTA
+}
+
+/// Uma chamada da mesa à sala — «chamar a equipa» e «pedir a conta».
+///
+/// ── A janela é por MESA, e não por telemóvel ──────────────────────────────
+///
+/// O QR é um token ao portador: quem tem a fotografia pode abrir **muitas**
+/// sessões de visitante na mesma mesa. Uma janela por sessão limitava cada
+/// telemóvel e não limitava nada — bastava abrir outro.
+///
+/// E é a unidade certa também do outro lado: quem serve olha para a mesa 5, não
+/// para o telefone de quem lá está sentado. Duas pessoas na mesma mesa a
+/// carregarem no botão ao mesmo tempo são **uma** chamada, e é isso que uma sala
+/// cheia precisa que aconteça.
+///
+/// ── E o atendimento é uma linha, não uma coluna algures ──────────────────
+///
+/// «Sem a confirmação, quem chamou não sabe se alguém vem, e volta a carregar.»
+/// A chamada existe como facto: foi pedida, e depois foi atendida — por alguém,
+/// a uma hora. Guardar só um booleano na sessão perdia quem atendeu e quando, que
+/// é o que se pergunta quando alguém diz que ninguém foi lá.
+model GuestCall {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  tableId        String @map("table_id") @db.Uuid
+  tableSessionId String @map("table_session_id") @db.Uuid
+
+  /// Quem pediu. Serve para o ecrã do visitante saber que a chamada é dele — e
+  /// **não** entra na deduplicação, que é da mesa.
+  guestSessionId String @map("guest_session_id") @db.Uuid
+
+  tipo TipoDeChamada
+
+  /// ── Os carimbos são do SERVIDOR ────────────────────────────────────────
+  ///
+  /// A janela mede-se com eles. Com o relógio do telemóvel, quem quisesse
+  /// contornar o limite mudava a hora do aparelho — e é a mesma lição do E16,
+  /// onde o tablet da cozinha era o aparelho que ninguém acerta.
+  pedidaEm   DateTime  @default(now()) @map("pedida_em") @db.Timestamptz(6)
+  atendidaEm DateTime? @map("atendida_em") @db.Timestamptz(6)
+  /// Quem atendeu. `null` enquanto ninguém foi — e ausência é ausência.
+  atendidaPor String?  @map("atendida_por")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  mesa         ServiceTable @relation(fields: [organizationId, tableId], references: [organizationId, id], onDelete: Restrict)
+  sessaoDeMesa TableSession @relation(fields: [organizationId, tableSessionId], references: [organizationId, id], onDelete: Cascade)
+  visitante    GuestSession @relation(fields: [organizationId, guestSessionId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, id], name: "chamada_por_organizacao")
+  @@index([organizationId, locationId, atendidaEm])
+  @@index([tableSessionId, tipo, pedidaEm])
+  @@map("guest_calls")
 }

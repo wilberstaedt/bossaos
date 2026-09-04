@@ -1,9 +1,11 @@
-import { Aviso } from '@bossaos/ui';
-import { totalDoPedido } from '@bossaos/db';
+import { totalDoPedido } from '@bossaos/domain';
 import { formatarDinheiro, type Idioma } from '@bossaos/i18n';
 import {
-  carregarVisita, pedidosDaMesa,
+  carregarVisita, chamadasDaVisitaActual, pedidosDaMesa,
 } from '../../../../../../src/visitante/carregar-visita.ts';
+import {
+  ChamadasDaMesa, RespostaDaChamada,
+} from '../../../../../../src/visitante/ChamadasDaMesa.tsx';
 import {
   CabecalhoDaVisita, NavegacaoDaVisita, textosDoVisitante,
 } from '../../../../../../src/visitante/PecasDoVisitante.tsx';
@@ -37,7 +39,8 @@ export default async function TrazemosAConta({
   const idioma = locale as Idioma;
   const s = textosDoVisitante(idioma);
   const visitante = await carregarVisita(publicLocationSlug, locale);
-  const pedidos = await pedidosDaMesa(visitante);
+  const chamadas = await chamadasDaVisitaActual();
+  const pedidos = await pedidosDaMesa();
   const base = `/r/${publicLocationSlug}/${locale}`;
 
   const todasAsLinhas = pedidos.flatMap((p) => p.linhas);
@@ -49,11 +52,9 @@ export default async function TrazemosAConta({
                          titulo={s.trazemosAConta} tela="MENU-013" />
       <NavegacaoDaVisita idioma={idioma} base={base} actual="/conta" />
 
-      {busca.avisado === '1' ? (
-        <div data-teste="avisado">
-          <Aviso tom="sucesso" titulo={s.pedidoFeito}>{s.pedirContaAjuda}</Aviso>
-        </div>
-      ) : null}
+      {/* As três respostas, distinguidas. É o que faz alguém parar de carregar. */}
+      <RespostaDaChamada
+        avisado={typeof busca.avisado === 'string' ? busca.avisado : null} s={s} />
 
       {/* Ausência é ausência: sem nada aceite não há conta, e isso não é uma
           conta de zero. */}
@@ -67,7 +68,10 @@ export default async function TrazemosAConta({
 
       <p className="bo-campo__ajuda">{s.pedirContaAjuda}</p>
 
-      <form method="post" action="/api/publico/mesa" data-teste="pedir-conta">
+      <ChamadasDaMesa chamadas={chamadas.filter((c) => c.tipo === 'CONTA')}
+                      idioma={idioma} s={s} />
+
+      <form method="post" action={`/r/${publicLocationSlug}/api/mesa`} data-teste="pedir-conta">
         <input type="hidden" name="slug" value={publicLocationSlug} />
         <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="accao" value="conta" />

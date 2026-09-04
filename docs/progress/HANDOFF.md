@@ -28,8 +28,23 @@ passaria o teste.
 **O que está pronto para medir** — códigos de saída lidos directamente, sem canos:
 `pnpm verificar` (**0**) · `./scripts/provar-visitante.sh` (5 grupos, **21 casos,
 9 defeitos plantados**, 0) · `./scripts/provar-visitante-no-navegador.sh` (**22
-casos, 8 defeitos plantados**, 0) · `provar-pedidos.sh` · `provar-producao.sh` ·
-`provar-migracoes-do-zero.sh`.
+casos, 8 defeitos plantados**, 0) · `provar-kds-no-navegador.sh` (19 casos, 8
+plantados, 0) · `provar-staff-no-navegador.sh` (31 casos, **11** plantados, 0) ·
+`provar-pedidos.sh` · `provar-producao.sh` · `provar-migracoes-do-zero.sh` ·
+`pnpm inspeccionar` (**440 casos verdes**).
+
+**Uma correcção de arnês que não é do E17 e vale mais do que ele.** O fecho da
+semeadura reconhece o seu lixo por um prefixo no nome. Os **pedidos** não podem
+levar prefixo — entram pela porta real e o número vem da sequência do domínio.
+Ficaram 398 na base, desde `A04001`, a prender as estações da inspecção por chave
+estrangeira; quem estoirava era a limpeza da prova SEGUINTE, e por isso o
+vermelho aparecia sempre na prova errada. E o fecho **verifica-se a si próprio**,
+mas contava com o mesmo crachá que a limpeza usava — um detector calibrado pelo
+critério que verifica confirma o critério, não o resultado. Disse «nada ficou
+para trás» de cada vez. O crachá honesto estava na coluna ao lado: `aberto_por`
+= `painel@inspeccao.example`. Preso pelo controlo 11 do `provar-staff`, e está lá
+porque na prova do visitante ficou verde **com razão** — aquela passagem nunca
+submete um pedido, e não havia população que o defeito pudesse sujar.
 
 **A regra do contrato está na FORMA:** `guest_sessions` **não guarda a geração do
 QR**. Sem esse campo, a comparação que faria a rotação expulsar gente da mesa não

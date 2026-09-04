@@ -25,7 +25,7 @@ export default async function EstaVisita({
   const idioma = locale as Idioma;
   const s = textosDoVisitante(idioma);
   const visitante = await carregarVisita(publicLocationSlug, locale);
-  const [pedidos, carrinho] = await Promise.all([pedidosDaMesa(visitante), lerCarrinho()]);
+  const [pedidos, carrinho] = await Promise.all([pedidosDaMesa(), lerCarrinho()]);
   const base = `/r/${publicLocationSlug}/${locale}`;
 
   return (

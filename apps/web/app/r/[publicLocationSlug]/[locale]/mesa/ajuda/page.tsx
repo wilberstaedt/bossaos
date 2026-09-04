@@ -1,6 +1,8 @@
-import { Aviso } from '@bossaos/ui';
 import { type Idioma } from '@bossaos/i18n';
-import { carregarVisita } from '../../../../../../src/visitante/carregar-visita.ts';
+import { carregarVisita, chamadasDaVisitaActual } from '../../../../../../src/visitante/carregar-visita.ts';
+import {
+  ChamadasDaMesa, RespostaDaChamada,
+} from '../../../../../../src/visitante/ChamadasDaMesa.tsx';
 import {
   CabecalhoDaVisita, NavegacaoDaVisita, textosDoVisitante,
 } from '../../../../../../src/visitante/PecasDoVisitante.tsx';
@@ -34,6 +36,7 @@ export default async function ComoPodemosAjudar({
   const idioma = locale as Idioma;
   const s = textosDoVisitante(idioma);
   const visitante = await carregarVisita(publicLocationSlug, locale);
+  const chamadas = await chamadasDaVisitaActual();
   const base = `/r/${publicLocationSlug}/${locale}`;
 
   return (
@@ -42,15 +45,16 @@ export default async function ComoPodemosAjudar({
                          titulo={s.comoAjudamos} tela="MENU-012" />
       <NavegacaoDaVisita idioma={idioma} base={base} actual="/ajuda" />
 
-      {busca.avisado === '1' ? (
-        <div data-teste="avisado">
-          <Aviso tom="sucesso" titulo={s.pedidoFeito}>{s.chamarAjuda}</Aviso>
-        </div>
-      ) : null}
+      {/* As três respostas, distinguidas. É o que faz alguém parar de carregar. */}
+      <RespostaDaChamada
+        avisado={typeof busca.avisado === 'string' ? busca.avisado : null} s={s} />
 
       <p className="bo-campo__ajuda">{s.chamarAjuda}</p>
 
-      <form method="post" action="/api/publico/mesa" data-teste="chamar">
+      <ChamadasDaMesa chamadas={chamadas.filter((c) => c.tipo === 'AJUDA')}
+                      idioma={idioma} s={s} />
+
+      <form method="post" action={`/r/${publicLocationSlug}/api/mesa`} data-teste="chamar">
         <input type="hidden" name="slug" value={publicLocationSlug} />
         <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="accao" value="chamar" />

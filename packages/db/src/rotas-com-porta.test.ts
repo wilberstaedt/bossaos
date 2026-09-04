@@ -75,11 +75,49 @@ const EXCEPCOES = new Map<string, string>([
  * A organização nunca vem do corpo do pedido: sai de resolver o endereço
  * público, que é a mesma porta que serve a página.
  */
+/**
+ * ── O E17 trouxe a TERCEIRA forma, e ela é mais apertada do que parece ────
+ *
+ * Até aqui, tudo debaixo de `/r/` era **anónimo**: quem lia a carta não tinha
+ * entrado em lado nenhum. O E17 põe ali um visitante **com credencial** — o QR da
+ * mesa abre uma sessão, e a partir daí ele pede, chama a sala e vê a conta.
+ *
+ * A tentação foi alargar esta lista até o que eu tinha escrito caber. Alargar uma
+ * guarda para caber no que se escreveu é como se desligam guardas — e a forma da
+ * lista importa mais do que os nomes que lá estão.
+ *
+ * **A propriedade que estas funções partilham, e que as torna portas:** nenhuma
+ * aceita um `organizationId`. Recebem um identificador público — o `slug`, o
+ * domínio — ou uma **credencial**, e resolvem o inquilino elas próprias. É por
+ * isso que `pedirDoVisitante` existe: `enviarPedido` recebe o inquilino, e uma
+ * rota pública que lho passe tem a forma errada mesmo quando o valor está certo,
+ * porque quem lê o ficheiro não sabe de onde ele veio.
+ *
+ * O que **não** mudou é o que interessa: `PROIBIDO_NO_PUBLICO` continua igual.
+ * Uma tela debaixo de `/r/` que amanhã importe `comEscopo` para fazer a sua
+ * própria consulta continua vermelha — e foi assim que esta guarda me apanhou
+ * quatro telas do visitante a fazer exactamente isso.
+ */
 const PORTAS_DO_PUBLICO = [
   'cartaPublica', 'horarioPublico', 'registarConsulta', 'abertoAgora',
   'sitePublico', 'sitePublicoPorDominio', 'guardarLeadPublico', 'registarPedidoDeDemo',
+  // E17 · o visitante da mesa. Todas recebem a credencial, nunca um inquilino.
+  'abrirVisitante', 'visitanteActivo', 'visitanteFalou', 'pedirDoVisitante',
+  'chamarASala', 'chamadasDaVisita', 'pedidosDoVisitante', 'producaoDoVisitante',
 ];
-const SO_PELO_PUBLICO = /^app\/(r|api\/publico)\//;
+/**
+ * ── E `src/visitante/` entra aqui, e isso APERTA em vez de aliviar ────────
+ *
+ * O módulo do visitante é a canalização das telas de `/r/`, e de mais nada. Fora
+ * desta expressão, ele caía na regra GERAL — que lhe pediria `resolverPedido`,
+ * uma coisa que um visitante da mesa não tem e nunca vai ter. Ficava vermelho
+ * para sempre pelo motivo errado, ou passava por uma excepção sem verificação,
+ * que é uma porta.
+ *
+ * Aqui dentro passa a valer-lhe a regra apertada: só as portas, e nunca
+ * `comEscopo`. É mais exigente do que a geral, e é a certa para o sítio.
+ */
+const SO_PELO_PUBLICO = /^(app\/(r|api\/publico)|src\/visitante)\//;
 /** O que uma rota pública NÃO pode tocar: são os caminhos que exigem inquilino. */
 const PROIBIDO_NO_PUBLICO = ['comEscopo', 'comIdentidade', 'obterPrisma'];
 

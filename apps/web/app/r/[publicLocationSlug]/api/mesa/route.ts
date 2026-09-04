@@ -1,20 +1,38 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { abrirVisitante, enviarPedido, visitanteFalou } from '@bossaos/db';
-import { texto, voltarPara } from '../../../../src/formulario.ts';
+import { abrirVisitante, chamarASala, pedirDoVisitante, visitanteFalou } from '@bossaos/db';
+import { texto, voltarPara } from '../../../../../src/formulario.ts';
 import {
   BOLACHA_DO_VISITANTE, opcoesDaBolacha, visitanteDaRequisicao,
-} from '../../../../src/visitante/sessao-do-visitante.ts';
+} from '../../../../../src/visitante/sessao-do-visitante.ts';
 import {
   BOLACHA_DO_CARRINHO, acrescentar, escreverCarrinho, lerCarrinho,
-} from '../../../../src/visitante/carrinho.ts';
-import { obterBase } from '../../../../src/servidor.ts';
+} from '../../../../../src/visitante/carrinho.ts';
+import { obterBase } from '../../../../../src/servidor.ts';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**
  * A porta do visitante da mesa.
+ *
+ * ── Vive DENTRO do endereço do restaurante, e isso não é arrumação ────────
+ *
+ * Estava em `/api/publico/mesa`, e **nada funcionava**. A bolacha do visitante
+ * tem `path=/r/<slug>` — de propósito, para não viajar para os outros
+ * restaurantes servidos pelo mesmo domínio — e o navegador simplesmente não a
+ * envia para um endereço fora desse caminho. O formulário chegava cá sem
+ * credencial, a porta respondia «a sessão terminou», e quem estava sentado via a
+ * carta outra vez sem perceber porquê.
+ *
+ * Não dava erro em lado nenhum: a rota respondia 303, a página carregava, e o
+ * pedido desaparecia. Encontrou-o a prova de navegador ao carregar num botão —
+ * nenhuma prova de base o podia ver, porque do lado do servidor a bolacha estava
+ * sempre lá.
+ *
+ * A saída barata era `path: '/'`. Isso mandava a credencial da mesa 5 do
+ * restaurante A para o restaurante B no mesmo domínio, que é o oposto do que o
+ * `autenticacao-e-convites.md` decide sobre escopo. A porta é que muda de sítio.
  *
  * ── Abrir a sessão é um POST, e não uma leitura ───────────────────────────
  *
@@ -60,6 +78,10 @@ export async function POST(pedido: Request) {
   const visitante = await visitanteDaRequisicao();
   if (!visitante) return voltarPara(`${base}/menu`, { sessao: 'terminou' });
 
+  // A credencial em bruto: é o que as portas recebem. O `visitante` acima serve
+  // para recusar cedo — as portas voltam a validá-la, porque entre uma coisa e
+  // outra a equipa pode ter fechado a conta.
+  const bolachaDoVisitante = (await cookies()).get(BOLACHA_DO_VISITANTE)?.value ?? '';
   const prisma = obterBase();
 
   if (accao === 'acrescentar') {
@@ -82,25 +104,18 @@ export async function POST(pedido: Request) {
     const carrinho = await lerCarrinho();
     if (carrinho.length === 0) return voltarPara(`${base}/mesa/pedido`, { erro: 'sem_linhas' });
 
-    // O `organizationId` vem da PORTA (`visitante_activo`), e nunca de nada que
-    // o cliente tenha enviado. É a diferença entre o runtime agir em nome de um
-    // inquilino que a credencial provou, e agir em nome do que alguém escreveu
-    // num campo escondido.
-    const r = await enviarPedido(prisma, visitante.organizationId, {
+    // ── A escrita passa pela porta, e a porta recebe o TOKEN ─────────
+    //
+    // `enviarPedido` recebe um `organizationId`, e numa rota pública essa é a
+    // forma errada mesmo quando o valor está certo: quem lê o ficheiro não sabe
+    // de onde ele veio. `pedirDoVisitante` resolve o inquilino a partir da
+    // credencial, e não há por onde outro valor entrar.
+    const r = await pedirDoVisitante(prisma, {
+      token: bolachaDoVisitante,
       commandId: texto(dados, 'commandId') ?? crypto.randomUUID(),
-      locationId: visitante.locationId,
-      // ── A origem é CARTA, sempre ────────────────────────────────────────
-      //
-      // Um pedido de visitante nunca é de sala. O E15 já provou que a origem tem
-      // de ser visível e distinguível a quem serve — dois pratos iguais pedidos
-      // ao mesmo tempo pelo cliente e pela sala são DOIS, e é a origem que o
-      // explica a quem olha e acha que é engano.
-      canal: 'CARTA',
       linhas: carrinho,
-      tableSessionId: visitante.tableSessionId,
-      actor: { email: `visitante:${visitante.guestId}` },
     });
-    await visitanteFalou(prisma, visitante.guestId);
+    await visitanteFalou(prisma, bolachaDoVisitante);
     if (!r.ok) return voltarPara(`${base}/mesa/pedido`, { erro: r.motivo });
 
     // O carrinho esvazia-se **depois** de o pedido existir. Ao contrário, uma
@@ -108,16 +123,32 @@ export async function POST(pedido: Request) {
     (await cookies()).set(BOLACHA_DO_CARRINHO, '', { ...opcoesDaBolacha(publicSlug), maxAge: 0 });
 
     return voltarPara(
-      r.rejeitadas.length > 0 ? `${base}/mesa/esgotado` : `${base}/mesa/recebido`,
+      r.rejeitadas > 0 ? `${base}/mesa/esgotado` : `${base}/mesa/recebido`,
       { pedido: r.orderId,
-        ...(r.rejeitadas.length > 0 ? { esgotado: String(r.rejeitadas.length) } : {}) });
+        ...(r.rejeitadas > 0 ? { esgotado: String(r.rejeitadas) } : {}) });
   }
 
   if (accao === 'chamar' || accao === 'conta') {
-    // Um aviso à sala. Não muda o estado da mesa: pedir a conta é uma pessoa a
-    // trazê-la, e este ecrã não cobra — está escrito na tela.
-    await visitanteFalou(prisma, visitante.guestId);
-    return voltarPara(`${base}/mesa/${accao === 'conta' ? 'conta' : 'ajuda'}`, { avisado: '1' });
+    // ── Um aviso à sala, com limite e deduplicação ──────────────────────
+    //
+    // Ponto 4 do enunciado. Sem isto, quem tem o QR — e basta uma fotografia —
+    // carrega sem parar, e quem serve recebe avisos que não distingue de
+    // chamadas reais numa sala cheia.
+    //
+    // A janela vive na porta da base, e não aqui: uma verificação deste lado é
+    // a mesma corrida do E13 com outro nome — dois toques ao mesmo tempo lêem
+    // ambos «não há chamada aberta» e escrevem duas.
+    const chamada = await chamarASala(prisma, {
+      token: bolachaDoVisitante, tipo: accao === 'conta' ? 'CONTA' : 'AJUDA',
+    });
+    await visitanteFalou(prisma, bolachaDoVisitante);
+    const destino = `${base}/mesa/${accao === 'conta' ? 'conta' : 'ajuda'}`;
+    if (!chamada) return voltarPara(`${base}/menu`, { sessao: 'terminou' });
+    // O ecrã distingue as três respostas, e a distinção é o que faz alguém parar
+    // de carregar: «avisámos agora», «já tínhamos avisado», «alguém já foi».
+    return voltarPara(destino, {
+      avisado: chamada.atendidaEm ? 'atendida' : chamada.deduplicada ? 'ja' : '1',
+    });
   }
 
   return NextResponse.json({ erro: 'accao_desconhecida' }, { status: 400 });

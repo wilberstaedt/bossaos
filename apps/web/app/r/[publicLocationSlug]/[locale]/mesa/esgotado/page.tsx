@@ -32,7 +32,7 @@ export default async function UmPratoEsgotou({
   const idioma = locale as Idioma;
   const s = textosDoVisitante(idioma);
   const visitante = await carregarVisita(publicLocationSlug, locale);
-  const pedidos = await pedidosDaMesa(visitante);
+  const pedidos = await pedidosDaMesa();
   const base = `/r/${publicLocationSlug}/${locale}`;
 
   const esteId = typeof busca.pedido === 'string' ? busca.pedido : null;

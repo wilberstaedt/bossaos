@@ -42,16 +42,28 @@ if pgrep -f 'playwright test' >/dev/null 2>&1; then
   exit 2
 fi
 
+# ── O alvo MUDOU DE FICHEIRO no E17, e o script apanhou-o ─────────────────
+#
+# `estadoDerivado` e `totalDoPedido` são funções puras e mudaram-se para
+# `@bossaos/domain` — a guarda `rotas-com-porta.test.ts` mostrou porquê: uma tela
+# pública que só queria somar um total tinha de importar o pacote da base.
+#
+# O plante deixou de encontrar o alvo, o `assert` do Python rebentou, o ficheiro
+# ficou intacto e o controlo ficou VERDE. Foi o próprio ajudante que o disse —
+# «ficou VERDE com o defeito plantado» — e é exactamente para isto que ele
+# verifica as duas coisas em vez de uma.
 PRODUCAO=packages/db/src/producao.ts
+PURO=packages/domain/src/pedido-puro.ts
 CSS=packages/ui/src/estilos.css
 PECAS=apps/web/src/kds/PecasDoKds.tsx
 QUADRO="apps/web/app/[idioma]/kds/[locationId]/[stationId]/page.tsx"
 TUDO="apps/web/app/[idioma]/kds/[locationId]/[stationId]/tudo/page.tsx"
 SPEC=inspeccao/kds.spec.ts
 
-ORIG_PRODUCAO=$(mktemp); ORIG_CSS=$(mktemp); ORIG_PECAS=$(mktemp)
+ORIG_PRODUCAO=$(mktemp); ORIG_CSS=$(mktemp); ORIG_PECAS=$(mktemp); ORIG_PURO=$(mktemp)
 ORIG_QUADRO=$(mktemp); ORIG_SPEC=$(mktemp); ORIG_TUDO=$(mktemp)
 cp "$PRODUCAO" "$ORIG_PRODUCAO"; cp "$CSS" "$ORIG_CSS"; cp "$PECAS" "$ORIG_PECAS"
+cp "$PURO" "$ORIG_PURO"
 cp "$QUADRO" "$ORIG_QUADRO"; cp "$SPEC" "$ORIG_SPEC"; cp "$TUDO" "$ORIG_TUDO"
 falhas=0
 
@@ -60,6 +72,7 @@ vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); 
 
 restaurar() {
   cp "$ORIG_PRODUCAO" "$PRODUCAO"; cp "$ORIG_CSS" "$CSS"; cp "$ORIG_PECAS" "$PECAS"
+  cp "$ORIG_PURO" "$PURO"
   cp "$ORIG_QUADRO" "$QUADRO"; cp "$ORIG_SPEC" "$SPEC"; cp "$ORIG_TUDO" "$TUDO"
   rm -f "$ORIG_PRODUCAO" "$ORIG_CSS" "$ORIG_PECAS" "$ORIG_QUADRO" "$ORIG_SPEC" "$ORIG_TUDO"
 }
@@ -133,7 +146,7 @@ echo
 echo "3. CONTROLO NEGATIVO — «pronto parcial» volta a ser pronto NO ECRÃ"
 python3 - <<'PYPARCIAL'
 import io
-p = 'packages/db/src/producao.ts'
+p = 'packages/domain/src/pedido-puro.ts'
 s = io.open(p, encoding='utf-8').read()
 antigo = "  if (prontas === vivas.length) return { estado: 'PRONTO', prontas, total: vivas.length };"
 assert antigo in s, 'a regra do pronto nao esta onde se esperava'
@@ -142,7 +155,7 @@ io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, novo))
 PYPARCIAL
 exigir_vermelho "caiu o passe: disse PRONTO com trabalho por fazer" \
   'não diz pronto com metade por fazer' /tmp/bossaos-kds-nav-parcial.txt
-cp "$ORIG_PRODUCAO" "$PRODUCAO"
+cp "$ORIG_PURO" "$PURO"
 
 echo
 echo "4. CONTROLO NEGATIVO — o trabalho SEM ESTAÇÃO deixa de aparecer no ecrã"

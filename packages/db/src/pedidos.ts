@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { PrismaClient } from '@prisma/client';
 import { Prisma, type Canal } from '@prisma/client';
+import { totalDoPedido } from '@bossaos/domain';
 import { comEscopo, type ClienteComEscopo } from './escopo.ts';
 import { cancelarTarefasDaLinha, criarTarefasDasLinhas } from './producao.ts';
 import { estaDisponivel, precoEfectivo } from './catalogo.ts';
@@ -640,40 +641,8 @@ export function historicoDoPedido(db: ClienteComEscopo, orderId: string) {
   return db.orderEvent.findMany({ where: { orderId }, orderBy: { createdAt: 'asc' } });
 }
 
-/**
- * O total de um pedido, somado das linhas ACEITES.
- *
- * ── Não lê o catálogo, e é isso que o torna correcto ──────────────────────
- *
- * A régua reprova «preço lido no momento de fechar a conta». Este total é a soma
- * dos instantâneos: a conta de quem está sentado não muda porque a cozinha
- * actualizou a carta.
- *
- * E devolve `null` quando não há linhas aceites — não zero. Zero é um total; a
- * ausência de linhas não é um total de zero, é a ausência de conta.
- */
-export function totalDoPedido(
-  linhas: readonly {
-    estado: string; precoMenor: number | null; quantidade: number; moeda: string | null;
-    linhaPaiId?: string | null;
-  }[],
-): { montanteMenor: number; moeda: string } | null {
-  // ── Um componente de combo NÃO entra na soma ───────────────────────────
-  //
-  // «Não some o preço do combo e de seus componentes duas vezes» (E14, entregar
-  // 7). O componente existe para a cozinha saber o que fazer; o preço é do combo.
-  // A base já lhe recusa preço — este filtro é a segunda porta, e as duas falham
-  // por motivos diferentes, que é o que faz uma redundância valer alguma coisa.
-  const aceites = linhas.filter(
-    (l) => l.estado === 'ACEITE' && l.precoMenor !== null && !l.linhaPaiId);
-  if (aceites.length === 0) return null;
-  const moeda = aceites[0]!.moeda;
-  if (!moeda) return null;
-  // Moedas diferentes no mesmo pedido não se somam. Se acontecer, é defeito de
-  // configuração e devolver um número escondia-o.
-  if (aceites.some((l) => l.moeda !== moeda)) return null;
-  return {
-    montanteMenor: aceites.reduce((t, l) => t + l.precoMenor! * l.quantidade, 0),
-    moeda,
-  };
-}
+
+// `totalDoPedido` mudou-se para `@bossaos/domain` — é pura, e a tela pública que
+// só queria somar não tem de importar o pacote da base para isso. Reexporta-se
+// daqui para o resto do produto não mudar de sítio.
+export { totalDoPedido };

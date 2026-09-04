@@ -33,7 +33,7 @@ export default async function PedidoRecebido({
   const idioma = locale as Idioma;
   const s = textosDoVisitante(idioma);
   const visitante = await carregarVisita(publicLocationSlug, locale);
-  const pedidos = await pedidosDaMesa(visitante);
+  const pedidos = await pedidosDaMesa();
   const base = `/r/${publicLocationSlug}/${locale}`;
   const esteId = typeof busca.pedido === 'string' ? busca.pedido : null;
   const este = pedidos.find((p: { id: string }) => p.id === esteId) ?? pedidos[0] ?? null;

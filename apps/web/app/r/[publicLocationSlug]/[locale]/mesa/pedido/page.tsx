@@ -1,12 +1,12 @@
 import { Aviso } from '@bossaos/ui';
-import { comEscopo, obterProduto, obterPrisma, precoEfectivo } from '@bossaos/db';
+import { cartaPublica } from '@bossaos/db';
 import { formatarDinheiro, type Idioma } from '@bossaos/i18n';
 import { carregarVisita } from '../../../../../../src/visitante/carregar-visita.ts';
 import {
   CabecalhoDaVisita, NavegacaoDaVisita, textosDoVisitante,
 } from '../../../../../../src/visitante/PecasDoVisitante.tsx';
 import { lerCarrinho } from '../../../../../../src/visitante/carrinho.ts';
-import { obterEnv } from '../../../../../../src/servidor.ts';
+import { obterBase } from '../../../../../../src/servidor.ts';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,18 +37,29 @@ export default async function OTeuPedido({
   const carrinho = await lerCarrinho();
   const base = `/r/${publicLocationSlug}/${locale}`;
 
-  const prisma = obterPrisma(obterEnv().DATABASE_URL);
-  const linhas = await comEscopo(prisma, { organizationId: visitante.organizationId },
-    (db) => Promise.all(carrinho.map(async (item) => {
-      const produto = await obterProduto(db, item.productId);
-      const preco = await precoEfectivo(db, item.productId, visitante.locationId, 'CARTA');
-      return {
-        ...item,
-        nome: produto?.nome ?? null,
-        precoMenor: preco.ok ? preco.preco.montanteMenor : null,
-        moeda: preco.ok ? preco.preco.moeda : null,
-      };
-    })));
+  // ── Os nomes e os preços vêm da CARTA PÚBLICA ─────────────────────────
+  //
+  // É a porta do E09, e não uma consulta de inquilino escrita nesta página. O
+  // ganho é maior do que passar a guarda: o carrinho passa a mostrar **o que
+  // está publicado**, com os filtros de canal e visibilidade que a carta já
+  // aplica. Ler à parte era arranjar um segundo sítio onde o preço pode
+  // discordar do que o cliente viu na carta.
+  //
+  // E continua a ser uma PROPOSTA: o que vale é o preço do servidor no momento
+  // em que ele aceita — decisão do E14.
+  const servida = await cartaPublica(obterBase(), publicLocationSlug, 'CARTA', idioma);
+  const naCarta = new Map(
+    (servida?.carta.categorias ?? []).flatMap((c) => c.produtos)
+      .map((x) => [x.id, x]));
+  const linhas = carrinho.map((item) => {
+    const produto = naCarta.get(item.productId);
+    return {
+      ...item,
+      nome: produto?.nome ?? null,
+      precoMenor: produto?.preco?.montanteMenor ?? null,
+      moeda: produto?.preco?.moeda ?? null,
+    };
+  });
 
   return (
     <div className="bo-pagina">

@@ -41,10 +41,12 @@ VISITANTE=packages/db/src/visitante.ts
 PECAS=apps/web/src/visitante/PecasDoVisitante.tsx
 RENOVAR="apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/channels/qr/mesa/[tableId]/renovar/page.tsx"
 SPEC=inspeccao/visitante.spec.ts
+AJUDA="apps/web/app/r/[publicLocationSlug]/[locale]/mesa/ajuda/page.tsx"
 
 ORIG_VISITANTE=$(mktemp); ORIG_PECAS=$(mktemp); ORIG_RENOVAR=$(mktemp); ORIG_SPEC=$(mktemp)
+ORIG_AJUDA=$(mktemp)
 cp "$VISITANTE" "$ORIG_VISITANTE"; cp "$PECAS" "$ORIG_PECAS"
-cp "$RENOVAR" "$ORIG_RENOVAR"; cp "$SPEC" "$ORIG_SPEC"
+cp "$RENOVAR" "$ORIG_RENOVAR"; cp "$SPEC" "$ORIG_SPEC"; cp "$AJUDA" "$ORIG_AJUDA"
 falhas=0
 
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
@@ -52,8 +54,9 @@ vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); 
 
 restaurar() {
   cp "$ORIG_VISITANTE" "$VISITANTE"; cp "$ORIG_PECAS" "$PECAS"
-  cp "$ORIG_RENOVAR" "$RENOVAR"; cp "$ORIG_SPEC" "$SPEC"
-  rm -f "$ORIG_VISITANTE" "$ORIG_PECAS" "$ORIG_RENOVAR" "$ORIG_SPEC"
+  cp "$ORIG_RENOVAR" "$RENOVAR"; cp "$ORIG_SPEC" "$SPEC"; cp "$ORIG_AJUDA" "$AJUDA"
+  rm -rf "apps/web/app/api/publico/mesa"
+  rm -f "$ORIG_VISITANTE" "$ORIG_PECAS" "$ORIG_RENOVAR" "$ORIG_SPEC" "$ORIG_AJUDA"
 }
 trap restaurar EXIT INT TERM
 
@@ -85,8 +88,8 @@ exigir_vermelho() {
   verde "$nome"
 }
 
-# 3 de preparação + 16 do spec.
-CASOS_MINIMOS=19
+# 3 de preparação + 19 do spec.
+CASOS_MINIMOS=22
 
 echo "1. Com tudo ligado"
 if correr /tmp/bossaos-visita-nav-ligado.txt; then
@@ -207,7 +210,51 @@ exigir_vermelho "caiu o desvio: sem bolacha, as telas da visita mediam o STATE-0
 cp "$ORIG_SPEC" "$SPEC"
 
 echo
-echo "8. Reposto — tem de voltar ao verde"
+echo "8. CONTROLO NEGATIVO — a porta do visitante sai do endereco do restaurante"
+# ── O defeito que a prova de navegador apanhou, plantado de volta ───────────
+#
+# A bolacha do visitante tem `path=/r/<slug>` de proposito: uma bolacha a raiz
+# viajava para os outros restaurantes servidos pelo mesmo dominio. Com a porta
+# fora desse caminho, o navegador simplesmente NAO A ENVIA — e o formulario
+# chegava la sem credencial.
+#
+# Nada dava erro: a rota respondia 303, a pagina carregava, e o pedido
+# desaparecia. Nenhuma prova de base o podia ver, porque do lado do servidor a
+# bolacha estava sempre la. So carregar num botao o mostrava.
+python3 - <<'PYPORTA'
+import io, pathlib
+# A porta muda de sitio; o formulario passa a apontar para fora do `path` da
+# bolacha, que e' exactamente o defeito.
+p = 'apps/web/app/r/[publicLocationSlug]/[locale]/mesa/ajuda/page.tsx'
+s = io.open(p, encoding='utf-8').read()
+antigo = 'action={`/r/${publicLocationSlug}/api/mesa`}'
+assert antigo in s, 'o endereco da porta nao esta onde se esperava'
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, 'action="/api/publico/mesa"'))
+PYPORTA
+# ── Apaga-se SÓ o que este controlo cria ──────────────────────────────────
+#
+# A primeira versão fazia `rm -rf apps/web/app/api/publico` — e essa pasta é do
+# E10: leva o `demo` e o `lead`, que são rotas a sério. Apagou as duas, e só o
+# `git status` mo disse.
+#
+# Um script de prova que destrói trabalho é pior do que uma prova em falta: a
+# prova em falta não mente sobre o repositório. Agora remove-se a pasta `mesa`
+# que ele próprio criou, e mais nada.
+mkdir -p "apps/web/app/api/publico/mesa"
+cp "apps/web/app/r/[publicLocationSlug]/api/mesa/route.ts" /tmp/bossaos-porta-visitante.ts
+python3 - <<'PYCOPIA'
+import io
+s = io.open('/tmp/bossaos-porta-visitante.ts', encoding='utf-8').read()
+# A copia na raiz precisa de um nivel a menos nos caminhos.
+s = s.replace("'../../../../../src/", "'../../../../src/")
+io.open('apps/web/app/api/publico/mesa/route.ts', 'w', encoding='utf-8').write(s)
+PYCOPIA
+exigir_vermelho "caiu o ciclo: a bolacha deixou de chegar a porta, e a chamada evaporou-se" \
+  'primeiro toque diz' /tmp/bossaos-visita-nav-porta.txt
+cp "$ORIG_AJUDA" "$AJUDA"
+rm -rf "apps/web/app/api/publico/mesa"
+
+echo "9. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-visita-nav-reposto.txt; then
   passou=$(grep -oE '[0-9]+ passed' /tmp/bossaos-visita-nav-reposto.txt | grep -oE '[0-9]+' || echo 0)
   if (( passou < CASOS_MINIMOS )); then

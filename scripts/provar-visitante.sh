@@ -29,8 +29,8 @@ if [[ "$NODE_ACTUAL" != "$NODE_ESPERADO" ]]; then
   exit 2
 fi
 
-GRUPOS_ESPERADOS=4
-CASOS_ESPERADOS=11
+GRUPOS_ESPERADOS=5
+CASOS_ESPERADOS=21
 falhas=0
 
 VISITANTE=packages/db/src/visitante.ts
@@ -81,6 +81,45 @@ LANGUAGE sql SECURITY DEFINER SET search_path = public STABLE AS $$
     AND l.archived_at IS NULL
     AND t.qr_segredo_hash IS NOT NULL
     AND t.qr_segredo_hash = p_segredo_hash
+$$;
+-- ── E a porta das CHAMADAS ────────────────────────────────────────────────
+--
+-- Sem esta reposição, um script morto a meio deixava a deduplicação desligada —
+-- em silêncio, e cada toque no botão passava a ser um aviso à sala. É o mesmo
+-- risco que o índice único do E14 correu, e a mesma resposta.
+CREATE OR REPLACE FUNCTION chamar_a_sala(
+  p_token_hash text, p_tipo "TipoDeChamada", p_janela_segundos integer
+)
+RETURNS TABLE (call_id uuid, pedida_em timestamptz, atendida_em timestamptz, deduplicada boolean)
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_guest uuid; v_org uuid; v_loc uuid; v_mesa uuid; v_sessao uuid;
+  v_id uuid; v_pedida timestamptz; v_atendida timestamptz;
+BEGIN
+  SELECT a.guest_id, a.organization_id, a.location_id, a.table_id, a.table_session_id
+    INTO v_guest, v_org, v_loc, v_mesa, v_sessao
+  FROM visitante_activo(p_token_hash) a;
+  IF v_guest IS NULL THEN RETURN; END IF;
+  SELECT c.id, c.pedida_em, c.atendida_em INTO v_id, v_pedida, v_atendida
+  FROM guest_calls c
+  WHERE c.table_session_id = v_sessao
+    AND c.tipo = p_tipo
+    AND c.pedida_em > now() - make_interval(secs => p_janela_segundos)
+  ORDER BY c.pedida_em DESC
+  LIMIT 1
+  FOR UPDATE;
+  IF v_id IS NOT NULL THEN
+    RETURN QUERY SELECT v_id, v_pedida, v_atendida, true;
+    RETURN;
+  END IF;
+  INSERT INTO guest_calls (
+    id, organization_id, location_id, table_id, table_session_id,
+    guest_session_id, tipo, updated_at
+  ) VALUES (
+    gen_random_uuid(), v_org, v_loc, v_mesa, v_sessao, v_guest, p_tipo, now()
+  ) RETURNING id, guest_calls.pedida_em INTO v_id, v_pedida;
+  RETURN QUERY SELECT v_id, v_pedida, NULL::timestamptz, false;
+END;
 $$;
 PSQL
 }
@@ -278,7 +317,148 @@ exigir_vermelho "caiu o QR antigo: continuou a abrir sessões depois de rodar" \
 cp "$ORIG_VISITANTE" "$VISITANTE"
 
 echo
-echo "7. Reposto — tem de voltar ao verde"
+echo "8. CONTROLO NEGATIVO — a deduplicacao desaparece: cada toque e uma chamada"
+# O defeito que o ponto 4 existe para impedir. Quem tem o QR — e basta uma
+# fotografia — carrega sem parar, e quem serve recebe avisos que nao distingue de
+# chamadas reais numa sala cheia.
+BASE_MEXIDA=1
+psql "$MIGRATION_DATABASE_URL" -q >/dev/null 2>&1 <<'PSQL'
+CREATE OR REPLACE FUNCTION chamar_a_sala(
+  p_token_hash text, p_tipo "TipoDeChamada", p_janela_segundos integer
+)
+RETURNS TABLE (call_id uuid, pedida_em timestamptz, atendida_em timestamptz, deduplicada boolean)
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_guest uuid; v_org uuid; v_loc uuid; v_mesa uuid; v_sessao uuid;
+  v_id uuid; v_pedida timestamptz;
+BEGIN
+  SELECT a.guest_id, a.organization_id, a.location_id, a.table_id, a.table_session_id
+    INTO v_guest, v_org, v_loc, v_mesa, v_sessao
+  FROM visitante_activo(p_token_hash) a;
+  IF v_guest IS NULL THEN RETURN; END IF;
+  INSERT INTO guest_calls (
+    id, organization_id, location_id, table_id, table_session_id,
+    guest_session_id, tipo, updated_at
+  ) VALUES (
+    gen_random_uuid(), v_org, v_loc, v_mesa, v_sessao, v_guest, p_tipo, now()
+  ) RETURNING id, guest_calls.pedida_em INTO v_id, v_pedida;
+  RETURN QUERY SELECT v_id, v_pedida, NULL::timestamptz, false;
+END;
+$$;
+PSQL
+exigir_vermelho "caiu a deduplicacao: duas chamadas seguidas deixaram de dar uma" \
+  'DUAS chamadas seguidas dão UMA' /tmp/bossaos-visitante-dedup.txt 'PAR: uma chamada legítima'
+repor_base; BASE_MEXIDA=0
+
+echo
+echo "9. CONTROLO NEGATIVO — «IGNORA TUDO»: a janela passa a ser infinita"
+# ── E este e o que a regua nomeia pelo nome ──────────────────────────────────
+#
+# «Sem o par, "ignora tudo" passa o teste.» Uma janela infinita deduplica sempre:
+# passa o controlo 8 com folga, e engole a chamada de quem esperou e ninguem veio
+# — que e' pior do que nao limitar, porque a pessoa deixa de ter forma de o dizer.
+#
+# O que tem de acender e' o PAR, e o controlo 8 tem de continuar verde: se os dois
+# caissem, o detector estaria a medir 'alguma coisa parou'.
+BASE_MEXIDA=1
+psql "$MIGRATION_DATABASE_URL" -q >/dev/null 2>&1 <<'PSQL'
+CREATE OR REPLACE FUNCTION chamar_a_sala(
+  p_token_hash text, p_tipo "TipoDeChamada", p_janela_segundos integer
+)
+RETURNS TABLE (call_id uuid, pedida_em timestamptz, atendida_em timestamptz, deduplicada boolean)
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_guest uuid; v_org uuid; v_loc uuid; v_mesa uuid; v_sessao uuid;
+  v_id uuid; v_pedida timestamptz; v_atendida timestamptz;
+BEGIN
+  SELECT a.guest_id, a.organization_id, a.location_id, a.table_id, a.table_session_id
+    INTO v_guest, v_org, v_loc, v_mesa, v_sessao
+  FROM visitante_activo(p_token_hash) a;
+  IF v_guest IS NULL THEN RETURN; END IF;
+  SELECT c.id, c.pedida_em, c.atendida_em INTO v_id, v_pedida, v_atendida
+  FROM guest_calls c
+  WHERE c.table_session_id = v_sessao AND c.tipo = p_tipo
+  ORDER BY c.pedida_em DESC LIMIT 1 FOR UPDATE;
+  IF v_id IS NOT NULL THEN
+    RETURN QUERY SELECT v_id, v_pedida, v_atendida, true;
+    RETURN;
+  END IF;
+  INSERT INTO guest_calls (
+    id, organization_id, location_id, table_id, table_session_id,
+    guest_session_id, tipo, updated_at
+  ) VALUES (
+    gen_random_uuid(), v_org, v_loc, v_mesa, v_sessao, v_guest, p_tipo, now()
+  ) RETURNING id, guest_calls.pedida_em INTO v_id, v_pedida;
+  RETURN QUERY SELECT v_id, v_pedida, NULL::timestamptz, false;
+END;
+$$;
+PSQL
+exigir_vermelho "caiu o PAR: uma chamada legitima depois da janela foi engolida" \
+  'PAR: uma chamada legítima' /tmp/bossaos-visitante-ignora.txt 'DUAS chamadas seguidas dão UMA'
+repor_base; BASE_MEXIDA=0
+
+echo
+echo "10. CONTROLO NEGATIVO — a janela passa a ser por TELEMOVEL e nao por mesa"
+# Quem tem a fotografia do QR abre outra sessao e chama outra vez. Uma janela por
+# sessao limitava cada telemovel e nao limitava nada.
+BASE_MEXIDA=1
+psql "$MIGRATION_DATABASE_URL" -q >/dev/null 2>&1 <<'PSQL'
+CREATE OR REPLACE FUNCTION chamar_a_sala(
+  p_token_hash text, p_tipo "TipoDeChamada", p_janela_segundos integer
+)
+RETURNS TABLE (call_id uuid, pedida_em timestamptz, atendida_em timestamptz, deduplicada boolean)
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_guest uuid; v_org uuid; v_loc uuid; v_mesa uuid; v_sessao uuid;
+  v_id uuid; v_pedida timestamptz; v_atendida timestamptz;
+BEGIN
+  SELECT a.guest_id, a.organization_id, a.location_id, a.table_id, a.table_session_id
+    INTO v_guest, v_org, v_loc, v_mesa, v_sessao
+  FROM visitante_activo(p_token_hash) a;
+  IF v_guest IS NULL THEN RETURN; END IF;
+  SELECT c.id, c.pedida_em, c.atendida_em INTO v_id, v_pedida, v_atendida
+  FROM guest_calls c
+  WHERE c.guest_session_id = v_guest AND c.tipo = p_tipo
+    AND c.pedida_em > now() - make_interval(secs => p_janela_segundos)
+  ORDER BY c.pedida_em DESC LIMIT 1 FOR UPDATE;
+  IF v_id IS NOT NULL THEN
+    RETURN QUERY SELECT v_id, v_pedida, v_atendida, true;
+    RETURN;
+  END IF;
+  INSERT INTO guest_calls (
+    id, organization_id, location_id, table_id, table_session_id,
+    guest_session_id, tipo, updated_at
+  ) VALUES (
+    gen_random_uuid(), v_org, v_loc, v_mesa, v_sessao, v_guest, p_tipo, now()
+  ) RETURNING id, guest_calls.pedida_em INTO v_id, v_pedida;
+  RETURN QUERY SELECT v_id, v_pedida, NULL::timestamptz, false;
+END;
+$$;
+PSQL
+exigir_vermelho "caiu a unidade: um segundo telemovel contornou o limite" \
+  'por MESA, e não por telemóvel' /tmp/bossaos-visitante-telemovel.txt
+repor_base; BASE_MEXIDA=0
+
+echo
+echo "11. CONTROLO NEGATIVO — a confirmacao de atendimento deixa de chegar ao visitante"
+# «Sem ela, quem chamou nao sabe se alguem vem, e volta a carregar.» A chamada
+# fica atendida do lado da sala e o visitante nunca sabe — que e' o pior dos dois
+# mundos: o aviso sai da fila e a pessoa continua a carregar.
+python3 - <<'PYCONFIRMA'
+import io
+p = 'packages/db/src/visitante.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "    atendidaEm: l.atendida_em, atendidaPor: l.atendida_por,"
+assert antigo in s, 'a leitura do atendimento nao esta onde se esperava'
+novo = "    atendidaEm: null, atendidaPor: null,"
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, novo))
+PYCONFIRMA
+exigir_vermelho "caiu a confirmacao: quem chamou deixou de saber que alguem foi" \
+  'CONFIRMAÇÃO fecha o ciclo' /tmp/bossaos-visitante-confirma.txt
+cp "$ORIG_VISITANTE" "$VISITANTE"
+
+echo
+echo "12. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-visitante-reposto.txt; then
   read -r g c <<<"$(analisar /tmp/bossaos-visitante-reposto.txt)"
   verde "reposto: $g grupos, $c casos"

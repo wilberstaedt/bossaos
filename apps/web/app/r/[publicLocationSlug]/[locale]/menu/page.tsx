@@ -182,7 +182,7 @@ export default async function CartaPublica({
           </p>
         ) : segredoDoQr ? (
           // Chegou pelo QR e ainda não entrou. Abrir a sessão é um POST.
-          <form method="post" action="/api/publico/mesa" data-teste="entrar">
+          <form method="post" action={`/r/${publicLocationSlug}/api/mesa`} data-teste="entrar">
             <input type="hidden" name="slug" value={publicLocationSlug} />
             <input type="hidden" name="locale" value={idioma} />
             <input type="hidden" name="accao" value="entrar" />

@@ -3,7 +3,7 @@ import {
   IDIOMAS, LARGURAS, alvosPequenos, elementosForaDoEcra, textosComPoucoContraste,
   transbordaNaHorizontal,
 } from './ajudas.ts';
-import { resolverAlvos, SEGREDO_DO_QR, TOKEN_DO_VISITANTE, type Alvos } from './alvos.ts';
+import { resolverAlvos, TOKEN_DO_VISITANTE, type Alvos } from './alvos.ts';
 
 /**
  * As 16 telas do E17, medidas no navegador.
@@ -112,7 +112,7 @@ test('e são exactamente as 16 da MATRIZ, sem faltar nem sobrar', async () => {
 });
 
 async function visitar(
-  pagina: import('@playwright/test').Page, tela: Tela, idioma: string, a: Alvos,
+  pagina: import('@playwright/test').Page, tela: Tela, idioma: string,
 ) {
   if (tela.comVisita) await comBolachaDeVisita(pagina.context());
   const caminho = tela.caminho.replace('/es-ES/', `/${idioma}/`).replace(`/${SLUG}/es-ES`, `/${SLUG}/${idioma}`);
@@ -136,7 +136,7 @@ for (const largura of LARGURAS) {
 
     test('as 16 telas não transbordam nem escondem acções', async ({ page }) => {
       for (const tela of telas(alvos)) {
-        await visitar(page, tela, 'es-ES', alvos);
+        await visitar(page, tela, 'es-ES');
         expect(await transbordaNaHorizontal(page), `${tela.id} rola na horizontal`).toBe(0);
         const fora = await elementosForaDoEcra(page);
         expect(fora, `${tela.id} · elementos fora do ecrã:\n${fora.join('\n')}`).toEqual([]);
@@ -150,7 +150,7 @@ test.describe('visitante a 360 px — o telemóvel de quem está sentado', () =>
 
   test('os alvos de toque têm 44 px', async ({ page }) => {
     for (const tela of telas(alvos)) {
-      await visitar(page, tela, 'es-ES', alvos);
+      await visitar(page, tela, 'es-ES');
       const maus = await alvosPequenos(page, TOQUE);
       expect(maus, `${tela.id} · alvos pequenos:\n${maus.join('\n')}`).toEqual([]);
     }
@@ -158,7 +158,7 @@ test.describe('visitante a 360 px — o telemóvel de quem está sentado', () =>
 
   test('o contraste cumpre a WCAG', async ({ page }) => {
     for (const tela of telas(alvos)) {
-      await visitar(page, tela, 'es-ES', alvos);
+      await visitar(page, tela, 'es-ES');
       const maus = await textosComPoucoContraste(page);
       expect(maus, `${tela.id} · texto com pouco contraste:\n${maus.join('\n')}`).toEqual([]);
     }
@@ -171,7 +171,7 @@ test.describe('visitante nos três idiomas', () => {
   for (const idioma of IDIOMAS) {
     test(`${idioma} a 360 px`, async ({ page }) => {
       for (const tela of telas(alvos)) {
-        await visitar(page, tela, idioma, alvos);
+        await visitar(page, tela, idioma);
         expect(await transbordaNaHorizontal(page), `${tela.id} · ${idioma} transborda`).toBe(0);
         const fora = await elementosForaDoEcra(page);
         expect(fora, `${tela.id} · ${idioma}:\n${fora.join('\n')}`).toEqual([]);
@@ -285,4 +285,141 @@ test.describe('rodar não expulsa quem está sentado', () => {
       .toBe(daVisita);
     await expect(page.locator('h1[data-tela="MENU-011"]')).toBeVisible();
   });
+});
+
+/**
+ * O CICLO DA CHAMADA, ponta a ponta — ponto 4 do enunciado.
+ *
+ * ── O que a régua exige ver, e porquê ─────────────────────────────────────
+ *
+ * *«Quero ver duas chamadas seguidas darem uma, e o par — uma chamada legítima
+ * depois da janela passa. Sem o par, "ignora tudo" passa o teste.»*
+ *
+ * A regra está provada na base, onde vive. Aqui mede-se o que só o navegador
+ * vê: que as **três respostas são diferentes no ecrã**, e que a confirmação
+ * chega a quem chamou. É essa diferença que faz alguém parar de carregar — sem
+ * ela, a regra está certa e a pessoa continua a bater no botão.
+ */
+test.describe.serial('chamar a sala: o ciclo completo', () => {
+  test.use({ viewport: { width: 390, height: 780 } });
+
+  const daAjuda = `/r/${SLUG}/es-ES/mesa/ajuda`;
+
+  /** Apaga as chamadas desta unidade, para cada caso começar do zero. */
+  async function limparChamadas() {
+    const { Client } = await import('pg');
+    const url = process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL;
+    if (!url) throw new Error('MIGRATION_DATABASE_URL em falta');
+    const sql = new Client({ connectionString: url });
+    await sql.connect();
+    await sql.query(
+      `DELETE FROM guest_calls WHERE table_id IN
+         (SELECT id FROM service_tables WHERE codigo LIKE 'insp-%')`);
+    await sql.end();
+  }
+
+  test('o primeiro toque diz «avisámos agora», e o segundo diz «já tínhamos avisado»',
+    async ({ page }) => {
+      await limparChamadas();
+      await comBolachaDeVisita(page.context());
+
+      await page.goto(daAjuda);
+      await page.waitForLoadState('networkidle');
+      // Declarado antes de afirmar: não havia chamadas nenhumas.
+      expect(Number(await page.locator('[data-teste="quantas-chamadas"]').innerText()),
+        'já havia chamadas: a contagem não mediria a deduplicação').toBe(0);
+
+      await page.locator('[data-teste="chamar"] button').click();
+      await page.waitForLoadState('networkidle');
+      await expect(page.locator('[data-teste="resposta-da-chamada"]'))
+        .toHaveAttribute('data-resposta', '1');
+      const depoisDaPrimeira = Number(
+        await page.locator('[data-teste="quantas-chamadas"]').innerText());
+      expect(depoisDaPrimeira, 'o primeiro toque não registou chamada nenhuma').toBe(1);
+
+      // ── O segundo toque ────────────────────────────────────────────────
+      await page.goto(daAjuda);
+      await page.locator('[data-teste="chamar"] button').click();
+      await page.waitForLoadState('networkidle');
+
+      // A resposta é OUTRA — e é isso que faz a pessoa parar. «Pedido enviado»
+      // nas duas dava a mesma frase a quem carregou uma vez e a quem carregou
+      // cinco, e nenhuma delas dizia se havia alguém a caminho.
+      await expect(page.locator('[data-teste="resposta-da-chamada"]'),
+        'o segundo toque respondeu como se fosse o primeiro')
+        .toHaveAttribute('data-resposta', 'ja');
+
+      // E continua a haver UMA chamada, não duas.
+      expect(Number(await page.locator('[data-teste="quantas-chamadas"]').innerText()),
+        'o segundo toque criou uma chamada nova').toBe(1);
+    });
+
+  test('a sala VÊ a chamada, atende, e quem chamou fica a saber', async ({ page }) => {
+    // A confirmação é a metade que fecha o ciclo. Sem ela, quem chamou não sabe
+    // se alguém vem — e volta a carregar até deixar de acreditar no botão.
+    await limparChamadas();
+    await comBolachaDeVisita(page.context());
+
+    await page.goto(daAjuda);
+    await page.locator('[data-teste="chamar"] button').click();
+    await page.waitForLoadState('networkidle');
+    // Ainda ninguém viu, e o ecrã di-lo por palavras.
+    await expect(page.locator('[data-teste="chamada"]').first())
+      .toHaveAttribute('data-atendida', '0');
+
+    // ── Do lado da sala ────────────────────────────────────────────────
+    await page.goto(`/es-ES/staff/${alvos.unidadeDoStaff}/avisos`);
+    await page.waitForLoadState('networkidle');
+    const naSala = page.locator('[data-teste="aviso"][data-tipo="chamada"]');
+    await expect(naSala, 'a chamada não chegou ao ecrã de quem serve').toHaveCount(1);
+
+    await naSala.locator('[data-teste="atender"] button').click();
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('[data-teste="aviso"][data-tipo="chamada"]'),
+      'a chamada atendida ficou na fila de quem serve').toHaveCount(0);
+
+    // ── E de volta ao telemóvel de quem chamou ─────────────────────────
+    await page.goto(daAjuda);
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('[data-teste="chamada"]').first(),
+      'quem chamou não vê que alguém já foi')
+      .toHaveAttribute('data-atendida', '1');
+
+    // E se carregar outra vez, a resposta di-lo — em vez de fingir que criou
+    // uma chamada nova.
+    await page.locator('[data-teste="chamar"] button').click();
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('[data-teste="resposta-da-chamada"]'))
+      .toHaveAttribute('data-resposta', 'atendida');
+  });
+
+  test('pedir a CONTA é outra chamada, e não é engolida pela de ajuda',
+    async ({ page }) => {
+      // Cada uma tem uma resposta diferente do outro lado: uma traz uma pessoa, a
+      // outra traz a conta. Colapsá-las fazia quem pediu a conta receber alguém a
+      // perguntar o que se passa.
+      await limparChamadas();
+      await comBolachaDeVisita(page.context());
+
+      await page.goto(daAjuda);
+      await page.locator('[data-teste="chamar"] button').click();
+      await page.waitForLoadState('networkidle');
+
+      await page.goto(`/r/${SLUG}/es-ES/mesa/conta`);
+      await page.waitForLoadState('networkidle');
+      await page.locator('[data-teste="pedir-conta"] button').click();
+      await page.waitForLoadState('networkidle');
+
+      await expect(page.locator('[data-teste="resposta-da-chamada"]'),
+        'pedir a conta foi engolido pela chamada de ajuda')
+        .toHaveAttribute('data-resposta', '1');
+
+      // A sala vê as duas, e distingue-as: uma leva uma pessoa, a outra a conta.
+      await page.goto(`/es-ES/staff/${alvos.unidadeDoStaff}/avisos`);
+      await page.waitForLoadState('networkidle');
+      await expect(page.locator('[data-teste="aviso"][data-chamada="AJUDA"]')).toHaveCount(1);
+      await expect(page.locator('[data-teste="aviso"][data-chamada="CONTA"]')).toHaveCount(1);
+
+      await limparChamadas();
+    });
 });

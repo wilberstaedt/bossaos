@@ -236,5 +236,9 @@ export {
 export {
   resumirSegredo, segredoNovo, rodarQrDaMesa, sessoesVivasDaMesa, revogarAcessoDaMesa,
   abrirVisitante, visitanteActivo, visitanteFalou, visitantesDaUnidade, estadoDoVisitante,
+  JANELA_DE_CHAMADA_SEGUNDOS, chamarASala, chamadasDaVisita, chamadasPorAtender,
+  atenderChamada, pedidosDoVisitante, producaoDoVisitante, pedirDoVisitante,
+  type PedidoDoVisitante, type LinhaDoVisitante,
   type ResultadoDaRotacao, type VisitanteAberto, type VisitanteActivo,
+  type TipoDeChamada, type ChamadaDaMesa, type ChamadaVista,
 } from './visitante.ts';

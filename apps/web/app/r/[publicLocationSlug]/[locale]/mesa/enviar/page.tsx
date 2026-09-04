@@ -1,12 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import { comEscopo, obterProduto, obterPrisma } from '@bossaos/db';
+import { cartaPublica } from '@bossaos/db';
 import { type Idioma } from '@bossaos/i18n';
 import { carregarVisita } from '../../../../../../src/visitante/carregar-visita.ts';
 import {
   CabecalhoDaVisita, NavegacaoDaVisita, textosDoVisitante,
 } from '../../../../../../src/visitante/PecasDoVisitante.tsx';
 import { lerCarrinho } from '../../../../../../src/visitante/carrinho.ts';
-import { obterEnv } from '../../../../../../src/servidor.ts';
+import { obterBase } from '../../../../../../src/servidor.ts';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,11 +36,15 @@ export default async function ProntoParaEnviar({
   const carrinho = await lerCarrinho();
   const base = `/r/${publicLocationSlug}/${locale}`;
 
-  const prisma = obterPrisma(obterEnv().DATABASE_URL);
-  const nomes = await comEscopo(prisma, { organizationId: visitante.organizationId },
-    (db) => Promise.all(carrinho.map(async (i) => ({
-      ...i, nome: (await obterProduto(db, i.productId))?.nome ?? i.productId,
-    }))));
+  // Os nomes vêm da carta pública, pela mesma razão do MENU-007: é a porta, e é
+  // o que o cliente viu. Uma consulta de inquilino escrita nesta página era o que
+  // a guarda do E09 recusa, e com razão — o endereço vai impresso no autocolante.
+  const servida = await cartaPublica(obterBase(), publicLocationSlug, 'CARTA', idioma);
+  const naCarta = new Map(
+    (servida?.carta.categorias ?? []).flatMap((c) => c.produtos).map((x) => [x.id, x]));
+  const nomes = carrinho.map((i) => ({
+    ...i, nome: naCarta.get(i.productId)?.nome ?? i.productId,
+  }));
 
   return (
     <div className="bo-pagina">
@@ -61,7 +65,7 @@ export default async function ProntoParaEnviar({
               </li>
             ))}
           </ul>
-          <form method="post" action="/api/publico/mesa" data-teste="enviar">
+          <form method="post" action={`/r/${publicLocationSlug}/api/mesa`} data-teste="enviar">
             <input type="hidden" name="slug" value={publicLocationSlug} />
             <input type="hidden" name="locale" value={locale} />
             <input type="hidden" name="accao" value="pedir" />
