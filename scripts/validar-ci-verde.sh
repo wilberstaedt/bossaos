@@ -58,6 +58,7 @@ fi
 
 # A corrida mais recente do ramo. Nao filtro pelo SHA de proposito: se ha uma
 # corrida vermelha mais nova do que o meu commit, o problema existe na mesma.
+id_corrida=$(gh run list --limit 1 --json databaseId -q '.[0].databaseId' 2>/dev/null || true)
 estado=$(gh run list --limit 1 --json conclusion,status,displayTitle 2>/dev/null \
   | python3 -c 'import json,sys
 try:
@@ -76,6 +77,27 @@ case "$caso" in
   SEM_DADOS|"") pend "nao consegui ler a lista de corridas — NAO MEDI" ;;
   in_progress|queued|pending)
                 pend "a corrida ainda decorre ($caso) — espera por ela antes de assinar" ;;
+  failure)
+    # ── Falhou, ou NAO MEDIU? A guarda tem de distinguir ────────────────────
+    #
+    # A 04/09 uma corrida falhou DUAS vezes com zero passos falhados e sem log
+    # nenhum. Isso nao e o codigo vermelho: e o corredor a nao arrancar. E a
+    # minha propria guarda, escrita para exigir a distincao entre falha e "nao
+    # medi", tratava as duas como a mesma coisa - e passava a bloquear qualquer
+    # validacao futura por um motivo que nao e sobre o codigo.
+    #
+    # O sinal e claro e barato: uma corrida que falha sem NENHUM passo falhado
+    # nao chegou a medir. Dizer que reprovou seria inventar um resultado.
+    passos=$(gh run view "$id_corrida" --json jobs \
+      -q '[.jobs[].steps[] | select(.conclusion=="failure")] | length' 2>/dev/null || true)
+    if [ "${passos:-0}" -eq 0 ] 2>/dev/null; then
+      pend "a corrida falhou sem NENHUM passo falhado — nao mediu nada, e isso nao e reprovar"
+      echo "           Sintoma de bloqueio externo (quota, corredor, permissoes)."
+      echo "           Ve o semaforo tu proprio antes de assinar: eu nao consigo."
+    else
+      erro "a ultima corrida falhou em $passos passo(s) — $titulo"
+      echo "           Nao assines nada enquanto isto for verdade."
+    fi ;;
   *)            erro "a ultima corrida esta '$caso' — $titulo"
                 echo "           Nao assines nada enquanto isto for verdade. Um verde local"
                 echo "           que a CI contradiz nao e uma medicao, e ja me custou uma"
