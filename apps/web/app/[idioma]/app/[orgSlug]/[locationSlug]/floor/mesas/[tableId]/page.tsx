@@ -101,6 +101,14 @@ export default async function EditarMesa({
           <button className="bo-botao bo-botao--secundario" type="submit">{s.accaoArquivar}</button>
         </form>
       </Cartao>
+      {/* O QR DESTA mesa (E17). Estava sem entrada nenhuma: a tela respondia ao
+          endereço e não havia por onde lá chegar a partir da mesa — que é o
+          sítio onde alguém pensa nela. */}
+      <nav className="bo-publico__seccoes" data-teste="qr-desta-mesa">
+        <a href={`/${idioma}/app/${orgSlug}/${locationSlug}/channels/qr/mesa/${tableId}`}
+           data-seccao="QR-002">{mensagensDe(idioma).visitanteE17.qrDaMesa}</a>
+      </nav>
+
     </div>
   );
 }

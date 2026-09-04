@@ -4,6 +4,7 @@ import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { abertoAgora, cartaPublica, horarioPublico, registarConsulta, temaPublico } from '@bossaos/db';
 import { IDIOMAS_DE_CONTEUDO, procurarNaCarta, type IdiomaDeConteudo } from '@bossaos/domain';
 import { obterBase, obterLogger } from '../../../../../src/servidor.ts';
+import { visitanteDaRequisicao } from '../../../../../src/visitante/sessao-do-visitante.ts';
 
 /**
  * MENU-001 a 004 e 019 · a carta pública (atlas pp. 78-82, 96)
@@ -37,7 +38,11 @@ export default async function CartaPublica({
   params, searchParams,
 }: {
   params: Promise<{ publicLocationSlug: string; locale: string }>;
-  searchParams: Promise<{ view?: string; categoria?: string; q?: string; de?: string }>;
+  searchParams: Promise<{
+    view?: string; categoria?: string; q?: string; de?: string;
+    /** E17: a mesa e o segredo do QR, e os dois estados que os explicam. */
+    mesa?: string; t?: string; qr?: string; sessao?: string;
+  }>;
 }) {
   const { publicLocationSlug, locale } = await params;
   const procura = await searchParams;
@@ -97,6 +102,54 @@ export default async function CartaPublica({
 
   const base = `/r/${publicLocationSlug}/${idioma}/menu`;
 
+  // ── E17 · a mesa, o QR, e os dois estados que o explicam ────────────────
+  //
+  // O QR da mesa aponta para ESTE endereço, com `mesa` e `t`. Ler o código é um
+  // GET e não abre sessão nenhuma: cai aqui, com a mesa identificada e um botão.
+  // Um GET que criasse sessão era criado por um leitor que pré-carrega o
+  // endereço, por um crawler, ou por a pessoa abrir o link duas vezes — e cada
+  // um deixava uma sessão aberta que ninguém pediu, contada no ecrã de quem
+  // revoga.
+  const v = mensagensDe(idioma as Idioma).visitanteE17;
+  const segredoDoQr = typeof procura.t === 'string' ? procura.t : null;
+  const visitanteActual = await visitanteDaRequisicao();
+
+  // MENU-018 · o QR já não abre. Cobre os dois casos que o contrato junta de
+  // propósito — código trocado e mesa fora de serviço — porque distingui-los
+  // diria a quem tem o autocolante se ele ainda serve.
+  if (procura.qr === 'inactivo') {
+    return (
+      <div className="bo-publico" style={variaveisDoTema(tema) as React.CSSProperties}>
+        <header className="bo-publico__cabecalho">
+          <p className="bo-estado__sobrancelha">{carta.unidade}</p>
+          <h1 data-tela="MENU-018">{v.qrJaNaoActivo}</h1>
+        </header>
+        <p className="bo-publico__texto" data-teste="qr-inactivo">{v.qrJaNaoActivoAjuda}</p>
+        <nav className="bo-publico__seccoes">
+          <a href={base}>{carta.unidade}</a>
+        </nav>
+      </div>
+    );
+  }
+
+  // STATE-009 · a sessão da mesa terminou. Quem estava a pedir e viu a conta
+  // fechar merece a frase, e não um ecrã que se comporta como se ele nunca
+  // tivesse estado ali.
+  if (procura.sessao === 'terminou') {
+    return (
+      <div className="bo-publico" style={variaveisDoTema(tema) as React.CSSProperties}>
+        <header className="bo-publico__cabecalho">
+          <p className="bo-estado__sobrancelha">{carta.unidade}</p>
+          <h1 data-tela="STATE-009">{v.sessaoTerminou}</h1>
+        </header>
+        <p className="bo-publico__texto" data-teste="sessao-terminou">{v.sessaoTerminouAjuda}</p>
+        <nav className="bo-publico__seccoes">
+          <a href={base}>{carta.unidade}</a>
+        </nav>
+      </div>
+    );
+  }
+
   return (
     <div className="bo-publico" style={variaveisDoTema(tema) as React.CSSProperties}>
       <header className="bo-publico__cabecalho">
@@ -117,6 +170,28 @@ export default async function CartaPublica({
             <h2>{c.tituloCartaFechado}</h2>
             <p>{c.notaFechado}</p>
           </div>
+        ) : null}
+
+        {/* Já dentro de uma visita: o caminho de volta à mesa. */}
+        {visitanteActual ? (
+          <p data-teste="na-mesa">
+            {v.naMesa} {visitanteActual.mesaCodigo} ·{' '}
+            <a href={`/r/${publicLocationSlug}/${idioma}/mesa`} data-seccao="MENU-011">
+              {v.estaVisita}
+            </a>
+          </p>
+        ) : segredoDoQr ? (
+          // Chegou pelo QR e ainda não entrou. Abrir a sessão é um POST.
+          <form method="post" action="/api/publico/mesa" data-teste="entrar">
+            <input type="hidden" name="slug" value={publicLocationSlug} />
+            <input type="hidden" name="locale" value={idioma} />
+            <input type="hidden" name="accao" value="entrar" />
+            <input type="hidden" name="qr" value={segredoDoQr} />
+            <p className="bo-campo__ajuda">{v.entrarAjuda}</p>
+            <button className="bo-botao bo-botao--primario" type="submit">
+              {v.entrarNaMesa}
+            </button>
+          </form>
         ) : null}
       </header>
 

@@ -119,6 +119,16 @@ export default async function CodigosQr({
             registá-la, e uma pendência declarada é resposta. */}
         <Etiqueta tom="aviso">{c.notaQrPendente}</Etiqueta>
       </Cartao>
+      {/* ── E17 · o QR DA MESA, que é outra coisa ───────────────────────────
+          O código acima é um endereço: abre a carta e mais nada. O da mesa leva
+          um segredo, e por isso tem par de actos próprio — rodar e revogar. As
+          duas famílias vivem lado a lado de propósito: quem chega aqui tem de
+          poder ver que são diferentes. */}
+      <nav className="bo-publico__seccoes" data-teste="qr-das-mesas">
+        <a href={`/${idioma}/app/${orgSlug}/${locationSlug}/channels/qr/sessoes`}
+           data-seccao="QR-006">{m.visitanteE17.sessoesActivas}</a>
+      </nav>
+
     </div>
   );
 }

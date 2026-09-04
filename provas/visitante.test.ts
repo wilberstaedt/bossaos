@@ -29,8 +29,6 @@ let prisma: ReturnType<typeof obterPrisma>;
 const PREFIXO = 'e17-';
 const ACTOR = { email: 'prova-e17@bossaos.example' };
 const SLUG_PUBLICO = 'e17-marina';
-const ZONA = 'e17a1111-0000-4000-8000-0000000000z1'.replace('z', 'a');
-const MESA = 'e17a1111-0000-4000-8000-00000000mesa'.replace(/[^0-9a-f-]/g, '1');
 
 const comA = <T>(fn: Parameters<typeof comEscopo<T>>[2]) =>
   comEscopo(prisma, { organizationId: IDS.orgA }, fn);
