@@ -70,6 +70,14 @@ PUB-003 RES-C-001 RES-C-002 RES-C-003 RES-C-004 RES-C-005 RES-C-006 RES-C-007 RE
 RES-B-004 RES-B-005 RES-B-006 RES-B-007 RES-B-008 RES-B-009 RES-B-010 RES-B-011 RES-B-017 RES-B-018 RES-B-019 REP-008 INT-004 SET-009
 ```
 
+**E uma tela que não está nesta lista, e tem de mudar à mesma: `FLOOR-006`.**
+O mapa de sala ao vivo tem `etapa_principal = E13`, mas a matriz marca-o como
+revisitado pelo E15 e pelo **E19** — porque uma reserva confirmada para as 20h
+tem de **aparecer na sala** antes das 20h, senão o host vê a mesa livre e senta
+lá um walk-in. As 28 são as telas novas; o `FLOOR-006` é a que já existe e passa
+a receber dados novos. Contá-la como nova seria errado; deixá-la fora do alvo
+seria pior — é exactamente por onde a reserva se perde entre o motor e a sala.
+
 Escrevi «28 telas» três vezes nesta régua e nunca disse **quais** — e isso é
 precisamente o buraco que tu me apontaste no E15: **um número sem o conjunto
 deixa passar uma tela trocada por outra.** A prova lê a matriz e compara conjunto
