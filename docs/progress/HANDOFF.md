@@ -460,3 +460,36 @@ inválido não chega a criar trabalho nenhum.
 O que isto **não** prova, e não vale fingir que prova: que cada `uses:` resolve.
 Isso só se sabe a correr, e correr é o que a facturação impede. Fica medido até
 onde dá, e dito onde pára.
+
+## Metade das provas nunca correu na CI — 04/09
+
+`scripts/validar-provas-na-ci.sh` (nova) mede-o: **25 provas, 12 na CI, 12 sem
+decisão nenhuma.** Ficam de fora, entre outras, a `provar-pedidos.sh` (o E14,
+validado esta manhã), a `provar-sala.sh` (E13) e a **`provar-marco-e11.sh`, o
+marco Starter inteiro**. Uma regressão em qualquer delas não seria apanhada por
+máquina nenhuma — só por alguém se lembrar de correr o script à mão.
+
+A causa está escrita no cabeçalho do `provar-tudo.sh`, que já a tinha resolvido
+para si próprio: **uma lista escrita à mão deriva.** O `ci.yml` continuou a
+listar doze e envelheceu em silêncio, que é o único modo em que estas listas
+envelhecem. O mesmo comentário no `ci.yml` regista que sete das treze guardas
+`validar-*` também nunca lá corriam. É o mesmo defeito, duas vezes.
+
+**Não corrigi a CI, de propósito.** Acrescentar doze passos a um ficheiro que eu
+não consigo executar — a facturação impede — deixava-me sem saber distinguir «o
+YAML partiu» de «é a facturação». Perder essa distinção é pior do que a dívida.
+
+**Fica como pendência com cobrador:** a guarda falha enquanto as doze não
+estiverem na CI ou declaradas fora com o motivo. Quando a facturação destrancar,
+o primeiro trabalho é acrescentá-las e ver a guarda ficar verde.
+
+### E um defeito meu, dentro da guarda que escrevi para isto
+
+A primeira versão fazia `cat` ao `ci.yml` e procurava o nome do ficheiro. Deu
+como «corre na CI» o `provar-tudo.sh` — que aparece lá uma vez, **dentro de um
+comentário**. A guarda escrita para apanhar provas que ninguém corre dava verde
+a uma prova que ninguém corre, porque alguém lhe escreveu o nome num comentário.
+
+É o defeito que ando a caçar o dia inteiro, e desta vez foi meu, escrito dez
+minutos depois de eu o nomear no cabeçalho do próprio ficheiro: **vigiar a forma
+de escrita em vez da propriedade.** Agora tira os comentários antes de procurar.
