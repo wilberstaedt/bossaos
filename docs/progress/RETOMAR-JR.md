@@ -199,3 +199,41 @@ feita há uma hora.
 - Antes de empurrar, `pnpm verificar` e ler o código de saída — e o `&&` tem de estar
   **na verificação**, não no `git add`. Foi assim que empurrei por cima de um vermelho
   nesse mesmo dia, com o resultado à minha frente.
+
+## O que aterrou entre o E11 e o E13, e uma sessão nova não pode redescobrir
+
+**Primeiro, antes de olhar para código: a CI está parada por FACTURAÇÃO do
+GitHub**, desde 04/09. «The job was not started because recent account payments
+have failed.» Cinco trabalhos, zero passos, log nenhum. **Vermelho na CI neste
+momento não diz nada sobre o teu código** — não vás caçar um defeito que não
+existe, como o sénior quase fez duas vezes. Só o Matheus desbloqueia. Até lá a
+prova é local, e quem valida escreve que foi local.
+
+**O marco Starter (E11) passou, com seis reprovações pelo caminho** — nenhuma
+por defeito de produto. Foram aceites não demonstrados e instrumentos a medir
+zero. O padrão que as apanhou todas: a régua (`docs/reviews/ALVO-E##.md`)
+escrita **antes** de ver a entrega.
+
+**O ORG-007 apareceu uma terceira vez no E13** — juntar `user` a uma consulta de
+inquilino. A política `identidade_propria` limita o runtime à própria linha e o
+Prisma devolve a relação a **null sem se queixar**: não estoira, mente. Agora há
+guarda estrutural, `scripts/validar-juncao-identidade.sh`, e ela encontrou a
+terceira ocorrência **um minuto depois de existir**. Se precisares de identidade
+dentro do inquilino, passa pela porta que existe (`packages/db/src/autenticacao.ts`),
+não abras um atalho.
+
+**Uma migração pode ter lógica que a base viva não tem.** No E13 a função de
+idempotência estava na migração e **não** na base — dois testes falhavam por
+isso, e a causa foi um script de prova morto a meio. Quando um teste falhar sem
+explicação, compara o que está **declarado** com o que está **vivo** antes de
+mexer no código.
+
+**O sénior e tu já não partilham base de dados.** Ele corre as provas dele na
+`bossaos_revisao` (`scripts/base-de-revisao.sh`). A `bossaos_dev` é tua. Se vires
+dados a mexer-se por baixo de ti, isso é um defeito novo, não é ele.
+
+**A pergunta de dinheiro do E14 já está decidida**, em
+`docs/architecture/preco-de-um-pedido-escrito-offline.md`: um pedido escrito
+offline paga o preço **do momento em que foi escrito**, mas quem confere é o
+servidor contra a versão da ementa, nunca o aparelho. Preço que não bate ou
+versão desconhecida **param numa pessoa** — nunca se reprecifica em silêncio.
