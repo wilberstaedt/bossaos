@@ -78,6 +78,11 @@ export default async function ArranqueDaSala({
         <div className="bo-estado__accoes">
           <a className="bo-botao bo-botao--primario" href={`${base}/zonas`}>{s.zonas}</a>
           <a className="bo-botao bo-botao--secundario" href={`${base}/mesas`}>{s.mesas}</a>
+          {/* O passo da cozinha entra ANTES do «pronto»: sem estações e sem
+              regras, tudo o que for pedido nasce não encaminhado — e é melhor
+              descobri-lo aqui do que no primeiro serviço. */}
+          <a className="bo-botao bo-botao--secundario" href={`/${idioma}/onboarding/cozinha`}
+             data-seccao="ONB-008">{m.kdsE16.ligarCozinha}</a>
           <a className="bo-botao bo-botao--secundario" href={`/${idioma}/onboarding/pronto`}>
             {m.comum.guardar}
           </a>

@@ -69,6 +69,20 @@ export default async function Relatorio({
            href={`/${idioma}/app/${orgSlug}/${locationSlug}/channels`}>{c.tituloCanais}</a>
       </div>
 
+      {/* Os outros relatórios desta unidade. Estavam sem entrada nenhuma — o
+          `reports/servico`, `canais`, `produtos`, `categorias`, `franjas` e
+          `mesas` respondiam ao endereço e não havia por onde lá chegar. A mesma
+          coisa que aconteceu na configuração, e descoberta pela mesma razão:
+          tive de decidir onde pendurar o REP-009. */}
+      <nav className="bo-publico__seccoes" aria-label={c.tituloRelatorio} data-teste="mais-relatorios">
+        {['servico', 'canais', 'produtos', 'categorias', 'franjas', 'mesas'].map((r) => (
+          <a key={r} href={`/${idioma}/app/${orgSlug}/${locationSlug}/reports/${r}`}>{r}</a>
+        ))}
+        <a href={`/${idioma}/app/${orgSlug}/${locationSlug}/reports/cozinha`} data-seccao="REP-009">
+          {m.kdsE16.temposDeCozinha}
+        </a>
+      </nav>
+
       {dados.total === 0 ? (
         // Sem consultas diz-se que não há. Uma série ilustrativa aqui seria a
         // mesma mentira que o gráfico do ORG-013.

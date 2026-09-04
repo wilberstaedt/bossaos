@@ -98,6 +98,10 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     DELETE FROM device_pairings      WHERE device_id IN (SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%');
     DELETE FROM devices              WHERE nome LIKE '${PREFIXO}%';
     DELETE FROM service_types        WHERE nome LIKE '${PREFIXO}%';
+    DELETE FROM production_events    WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%');
+    DELETE FROM production_tasks     WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%');
+    DELETE FROM routing_rules        WHERE station_id IN (SELECT id FROM production_stations WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM production_stations  WHERE nome LIKE '${PREFIXO}%';
     DELETE FROM order_events         WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%');
     DELETE FROM order_lines          WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%');
     DELETE FROM order_submissions    WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%');

@@ -603,6 +603,16 @@ p { margin: 0; }
   .bo-staff__divergencia p { grid-column: 1 / -1; }
 }
 
+/* O KDS é a superfície mais apertada de todas: lê-se a um metro e meio, com as
+   mãos ocupadas e de pé. Os alvos são de OPERAÇÃO, e a barra de secções também —
+   no Staff foi a barra que ficou por medir e deu ligações de 22 px. */
+.bo-kds .bo-publico__seccoes a { min-height: var(--bo-toque-operacao); }
+.bo-kds .bo-publico__lista a { min-height: var(--bo-toque-operacao); align-items: center; }
+.bo-kds .bo-lista a { display: flex; align-items: center; min-height: var(--bo-toque-operacao); }
+.bo-kds .bo-botao { min-height: var(--bo-toque-operacao); }
+.bo-kds__contagem { display: flex; flex-wrap: wrap; gap: var(--bo-espaco-md); }
+.bo-kds__contagem strong { font-size: 20px; }
+
 /* ── KDS / TPV ──────────────────────────────────────────────────────────────
    Lê-se a um metro e meio, com as mãos ocupadas: fundo escuro, corpo maior,
    alvos de operação. O manual manda inspeccionar isto à distância real de uso;

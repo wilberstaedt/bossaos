@@ -99,6 +99,12 @@ export default async function PreferenciasDaUnidade({
         <a href={`/${idioma}/app/${orgSlug}/${locationSlug}/settings/avisos`} data-seccao="SET-008">
           {m.staffE15.quemRecebe}
         </a>
+        <a href={`/${idioma}/app/${orgSlug}/${locationSlug}/settings/estacoes`} data-seccao="SET-005">
+          {m.kdsE16.cadaProdutoASuaEstacao}
+        </a>
+        <a href={`/${idioma}/app/${orgSlug}/${locationSlug}/settings/ecras`} data-seccao="SET-006">
+          {m.kdsE16.ajustarEcras}
+        </a>
       </nav>
     </div>
   );

@@ -598,6 +598,125 @@ async function principal(): Promise<void> {
       },
     });
 
+    // ── E16 · estações, roteamento e tarefas de produção ─────────────────
+    //
+    // Duas estações e um prato que vai às DUAS. É o caso que parte o modelo
+    // ingénuo — «uma linha, uma estação» —, e sem ele as telas do KDS mediam
+    // sempre o caminho fácil: um prato, uma estação, tudo bate.
+    //
+    // E um prato SEM regra nenhuma, porque «não encaminhado» é um estado real
+    // que tem de aparecer no ecrã em cinco larguras. Sem ele, o aviso do KDS-009
+    // nunca renderizava e as medições passavam sobre a metade fácil.
+    const grelha = await prisma.productionStation.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Cocina caliente`, tipo: 'PREPARACAO', ordem: 1,
+        // Baixo de propósito: com três, os cinco bilhetes semeados excedem-no e
+        // o KDS-010 tem mesmo o que mostrar. Um limite de doze fazia o «em
+        // espera» ficar sempre vazio, e a tela media um ecrã que nunca acontece.
+        limiteVisivel: 3,
+      },
+      select: { id: true },
+    });
+    const expo = await prisma.productionStation.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Pase`, tipo: 'EXPO', ordem: 2, limiteVisivel: 12,
+      },
+      select: { id: true },
+    });
+    const fritadeira = await prisma.productionStation.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Freidora`, tipo: 'PREPARACAO', ordem: 3, limiteVisivel: 12,
+      },
+      select: { id: true },
+    });
+
+    const pratosDaCarta = await prisma.product.findMany({
+      where: { organizationId: IDS.orgA, nome: { startsWith: PREFIXO } },
+      orderBy: { nome: 'asc' }, select: { id: true, nome: true },
+    });
+    const comDuasEstacoes = pratosDaCarta[0];
+    const soNaGrelha = pratosDaCarta[1];
+    if (!comDuasEstacoes || !soNaGrelha) {
+      throw new Error('a semeadura do E16 precisa de pelo menos dois pratos na carta');
+    }
+    // O primeiro vai às DUAS. O segundo só à grelha. O terceiro (se houver) fica
+    // SEM regra — e é ele que aparece como não encaminhado.
+    for (const stationId of [grelha.id, fritadeira.id]) {
+      await prisma.routingRule.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          stationId, productId: comDuasEstacoes.id,
+        },
+      });
+    }
+    await prisma.routingRule.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        stationId: grelha.id, productId: soNaGrelha.id,
+      },
+    });
+
+    // As tarefas do pedido semeado, e mais algumas para o backlog exceder o
+    // limite visível de três. Criadas à mão e não pelo motor: a semeadura não
+    // passa pelo `enviarPedido`, e o que interessa medir nas telas é o que
+    // existe, não como lá chegou — isso tem prova própria.
+    const linhasDoPedido = await prisma.orderLine.findMany({
+      where: { orderId: pedidoInsp.id }, select: { id: true }, orderBy: { createdAt: 'asc' },
+    });
+    const primeiraLinha = linhasDoPedido[0];
+    if (!primeiraLinha) throw new Error('o pedido semeado ficou sem linhas');
+
+    for (const [i, stationId] of [grelha.id, fritadeira.id].entries()) {
+      await prisma.productionTask.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          orderId: pedidoInsp.id, lineId: primeiraLinha.id, stationId,
+          // Uma PRONTA e uma por começar: é o «pronto parcial» do KDS-012, e sem
+          // ele a contagem `1/2` nunca aparecia no ecrã para ser medida.
+          estado: i === 0 ? 'PRONTA' : 'POR_INICIAR',
+          ...(i === 0 ? { prontaEm: new Date(), iniciadaEm: new Date() } : {}),
+        },
+      });
+    }
+    // Uma tarefa SEM estação: o não encaminhado, visível no KDS-009.
+    await prisma.productionTask.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        orderId: pedidoInsp.id, lineId: linhasDoPedido[1]?.id ?? primeiraLinha.id,
+        estado: 'POR_INICIAR',
+      },
+    });
+    // E quatro na grelha, para os cinco excederem o limite de três.
+    for (let i = 0; i < 4; i += 1) {
+      const pedidoExtra = await prisma.order.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2, canal: 'SALA',
+          numero: `${PREFIXO}K${String(i).padStart(3, '0')}`, estado: 'ACEITE',
+          abertoPor: 'inspeccao@exemplo.example',
+        },
+        select: { id: true },
+      });
+      const linhaExtra = await prisma.orderLine.create({
+        data: {
+          organizationId: IDS.orgA, orderId: pedidoExtra.id,
+          nome: `${PREFIXO}Plato de cocina ${i + 1}`, quantidade: 1,
+          precoMenor: 900, moeda: 'EUR', estado: 'ACEITE', aceiteEm: new Date(),
+        },
+        select: { id: true },
+      });
+      await prisma.productionTask.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          orderId: pedidoExtra.id, lineId: linhaExtra.id, stationId: grelha.id,
+          estado: 'POR_INICIAR',
+        },
+      });
+    }
+    void expo;
+
     // ── O SITE do restaurante (E10), publicado ────────────────────────────
     //
     // Sem isto, as telas públicas do E10 mediam a página de "não encontrado" e
