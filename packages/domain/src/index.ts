@@ -150,3 +150,7 @@ export {
   avaliarVerificacao, serveConteudo, nomeDoRegistoDeProva, valorDoRegistoDeProva,
   type EstadoDeDominio, type RespostaDeDns, type Veredicto,
 } from './dominios.ts';
+
+export {
+  TENTATIVAS_ATE_BLOQUEAR, MINUTOS_DE_BLOQUEIO, MINUTOS_DE_PAREAMENTO,
+} from './dispositivos.ts';

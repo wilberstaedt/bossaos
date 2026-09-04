@@ -26,6 +26,11 @@ export interface Alvos {
   unidadeArquivadaId: string;
   unidadeVivaId: string;
   orgId: string;
+  /** E13: a sala. Sem eles, cinco telas mediriam a página de «não encontrado». */
+  tableId: string;
+  sessionId: string;
+  deviceId: string;
+  deviceRevogavelId: string;
 }
 
 const PREFIXO = 'insp-';
@@ -80,6 +85,17 @@ export async function resolverAlvos(): Promise<Alvos> {
         'a unidade viva da inspecção',
       ),
       orgId: ORG_A,
+      tableId: await um(sql, `SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%' ORDER BY codigo LIMIT 1`, 'uma mesa'),
+      sessionId: await um(
+        sql,
+        `SELECT id FROM table_sessions WHERE estado <> 'FECHADA'
+           AND table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%') LIMIT 1`,
+        'uma sessão de mesa aberta'),
+      // Dois dispositivos, e não um: a ficha mede-se num ACTIVO e a revogação
+      // precisa de um que ainda não esteja revogado. Com um só, a segunda visita
+      // media o ecrã de um aparelho que a primeira já tinha retirado.
+      deviceId: await um(sql, `SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%' AND estado = 'ACTIVO' LIMIT 1`, 'um dispositivo activo'),
+      deviceRevogavelId: await um(sql, `SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%' AND estado = 'PENDENTE' LIMIT 1`, 'um dispositivo por aprovar'),
     };
   } finally {
     await sql.end();

@@ -349,6 +349,74 @@ async function principal(): Promise<void> {
               '${PREFIXO}Marina Cerrada', 'insp-cerrada', 'EUR', 'Europe/Madrid', now(), now())
       ON CONFLICT (id) DO UPDATE SET archived_at = now(), updated_at = now()`);
 
+    // ── A SALA (E13), para as dezassete telas terem o que medir ───────────
+    //
+    // Zonas, mesas, uma sessão ABERTA e dois dispositivos. Sem isto, as telas
+    // com identificador — a ficha da sessão, a transferência, o encerramento, a
+    // ficha e a revogação do dispositivo — mediam a página de «não encontrado» e
+    // diziam verde, que é a classe de erro que este projecto passa o tempo a
+    // fechar.
+    //
+    // Na unidade `puerto` (a mesma do painel), porque é a que a sessão do arnês
+    // abre.
+    const zona = await prisma.serviceArea.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Terraza`, tipo: 'TERRACO', ordem: 1,
+      },
+      select: { id: true },
+    });
+    // Nomes longos de propósito, pela mesma razão que os pratos: uma sala com
+    // «1», «2», «3» nunca transborda a 360 px e mede uma coisa que não se parece
+    // com a real.
+    const mesas = await Promise.all([
+      ['07', 4, 0, 0], ['08 junto a la ventana', 2, 1, 0], ['Barra alta 12', 6, null, null],
+    ].map(([codigo, capacidade, x, y]) => prisma.serviceTable.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2, areaId: zona.id,
+        codigo: `${PREFIXO}${codigo as string}`, capacidade: capacidade as number,
+        posX: x as number | null, posY: y as number | null,
+      },
+      select: { id: true },
+    })));
+
+    const primeiraMesa = mesas[0];
+    if (!primeiraMesa) throw new Error('a semeadura da sala não criou mesas');
+    const sessaoDeMesa = await prisma.tableSession.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2, tableId: primeiraMesa.id,
+        estado: 'ABERTA', comensais: 3, abertaPor: 'inspeccao@exemplo.example',
+      },
+      select: { id: true },
+    });
+    await prisma.tableSessionEvent.create({
+      data: {
+        organizationId: IDS.orgA, sessionId: sessaoDeMesa.id, accao: 'sessao.aberta',
+        actorEmail: 'inspeccao@exemplo.example',
+      },
+    });
+
+    await prisma.device.createMany({
+      data: [
+        {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          nome: `${PREFIXO}Tablet de sala del turno de noche`, estacao: 'SALA',
+          estado: 'ACTIVO', ultimoVistoEm: new Date(),
+        },
+        {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          nome: `${PREFIXO}Pantalla de cocina 01`, estacao: 'COZINHA', estado: 'PENDENTE',
+        },
+      ],
+    });
+
+    await prisma.serviceType.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Comida`, inicioMinutos: 13 * 60, fimMinutos: 16 * 60,
+      },
+    });
+
     // ── O SITE do restaurante (E10), publicado ────────────────────────────
     //
     // Sem isto, as telas públicas do E10 mediam a página de "não encontrado" e

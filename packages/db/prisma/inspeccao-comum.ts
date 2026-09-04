@@ -84,6 +84,16 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
   `);
   await prisma.$executeRawUnsafe(`
     DELETE FROM public_slug_owners WHERE slug LIKE '${PREFIXO}%';
+    DELETE FROM table_session_events WHERE session_id IN (SELECT id FROM table_sessions WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%'));
+    DELETE FROM table_sessions       WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%');
+    DELETE FROM table_combination_members WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%');
+    DELETE FROM table_combinations   WHERE nome LIKE '${PREFIXO}%';
+    DELETE FROM service_tables       WHERE codigo LIKE '${PREFIXO}%';
+    DELETE FROM service_areas        WHERE nome LIKE '${PREFIXO}%';
+    DELETE FROM device_shifts        WHERE device_id IN (SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM device_pairings      WHERE device_id IN (SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM devices              WHERE nome LIKE '${PREFIXO}%';
+    DELETE FROM service_types        WHERE nome LIKE '${PREFIXO}%';
     DELETE FROM menu_views        WHERE revision_id IN (SELECT id FROM menu_revisions WHERE menu_id IN (SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%'));
     DELETE FROM menu_publications WHERE menu_id IN (SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%');
     DELETE FROM menu_revisions    WHERE menu_id IN (SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%');

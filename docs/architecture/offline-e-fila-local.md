@@ -34,12 +34,39 @@ que os rascunhos ficam suspensos até *o dono se reautenticar e resolvê-los* �
 dispositivo revogado o dono não volta. A saída existe para o logout e desaparece
 exactamente no caso em que alguém não regressa.
 
-Encontrado a 04/09, ao escrever a régua do E13. **Fica em aberto de propósito e com
-o custo à vista:** o trabalho não é enviado, não é apagado em silêncio — porque
-apagar é perder o trabalho de alguém — e ninguém lhe pode chegar. As três saídas
-possíveis são o dono resolver noutro aparelho onde entre, um administrador da
-unidade resolver por ele, ou declarar-se que a revogação **descarta** e dizê-lo **ao
-revogar**, e não depois. Qualquer uma serve. O que não serve é ficar por decidir.
+Encontrado a 04/09, ao escrever a régua do E13, e **decidido no E13**.
+
+**A decisão: a revogação DESCARTA, e diz-se ao revogar.** É a terceira das três
+saídas, e as outras duas foram postas de lado por não serem implementáveis no caso
+que interessa — não por serem piores em abstracto:
+
+- **«O dono resolve noutro aparelho onde entre»** exige que os rascunhos tenham
+  saído do tablet. Se tivessem saído, não eram rascunhos por enviar. E o aparelho
+  pode estar sem rede exactamente no momento em que é revogado, que é o caso
+  típico de um tablet perdido ou roubado. A saída só funciona quando não é precisa.
+- **«Um administrador da unidade resolve por ele»** exige que alguém **leia** o
+  trabalho de outra pessoa, e a regra 3 diz o contrário: o operador seguinte não vê
+  nome de cliente nem totais do anterior. Quem revoga também não é o dono. E
+  esbarra na mesma impossibilidade: para resolver por ele, os rascunhos teriam de
+  estar do lado do servidor.
+
+**A condição que torna a decisão honesta é o momento.** Descartar é aceitável
+quando quem decide sabe o que está a descartar; descobrir depois não é. Por isso o
+ecrã de revogar (DEV-004) diz, **antes de confirmar**, que a revogação descarta os
+rascunhos e mostra **quantos** o dispositivo declarou ter — um número, nunca
+conteúdo, que é o que a regra 3 permite. E quando o dispositivo nunca reportou, a
+página diz **que não sabe**: ausência não é zero, e um zero tranquilizador que
+ninguém mediu é pior do que a frase.
+
+**O que fica por ligar, e está declarado:** `devices.rascunhos_por_enviar` é o
+campo que o dispositivo preenche, e quem o preenche é a fila local — que nasce no
+E15/E16. Até lá o valor é `null` em todos os aparelhos, e o ecrã diz o que isso
+quer dizer. Não é uma simulação com ar de pronto: é o campo à espera de quem o
+escreve, e a decisão já tomada para quando ele chegar.
+
+E a alternativa que não precisa de código: **esvaziar o aparelho antes de o
+revogar**, quando não é urgência. O ecrã diz isso também, porque é a única forma
+de não perder trabalho e não depende de nada que o produto ainda não tenha.
 
 **4. O `command_id` nasce no cliente, antes do envio, e sobrevive ao recarregamento.** Se
 morre com o separador do navegador, a retentativa cria uma segunda cobrança ou um segundo

@@ -1052,3 +1052,40 @@ label.bo-planos__item input[type="radio"] {
   width: 20px; height: 20px; display: inline-block; vertical-align: middle;
   margin-right: var(--bo-espaco-sm);
 }
+
+/* ── E13 · o desenho da sala (FLOOR-004) ───────────────────────────────────
+   Uma grelha com as mesas nas coordenadas que a mesa tem guardadas. Sem
+   arrastar: arrastar exige JavaScript, e a sala é o sítio do produto onde ele
+   falha mais — tablet velho, rede do restaurante, mão molhada.
+
+   As mesas SEM posição não entram aqui. Desenhá-las em `0,0` juntava todas as
+   que faltam colocar no mesmo canto e fazia o desenho mentir sobre a sala. */
+.bo-plano {
+  display: grid;
+  gap: var(--bo-espaco-sm);
+  /* Conteúdo largo dentro de grelha: sem `minmax(0, …)` nas colunas, uma mesa
+     com código comprido estica a página e ela passa a rolar na horizontal a
+     360 px. É a armadilha que o E10 pagou uma vez. */
+  overflow-x: auto;
+  padding: var(--bo-espaco-md);
+  border: 1px solid var(--bo-borda);
+  border-radius: var(--bo-raio-cartao);
+  background: var(--bo-superficie-suave);
+}
+.bo-plano__mesa {
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  /* 44 px é o alvo de toque mínimo da WCAG 2.2, e este é um controlo que se usa
+     com o dedo em movimento. */
+  min-width: 56px;
+  min-height: 56px;
+  padding: var(--bo-espaco-sm);
+  border: 1px solid var(--bo-borda);
+  border-radius: var(--bo-raio-controlo);
+  background: var(--bo-superficie-base);
+  color: var(--bo-texto-primario);
+  text-decoration: none;
+}
+.bo-plano__codigo { font-weight: 700; }
+.bo-plano__capacidade { font-size: 12px; color: var(--bo-texto-secundario); }

@@ -194,3 +194,18 @@ export {
   gerarTokenDeProva, vincularDominio, largarDominio, dominiosDaUnidade, registarVerificacao,
   type ResultadoDoVinculo, type DominioVinculado,
 } from './dominios.ts';
+
+// ── E13 · sala, sessões, dispositivos e PIN ────────────────────────────────
+export {
+  abrirSessao, fecharSessao, iniciarEncerramento, transferirSessao, arquivarMesa,
+  registarEvento, listarZonas, listarMesas, salaAgora, historicoDaSessao,
+  listarCombinacoes, listarTiposDeServico,
+  type Actor, type ResultadoDeAbertura, type ResultadoDeFecho,
+  type ResultadoDaTransferencia, type ResultadoDeArquivoDeMesa,
+} from './sala.ts';
+
+export {
+  dispositivoPodeComandar, definirPin, entrarComPin, criarPareamento, usarPareamento,
+  revogarDispositivo, listarDispositivos, turnoAberto, resumirToken,
+  type ResultadoDoPin, type ResultadoDoPareamento, type ResultadoDaRevogacao,
+} from './dispositivos.ts';

@@ -101,6 +101,18 @@ model Organization {
   featureFlags    FeatureFlag[]
   themeRevisions  ThemeRevision[]
   themeDrafts     ThemeDraft[]
+  // ── E13 ──
+  serviceAreas       ServiceArea[]
+  serviceTables      ServiceTable[]
+  tableCombinations  TableCombination[]
+  combinationMembers TableCombinationMember[]
+  tableSessions      TableSession[]
+  sessionEvents      TableSessionEvent[]
+  devices            Device[]
+  devicePairings     DevicePairing[]
+  operatorPins       OperatorPin[]
+  deviceShifts       DeviceShift[]
+  serviceTypes       ServiceType[]
   onboarding      OnboardingProgress?
   scheduleDays    ScheduleDay[]
   scheduleExceptions ScheduleException[]
@@ -218,6 +230,15 @@ model Location {
   site            Site?
   leads           Lead[]
   dominios        CustomDomain[]
+  // ── E13 ──
+  zonas           ServiceArea[]
+  mesas           ServiceTable[]
+  combinacoes     TableCombination[]
+  sessoes         TableSession[]
+  dispositivos    Device[]
+  pins            OperatorPin[]
+  turnos          DeviceShift[]
+  tiposDeServico  ServiceType[]
 
   @@unique([organizationId, id], name: "location_por_organizacao")
   @@unique([organizationId, slug])
@@ -359,6 +380,9 @@ model Membership {
   organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   user            User             @relation(fields: [userId], references: [id], onDelete: Restrict)
   roleAssignments RoleAssignment[]
+  // ── E13 ──
+  sessoesResponsavel TableSession[]
+  pins               OperatorPin[]
 
   @@unique([organizationId, id], name: "membership_por_organizacao")
   @@unique([organizationId, userId])
@@ -692,7 +716,7 @@ model ThemeRevision {
   /// Não é decoração: quem lê a linha meses depois não tem como saber que a
   /// carta e o site partilham o tema, e adivinhar isso pelo código de hoje é
   /// adivinhar pelo código de hoje.
-  destinos       String[]
+  destinos       String[] @default([])
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
@@ -1935,4 +1959,358 @@ model DemoRequest {
 
   @@index([createdAt])
   @@map("demo_requests")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E13 — sala, sessões, dispositivos e PIN
+//
+// A primeira etapa em que DUAS PESSOAS mexem na mesma coisa ao mesmo tempo.
+// Tudo o que veio antes tinha um dono de cada vez, e por isso a forma destes
+// modelos é decidida pela concorrência e não pela arrumação.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// O que uma zona é para o serviço. Fechada porque cada tipo tem regras de
+/// operação diferentes — uma barra não se reserva como uma sala.
+enum TipoDeZona {
+  SALA
+  TERRACO
+  BARRA
+  PRIVADO
+}
+
+/// O estado de uma sessão de mesa.
+///
+/// `A_ENCERRAR` não é decoração: é o intervalo entre pedir a conta e a mesa
+/// ficar livre, e durante ele **a mesa continua ocupada**. Sem este estado, ou
+/// se liberta a mesa cedo demais — e outra pessoa senta-se em cima da conta de
+/// quem ainda lá está — ou tarde demais, e a sala mente sobre o que tem livre.
+enum EstadoDeSessao {
+  ABERTA
+  A_ENCERRAR
+  FECHADA
+}
+
+/// O ciclo de vida de um dispositivo de sala.
+///
+/// `PENDENTE` existe porque parear é um pedido, e aprovar é um acto de gerência
+/// (E13, entregar 3). Um dispositivo que nasce activo é um tablet que qualquer
+/// pessoa liga à rede do restaurante e passa a ver a sala.
+enum EstadoDeDispositivo {
+  PENDENTE
+  ACTIVO
+  REVOGADO
+}
+
+/// Onde o dispositivo está, e é isto que limita o que ele pode fazer.
+///
+/// «A estação limita o que o dispositivo pode fazer» (E13, respeitar 1). Não é
+/// um rótulo: um ecrã de cozinha não abre mesas, e um tablet de sala não
+/// configura a organização.
+enum Estacao {
+  SALA
+  COZINHA
+  BALCAO
+  GERENCIA
+}
+
+/// Zona de serviço: sala, terraço, barra (FLOOR-001, ONB-007).
+model ServiceArea {
+  id             String     @id @default(uuid()) @db.Uuid
+  organizationId String     @map("organization_id") @db.Uuid
+  locationId     String     @map("location_id") @db.Uuid
+  nome           String
+  tipo           TipoDeZona @default(SALA)
+  ordem          Int        @default(0)
+
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location      @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  mesas        ServiceTable[]
+
+  @@unique([organizationId, id], name: "zona_por_organizacao")
+  @@index([organizationId, locationId])
+  @@map("service_areas")
+}
+
+/// A mesa FÍSICA (FLOOR-002, FLOOR-003, FLOOR-004).
+///
+/// Separada da sessão de propósito: a mesa é mobiliário e dura anos; a sessão é
+/// um serviço e dura uma noite. Juntá-las obrigaria a apagar história para
+/// libertar uma mesa.
+model ServiceTable {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  areaId         String @map("area_id") @db.Uuid
+  /// O que está escrito na mesa. Texto, não número: há mesas «07», «T3» e «Barra 2».
+  codigo         String
+  capacidade     Int    @default(2)
+  /// Posição no desenho da sala (FLOOR-004). Anuláveis: uma mesa por posicionar
+  /// é um estado real, e `0,0` seria uma posição inventada no canto.
+  posX           Int?   @map("pos_x")
+  posY           Int?   @map("pos_y")
+
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  area         ServiceArea  @relation(fields: [organizationId, areaId], references: [organizationId, id], onDelete: Restrict)
+  sessoes      TableSession[]
+  combinacoes  TableCombinationMember[]
+
+  @@unique([organizationId, id], name: "mesa_por_organizacao")
+  @@unique([locationId, codigo], name: "codigo_de_mesa_por_unidade")
+  @@index([organizationId, locationId])
+  @@map("service_tables")
+}
+
+/// Combinações permitidas (FLOOR-005): que mesas se podem juntar.
+///
+/// Uma lista do que É permitido, e não um cálculo de proximidade: duas mesas
+/// encostadas com um pilar pelo meio não se juntam, e isso não está nas
+/// coordenadas.
+model TableCombination {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  nome           String
+  capacidade     Int
+
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  membros      TableCombinationMember[]
+
+  @@unique([organizationId, id], name: "combinacao_por_organizacao")
+  @@index([organizationId, locationId])
+  @@map("table_combinations")
+}
+
+model TableCombinationMember {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  combinationId  String @map("combination_id") @db.Uuid
+  tableId        String @map("table_id") @db.Uuid
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  combinacao   TableCombination @relation(fields: [organizationId, combinationId], references: [organizationId, id], onDelete: Cascade)
+  mesa         ServiceTable     @relation(fields: [organizationId, tableId], references: [organizationId, id], onDelete: Restrict)
+
+  @@unique([combinationId, tableId])
+  @@index([organizationId, tableId])
+  @@map("table_combination_members")
+}
+
+/// A SESSÃO de mesa (FLOOR-006 a 011).
+///
+/// ── A unicidade vive na BASE, e não numa consulta prévia ─────────────────
+///
+/// O aceite 1 é «duas aberturas concorrentes produzem UMA sessão activa». Um
+/// `SELECT` antes do `INSERT` é uma corrida com janela mais estreita: passa a
+/// maior parte das vezes, e isso é pior do que falhar sempre. A garantia é um
+/// **índice único parcial** sobre `table_id` onde o estado não é `FECHADA` —
+/// escrito na migração, porque o Prisma não exprime índices parciais.
+///
+/// E o par que o índice tem de deixar passar: quando a sessão fecha, sai do
+/// índice e a mesa **volta a poder abrir**. Um índice único sobre `(table_id)`
+/// sem a condição de estado passaria o aceite e deixava a mesa inutilizável para
+/// sempre.
+model TableSession {
+  id             String         @id @default(uuid()) @db.Uuid
+  organizationId String         @map("organization_id") @db.Uuid
+  locationId     String         @map("location_id") @db.Uuid
+  tableId        String         @map("table_id") @db.Uuid
+  estado         EstadoDeSessao @default(ABERTA)
+  comensais      Int            @default(1)
+  /// Quem responde pela mesa. É uma pertença e não um utilizador: o mesmo
+  /// utilizador pode estar em duas organizações, e a responsabilidade é de uma.
+  responsavelId  String?        @map("responsavel_id") @db.Uuid
+  abertaPor      String         @map("aberta_por")
+  abertaEm       DateTime       @default(now()) @map("aberta_em") @db.Timestamptz(6)
+  fechadaPor     String?        @map("fechada_por")
+  fechadaEm      DateTime?      @map("fechada_em") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  mesa         ServiceTable @relation(fields: [organizationId, tableId], references: [organizationId, id], onDelete: Restrict)
+  responsavel  Membership?  @relation(fields: [organizationId, responsavelId], references: [organizationId, id], onDelete: Restrict)
+  eventos      TableSessionEvent[]
+
+  @@unique([organizationId, id], name: "sessao_por_organizacao")
+  @@index([organizationId, locationId, estado])
+  @@index([tableId])
+  @@map("table_sessions")
+}
+
+/// O histórico da sessão (E13, entregar 2: «com histórico»).
+///
+/// Append-only por privilégio, como `audit_events`: uma transferência que se
+/// possa reescrever depois não é histórico, é uma versão dos factos.
+model TableSessionEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  sessionId      String   @map("session_id") @db.Uuid
+  accao          String
+  detalhe        Json?
+  actorEmail     String   @map("actor_email")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  sessao       TableSession @relation(fields: [organizationId, sessionId], references: [organizationId, id], onDelete: Restrict)
+
+  @@index([organizationId, sessionId, createdAt])
+  @@map("table_session_events")
+}
+
+/// Um dispositivo de sala (DEV-001 a 004).
+model Device {
+  id             String              @id @default(uuid()) @db.Uuid
+  organizationId String              @map("organization_id") @db.Uuid
+  locationId     String              @map("location_id") @db.Uuid
+  nome           String
+  estacao        Estacao             @default(SALA)
+  estado         EstadoDeDispositivo @default(PENDENTE)
+
+  aprovadoPorId String?   @map("aprovado_por_id") @db.Uuid
+  aprovadoEm    DateTime? @map("aprovado_em") @db.Timestamptz(6)
+  revogadoPorId String?   @map("revogado_por_id") @db.Uuid
+  revogadoEm    DateTime? @map("revogado_em") @db.Timestamptz(6)
+  /// Porque foi retirado o acesso. Obrigatório ao revogar, no serviço: uma
+  /// revogação sem motivo é uma que ninguém consegue rever daqui a seis meses.
+  revogadoMotivo String?  @map("revogado_motivo")
+
+  ultimoVistoEm DateTime? @map("ultimo_visto_em") @db.Timestamptz(6)
+  /// Quantos rascunhos por enviar o dispositivo declarou ter na última vez que
+  /// falou. Um NÚMERO e nunca conteúdo — a regra 3 do `offline-e-fila-local`
+  /// diz que o operador seguinte não vê nada do anterior, e quem revoga também
+  /// não é o dono do trabalho.
+  ///
+  /// **Anulável, e a ausência não é zero.** Um dispositivo que nunca reportou
+  /// não tem zero rascunhos: não se sabe. O ecrã de revogar diz isso por
+  /// palavras em vez de mostrar um zero tranquilizador que ninguém mediu.
+  rascunhosPorEnviar Int? @map("rascunhos_por_enviar")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location        @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  pareamentos  DevicePairing[]
+
+  @@unique([organizationId, id], name: "dispositivo_por_organizacao")
+  @@index([organizationId, locationId, estado])
+  @@map("devices")
+}
+
+/// O convite de pareamento (DEV-002): token de uso único, com prazo.
+///
+/// Guarda o RESUMO do token e nunca o token, como os convites do E04 e pela
+/// mesma razão: quem tiver a base não fica com os pareamentos em aberto.
+model DevicePairing {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  deviceId       String    @map("device_id") @db.Uuid
+  tokenHash      String    @unique @map("token_hash")
+  expiresAt      DateTime  @map("expires_at") @db.Timestamptz(6)
+  usedAt         DateTime? @map("used_at") @db.Timestamptz(6)
+  criadoPorId    String    @map("criado_por_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  device       Device       @relation(fields: [organizationId, deviceId], references: [organizationId, id], onDelete: Cascade)
+
+  @@index([organizationId, deviceId])
+  @@map("device_pairings")
+}
+
+/// O PIN de troca rápida de operador (AUTH-002).
+///
+/// ── O que um PIN é, e o que ele NÃO é ─────────────────────────────────────
+///
+/// «PIN curto sozinho não autentica na internet nem concede privilégio de
+/// owner» (E13, respeitar 1). Isto é uma troca de operador **dentro de um
+/// dispositivo já confiável** — quatro dígitos são adivinháveis, e o que os
+/// torna suficientes é o dispositivo já ter passado por pareamento e aprovação.
+///
+/// Guarda-se um resumo com sal e nunca o PIN. E a comparação é em tempo
+/// constante: comparar cadeias com `===` diz quantos dígitos estavam certos
+/// pelo tempo que demora a responder.
+model OperatorPin {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  membershipId   String @map("membership_id") @db.Uuid
+
+  resumo String
+  sal    String
+
+  tentativas   Int       @default(0)
+  bloqueadoAte DateTime? @map("bloqueado_ate") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  membership   Membership   @relation(fields: [organizationId, membershipId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([locationId, membershipId], name: "pin_por_unidade_e_pessoa")
+  @@index([organizationId, locationId])
+  @@map("operator_pins")
+}
+
+/// O turno aberto num dispositivo (AUTH-002, DEV-003).
+///
+/// Existe para a revogação poder ser medida **a meio**: sem uma linha que diga
+/// «este operador está a usar este aparelho agora», o ataque 2 da régua — revogar
+/// durante uma sessão aberta — não tem nada onde bater.
+model DeviceShift {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  locationId     String    @map("location_id") @db.Uuid
+  deviceId       String    @map("device_id") @db.Uuid
+  membershipId   String    @map("membership_id") @db.Uuid
+  abertaEm       DateTime  @default(now()) @map("aberta_em") @db.Timestamptz(6)
+  terminadaEm    DateTime? @map("terminada_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, deviceId, terminadaEm])
+  @@map("device_shifts")
+}
+
+/// Tipos de serviço da unidade (SET-003): almoço, jantar, brunch.
+model ServiceType {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  nome           String
+  /// Minutos desde a meia-noite LOCAL da unidade. O fuso é da unidade e está no
+  /// `Location` — guardar um instante aqui obrigaria a recalcular todos os dias.
+  inicioMinutos  Int    @map("inicio_minutos")
+  fimMinutos     Int    @map("fim_minutos")
+  activo         Boolean @default(true)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+
+  @@unique([locationId, nome], name: "tipo_de_servico_por_unidade")
+  @@index([organizationId, locationId])
+  @@map("service_types")
 }
