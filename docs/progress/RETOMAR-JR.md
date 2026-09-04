@@ -258,3 +258,26 @@ ainda não começou.
 **Antes de tocares em código, corre `bash scripts/validar-provas-na-ci.sh`.** Ela
 falha de propósito desde 04/09: metade das provas não corre na CI e isso é dívida
 conhecida, não defeito teu. Falha enquanto a facturação estiver trancada.
+
+## Como fechar quando o contexto acabar — sem esperar que te mandem
+
+A 04/09 chegaste aos 98% e foi o sénior que se lembrou de te mandar commitar. Se
+ele não estivesse a olhar, o trabalho ficava por versionar e a sessão seguinte
+tinha de o reconstruir a partir de ficheiros sem explicação. Isto passa a ser
+teu, não dele.
+
+**Aos ~90% de contexto, pára de construir e faz duas coisas, por esta ordem:**
+
+1. **Commita o que tens, mesmo a meio.** A mensagem diz onde paraste e o que
+   falta. **Código a meio commitado vale mais do que código a meio órfão** — os
+   ficheiros sobrevivem aos dois, o que se perde é a intenção.
+2. **Escreve `docs/progress/E<N>.md`** com: o que está feito e provado, o que
+   falta, e o que já decidiste e não deve ser rediscutido. Começa-o com **A
+   MEIO**, para quem o ler saber que não é uma declaração.
+
+Depois disso podes parar. Não gastes o resto do contexto a explicar-te a ninguém.
+
+**Não declares uma etapa com ficheiros por commitar.** A `validar-handoff.sh`
+recusa-o, e tem razão: o revisor não pode medir o que ainda está a mudar. Já
+custou onze vermelhos que não eram regressão nenhuma — era só um ficheiro a meio
+que não compilava, a derrubar tudo o que precisa da aplicação de pé.
