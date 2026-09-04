@@ -1,8 +1,14 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E14 — motor de pedidos e entrega confiável (**18 telas**, não 20).
-**Estado:** implementado, **aguardando validação** — 04/09. Declarado, não assinado.
-**Régua:** `docs/reviews/ALVO-E14.md`. Detalhe: `docs/progress/E14.md`.
+**Etapa atual:** E15 — Staff PWA e funcionamento degradado (**23 telas**).
+**Estado:** **A MEIO**, com o JR. A fila local (`packages/fila`) está feita e
+provada, e as duas perdas de rede estão provadas no navegador; as telas seguem.
+**Régua:** `docs/reviews/ALVO-E15.md`, escrita antes de existir código.
+Detalhe: `docs/progress/E15.md`, escrito pelo JR ao fechar por contexto.
+
+**O E14 ficou VALIDADO** a 04/09 — 18 telas, e a prova foi **local**, porque a CI
+está trancada por facturação do GitHub. O resto deste ficheiro é o contexto do
+E14 e continua a valer: o que mudou foi a etapa, não o que ali está escrito.
 
 **Dezoito e não vinte:** a matriz tem 18 com `etapa_principal = E14`; as outras 3
 que a autorização menciona (CAT-010, CHAN-001, FLOOR-008) estão em
