@@ -66,10 +66,27 @@ vou fazer é o que acontece à conta de quem está sentado.
 - **Verde sobre sala vazia:** uma sala sem mesas passa tudo. A prova declara
   quantas mesas existem antes de afirmar seja o que for.
 
-## O que já sei que vou perguntar
+## O que já sei que vou perguntar — corrigido, e a aresta que sobra
 
-O tablet é **partilhado** — está no contrato `offline-e-fila-local.md` do E00, e a
-fila é por `org + unidade + utilizador`. Portanto: **o que acontece à fila local
-quando o dispositivo é revogado?** Se ficar lá, um empregado despedido leva
-pedidos por enviar no aparelho que já não é dele. Não vi isto escrito em lado
-nenhum, e é a pergunta que a etapa tem de responder.
+Escrevi aqui que **não vi escrito em lado nenhum** o que acontece à fila local
+quando o dispositivo é revogado. **Estava errado, e a correcção é minha:** o
+`offline-e-fila-local.md` responde nas regras 2 e 3, e fui eu que as escrevi no
+E00. Deixar a frase falsa mandava o executor procurar o que existe — ou, pior,
+inventar uma segunda resposta ao lado da primeira.
+
+O que o contrato já diz: a fila é particionada por `org + unidade + utilizador` e
+a partição faz parte da **chave**; trocar de contexto **suspende** a sincronização
+em vez de descarregar ou apagar; e logout ou revogação **limpam o que é legível**,
+para o operador seguinte não ver nome de cliente nem totais do anterior.
+
+**E ao relê-lo encontrei a aresta que fica de pé.** A regra 2 diz que os rascunhos
+ficam suspensos *«até o dono se reautenticar e resolvê-los»* — e num dispositivo
+**revogado** o dono **não pode voltar**. A saída existe para o logout e desaparece
+na revogação, que é precisamente o caso em que alguém não volta.
+
+Portanto o trabalho fica **nem enviado nem recuperável**, e a regra 2 diz que
+apagar em silêncio é perder o trabalho de alguém. **É a pergunta desta etapa**, e
+tem três respostas possíveis — o dono resolve noutro aparelho onde entre, um
+administrador da unidade resolve por ele, ou declara-se que a revogação descarta e
+diz-se isso **ao revogar**, em vez de o descobrir depois. Qualquer uma serve; o que
+não serve é ficar por decidir e o rascunho apodrecer num tablet.

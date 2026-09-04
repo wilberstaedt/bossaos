@@ -29,6 +29,18 @@ Não se apagam em silêncio — apagar é perder o trabalho de alguém — mas t
 linhas de pedido nem totais do anterior. O que sobrevive à sessão é o mínimo para o dono
 recuperar o rascunho, e não é legível pelo seguinte.
 
+**3-bis. A revogação fecha a porta por onde a regra 2 mandava sair.** A regra 2 diz
+que os rascunhos ficam suspensos até *o dono se reautenticar e resolvê-los* — e num
+dispositivo revogado o dono não volta. A saída existe para o logout e desaparece
+exactamente no caso em que alguém não regressa.
+
+Encontrado a 04/09, ao escrever a régua do E13. **Fica em aberto de propósito e com
+o custo à vista:** o trabalho não é enviado, não é apagado em silêncio — porque
+apagar é perder o trabalho de alguém — e ninguém lhe pode chegar. As três saídas
+possíveis são o dono resolver noutro aparelho onde entre, um administrador da
+unidade resolver por ele, ou declarar-se que a revogação **descarta** e dizê-lo **ao
+revogar**, e não depois. Qualquer uma serve. O que não serve é ficar por decidir.
+
 **4. O `command_id` nasce no cliente, antes do envio, e sobrevive ao recarregamento.** Se
 morre com o separador do navegador, a retentativa cria uma segunda cobrança ou um segundo
 pedido — que é exactamente o defeito que ele existe para impedir.
