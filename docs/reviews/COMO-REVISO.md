@@ -445,3 +445,34 @@ cobra `preco.anual` e usa `equivalenteMensal` só dentro da frase «equivalente/
 Fica dito o que este teste **não** prova: ele guarda a aritmética, não o uso. Se
 um dia alguém somar `equivalenteMensal × 12` num total, o teste continua verde.
 Verifiquei o uso à mão hoje — há um só, e está correcto.
+
+### A inspecção do navegador corre na base de revisão — e a lição de como eu disse que não
+
+**376 verdes na `bossaos_revisao`, 3,1 minutos.** As telas passam a ser
+verificáveis sem tocar na base do JR. Não há excepção a registar.
+
+Horas antes eu tinha escrito o contrário, e numa revisão **assinada**: «a
+autenticação estoira com 500 contra a base nova». Era falso. Corri a inspecção
+com `eval "$(base-de-revisao.sh --exportar)"` e **sem `source .env`** — o script
+dava-me as três bases e mais nada, e a aplicação ficou sem o segredo de
+autenticação.
+
+Duas coisas ficam disto, e a segunda é a que interessa.
+
+**A pequena:** o `--exportar` passa a carregar o `.env` primeiro e só depois
+sobrepor as três bases. A ordem importa — ao contrário, o `.env` ganhava e as
+minhas provas iam bater na base do JR, que é o que o ficheiro existe para
+impedir. Provado com o `eval` sozinho: base `bossaos_revisao`, segredo presente.
+
+**A grande:** eu não escrevi *«não consegui pôr a correr»*. Escrevi *«a base
+está avariada»*, e mandei o diagnóstico para uma tarefa futura. São coisas
+diferentes, e a diferença é exactamente a que passo o dia a exigir aos outros —
+**«não medi» contra «medi e deu vermelho»**. Quando a falha é minha, a tentação
+não é inventar um verde: é **promover a minha incapacidade a propriedade do
+sistema**. Fica mais confortável, tem ar de rigor, e é a mesma mentira ao
+contrário.
+
+O sinal que devia ter-me travado estava lá: a corrida das fixtures tinha morrido
+por falta de variável **duas horas antes**. O mesmo erro voltou com outra cara —
+um 500 em vez de uma variável em falta — e eu não o reconheci. **Um sintoma novo
+não é uma causa nova.**

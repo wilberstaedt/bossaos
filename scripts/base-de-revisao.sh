@@ -51,6 +51,24 @@ U_AUTH="$(url auth "$SENHA_AUTH")"
 
 if [ "${1:-}" = "--exportar" ]; then
   # Para: eval "$(bash scripts/base-de-revisao.sh --exportar)"
+  #
+  # ── PORQUE E' QUE ISTO CARREGA O .env PRIMEIRO ──────────────────────────
+  #
+  # Ate 04/09 isto imprimia so as tres linhas de baixo. Quem fizesse apenas o
+  # eval ficava com as bases certas e SEM o resto do ambiente - segredo de
+  # autenticacao incluido. Apanhou-me duas vezes no mesmo dia: uma corrida
+  # morreu nas fixtures por falta de variavel, e outra devolveu 500 no sign-up.
+  # Da segunda escrevi numa revisao ASSINADA que a base de revisao estava
+  # avariada. Nao estava; faltava-lhe o ambiente que este script nao dava.
+  #
+  # A ordem importa: carrega-se o .env e SO DEPOIS se sobrepoem as tres bases.
+  # Ao contrario, o .env ganhava e as provas iam bater na base do JR - que e'
+  # exactamente o que este ficheiro existe para impedir.
+  if [ -f .env ]; then
+    echo "set -a; . '$(pwd)/.env'; set +a"
+  else
+    echo "echo 'AVISO: nao ha .env; o ambiente pode estar incompleto' >&2"
+  fi
   echo "export DATABASE_URL='$U_APP'"
   echo "export MIGRATION_DATABASE_URL='$U_MIG'"
   echo "export AUTH_DATABASE_URL='$U_AUTH'"
