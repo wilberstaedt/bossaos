@@ -1,60 +1,19 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E11 — revisão do Starter e primeiro marco utilizável
-**Estado:** as **CINCO** correcções do parecer estão feitas e declaradas —
-`docs/reviews/E11-CORRECCOES.md`. O sénior avisou que volta a medir e não aceita
-declaração. **Régua:** `docs/reviews/ALVO-E11.md` · parecer: `docs/reviews/E11.md`.
+**Etapa atual:** E12 — cores públicas e mudanças de plano (**7 telas**, `THEME 002-008`)
+**Estado:** autorizado 04/09, depois de o marco do Starter passar.
+**Régua:** `docs/reviews/ALVO-E12.md`, escrita antes de existir código · fonte dos
+planos e das cores em `docs/bossaos/PRECIFICACAO.md`.
 
-**1 · móvel: a dívida está VAZIA.** As 66 telas saíram — 63 na primeira volta e as últimas
-três depois de a correcção 5 as pôr de pé. `validar-movel.sh`: 109 de 109 com prova, 0
-declaradas. A medição encontrou **quatro defeitos de alvo de toque** que ninguém tinha
-visto, incluindo as caixas dos alérgenos a 13×13 — a tela onde um toque errado muda uma
-declaração com valor legal.
+**As três coisas que o E12 tem de mostrar ao mesmo tempo:**
+1. Restaurant e Pro **mudam** a cor pública.
+2. O Starter **não consegue** — e não é um ecrã escondido, é o servidor a recusar.
+3. **O que não é personalizável continua a não ser**, mesmo no plano de cima:
+   tipografia, componentes e as cores dos ESTADOS não são do restaurante.
 
-**2 · a recusa vista no produto.** Duas contas reais: A pede um recurso de B e vê a recusa
-no ecrã; **B pede o mesmo e vê-o**. `provar-isolamento-no-produto.sh` com **dois** controlos
-negativos, porque as recusas não são a mesma coisa — a de endereço alheio cai com uma
-pertença plantada, a de recurso alheio dentro da própria organização só cai com a política
-de linha desligada.
-
-**3 · os 12 botões.** Dois ganharam destino, dez saíram, os 7 das vitrinas ficaram. Guarda
-`botoes-com-accao.test.ts` com excepção por caminho. Corrigi também a nota do ONB-009, que
-prometia em prosa o que o botão prometia em vão.
-
-**4 · a jornada.** `provar-jornada.sh`: 3 jornadas, 18 passos, de uma organização que **não
-existe** até um estranho ver a carta e o site no ar — sem fixture no meio, com os
-identificadores tirados do redireccionamento do produto. Os **dois elos partidos** que a
-régua nomeou param-na: o menu sem secções e a unidade sem moeda.
-
-A jornada encontrou o que nenhuma prova de segmento via: **todas as submissões de formulário
-devolviam 500** (o `voltarPara` chamava `NextResponse.redirect` com um URL relativo, em 37
-rotas — e nenhuma prova submetia formulário, todas mandavam JSON); e o produto dizia **«sem
-preço» quando o preço existia**, porque o que faltava era a moeda da unidade.
-
-E fica dito o que a jornada mostrou sobre o marco: **hoje ninguém se inscreve sozinho.** Uma
-pessoa cria conta e organização e pára até alguém da BossaOS lhe dar plano e habilitação —
-que é a decisão do E05 e a regra da precificação, não um defeito.
-
-**5 · a tela de equipa.** `identidades_da_organizacao`, espelho da `identidade_por_email`,
-que devolve só id, email e nome e **verifica que a organização pedida é a do contexto da
-sessão**. Nada foi alargado: a leitura directa de `users` continua a devolver **uma linha, a
-própria**. `provar-identidades.sh` planta os **dois consertos errados** — alargar a política,
-e tirar a verificação de quem chama — e exige que cada um derrube a asserção certa.
-
-**Medido, com a árvore parada:** `provar-tudo.sh` **30 scripts, todos verdes** · `pnpm
-verificar` a 0 com **404 testes** · `pnpm inspeccionar` **337 verificações, 0 falhas**.
-
-**Nota de interacção, medida e não escondida:** o `provar-acesso.sh` falhou uma vez dentro
-do `provar-tudo.sh` e passou sozinho a seguir, e passou na segunda passagem da suite. Corri
-a jornada à mão imediatamente antes da primeira — e a jornada inscreve uma conta, com o
-limitador de abuso partilhado.
-
-**O que o marco exige, e o que disso já existe:**
-- Percorrer J01, J02 e J11 inteiros, nas duas superfícies — o arnês do navegador
-  ganhou semeadura no E10 e corre 254 casos a 360/390/768/1280/1440.
-- Um acesso cruzado entre inquilinos **negado**, visto no produto e não só na base.
-- Nenhuma falha bloqueante aberta; dependências reais (DNS) explícitas e não dadas
-  como concluídas.
+**E11 — MARCO DO STARTER APROVADO à 2ª.** Reprovado à 1ª com seis falhas, todas de
+medição e duas de assinatura minha. Fechadas e **reprovadas por comando**:
+`scripts/provar-marco-e11.sh` responde às seis pelo nome. `docs/reviews/E11.md`.
 
 **E10 VALIDADO à primeira** — 04/09. 29 telas. `provar-sites.sh` com 11 passos, 27
 casos e **8 controlos negativos**, incluindo o `catch` largo que esconde falha real
