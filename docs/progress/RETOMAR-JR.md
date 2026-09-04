@@ -321,3 +321,29 @@ problema**. Não é conforto — é a diferença entre corrigir e procurar.
 O `scripts/provar-staff-no-navegador.sh` recusa arrancar com a porta ocupada ou
 com outra passagem viva. Se escreveres um script que corre o arnês em ciclo,
 copia essas duas guardas: sem elas, o teu próprio ciclo é o candidato número um.
+
+## O que aterrou entre o E14 e o E17, e é fácil desfazer sem dar por isso
+
+**1. A garantia do QR vive num campo que NÃO existe.** `guest_sessions` não
+guarda a geração do QR que a abriu. Sem esse campo ninguém *pode* comparar a
+geração da sessão com a da mesa — e é essa comparação que faria a **rotação
+expulsar clientes a meio do prato**. Se alguma vez te apetecer acrescentar
+`qrGeneration` ali «para saber de onde veio a sessão», estás a reactivar o
+defeito, e nada te vai avisar. **Rodar não é revogar**, e é assim que se mantém.
+
+**2. `data-tela` quer dizer «esta página identifica-se a si própria».** As
+ligações da navegação levam `data-seccao`. Antes eram as duas coisas o mesmo
+atributo, e a asserção do marcador **não conseguia falhar** — a barra escrevia o
+id de todas as telas em todas as páginas. Ao corrigir isso descobriu-se que o
+STAFF-001 nunca tinha tido marcador nenhum. Não voltes a pôr `data-tela` num
+link.
+
+**3. A população das telas vem da MATRIZ, conjunto a conjunto.** Ler o
+`coverage.csv` e comparar, com guarda contra ler vazio. Contar só o número deixa
+passar uma tela trocada por outra. Foste tu que inventaste isto no E15; é régua
+desde então.
+
+**4. Duas suites de navegador ao mesmo tempo não medem o produto.** Medem quem
+chegou primeiro ao CPU, e o sintoma são falhas de ~12s que mudam de sítio a cada
+corrida. `scripts/maquina-livre.sh` avisa. O sénior corre na árvore e base dele;
+se vires um vermelho estranho, confirma primeiro que não há outra suite viva.
