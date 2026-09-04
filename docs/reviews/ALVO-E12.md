@@ -53,6 +53,29 @@ diferentes:
    duas primeiras e falharia esta. Sem o terceiro caso, «reverter» e «apagar» são
    indistinguíveis.
 
+## A minha sonda estava errada, e o executor corrigiu-a antes de eu a usar
+
+Escrevi `inspeccao/sonda-tema.ts` a ler sempre `:root`. **A implementação aplica o
+tema em `.bo-publico`**, e por uma razão que eu não tinha visto: isso **contém** o
+tema na superfície pública, para as cores de um restaurante não escorrerem para os
+ecrãs de operação — que não partilham rota nenhuma, mas partilham o CSS todo.
+
+**A minha sonda teria produzido uma retenção falsa.** Lia a raiz, não veria
+mudança, e eu concluiria que o tema não chega ao cliente — exactamente o defeito
+que ela existe para apanhar, ao contrário.
+
+Ele acrescentou o selector com valor por omissão `:root`, para o que já estava
+escrito não mudar de significado. E a leitura nos dois sítios passa a provar duas
+coisas em vez de uma:
+
+- em `.bo-publico`, os cinco tokens públicos **mudam** com o tema publicado;
+- em `:root`, **continuam nos valores de origem** — ou seja, o tema está contido
+  onde devia estar.
+
+**É melhor do que o que eu pedi**, e é a segunda vez nesta etapa que o instrumento
+dele responde a uma pergunta que a minha régua não sabia fazer. Fica registado
+aqui porque a régua é minha e estava incompleta.
+
 ## O que reprova à cabeça
 
 - **Cor lida do formulário e não da página servida.**
