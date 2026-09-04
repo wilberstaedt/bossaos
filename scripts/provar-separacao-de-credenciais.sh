@@ -28,7 +28,7 @@ verificacoes=0
 # mensagem dizer "esperadas 8" enquanto a comparação usava outro número: tinha o
 # valor escrito duas vezes. Uma régua que se descreve a si própria de forma
 # diferente da que aplica é uma régua que ninguém pode acreditar.
-MINIMO_VERIFICACOES=8
+MINIMO_VERIFICACOES=9
 
 verde() { printf '  \033[32mok\033[0m   %s\n' "$1"; verificacoes=$((verificacoes + 1)); }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); verificacoes=$((verificacoes + 1)); }
@@ -82,6 +82,30 @@ fi
 psql "$DATABASE_URL" -q -c "DELETE FROM app_meta WHERE key = 'prova_runtime'" >/dev/null 2>&1
 
 echo
+echo
+echo "4. A IDENTIDADE fica fora do alcance do runtime"
+# Acrescentado a 04/09, e nasce de um defeito real e nao de uma ideia.
+#
+# A tela de equipa (ORG-007) devolvia 500 e NUNCA tinha funcionado: lia `users`
+# pelo cliente do runtime, e o runtime nao ve `users`. A juncao devolvia nulos e a
+# pagina rebentava. Isso nao e defeito da base - e ESTA separacao, e esta certa.
+#
+# O conserto errado e obvio e tentador: dar ao runtime permissao de ler `users` e
+# a tela passa a renderizar. Isso trocava um ecra partido por um buraco de
+# seguranca, e NENHUMA verificacao aqui o apanhava, porque a seccao 2 so mede DDL.
+#
+# O par que da sentido: o runtime nao ve NENHUMA linha e a migracao ve algumas. Sem
+# a segunda metade, uma base vazia passaria isto de olhos fechados.
+n_runtime=$(psql "$DATABASE_URL" -tAc "SELECT count(*) FROM users" 2>/dev/null | tr -d ' ')
+n_migracao=$(psql "$MIGRATION_DATABASE_URL" -tAc "SELECT count(*) FROM users" 2>/dev/null | tr -d ' ')
+if [ -z "$n_migracao" ] || [ "${n_migracao:-0}" -eq 0 ]; then
+  vermelho "a migracao nao ve utilizadores — sem populacao, a recusa abaixo nao prova nada"
+elif [ "${n_runtime:-1}" -ne 0 ]; then
+  vermelho "o runtime ve $n_runtime utilizadores — a identidade deixou de estar separada"
+else
+  verde "o runtime ve 0 de $n_migracao utilizadores — identidade separada, com populacao a provar"
+fi
+
 if (( verificacoes < MINIMO_VERIFICACOES )); then
   echo
   echo "VERDE COM ZERO MEDIDO: só $verificacoes verificações correram, esperadas $MINIMO_VERIFICACOES."
