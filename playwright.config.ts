@@ -12,7 +12,24 @@ import { FICHEIRO_DE_SESSAO } from './inspeccao/caminhos.ts';
  * Corre contra a aplicação CONSTRUÍDA, não contra o servidor de desenvolvimento:
  * é a versão que vai para a rua que interessa medir.
  */
-const PORTA = 3010;
+/**
+ * A porta vem do ambiente, com 3010 por omissão.
+ *
+ * Fixa, o revisor e o executor não podem medir ao mesmo tempo: a 04/09 tentei
+ * três vezes correr a prova do tema enquanto o executor a corria também, e as
+ * três leituras foram inúteis — uma disse «porta já em uso», outra deu um
+ * vermelho que não era o esperado, e a terceira apanhou um `.next` a meio de dois
+ * builds a colidir.
+ *
+ * Nenhuma dessas era um defeito do produto, e a pior parte é que a primeira
+ * PARECIA um. Duas pessoas a medir a mesma coisa no mesmo sítio produzem
+ * resultados que não distinguem o produto do arnês.
+ *
+ * `PORTA_INSPECCAO=3012 npx playwright test` dá a quem revê um sítio só seu. O
+ * `BETTER_AUTH_URL` acompanha, senão a biblioteca recusa a origem e devolve 403
+ * ao registar — sem dizer uma palavra sobre portas.
+ */
+const PORTA = Number(process.env.PORTA_INSPECCAO ?? 3010);
 
 export default defineConfig({
   testDir: './inspeccao',

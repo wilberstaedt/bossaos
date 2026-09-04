@@ -95,6 +95,19 @@ deu um vermelho que **não era o esperado**, e a segunda nem arrancou o servidor
 Fui à causa e não era o produto: **os dois builds colidiram**, e o segundo apanhou
 o `.next` do primeiro a meio.
 
+### A porta ficou resolvida; a BASE não
+
+A 04/09 tornei a porta da inspecção configurável (`PORTA_INSPECCAO`), e isso
+removeu uma classe de colisão: com o executor no 3010, corri no 3012 e a prova
+**arrancou**. Mas deu `a carta pública de B não responde` — e isso **também não é
+um defeito**, porque ele tinha um comando a correr há quatro minutos e a limpeza
+da inspecção dele apaga a semeadura a meio da minha.
+
+**O revisor precisa de base própria, não só de porta própria.** Enquanto os dois
+partilharem o PostgreSQL, uma revisão feita durante o trabalho dele mede o
+arnês, não o produto. Fica registado como a próxima coisa a resolver no arnês —
+e como a razão por que esta medição continua por fazer.
+
 **Não chamo defeito ao que não consegui medir**, e não é a primeira vez hoje que
 esta distinção me salva de uma acusação errada. Fica pendente para a passagem
 seguinte, com o recurso livre e **uma** corrida só.
