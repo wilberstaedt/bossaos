@@ -34,6 +34,46 @@ if [[ "$NODE_ACTUAL" != "$NODE_ESPERADO" ]]; then
   exit 2
 fi
 
+# ── A porta tem de estar LIVRE antes de começar ────────────────────────────
+#
+# Este script corre onze vezes o arnês, e cada corrida levanta o seu servidor. Um
+# servidor órfão de uma corrida anterior — interrompida a meio, que acontece — faz
+# o Playwright dizer «is already used» e o script responde «a prova de navegador
+# falhou com tudo ligado». É verdade e é inútil: manda procurar um defeito no
+# produto quando o problema é um processo esquecido.
+#
+# Aconteceu-me hoje, e custou uma leitura de logs para descobrir que o vermelho
+# não era sobre código nenhum. Um vermelho que não significa o que diz é pior do
+# que nenhum: ensina a desconfiar do vermelho.
+PORTA_DA_PROVA="${PORTA_INSPECCAO:-3010}"
+if lsof -ti:"$PORTA_DA_PROVA" >/dev/null 2>&1; then
+  echo "ERRO: a porta $PORTA_DA_PROVA já está ocupada." >&2
+  echo "      Provavelmente um servidor órfão de uma corrida interrompida." >&2
+  echo "      lsof -ti:$PORTA_DA_PROVA | xargs kill -9   — ou PORTA_INSPECCAO=3012 para outra." >&2
+  exit 2
+fi
+
+# ── E nenhuma outra passagem do arnês pode estar VIVA ──────────────────────
+#
+# Este é o defeito que me custou mais tempo hoje, e o diagnóstico só apareceu
+# porque a mensagem do 404 passou a perguntar à base: **«a sessão JÁ NÃO EXISTE
+# na base: alguém a apagou a meio da passagem»**.
+#
+# O arnês semeia no arranque e **apaga no fim** (`globalTeardown`). Uma passagem
+# anterior que ainda esteja viva — ou que tenha sido interrompida e chegue ao
+# fecho mais tarde — apaga as fixtures **por baixo** desta. O sintoma é um 404
+# numa rota com identificador, intermitente, em telas diferentes a cada corrida.
+#
+# Foi isto que fez uma passagem completa dar 404 no STAFF-005 e a seguinte dar
+# verde sem eu tocar em nada. Passei a ter a causa em vez da teoria, e a causa
+# não estava no produto.
+if pgrep -f 'playwright test' >/dev/null 2>&1; then
+  echo "ERRO: já há uma passagem do arnês a correr." >&2
+  echo "      Ela SEMEIA no arranque e APAGA no fim — as fixtures desta iam" >&2
+  echo "      desaparecer a meio, e o sintoma seria um 404 que não é do produto." >&2
+  exit 2
+fi
+
 PAINEL=apps/web/src/staff/PainelDaFila.tsx
 NAVEG=packages/fila/src/navegador.ts
 CSS=packages/ui/src/estilos.css
@@ -88,12 +128,12 @@ exigir_vermelho() {
 
 # O número MEDIDO hoje, e não um mínimo folgado.
 #
-# 3 de preparação + 14 do `staff.spec.ts` + 13 do `staff-telas.spec.ts`. Um
+# 3 de preparação + 15 do `staff.spec.ts` + 13 do `staff-telas.spec.ts`. Um
 # mínimo folgado — «pelo menos 12» — deixa a suite encolher para metade sem que
 # nada acenda, e encolher em silêncio é como uma suite deixa de medir. Quando a
 # etapa entregar mais casos, este número sobe com eles; é uma linha a mudar, e a
 # alternativa é não saber.
-CASOS_MINIMOS=30
+CASOS_MINIMOS=31
 
 echo "1. Com tudo ligado"
 if correr /tmp/bossaos-staff-nav-ligado.txt; then
@@ -301,7 +341,35 @@ exigir_vermelho "caiu o marcador: uma tela sem cabecalho proprio deixou de passa
 cp "$ORIG_PECAS" "$PECAS"; rm -f "$ORIG_PECAS"
 
 echo
-echo "10. Reposto — tem de voltar ao verde"
+echo "10. CONTROLO NEGATIVO — a origem do pedido some do ecra"
+# O buraco que o senior encontrou na assinatura: a origem estava no PRODUTO e nao
+# havia uma unica prova que a observasse. Nao era defeito — era uma propriedade
+# implementada e por provar, que e' a definicao do que pode regredir em silencio.
+#
+# A regra que ele completou, e que este controlo executa: para cada aceite,
+# aponta a linha do produto onde ele e' exercido E a assercao que fica vermelha
+# se essa linha desaparecer. Uma sem a outra deixa passar as duas formas —
+# codigo sem prova, e prova sem codigo.
+ANDAMENTO="apps/web/app/[idioma]/staff/[locationId]/andamento/page.tsx"
+ORIG_ANDAMENTO=$(mktemp); cp "$ANDAMENTO" "$ORIG_ANDAMENTO"
+python3 - <<'PYORIGEM'
+import io, re
+p = 'apps/web/app/[idioma]/staff/[locationId]/andamento/page.tsx'
+s = io.open(p, encoding='utf-8').read()
+antigo = """            <p data-teste="origem" data-canal={pedido.canal}>
+              {s.origem}: {pedido.canal === 'SALA' ? s.origemEmpregado : s.origemCliente}
+            </p>"""
+assert antigo in s, 'a linha da origem nao esta onde se esperava'
+# A origem some do ecra. O pedido continua a aparecer — e e' esse o defeito:
+# nada estoira, so' deixa de se poder distinguir de onde veio.
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, ''))
+PYORIGEM
+exigir_vermelho "caiu a origem: os dois pedidos deixaram de se distinguir" \
+  'origem do pedido' /tmp/bossaos-staff-nav-origem.txt
+cp "$ORIG_ANDAMENTO" "$ANDAMENTO"; rm -f "$ORIG_ANDAMENTO"
+
+echo
+echo "11. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-staff-nav-reposto.txt; then
   passou=$(grep -oE '[0-9]+ passed' /tmp/bossaos-staff-nav-reposto.txt | grep -oE '[0-9]+' || echo 0)
   if (( passou < CASOS_MINIMOS )); then

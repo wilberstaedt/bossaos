@@ -660,3 +660,54 @@ test.describe.serial('o aparelho declara quantos rascunhos tem', () => {
     await esquecerDeclaracao(alvos.deviceId);
   });
 });
+
+/**
+ * A ORIGEM do pedido, conservada e **distinguível no ecrã**.
+ *
+ * ── Escrita no produto e medida em lado nenhum ───────────────────────────
+ *
+ * O aceite 2 da régua pede *«cliente e empregado ao mesmo tempo, origens
+ * conservadas»*. A metade do duplicado está garantida pela forma desde o E14 —
+ * cada linha é uma linha nova, com controlo negativo. **A metade da origem não
+ * estava medida em sítio nenhum**: o canal aparecia no ecrã e nada o observava.
+ *
+ * Foi o sénior que o apanhou, a procurar `data-canal` nas provas e a encontrar
+ * zero. Não era defeito de produto: era uma propriedade **implementada e por
+ * provar**, que é a definição do que pode regredir em silêncio.
+ *
+ * ── E é preciso o PAR ────────────────────────────────────────────────────
+ *
+ * Com um pedido só, isto passava com um ecrã que escrevesse «Sala» à mão. Dois
+ * pedidos vivos, um por cada via, e o ecrã tem de os **distinguir** — e o texto
+ * tem de ser diferente, não só o atributo: um `data-canal` certo por cima de
+ * duas frases iguais não diz nada a quem está na sala.
+ */
+test.describe('a origem do pedido conserva-se, e vê-se', () => {
+  test.use({ viewport: { width: 390, height: 780 } });
+
+  test('sala e cliente aparecem os DOIS, e distinguem-se por palavras', async ({ page }) => {
+    await page.context().setOffline(false);
+    await page.goto(`${rotaDoStaff(alvos)}/andamento`);
+    await page.waitForLoadState('networkidle');
+
+    // Declarado antes de afirmar seja o que for: quantos pedidos há em marcha.
+    const quantos = Number(await page.locator('[data-teste="quantos"]').innerText());
+    expect(quantos, 'não há pedidos em marcha para medir a origem').toBeGreaterThanOrEqual(2);
+
+    const daSala = page.locator('[data-teste="origem"][data-canal="SALA"]');
+    const doCliente = page.locator('[data-teste="origem"][data-canal="CARTA"]');
+    await expect(daSala, 'o pedido da sala não diz a origem').not.toHaveCount(0);
+    await expect(doCliente, 'o pedido do cliente não diz a origem').not.toHaveCount(0);
+
+    // ── E as PALAVRAS são diferentes ─────────────────────────────────────
+    //
+    // O atributo é para a prova; quem está na sala lê o texto. Duas frases
+    // iguais com atributos diferentes passavam a asserção acima e não
+    // distinguiam nada para a pessoa — que é o que o aceite pede.
+    const textoDaSala = (await daSala.first().innerText()).trim();
+    const textoDoCliente = (await doCliente.first().innerText()).trim();
+    expect(textoDaSala.length, 'a origem da sala está vazia').toBeGreaterThan(0);
+    expect(textoDaSala, 'as duas origens estão escritas com as mesmas palavras')
+      .not.toBe(textoDoCliente);
+  });
+});

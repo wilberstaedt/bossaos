@@ -569,6 +569,35 @@ async function principal(): Promise<void> {
       },
     });
 
+    // ── Um segundo pedido, do CLIENTE — e é ele que faz o par ────────────
+    //
+    // O aceite 2 da régua do E15 pede «cliente e empregado ao mesmo tempo,
+    // origens conservadas». Com um pedido só, a tela mostrava «Sala» em tudo e a
+    // asserção passava com um ecrã que escrevesse «Sala» à mão.
+    //
+    // O par é o que dá sentido: dois pedidos vivos na mesma unidade, um por
+    // `SALA` e outro por `CARTA`, **distinguíveis** no ecrã. E é também o
+    // cenário do duplicado que não é duplicado: o mesmo prato pedido pelas duas
+    // vias são dois pratos, e é a origem que o explica a quem acha que é engano.
+    const pedidoDoCliente = await prisma.order.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2, canal: 'CARTA',
+        numero: `${PREFIXO}C001`, estado: 'ACEITE',
+        abertoPor: 'cliente@exemplo.example',
+      },
+      select: { id: true },
+    });
+    await prisma.orderLine.create({
+      data: {
+        organizationId: IDS.orgA, orderId: pedidoDoCliente.id,
+        // O MESMO prato do pedido da sala, de propósito: é o caso em que alguém
+        // olha para os dois e conclui que é engano.
+        nome: `${PREFIXO}Arroz de sepia y alcachofas para dos`,
+        quantidade: 2, precoMenor: 2400, moeda: 'EUR', estado: 'ACEITE',
+        aceiteEm: new Date(),
+      },
+    });
+
     // ── O SITE do restaurante (E10), publicado ────────────────────────────
     //
     // Sem isto, as telas públicas do E10 mediam a página de "não encontrado" e
