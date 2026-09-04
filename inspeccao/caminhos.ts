@@ -14,8 +14,21 @@
  * quiser não paga por isso.
  */
 
-/** Onde fica a sessão que o `preparar` guarda e o projecto `painel` carrega. */
-export const FICHEIRO_DE_SESSAO = 'inspeccao/.resultados/sessao.json';
+/**
+ * Onde fica a sessão que o `preparar` guarda e o projecto `painel` carrega.
+ *
+ * ── FORA do `outputDir`, e isto foi uma corrida a sério ───────────────────
+ *
+ * Estava em `inspeccao/.resultados/`, que é o `outputDir` do Playwright — e o
+ * Playwright **limpa o `outputDir` quando cada projecto arranca**. O `preparar`
+ * escrevia lá o ficheiro e o `painel`, ao arrancar, apagava-o: 79 falhas com
+ * `ENOENT` em telas que tinham passado dez minutos antes.
+ *
+ * O que torna isto perigoso não é a falha — é que a corrida também podia dar
+ * verde. Um resultado que muda sem ninguém tocar em nada não é uma medição, e
+ * essa regra vale nos dois sentidos.
+ */
+export const FICHEIRO_DE_SESSAO = 'inspeccao/.sessao/estado.json';
 
 /** O email da conta do arnês. Do domínio da inspecção, para a limpeza o apanhar. */
 export const EMAIL_DO_ARNES = 'painel@inspeccao.example';
