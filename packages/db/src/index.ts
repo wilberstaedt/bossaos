@@ -222,3 +222,12 @@ export {
   resumoDoServico, porCanal, porProduto, porCategoria, porFranja, porMesa,
   type ResumoDoServico,
 } from './relatorios.ts';
+
+// ── E16 · produção, estações e KDS ─────────────────────────────────────────
+export {
+  listarEstacoes, guardarEstacao, listarRegras, guardarRegra, apagarRegra,
+  estacoesParaProduto, criarTarefasDasLinhas, tarefasDaEstacao, estadoDerivado,
+  transitarTarefa, priorizarTarefa, cancelarTarefasDaLinha, eventosDesde, cursorActual,
+  type EstadoDaProducao, type ActorDeProducao, type ResultadoDaTransicao,
+  type EventoDeProducao,
+} from './producao.ts';

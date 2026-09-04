@@ -132,6 +132,10 @@ model Organization {
   dominios          CustomDomain[]
   dominiosDetidos   CustomDomainOwner[]
 
+  estacoesDeProducao ProductionStation[]
+  regrasDeRoteamento RoutingRule[]
+  tarefasDeProducao  ProductionTask[]
+  eventosDeProducao  ProductionEvent[]
   @@map("organizations")
   revisoes        MenuRevision[]
   publicacoes     MenuPublication[]
@@ -249,6 +253,9 @@ model Location {
   pedidos         Order[]
   regrasDePedidos OrderRules?
 
+  estacoesDeProducao ProductionStation[]
+  regrasDeRoteamento RoutingRule[]
+  tarefasDeProducao  ProductionTask[]
   @@unique([organizationId, id], name: "location_por_organizacao")
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -1019,6 +1026,7 @@ model Category {
   produtos     Product[]
   emMenus      MenuCategory[]
 
+  regrasDeRoteamento RoutingRule[]
   @@unique([organizationId, id], name: "categoria_por_organizacao")
   @@index([organizationId])
   @@index([organizationId, brandId])
@@ -1078,6 +1086,7 @@ model Product {
 
   /// SKU único POR MARCA, e só quando preenchido. Vários `NULL` não colidem no
   /// PostgreSQL, que é exactamente o que se quer: nem todo o produto tem SKU.
+  regrasDeRoteamento RoutingRule[]
   @@unique([organizationId, brandId, sku])
   @@unique([organizationId, id], name: "produto_por_organizacao")
   @@index([organizationId])
@@ -2413,6 +2422,7 @@ model Order {
   envios       OrderSubmission[]
   eventos      OrderEvent[]
 
+  tarefas ProductionTask[]
   @@unique([organizationId, id], name: "pedido_por_organizacao")
   @@unique([locationId, numero], name: "numero_por_unidade")
   @@index([organizationId, locationId, estado])
@@ -2469,6 +2479,7 @@ model OrderLine {
   linhaPai     OrderLine?   @relation("componenteDeCombo", fields: [organizationId, linhaPaiId], references: [organizationId, id], onDelete: Cascade)
   componentes  OrderLine[]  @relation("componenteDeCombo")
 
+  tarefas ProductionTask[]
   @@unique([organizationId, id], name: "linha_por_organizacao")
   @@index([organizationId, orderId])
   @@index([linhaPaiId])
@@ -2553,4 +2564,233 @@ model OrderRules {
   location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
 
   @@map("order_rules")
+}
+
+// ── E16 · produção, estações e KDS ─────────────────────────────────────────
+
+/// O que uma estação faz. **Não é o mesmo que a `Estacao` do dispositivo.**
+///
+/// A `Estacao` do E13 diz onde um APARELHO está (sala, cozinha, balcão,
+/// gerência) e limita o que ele pode comandar. Isto diz o que um POSTO DE
+/// TRABALHO faz, e é do restaurante: «cozinha quente» e «cozinha fria» são duas
+/// estações de produção no mesmo sítio, e o atlas nomeia-as (KDS-002).
+///
+/// São coisas diferentes com nomes parecidos, e é por isso que estão em enums
+/// separados em vez de num só «suficientemente geral».
+enum TipoDeEstacao {
+  /// Prepara comida. Tem bilhetes, temporizadores e um «pronto».
+  PREPARACAO
+  /// Coordena a saída. Não prepara nada — vê o que as outras estão a fazer.
+  EXPO
+}
+
+/// O estado de uma TAREFA de produção.
+///
+/// ── Porque é que não reutiliza a `EstadoDeTarefa` ─────────────────────────
+///
+/// Já existe uma `EstadoDeTarefa` neste schema, e é da **caixa de saída**:
+/// PENDENTE, A_CORRER, CONCLUIDA, FALHADA — o vocabulário de um trabalho de
+/// fundo que pode falhar e ser repetido. Uma tarefa de cozinha não «falha» nem
+/// se repete sozinha: começa, fica pronta, sai, ou é cancelada por uma pessoa.
+///
+/// Reutilizar o enum poupava seis linhas e obrigava para sempre a perguntar de
+/// qual dos dois se está a falar.
+enum EstadoDaProducao {
+  POR_INICIAR
+  EM_PREPARO
+  PRONTA
+  ENTREGUE
+  CANCELADA
+}
+
+/// Uma estação de produção da unidade: cozinha quente, fria, bar, expo.
+model ProductionStation {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  nome           String
+  tipo           TipoDeEstacao @default(PREPARACAO) 
+  ordem          Int    @default(0)
+
+  /// ── Quantos bilhetes o ecrã mostra de uma vez. É VISUALIZAÇÃO ──────────
+  ///
+  /// «Quantidade máxima visível, prioridade e ordem de pratos são regras de
+  /// visualização, não regras de fila» (`kds-e-tempo-real.md`). O erro concreto
+  /// que isto previne está escrito lá: o KDS mostra doze, chegam vinte, e os
+  /// oito de baixo **desaparecem** em vez de ficarem alcançáveis. Parece limpo,
+  /// e é comida que nunca é feita.
+  ///
+  /// Por isso este número **nunca** entra num `WHERE` nem num `take` que decida
+  /// o que existe: entra na apresentação, e o que fica de fora continua contado
+  /// e alcançável.
+  limiteVisivel  Int    @default(12) @map("limite_visivel")
+
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  regras       RoutingRule[]
+  tarefas      ProductionTask[]
+
+  @@unique([organizationId, id], name: "estacao_por_organizacao")
+  @@unique([locationId, nome], name: "estacao_por_unidade")
+  @@index([organizationId, locationId])
+  @@map("production_stations")
+}
+
+/// Qual estação faz o quê. **Configuração do restaurante, não código.**
+///
+/// ── Não há regra por omissão, e isso é a decisão ──────────────────────────
+///
+/// «Ausência de regra não é *cozinha por omissão*» — o contrato di-lo pelo nome.
+/// Um item sem roteamento definido gera uma tarefa **sem estação**, que aparece
+/// como não encaminhada a quem configura. Mandá-lo em silêncio para a estação
+/// mais provável é inventar uma decisão do dono e esconder que foi inventada.
+///
+/// ── E TODAS as regras que casam aplicam-se ────────────────────────────────
+///
+/// Não há precedência entre uma regra de produto e uma de categoria: as duas
+/// valem, e o resultado são duas tarefas. É o que faz um hambúrguer com batata
+/// ser grelha **e** fritadeira — o caso que parte o modelo ingénuo.
+///
+/// A alternativa — o produto «ganhar» à categoria — teria de ser uma decisão do
+/// restaurante, e este contrato diz que eu não a tomo. Com a união, quem quer
+/// uma estação só põe uma regra só; com a precedência, quem quer duas não tinha
+/// como o dizer.
+model RoutingRule {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  stationId      String @map("station_id") @db.Uuid
+
+  /// A regra aponta a um produto **ou** a uma categoria. Nunca aos dois, e
+  /// nunca a nenhum — uma restrição na base garante-o, para não depender de
+  /// quem escreve.
+  productId  String? @map("product_id") @db.Uuid
+  categoryId String? @map("category_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location          @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  estacao      ProductionStation @relation(fields: [organizationId, stationId], references: [organizationId, id], onDelete: Cascade)
+  produto      Product?          @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Cascade)
+  categoria    Category?         @relation(fields: [organizationId, categoryId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([locationId, stationId, productId], name: "regra_por_produto")
+  @@unique([locationId, stationId, categoryId], name: "regra_por_categoria")
+  @@index([organizationId, locationId])
+  @@map("routing_rules")
+}
+
+/// Uma TAREFA de produção. **A unidade da estação é isto, não a linha.**
+///
+/// ── O modelo ingénuo e porque não está aqui ───────────────────────────────
+///
+/// «Cada linha de pedido pertence a uma estação» é a primeira coisa que se
+/// escreve e passa em quase todos os testes, porque quase todos os pratos são de
+/// uma estação só. Parte no primeiro que precisa de duas — e o defeito não dá
+/// erro: dá comida em falta, descoberta pelo cliente.
+///
+/// Um-para-muitos desde o primeiro dia, mesmo com a maioria a ter uma só, porque
+/// o dia em que tiver duas é uma **migração** e não uma configuração.
+model ProductionTask {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  orderId        String @map("order_id") @db.Uuid
+  lineId         String @map("line_id") @db.Uuid
+
+  /// `null` é **não encaminhada**, e é um estado real: há trabalho e ninguém foi
+  /// avisado. Aparece a quem configura, em vez de ir para a estação mais
+  /// provável sem o dizer.
+  stationId String? @map("station_id") @db.Uuid
+
+  estado EstadoDaProducao @default(POR_INICIAR)
+
+  /// ── A versão, e é ela que impede o ecrã de REGREDIR ───────────────────
+  ///
+  /// «Uma versão antiga nunca se aplica sobre uma mais recente» — e o que não
+  /// pode acontecer é um evento atrasado reabrir um bilhete que já saiu.
+  /// Eventos repetidos e fora de ordem são normais, não são avaria.
+  versao Int @default(1)
+
+  /// ── Os carimbos são do SERVIDOR, sempre ───────────────────────────────
+  ///
+  /// «Os temporizadores contam a partir do carimbo do servidor, nunca do relógio
+  /// do tablet.» O tablet da cozinha é exactamente o aparelho que ninguém
+  /// acerta — e com o relógio dele um bilhete velho podia parecer novo.
+  ///
+  /// `DEFAULT now()` na base e nunca um valor vindo do cliente: a garantia está
+  /// na forma, e não em quem escreve se lembrar.
+  criadaEm    DateTime  @default(now()) @map("criada_em") @db.Timestamptz(6)
+  iniciadaEm  DateTime? @map("iniciada_em") @db.Timestamptz(6)
+  prontaEm    DateTime? @map("pronta_em") @db.Timestamptz(6)
+  entregueEm  DateTime? @map("entregue_em") @db.Timestamptz(6)
+
+  /// Prioridade manual (KDS-008). **Exige motivo**: uma prioridade sem razão é
+  /// uma decisão que ninguém consegue rever depois do turno.
+  prioridade       Int     @default(0)
+  motivoPrioridade String? @map("motivo_prioridade")
+
+  /// Cancelar em preparação exige motivo (`kds-e-tempo-real.md`). O produto já
+  /// foi consumido em tempo e ingredientes, e isso fica registado.
+  motivoCancelamento String? @map("motivo_cancelamento")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location           @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  pedido       Order              @relation(fields: [organizationId, orderId], references: [organizationId, id], onDelete: Cascade)
+  linha        OrderLine          @relation(fields: [organizationId, lineId], references: [organizationId, id], onDelete: Cascade)
+  estacao      ProductionStation? @relation(fields: [organizationId, stationId], references: [organizationId, id], onDelete: Restrict)
+  eventos      ProductionEvent[]
+
+  @@unique([organizationId, id], name: "tarefa_por_organizacao")
+  /// Uma linha não gera duas tarefas para a MESMA estação. A base recusa-o, e
+  /// por isso um roteamento repetido não vira trabalho a dobrar na cozinha.
+  @@unique([lineId, stationId], name: "tarefa_por_linha_e_estacao")
+  @@index([organizationId, locationId, estado])
+  @@index([organizationId, orderId])
+  @@map("production_tasks")
+}
+
+/// O evento durável do KDS, e o **cursor** de retoma.
+///
+/// ── Porque é que o cursor é um inteiro e não o relógio ────────────────────
+///
+/// «SSE com cursor e eventos duráveis; ao detectar um intervalo desconhecido,
+/// vai ao estado autoritativo em vez de adivinhar.» Um carimbo de tempo não
+/// serve de cursor: dois eventos no mesmo milissegundo são indistinguíveis, e um
+/// relógio que ande para trás faz o cliente saltar eventos sem dar por isso.
+///
+/// Uma sequência é monótona por construção — e «falta um evento no meio» passa a
+/// ser uma subtracção, em vez de uma suposição.
+model ProductionEvent {
+  /// O CURSOR. `BigInt` autoincremental: monótono, e sem buracos que o cliente
+  /// tenha de interpretar.
+  cursor         BigInt @id @default(autoincrement())
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  taskId         String? @map("task_id") @db.Uuid
+  orderId        String  @map("order_id") @db.Uuid
+
+  accao   String
+  /// A versão da tarefa DEPOIS deste evento. É o que o cliente compara para não
+  /// deixar um evento atrasado sobrepor-se a um mais recente.
+  versao  Int
+  detalhe Json?
+
+  actorEmail String   @map("actor_email")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  tarefa       ProductionTask? @relation(fields: [organizationId, taskId], references: [organizationId, id], onDelete: Cascade)
+
+  @@index([organizationId, locationId, cursor])
+  @@map("production_events")
 }

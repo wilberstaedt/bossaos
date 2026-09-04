@@ -154,3 +154,9 @@ export {
 export {
   TENTATIVAS_ATE_BLOQUEAR, MINUTOS_DE_BLOQUEIO, MINUTOS_DE_PAREAMENTO,
 } from './dispositivos.ts';
+
+export {
+  aplicarNoKds, aplicarSequencia, projeccaoVazia, minutosDecorridos, repartirBacklog,
+  type BilheteNoEcra, type EventoRecebido, type ProjeccaoDoKds,
+  type ResultadoDaAplicacao, type EstadoDaTarefaNoEcra,
+} from './kds.ts';

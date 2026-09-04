@@ -91,7 +91,15 @@ export default async function EditarPedido({
           <span className="bo-campo">
             <label className="bo-campo__rotulo" htmlFor="estado">{p.estado}</label>
             <select className="bo-campo__controlo" id="estado" name="estado" defaultValue={pedido.estado}>
-              {['RASCUNHO', 'ACEITE', 'EM_PREPARO', 'PRONTO', 'ENTREGUE'].map((e) => (
+              {/* ── `EM_PREPARO` e `PRONTO` SAÍRAM desta lista (E16) ──────────
+                  Não é arrumação: são estados de PRODUÇÃO e passaram a derivar
+                  das tarefas das estações. Deixá-los aqui era oferecer a alguém
+                  a criação da segunda verdade que o contrato proíbe — e a base
+                  recusa-os agora com um gatilho, portanto isto era um selector
+                  que dava erro a quem o usasse.
+                  Quem quer saber se está pronto olha ao KDS, que conta as
+                  tarefas; quem quer forçar não pode, e é essa a decisão. */}
+              {['RASCUNHO', 'ACEITE', 'ENTREGUE'].map((e) => (
                 <option key={e} value={e}>{e}</option>
               ))}
             </select>

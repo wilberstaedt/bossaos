@@ -1,5 +1,5 @@
 import { Aviso, Etiqueta } from '@bossaos/ui';
-import { listarPedidos } from '@bossaos/db';
+import { estadoDerivado, listarPedidos } from '@bossaos/db';
 import { type Idioma } from '@bossaos/i18n';
 import { carregarStaff } from '../../../../../src/staff/carregar-staff.ts';
 import { comEscopoDoPedido } from '../../../../../src/sessao.ts';
@@ -29,8 +29,31 @@ export default async function EntregarDoStaff({
   const busca = (await searchParams) ?? {};
   const s = textosDoStaff(idioma);
   const { sessao, unidade, orgSlug } = await carregarStaff(idioma, locationId);
-  const pedidos = await comEscopoDoPedido(sessao, (db) =>
-    listarPedidos(db, unidade.id, { estado: 'PRONTO' }));
+  // ── «Pronto» passou a ser DERIVADO das tarefas (E16) ──────────────────
+  //
+  // Era `listarPedidos(..., { estado: 'PRONTO' })`, e `orders.estado` já não
+  // recebe esse valor: o contrato de produção diz que ele deriva das tarefas, e
+  // a base recusa-o por escrita directa. Deixar o filtro como estava dava uma
+  // lista **sempre vazia** — e uma lista vazia lê-se como «não há nada pronto»,
+  // que é a mentira que esta família de ecrãs existe para não contar.
+  //
+  // «Pronto» é TODAS as tarefas prontas. Com a penúltima pronta, o pedido ainda
+  // não está — e é `estadoDerivado` que sabe isso, num sítio só.
+  const pedidos = await comEscopoDoPedido(sessao, async (db) => {
+    const todos = await listarPedidos(db, unidade.id);
+    const tarefas = await db.productionTask.findMany({
+      where: { locationId: unidade.id },
+      select: { orderId: true, estado: true },
+    });
+    const porPedido = new Map<string, { estado: string }[]>();
+    for (const t of tarefas) {
+      const lista = porPedido.get(t.orderId) ?? [];
+      lista.push({ estado: t.estado });
+      porPedido.set(t.orderId, lista);
+    }
+    return todos.filter((p: { id: string }) =>
+      estadoDerivado(porPedido.get(p.id) ?? [])?.estado === 'PRONTO');
+  });
 
   return (
     <div className="bo-pagina">

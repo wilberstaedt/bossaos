@@ -261,14 +261,24 @@ describe('2. dois operadores sem apagar o trabalho um do outro', () => {
   });
 
   it('uma versão desactualizada dá CONFLITO — e recuperável', async () => {
+    // ── Os estados mudaram; o que isto mede não ────────────────────────────
+    //
+    // Este caso usava `EM_PREPARO` e `PRONTO`, e o que ele mede é a
+    // **concorrência optimista** — os estados eram só dois valores diferentes
+    // quaisquer. O E16 tornou-os derivados das tarefas de produção, e a base
+    // recusa-os agora por escrita directa.
+    //
+    // Trocam-se os valores por dois do ciclo COMERCIAL, que é o que
+    // `guardarPedido` continua a escrever. A propriedade medida é a mesma: uma
+    // versão desactualizada perde, e o conflito devolve com que continuar.
     const orderId = await pedidoAberto();
     const primeiro = await comA((db) => guardarPedido(db, IDS.orgA, {
-      orderId, versaoEsperada: 1, estado: 'EM_PREPARO', actor: ACTOR,
+      orderId, versaoEsperada: 1, estado: 'ACEITE', actor: ACTOR,
     }));
     assert.ok(primeiro.ok);
 
     const segundo = await comA((db) => guardarPedido(db, IDS.orgA, {
-      orderId, versaoEsperada: 1, estado: 'PRONTO', actor: ACTOR,
+      orderId, versaoEsperada: 1, estado: 'ENTREGUE', actor: ACTOR,
     }));
     assert.ok(!segundo.ok);
     assert.equal(segundo.motivo, 'conflito');
@@ -285,7 +295,7 @@ describe('2. dois operadores sem apagar o trabalho um do outro', () => {
     // Sem isto, o conflito acima passava num sistema que recusasse sempre.
     const orderId = await pedidoAberto();
     const r = await comA((db) => guardarPedido(db, IDS.orgA, {
-      orderId, versaoEsperada: 1, estado: 'EM_PREPARO', actor: ACTOR,
+      orderId, versaoEsperada: 1, estado: 'ACEITE', actor: ACTOR,
     }));
     assert.ok(r.ok);
     assert.equal(r.versao, 2);

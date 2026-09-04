@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import type { PrismaClient } from '@prisma/client';
 import { Prisma, type Canal } from '@prisma/client';
 import { comEscopo, type ClienteComEscopo } from './escopo.ts';
+import { cancelarTarefasDaLinha, criarTarefasDasLinhas } from './producao.ts';
 import { estaDisponivel, precoEfectivo } from './catalogo.ts';
 
 /**
@@ -170,6 +171,20 @@ export async function enviarPedido(
       if (aceites > 0) {
         await db.order.update({ where: { id: orderId }, data: { estado: 'ACEITE' } });
       }
+
+      // ── As tarefas de produção nascem na MESMA transacção ──────────────
+      //
+      // É a razão do E05 outra vez: um efeito fora da transacção sobrevive a um
+      // rollback ou perde-se num commit, e aqui as duas metades doem. Sem
+      // tarefas, o pedido existe e a cozinha nunca soube — que é o modo de falha
+      // que não dá erro nenhum. Com tarefas e sem pedido, a cozinha faz comida
+      // para um pedido que não existe.
+      //
+      // Uma linha sem regra de roteamento gera uma tarefa **sem estação**, e não
+      // zero tarefas: ausência de regra não é «cozinha por omissão».
+      await criarTarefasDasLinhas(db, organizationId, {
+        locationId: dados.locationId, orderId, actor: dados.actor,
+      });
 
       await db.orderEvent.create({
         data: {
@@ -411,6 +426,15 @@ export async function acrescentarLinhas(
         actorEmail: dados.actor.email, detalhe: { quantas: veredictos.length } as object,
       },
     });
+
+    // «Acrescentar depois do envio cria uma rodada nova, não altera a anterior.»
+    // As tarefas das linhas novas nascem aqui; as das anteriores ficam como
+    // estão — reescrever o bilhete que a cozinha tem à frente é mudar as
+    // instruções a meio.
+    await criarTarefasDasLinhas(db, organizationId, {
+      locationId: dados.locationId, orderId: pedido.id, actor: dados.actor,
+    });
+
     return { ok: true as const, acrescentadas: veredictos.length };
   });
 }
@@ -447,7 +471,19 @@ export async function guardarPedido(
   dados: {
     orderId: string;
     versaoEsperada: number;
-    estado?: 'RASCUNHO' | 'ACEITE' | 'EM_PREPARO' | 'PRONTO' | 'ENTREGUE' | 'CANCELADO';
+    /**
+     * O ciclo COMERCIAL do pedido. **`EM_PREPARO` e `PRONTO` saíram daqui.**
+     *
+     * `tarefas-de-producao-e-estacoes.md`, invariante 2: o estado de produção
+     * deriva das tarefas e nunca se escreve. Guardá-lo em paralelo cria duas
+     * verdades, e a que o expo mostra passa a depender de quem escreveu por
+     * último.
+     *
+     * Não é só uma convenção de tipos: a base tem um gatilho que recusa os dois
+     * estados por escrita directa. Este tipo existe para o erro aparecer no
+     * compilador em vez de aparecer em produção.
+     */
+    estado?: 'RASCUNHO' | 'ACEITE' | 'ENTREGUE' | 'CANCELADO';
     tableSessionId?: string | null;
     actor: ActorDoPedido;
   },
@@ -506,20 +542,47 @@ export async function cancelarLinha(
   organizationId: string,
   linhaId: string,
   actor: ActorDoPedido,
-): Promise<{ ok: true } | { ok: false; motivo: 'linha_desconhecida' }> {
+  /**
+   * O motivo. **Obrigatório se já houver trabalho em preparação.**
+   *
+   * «Cancelar uma linha já em preparação exige motivo» — o produto foi consumido
+   * em tempo e em ingredientes, e isso tem de ficar registado. Uma linha que
+   * ninguém começou ainda não custou nada, e por isso não se exige a mesma coisa.
+   */
+  motivo?: string,
+): Promise<{ ok: true; tarefasCanceladas: number }
+  | { ok: false; motivo: 'linha_desconhecida' | 'sem_motivo' }> {
   const linha = await db.orderLine.findFirst({
     where: { id: linhaId }, select: { id: true, orderId: true },
   });
   if (!linha) return { ok: false, motivo: 'linha_desconhecida' };
 
+  const emPreparo = await db.productionTask.count({
+    where: { lineId: linhaId, estado: { in: ['EM_PREPARO', 'PRONTA'] } },
+  });
+  if (emPreparo > 0 && !motivo?.trim()) return { ok: false, motivo: 'sem_motivo' };
+
   await db.orderLine.update({ where: { id: linhaId }, data: { estado: 'CANCELADA' } });
+
+  // ── E as tarefas dela, em TODAS as estações ─────────────────────────────
+  //
+  // Invariante 3 do contrato. Uma tarefa órfã numa estação é comida a ser feita
+  // para um pedido que já não existe — e a cozinha não tem como saber, porque do
+  // lado dela nada mudou.
+  const { canceladas } = await cancelarTarefasDaLinha(db, organizationId, {
+    lineId: linhaId,
+    motivo: motivo?.trim() || 'linha cancelada',
+    actor: { email: actor.email },
+  });
+
   await db.orderEvent.create({
     data: {
       organizationId, orderId: linha.orderId, accao: 'linha.cancelada',
-      actorEmail: actor.email, detalhe: { linhaId } as object,
+      actorEmail: actor.email,
+      detalhe: { linhaId, tarefasCanceladas: canceladas, motivo: motivo?.trim() ?? null } as object,
     },
   });
-  return { ok: true };
+  return { ok: true, tarefasCanceladas: canceladas };
 }
 
 // ── Leituras ───────────────────────────────────────────────────────────────
