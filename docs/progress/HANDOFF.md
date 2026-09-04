@@ -533,3 +533,27 @@ válida — se os três em falta forem o E00 a ter prometido mais do que entrego
 diz-se, e não custa nada agora.
 
 Faz isso quando fechares uma etapa e tiveres contexto de sobra, não a meio.
+
+## Dívidas conhecidas à entrada do E16
+
+Nenhuma bloqueia a etapa. Ficam escritas porque uma dívida que só existe na
+cabeça de quem a criou desaparece na sessão seguinte.
+
+**1. Metade das provas não corre na CI.** `scripts/validar-provas-na-ci.sh`
+mede-o e falha de propósito: 25 provas, 12 na CI. Entre as que ficam de fora
+estão a `provar-pedidos.sh` (E14), a `provar-sala.sh` (E13), a `provar-fila.sh` e
+a `provar-staff-no-navegador.sh` (E15), e a **`provar-marco-e11.sh`, o marco
+Starter inteiro**. **Depende da facturação do GitHub**, que está trancada desde
+04/09 e só o Matheus destranca. Vermelho nessa guarda **não é defeito de código**.
+
+**2. A identidade de dispositivo é uma etiqueta escolhida por quem tem sessão.**
+Declarada pelo JR no fim do E15. Não é falha do E15 — é o desenho actual, e o
+E15 não prometeu mais do que isso. Passa a ser dívida conhecida: qualquer etapa
+que faça uma decisão **depender** do dispositivo (e não do operador) tem de a
+fechar primeiro, ou está a confiar num nome que o próprio cliente escolhe.
+
+**3. O 404 fantasma do arnês tem causa e não é do produto.** Uma passagem
+anterior — viva ou interrompida a chegar ao fecho tarde — apaga as fixtures por
+baixo da que está a medir. Basta um `pnpm inspeccionar` esquecido. **Duas
+passagens do arnês nunca se sobrepõem**: quem revê corre na `bossaos_revisao` e
+na árvore de revisão, não na base de quem escreve.
