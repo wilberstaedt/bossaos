@@ -96,10 +96,24 @@ echo "4. A IDENTIDADE fica fora do alcance do runtime"
 #
 # O par que da sentido: o runtime nao ve NENHUMA linha e a migracao ve algumas. Sem
 # a segunda metade, uma base vazia passaria isto de olhos fechados.
+# A prova SEMEIA a sua propria populacao, e nao depende de quem correu antes.
+#
+# A primeira versao lia os utilizadores que por acaso la estivessem, e partiu a CI
+# na hora seguinte: no servidor a base nasce das migracoes e `users` esta vazia,
+# portanto a verificacao recusava-se a concluir - o que estava CERTO - e reprovava
+# o trabalho. A guarda tinha razao e estava no sitio errado.
+#
+# Semear aqui torna-a independente da ordem dos passos, que e a mesma disciplina
+# que aplico as sondas: quem precisa de populacao cria a sua e apanha-a a seguir.
+SONDA_UTILIZADOR="separacao-$$@prova.invalido"
+psql "$MIGRATION_DATABASE_URL" -q -c \
+  "INSERT INTO users (id, email, nome, updated_at) VALUES (gen_random_uuid(), '$SONDA_UTILIZADOR', 'Sonda', now())" \
+  >/dev/null 2>&1
 n_runtime=$(psql "$DATABASE_URL" -tAc "SELECT count(*) FROM users" 2>/dev/null | tr -d ' ')
 n_migracao=$(psql "$MIGRATION_DATABASE_URL" -tAc "SELECT count(*) FROM users" 2>/dev/null | tr -d ' ')
+psql "$MIGRATION_DATABASE_URL" -q -c "DELETE FROM users WHERE email = '$SONDA_UTILIZADOR'" >/dev/null 2>&1
 if [ -z "$n_migracao" ] || [ "${n_migracao:-0}" -eq 0 ]; then
-  vermelho "a migracao nao ve utilizadores — sem populacao, a recusa abaixo nao prova nada"
+  vermelho "a migracao nao ve utilizadores nem depois de eu semear um — a semeadura falhou, nao concluo nada"
 elif [ "${n_runtime:-1}" -ne 0 ]; then
   vermelho "o runtime ve $n_runtime utilizadores — a identidade deixou de estar separada"
 else
