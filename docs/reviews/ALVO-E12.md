@@ -64,8 +64,34 @@ diferentes:
   todas as asserções passam contra o tema base e não medem nada. A prova declara
   qual é o tema em vigor antes de afirmar seja o que for.
 
-## O que já sei que vou pedir e ainda não existe
+## A fonte apareceu, e confirma o que eu tinha deduzido
 
-O Starter tem **cores fixas** por decisão de plano. Portanto o E12 tem de mostrar
-duas coisas ao mesmo tempo: que o Restaurant/Pro muda a cor **e** que o Starter
-**não consegue** — e a segunda não é um ecrã escondido, é o servidor a recusar.
+Escrevi esta régua a deduzir do plano que o Starter tem cores fixas. A 04/09 o
+Matheus disse que havia um PDF de precificação, e havia — fora do repositório. Está
+agora em `docs/bossaos/PRECIFICACAO.md`, e **documenta a regra que eu tinha
+inferido**, mais duas que eu não sabia:
+
+| Regra | Onde estava |
+| --- | --- |
+| Cores públicas: **Starter fixas**, Restaurant e Pro personalizáveis | deduzida por mim, agora documentada |
+| Mudança de plano **preserva dados** e mostra **data, valor e impacto ANTES** de mudar | só no PDF |
+| A personalização preserva tipografia, componentes, legibilidade e cores dos estados | só no PDF |
+
+A terceira aperta o aceite 1 e vale a pena dizê-la em voz alta: **personalizar não é
+poder pintar tudo.** O restaurante muda a cor da experiência pública; a tipografia,
+os componentes e as cores de estado — sucesso, aviso, perigo — **não são dele**. Uma
+implementação que deixe o cliente repintar um estado de erro passa o aceite 1 e
+quebra a leitura de um ecrã de operação.
+
+Portanto o E12 mostra **três** coisas: que o Restaurant/Pro muda a cor, que o
+Starter **não consegue** — e a segunda não é um ecrã escondido, é o servidor a
+recusar — e que **o que não é personalizável continua a não ser**, mesmo para quem
+paga o plano de cima.
+
+## E o downgrade agora tem uma exigência escrita, não inferida
+
+*«Preservar dados e mostrar data, valor e impacto antes da mudança.»* São **quatro**
+coisas a verificar antes de o botão fazer efeito, e a que se esquece é o **impacto**:
+dizer que a aparência volta ao fixo, e o que deixa de estar disponível. Um ecrã que
+mostra data e valor e cala o impacto cumpre metade da regra e engana a pessoa
+exactamente no momento em que ela decide.
