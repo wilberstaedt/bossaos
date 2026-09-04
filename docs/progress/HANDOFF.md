@@ -1,12 +1,40 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E13 — sala, sessões, dispositivos e PIN (**16 telas**). **Retomado.**
-**Estado:** autorizado. O trabalho já commitado em `392fd29` continua de onde estava.
-**Régua:** `docs/reviews/ALVO-E13.md` — não mudou.
+**Etapa atual:** E13 — sala, sessões, dispositivos e PIN (**17 telas**, não 16).
+**Estado:** implementado, **aguardando validação** — 04/09. Declarado, não assinado.
+**Régua:** `docs/reviews/ALVO-E13.md` — não mudou. Detalhe: `docs/progress/E13.md`.
 
-**O defeito mais provável tem nome: concorrência provada em SEQUÊNCIA.** Duas
-aberturas com `await` entre elas medem sequência. A `validar-concorrencia.sh` já
-existe e exige despacho paralelo e índice único na base.
+**Dezassete e não dezasseis:** a régua e a autorização dizem 16; a matriz tem 17
+com `etapa_principal = E13`, e estão enumeradas no `inspeccao/sala.spec.ts`. As
+dezassete têm móvel medido.
+
+**O defeito mais provável tem nome, e a resposta tem duas formas.** «Concorrência
+provada em SEQUÊNCIA»: duas aberturas com `await` entre elas medem que o segundo
+pedido viu o primeiro já gravado. A prova faz as duas coisas — `Promise.all` (o
+que o produto faz) **e duas transacções demonstravelmente abertas ao mesmo
+tempo**, com o bloqueio da segunda **medido** antes do `COMMIT` da primeira. A
+unicidade vem de um **índice único PARCIAL** na base, e o par é a condição de
+estado: sem ela, o aceite 1 passa e a mesa nunca mais volta a abrir.
+
+**A `validar-concorrencia.sh` estava CEGA em dois sítios, e saía a verde.** Corri-a
+antes de declarar, como mandaste, e ela disse «ainda não há prova de concorrência»
+com a prova no repositório:
+1. a busca é sensível a maiúsculas e **«concorrência» não contém «concorrent»** —
+   a palavra mais provável no cabeçalho de uma prova de concorrência era a que o
+   padrão não apanhava;
+2. a verificação do índice casava com **`sessions_token_key` do E04** e passava
+   desde antes de o E13 existir. Medido: degradei o índice a serio para índice
+   normal e ela continuou verde.
+
+Corrigida: exige um índice **UNIQUE, sobre `table_sessions`, e PARCIAL**; as duas
+verificações **provam-se a si próprias** antes de julgar; e a ausência de prova
+passa a ser **FALHA** a partir do E13, em vez de pendência. Verificada a morder em
+três degradações.
+
+**A regra 3-bis do `offline-e-fila-local` fica DECIDIDA:** a revogação **descarta**
+a fila local, e diz-se **ao revogar**, com o número de rascunhos quando o aparelho
+o declarou e «não sei» quando nunca reportou. Pendência declarada: quem preenche
+esse número é a fila local, do E15/E16.
 
 **E12 VALIDADO à 2ª.** A 1ª assinatura foi minha e foi retirada: assinei sobre um
 verde só local. A prova **herdava** o plano da base em vez de o estabelecer, e
