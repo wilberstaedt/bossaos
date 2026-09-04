@@ -68,3 +68,29 @@ confirmada** — «não é limitação da primeira versão, é o desenho». O E1
 preço?** O do momento em que foi escrito, ou o do momento em que chegou? O aceite
 3 diz que preço novo não mexe em linha aceite — mas ali a linha ainda não tinha
 sido aceite quando o preço mudou. Não vi isto decidido, e é dinheiro.
+
+## Respondida — 04/09, antes da entrega
+
+Deixo a pergunta acima de pé, porque o que ela revela é que a régua tinha um
+buraco de dinheiro. A resposta está em
+`docs/architecture/preco-de-um-pedido-escrito-offline.md`, e passa a ser **aceite
+desta etapa**:
+
+**O momento que conta é a escrita. A autoridade sobre o que esse momento valia
+não é o aparelho — é a cópia da ementa que o servidor tem.** A linha viaja com o
+preço mostrado *e* a versão da ementa; à chegada o servidor confere. Bate certo,
+aceita. Não bate, ou versão desconhecida: **pára numa pessoa**, nunca
+reprecifica em silêncio.
+
+### O que exijo ver, e o que recuso
+
+Recuso a demonstração feliz — pedido escrito, preço mantido — porque a regra
+errada («o preço de quando chegou») passa-a sempre que o preço não muda no meio.
+O que essa prova mede é o caso em que as três regras concordam.
+
+1. **Mudar o preço ENTRE a escrita e a chegada** e a conta ficar no valor antigo.
+   Sem a alteração no meio, não foi medido nada.
+2. **Mandar uma linha com um preço que aquela versão da ementa não continha** e
+   verificar que não foi aceite *nem* recalculada — que parou numa decisão
+   humana. Esta é a metade que distingue a regra certa de confiar no aparelho.
+3. **Declarar quantas linhas o pedido tinha** antes de afirmar qualquer das duas.
