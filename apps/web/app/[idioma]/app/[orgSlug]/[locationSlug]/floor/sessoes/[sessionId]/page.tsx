@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { Aviso, Cartao, Etiqueta } from '@bossaos/ui';
 import { formatarHora, mensagensDe, type Idioma } from '@bossaos/i18n';
-import { historicoDaSessao, salaAgora } from '@bossaos/db';
+import { historicoDaSessao, pessoasDaUnidade, salaAgora } from '@bossaos/db';
 import { comEscopoDoPedido } from '../../../../../../../../src/sessao.ts';
 import { carregarSala } from '../../../../../../../../src/sala-da-pagina.ts';
 
@@ -27,11 +27,15 @@ export default async function FichaDaSessao({
   const s = m.salaE13;
   const { sessao, unidade } = await carregarSala(idioma, orgSlug, locationSlug);
 
-  const { mesa, historico } = await comEscopoDoPedido(sessao, async (db) => {
+  const { mesa, historico, pessoas } = await comEscopoDoPedido(sessao, async (db) => {
     const mesas = await salaAgora(db, unidade.id);
     return {
       mesa: mesas.find((x) => x.sessao?.id === sessionId) ?? null,
       historico: await historicoDaSessao(db, sessionId),
+      // As pertenças saem do escopo do pedido: uma pessoa de outro inquilino não
+      // aparece porque a política não a devolve, e não porque alguém se lembrou
+      // de a filtrar.
+      pessoas: await pessoasDaUnidade(db, sessao.contexto.organizationId),
     };
   });
 
@@ -68,7 +72,7 @@ export default async function FichaDaSessao({
           <dt>{s.estado}</dt>
           <dd>
             <Etiqueta tom={activa.estado === 'A_ENCERRAR' ? 'aviso' : 'perigo'}>
-              {activa.estado === 'A_ENCERRAR' ? s.aEncerrar : s.ocupada}
+              {activa.estado === 'A_ENCERRAR' ? s.aEncerrar : activa.estado === 'EM_LIMPEZA' ? s.emLimpeza : s.ocupada}
             </Etiqueta>
           </dd>
           <dt>{s.comensais}</dt>
@@ -78,6 +82,30 @@ export default async function FichaDaSessao({
           <dt>{s.responsavel}</dt>
           <dd>{activa.responsavel?.user.nome ?? activa.responsavel?.user.email ?? s.semResponsavel}</dd>
         </dl>
+      </Cartao>
+
+      <Cartao titulo={s.accaoResponsavel}>
+        {/* Muda-se durante o serviço, e é suposto: o turno acaba e a mesa passa a
+            outra pessoa com a conta a meio. Cada troca fica no histórico, que é o
+            que responde a «quem estava com esta mesa às onze». */}
+        <form method="post" action={`/api/org/${orgSlug}/sala`}>
+          <input type="hidden" name="idioma" value={idioma} />
+          <input type="hidden" name="locationSlug" value={locationSlug} />
+          <input type="hidden" name="accao" value="responsavel" />
+          <input type="hidden" name="sessaoId" value={sessionId} />
+          <span className="bo-campo">
+            <label className="bo-campo__rotulo" htmlFor="membershipId">{s.escolhePessoa}</label>
+            <select className="bo-campo__controlo" id="membershipId" name="membershipId"
+                    defaultValue={activa.responsavel?.id ?? pessoas[0]?.id} required>
+              {pessoas.map((p) => (
+                <option key={p.id} value={p.id}>{p.nome ?? p.email ?? p.id}</option>
+              ))}
+            </select>
+          </span>
+          <div className="bo-estado__accoes">
+            <button className="bo-botao bo-botao--primario" type="submit">{s.accaoResponsavel}</button>
+          </div>
+        </form>
       </Cartao>
 
       <section aria-labelledby="historico">

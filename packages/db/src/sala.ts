@@ -163,6 +163,80 @@ export async function iniciarEncerramento(
 }
 
 /**
+ * Manda limpar a mesa. Continua **ocupada**.
+ *
+ * O prompt do E13 pede «iniciar encerramento **e limpeza**», e a limpeza tem de
+ * ser um estado seu: entre a conta paga e a mesa pronta há alguém a limpá-la, e
+ * durante esse tempo a mesa está vazia mas **não está livre**. Sentar gente numa
+ * mesa por limpar é o defeito que este estado impede.
+ *
+ * Não custa nada ao modelo: `EM_LIMPEZA` continua dentro do índice único parcial,
+ * porque a condição dele é `estado <> 'FECHADA'`. A mesa fica ocupada sem uma
+ * segunda regra a ter de concordar com a primeira.
+ */
+export async function iniciarLimpeza(
+  db: ClienteComEscopo,
+  organizationId: string,
+  sessaoId: string,
+  actor: Actor,
+): Promise<ResultadoDeFecho> {
+  const sessao = await db.tableSession.findFirst({
+    where: { id: sessaoId }, select: { id: true, estado: true },
+  });
+  if (!sessao) return { ok: false, motivo: 'sessao_desconhecida' };
+  if (sessao.estado === 'FECHADA') return { ok: false, motivo: 'ja_fechada' };
+
+  await db.tableSession.update({ where: { id: sessaoId }, data: { estado: 'EM_LIMPEZA' } });
+  await registarEvento(db, organizationId, sessaoId, 'sessao.limpeza_iniciada', actor.email);
+  return { ok: true, sessaoId };
+}
+
+export type ResultadoDeResponsavel =
+  | { ok: true; sessaoId: string; responsavelId: string }
+  | { ok: false; motivo: 'sessao_desconhecida' | 'ja_fechada' | 'pessoa_desconhecida' };
+
+/**
+ * Atribui o responsável pela mesa (E13, entregar 2).
+ *
+ * ── É uma PERTENÇA, e não um utilizador ──────────────────────────────────
+ *
+ * O mesmo utilizador pode estar em duas organizações, e a responsabilidade por
+ * uma mesa é de uma delas. A pertença é lida **dentro do escopo**, e por isso uma
+ * pertença de outro inquilino simplesmente não aparece — a recusa é ausência, e
+ * não uma verificação que alguém se tenha de lembrar de escrever.
+ *
+ * Muda-se durante o serviço, e é suposto: o turno acaba e a mesa passa a outra
+ * pessoa com a conta a meio. Cada troca fica no histórico, que é o que responde a
+ * «quem estava com esta mesa às onze».
+ */
+export async function atribuirResponsavel(
+  db: ClienteComEscopo,
+  organizationId: string,
+  sessaoId: string,
+  membershipId: string,
+  actor: Actor,
+): Promise<ResultadoDeResponsavel> {
+  const sessao = await db.tableSession.findFirst({
+    where: { id: sessaoId }, select: { id: true, estado: true, responsavelId: true },
+  });
+  if (!sessao) return { ok: false, motivo: 'sessao_desconhecida' };
+  if (sessao.estado === 'FECHADA') return { ok: false, motivo: 'ja_fechada' };
+
+  const pertenca = await db.membership.findFirst({
+    where: { id: membershipId, estado: 'ACTIVO' }, select: { id: true },
+  });
+  if (!pertenca) return { ok: false, motivo: 'pessoa_desconhecida' };
+
+  await db.tableSession.update({
+    where: { id: sessaoId }, data: { responsavelId: pertenca.id },
+  });
+  await registarEvento(db, organizationId, sessaoId, 'sessao.responsavel_atribuido', actor.email, {
+    de: sessao.responsavelId, para: pertenca.id,
+  });
+  return { ok: true, sessaoId, responsavelId: pertenca.id };
+}
+
+/**
  * Fecha a sessão. A mesa **volta a poder abrir**.
  *
  * É o par do aceite 1, e é a condição `estado <> 'FECHADA'` do índice que o
@@ -355,6 +429,45 @@ export function listarCombinacoes(db: ClienteComEscopo, locationId: string) {
     orderBy: { nome: 'asc' },
     include: { membros: { include: { mesa: { select: { id: true, codigo: true } } } } },
   });
+}
+
+/**
+ * As pertenças activas, para escolher quem responde pela mesa.
+ *
+ * ── Passa pela PORTA, e a primeira versão não passava ─────────────────────
+ *
+ * Escrevi isto como `include: { user: { select: { nome, email } } }` e o ecrã
+ * respondeu **500**: `Cannot read properties of null (reading 'nome')`. O runtime
+ * não lê `users` — a política `identidade_propria` limita-o à linha dele próprio —
+ * e o Prisma devolve a relação a `null` sem se queixar.
+ *
+ * É **o mesmo defeito do ORG-007**, que o marco do E11 já tinha apanhado e
+ * fechado com `identidades_da_organizacao`, uma porta `SECURITY DEFINER` que abre
+ * uma pergunta e verifica o seu próprio chamador. Escrevê-lo outra vez mostra
+ * que a lição não vive na cabeça de quem escreve: vive na porta, e é por isso que
+ * a porta existe.
+ *
+ * O par que o E11 fixou continua de pé: a tela funciona **e** o runtime continua
+ * sem conseguir ler `users` directamente. Dar-lhe a permissão trocava um ecrã
+ * partido por um buraco de segurança.
+ */
+export async function pessoasDaUnidade(db: ClienteComEscopo, organizationId: string) {
+  const pertencas = await db.membership.findMany({
+    where: { estado: 'ACTIVO' },
+    select: { id: true, userId: true },
+    orderBy: { createdAt: 'asc' },
+  });
+  const identidades = await db.$queryRaw<{ id: string; email: string; nome: string | null }[]>`
+    SELECT * FROM identidades_da_organizacao(${organizationId}::uuid)`;
+  const porId = new Map(identidades.map((i) => [i.id, i]));
+
+  // Uma identidade que a porta não devolve fica com o email VAZIO e o nome nulo —
+  // nunca com um nome inventado nem com o identificador a fazer de nome.
+  return pertencas.map((p) => ({
+    id: p.id,
+    nome: porId.get(p.userId)?.nome ?? null,
+    email: porId.get(p.userId)?.email ?? '',
+  }));
 }
 
 export function listarTiposDeServico(db: ClienteComEscopo, locationId: string) {

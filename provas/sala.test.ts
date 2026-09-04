@@ -2,10 +2,10 @@ import { after, before, beforeEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from 'pg';
 import {
-  abrirSessao, arquivarMesa, comEscopo, criarPareamento, definirPin,
+  abrirSessao, arquivarMesa, atribuirResponsavel, comEscopo, criarPareamento, definirPin,
   dispositivoPodeComandar, entrarComPin, fecharSessao, historicoDaSessao,
-  iniciarEncerramento, obterPrisma, revogarDispositivo, salaAgora, transferirSessao,
-  turnoAberto, usarPareamento,
+  iniciarEncerramento, iniciarLimpeza, obterPrisma, pessoasDaUnidade,
+  revogarDispositivo, salaAgora, transferirSessao, turnoAberto, usarPareamento,
 } from '../packages/db/src/index.ts';
 import { IDS } from '../packages/db/prisma/fixtures.ts';
 
@@ -233,6 +233,64 @@ describe('1. duas aberturas CONCORRENTES produzem UMA sessão', () => {
     });
     assert.ok(!outra.ok);
     assert.equal(outra.motivo, 'mesa_ocupada');
+  });
+
+  it('a LIMPEZA não liberta a mesa — vazia por limpar não é livre', async () => {
+    // O prompt pede «iniciar encerramento e limpeza», e a limpeza tem de ser um
+    // estado seu: entre a conta paga e a mesa pronta há alguém a limpá-la. Sentar
+    // gente numa mesa por limpar é o defeito que este estado impede.
+    const s = await abrirSessao(prisma, IDS.orgA, {
+      locationId: IDS.unidadeA, tableId: MESA_A, actor: ACTOR,
+    });
+    assert.ok(s.ok);
+    await comA((db) => iniciarEncerramento(db, IDS.orgA, s.sessaoId, ACTOR));
+    await comA((db) => iniciarLimpeza(db, IDS.orgA, s.sessaoId, ACTOR));
+
+    const durante = await abrirSessao(prisma, IDS.orgA, {
+      locationId: IDS.unidadeA, tableId: MESA_A, actor: ACTOR,
+    });
+    assert.ok(!durante.ok);
+    assert.equal(durante.motivo, 'mesa_ocupada');
+
+    // E o PAR: fechada a limpeza, a mesa volta. É a mesma condição do índice —
+    // `EM_LIMPEZA` está dentro dele, `FECHADA` não.
+    await comA((db) => fecharSessao(db, IDS.orgA, s.sessaoId, ACTOR));
+    const depois = await abrirSessao(prisma, IDS.orgA, {
+      locationId: IDS.unidadeA, tableId: MESA_A, actor: ACTOR,
+    });
+    assert.ok(depois.ok, 'a limpeza deixou a mesa presa depois de fechar');
+  });
+
+  it('atribuir responsável fica no histórico, e uma pessoa que não é da casa não entra', async () => {
+    const s = await abrirSessao(prisma, IDS.orgA, {
+      locationId: IDS.unidadeA, tableId: MESA_A, actor: ACTOR,
+    });
+    assert.ok(s.ok);
+
+    const pessoas = await comA((db) => pessoasDaUnidade(db, IDS.orgA));
+    assert.ok(pessoas.length > 0, 'não há pertenças — não há o que atribuir');
+    const r = await comA((db) =>
+      atribuirResponsavel(db, IDS.orgA, s.sessaoId, pessoas[0]!.id, ACTOR));
+    assert.ok(r.ok);
+
+    const sala = await comA((db) => salaAgora(db, IDS.unidadeA));
+    assert.equal(sala.find((m) => m.id === MESA_A)?.sessao?.responsavel?.id, pessoas[0]!.id);
+
+    const historico = await comA((db) => historicoDaSessao(db, s.sessaoId));
+    assert.ok(historico.some((e) => e.accao === 'sessao.responsavel_atribuido'),
+      'a troca de responsável não ficou no histórico');
+
+    // A pertença de OUTRO inquilino não aparece dentro deste escopo, portanto a
+    // recusa é ausência — e não uma verificação que alguém se tenha de lembrar de
+    // escrever.
+    const deB = await sql.query(
+      'SELECT id FROM memberships WHERE organization_id = $1 LIMIT 1', [IDS.orgB]);
+    const alheia = deB.rows[0]?.id as string | undefined;
+    assert.ok(alheia, 'a organização B não tem pertença — o caso não mede nada');
+    const cruzada = await comA((db) =>
+      atribuirResponsavel(db, IDS.orgA, s.sessaoId, alheia, ACTOR));
+    assert.ok(!cruzada.ok);
+    assert.equal(cruzada.motivo, 'pessoa_desconhecida');
   });
 
   it('uma mesa que não existe dá ausência, e não "ocupada"', async () => {

@@ -1235,6 +1235,11 @@
     "fim": "Ends",
     "sessoesAbertas": "Open services",
     "mesasLivres": "Free tables",
-    "semFuso": "This unit has no time zone configured, so a time written here does not mean anything yet."
+    "semFuso": "This unit has no time zone configured, so a time written here does not mean anything yet.",
+    "emLimpeza": "Being cleaned",
+    "accaoLimpar": "Send for cleaning",
+    "avisoLimpeza": "The table stays occupied while it is cleaned. An empty table that has not been cleaned is not a free table.",
+    "accaoResponsavel": "Assign someone",
+    "escolhePessoa": "Who is in charge of the table"
   }
 }

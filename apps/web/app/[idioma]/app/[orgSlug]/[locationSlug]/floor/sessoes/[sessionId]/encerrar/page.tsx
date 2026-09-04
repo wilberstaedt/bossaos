@@ -61,13 +61,17 @@ export default async function EncerrarSessao({
       <Cartao titulo={mesa.codigo}>
         <dl className="bo-estado__factos">
           <dt>{s.estado}</dt>
-          <dd>{activa.estado === 'A_ENCERRAR' ? s.aEncerrar : s.ocupada}</dd>
+          <dd>{activa.estado === 'A_ENCERRAR' ? s.aEncerrar : activa.estado === 'EM_LIMPEZA' ? s.emLimpeza : s.ocupada}</dd>
           <dt>{s.comensais}</dt>
           <dd>{activa.comensais}</dd>
           <dt>{s.abertaEm}</dt>
           <dd>{formatarHora(activa.abertaEm, idioma)}</dd>
         </dl>
 
+        {/* ── Três passos, e o do meio é o que liberta a mesa mais tarde ────
+            pedir a conta → mandar limpar → fechar. A mesa fica ocupada nos dois
+            primeiros: uma mesa vazia por limpar não é uma mesa livre, e é só ao
+            fechar que ela sai do índice único e volta a poder abrir. */}
         {activa.estado === 'ABERTA' ? (
           <form method="post" action={`/api/org/${orgSlug}/sala`}>
             <input type="hidden" name="idioma" value={idioma} />
@@ -75,6 +79,14 @@ export default async function EncerrarSessao({
             <input type="hidden" name="accao" value="pedir_conta" />
             <input type="hidden" name="sessaoId" value={sessionId} />
             <button className="bo-botao bo-botao--primario" type="submit">{s.accaoPedirConta}</button>
+          </form>
+        ) : activa.estado === 'A_ENCERRAR' ? (
+          <form method="post" action={`/api/org/${orgSlug}/sala`}>
+            <input type="hidden" name="idioma" value={idioma} />
+            <input type="hidden" name="locationSlug" value={locationSlug} />
+            <input type="hidden" name="accao" value="limpar" />
+            <input type="hidden" name="sessaoId" value={sessionId} />
+            <button className="bo-botao bo-botao--primario" type="submit">{s.accaoLimpar}</button>
           </form>
         ) : (
           <form method="post" action={`/api/org/${orgSlug}/sala`}>
@@ -85,6 +97,9 @@ export default async function EncerrarSessao({
             <button className="bo-botao bo-botao--primario" type="submit">{s.accaoFechar}</button>
           </form>
         )}
+        {activa.estado === 'EM_LIMPEZA' ? (
+          <p className="bo-campo__ajuda">{s.avisoLimpeza}</p>
+        ) : null}
       </Cartao>
     </div>
   );

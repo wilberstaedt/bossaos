@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import {
-  abrirSessao, arquivarMesa, comEscopo, fecharSessao, iniciarEncerramento,
-  registar, transferirSessao,
+  abrirSessao, arquivarMesa, atribuirResponsavel, comEscopo, fecharSessao,
+  iniciarEncerramento, iniciarLimpeza, registar, transferirSessao,
 } from '@bossaos/db';
 import { corpoDaResposta, estadoHttp, exigirAccao } from '@bossaos/domain';
 import { comEscopoDoPedido, resolverPedido } from '../../../../../src/sessao.ts';
@@ -185,9 +185,22 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
       const sessaoId = texto(dados, 'sessaoId') ?? '';
       return { tipo: 'sessao' as const, sessaoId, r: await iniciarEncerramento(db, organizationId, sessaoId, actor) };
     }
+    if (accao === 'limpar') {
+      const sessaoId = texto(dados, 'sessaoId') ?? '';
+      return { tipo: 'sessao' as const, sessaoId, r: await iniciarLimpeza(db, organizationId, sessaoId, actor) };
+    }
     if (accao === 'fechar') {
       const sessaoId = texto(dados, 'sessaoId') ?? '';
       return { tipo: 'sessao' as const, sessaoId, r: await fecharSessao(db, organizationId, sessaoId, actor) };
+    }
+    if (accao === 'responsavel') {
+      const sessaoId = texto(dados, 'sessaoId') ?? '';
+      const membershipId = texto(dados, 'membershipId') ?? '';
+      const r = await atribuirResponsavel(db, organizationId, sessaoId, membershipId, actor);
+      return {
+        tipo: 'sessao' as const, sessaoId,
+        r: r.ok ? { ok: true as const, sessaoId } : { ok: false as const, motivo: r.motivo },
+      };
     }
     if (accao === 'arquivar_mesa') {
       const tableId = texto(dados, 'tableId') ?? '';

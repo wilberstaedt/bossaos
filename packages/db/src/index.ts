@@ -197,11 +197,12 @@ export {
 
 // ── E13 · sala, sessões, dispositivos e PIN ────────────────────────────────
 export {
-  abrirSessao, fecharSessao, iniciarEncerramento, transferirSessao, arquivarMesa,
+  abrirSessao, fecharSessao, iniciarEncerramento, iniciarLimpeza, atribuirResponsavel,
+  transferirSessao, arquivarMesa,
   registarEvento, listarZonas, listarMesas, salaAgora, historicoDaSessao,
-  listarCombinacoes, listarTiposDeServico,
+  listarCombinacoes, listarTiposDeServico, pessoasDaUnidade,
   type Actor, type ResultadoDeAbertura, type ResultadoDeFecho,
-  type ResultadoDaTransferencia, type ResultadoDeArquivoDeMesa,
+  type ResultadoDaTransferencia, type ResultadoDeArquivoDeMesa, type ResultadoDeResponsavel,
 } from './sala.ts';
 
 export {

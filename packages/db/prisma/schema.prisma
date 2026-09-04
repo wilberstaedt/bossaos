@@ -1987,6 +1987,11 @@ enum TipoDeZona {
 enum EstadoDeSessao {
   ABERTA
   A_ENCERRAR
+  /// A mesa está a ser limpa. **Continua ocupada** — o índice único parcial
+  /// cobre tudo o que não é `FECHADA`, e por isso a mesa só volta a abrir quando
+  /// a limpeza terminar. Uma mesa vazia por limpar não é uma mesa livre, e
+  /// sentar alguém nela é o defeito que este estado existe para impedir.
+  EM_LIMPEZA
   FECHADA
 }
 

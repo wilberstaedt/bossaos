@@ -1235,6 +1235,11 @@
     "fim": "Termina",
     "sessoesAbertas": "Serviços abertos",
     "mesasLivres": "Mesas livres",
-    "semFuso": "Esta unidade não tem fuso configurado, então um horário escrito aqui ainda não diz nada."
+    "semFuso": "Esta unidade não tem fuso configurado, então um horário escrito aqui ainda não diz nada.",
+    "emLimpeza": "Limpando",
+    "accaoLimpar": "Mandar limpar",
+    "avisoLimpeza": "A mesa continua ocupada enquanto é limpa. Uma mesa vazia por limpar não é uma mesa livre.",
+    "accaoResponsavel": "Atribuir responsável",
+    "escolhePessoa": "Quem responde pela mesa"
   }
 }

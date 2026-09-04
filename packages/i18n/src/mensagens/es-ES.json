@@ -1235,6 +1235,11 @@
     "fim": "Termina",
     "sessoesAbertas": "Servicios abiertos",
     "mesasLivres": "Mesas libres",
-    "semFuso": "Esta unidad no tiene zona horaria configurada, así que una hora escrita aquí no dice nada todavía."
+    "semFuso": "Esta unidad no tiene zona horaria configurada, así que una hora escrita aquí no dice nada todavía.",
+    "emLimpeza": "Limpiando",
+    "accaoLimpar": "Mandar limpiar",
+    "avisoLimpeza": "La mesa sigue ocupada mientras se limpia. Una mesa vacía sin limpiar no es una mesa libre.",
+    "accaoResponsavel": "Asignar responsable",
+    "escolhePessoa": "Quién responde por la mesa"
   }
 }

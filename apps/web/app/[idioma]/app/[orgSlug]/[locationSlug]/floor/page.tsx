@@ -72,8 +72,9 @@ export default async function SalaEmTempoReal({
                   </span>
                   <span className="bo-publico__preco">
                     {mesa.sessao ? (
-                      <Etiqueta tom={mesa.sessao.estado === 'A_ENCERRAR' ? 'aviso' : 'perigo'}>
-                        {mesa.sessao.estado === 'A_ENCERRAR' ? s.aEncerrar : s.ocupada}
+                      <Etiqueta tom={mesa.sessao.estado === 'ABERTA' ? 'perigo' : 'aviso'}>
+                        {mesa.sessao.estado === 'A_ENCERRAR' ? s.aEncerrar
+                          : mesa.sessao.estado === 'EM_LIMPEZA' ? s.emLimpeza : s.ocupada}
                       </Etiqueta>
                     ) : (
                       <Etiqueta tom="sucesso">{s.livre}</Etiqueta>

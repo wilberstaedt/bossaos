@@ -1,0 +1,24 @@
+-- ── E13 · a limpeza, e o que ela faz à mesa ────────────────────────────────
+--
+-- O prompt do E13 pede a sessão com «abrir, atribuir responsável, transferir,
+-- iniciar encerramento **e limpeza**». Faltava o estado da limpeza, e não é
+-- burocracia: é a diferença entre uma mesa livre e uma mesa vazia.
+--
+-- ── Porque é que a limpeza é estado da SESSÃO e não da mesa ────────────────
+--
+-- Porque enquanto ela dura **a mesa não está livre**, e o que impede outra
+-- abertura é o índice único parcial `uma_sessao_activa_por_mesa`, cuja condição é
+-- `estado <> 'FECHADA'`. Pondo a limpeza como estado da sessão, a mesa continua
+-- ocupada sem uma linha de código nova — e sem uma segunda regra a ter de
+-- concordar com a primeira, que é onde a coerência se perde.
+--
+-- Se a limpeza fosse uma coluna da mesa, passavam a existir duas fontes para a
+-- mesma pergunta («esta mesa pode abrir?») e o dia em que discordassem seria uma
+-- sexta-feira à noite.
+--
+-- O ciclo fica: ABERTA → A_ENCERRAR → EM_LIMPEZA → FECHADA. Só a última liberta.
+--
+-- `ALTER TYPE ... ADD VALUE` corre dentro da transacção da migração porque o
+-- PostgreSQL 12+ o permite desde que o valor novo não seja USADO na mesma
+-- transacção. Não é: o predicado do índice compara com 'FECHADA', que já existia.
+ALTER TYPE "EstadoDeSessao" ADD VALUE IF NOT EXISTS 'EM_LIMPEZA' AFTER 'A_ENCERRAR';

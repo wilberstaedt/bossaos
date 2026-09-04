@@ -26,7 +26,7 @@ if [[ "$NODE_ACTUAL" != "$NODE_ESPERADO" ]]; then
 fi
 
 GRUPOS_ESPERADOS=3
-CASOS_ESPERADOS=22
+CASOS_ESPERADOS=24
 falhas=0
 
 SALA=packages/db/src/sala.ts
@@ -261,7 +261,43 @@ exigir_vermelho "caiu a asserção do PIN em claro" \
 cp "$ORIG_DISP" "$DISP"
 
 echo
-echo "9. Reposto — tem de voltar ao verde"
+echo "9. CONTROLO NEGATIVO — a limpeza passa a libertar a mesa"
+# Uma mesa vazia por limpar NAO e uma mesa livre. Se `EM_LIMPEZA` sair do indice
+# — ou se o fecho acontecer sem passar por ela — outra pessoa senta-se numa mesa
+# por limpar, e o ecra da sala diz que estava tudo bem.
+python3 - <<'PYLIMP'
+import io
+p = 'packages/db/src/sala.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "  await db.tableSession.update({ where: { id: sessaoId }, data: { estado: 'EM_LIMPEZA' } });"
+assert antigo in s, 'a limpeza nao esta onde se esperava'
+novo = ("  await db.tableSession.update({ where: { id: sessaoId },\n"
+        "    data: { estado: 'FECHADA', fechadaEm: new Date(), fechadaPor: actor.email } });")
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, novo))
+PYLIMP
+exigir_vermelho "caiu a asserção da mesa ocupada durante a limpeza" \
+  'a LIMPEZA não liberta a mesa' /tmp/bossaos-sala-limpeza.txt
+cp "$ORIG_SALA" "$SALA"
+
+echo
+echo "10. CONTROLO NEGATIVO — o responsável deixa de ser verificado"
+# A pertenca de outro inquilino nao aparece dentro do escopo; sem a verificacao,
+# o `update` aceitaria um identificador vindo do formulario e a mesa passava a
+# responder a alguem que nao e da casa.
+python3 - <<'PYRESP'
+import io
+p = 'packages/db/src/sala.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "  if (!pertenca) return { ok: false, motivo: 'pessoa_desconhecida' };"
+assert antigo in s
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, "  void pertenca;"))
+PYRESP
+exigir_vermelho "caiu a asserção da pertença alheia" \
+  'uma pessoa que não é da casa não entra' /tmp/bossaos-sala-responsavel.txt
+cp "$ORIG_SALA" "$SALA"
+
+echo
+echo "11. Reposto — tem de voltar ao verde"
 node --experimental-strip-types packages/db/prisma/fixtures.ts >/dev/null 2>&1
 if correr /tmp/bossaos-sala-reposto.txt; then
   if ! leitura=$(analisar /tmp/bossaos-sala-reposto.txt); then
