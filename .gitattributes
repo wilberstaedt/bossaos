@@ -1,13 +1,18 @@
-# Os CSV deste repositorio guardam-se BYTE A BYTE, sem conversao de fim de linha.
+# Fim de linha fixado, para os diffs continuarem a poder ser lidos.
 #
-# PORQUE. O MATRIZ_PERMISSOES.csv esta commitado com CRLF. Sem esta linha, o git
-# converte-o ao levantar a copia, e o ficheiro aparece MODIFICADO num checkout
-# acabado de fazer - sem ninguem lhe ter tocado. Descoberto a 04/09 ao criar a
-# arvore de revisao: nasceu com "1 ficheiro sujo".
+# A 2026-09-03 o coverage.csv passou de LF para CRLF e o commit do E04 apareceu com
+# 397 linhas mudadas — a esconder as 12 que eram reais. Nao era deriva: a referencia
+# em docs/bossaos/COBERTURA_TELAS.csv sempre foi CRLF, e o ficheiro de trabalho e
+# derivado dela, portanto o alinhamento e que voltou ao sitio. Mas custou uma
+# revisao inteira a distinguir forma de conteudo, e sem essa medicao eu tinha
+# aceitado as 397 as cegas ou acusado um defeito que nao existia.
 #
-# Nao e' cosmetica. Uma arvore que nasce suja envenena tudo o que depende de
-# "esta arvore esta limpa": a guarda da arvore de revisao, o aviso do
-# provar-tudo.sh, e a validar-handoff.sh, que recusa declarar uma etapa com
-# ficheiros por commitar. Um sujo permanente ensina toda a gente a ignorar o
-# aviso - e ai ele deixa de valer para o caso em que e' verdade.
-*.csv -text
+# Os CSV ficam presos ao CRLF da referencia; o resto fica em LF. Assim um diff de
+# cobertura volta a mostrar so o que mudou de facto.
+*.csv text eol=crlf
+*.md  text eol=lf
+*.ts  text eol=lf
+*.tsx text eol=lf
+*.sh  text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
