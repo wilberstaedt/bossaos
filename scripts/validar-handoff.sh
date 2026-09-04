@@ -34,6 +34,29 @@ else
   ok "handoff e medidor concordam em $ATUAL"
 fi
 
+echo
+echo "2. O prompt de retoma nao mente sobre a divida de movel"
+# A quinta vez que um documento so lido na emergencia estava errado quando era
+# preciso. A 04/09 o RETOMAR-JR dizia "77 estao assinadas sem essa prova" com a
+# divida ja VAZIA - um sucessor herdava trabalho que nao existe.
+#
+# O invariante e crisp e cobre a deriva exacta que aconteceu: se a divida esta
+# vazia, o documento tem de o dizer; se tem itens, nao pode dizer que esta vazia.
+# `grep -c` imprime 0 E sai com codigo 1 quando nao acha, portanto um `|| echo 0`
+# aqui produz DOIS zeros e a comparacao numerica rebenta. Ja me apanhou no
+# estado.sh a 03/09 e voltou a apanhar-me aqui.
+DIVIDA_ITENS=$(grep -cE '^[A-Z]{2,8}-[0-9]{3}$' docs/progress/DIVIDA-MOVEL.txt 2>/dev/null || true)
+DIZ_VAZIA=$(grep -ciE 'divida esta VAZIA|dívida está VAZIA' docs/progress/RETOMAR-JR.md 2>/dev/null || true)
+DIVIDA_ITENS=${DIVIDA_ITENS:-0}
+DIZ_VAZIA=${DIZ_VAZIA:-0}
+if [ "${DIVIDA_ITENS:-0}" -eq 0 ] && [ "${DIZ_VAZIA:-0}" -eq 0 ]; then
+  erro "a divida de movel esta vazia e o RETOMAR-JR nao o diz — um sucessor herda trabalho que nao existe"
+elif [ "${DIVIDA_ITENS:-0}" -gt 0 ] && [ "${DIZ_VAZIA:-0}" -gt 0 ]; then
+  erro "o RETOMAR-JR diz que a divida esta vazia e ela tem $DIVIDA_ITENS itens"
+else
+  ok "o prompt de retoma bate com a divida real ($DIVIDA_ITENS itens)"
+fi
+
 # ── controlo negativo ────────────────────────────────────────────────────────
 # Com o handoff a apontar para outra etapa, esta guarda TEM de acusar. Sem isto
 # seria mais um documento a dizer que está tudo bem.

@@ -114,10 +114,10 @@ Aponta-se, não se copia: um documento lido só na emergência envelhece sem nin
 isso — já aconteceu com o prompt do sénior a 03/09, que listava como pendente uma coisa
 feita há uma hora.
 
-- **`docs/progress/DIVIDA-MOVEL.txt`** — o móvel é obrigatório no atlas em todas as telas
-  até ao marco, e 77 estão assinadas sem essa prova. A guarda `validar-movel.sh` reprova
-  dívida **nova**: uma tela nova ou se mede em móvel, ou entra ali com o motivo. As onze do
-  E09 têm **prazo bloqueante no E10** — são a carta pública e o QR, lidos ao telemóvel.
+- **`docs/progress/DIVIDA-MOVEL.txt` — a dívida está VAZIA desde 04/09.** As 112 telas até
+  ao marco estão validadas **e** medidas em móvel. A `validar-movel.sh` continua a reprovar
+  dívida **nova**, e a `validar-movel-real.sh` cruza a frase «móvel medido» com os specs que
+  a medem — sem esse cruzamento, pagar a dívida era escrever seis palavras na coluna certa.
 - **`docs/architecture/catalogo-e-publicacao.md`** e **`dominios-e-enderecos.md`** — o
   endereço público e o domínio **não voltam ao mundo** quando se largam. `@unique` impede
   dois ao mesmo tempo, não dois em sequência, e o QR está impresso.
@@ -161,10 +161,13 @@ feita há uma hora.
   tem de bater certo com a porta da inspecção, senão o registo devolve 403 e o erro não diz
   uma palavra sobre portas.
 
-- **Recusar inventar é uma entrega, não uma falta.** A página de planos do E10 não tem
-  preços porque preço nenhum está decidido em documento nenhum, e um preço publicado é uma
-  promessa a quem o leu. Ficou declarado. O contrário — pôr números plausíveis para a página
-  não ficar com um buraco — é o que a régua chama dados inventados na pior superfície.
+- **Recusar inventar é uma entrega, não uma falta — e a fonte JÁ CHEGOU.** A página de
+  planos do E10 nasceu sem preços porque nenhum estava decidido em documento nenhum, e
+  recusar inventá-los foi a decisão certa: um preço publicado é uma promessa a quem o leu.
+  **Mudou a 04/09.** O PDF comercial existia fora do repositório e os dois ficheiros que ele
+  mandava criar nunca tinham sido entregues. Estão agora em `docs/bossaos/PRECIFICACAO.md` e
+  `PRECIFICACAO.json`, em cêntimos inteiros. **Quem tocar na LP lê de lá**, e a
+  `validar-precos.sh` reprova um preço escrito à mão numa tela.
 
 ## Notas para o sénior (não colar)
 
