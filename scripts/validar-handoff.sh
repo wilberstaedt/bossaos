@@ -66,7 +66,18 @@ echo "3. Declarar e convidar a rever — e nao se revê arvore suja"
 #
 # So morde LOCALMENTE: na CI a arvore e sempre limpa e isto passa por construcao.
 # Digo-o em vez de fingir que cobre os dois sitios.
-if grep -qiE '^\*\*Estado:\*\*.*aguardando valida' docs/progress/HANDOFF.md 2>/dev/null; then
+# Dentro da CI NAO se pergunta, e agora e a codigo e nao so em comentario.
+#
+# Eu tinha escrito "so morde localmente" e nao o implementei: a CI reprovou com
+# "1 ficheiro por commitar", porque o checkout tem sempre uma normalizacao de fim
+# de linha - o mesmo ruido do COBERTURA_TELAS.csv que ja me tinha mordido hoje.
+# Uma guarda que falha por ruido de ambiente ensina a ignorar a guarda.
+#
+# E o invariante e mesmo local: e sobre alguem declarar ANTES de commitar, o que
+# so acontece na maquina de quem declara.
+if [ -n "${CI:-}" ] || [ -n "${GITHUB_ACTIONS:-}" ]; then
+  ok "dentro da CI a arvore e do checkout — esta verificacao e para quem declara"
+elif grep -qiE '^\*\*Estado:\*\*.*aguardando valida' docs/progress/HANDOFF.md 2>/dev/null; then
   sujos=$(git status --porcelain 2>/dev/null | grep -cvE 'capturas/|\.png$' || true)
   sujos=${sujos:-0}
   if [ "$sujos" -gt 0 ]; then
