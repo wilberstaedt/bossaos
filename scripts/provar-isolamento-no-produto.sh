@@ -39,7 +39,20 @@ fi
 
 ORG_B='22222222-2222-4222-8222-222222222222'
 EMAIL_A='painel@inspeccao.example'
-CASOS_ESPERADOS=9
+# Contam-se os casos DO ISOLAMENTO, nao todas as linhas verdes da corrida.
+#
+# A 04/09 esta guarda deu vermelho com «10 (esperava 9)» e nao era regressao
+# nenhuma: os sete testes do isolamento passavam todos, e o que crescera foi a
+# PREPARACAO partilhada — o E15 acrescentou-lhe uma segunda pessoa no inquilino
+# A, para medir a troca de utilizador. A contagem apanhava as linhas do
+# `[preparar]` junto com as do `[painel]`.
+#
+# O numero continua escrito a mao de proposito: se derivasse da propria spec
+# batia sempre e nao provava nada. O que muda e' ONDE se conta — acrescentar uma
+# sessao a preparacao partilhada deixa de partir esta prova, e acrescentar ou
+# tirar um caso de isolamento continua a parti-la, que e' o que ela existe para
+# fazer.
+CASOS_ESPERADOS=7
 falhas=0
 
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
@@ -86,7 +99,7 @@ correr() {
 
 echo "1. Com o isolamento a funcionar"
 if correr /tmp/bossaos-iso.txt; then
-  passaram=$(grep -cE '^\s+✓' /tmp/bossaos-iso.txt || true)
+  passaram=$(grep -E '^\s+✓' /tmp/bossaos-iso.txt | grep -c 'isolamento\.spec\.ts' || true)
   if [[ "$passaram" == "$CASOS_ESPERADOS" ]]; then
     verde "$passaram casos verdes no navegador, com duas sessões reais"
   else
@@ -156,7 +169,7 @@ echo
 echo "3. Reposto — tem de voltar ao verde"
 despromover
 if correr /tmp/bossaos-iso-reposto.txt; then
-  passaram=$(grep -cE '^\s+✓' /tmp/bossaos-iso-reposto.txt || true)
+  passaram=$(grep -E '^\s+✓' /tmp/bossaos-iso-reposto.txt | grep -c 'isolamento\.spec\.ts' || true)
   verde "reposto: $passaram casos verdes"
 else
   vermelho "não voltou ao verde depois de repor"
