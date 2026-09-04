@@ -476,3 +476,55 @@ O sinal que devia ter-me travado estava lá: a corrida das fixtures tinha morrid
 por falta de variável **duas horas antes**. O mesmo erro voltou com outra cara —
 um 500 em vez de uma variável em falta — e eu não o reconheci. **Um sintoma novo
 não é uma causa nova.**
+
+## As armadilhas de 04/09, em forma de lista — porque me custaram todas caro
+
+Um dia inteiro de revisão do E14 e do E15. Metade dos meus vermelhos e verdes
+não era sobre o produto. Escrevo-as como perguntas porque é assim que se usam.
+
+### Antes de acreditar num VERDE
+
+1. **A prova consegue ficar vermelha?** Degrada o artefacto real e vê. Se não
+   apanhar, é decoração. *(O marcador por tela não conseguia falhar: a navegação
+   escrevia o id de todas as telas em todas as páginas.)*
+2. **A população está declarada?** Quantas linhas, quantos comandos, quantas
+   telas — dito em voz alta antes de qualquer afirmação. Verde sobre zero passa
+   quase tudo.
+3. **A lista vem de onde?** Se a prova tira a lista do código que mede, comparou
+   a declaração consigo própria. *(A precificação resolvi lendo o PDF outra vez à
+   mão; as 23 telas, lendo a matriz.)*
+4. **Quem, no PRODUTO, chama isto?** Um aceite pode estar provado na lógica e
+   morto no produto — um parâmetro com omissão `= true` é o caso clássico, e o
+   teste passa o valor que o produto nunca passa.
+5. **E qual asserção fica vermelha se essa linha desaparecer?** Sem esta, deixa
+   passar código sem prova. *(A origem do pedido: implementada, e nenhuma prova
+   a observava.)*
+
+### Antes de acreditar num VERMELHO
+
+6. **É asserção ou é build?** Uma avaria que impede o produto de arrancar mede o
+   compilador. *(Apaguei duas atribuições, o TypeScript recusou, e o vermelho não
+   provava detecção nenhuma.)*
+7. **Falha sempre no mesmo sítio?** Um defeito real falha na mesma tela e na
+   mesma largura. Se muda de sítio a cada corrida e mantém a duração, é tempo
+   esgotado. *(Quatro navegadores em paralelo com 430 MB livres.)*
+8. **Havia outra suite a correr?** `scripts/maquina-livre.sh`. O CPU é um só.
+9. **A árvore estava limpa?** Um ficheiro a meio que não compila derruba tudo o
+   que precisa da aplicação de pé. *(Onze vermelhos, nenhum era regressão.)*
+10. **O servidor era novo?** O Playwright reaproveita um servidor já a correr
+    fora de CI: a avaria fica no código e a página servida é a antiga.
+
+### Antes de acusar
+
+11. **Degradei o que a asserção observa, ou o que era fácil de degradar?**
+    Quatro tentativas até um controlo negativo válido, e as três primeiras
+    falharam por isto. Uma delas apontava à única tela onde a avaria não podia
+    ser vista — e eu estava a dois passos de devolver a etapa com ela.
+12. **O meu instrumento encontrou zero de tudo?** Então está avariado, não está
+    a medir. *(Uma grep minha deu zero nas 23 telas — e zero no total.)*
+
+### E a que vale por todas
+
+13. **O que MAIS produziria este resultado?** Um verde sobre um servidor velho e
+    um verde sobre um instrumento cego são idênticos no ecrã e opostos no
+    significado. A diferença entre eles é acusar injustamente ou deixar passar.
