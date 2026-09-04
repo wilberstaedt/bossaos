@@ -415,3 +415,33 @@ negativos ao todo. `pnpm verificar` a 0 sem `.env`; `pnpm inspeccionar` com 69 v
 depois de a divisão em três estar commitada. Verifiquei a forma dos 41 passos — cada um tem
 `run` ou `uses` — mas **não contra o esquema do Actions**, que é o que a régua pede: não há
 `pyyaml` nesta máquina. Fica para quem valida.
+
+## Bloqueio externo: a CI está parada por facturação — 04/09
+
+`scripts/validar-ci-verde.sh` vai continuar a dizer PENDENTE, e **não é do
+código**. O GitHub escreve o motivo, inteiro, numa anotação do check-run:
+
+> The job was not started because recent account payments have failed or your
+> spending limit needs to be increased.
+
+Cinco trabalhos, duas tentativas, zero passos corridos, log nenhum. **Só o
+Matheus resolve** (Billing & plans). Até lá:
+
+- **O verde da CI não existe como prova.** Quem validar uma etapa daqui para a
+  frente corre a suite localmente e **escreve que foi local** — «validado» sem
+  essa nota vai ser lido como confirmado por uma máquina independente, e não é.
+- Passei duas vezes ao lado disto: primeiro chamei-lhe *infra-estrutura* (certo,
+  mas vago), depois listei três hipóteses quando bastava ler a anotação. A
+  guarda passa a lê-la e a imprimir o motivo verdadeiro.
+
+### E fica fechado o item que o JR me deixou sobre o `ci.yml`
+
+Ele escreveu: verificou a forma dos 41 passos, mas **não contra o esquema do
+Actions**, por não haver parser nesta máquina. Não é preciso parser — a
+autoridade que conta já respondeu: **o GitHub aceitou o ficheiro e agendou os
+cinco trabalhos**, com os cinco nomes declarados, verbatim. Um ficheiro
+inválido não chega a criar trabalho nenhum.
+
+O que isto **não** prova, e não vale fingir que prova: que cada `uses:` resolve.
+Isso só se sabe a correr, e correr é o que a facturação impede. Fica medido até
+onde dá, e dito onde pára.

@@ -92,8 +92,18 @@ case "$caso" in
       -q '[.jobs[].steps[] | select(.conclusion=="failure")] | length' 2>/dev/null || true)
     if [ "${passos:-0}" -eq 0 ] 2>/dev/null; then
       pend "a corrida falhou sem NENHUM passo falhado — nao mediu nada, e isso nao e reprovar"
-      echo "           Sintoma de bloqueio externo (quota, corredor, permissoes)."
-      echo "           Ve o semaforo tu proprio antes de assinar: eu nao consigo."
+      # Nao adivinhar o motivo: o GitHub escreve-o numa anotacao do check-run.
+      # A 04/09 eu listei tres hipoteses ("quota, corredor, permissoes") quando
+      # bastava ler - e a resposta estava la, inteira: pagamento em falta.
+      motivo=$(gh api "repos/{owner}/{repo}/actions/runs/$id_corrida/jobs" \
+                 -q '.jobs[0].id' 2>/dev/null \
+               | xargs -I{} gh api "repos/{owner}/{repo}/check-runs/{}/annotations" \
+                 -q '.[0].message' 2>/dev/null || true)
+      if [ -n "${motivo:-}" ]; then
+        echo "           Motivo, dito pelo GitHub: $motivo"
+      else
+        echo "           O GitHub nao deixou anotacao. Ve o semaforo a mao."
+      fi
     else
       erro "a ultima corrida falhou em $passos passo(s) — $titulo"
       echo "           Nao assines nada enquanto isto for verdade."
