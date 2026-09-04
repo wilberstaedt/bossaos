@@ -237,3 +237,24 @@ dados a mexer-se por baixo de ti, isso é um defeito novo, não é ele.
 offline paga o preço **do momento em que foi escrito**, mas quem confere é o
 servidor contra a versão da ementa, nunca o aparelho. Preço que não bate ou
 versão desconhecida **param numa pessoa** — nunca se reprecifica em silêncio.
+
+## Onde estás AGORA — deriva-se, não se escreve aqui
+
+Não há retrato do estado neste ficheiro, de propósito: um retrato envelhece e um
+documento de emergência só é lido na emergência, que é o pior momento para
+descobrir que está errado. Deriva-se em três comandos:
+
+```
+bash scripts/estado.sh                    # a percentagem e a etapa: ATUAL=E<N>
+cat docs/progress/E<N>.md                 # o TEU estado, escrito por ti
+cat docs/reviews/ALVO-E<N>.md             # a régua, escrita pelo sénior antes
+git log --oneline -5                      # o que ficou commitado
+```
+
+Se o `E<N>.md` disser **A MEIO**, foi escrito por ti a fechar por contexto —
+confia nele, é o teu, e não reconstruas o que ele já diz. Se não existir, a etapa
+ainda não começou.
+
+**Antes de tocares em código, corre `bash scripts/validar-provas-na-ci.sh`.** Ela
+falha de propósito desde 04/09: metade das provas não corre na CI e isso é dívida
+conhecida, não defeito teu. Falha enquanto a facturação estiver trancada.
