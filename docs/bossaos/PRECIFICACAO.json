@@ -1,0 +1,19 @@
+{
+  "_fonte": "BossaOS_Precificacao_e_Modelo_Comercial_v1.pdf, 02/09/2026, versao V1",
+  "_nota": "Valores em CENTIMOS, inteiros. Nunca virgula flutuante — docs/architecture/dinheiro.md.",
+  "moeda": "EUR",
+  "impostos": { "incluidos": false, "nota": "Todos os valores sao acrescidos de IVA." },
+  "unidade_de_cobranca": "estabelecimento_fisico",
+  "planos": {
+    "STARTER":    { "mensal": 1900,  "anual": 19000,  "implantacao_sozinho": 0,    "implantacao_assistida": 9900,  "horas_implantacao": 2 },
+    "RESTAURANT": { "mensal": 7900,  "anual": 79000,  "implantacao_sozinho": null, "implantacao_assistida": 29900, "horas_implantacao": 4 },
+    "PRO":        { "mensal": 14900, "anual": 149000, "implantacao_sozinho": null, "implantacao_assistida": 49900, "horas_implantacao": 8 }
+  },
+  "anual": {
+    "mensalidades_cobradas": 10,
+    "nota": "O ano custa dez mensalidades. O equivalente mensal e APRESENTACAO: a cobranca anual usa o valor integral, sem multiplicar o equivalente arredondado."
+  },
+  "comissao_pedidos_e_reservas_directos": 0,
+  "cores_publicas": { "STARTER": "fixas_bossaos", "RESTAURANT": "personalizaveis", "PRO": "personalizaveis" },
+  "_ausencia": "Um campo sem valor NAO significa gratuito, ilimitado nem integracao activa. Significa por definir."
+}
