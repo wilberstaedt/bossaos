@@ -55,6 +55,13 @@ function portas(orgSlug: string): PortasDeRede {
         corpo.append('quantidade', String(l.quantidade));
       }
 
+      // SABE-SE que não sai: o aparelho está offline. Não se tenta, e a entrada
+      // fica «não enviado» em vez de «saiu, e não sei» — que era exagerar o que
+      // aconteceu, e foi o que a prova de navegador apanhou.
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        return { ok: false, naoSaiu: true };
+      }
+
       try {
         const r = await fetch(`/api/org/${orgSlug}/pedidos`, {
           method: 'POST', body: corpo, redirect: 'manual',
@@ -70,7 +77,8 @@ function portas(orgSlug: string): PortasDeRede {
         // enviado» aqui apagava a dúvida — e a dúvida é a informação.
         return { ok: false, indeterminado: true };
       } catch {
-        // A rede falhou. NÃO se sabe se chegou.
+        // Falhou com o aparelho a dizer que tinha rede. Pode ter chegado — e por
+        // isso fica pendente, e a reconexão consulta antes de repetir.
         return { ok: false, indeterminado: true };
       }
     },
@@ -112,7 +120,11 @@ export async function sincronizarAgora(
 ): Promise<FilaViva & { resumo: Awaited<ReturnType<typeof sincronizar>>['resumo'] }> {
   const armazem = armazemDoNavegador(window.localStorage, particao);
   const antes = await armazem.ler();
-  const { entradas, resumo } = await sincronizar(antes, particao, portas(orgSlug), sessaoValida);
+  // A gravação vai a CADA transição, e não só no fim: um envio que fique pendurado
+  // tem de deixar «à espera de confirmação» no disco, e não «não enviado».
+  const { entradas, resumo } = await sincronizar(
+    antes, particao, portas(orgSlug), sessaoValida,
+    (parciais) => armazem.escrever([...parciais]));
   await armazem.escrever(entradas);
   return { entradas, suspensas: suspensas(entradas, particao), resumo };
 }

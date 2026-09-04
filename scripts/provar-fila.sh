@@ -21,8 +21,8 @@ if [[ "$NODE_ACTUAL" != "$NODE_ESPERADO" ]]; then
   exit 2
 fi
 
-GRUPOS_ESPERADOS=8
-CASOS_ESPERADOS=18
+GRUPOS_ESPERADOS=10
+CASOS_ESPERADOS=21
 falhas=0
 
 FILA=packages/fila/src/fila.ts
@@ -215,7 +215,49 @@ exigir_vermelho "caiu a asserção dos dois pedidos iguais" \
 cp "$ORIG_FILA" "$FILA"
 
 echo
-echo "9. Reposto — tem de voltar ao verde"
+echo "9. CONTROLO NEGATIVO — «nao saiu» volta a confundir-se com «nao sei»"
+# Apanhado pela prova de NAVEGADOR: com a rede cortada antes do envio, a entrada
+# ficava "saiu, e nao sei". Nao tinha saido - e essa duvida a mais e o que faz
+# alguem nao repetir um pedido que nunca chegou.
+python3 - <<'PYSAIU'
+import io
+p = 'packages/fila/src/sincronizacao.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "    } else if ('naoSaiu' in r) {"
+assert antigo in s, 'o ramo do naoSaiu nao esta onde se esperava'
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, "    } else if (false) {"))
+PYSAIU
+exigir_vermelho "caiu a distinção entre «não saiu» e «não sei»" \
+  'volta a NÃO ENVIADO' /tmp/bossaos-fila-naosaiu.txt
+cp "$ORIG_SINC" "$SINC"
+
+echo
+echo "10. CONTROLO NEGATIVO — a gravacao volta a acontecer so no fim"
+# O comentario prometia "marca-se pendente ANTES de enviar" e isso era verdade no
+# array e mentira no disco: um envio pendurado deixava o armazem a dizer que nada
+# tinha saido, sobre um comando que podia ter chegado.
+python3 - <<'PYGRAV'
+import io
+p = 'packages/fila/src/sincronizacao.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = """    resumo.enviadas += 1;
+    // No DISCO, e antes de a rede ser tocada. E o que faz a frase acima ser
+    // verdade quando o processo morre a meio.
+    await gravar();"""
+if antigo not in s:
+    antigo = """    resumo.enviadas += 1;
+    // No DISCO, e antes de a rede ser tocada. \u00c9 o que faz a frase acima ser
+    // verdade quando o processo morre a meio.
+    await gravar();"""
+assert antigo in s, 'a gravacao antes do envio nao esta onde se esperava'
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, "    resumo.enviadas += 1;"))
+PYGRAV
+exigir_vermelho "caiu a gravação a cada transição" \
+  'deixa PENDENTE no armazém' /tmp/bossaos-fila-gravacao.txt
+cp "$ORIG_SINC" "$SINC"
+
+echo
+echo "11. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-fila-reposto.txt; then
   read -r grupos casos <<<"$(analisar /tmp/bossaos-fila-reposto.txt)"
   if (( grupos != GRUPOS_ESPERADOS )) || (( casos != CASOS_ESPERADOS )); then

@@ -258,3 +258,65 @@ describe('dois itens iguais de pessoas diferentes são DOIS', () => {
     assert.deepEqual(enviados, [], 'reenviou um comando que o servidor já conhecia');
   });
 });
+
+describe('«não saiu» e «não sei» são estados diferentes', () => {
+  it('offline: o comando volta a NÃO ENVIADO, e não fica pendente', async () => {
+    // Apanhado pela prova de navegador: com a rede cortada ANTES do envio, a
+    // entrada ficava «saiu, e não sei». Não tinha saído — e essa dúvida a mais é
+    // o que faz alguém não repetir um pedido que nunca chegou.
+    const fila = [rascunho('c1', A)];
+    assert.equal(fila.length, 1);
+
+    const { entradas, resumo } = await sincronizar(fila, A, {
+      consultar: async () => ({ conhecido: false }),
+      enviar: async () => ({ ok: false, naoSaiu: true }),
+    });
+
+    assert.equal(entradas[0]!.estado, 'NAO_ENVIADO', 'disse «saiu» sobre o que não saiu');
+    assert.equal(resumo.naoSairam, 1);
+    assert.equal(resumo.indeterminadas, 0, 'confundiu «não saiu» com «não sei»');
+  });
+
+  it('O PAR: falhar A MEIO deixa pendente, porque aí não se sabe mesmo', async () => {
+    // Sem isto, a correcção acima virava «tudo volta a não enviado» — e um
+    // comando que chegou passava a ser reenviado às cegas.
+    const fila = [rascunho('c1', A)];
+    const { entradas, resumo } = await sincronizar(fila, A, {
+      consultar: async () => ({ conhecido: false }),
+      enviar: async () => ({ ok: false, indeterminado: true }),
+    });
+    assert.equal(entradas[0]!.estado, 'PENDENTE_DE_CONFIRMACAO');
+    assert.equal(resumo.indeterminadas, 1);
+    assert.equal(resumo.naoSairam, 0);
+  });
+});
+
+describe('o estado é gravado a CADA transição, e não só no fim', () => {
+  it('um envio que fica pendurado deixa PENDENTE no armazém, e não «não enviado»', async () => {
+    // Apanhado pela prova de navegador: o comentário prometia «marca-se pendente
+    // antes de enviar» e isso era verdade no array e mentira no disco. Um envio
+    // pendurado deixava o armazém a dizer que nada tinha saído — sobre um comando
+    // que podia ter chegado.
+    const fila = [rascunho('c1', A)];
+    assert.equal(fila.length, 1);
+
+    const gravacoes: string[][] = [];
+    let resolverEnvio: (() => void) | null = null;
+    const envio = new Promise<void>((r) => { resolverEnvio = r; });
+
+    const promessa = sincronizar(fila, A, {
+      consultar: async () => ({ conhecido: false }),
+      enviar: async () => { await envio; return { ok: true, resposta: {} }; },
+    }, true, async (parciais) => { gravacoes.push(parciais.map((e) => e.estado)); });
+
+    // Enquanto o envio está pendurado, o que já foi GRAVADO diz pendente.
+    await new Promise((r) => setTimeout(r, 10));
+    assert.deepEqual(gravacoes.at(-1), ['PENDENTE_DE_CONFIRMACAO'],
+      'o disco ainda dizia «não enviado» com o comando já a caminho');
+
+    resolverEnvio!();
+    const { entradas } = await promessa;
+    assert.equal(entradas[0]!.estado, 'CONFIRMADO');
+    assert.deepEqual(gravacoes.at(-1), ['CONFIRMADO']);
+  });
+});

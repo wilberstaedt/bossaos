@@ -21,8 +21,25 @@ export type RespostaDaConsulta =
 export type RespostaDoEnvio =
   | { ok: true; resposta: unknown }
   | { ok: false; conflito: { versaoActual: number; mudou: string[] } }
-  /** A rede falhou. Não se sabe se chegou — e é por isso que fica pendente. */
-  | { ok: false; indeterminado: true };
+  /** A rede falhou a meio. **Não se sabe** se chegou — e é por isso que fica pendente. */
+  | { ok: false; indeterminado: true }
+  /**
+   * SABE-SE que não saiu: o aparelho estava offline e o pedido nem chegou a ser
+   * feito.
+   *
+   * ── Porque é que esta variante existe ──────────────────────────────────
+   *
+   * A prova de navegador apanhou-o: com a rede cortada antes do envio, a entrada
+   * ficava `PENDENTE_DE_CONFIRMACAO` — «saiu, e não sei». **Não tinha saído.** Ao
+   * exagerar o que aconteceu, o ecrã dizia à pessoa que talvez a cozinha já
+   * soubesse, e essa dúvida é o que faz alguém não repetir um pedido que nunca
+   * chegou.
+   *
+   * A distinção é possível porque **estar offline é sabível**: o aparelho sabe
+   * que não tem rede antes de tentar. Uma falha a meio do voo não é sabível — e
+   * essa continua `indeterminado`, que é a resposta honesta.
+   */
+  | { ok: false; naoSaiu: true };
 
 export interface PortasDeRede {
   consultar(commandId: string): Promise<RespostaDaConsulta>;
@@ -33,8 +50,10 @@ export interface ResumoDaSincronizacao {
   enviadas: number;
   confirmadas: number;
   conflitos: number;
-  /** Ficaram por resolver: a rede voltou a falhar. */
+  /** Ficaram por resolver: a rede falhou a meio e não se sabe se chegaram. */
   indeterminadas: number;
+  /** Nem chegaram a sair: o aparelho estava offline. Não é o mesmo que o de cima. */
+  naoSairam: number;
   /** Não seguiram porque a partição não é a actual. Contadas, nunca apagadas. */
   suspensas: number;
 }
@@ -69,14 +88,31 @@ export async function sincronizar(
    * que o teste faz.
    */
   sessaoValida = true,
+  /**
+   * Grava o estado a CADA transição, e não só no fim.
+   *
+   * ── Porque é que isto tinha de existir ─────────────────────────────────
+   *
+   * O comentário aqui ao lado dizia «marca-se pendente ANTES de enviar, para o
+   * que fica gravado ser a verdade se o processo morrer a meio». Era verdade no
+   * ARRAY e mentira no DISCO: a fila só era escrita quando `sincronizar`
+   * devolvia, e um envio que ficasse pendurado deixava o armazém a dizer «não
+   * enviado» sobre um comando que podia ter chegado.
+   *
+   * Apanhado pela prova de navegador, com o servidor a receber e a resposta a
+   * demorar. Um comentário que promete o que o código não faz guia mal quem vier
+   * a seguir — e neste caso guiava mal a pessoa que ia repetir o pedido.
+   */
+  aoMudar?: (entradas: readonly EntradaDaFila[]) => Promise<void>,
 ): Promise<{ entradas: EntradaDaFila[]; resumo: ResumoDaSincronizacao }> {
   const resultado = [...entradas];
+  const gravar = async () => { if (aoMudar) await aoMudar(resultado); };
   // Com a sessão morta, NADA sai — e nada se apaga. A fila fica onde está, e a
   // interface manda entrar outra vez. Um `paraEnviar` vazio aqui não é o mesmo
   // que uma fila vazia: as entradas contam-se como suspensas.
   const aEnviar = sessaoValida ? paraEnviar(entradas, actual) : [];
   const resumo: ResumoDaSincronizacao = {
-    enviadas: 0, confirmadas: 0, conflitos: 0, indeterminadas: 0,
+    enviadas: 0, confirmadas: 0, conflitos: 0, indeterminadas: 0, naoSairam: 0,
     suspensas: entradas.filter(
       (e) => (e.estado === 'NAO_ENVIADO' || e.estado === 'PENDENTE_DE_CONFIRMACAO')
         && !aEnviar.includes(e)).length,
@@ -91,6 +127,7 @@ export async function sincronizar(
       if (conhecido.conhecido) {
         resultado[i] = { ...entrada, estado: 'CONFIRMADO', resposta: conhecido.resposta };
         resumo.confirmadas += 1;
+        await gravar();
         continue;
       }
     }
@@ -100,6 +137,9 @@ export async function sincronizar(
     // «não enviado» sobre um comando que chegou, e a retentativa cobrava duas vezes.
     resultado[i] = { ...entrada, estado: 'PENDENTE_DE_CONFIRMACAO' };
     resumo.enviadas += 1;
+    // No DISCO, e antes de a rede ser tocada. É o que faz a frase acima ser
+    // verdade quando o processo morre a meio.
+    await gravar();
 
     const r = await rede.enviar(entrada);
     if (r.ok) {
@@ -108,11 +148,19 @@ export async function sincronizar(
     } else if ('conflito' in r) {
       resultado[i] = { ...entrada, estado: 'CONFLITO', conflito: r.conflito };
       resumo.conflitos += 1;
+    } else if ('naoSaiu' in r) {
+      // Sabe-se que não saiu: **volta** a «não enviado». Aqui não há dúvida
+      // nenhuma para preservar, e deixá-la pendente dizia à pessoa que talvez a
+      // cozinha já soubesse.
+      resultado[i] = { ...entrada, estado: 'NAO_ENVIADO' };
+      resumo.enviadas -= 1;
+      resumo.naoSairam += 1;
     } else {
-      // Fica pendente. Não volta a «não enviado»: isso apagava a dúvida, e a
-      // dúvida é a informação.
+      // Falhou a meio. Fica pendente: não volta a «não enviado», porque isso
+      // apagava a dúvida — e a dúvida é a informação.
       resumo.indeterminadas += 1;
     }
+    await gravar();
   }
 
   return { entradas: resultado, resumo };

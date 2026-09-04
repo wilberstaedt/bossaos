@@ -33,6 +33,8 @@ export interface Alvos {
   deviceRevogavelId: string;
   /** E14: o pedido semeado, com uma linha aceite e uma rejeitada. */
   orderId: string;
+  /** E15: a unidade onde o Staff PWA corre. É a `puerto`, a mesma do painel. */
+  unidadeDoStaff: string;
 }
 
 const PREFIXO = 'insp-';
@@ -99,6 +101,11 @@ export async function resolverAlvos(): Promise<Alvos> {
       deviceId: await um(sql, `SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%' AND estado = 'ACTIVO' LIMIT 1`, 'um dispositivo activo'),
       deviceRevogavelId: await um(sql, `SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%' AND estado = 'PENDENTE' LIMIT 1`, 'um dispositivo por aprovar'),
       orderId: await um(sql, `SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' LIMIT 1`, 'um pedido'),
+      unidadeDoStaff: await um(
+        sql,
+        `SELECT id FROM locations WHERE organization_id = '${ORG_A}'
+           AND slug = 'puerto' AND archived_at IS NULL LIMIT 1`,
+        'a unidade do Staff'),
     };
   } finally {
     await sql.end();
