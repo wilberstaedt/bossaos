@@ -60,3 +60,30 @@ metade, uma função que devolvesse toda a gente passava a primeira.
 E o controlo que impede o conserto errado: **depois da correcção, o runtime
 continua a ver zero linhas de `users` numa consulta directa.** Se esse número
 subir, a tela foi arranjada pelo caminho que não se pode tomar.
+
+## O mecanismo por baixo, e até onde ele chega
+
+**O ORM devolve `null` para o que a política de linha esconde, e não se queixa.**
+`include: { user: … }` compila, corre, e a relação vem vazia — não há erro, não há
+aviso. A tela rebenta mais à frente com *cannot read properties of null*, longe da
+causa, e quem lá chegar procura um defeito na tela.
+
+Foi assim três vezes: `ORG-007` no E11, `FLOOR-008` no E13, e o `responsavel` do
+`salaAgora` no mesmo commit que dizia ter fechado o segundo. **Um defeito que volta
+depois de fechado quer dizer que o fecho não foi estrutural** — o E11 abriu a
+porta, e nada impedia que a junção fosse escrita outra vez. Agora impede:
+`scripts/validar-juncao-identidade.sh`.
+
+### Até onde chega, medido a 04/09
+
+Oito tabelas têm políticas que não são simples escopo de inquilino: `users`,
+`memberships`, `organizations`, `idempotency_keys`, e as quatro do domínio de
+autenticação — `accounts`, `sessions`, `two_factors`, `verifications`.
+
+**O runtime não junta nenhuma das de autenticação** — contei, dão zero fora do
+`autenticacao.ts`, que tem privilégio por desenho. E `memberships` e
+`organizations` são lidas *dentro* do inquilino, onde a política as devolve.
+
+**Portanto o perigo está contido ao `users`**, e é o único caso em que o runtime
+pede uma linha que a política lhe esconde. Registo-o para ninguém ter de o
+re-derivar a partir de um 500 — que foi como as três vezes começaram.
