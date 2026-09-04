@@ -354,6 +354,58 @@ test.describe.serial('chamar a sala: o ciclo completo', () => {
         'o segundo toque criou uma chamada nova').toBe(1);
     });
 
+  test('a MESMA escrita sem bolacha é RECUSADA — o par da regra da pasta pública',
+    async ({ browser }) => {
+      // ── A regra da pasta pública mudou de forma, e este é o par dela ────
+      //
+      // Até ao E17, `apps/web/app/r` era «nada além de ler», e a prova do E09
+      // varria a pasta à procura de verbos de escrita. O E17 trouxe a porta do
+      // visitante para cá — a bolacha tem `path=/r/<slug>` e fora dele o
+      // navegador não a envia —, e essa asserção passou a ser falsa **sem
+      // aparecer em declaração nenhuma**. A decisão está agora escrita em
+      // `qr-da-mesa-e-o-visitante.md`: não é «nada além de ler», é **nada sem
+      // sessão de visitante**.
+      //
+      // A varredura do ficheiro prova que a porta LÊ a credencial e tem um
+      // caminho de recusa. Isto prova que a recusa **acontece**: um ficheiro
+      // pode ler a bolacha e continuar à mesma, e a leitura estática não
+      // distingue as duas coisas.
+      //
+      // O par vive nos dois lados: aqui recusa-se sem bolacha, e o caso acima
+      // — «avisámos agora» — é a mesma escrita a passar COM ela. Sem essa
+      // metade, uma porta partida que recusasse toda a gente passava este teste.
+      await limparChamadas();
+
+      // Um contexto LIMPO. Não é o mesmo de onde a bolacha foi posta.
+      const semVisita = await browser.newContext();
+      try {
+        const resposta = await semVisita.request.post(
+          `/r/${SLUG}/api/mesa`,
+          { form: { accao: 'chamar', tipo: 'AJUDA', idioma: 'es-ES' }, maxRedirects: 0 });
+
+        // A porta responde com um desvio para o ecrã de «a sessão terminou», e
+        // é essa a recusa: não há erro 500 nem página de conteúdo.
+        expect([302, 303, 307].includes(resposta.status()),
+          `a porta respondeu ${resposta.status()} a uma escrita sem credencial`).toBe(true);
+        expect(resposta.headers().location ?? '',
+          'a recusa não mandou entrar outra vez').toContain('sessao=terminou');
+      } finally {
+        await semVisita.close();
+      }
+
+      // E o que interessa mesmo: NADA foi escrito.
+      const { Client } = await import('pg');
+      const url = process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL;
+      if (!url) throw new Error('MIGRATION_DATABASE_URL em falta');
+      const sql = new Client({ connectionString: url });
+      await sql.connect();
+      const { rows } = await sql.query(
+        `SELECT count(*)::int AS n FROM guest_calls WHERE table_id IN
+           (SELECT id FROM service_tables WHERE codigo LIKE 'insp-%')`);
+      await sql.end();
+      expect(rows[0].n, 'a escrita sem credencial chegou à base').toBe(0);
+    });
+
   test('a sala VÊ a chamada, atende, e quem chamou fica a saber', async ({ page }) => {
     // A confirmação é a metade que fecha o ciclo. Sem ela, quem chamou não sabe
     // se alguém vem — e volta a carregar até deixar de acreditar no botão.

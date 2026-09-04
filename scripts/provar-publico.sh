@@ -236,6 +236,16 @@ repor_funcoes
 
 echo
 echo "6b. CONTROLO NEGATIVO — ONZE formas de exportar um verbo de escrita"
+# ── A regra mudou de FORMA no E18, e este bloco continua a valer ──────────
+#
+# A pasta pública deixou de ser «nada além de ler» e passou a ser «nada sem
+# sessão de visitante» — a decisão está em `qr-da-mesa-e-o-visitante.md`, e foi
+# escrita antes de a asserção mudar.
+#
+# As onze formas continuam a ter de acender, e por uma razão que não mudou: são
+# plantadas na PÁGINA da carta, que não lê credencial nenhuma. Um verbo de
+# escrita ali é alcançável por quem só tem o endereço, que é exactamente o que
+# continua proibido.
 # ── Porque é que são onze e não uma ───────────────────────────────────────
 #
 # A primeira versão desta medição procurava `export async function POST`. Não
@@ -269,7 +279,7 @@ for forma in "${FORMAS[@]}"; do
   if correr /tmp/bossaos-pb-verbo.txt; then
     vermelho "ESCAPOU: $(printf '%s' "$forma" | head -c 46)"
     escaparam=$((escaparam + 1))
-  elif ! grep -qE '^ *not ok .*porta pública não aceita' /tmp/bossaos-pb-verbo.txt; then
+  elif ! grep -qE '^ *not ok .*porta pública não escreve nada SEM SESSÃO' /tmp/bossaos-pb-verbo.txt; then
     vermelho "vermelho por outro motivo: $(printf '%s' "$forma" | head -c 46)"
     escaparam=$((escaparam + 1))
   fi
@@ -278,6 +288,32 @@ repor "$PAGINA"
 if (( escaparam == 0 )); then
   verde "as ${#FORMAS[@]} formas de exportar um verbo foram todas apanhadas"
 fi
+
+echo
+echo "6bb. CONTROLO NEGATIVO — a porta do visitante deixa de EXIGIR a credencial"
+# ── O par da regra nova, do lado estático ─────────────────────────────────
+#
+# A pasta pública passou a poder escrever, desde que a escrita exija a sessão de
+# visitante. O bloco 6b prova que uma escrita SEM credencial acende; este prova o
+# outro lado — que a exigência é mesmo verificada, e não uma frase no comentário.
+#
+# Tira-se o caminho de recusa da porta real e mantém-se a leitura da bolacha: é a
+# porta que lê a credencial e continua à mesma, que é o defeito mais provável
+# desta forma nova e o que uma varredura ingénua não distingue.
+PORTA_DO_VISITANTE='apps/web/app/r/[publicLocationSlug]/api/mesa/route.ts'
+cp "$PORTA_DO_VISITANTE" /tmp/bossaos-porta-visitante-orig.ts
+python3 - <<'PYPORTA'
+import io
+p = 'apps/web/app/r/[publicLocationSlug]/api/mesa/route.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "  if (!visitante) return voltarPara(`${base}/menu`, { sessao: 'terminou' });"
+assert antigo in s, 'o caminho de recusa da porta nao esta onde se esperava'
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, "  // sem recusa", 1))
+PYPORTA
+exigir_vermelho "caiu a exigência: a porta lê a credencial e já não recusa quem não a tem" \
+  'não recusa quem não a tem|SEM SESSÃO' /tmp/bossaos-pb-exigencia.txt
+cp /tmp/bossaos-porta-visitante-orig.ts "$PORTA_DO_VISITANTE"
+rm -f /tmp/bossaos-porta-visitante-orig.ts
 
 echo
 echo "6c. CONTROLO NEGATIVO — o endereço largado volta ao mundo"

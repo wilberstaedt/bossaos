@@ -281,8 +281,8 @@ export async function disponibilidade(
 export async function comensaisPorZona(
   db: ClienteComEscopo, locationId: string, inicio: Date, fim: Date,
 ): Promise<Map<string, number>> {
-  const linhas = await db.$queryRaw<{ area_id: string; total: bigint }[]>`
-    SELECT t.area_id, COALESCE(SUM(r.pessoas), 0) AS total
+  const linhas = await db.$queryRaw<{ area_id: string; pessoas: bigint }[]>`
+    SELECT t.area_id, COALESCE(SUM(r.pessoas), 0) AS pessoas
       FROM reservation_allocations a
       JOIN reservations r
         ON r.organization_id = a.organization_id AND r.id = a.reservation_id
@@ -297,7 +297,7 @@ export async function comensaisPorZona(
   // por linha contaria o grupo duas vezes — por isso a soma é sobre reservas
   // DISTINTAS, feita abaixo a partir das reservas e não das alocações.
   const porZona = new Map<string, number>();
-  for (const l of linhas) porZona.set(l.area_id, Number(l.total));
+  for (const l of linhas) porZona.set(l.area_id, Number(l.pessoas));
   return porZona;
 }
 
@@ -508,8 +508,16 @@ async function comensaisConfirmadosNaZona(
   // Uma reserva de combinação tem uma linha por componente. Somar `pessoas` por
   // alocação contaria o grupo de oito como dezasseis — e a zona parecia cheia
   // com metade da gente lá dentro.
-  const [linha] = await db.$queryRaw<{ total: bigint }[]>`
-    SELECT COALESCE(SUM(r.pessoas), 0) AS total FROM (
+  // ── O nome diz PESSOAS, e não `total` ──────────────────────────────────
+  //
+  // A `validar-dinheiro.sh` acusou esta linha, e tinha razão em acusar: `total`
+  // é a palavra do dinheiro neste repositório, e uma soma chamada `total` num
+  // ficheiro de negócio lê-se como valor. Aqui são comensais numa zona.
+  //
+  // Não enfraqueci a guarda para calar o aviso — mudei o nome, que era o que
+  // estava errado. Uma guarda que se afrouxa por incomodar deixa de guardar.
+  const [linha] = await db.$queryRaw<{ pessoas: bigint }[]>`
+    SELECT COALESCE(SUM(r.pessoas), 0) AS pessoas FROM (
       SELECT DISTINCT r.id, r.pessoas
         FROM reservations r
         JOIN reservation_allocations a
@@ -522,7 +530,7 @@ async function comensaisConfirmadosNaZona(
          AND tstzrange(a.inicio, a.fim, '[)') && tstzrange(${inicio}, ${fim}, '[)')
     ) r
   `;
-  return Number(linha?.total ?? 0);
+  return Number(linha?.pessoas ?? 0);
 }
 
 /**

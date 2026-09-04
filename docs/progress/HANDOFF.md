@@ -74,6 +74,22 @@ acima. O caso passa sozinho (18/18) e só cai sob carga, que é o sintoma de uma
 corrida. **Não lhe toquei** — é do E14 e a etapa autorizada era esta. Enquanto
 existir, `pnpm inspeccionar` não é um portão fiável sob carga.
 
+**RETIDO e corrigido: uma asserção de segurança anterior ficou falsa em
+silêncio.** O E17 trouxe a porta do visitante para dentro de `apps/web/app/r`, a
+pasta que a `provar-publico.sh` declara só de leitura. Não é buraco — a porta
+exige a credencial da visita antes de escrever —, mas nem o E17 nem o E18
+correram essa prova, e a asserção ficou falsa sem aparecer em lado nenhum.
+
+**A decisão veio primeiro, e depois a prova.** `qr-da-mesa-e-o-visitante.md` diz
+agora que a pasta pública pode conter escrita desde que autenticada por sessão de
+visitante, com a razão: manter o âmbito do inquilino no endereço é melhor do que
+uma `/api/publico` global, porque uma bolacha em `path=/` viaja para os outros
+restaurantes do mesmo domínio. A regra passou de «nada além de ler» para **«nada
+sem sessão de visitante»**, com par dos dois lados — estático (`provar-publico.sh`
+6b e o novo 6bb) e vivo (`provar-visitante-no-navegador.sh`, controlo 9: escrita
+sem bolacha recusada e ausente da base). Trocar a asserção sem escrever a decisão
+seria calibrar a guarda ao que existe.
+
 **A prova foi LOCAL.** A CI continua trancada por facturação do GitHub.
 
 **O E17 ficou VALIDADO** a 04/09 — 16 telas, prova **local**, 17 controlos

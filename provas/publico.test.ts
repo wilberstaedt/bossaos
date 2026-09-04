@@ -332,7 +332,7 @@ describe('4. As consultas contam, e não seguem ninguém', () => {
 
 // ═══════════════════════════════════════════════════════════════════════════
 describe('5. O QR é um endereço, não uma credencial', () => {
-  it('a porta pública não aceita nada além de ler', async () => {
+  it('a porta pública não escreve nada SEM SESSÃO DE VISITANTE', async () => {
     // ── Esta medição já esteve errada, e o sénior provou-o ─────────────────
     //
     // A primeira versão procurava `export async function POST`. Isso não apanha
@@ -354,6 +354,25 @@ describe('5. O QR é um endereço, não uma credencial', () => {
     // dispara — e é o lado certo para errar: um falso positivo faz alguém
     // renomear uma constante; um falso negativo é um endpoint de encomenda que
     // ninguém viu numa superfície pública.
+    //
+    // ── A regra mudou de FORMA, e não de força ────────────────────────────
+    //
+    // Até ao E17 isto dizia «nada além de ler», e era a regra certa enquanto
+    // aqui só vivia a carta. O E17 trouxe a porta do visitante para dentro de
+    // `/r/<slug>`, porque a bolacha da visita tem `path=/r/<slug>` e fora dele o
+    // navegador não a envia — a alternativa era alargar a bolacha para a raiz e
+    // mandar a credencial da mesa 5 para os outros restaurantes do mesmo
+    // domínio.
+    //
+    // A decisão está escrita em `qr-da-mesa-e-o-visitante.md`, e foi escrita
+    // ANTES desta alteração: trocar a asserção sem a decisão seria calibrar a
+    // guarda ao que já existe.
+    //
+    // O que continua proibido é o mesmo: um verbo de escrita alcançável por quem
+    // só tem o endereço. Por isso uma escrita aqui só é aceite se o ficheiro
+    // **exigir a credencial da visita antes de tocar em qualquer coisa** — e o
+    // caso seguinte prova que a recusa acontece mesmo, em vez de acreditar que o
+    // ficheiro faz o que diz.
     const { readFileSync, readdirSync, statSync } = await import('node:fs');
     const { join } = await import('node:path');
     const raiz = join(process.cwd(), 'apps', 'web', 'app', 'r');
@@ -368,23 +387,42 @@ describe('5. O QR é um endereço, não uma credencial', () => {
     visitar(raiz);
     assert.ok(ficheiros.length > 0, 'não havia rotas públicas para medir');
 
+    let comEscrita = 0;
     for (const f of ficheiros) {
       // As quebras de linha colapsam primeiro: `export {\n  x as POST,\n}` é
       // uma exportação e não pode escapar por estar escrita em três linhas.
-      const conteudo = readFileSync(f, 'utf8').replace(/\s+/g, ' ');
-      for (const verbo of VERBOS_DE_ESCRITA) {
-        const padrao = new RegExp(
-          // `export`, opcionalmente `default`/`async`, e depois o verbo dentro
-          // de uma janela que não atravessa um `;` — que é o que impede a
-          // procura de escorregar para dentro do corpo da função.
-          String.raw`\bexport\b(?:[^;]{0,200}?)\b${verbo}\b`,
-        );
-        assert.ok(
-          !padrao.test(conteudo),
-          `${f.replace(process.cwd(), '')}: exporta ${verbo} — a carta pública é só de leitura`,
-        );
-      }
+      const bruto = readFileSync(f, 'utf8');
+      const conteudo = bruto.replace(/\s+/g, ' ');
+      const escreve = VERBOS_DE_ESCRITA.some((verbo) => new RegExp(
+        // `export`, opcionalmente `default`/`async`, e depois o verbo dentro
+        // de uma janela que não atravessa um `;` — que é o que impede a
+        // procura de escorregar para dentro do corpo da função.
+        String.raw`\bexport\b(?:[^;]{0,200}?)\b${verbo}\b`,
+      ).test(conteudo));
+      if (!escreve) continue;
+
+      comEscrita += 1;
+      // ── E se escreve, tem de EXIGIR a visita ────────────────────────────
+      //
+      // A leitura da bolacha não chega: um ficheiro que a lê e continua sem ela
+      // é uma porta aberta com um cadeado pendurado ao lado. Exige-se a leitura
+      // **e** um caminho de recusa — e a recusa é depois exercida a sério, na
+      // asserção seguinte, contra a porta a correr.
+      assert.match(
+        conteudo,
+        /visitanteDaRequisicao|bolachaDoVisitante/,
+        `${f.replace(process.cwd(), '')}: escreve sem ler a credencial da visita`,
+      );
+      assert.match(
+        conteudo,
+        /if \(!visitante|visitante === null|!bolachaDoVisitante/,
+        `${f.replace(process.cwd(), '')}: lê a credencial e não recusa quem não a tem`,
+      );
     }
+    // Guarda de leitor cego. Se a pasta deixar de ter escrita nenhuma, este caso
+    // passa a não medir coisa alguma — e passaria em silêncio para sempre.
+    assert.ok(comEscrita > 0,
+      'não há escrita nenhuma na pasta pública: esta asserção deixou de medir o que diz medir');
   });
 
   it('e a porta da base só devolve o que está publicado', async () => {

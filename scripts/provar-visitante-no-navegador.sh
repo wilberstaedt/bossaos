@@ -45,8 +45,12 @@ AJUDA="apps/web/app/r/[publicLocationSlug]/[locale]/mesa/ajuda/page.tsx"
 
 ORIG_VISITANTE=$(mktemp); ORIG_PECAS=$(mktemp); ORIG_RENOVAR=$(mktemp); ORIG_SPEC=$(mktemp)
 ORIG_AJUDA=$(mktemp)
+LEITOR="apps/web/src/visitante/sessao-do-visitante.ts"
+PORTA="apps/web/app/r/[publicLocationSlug]/api/mesa/route.ts"
+ORIG_LEITOR=$(mktemp); ORIG_PORTA=$(mktemp)
 cp "$VISITANTE" "$ORIG_VISITANTE"; cp "$PECAS" "$ORIG_PECAS"
 cp "$RENOVAR" "$ORIG_RENOVAR"; cp "$SPEC" "$ORIG_SPEC"; cp "$AJUDA" "$ORIG_AJUDA"
+cp "$LEITOR" "$ORIG_LEITOR"; cp "$PORTA" "$ORIG_PORTA"
 falhas=0
 
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
@@ -55,8 +59,9 @@ vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); 
 restaurar() {
   cp "$ORIG_VISITANTE" "$VISITANTE"; cp "$ORIG_PECAS" "$PECAS"
   cp "$ORIG_RENOVAR" "$RENOVAR"; cp "$ORIG_SPEC" "$SPEC"; cp "$ORIG_AJUDA" "$AJUDA"
+  cp "$ORIG_LEITOR" "$LEITOR"; cp "$ORIG_PORTA" "$PORTA"
   rm -rf "apps/web/app/api/publico/mesa"
-  rm -f "$ORIG_VISITANTE" "$ORIG_PECAS" "$ORIG_RENOVAR" "$ORIG_SPEC" "$ORIG_AJUDA"
+  rm -f "$ORIG_VISITANTE" "$ORIG_PECAS" "$ORIG_RENOVAR" "$ORIG_SPEC" "$ORIG_AJUDA" "$ORIG_LEITOR" "$ORIG_PORTA"
 }
 trap restaurar EXIT INT TERM
 
@@ -89,7 +94,7 @@ exigir_vermelho() {
 }
 
 # 3 de preparação + 19 do spec.
-CASOS_MINIMOS=22
+CASOS_MINIMOS=23
 
 echo "1. Com tudo ligado"
 if correr /tmp/bossaos-visita-nav-ligado.txt; then
@@ -254,7 +259,58 @@ exigir_vermelho "caiu o ciclo: a bolacha deixou de chegar a porta, e a chamada e
 cp "$ORIG_AJUDA" "$AJUDA"
 rm -rf "apps/web/app/api/publico/mesa"
 
-echo "9. Reposto — tem de voltar ao verde"
+echo "9. CONTROLO NEGATIVO — a porta deixa de RECUSAR quem não tem bolacha"
+# ── O par vivo da regra nova da pasta pública ─────────────────────────────
+#
+# A `provar-publico.sh` verifica isto por leitura do ficheiro, e a leitura não
+# distingue uma porta que recusa de uma porta que lê a credencial e continua à
+# mesma. Aqui a recusa é exercida contra a porta a correr.
+#
+# ── Duas guardas, e por isso o plante tem duas linhas ─────────────────────
+#
+# Tentei três plantes antes deste, e os dois primeiros ensinaram-me alguma coisa:
+#
+#  1. apagar o `if (!visitante) return …` da rota **não compila** — sem a recusa,
+#     `visitante` fica anulável a jusante. Um defeito que não compila não é um
+#     defeito plantado: é um ficheiro partido, e o ajudante disse-o em vez de o
+#     contar como vermelho;
+#  2. fazer o leitor devolver «qualquer visita ACTIVA» com o cliente do runtime
+#     ficou VERDE, porque sem escopo de inquilino a política de linha recusa em
+#     silêncio. O RLS estava a anular o defeito — a mesma lição que já mordeu no
+#     E17;
+#  3. mandar o leitor pela porta estreita ficou verde na mesma, e aí a razão é
+#     do produto: a rota **não usa** o objecto do visitante para escrever. Usa o
+#     TOKEN que veio no pedido, e sem bolacha esse token é vazio.
+#
+# São duas guardas independentes em série: uma identifica a visita, a outra
+# autoriza a escrita com a credencial do próprio pedido. É melhor assim — e
+# significa que nenhum plante de uma linha abre a porta.
+#
+# Por isso este controlo planta as duas. Continua a ser UM defeito — «a porta
+# deixa de exigir a credencial» — e a alternativa era ter uma asserção viva sem
+# controlo nenhum, que é a guarda que ninguém pode verificar.
+python3 - <<'PYRECUSA'
+import io
+p = 'apps/web/src/visitante/sessao-do-visitante.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "  if (!bolacha) return null;"
+assert antigo in s, 'a recusa do leitor da credencial nao esta onde se esperava'
+io.open(p, 'w', encoding='utf-8').write(s.replace(
+    antigo, "  if (!bolacha) return visitanteActivo(obterBase(), 'insp-token-do-visitante-para-medir');", 1))
+
+p = 'apps/web/app/r/[publicLocationSlug]/api/mesa/route.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "  const bolachaDoVisitante = (await cookies()).get(BOLACHA_DO_VISITANTE)?.value ?? '';"
+assert antigo in s, 'a leitura do token do pedido nao esta onde se esperava'
+io.open(p, 'w', encoding='utf-8').write(s.replace(
+    antigo,
+    "  const bolachaDoVisitante = (await cookies()).get(BOLACHA_DO_VISITANTE)?.value ?? 'insp-token-do-visitante-para-medir';", 1))
+PYRECUSA
+exigir_vermelho "caiu a recusa: uma escrita sem credencial chegou ao produto" \
+  'sem bolacha é RECUSADA' /tmp/bossaos-visita-nav-recusa.txt
+cp "$ORIG_LEITOR" "$LEITOR"; cp "$ORIG_PORTA" "$PORTA"
+
+echo "10. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-visita-nav-reposto.txt; then
   passou=$(grep -oE '[0-9]+ passed' /tmp/bossaos-visita-nav-reposto.txt | grep -oE '[0-9]+' || echo 0)
   if (( passou < CASOS_MINIMOS )); then

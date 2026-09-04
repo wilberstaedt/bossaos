@@ -47,6 +47,42 @@ própria, presa à sessão de mesa aberta pela equipa — logo:
   origem tem de ser visível e distinguível a quem serve, com palavras e não só
   com um atributo.
 
+## A pasta pública pode ESCREVER, e é uma decisão que se toma aqui
+
+Até ao E17 a regra da superfície pública era «nada além de ler», e a prova do E09
+verificava-a a varrer `apps/web/app/r` à procura de qualquer verbo de escrita
+exportado. Era a regra certa enquanto ali só vivia a carta.
+
+**Deixou de ser verdade, e a mudança foi minha.** A bolacha do visitante tem
+`path=/r/<slug>`; com a porta em `/api/publico/mesa`, fora desse caminho, o
+navegador **nunca a enviava** — e todos os POST do visitante caíam em silêncio no
+`?sessao=terminou`. A porta mudou para dentro do endereço do restaurante.
+
+A alternativa barata era alargar a bolacha para `path=/`. Não o fiz, e é por isso
+que esta decisão fica escrita: **manter o âmbito do inquilino no endereço é
+melhor do que uma porta `/api/publico` global.** Uma credencial de mesa que viaja
+para a raiz vai com cada pedido feito a qualquer outro restaurante servido pelo
+mesmo domínio. O âmbito no caminho não é uma conveniência de arrumação — é a
+única coisa que impede a credencial da mesa 5 de chegar à casa do lado.
+
+Portanto a regra da pasta pública **muda de forma**, e não de força:
+
+> Não é «nada além de ler». É **nada sem sessão de visitante**.
+
+O que fica proibido continua a ser o mesmo: um verbo de escrita alcançável por
+quem só tem o endereço. O que passa a ser permitido é um verbo de escrita que
+**exige a credencial da visita antes de tocar em qualquer coisa** — a porta lê a
+bolacha, resolve o inquilino a partir dela, e recusa sem ela.
+
+E a prova tem de afirmar a regra nova com o par, senão mede outra coisa:
+
+- uma escrita **sem bolacha** é recusada;
+- e a mesma escrita **com bolacha** passa — sem esta metade, «recusa tudo»
+  satisfazia o teste e a porta podia estar partida.
+
+Trocar a asserção sem escrever esta decisão seria calibrar a guarda ao que já
+existe, que é a forma mais silenciosa de uma guarda deixar de guardar.
+
 ## O que NÃO decido, porque não é meu
 
 **Com que frequência se roda é do restaurante**, e o sistema não traz um valor
@@ -63,3 +99,6 @@ tempo o QR daquela mesa não é rodado** — informar não é decidir.
    fotografia, e uma prova que só teste com a mesa aberta não o mede.
 4. **QR antigo depois de rodar:** não abre sessão nova — mas o ponto 1 continua
    verdadeiro. As duas coisas ao mesmo tempo são a prova de que são dois actos.
+5. **Escrita na pasta pública sem bolacha de visitante:** recusada, e a mesma
+   escrita com bolacha passa. Sem a segunda metade, uma porta partida — que
+   recusa toda a gente — passava o teste.
