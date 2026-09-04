@@ -281,3 +281,43 @@ Depois disso podes parar. Não gastes o resto do contexto a explicar-te a ningu�
 recusa-o, e tem razão: o revisor não pode medir o que ainda está a mudar. Já
 custou onze vermelhos que não eram regressão nenhuma — era só um ficheiro a meio
 que não compilava, a derrubar tudo o que precisa da aplicação de pé.
+
+## O 404 fantasma do arnês: RESOLVIDO, e a causa não era o produto
+
+Escrito a 04/09, e fica aqui porque volta noutra etapa se ninguém souber.
+
+**O sintoma:** uma rota com identificador — `/staff/<unidade>/mesas/<sessionId>`,
+mas serve para qualquer uma — devolve **404 numa passagem completa e verde na
+seguinte**, sem ninguém tocar em nada, em telas diferentes de cada vez.
+
+**A causa:** o arnês **semeia no arranque e apaga no fim** (`globalTeardown` →
+`limpar-inspeccao.ts`). Uma passagem anterior ainda viva, ou interrompida e a
+chegar ao fecho mais tarde, apaga as fixtures **por baixo** da que está a medir.
+Basta um `pnpm inspeccionar` esquecido, ou um script de controlos negativos que o
+temporizador matou a meio.
+
+**Duas hipóteses foram descartadas pelo caminho**, e vale a pena não as repetir:
+não é o `sala.spec` a fechar a sessão — ele só submete `abrir`, e **visitar uma
+tela de encerrar não fecha nada**, porque é um GET que desenha formulários; e
+não é a partilha da fixture, embora separá-la continue a ser boa higiene.
+
+**O que deu a resposta foi a MENSAGEM, e não a investigação.** Quando uma rota com
+identificador devolve 404, a prova pergunta agora à base se a linha ainda existe,
+e diz qual dos dois casos é:
+
+```
+STAFF-005 · … respondeu 404 — e a sessão JÁ NÃO EXISTE na base:
+alguém a apagou a meio da passagem
+```
+
+«A linha existe e o produto não a serviu» e «a linha já não existe» são causas
+**completamente diferentes**, e a segunda nem sequer é um defeito do produto.
+Distingui-las com «respondeu 404» à frente custou uma hora e uma hipótese errada.
+
+**A regra que fica, e é maior do que este caso:** quando uma prova falhar sobre
+um recurso que outra coisa gere, a mensagem tem de dizer **de que lado está o
+problema**. Não é conforto — é a diferença entre corrigir e procurar.
+
+O `scripts/provar-staff-no-navegador.sh` recusa arrancar com a porta ocupada ou
+com outra passagem viva. Se escreveres um script que corre o arnês em ciclo,
+copia essas duas guardas: sem elas, o teu próprio ciclo é o candidato número um.
