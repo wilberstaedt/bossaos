@@ -1,10 +1,15 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E15 — Staff PWA e funcionamento degradado (**23 telas**).
-**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** Declarado pelo JR; não
-assinado — ninguém assina a revisão do próprio código.
-**Régua:** `docs/reviews/ALVO-E15.md`, escrita antes de existir código.
-**Detalhe e achados:** `docs/progress/E15.md`.
+**Etapa atual:** E16 — KDS de cozinha, barra e expo (**20 telas**).
+**Estado:** autorizada. O JR ainda estava a afinar as provas do E15 quando assinei.
+**Régua:** `docs/reviews/ALVO-E16.md`, escrita antes de existir código.
+**Contratos que mandam:** `kds-e-tempo-real.md` (E00) e
+`tarefas-de-producao-e-estacoes.md` (escrito para esta etapa).
+
+**O E15 ficou VALIDADO** a 04/09 no commit `4ffc913` — 23 telas, prova **local**.
+Leva uma correcção de uma linha: o marcador `[data-tela]` por tela não consegue
+falhar, porque a navegação escreve o id das 19 secções em todas as páginas.
+Ancorar ao cabeçalho (`h1[data-tela=...]`). Detalhe em `docs/reviews/E15.md`.
 
 **A prova foi LOCAL.** A CI continua trancada por facturação do GitHub, e nada
 desta etapa correu lá. Quem validar escreve isso.
