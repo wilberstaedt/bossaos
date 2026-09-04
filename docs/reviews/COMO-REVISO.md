@@ -418,3 +418,30 @@ existia lá (`t`) e que **não existia** na base do JR (`f`), e li
 `current_database()` nas duas pontas. Uma escrita de um lado ausente do outro é
 a única coisa que prova separação; dois URLs diferentes não provam nada, porque
 podem apontar ao mesmo sítio.
+
+## Conferi o dinheiro contra o PDF, e está certo — 04/09
+
+Fui **eu** que transcrevi a `PRECIFICACAO.json` do PDF, e os testes lêem esse
+mesmo ficheiro. Instrumento e alvo saídos da mesma fonte: se eu tivesse trocado
+um dígito, tudo passava a verde por baixo do erro. Ninguém tinha conferido.
+
+Reli o PDF de fresco e escrevi os números **à mão** no comparador, em vez de
+reaproveitar o ficheiro do repo — comparar o ficheiro consigo próprio era
+exactamente o que eu queria evitar. **15 campos, 0 falhas.** O ano são dez
+mensalidades nos três planos, e a economia dá os €38 / €158 / €298 que o PDF
+declara, ao cêntimo.
+
+### A armadilha que o PDF avisa, e o estado dela
+
+«A cobrança anual usa o valor integral do ano, **sem multiplicar o equivalente
+mensal arredondado**.» Não é conselho: `1583 × 12 = 18996`, e o ano custa 19000.
+Quatro cêntimos. No Pro arredonda ao contrário — `12417 × 12 = 149004`, quatro
+cêntimos **a mais**, que é cobrar de mais.
+
+Está guardado, e bem: `precificacao.test.ts` afirma que doze vezes o equivalente
+**não** é o anual, com a mensagem certa. E a única página que mostra os dois
+cobra `preco.anual` e usa `equivalenteMensal` só dentro da frase «equivalente/mês».
+
+Fica dito o que este teste **não** prova: ele guarda a aritmética, não o uso. Se
+um dia alguém somar `equivalenteMensal × 12` num total, o teste continua verde.
+Verifiquei o uso à mão hoje — há um só, e está correcto.
