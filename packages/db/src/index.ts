@@ -231,3 +231,10 @@ export {
   type EstadoDaProducao, type ActorDeProducao, type ResultadoDaTransicao,
   type EventoDeProducao,
 } from './producao.ts';
+
+// ── E17 · o QR da mesa e o visitante ───────────────────────────────────────
+export {
+  resumirSegredo, segredoNovo, rodarQrDaMesa, sessoesVivasDaMesa, revogarAcessoDaMesa,
+  abrirVisitante, visitanteActivo, visitanteFalou, visitantesDaUnidade, estadoDoVisitante,
+  type ResultadoDaRotacao, type VisitanteAberto, type VisitanteActivo,
+} from './visitante.ts';

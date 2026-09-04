@@ -136,6 +136,7 @@ model Organization {
   regrasDeRoteamento RoutingRule[]
   tarefasDeProducao  ProductionTask[]
   eventosDeProducao  ProductionEvent[]
+  visitantes GuestSession[]
   @@map("organizations")
   revisoes        MenuRevision[]
   publicacoes     MenuPublication[]
@@ -256,6 +257,7 @@ model Location {
   estacoesDeProducao ProductionStation[]
   regrasDeRoteamento RoutingRule[]
   tarefasDeProducao  ProductionTask[]
+  visitantes GuestSession[]
   @@unique([organizationId, id], name: "location_por_organizacao")
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -2080,6 +2082,37 @@ model ServiceTable {
   posX           Int?   @map("pos_x")
   posY           Int?   @map("pos_y")
 
+  /// ── O QR desta mesa: um token AO PORTADOR, colado num sítio público ────
+  ///
+  /// Guarda-se o **resumo**, nunca o segredo — como os convites do E04 e o
+  /// pareamento do E13. Quem tem a base não tem o autocolante.
+  ///
+  /// `null` é uma mesa sem QR emitido, e é um estado real: não se inventa um
+  /// segredo à espera de que alguém o imprima.
+  qrSegredoHash String? @map("qr_segredo_hash")
+
+  /// Quantas vezes o QR desta mesa foi rodado, e quando foi a última.
+  ///
+  /// ── Isto NÃO decide se uma sessão viva continua válida ─────────────────
+  ///
+  /// É a distinção inteira do contrato: **rodar não é revogar**. Rodar troca o
+  /// segredo que abre sessões NOVAS e não fecha as que já estão abertas — quem
+  /// está sentado continua a comer.
+  ///
+  /// O contador serve para o ecrã dizer há quanto tempo o QR não é rodado, e
+  /// mais nada. *«Informar não é decidir»*: com que frequência se roda é do
+  /// restaurante, e o sistema não traz um valor por omissão que finja ser
+  /// política.
+  ///
+  /// **E repare no que a `GuestSession` NÃO tem:** uma cópia deste número. Se
+  /// tivesse, alguém escreveria um dia `sessao.qrGeracao === mesa.qrGeracao` na
+  /// verificação — e a rotação passava a expulsar gente da mesa a meio do prato,
+  /// que é exactamente o colapso que este contrato existe para impedir. Sem o
+  /// campo, esse `if` não tem o que comparar: é preciso uma migração para o
+  /// escrever, e uma migração é revista.
+  qrGeracao  Int       @default(0) @map("qr_geracao")
+  qrRodadoEm DateTime? @map("qr_rodado_em") @db.Timestamptz(6)
+
   createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   archivedAt DateTime? @map("archived_at") @db.Timestamptz(6)
@@ -2089,6 +2122,7 @@ model ServiceTable {
   area         ServiceArea  @relation(fields: [organizationId, areaId], references: [organizationId, id], onDelete: Restrict)
   sessoes      TableSession[]
   combinacoes  TableCombinationMember[]
+  visitantes   GuestSession[]
 
   @@unique([organizationId, id], name: "mesa_por_organizacao")
   @@unique([locationId, codigo], name: "codigo_de_mesa_por_unidade")
@@ -2173,6 +2207,7 @@ model TableSession {
   mesa         ServiceTable @relation(fields: [organizationId, tableId], references: [organizationId, id], onDelete: Restrict)
   responsavel  Membership?  @relation(fields: [organizationId, responsavelId], references: [organizationId, id], onDelete: Restrict)
   eventos      TableSessionEvent[]
+  visitantes   GuestSession[]
 
   @@unique([organizationId, id], name: "sessao_por_organizacao")
   @@index([organizationId, locationId, estado])
@@ -2793,4 +2828,75 @@ model ProductionEvent {
 
   @@index([organizationId, locationId, cursor])
   @@map("production_events")
+}
+
+
+// ── E17 · o visitante da mesa ──────────────────────────────────────────────
+
+/// O que uma sessão de visitante pode ter de INTRÍNSECO.
+///
+/// ── Repare no que não está aqui: `TERMINADA` ──────────────────────────────
+///
+/// «Uma sessão de visitante não sobrevive ao fecho da mesa. A conta fecha, a
+/// credencial morre com ela.» Isso é **derivado** da sessão de mesa, e não um
+/// estado a escrever — guardá-lo em paralelo criava duas verdades, e a que o
+/// ecrã do visitante mostrasse passava a depender de quem escreveu por último.
+/// É a mesma lição do E16, e custou lá um gatilho a aprender.
+///
+/// Aqui ficam só os dois estados que são **desta** sessão e de mais nada: está
+/// activa, ou alguém a revogou.
+enum EstadoDoVisitante {
+  ACTIVA
+  REVOGADA
+}
+
+/// A sessão de quem chega pelo QR da mesa.
+///
+/// ── O QR ABRE a sessão; não É a sessão ────────────────────────────────────
+///
+/// Quem entra recebe uma **credencial própria**, presa à sessão de mesa que a
+/// equipa abriu. Daí saem as duas consequências que o contrato nomeia:
+///
+/// - **mesa fechada com QR válido não abre sessão nenhuma** — fora de serviço o
+///   autocolante não vale nada, e é isso que tira valor à fotografia;
+/// - **rodar o QR não mexe nesta linha** — ela tem token próprio, e nada aqui
+///   aponta para o segredo que a abriu.
+model GuestSession {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  tableId        String @map("table_id") @db.Uuid
+
+  /// A sessão de mesa a que esta credencial está presa. **Obrigatória**: uma
+  /// sessão de visitante sem mesa aberta é a fotografia do QR a funcionar.
+  tableSessionId String @map("table_session_id") @db.Uuid
+
+  /// O resumo da credencial. A base nunca guarda o token, como em todo o resto.
+  tokenHash String @unique @map("token_hash")
+
+  estado EstadoDoVisitante @default(ACTIVA)
+
+  abertaEm    DateTime  @default(now()) @map("aberta_em") @db.Timestamptz(6)
+  /// O último sinal de vida. Serve ao QR-006 para dizer o que está a acontecer
+  /// agora — e «nunca pediu nada» é diferente de «pediu há uma hora».
+  ultimaVezEm DateTime? @map("ultima_vez_em") @db.Timestamptz(6)
+
+  revogadaEm     DateTime? @map("revogada_em") @db.Timestamptz(6)
+  revogadaPor    String?   @map("revogada_por")
+  /// Revogar é o acto de excepção, e um acto de excepção sem razão escrita é
+  /// uma decisão que ninguém consegue rever. Mesma regra do E16.
+  revogadaMotivo String?   @map("revogada_motivo")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  mesa         ServiceTable @relation(fields: [organizationId, tableId], references: [organizationId, id], onDelete: Restrict)
+  sessaoDeMesa TableSession @relation(fields: [organizationId, tableSessionId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, id], name: "visitante_por_organizacao")
+  @@index([organizationId, locationId, estado])
+  @@index([tableSessionId])
+  @@map("guest_sessions")
 }
