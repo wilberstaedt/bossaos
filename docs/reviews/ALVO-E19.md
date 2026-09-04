@@ -60,3 +60,17 @@ num sábado às 21h.
 - **Mensageria externa activa sem contrato.** O enunciado di-lo: sem provedor
   configurado, o conector fica **desligado e visível como desligado** — não a
   fingir que enviou.
+
+## A população que vou contar — fixada antes da entrega
+
+Da matriz, `etapa_principal = E19`, **28 telas**:
+
+```
+PUB-003 RES-C-001 RES-C-002 RES-C-003 RES-C-004 RES-C-005 RES-C-006 RES-C-007 RES-C-008 RES-C-009 RES-C-010 RES-B-001 RES-B-002 RES-B-003
+RES-B-004 RES-B-005 RES-B-006 RES-B-007 RES-B-008 RES-B-009 RES-B-010 RES-B-011 RES-B-017 RES-B-018 RES-B-019 REP-008 INT-004 SET-009
+```
+
+Escrevi «28 telas» três vezes nesta régua e nunca disse **quais** — e isso é
+precisamente o buraco que tu me apontaste no E15: **um número sem o conjunto
+deixa passar uma tela trocada por outra.** A prova lê a matriz e compara conjunto
+a conjunto, como já fazes desde então.
