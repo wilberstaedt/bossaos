@@ -1,0 +1,71 @@
+# Régua do E12 — cores públicas e mudanças de plano
+
+> Escrita a 04/09 com o marco E11 ainda reprovado e **sem uma linha de E12**. É o
+> padrão com melhor histórico do projecto: as etapas que passaram à primeira foram
+> as que tinham régua antes do código.
+
+Sete telas — `THEME 002-008` — e duas coisas que não se parecem uma com a outra:
+**cor** e **direito**. A cor é do restaurante; o direito é do plano que ele paga.
+
+## Aceite 1 — «estados reais e o tema efectivamente aplicado»
+
+A palavra que carrega o aceite é **efectivamente**. Uma tela que mostra a cor
+guardada no formulário não mostra o tema aplicado — mostra o que se escreveu.
+
+**O meu ataque:** guardar uma cor, ir à **rota pública** e ler a cor que o
+navegador **calcula** (`getComputedStyle`), não a que o CSS declara. Foi assim que
+o E09 escondeu de mim uma carta servida sem folha de estilos: as classes existiam,
+o ficheiro é que não chegava à página. Um tema "aplicado" que não chega ao browser
+é o mesmo defeito com outro nome.
+
+E o par de sempre: **antes e depois**. Uma tela que mostra o tema certo mas mostra
+o mesmo tema para qualquer valor não está a ler nada.
+
+## Aceite 2 — a cor ilegível e o tema da unidade alheia
+
+São duas regras diferentes e a tentação é prová-las juntas.
+
+**Cor ilegível falha NO SERVIDOR.** No cliente é conveniência; no servidor é a
+regra. Vou tentar publicar um contraste abaixo do limiar por onde o produto grava
+— e se houver validação só no formulário, o aceite está reprovado por definição.
+O limiar tem de ser o mesmo que a inspecção já mede (4,5:1 para texto corrente,
+3:1 para indicadores de estado), senão temos duas verdades sobre contraste.
+
+**Tema noutra unidade sem autorização falha.** Este prova-se com **dois** — dois
+inquilinos, ou duas unidades com permissões diferentes. Um utilizador a mudar o
+tema da unidade dele não prova nada sobre a de outro. E quero a recusa **no
+ecrã**, como o E11 exigiu para o isolamento: a base recusar não é o produto
+recusar.
+
+## Aceite 3 — o downgrade, que é o mais perigoso dos três
+
+*«Reverte a aparência na data de teste, preserva conteúdo e permite restaurar a
+versão anterior após upgrade.»* São **três** promessas e falham por caminhos
+diferentes:
+
+1. **Reverte na data** — não à meia-noite do servidor. É o caso do E06 outra vez:
+   dezanove asserções verdes sobre um motor que ignorava o fuso da unidade.
+2. **Preserva conteúdo** — a aparência recua, o conteúdo **não se perde**. Este é o
+   que custa dinheiro a um cliente: quem desce de plano e perde o que escreveu não
+   volta a subir.
+3. **Restaura depois do upgrade** — e aqui está o par que separa a regra certa da
+   preguiçosa: uma implementação que **apagasse** o tema no downgrade passaria as
+   duas primeiras e falharia esta. Sem o terceiro caso, «reverter» e «apagar» são
+   indistinguíveis.
+
+## O que reprova à cabeça
+
+- **Cor lida do formulário e não da página servida.**
+- **Validação de contraste só no cliente.**
+- **Downgrade provado com um só inquilino**, ou sem restaurar depois.
+- **Tema aplicado sem dizer de que revisão veio** — a publicação tem revisões
+  desde o E08; a aparência não pode ser a única coisa sem rasto.
+- **Verde sobre tema por omissão:** se a unidade de teste nunca teve tema próprio,
+  todas as asserções passam contra o tema base e não medem nada. A prova declara
+  qual é o tema em vigor antes de afirmar seja o que for.
+
+## O que já sei que vou pedir e ainda não existe
+
+O Starter tem **cores fixas** por decisão de plano. Portanto o E12 tem de mostrar
+duas coisas ao mesmo tempo: que o Restaurant/Pro muda a cor **e** que o Starter
+**não consegue** — e a segunda não é um ecrã escondido, é o servidor a recusar.
