@@ -1,24 +1,39 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E14 — motor de pedidos e entrega confiável (**20 telas**)
-**Estado:** autorizado 04/09.
-**Régua:** `docs/reviews/ALVO-E14.md`, escrita antes de existir código.
+**Etapa atual:** E14 — motor de pedidos e entrega confiável (**18 telas**, não 20).
+**Estado:** implementado, **aguardando validação** — 04/09. Declarado, não assinado.
+**Régua:** `docs/reviews/ALVO-E14.md`. Detalhe: `docs/progress/E14.md`.
 
-**A primeira etapa onde um defeito cobra dinheiro duas vezes** ou faz desaparecer
-o trabalho de alguém a meio de um serviço. Os três aceites são três formas da
-mesma coisa falhar: **duas escritas que se encontram**.
+**Dezoito e não vinte:** a matriz tem 18 com `etapa_principal = E14`; as outras 3
+que a autorização menciona (CAT-010, CHAN-001, FLOOR-008) estão em
+`etapas_relacionadas` — telas anteriores a rever, já validadas.
 
-- **Aceite 1** carrega em «depois do commit»: gravar, a resposta perder-se, o
-  cliente reenviar. Com o par — **duas chaves diferentes criam dois pedidos**.
-- **Aceite 2** é o que perde trabalho em silêncio: ler, juntar, gravar o pedido
-  inteiro faz a **última escrita ganhar**. E «conflito **recuperável**» é a
-  palavra: um 409 que obriga a refazer tudo cumpre a letra e falha a pessoa.
-- **Aceite 3**: esgotado rejeita-se **com o carrinho preservado**.
+**Os três aceites são três formas de duas escritas se encontrarem**, e as
+garantias estão na FORMA:
+1. `order_submissions.command_id` **único na base** — o reenvio depois do commit
+   devolve a MESMA resposta. O par: duas chaves diferentes criam dois pedidos.
+2. As linhas são **acrescentadas**, nunca reescritas em bloco — o padrão que perde
+   trabalho não tem por onde acontecer. A versão optimista é só para as edições, e
+   o conflito é **recuperável**: diz o que mudou, por quem, e devolve as linhas.
+3. O preço é **copiado** para a linha ao ser aceite, com um **gatilho** na base a
+   recusar alterá-lo. O esgotado é rejeitado **com o carrinho preservado**.
 
-**A pergunta de dinheiro que trago do contrato e ainda não foi decidida:** um
-pedido escrito **offline** e aceite mais tarde cobra ao preço de quando foi
-escrito, ou de quando chegou? O aceite 3 protege linhas já aceites — ali a linha
-ainda não tinha sido aceite quando o preço mudou.
+**A pergunta de dinheiro está RESPONDIDA:** um pedido escrito offline e aceite
+mais tarde vale o **preço do servidor ao aceitar** — porque o preço do cliente é
+uma proposta, e o E14 proíbe pelo nome que ele mande. E a divergência **não é
+aplicada em silêncio**: a linha é rejeitada com `PRECO_DIVERGENTE` e o carrinho
+fica, para quem está à mesa decidir. Fica **por decidir e declarado** se o
+restaurante quer honrar o preço antigo — isso é política comercial do dono.
+
+**Combos:** a conta soma **uma** vez, em três portas que falham por motivos
+diferentes (restrição na base, `totalDoPedido`, filtro dos relatórios).
+
+**Comandos do E14:** `./scripts/provar-pedidos.sh` (3 grupos, 21 casos, 8 defeitos
+plantados) e `pnpm exec playwright test pedidos.spec.ts` (18 telas, 5 larguras).
+
+---
+
+## O que fechou antes
 
 **E13 VALIDADO à 2ª** — 17 telas. `docs/progress/E13.md`.
 

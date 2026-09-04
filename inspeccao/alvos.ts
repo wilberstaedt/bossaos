@@ -31,6 +31,8 @@ export interface Alvos {
   sessionId: string;
   deviceId: string;
   deviceRevogavelId: string;
+  /** E14: o pedido semeado, com uma linha aceite e uma rejeitada. */
+  orderId: string;
 }
 
 const PREFIXO = 'insp-';
@@ -96,6 +98,7 @@ export async function resolverAlvos(): Promise<Alvos> {
       // media o ecrã de um aparelho que a primeira já tinha retirado.
       deviceId: await um(sql, `SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%' AND estado = 'ACTIVO' LIMIT 1`, 'um dispositivo activo'),
       deviceRevogavelId: await um(sql, `SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%' AND estado = 'PENDENTE' LIMIT 1`, 'um dispositivo por aprovar'),
+      orderId: await um(sql, `SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' LIMIT 1`, 'um pedido'),
     };
   } finally {
     await sql.end();

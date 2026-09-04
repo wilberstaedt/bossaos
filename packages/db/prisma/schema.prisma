@@ -113,6 +113,12 @@ model Organization {
   operatorPins       OperatorPin[]
   deviceShifts       DeviceShift[]
   serviceTypes       ServiceType[]
+  // ── E14 ──
+  orders             Order[]
+  orderLines         OrderLine[]
+  orderSubmissions   OrderSubmission[]
+  orderEvents        OrderEvent[]
+  orderRules         OrderRules[]
   onboarding      OnboardingProgress?
   scheduleDays    ScheduleDay[]
   scheduleExceptions ScheduleException[]
@@ -239,6 +245,9 @@ model Location {
   pins            OperatorPin[]
   turnos          DeviceShift[]
   tiposDeServico  ServiceType[]
+  // ── E14 ──
+  pedidos         Order[]
+  regrasDePedidos OrderRules?
 
   @@unique([organizationId, id], name: "location_por_organizacao")
   @@unique([organizationId, slug])
@@ -1038,6 +1047,10 @@ model Product {
   brandId        String  @map("brand_id") @db.Uuid
   categoryId     String? @map("category_id") @db.Uuid
   nome           String
+  /// E14: menu fechado — preço fixo, componentes identificáveis, e a conta soma
+  /// **uma** vez. Uma bandeira aqui e não uma segunda tabela: uma lista separada
+  /// de «combos» era a cópia do catálogo que o E07 proibiu pelo nome.
+  combo          Boolean @default(false)
   descricao      String?
   /// Referência interna. **Nome igual não é chave de identidade** e um SKU vazio
   /// não autoriza fundir linhas — dois "Café" não são o mesmo produto.
@@ -2318,4 +2331,226 @@ model ServiceType {
   @@unique([locationId, nome], name: "tipo_de_servico_por_unidade")
   @@index([organizationId, locationId])
   @@map("service_types")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E14 — motor de pedidos e entrega confiável
+//
+// A primeira etapa onde um defeito **cobra dinheiro duas vezes** ou faz
+// desaparecer o trabalho de alguém a meio de um serviço. Os três aceites são
+// três formas de a mesma coisa falhar: **duas escritas que se encontram**.
+//
+// Por isso as garantias estão na FORMA, e não em código que alguém tem de se
+// lembrar de escrever:
+//
+//   aceite 1  `order_submissions.command_id` é ÚNICO. O reenvio depois do commit
+//             é impossível de duplicar, e não uma consulta prévia que perde a
+//             corrida.
+//   aceite 2  as linhas são ACRESCENTADAS, nunca reescritas em bloco. Dois
+//             operadores a juntar itens ao mesmo tempo não se encontram — o
+//             padrão que perde trabalho é ler-tudo-e-gravar-tudo, e aqui ele não
+//             tem por onde acontecer.
+//   aceite 3  o preço é COPIADO para a linha ao ser aceite. Uma publicação nova
+//             não tem como lhe tocar: são linhas diferentes da base.
+// ═══════════════════════════════════════════════════════════════════════════
+
+enum EstadoDePedido {
+  RASCUNHO
+  ACEITE
+  EM_PREPARO
+  PRONTO
+  ENTREGUE
+  CANCELADO
+}
+
+/// O estado de uma linha. `PROPOSTA` é o que o cliente pediu; `ACEITE` é o que o
+/// servidor confirmou, **com o preço dele**.
+enum EstadoDeLinha {
+  PROPOSTA
+  ACEITE
+  REJEITADA
+  CANCELADA
+}
+
+/// Porque é que uma linha foi recusada. Fechado, porque cada motivo tem uma
+/// resposta diferente no ecrã — e «indisponível» sem dizer porquê é o que faz
+/// alguém pedir a mesma coisa outra vez.
+enum MotivoDeRejeicao {
+  ESGOTADO
+  SEM_PRECO
+  PRECO_DIVERGENTE
+  PRODUTO_DESCONHECIDO
+}
+
+/// O pedido, um por canal e um motor só (E14, entrega).
+model Order {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  /// A mesa, quando existe. Um pedido de balcão não tem mesa — e `null` diz
+  /// isso, em vez de uma mesa inventada para a coluna não ficar vazia.
+  tableSessionId String? @map("table_session_id") @db.Uuid
+  canal          Canal
+  /// O número que a pessoa lê e diz em voz alta («o A104»).
+  numero         String
+  estado         EstadoDePedido @default(RASCUNHO)
+
+  /// Concorrência optimista (E14, entregar 4).
+  ///
+  /// **Não serve para acrescentar linhas** — isso é aditivo e não precisa de
+  /// versão. Serve para as edições que reescrevem o rascunho, onde a última
+  /// escrita ganharia. O conflito que sai dela tem de ser **recuperável**: diz o
+  /// que mudou e a versão actual, para a pessoa continuar em vez de refazer.
+  versao         Int    @default(1)
+
+  abertoPor String   @map("aberto_por")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  linhas       OrderLine[]
+  envios       OrderSubmission[]
+  eventos      OrderEvent[]
+
+  @@unique([organizationId, id], name: "pedido_por_organizacao")
+  @@unique([locationId, numero], name: "numero_por_unidade")
+  @@index([organizationId, locationId, estado])
+  @@index([tableSessionId])
+  @@map("orders")
+}
+
+/// Uma linha do pedido — e o sítio onde o aceite 3 vive.
+model OrderLine {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  orderId        String @map("order_id") @db.Uuid
+  /// A ronda que a trouxe. `null` numa linha de rascunho ainda por enviar.
+  submissionId   String? @map("submission_id") @db.Uuid
+  /// O produto do catálogo. Anulável porque o produto pode ser arquivado depois,
+  /// e a linha servida continua a valer — é a razão de haver instantâneo.
+  productId      String? @map("product_id") @db.Uuid
+
+  /// ── O INSTANTÂNEO, que é o aceite 3 escrito em colunas ─────────────────
+  ///
+  /// Nome, preço e opções ficam COPIADOS na linha ao ser aceite. Uma publicação
+  /// de preço novo cria linhas noutra tabela; não tem por onde tocar nesta.
+  ///
+  /// A alternativa — ler o preço ao fechar a conta — é o defeito que a régua
+  /// reprova à cabeça: a conta de quem está sentado mudaria porque a cozinha
+  /// actualizou a carta a meio do jantar.
+  nome           String
+  quantidade     Int    @default(1)
+  precoMenor     Int?   @map("preco_menor")
+  moeda          String? @db.Char(3)
+  opcoes         Json?
+
+  /// O que o cliente PROPÔS, guardado para se poder mostrar a divergência.
+  /// «Preço e dados recebidos do navegador são propostas» (E14, respeitar 1).
+  precoPropostoMenor Int? @map("preco_proposto_menor")
+
+  /// ── O componente de um combo (E14, entregar 7) ─────────────────────────
+  ///
+  /// Preenchido nas linhas que existem para a COZINHA saber o que fazer, dentro
+  /// de um menu fechado. Quem soma ignora-as — e a base recusa-lhes preço, para
+  /// a regra não depender de quem soma: um relatório escrito daqui a seis meses
+  /// por quem não conhece esta coluna não consegue somar o combo duas vezes.
+  linhaPaiId     String? @map("linha_pai_id") @db.Uuid
+
+  estado         EstadoDeLinha    @default(PROPOSTA)
+  motivoRejeicao MotivoDeRejeicao? @map("motivo_rejeicao")
+  aceiteEm       DateTime?        @map("aceite_em") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  pedido       Order        @relation(fields: [organizationId, orderId], references: [organizationId, id], onDelete: Cascade)
+  linhaPai     OrderLine?   @relation("componenteDeCombo", fields: [organizationId, linhaPaiId], references: [organizationId, id], onDelete: Cascade)
+  componentes  OrderLine[]  @relation("componenteDeCombo")
+
+  @@unique([organizationId, id], name: "linha_por_organizacao")
+  @@index([organizationId, orderId])
+  @@index([linhaPaiId])
+  @@map("order_lines")
+}
+
+/// Um envio — uma ronda de linhas mandada de uma vez.
+///
+/// ── `command_id` é ÚNICO, e é o aceite 1 inteiro ───────────────────────────
+///
+/// *«Timeout depois do commit e reenvio com a mesma chave criam apenas um
+/// pedido/envio.»* O caso não é a rede falhar antes de gravar: é **gravar**, a
+/// resposta perder-se, e o cliente reenviar. O servidor já tem; o cliente acha
+/// que não.
+///
+/// Um `SELECT` por `command_id` antes do `INSERT` é a mesma corrida do E13 com
+/// outro nome — dois reenvios simultâneos leem ambos que não existe. Aqui a
+/// segunda linha é **impossível de escrever**, e o serviço traduz o `23505` na
+/// resposta que já tinha sido dada.
+///
+/// `resposta` existe para isso: repetir o comando devolve **o mesmo**, e não um
+/// «já existe» que obriga quem chama a adivinhar o que aconteceu da primeira vez.
+model OrderSubmission {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  orderId        String @map("order_id") @db.Uuid
+
+  /// Global, e não por organização: nasce no cliente antes de haver pedido, e um
+  /// identificador que se repetisse entre inquilinos era um pedido de um
+  /// restaurante a colidir com o de outro.
+  commandId      String @unique @map("command_id")
+  /// Resumo do que foi enviado. A mesma chave com corpo diferente é **conflito**
+  /// — não é uma repetição, é outra coisa a usar o mesmo nome.
+  payloadHash    String @map("payload_hash")
+  resposta       Json
+
+  criadoPor String   @map("criado_por")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  pedido       Order        @relation(fields: [organizationId, orderId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, id], name: "envio_por_organizacao")
+  @@index([organizationId, orderId])
+  @@map("order_submissions")
+}
+
+/// O histórico do pedido (ORD-009). Append-only por privilégio, como o do E13.
+model OrderEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  orderId        String   @map("order_id") @db.Uuid
+  accao          String
+  detalhe        Json?
+  actorEmail     String   @map("actor_email")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  pedido       Order        @relation(fields: [organizationId, orderId], references: [organizationId, id], onDelete: Restrict)
+
+  @@index([organizationId, orderId, createdAt])
+  @@map("order_events")
+}
+
+/// Regras de pedidos da unidade (SET-004).
+model OrderRules {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @unique @map("location_id") @db.Uuid
+
+  /// Aceitar automaticamente o que não tem divergência nenhuma. Quando falso,
+  /// tudo espera por alguém — que é o que um restaurante com cozinha pequena quer.
+  aceitacaoAutomatica Boolean @default(true) @map("aceitacao_automatica")
+  /// Quantas linhas iguais de uma vez. `null` é **por configurar**, e não
+  /// «ilimitado»: a regra do vault vale aqui — ausência não é política.
+  maximoPorLinha      Int?    @map("maximo_por_linha")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+
+  @@map("order_rules")
 }

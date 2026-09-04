@@ -88,6 +88,9 @@ export function listarProdutos(db: ClienteComEscopo, filtro: FiltroDeProdutos = 
     },
     select: {
       id: true, nome: true, sku: true, estado: true, version: true, archivedAt: true,
+      // E14: um menu fechado lê-se aqui como qualquer outro produto. Uma segunda
+      // lista de "combos" era a cópia do catálogo que o E07 proibiu pelo nome.
+      combo: true,
       category: { select: { id: true, nome: true } },
     },
     orderBy: { nome: 'asc' },

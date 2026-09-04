@@ -210,3 +210,15 @@ export {
   revogarDispositivo, listarDispositivos, turnoAberto, resumirToken,
   type ResultadoDoPin, type ResultadoDoPareamento, type ResultadoDaRevogacao,
 } from './dispositivos.ts';
+
+// ── E14 · motor de pedidos ─────────────────────────────────────────────────
+export {
+  enviarPedido, acrescentarLinhas, guardarPedido, cancelarLinha, pedidoPorComando,
+  listarPedidos, obterPedido, historicoDoPedido, totalDoPedido, resumoDoEnvio,
+  type LinhaProposta, type ResultadoDoEnvio, type ConflitoRecuperavel, type ActorDoPedido,
+} from './pedidos.ts';
+
+export {
+  resumoDoServico, porCanal, porProduto, porCategoria, porFranja, porMesa,
+  type ResumoDoServico,
+} from './relatorios.ts';

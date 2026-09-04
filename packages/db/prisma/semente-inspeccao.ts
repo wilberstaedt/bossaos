@@ -470,6 +470,53 @@ async function principal(): Promise<void> {
       },
     });
 
+    // ── Um PEDIDO (E14), para as telas com identificador terem o que medir ─
+    //
+    // Sem ele, a ficha do pedido, a edição, a ronda, o cancelamento, a mudança de
+    // mesa e a história mediriam a página de «não encontrado» e diriam verde.
+    //
+    // Com uma linha ACEITE e uma REJEITADA: é o cenário que exercita o aceite 3
+    // no ecrã — a rejeitada tem de aparecer, com o motivo, e o resto do carrinho
+    // tem de ficar. Um pedido só com linhas boas media metade.
+    const pedidoInsp = await prisma.order.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2, canal: 'SALA',
+        numero: `${PREFIXO}A001`, estado: 'ACEITE',
+        abertoPor: 'inspeccao@exemplo.example',
+      },
+      select: { id: true },
+    });
+    const envioInsp = await prisma.orderSubmission.create({
+      data: {
+        organizationId: IDS.orgA, orderId: pedidoInsp.id,
+        commandId: `${PREFIXO}comando-de-inspeccao`,
+        payloadHash: 'insp', resposta: { aceites: 1, rejeitadas: 1 } as object,
+        criadoPor: 'inspeccao@exemplo.example',
+      },
+      select: { id: true },
+    });
+    await prisma.orderLine.createMany({
+      data: [
+        {
+          organizationId: IDS.orgA, orderId: pedidoInsp.id, submissionId: envioInsp.id,
+          nome: `${PREFIXO}Arroz de sepia y alcachofas para dos`,
+          quantidade: 2, precoMenor: 2400, moeda: 'EUR', estado: 'ACEITE',
+          aceiteEm: new Date(),
+        },
+        {
+          organizationId: IDS.orgA, orderId: pedidoInsp.id, submissionId: envioInsp.id,
+          nome: `${PREFIXO}Pulpo a la gallega`,
+          quantidade: 1, estado: 'REJEITADA', motivoRejeicao: 'ESGOTADO',
+        },
+      ],
+    });
+    await prisma.orderEvent.create({
+      data: {
+        organizationId: IDS.orgA, orderId: pedidoInsp.id, accao: 'pedido.enviado',
+        actorEmail: 'inspeccao@exemplo.example',
+      },
+    });
+
     // ── O SITE do restaurante (E10), publicado ────────────────────────────
     //
     // Sem isto, as telas públicas do E10 mediam a página de "não encontrado" e
