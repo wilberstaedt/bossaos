@@ -72,35 +72,56 @@ jobs:
         # package.json. É o que transforma "instalou" em "instalou o mesmo".
         run: pnpm install --frozen-lockfile
 
-      - name: Cobertura íntegra (396 IDs)
-        run: ./scripts/validar-cobertura.sh
+      # ── As guardas DESCOBREM-SE, nao se listam ─────────────────────────
+      #
+      # Ate 04/09 esta seccao nomeava cada guarda numa linha propria. Fui contar:
+      # SETE das treze nunca corriam aqui - validar-movel, validar-ci e
+      # validar-handoff de 03/09, e as quatro que escrevi na noite de 04/09.
+      # Corriam no portatil de quem as escreveu e nunca no servidor.
+      #
+      # E o mesmo defeito que o proprio provar-tudo.sh ja tinha resolvido com um
+      # comentario a dizer "DESCOBRE em vez de listar" - e eu escrevi guardas
+      # novas ao lado dessa licao sem a aplicar aqui. Uma lista envelhece em
+      # silencio: ninguem ve a entrada que FALTA.
+      #
+      # Cada guarda decide sozinha se pode correr sem servicos; as que precisam
+      # de base vivem nos trabalhos `base_*`. As que aqui falharem falham cedo,
+      # que e o ponto deste trabalho.
+      - name: Guardas (descobertas, não listadas)
+        run: |
+          set -uo pipefail
+          falhou=0
+          corridas=0
+          for g in scripts/validar-*.sh; do
+            [ -x "$g" ] || continue
+            echo "::group::$g"
+            if ./"$g"; then echo "ok $g"; else echo "FALHOU $g"; falhou=1; fi
+            corridas=$((corridas + 1))
+            echo "::endgroup::"
+          done
+          # Guarda do proprio corredor: se o glob nao casar nada, o `for` corre
+          # uma vez com o padrao literal e isto sairia verde sobre zero guardas.
+          if [ "$corridas" -lt 10 ]; then
+            echo "VERDE SOBRE POPULACAO ZERO: so $corridas guardas correram, esperadas 10 ou mais."
+            exit 1
+          fi
+          echo "$corridas guardas corridas."
+          exit "$falhou"
 
       # Barata como a cobertura, e a que tem pior consequencia se falhar tarde:
       # um segredo que entra no historico nao sai de la apagando o ficheiro.
       - name: Nenhum segredo na árvore
         run: ./scripts/varrer-segredos.sh
 
-      - name: Ordem das etapas
-        run: ./scripts/validar-ordem.sh
-
       # Dinheiro em inteiros de unidade minima. Barata, e o E22-E24 vao encher o
       # schema de campos de dinheiro - e la que esta guarda paga.
-      - name: Dinheiro em inteiros
-        run: ./scripts/validar-dinheiro.sh
-
       # A regra mais seria do produto, trancada por estrutura: alergeno desconhecido
       # nao e alergeno ausente, e inferir a partir do nome tem de ser IMPOSSIVEL e
       # nao apenas proibido. E a regra que alguem vai querer "melhorar".
-      - name: A distinção dos alérgenos
-        run: ./scripts/validar-alergenios.sh
-
       # Uma classe `bo-` que o CSS nao define nao da erro em lado nenhum: o
       # elemento aparece sem estilo, o `tsc` nao ve dentro de uma cadeia, e o
       # teste de contraste le a cor herdada do pai, que passa. Encontrou quatro
       # escritas por mim no E07 e uma anterior no componente dos separadores.
-      - name: Classes CSS que existem
-        run: ./scripts/validar-classes.sh
-
       - name: Lint
         run: pnpm lint
 
@@ -109,9 +130,6 @@ jobs:
 
       # Antes dos testes: nenhum pacote pode desaparecer da medicao em silencio.
       # Nasceu do E04 - packages/auth tinha zero ficheiros de teste e saia a 0.
-      - name: Todos os pacotes medidos
-        run: ./scripts/validar-testes.sh
-
       # Nenhuma etapa comeca antes de a anterior estar validada. Detector de
       # ESTADO, nao de culpa: quando o revisor esta indisponivel a saida certa e
       # trabalho que nao dependa da etapa em revisao, nao parar nem avancar.

@@ -103,6 +103,27 @@ for nome in "${alvos[@]}"; do
   passou=$(echo "$saida" | grep -oE '^# pass [0-9]+' | grep -oE '[0-9]+' | head -1)
   falhou=$(echo "$saida" | grep -oE '^# fail [0-9]+' | grep -oE '[0-9]+' | head -1)
   total=$(( ${passou:-0} + ${falhou:-0} ))
+
+  # ── NAO MEDI e outra resposta, diferente de ZERO ──────────────────────────
+  #
+  # Ate 04/09 esta guarda lia a saida a procura de `# pass N` e tratava a
+  # AUSENCIA como zero. Consequencia medida: sem DATABASE_URL, os oito pacotes
+  # reportavam "zero testes" - incluindo o `domain`, que tem 302 -, porque a
+  # corrida rebentava antes de escrever a linha do sumario.
+  #
+  # Ou seja, uma corrida que NAO ACONTECEU era indistinguivel do defeito exacto
+  # que esta guarda existe para apanhar. A mensagem mandava DECLARAR um pacote
+  # com 302 testes, que e o conselho errado com a maior confianca possivel.
+  #
+  # A distincao: se nao ha linha de sumario NENHUMA, o corredor nao chegou ao
+  # fim. Isso e "nao medi", nao e "zero".
+  if [ -z "${passou:-}" ] && [ -z "${falhou:-}" ]; then
+    erro "$nome: NAO MEDI — o corredor de testes nao chegou a escrever o sumario."
+    echo "        Isto NAO e o mesmo que zero testes. Primeira linha do erro:"
+    printf '%s\n' "$saida" | grep -viE '^\s*$' | tail -3 | sed 's/^/          /'
+    continue
+  fi
+
   if [ "${falhou:-0}" -gt 0 ]; then
     erro "$nome: $falhou teste(s) a reprovar"
   elif [ "$total" -eq 0 ]; then
