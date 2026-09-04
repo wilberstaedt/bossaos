@@ -3,9 +3,14 @@
 > Escrita a 04/09, com o E12 a arrancar e **sem uma linha de E13**. É o padrão com
 > melhor histórico do projecto.
 
-Dezasseis IDs — `AUTH 002`, `DEV 001-004`, `FLOOR 001-009 e 011`, `ONB 007`,
-`SET 003` — e a primeira etapa em que **duas pessoas mexem na mesma coisa ao mesmo
-tempo**. Tudo o que veio antes tinha um dono de cada vez.
+**Dezassete** IDs — `AUTH-002`, `DEV-001..004`, `FLOOR-001..009`, `FLOOR-011`,
+`ONB-007`, `SET-003` — e a primeira etapa em que **duas pessoas mexem na mesma
+coisa ao mesmo tempo**.
+
+> *Escrevi «dezasseis» à primeira e contei mal.* Corrigido a 04/09 contando na
+> fonte, não na memória: `coverage.csv` dá 17 com etapa principal E13. Uma régua
+> com a população errada faz medir a coisa errada, e passei a noite a exigir isso
+> dos outros. Tudo o que veio antes tinha um dono de cada vez.
 
 ## Aceite 1 — «duas aberturas concorrentes produzem UMA sessão»
 
