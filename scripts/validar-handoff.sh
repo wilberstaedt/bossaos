@@ -57,6 +57,28 @@ else
   ok "o prompt de retoma bate com a divida real ($DIVIDA_ITENS itens)"
 fi
 
+echo
+echo "3. Declarar e convidar a rever — e nao se revê arvore suja"
+# Nasceu de agora, 04/09: o handoff dizia "implementado, aguardando validacao" com
+# 47 ficheiros por commitar. Uma declaracao e um convite ao revisor, e rever uma
+# arvore a meio mede um estado que ninguem vai entregar - ja me custou duas
+# corridas hoje, e a segunda vez foi depois de eu ter escrito a regra.
+#
+# So morde LOCALMENTE: na CI a arvore e sempre limpa e isto passa por construcao.
+# Digo-o em vez de fingir que cobre os dois sitios.
+if grep -qiE '^\*\*Estado:\*\*.*aguardando valida' docs/progress/HANDOFF.md 2>/dev/null; then
+  sujos=$(git status --porcelain 2>/dev/null | grep -cvE 'capturas/|\.png$' || true)
+  sujos=${sujos:-0}
+  if [ "$sujos" -gt 0 ]; then
+    erro "o handoff declara 'aguardando validacao' com $sujos ficheiro(s) por commitar"
+    echo "        O revisor nao pode medir o que ainda esta a mudar. Commita antes de declarar."
+  else
+    ok "declarado com a arvore limpa — da para rever"
+  fi
+else
+  ok "o handoff nao esta em estado de espera; nada a exigir da arvore"
+fi
+
 # ── controlo negativo ────────────────────────────────────────────────────────
 # Com o handoff a apontar para outra etapa, esta guarda TEM de acusar. Sem isto
 # seria mais um documento a dizer que está tudo bem.
