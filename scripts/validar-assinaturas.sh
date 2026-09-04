@@ -77,9 +77,25 @@ d = pathlib.Path(sys.argv[1])
 linhas = list(csv.DictReader(open('docs/progress/coverage.csv', encoding='utf-8-sig')))
 campos = list(linhas[0].keys())
 # Uma tela de uma etapa POR VALIDAR, marcada validado: tem de ser apanhada.
-alvo = next((l for l in linhas if (l['etapa_principal'] or '').strip() == 'E12'), None)
+#
+# A etapa escolhe-se DA MATRIZ, em vez de vir fixa no codigo. A primeira versao
+# fixava E12, e no minuto em que validei o E12 o controlo passou a plantar uma
+# sonda LEGITIMA - a guarda nao a acusava, e com razao, mas o controlo dizia que
+# ela tinha falhado. Um controlo que depende de um facto que se move mede o
+# calendario e nao a propriedade.
+import re
+etapas = {}
+for linha in open('docs/progress/ETAPAS.md', encoding='utf-8'):
+    m = re.match(r'\|\s*(E\d{2})\s*\|([^|]*)\|', linha)
+    if m:
+        etapas[m.group(1)] = re.sub(r'[*_`]', '', m.group(2)).strip().lower()
+por_validar = next((e for e, s in sorted(etapas.items()) if e != 'E00' and s != 'validado'), None)
+if por_validar is None:
+    print('CONTAGENS 0 0')  # tudo validado: nao ha etapa para a sonda, e isso diz-se
+    raise SystemExit(0)
+alvo = next((l for l in linhas if (l['etapa_principal'] or '').strip() == por_validar), None)
 if alvo is None:
-    raise SystemExit('sem tela do E12 para a sonda')
+    raise SystemExit(f'sem tela da {por_validar} para a sonda')
 alvo = dict(alvo); alvo[campos[0]] = 'ZZZ-996'; alvo['status'] = 'validado'
 with open(d / 'cobertura.csv', 'w', encoding='utf-8-sig', newline='') as f:
     w = csv.DictWriter(f, fieldnames=campos); w.writeheader(); w.writerows(linhas + [alvo])
