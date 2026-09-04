@@ -53,3 +53,25 @@ estados que agora derivam das tarefas.
 - **Metade das provas não corre na CI.** Se a facturação continuar trancada, o
   parecer do E21 tem de o dizer: um marco operacional validado só em máquina
   local é um marco com uma nota de rodapé, e a nota tem de estar lá.
+
+## O padrão já existe, e nasceu do meu marco anterior
+
+`scripts/provar-jornada.sh` foi escrito como **correcção 4 do marco E11**, a
+partir do que eu próprio escrevi nessa revisão:
+
+> *«11 das 13 provas partem de fixtures. Nenhuma prova encadeia dois passos.
+> Provar a peça não prova o caminho: cada segmento pode estar certo e o produto
+> ser inutilizável se o estado que o passo N produz não for o que o passo N+1
+> aceita.»*
+
+Ela parte de uma organização que **não existe**, cria tudo pelos mesmos `POST` de
+formulário que os ecrãs submetem, e acaba com um estranho — sem cookie nenhum —
+a ver a carta.
+
+**O E21 não precisa de inventar o padrão: precisa de o estender** até à cadeia
+operacional — QR ou Staff, pedido, produção, expo, mesa. O trabalho é continuar
+uma jornada que já sabe encadear, não construir uma nova.
+
+Isso reduz o E21 de «construir a prova de integração» para «esticar a que
+existe», e é bom sinal de outra coisa: a correcção de um marco anterior deixou
+ferramenta, e não só um parecer.
