@@ -30,7 +30,7 @@ export default async function PessoasEAcessos({
   const podeGerir = !exigirAccao(sessao.concessoes, 'equipa.gerir');
 
   const { pessoas, convites } = await comEscopoDoPedido(sessao, async (db) => ({
-    pessoas: await pessoasEAcessos(db),
+    pessoas: await pessoasEAcessos(db, sessao.contexto.organizationId),
     convites: podeGerir ? await listarConvites(db) : [],
   }));
 

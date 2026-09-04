@@ -85,6 +85,7 @@ export {
 export {
   listarMarcas, obterMarca, criarMarca,
   listarUnidades, obterUnidade, criarUnidade,
+  type PessoaComAcesso,
   papeisDaFiliacao, filiacoesDaOrganizacao,
   organizacoesDoUtilizador, filiacoesDoUtilizador, euProprio,
   concessoesDoActor, pessoasEAcessos, revogarPertenca,

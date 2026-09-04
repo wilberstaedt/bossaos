@@ -9,9 +9,11 @@
 
 | Correcção | Estado |
 | --- | --- |
-| 1 · medir as 66 telas em móvel | **63 medidas**, 3 bloqueadas por um defeito real (abaixo) |
+| 1 · medir as 66 telas em móvel | **feita** — 66 de 66, depois de a 5 desbloquear as últimas três |
 | 2 · acesso cruzado negado no produto | **feita**, com dois controlos negativos |
 | 3 · resolver os 12 botões decorativos | **feita**, com guarda que impede a regressão |
+| 4 · a prova de jornada | **feita**, com os dois elos partidos que a régua nomeou |
+| 5 · a tela de equipa que devolvia 500 | **feita**, com o par que impede o conserto errado |
 
 **E a medição encontrou coisas.** Cinco defeitos de alvo de toque que ninguém tinha visto, e
 um **500 numa tela assinada como validada desde o E04**. Nenhum deles dava erro em lado
@@ -21,8 +23,9 @@ nenhum: build verde, tipos verdes, guardas verdes.
 
 ## Correcção 1 — as 66 telas em móvel
 
-**63 saíram da dívida.** `DIVIDA-MOVEL.txt` passou de 66 para **3**, e o
-`validar-movel.sh` conta 109 dos 112 IDs do marco com prova de móvel.
+**As 66 saíram da dívida** — 63 na primeira volta, e as últimas três depois de a correcção 5
+as pôr de pé. `DIVIDA-MOVEL.txt` está **vazia**: o `validar-movel.sh` conta 109 de 109 com
+prova, 0 declaradas.
 
 Duas provas novas, porque as telas não são todas do mesmo tipo:
 
@@ -72,10 +75,13 @@ Quatro de alvo de toque, todos em telas que nunca tinham sido renderizadas em m�
    um toque errado muda uma declaração com valor legal.
 4. **As caixas de verificação dos formulários do site**, a 13×13 antes da correcção do E10.
 
-### E um DEFEITO A SÉRIO: ORG-007 devolve 500
+### E um DEFEITO A SÉRIO: ORG-007 devolvia 500
 
-**As três que não saíram da dívida são ORG-007, ORG-008 e STATE-014, e não é por falta de
-tentativa: a rota devolve 500.**
+*(Escrito na primeira volta, quando as três ainda estavam bloqueadas. Ficou como estava,
+porque é o registo de como o defeito foi encontrado — a correcção está mais abaixo, na 5.)*
+
+**As três que não saíram na primeira volta são ORG-007, ORG-008 e STATE-014, e não foi por
+falta de tentativa: a rota devolvia 500.**
 
 A causa está medida, não suposta:
 
@@ -96,8 +102,8 @@ páginas. Isso não é «medir as 66»: é desenho na fronteira que o CT-04 prot
 é de quem assina o contrato. **Escrever «MÓVEL MEDIDO» nelas seria assinar o que não
 aconteceu** — a falha que este trabalho existe para pagar.
 
-Fica como **falha bloqueante aberta**, o que quer dizer que o aceite 2 do marco continua
-reprovado até alguém decidir a forma da correcção.
+Ficou como **falha bloqueante aberta** até o revisor confirmar a causa raiz e mandar
+corrigi-la com o par. Está feita — ver a correcção 5.
 
 ---
 
@@ -228,11 +234,144 @@ o tamanho certo de uma caixa) e os **rótulos** cresceram para 44.
 
 ## O que fica para o revisor decidir
 
-1. **ORG-007 / ORG-008 / STATE-014**: o 500 é real e a correcção mexe na fronteira de
-   identidades do CT-04. Proponho uma função `SECURITY DEFINER` que devolva as identidades
-   **da própria organização** — espelho da `identidade_por_email`, com o mesmo princípio de
-   interface mínima. Não a escrevi: a forma é de quem assina o contrato.
+1. ~~**ORG-007 / ORG-008 / STATE-014**~~ — **feito na correcção 5**, com a forma que aqui
+   estava proposta e o par que impede o conserto errado.
 2. **Convidar não tem interface.** A API existe, nenhum ecrã a usa. Fica declarado, e é o
    motivo de dois dos dez botões terem saído em vez de ganharem destino.
 3. **As fixtures concedem OWNER com âmbito de marca** e o produto concede com âmbito de
    organização.
+
+
+---
+
+# Correcções 4 e 5 — a segunda volta
+
+## Correcção 5 — a tela de equipa, e o par que impede o conserto errado
+
+**O defeito, medido:** `ORG-007` lia `users` pelo cliente do runtime. O revisor confirmou a
+causa raiz sem aceitar declaração — a credencial de execução devolve **0 linhas**, a de
+migração devolve 18 — e retirou as três assinaturas: 112 telas passaram a 109.
+
+**E eu tinha a forma errada da separação.** Escrevi «o runtime não pode ler `users`». Fui
+medir: o privilégio de `SELECT` **existe**. O que o E04 faz é mais fino — a política
+`identidade_propria` deixa ver `id = app_utilizador_actual()`, ou seja **a própria linha e
+mais nenhuma**. Era por isso que a tela recebia nulos: precisa das linhas dos OUTROS.
+
+**A correcção:** `identidades_da_organizacao(uuid)`, espelho da `identidade_por_email` do
+E03 — `SECURITY DEFINER`, `search_path` fixo, devolve **só id, email e nome**.
+
+Com uma diferença que a obrigou a mais: aquela devolve só um id, esta devolve nome e email.
+Sem verificação, qualquer rota do runtime enumerava a equipa de **qualquer** inquilino, com
+o `SECURITY DEFINER` a passar por cima do RLS a fazê-lo. Por isso a porta **confirma que a
+organização pedida é a do contexto da sessão** — o mesmo desenho das funções de plataforma
+do E05 — e **falha fechada**: sem contexto, `app_organizacao_actual()` é `NULL`, a
+comparação dá `NULL`, e não sai uma linha.
+
+**O par, que era a metade que interessava:**
+
+| | |
+| --- | --- |
+| a tela mostra a equipa | ✔ nome e email de quem pertence à organização |
+| o runtime continua a não ver os outros | ✔ a leitura directa devolve **exactamente 1 linha**, a própria |
+| e a tela mostra MAIS do que a leitura directa | ✔ senão «a porta funciona» e «o runtime lê tudo» eram indistinguíveis |
+
+`scripts/provar-identidades.sh` planta os **dois consertos errados** — alargar a política de
+`users`, e tirar a verificação de quem chama à porta nova — e exige que cada um derrube a
+asserção certa. Mais um controlo no sentido oposto: uma porta que devolve vazio «isola»
+tudo e deixa a tela em branco.
+
+**As três telas voltaram à medição de móvel** e passaram. A dívida está **vazia**: 0
+declaradas, 0 sem prova.
+
+---
+
+## Correcção 4 — a jornada
+
+`provas/jornada.test.ts` + `scripts/provar-jornada.sh`. **0 falhas**, 3 jornadas, 18 passos.
+
+Parte de uma organização que **não existe**, cria tudo pelos mesmos `POST` de formulário que
+os ecrãs submetem, tira os identificadores do **redireccionamento do produto** — que é o que
+o navegador segue —, e acaba com um estranho, **sem cookie nenhum**, a ver a carta e o site
+no ar.
+
+### O que a jornada encontrou, e que nenhuma prova de segmento via
+
+**1. Todas as submissões de formulário do produto devolviam 500.**
+
+`voltarPara` chamava `NextResponse.redirect` com um URL **relativo**, e o Next exige
+absoluto — `URL is malformed`. **Trinta e sete rotas** passavam por ali.
+
+Nunca foi apanhado porque **nenhuma prova submetia formulário**: as provas por HTTP mandam
+JSON, e o caminho JSON destas rotas responde `NextResponse.json` sem passar por aquela
+função. É a falha 4 escrita em código — provar a peça não prova o caminho, e o caminho da
+pessoa era precisamente o que faltava.
+
+Corrigido com um cabeçalho `Location` relativo, que é válido desde o RFC 7231 §7.1.2. Não se
+constrói um absoluto porque isso obrigaria a adivinhar o anfitrião a partir de um cabeçalho
+que o cliente controla — é assim que se abrem redirecções abertas.
+
+**2. O produto dizia «sem preço» quando o preço existia.**
+
+Com a unidade sem moeda, a publicação bloqueava com `sem_preco` — e o produto tinha preço,
+8,50 €. Manda a pessoa abrir a ficha do produto, encontrar lá o preço, e concluir que o
+sistema está avariado. O que falta está na unidade, três ecrãs ao lado.
+
+O tipo `erroDePreco` **já previa** `unidade_sem_moeda`; o motivo de bloqueio não existia, e o
+caso caía no genérico. Ligadas as duas pontas. Um motivo errado é pior do que um genérico.
+
+**3. Dois passos que a jornada teve de percorrer, e que não são defeitos.**
+
+- **O plano não é auto-serviço.** Sem plano, criar uma marca é recusado com `sem_plano` e um
+  402. É a decisão do E05: `subscriptions` é escrita só pela credencial de migração. A
+  jornada percorre a porta real — o controlo de plataforma auditado.
+- **Plano não é habilitação.** A precificação di-lo por escrito: *«criar uma unidade na base
+  NÃO é contratar: a habilitação exige concessão explícita»*. E o E05 já tinha a regra do
+  lado do código: **quota por configurar significa NEGADO**. Eu ia reportar «nenhuma
+  organização consegue criar uma marca» — e o produto estava a cumprir a regra.
+  As quotas do catálogo estão **declaradas como por definir** na precificação; a jornada
+  concede explicitamente, com motivo e rasto, e **não inventa números no catálogo**.
+
+**O que isto significa para o marco, e fica dito:** hoje **ninguém se inscreve sozinho**.
+Uma pessoa cria a conta e a organização, e pára até alguém da BossaOS lhe dar plano e
+habilitação.
+
+**4. Um produto novo nasce em RASCUNHO**, e `montarRevisao` só leva os ACTIVOS. Sem o passo
+de activar, a carta publica-se vazia — e o produto recusa, com `carta_vazia`, em vez de pôr
+uma página em branco na internet aberta. As fixtures criam o produto já activo; por isso
+nenhuma prova de segmento via este elo.
+
+### Os dois elos partidos, que são os que a régua nomeou
+
+| Elo | Onde parte | O que a jornada exige |
+| --- | --- | --- |
+| **o menu sem secções** | a criação do menu ignora as secções | a carta não chega ao estranho |
+| **a unidade sem moeda** | o E06 deixa-a nascer por configurar | pára na publicação **e o motivo nomeia a moeda** |
+
+São dois porque partem em sítios diferentes da corrente, e o segundo só ficou verde depois
+de o produto passar a dizer a verdade sobre o que falta.
+
+E o par que os mantém honestos é a própria jornada do passo 1: com tudo posto, ela chega ao
+fim. Sem esse par, apertar tudo passava nos dois controlos e partia o produto.
+
+### Uma decisão de limpeza, declarada
+
+A jornada cria uma organização real, e uma organização real deixa rasto em `audit_events` —
+**append-only por gatilho, para toda a gente, incluindo a credencial de migração**. Apagar
+isso obriga a desligar o gatilho.
+
+O script desliga-o, apaga, e volta a ligar — com `trap`, e com um **passo 6 que verifica que
+ficou ligado**. Uma auditoria sem protecção deixada para trás é o tipo de coisa que
+sobrevive a um commit distraído, e é a mesma lição que o `provar-acesso.sh` já tinha
+aprendido com uma política.
+
+---
+
+## Uma interacção entre provas, medida e não escondida
+
+`provar-acesso.sh` falhou dentro do `provar-tudo.sh` numa passagem e **passou sozinho na
+seguinte**, com 7 verificações verdes. Corri a jornada à mão imediatamente antes de arrancar
+a suite, e a jornada **inscreve uma conta** — o limitador de abuso da autenticação é
+partilhado e tem janela.
+
+Não afirmo mais do que medi: passa sozinho, falhou uma vez a seguir a outra prova que
+regista contas. Se voltar a acontecer, o sítio para olhar é o limitador, não a prova.

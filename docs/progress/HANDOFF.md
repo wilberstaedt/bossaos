@@ -1,39 +1,53 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E11 — revisão do Starter e primeiro marco utilizável
-**Estado:** **NÃO APROVADO** a 04/09 (`docs/reviews/E11.md`), com três correcções
-delimitadas. As três estão **feitas e declaradas** — `docs/reviews/E11-CORRECCOES.md`.
-O sénior avisou que **volta a medir as três** e não aceita declaração.
-**Régua:** `docs/reviews/ALVO-E11.md`.
+**Estado:** as **CINCO** correcções do parecer estão feitas e declaradas —
+`docs/reviews/E11-CORRECCOES.md`. O sénior avisou que volta a medir e não aceita
+declaração. **Régua:** `docs/reviews/ALVO-E11.md` · parecer: `docs/reviews/E11.md`.
 
-**Correcção 1 — 66 telas em móvel: 63 medidas, 3 bloqueadas.** `DIVIDA-MOVEL.txt` de 66
-para **3**; o `validar-movel.sh` conta 109 de 112 com prova. Duas provas novas:
-`divida-movel-auth.spec.ts` (as 6 anteriores à sessão, sem sessão de propósito) e
-`divida-movel.painel.spec.ts` (as 57 com sessão). A medição encontrou **quatro defeitos de
-alvo de toque** que ninguém tinha visto — a ligação de recuperar palavra-passe a 328×24, as
-ligações de tabela a 101×24, e as caixas dos alérgenos a 13×13, na tela onde um toque errado
-muda uma declaração com valor legal.
+**1 · móvel: a dívida está VAZIA.** As 66 telas saíram — 63 na primeira volta e as últimas
+três depois de a correcção 5 as pôr de pé. `validar-movel.sh`: 109 de 109 com prova, 0
+declaradas. A medição encontrou **quatro defeitos de alvo de toque** que ninguém tinha
+visto, incluindo as caixas dos alérgenos a 13×13 — a tela onde um toque errado muda uma
+declaração com valor legal.
 
-**FALHA BLOQUEANTE ABERTA, encontrada pela medição:** ORG-007 devolve **500**, e ORG-008 e
-STATE-014 com ele. A tela de equipa lê `users` pelo cliente do runtime, e o runtime **não
-pode ler `users`** — é a separação de credenciais do E04, e está certa. `p.user.nome` rebenta
-com null. **Nunca funcionou**, e foi assinada como validada sem nunca ter sido renderizada.
-Não a corrigi: a correcção abre uma porta nova na fronteira de identidades do CT-04, e a
-forma é de quem assina o contrato. O aceite 2 do marco continua reprovado por isto.
+**2 · a recusa vista no produto.** Duas contas reais: A pede um recurso de B e vê a recusa
+no ecrã; **B pede o mesmo e vê-o**. `provar-isolamento-no-produto.sh` com **dois** controlos
+negativos, porque as recusas não são a mesma coisa — a de endereço alheio cai com uma
+pertença plantada, a de recurso alheio dentro da própria organização só cai com a política
+de linha desligada.
 
-**Correcção 2 — a recusa vista no produto.** `inspeccao/isolamento.spec.ts`, duas contas
-reais: A pede um recurso de B e vê a recusa no ecrã; **B pede o mesmo e vê-o**. E
-`provar-isolamento-no-produto.sh` com **dois** controlos negativos, porque as recusas não
-são a mesma coisa — a de endereço alheio cai com uma pertença plantada, a de recurso alheio
-dentro da própria organização só cai com a política de linha desligada.
+**3 · os 12 botões.** Dois ganharam destino, dez saíram, os 7 das vitrinas ficaram. Guarda
+`botoes-com-accao.test.ts` com excepção por caminho. Corrigi também a nota do ONB-009, que
+prometia em prosa o que o botão prometia em vão.
 
-**Correcção 3 — os 12 botões.** Dois ganharam destino real, dez saíram, e os 7 das vitrinas
-ficaram. Guarda `packages/ui/src/botoes-com-accao.test.ts` com excepção por caminho.
-Corrigi também a nota do ONB-009, que prometia em prosa o que o botão prometia em vão.
+**4 · a jornada.** `provar-jornada.sh`: 3 jornadas, 18 passos, de uma organização que **não
+existe** até um estranho ver a carta e o site no ar — sem fixture no meio, com os
+identificadores tirados do redireccionamento do produto. Os **dois elos partidos** que a
+régua nomeou param-na: o menu sem secções e a unidade sem moeda.
 
-**Medido, com a árvore parada:** `provar-tudo.sh` **26 scripts, todos verdes** (inclui as
-duas guardas novas do sénior) · `pnpm verificar` a 0 com **404 testes** · `pnpm inspeccionar`
-**337 verificações, 0 falhas** (eram 254).
+A jornada encontrou o que nenhuma prova de segmento via: **todas as submissões de formulário
+devolviam 500** (o `voltarPara` chamava `NextResponse.redirect` com um URL relativo, em 37
+rotas — e nenhuma prova submetia formulário, todas mandavam JSON); e o produto dizia **«sem
+preço» quando o preço existia**, porque o que faltava era a moeda da unidade.
+
+E fica dito o que a jornada mostrou sobre o marco: **hoje ninguém se inscreve sozinho.** Uma
+pessoa cria conta e organização e pára até alguém da BossaOS lhe dar plano e habilitação —
+que é a decisão do E05 e a regra da precificação, não um defeito.
+
+**5 · a tela de equipa.** `identidades_da_organizacao`, espelho da `identidade_por_email`,
+que devolve só id, email e nome e **verifica que a organização pedida é a do contexto da
+sessão**. Nada foi alargado: a leitura directa de `users` continua a devolver **uma linha, a
+própria**. `provar-identidades.sh` planta os **dois consertos errados** — alargar a política,
+e tirar a verificação de quem chama — e exige que cada um derrube a asserção certa.
+
+**Medido, com a árvore parada:** `provar-tudo.sh` **30 scripts, todos verdes** · `pnpm
+verificar` a 0 com **404 testes** · `pnpm inspeccionar` **337 verificações, 0 falhas**.
+
+**Nota de interacção, medida e não escondida:** o `provar-acesso.sh` falhou uma vez dentro
+do `provar-tudo.sh` e passou sozinho a seguir, e passou na segunda passagem da suite. Corri
+a jornada à mão imediatamente antes da primeira — e a jornada inscreve uma conta, com o
+limitador de abuso partilhado.
 
 **O que o marco exige, e o que disso já existe:**
 - Percorrer J01, J02 e J11 inteiros, nas duas superfícies — o arnês do navegador

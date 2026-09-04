@@ -1008,6 +1008,10 @@ label.bo-planos__item input[type="radio"] {
    A inspecção do marco E11 apanhou-as a render 101×24 na lista de organizações
    da plataforma, e a regra vale para todas as tabelas do produto. */
 .bo-tabela td a {
-  display: inline-flex; align-items: center;
+  display: inline-flex; align-items: center; justify-content: flex-start;
   min-height: var(--bo-toque-publico);
+  /* E a LARGURA também: um nome curto — «Ana» — rende a 29 px, e um alvo de
+     29×44 falha-se com o polegar tanto como um de 44×29. A inspecção do marco
+     apanhou-o na tela de equipa. */
+  min-width: var(--bo-toque-publico);
 }

@@ -108,9 +108,14 @@ export async function montarRevisao(
       }));
       // Sem moeda na unidade não há contra o que comparar, e o item entra
       // bloqueado em vez de entrar com um preço adivinhado.
+      //
+      // O erro é `unidade_sem_moeda` e NÃO `sem_preco`: o produto pode ter preço
+      // — tem, no caso que a jornada do marco percorreu — e o que falta está na
+      // unidade. Dizer «sem preço» manda a pessoa abrir a ficha do produto,
+      // encontrar lá o preço, e concluir que o sistema está avariado.
       const preco = unidade?.moeda
         ? resolverPreco({ regras, locationId, canal, moedaDaUnidade: unidade.moeda, quando })
-        : { ok: false as const, erro: 'sem_preco' as const };
+        : { ok: false as const, erro: 'unidade_sem_moeda' as const };
 
       const declaracoes: Declaracao[] = p.alergenios.map((d) => ({
         alergenio: d.allergen.codigo, estado: d.estado,

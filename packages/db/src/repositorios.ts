@@ -150,15 +150,70 @@ export async function concessoesDoActor(db: ClienteComEscopo, userId: string) {
   };
 }
 
-export function pessoasEAcessos(db: ClienteComEscopo) {
-  return db.membership.findMany({
+/**
+ * As pessoas da organização, com o nome e o email de cada uma.
+ *
+ * ── Isto lia `users` pelo cliente do runtime, e o runtime NÃO PODE ─────────
+ *
+ * A versão anterior fazia `user: { select: { nome, email } }`. O runtime não tem
+ * acesso a `users` — é a separação de credenciais do E04, e está certa —, a
+ * junção devolvia `null`, e a tela de equipa rebentava com *Cannot read
+ * properties of null*. **Nunca funcionou**, e estava assinada como validada
+ * porque nunca tinha sido renderizada.
+ *
+ * A correcção não é dar `SELECT` ao runtime: isso trocava um ecrã partido por um
+ * buraco de segurança. É ler os nomes por uma porta estreita —
+ * `identidades_da_organizacao` — que corre como o dono, devolve só id, email e
+ * nome, e **verifica que a organização pedida é a do contexto da sessão**.
+ *
+ * As pertenças continuam a vir pelo cliente com escopo, com a política de linha
+ * activa. A porta serve para o que o RLS não pode resolver: uma tabela que o
+ * inquilino não tem, e não devia ter.
+ */
+export interface PessoaComAcesso {
+  id: string;
+  estado: string;
+  user: { id: string; nome: string | null; email: string };
+  roleAssignments: { papel: string; brandId: string | null; locationId: string | null }[];
+}
+
+export async function pessoasEAcessos(
+  db: ClienteComEscopo,
+  organizationId: string,
+): Promise<PessoaComAcesso[]> {
+  const pertencas = await db.membership.findMany({
     select: {
       id: true,
       estado: true,
-      user: { select: { id: true, nome: true, email: true } },
+      userId: true,
       roleAssignments: { select: { papel: true, brandId: true, locationId: true } },
     },
     orderBy: { createdAt: 'asc' },
+  });
+
+  const identidades = await db.$queryRaw<{ id: string; email: string; nome: string | null }[]>`
+    SELECT * FROM identidades_da_organizacao(${organizationId}::uuid)`;
+  const porId = new Map(identidades.map((i) => [i.id, i]));
+
+  return pertencas.map((p) => {
+    const identidade = porId.get(p.userId);
+    return {
+      id: p.id,
+      estado: p.estado as string,
+      // Uma identidade que a porta não devolve fica com o email **vazio** e o
+      // nome nulo — não com um nome inventado nem com o identificador a fazer de
+      // nome. Ausência não é um valor, e é a mesma regra do alérgeno por declarar.
+      user: {
+        id: p.userId,
+        nome: identidade?.nome ?? null,
+        email: identidade?.email ?? '',
+      },
+      roleAssignments: p.roleAssignments.map((r) => ({
+        papel: r.papel as string,
+        brandId: r.brandId,
+        locationId: r.locationId,
+      })),
+    };
   });
 }
 

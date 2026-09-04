@@ -55,11 +55,17 @@ function telasCom(a: Alvos): Tela[] {
     // manda escolher a organização primeiro — e mediríamos esse desvio.
     { id: 'AUTH-008', caminho: `/es-ES/auth/locations?org=${ORG}` },
     { id: 'ONB-009', caminho: '/es-ES/onboarding' },
-    // ORG-007, ORG-008 e STATE-014 estão fora, e o motivo está no relatório:
-    // as duas rotas rendem 500 porque lêem `users` pelo cliente do runtime, e o
-    // runtime NÃO PODE ler `users` — é a separação de credenciais do E04. Não
-    // são medíveis hoje, e escrever "móvel medido" nelas seria assinar o que não
-    // aconteceu, que é precisamente a falha que este trabalho existe para pagar.
+    // ── Estas três voltaram à lista, e conta como voltaram ────────────────
+    //
+    // Estiveram fora porque as rotas rendiam **500**: liam `users` pelo cliente
+    // do runtime, que só vê a própria linha. A correcção 5 pô-las de pé por uma
+    // porta estreita — `identidades_da_organizacao` — sem alargar nada.
+    //
+    // A medição delas em móvel só vale por a tela renderizar de verdade, e é
+    // isso que a visita afirma: estado abaixo de 400, e o cabeçalho visível.
+    { id: 'ORG-007', caminho: ORGZ },
+    { id: 'ORG-008', caminho: `${ORGZ}/${a.membershipId}` },
+    { id: 'STATE-014', caminho: `${ORGZ}/${a.membershipId}`, marcador: '.bo-estado__factos' },
 
     // ── E05 ──────────────────────────────────────────────────────────────
     { id: 'ONB-004', caminho: '/es-ES/onboarding/plano' },
@@ -212,13 +218,13 @@ test.describe('dívida de móvel a 360 px', () => {
 test.describe('a varredura mede mesmo sessenta telas', () => {
   test.use({ viewport: { width: 1280, height: 900 } });
 
-  test('a lista tem as 57 medíveis, e nenhuma repetida por engano', () => {
+  test('a lista tem as 60, e nenhuma repetida por engano', () => {
     // O controlo anti-verde-vazio desta prova. Sem ele, uma lista que encolhesse
     // — por um erro de edição, por um `filter` distraído — deixava telas por
     // medir e os casos acima continuavam verdes.
-    expect(TELAS.length, `a lista tem ${TELAS.length} entradas`).toBe(57);
+    expect(TELAS.length, `a lista tem ${TELAS.length} entradas`).toBe(60);
     const ids = TELAS.map((t) => t.id);
-    expect(new Set(ids).size, 'há IDs repetidos na lista').toBe(57);
+    expect(new Set(ids).size, 'há IDs repetidos na lista').toBe(60);
   });
 
   test('e nenhum endereço ficou com um identificador por resolver', () => {

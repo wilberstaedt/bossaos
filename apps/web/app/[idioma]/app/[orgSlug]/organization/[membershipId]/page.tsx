@@ -27,7 +27,8 @@ export default async function FichaDePessoa({
   if (!sessao.ok) notFound();
   if (exigirAccao(sessao.concessoes, 'equipa.ler')) notFound();
 
-  const pessoas = await comEscopoDoPedido(sessao, (db) => pessoasEAcessos(db));
+  const pessoas = await comEscopoDoPedido(sessao,
+    (db) => pessoasEAcessos(db, sessao.contexto.organizationId));
   const r = decidirLeitura({
     encontrado: pessoas.find((p) => p.id === membershipId) ?? null,
     concessoes: sessao.concessoes,

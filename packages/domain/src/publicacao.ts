@@ -20,6 +20,18 @@
 export type MotivoDeBloqueio =
   | 'carta_vazia'
   | 'sem_preco'
+  /**
+   * A UNIDADE não tem moeda — e não é o produto que não tem preço.
+   *
+   * O tipo `erroDePreco` já previa `unidade_sem_moeda` e o motivo não existia:
+   * o caso caía no `sem_preco` genérico. A jornada do marco E11 apanhou-o —
+   * publicou-se com um produto que tinha preço, e o produto disse «sem preço».
+   *
+   * Manda a pessoa ao sítio errado: ela vai ver a ficha do produto, encontra os
+   * 8,50 lá, e conclui que o sistema está avariado. O que falta está na unidade,
+   * três ecrãs ao lado. Um motivo errado é pior do que um motivo genérico.
+   */
+  | 'unidade_sem_moeda'
   | 'moeda_incompativel'
   | 'conflito_de_preco'
   | 'alergenos_por_declarar'
@@ -89,6 +101,10 @@ export function bloqueiosDePublicacao(
       bloqueios.push({ ...base, motivo: 'conflito_de_preco' });
     } else if (i.erroDePreco === 'moeda_incompativel') {
       bloqueios.push({ ...base, motivo: 'moeda_incompativel' });
+    } else if (i.erroDePreco === 'unidade_sem_moeda') {
+      // Antes de este ramo existir, isto era `sem_preco` — e o produto tinha
+      // preço. Ver `MotivoDeBloqueio`.
+      bloqueios.push({ ...base, motivo: 'unidade_sem_moeda' });
     } else if (i.precoMenor === null || i.moeda === null) {
       // Sem preço não se vende. Publicar a zero seria oferecer o prato.
       bloqueios.push({ ...base, motivo: 'sem_preco' });

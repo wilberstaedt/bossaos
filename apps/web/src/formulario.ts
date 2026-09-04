@@ -16,7 +16,27 @@ import { NextResponse } from 'next/server';
 export function voltarPara(destino: string, extra: Record<string, string> = {}): NextResponse {
   const url = new URL(destino, 'http://interno');
   for (const [k, v] of Object.entries(extra)) url.searchParams.set(k, v);
-  return NextResponse.redirect(new URL(`${url.pathname}${url.search}`, 'http://interno').toString().replace('http://interno', ''), 303);
+  const relativo = `${url.pathname}${url.search}`;
+
+  // ── Isto devolvia 500 em TODAS as submissões de formulário do produto ────
+  //
+  // A versão anterior chamava `NextResponse.redirect(relativo, 303)`. O Next
+  // exige um URL **absoluto** e atira `URL is malformed` — logo cada `<form>`
+  // que a pessoa submetia recebia 500 em vez do redireccionamento. Trinta e sete
+  // rotas passavam por aqui.
+  //
+  // Nunca foi apanhado porque **nenhuma prova submetia formulário**: as provas
+  // por HTTP mandam JSON, e o caminho JSON destas rotas responde
+  // `NextResponse.json` sem passar por esta função. É a falha 4 do marco escrita
+  // em código — provar a peça não prova o caminho, e o caminho da pessoa era o
+  // que faltava.
+  //
+  // O cabeçalho `Location` relativo é válido em HTTP desde o RFC 7231 §7.1.2 e é
+  // o que os navegadores resolvem contra o pedido. Não se constrói um absoluto
+  // porque isso obrigaria a adivinhar o anfitrião — e adivinhar o anfitrião a
+  // partir de um cabeçalho que o cliente controla é como se abrem redirecções
+  // abertas.
+  return new NextResponse(null, { status: 303, headers: { location: relativo } });
 }
 
 /** Lê um campo de texto. Vazio é `undefined`, **nunca** cadeia vazia. */

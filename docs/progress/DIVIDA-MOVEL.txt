@@ -26,6 +26,16 @@
 # identificada e está no relatório. Ficam aqui porque continuam por medir — que
 # é o que esta lista existe para não deixar esquecer.
 
-ORG-007
-ORG-008
-STATE-014
+# ── 04/09: a dívida está PAGA, e as últimas três saíram consertadas ───────
+#
+# As 66 estavam assinadas com prova só de desktop. 63 saíram medidas no arnês que
+# o E10 construiu. As últimas três — ORG-007, ORG-008 e STATE-014 — não saíam
+# porque a rota devolvia 500: a tela de equipa lia `users` pelo cliente do
+# runtime, que só vê a própria linha, e nunca tinha funcionado.
+#
+# Saíram a 04/09, depois da correcção 5 do marco: a tela passou a ler os nomes
+# por uma porta estreita, sem alargar nada, e foi medida com a tela a renderizar
+# de verdade.
+#
+# A lista está VAZIA. Ela existe para não deixar esquecer o que não foi medido —
+# e neste momento não há nada.
