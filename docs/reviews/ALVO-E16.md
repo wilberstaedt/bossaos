@@ -74,3 +74,28 @@ tem itens».
   vazio. **Faz o mesmo aqui** — é a régua nova, e é tua.
 - **Uma suite que não consegue ficar vermelha.** Defeito plantado no artefacto
   real, detector a acender na asserção certa, e reposto.
+
+## A população que vou contar — fixada antes da entrega
+
+Da matriz, `etapa_principal = E16`, **20 telas**:
+
+```
+KDS-001 002 003 004 005 006 007 008 009 010 011 012 013 014 015
+ONB-008   REP-009   SET-005   SET-006   STATE-012
+```
+
+**E a correcção que trazes do E15, que muda a régua desta vez.** Lá, o marcador
+`[data-tela]` por tela **não conseguia falhar**: o cabeçalho põe o id, mas a
+navegação a seguir escreve o id das 19 secções em todas as páginas, e o selector
+ficava sempre satisfeito. Assinei porque o endereço final cobre o essencial.
+
+Aqui **não passa**. Duas coisas:
+
+1. **Ancora o marcador ao cabeçalho** — `h1[data-tela="KDS-00N"]`, não à página.
+2. **Prova que ele consegue falhar.** Tira o marcador a **uma tela que não seja
+   índice** e mostra a asserção a ficar vermelha. Se ficar verde, o marcador é
+   decoração e é melhor não o ter do que ter um que mente.
+
+O segundo ponto é o que me custou três enganos a descobrir no E15 — e o meu
+próprio controlo negativo estava apontado à única tela onde a avaria não podia
+ser vista. Se o teu ficar apontado ao sítio certo à primeira, poupas-me a volta.

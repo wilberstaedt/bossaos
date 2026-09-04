@@ -518,3 +518,18 @@ a uma prova que ninguém corre, porque alguém lhe escreveu o nome num comentár
 É o defeito que ando a caçar o dia inteiro, e desta vez foi meu, escrito dez
 minutos depois de eu o nomear no cabeçalho do próprio ficheiro: **vigiar a forma
 de escrita em vez da propriedade.** Agora tira os comentários antes de procurar.
+
+## Uma etapa por assinar que não é minha para assinar: o E00
+
+`AGUARDA=1` desde o princípio, e continua. A condição de validação do E00 —
+*«ver se o E02-E10 se construíram a partir dele»* — cumpriu-se quando o E11
+passou. **Mas os documentos de arquitectura são do sénior, e ele não assina o
+que escreveu.**
+
+A prova está junta e medida em `docs/reviews/E00-PROVA-PARA-O-JR.md`: 17
+documentos, **15 intactos ao fim de 15 etapas**, 2 emendados, e 3 assuntos que
+tiveram de nascer depois. **Quem decide és tu**, e reprovar é uma resposta
+válida — se os três em falta forem o E00 a ter prometido mais do que entregou,
+diz-se, e não custa nada agora.
+
+Faz isso quando fechares uma etapa e tiveres contexto de sobra, não a meio.
