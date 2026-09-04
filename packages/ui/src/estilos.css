@@ -636,6 +636,58 @@ p { margin: 0; }
 .bo-kds .bo-botao { min-height: var(--bo-toque-operacao); font-size: 18px; }
 .bo-kds__numero { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 24px; font-variant-numeric: tabular-nums; }
 
+/* ── As peças do painel CLARO, dentro da superfície escura ─────────────────
+   As telas do E16 reutilizam `bo-publico__*`, `bo-estado__*` e `bo-campo__ajuda`
+   — que assumem fundo claro e pintam `--bo-texto-primario` e
+   `--bo-texto-secundario`. Dentro do `.bo-kds`, que é escuro por decisão do E02,
+   isso dava **1.00:1**: texto da cor do fundo, ou seja, invisível.
+
+   Encontrou-o a prova de contraste, e nada mais o podia apanhar: o navegador não
+   se queixa, o build passa, os tipos passam — e o ecrã que se lê a um metro e
+   meio não tem lá nada escrito. É a mesma família do `var()` inexistente do E07,
+   que pintava #102E35 sobre #102E35.
+
+   A correcção é mapear os papéis, e não reescrever as telas: a superfície muda o
+   significado de «texto secundário», não a estrutura da página. */
+.bo-kds .bo-estado__sobrancelha,
+.bo-kds .bo-estado__rotulo,
+.bo-kds .bo-publico__descricao,
+.bo-kds .bo-publico__vazio,
+.bo-kds .bo-campo__ajuda { color: rgba(255, 255, 255, 0.78); }
+.bo-kds .bo-publico__produto > a,
+.bo-kds .bo-publico__nome,
+.bo-kds .bo-publico__preco,
+.bo-kds .bo-lista,
+.bo-kds h1, .bo-kds h2, .bo-kds h3, .bo-kds p { color: var(--bo-texto-inverso); }
+.bo-kds .bo-publico__produto { border-bottom-color: rgba(255, 255, 255, 0.16); }
+.bo-kds .bo-publico__seccoes a { color: var(--bo-texto-inverso); border-color: rgba(255, 255, 255, 0.32); }
+.bo-kds .bo-campo__rotulo { color: var(--bo-texto-inverso); }
+/* Os campos ficam claros de propósito: escrever num campo escuro num tablet com
+   reflexo é pior do que a mudança de superfície. */
+.bo-kds .bo-campo__controlo { background: var(--bo-superficie-base); color: var(--bo-texto-primario); }
+
+/* ── O AVISO é um cartão CLARO, e continua a sê-lo aqui ────────────────────
+   `.bo-aviso` tem fundo próprio (`--bo-superficie-suave`), portanto dentro do
+   KDS ele é uma ilha clara sobre a superfície escura. A regra acima pintava-lhe
+   o texto de branco e dava 1.00:1 outra vez — o mesmo defeito ao contrário, e
+   apanhado pela mesma medição, na passagem seguinte.
+
+   Uma ilha clara mantém as cores de ilha clara. É por isso que isto repõe em vez
+   de inventar um terceiro conjunto de cores. */
+.bo-kds .bo-aviso,
+.bo-kds .bo-aviso p,
+.bo-kds .bo-aviso li,
+.bo-kds .bo-aviso .bo-lista { color: var(--bo-texto-primario); }
+.bo-kds .bo-aviso .bo-aviso__corpo { color: var(--bo-texto-secundario); }
+
+/* Uma ligação dentro de um aviso é um alvo de toque como qualquer outro — e foi
+   esta que a medição apanhou com 24 px de altura, no KDS-002. */
+.bo-kds .bo-aviso a {
+  display: inline-flex; align-items: center;
+  min-height: var(--bo-toque-operacao);
+  color: var(--bo-primaria);
+}
+
 /* Glifo de navegação: os quatro quadrados que o atlas desenha. Não é a família
    de ícones do produto — essa não existe ainda e está declarada como pendência. */
 .bo-admin__glifo {

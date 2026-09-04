@@ -49,6 +49,12 @@ export interface Alvos {
    * não é repetir até dar verde.
    */
   sessionIdDoStaff: string;
+  /** E16: a estação de PREPARAÇÃO onde o KDS mede. Tem bilhetes a mais de propósito. */
+  estacaoDeProducao: string;
+  /** E16: a estação de EXPO. Sem ela, o KDS-012 media um quadro de preparação. */
+  estacaoDeExpo: string;
+  /** E16: uma tarefa concreta, para a ficha do bilhete não medir um 404. */
+  tarefaDeProducao: string;
 }
 
 const PREFIXO = 'insp-';
@@ -126,6 +132,23 @@ export async function resolverAlvos(): Promise<Alvos> {
            JOIN service_tables t ON t.id = s.table_id
           WHERE s.estado <> 'FECHADA' AND t.codigo = '${PREFIXO}21 del Staff' LIMIT 1`,
         'a sessão de mesa do Staff'),
+      estacaoDeProducao: await um(
+        sql,
+        `SELECT id FROM production_stations
+          WHERE nome LIKE '${PREFIXO}%' AND tipo = 'PREPARACAO' AND archived_at IS NULL
+          ORDER BY ordem LIMIT 1`,
+        'a estação de produção da inspecção'),
+      estacaoDeExpo: await um(
+        sql,
+        `SELECT id FROM production_stations
+          WHERE nome LIKE '${PREFIXO}%' AND tipo = 'EXPO' AND archived_at IS NULL LIMIT 1`,
+        'a estação de expo'),
+      tarefaDeProducao: await um(
+        sql,
+        `SELECT id FROM production_tasks
+          WHERE station_id IN (SELECT id FROM production_stations WHERE nome LIKE '${PREFIXO}%')
+          ORDER BY criada_em LIMIT 1`,
+        'uma tarefa de produção'),
     };
   } finally {
     await sql.end();

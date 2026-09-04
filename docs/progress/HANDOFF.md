@@ -1,7 +1,37 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E16 — KDS de cozinha, barra e expo (**20 telas**).
-**Estado:** autorizada. O JR ainda estava a afinar as provas do E15 quando assinei.
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** Declarado pelo JR; não
+assinado — ninguém assina a revisão do próprio código.
+**Detalhe e achados:** `docs/progress/E16.md`.
+
+**O que está pronto para medir:**
+`pnpm verificar` (0 falhas) · `./scripts/provar-producao.sh` (8 grupos e 17 casos
+na base, 6 e 14 na projecção pura, **11 defeitos plantados** — o primeiro é o
+modelo ingénuo que o contrato exige pelo nome) ·
+`./scripts/provar-kds-no-navegador.sh` (19 casos, **7 defeitos plantados**) ·
+`./scripts/provar-pedidos.sh` (o E14, de volta ao verde) ·
+`./scripts/provar-migracoes-do-zero.sh`.
+
+**A decisão que custava migração está feita e provada:** a unidade da estação é a
+**tarefa**, um-para-muitos desde o primeiro dia, e o modelo ingénuo é o primeiro
+controlo negativo. Três gatilhos na base carregam o resto — o estado de produção
+recusado no pedido, a versão monótona e o carimbo do servidor.
+
+**Duas superfícies do E14 mudaram**, e não é dano colateral: o selector de estado
+do ecrã de edição perdeu `EM_PREPARO` e `PRONTO` (a base recusa-os), e o
+STAFF-012 passou a ler o estado derivado — estava a filtrar por um valor que já
+ninguém escreve e devolvia uma lista sempre vazia.
+
+**Achados no E16, três deles meus:** o texto do KDS estava **invisível** (1.00:1,
+peças do painel claro dentro da superfície escura) e a correcção teve um segundo
+tempo, porque os avisos são cartões claros; uma ligação de 24 px no KDS-002; o
+meu teste do passe casava números em vez da propriedade; e um controlo negativo
+meu plantava onde a medição não alcança — ficou verde, e com razão.
+
+**Fica declarado como NÃO feito:** o SSE a empurrar (a porta de cursor existe e a
+regra de ordem está provada; o transporte não), a ligação do bilhete ao tempo de
+serviço no KDS-006 (nenhum contrato a decide) e o adaptador de impressão.
 **Régua:** `docs/reviews/ALVO-E16.md`, escrita antes de existir código.
 **Contratos que mandam:** `kds-e-tempo-real.md` (E00) e
 `tarefas-de-producao-e-estacoes.md` (escrito para esta etapa).
