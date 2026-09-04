@@ -27,7 +27,20 @@ for f in pathlib.Path('packages/ui/src').rglob('*.css'):
     css |= set(re.findall(r'\.(bo-[A-Za-z0-9_-]+)', f.read_text(encoding='utf-8')))
 
 usadas: dict[str, set[str]] = {}
-raizes = [pathlib.Path('apps/web/app'), pathlib.Path('packages/ui/src')]
+# `apps/web/src` FALTAVA, e com ele todos os componentes de cliente do produto —
+# `src/componentes/` desde o E02, `src/staff/` desde o E15. A guarda dizia «167
+# classes usadas, todas definidas» e não tinha lido metade do JSX que existe.
+#
+# É a mesma família das outras cegueiras deste projecto: o verificador que dizia
+# verde com zero grupos, a varredura cega ao padrão que interessava, o `[A-Z]{3,6}`
+# que não via `QR-001`. Um instrumento que não alcança o alvo tem de FALHAR, e
+# este contava zero — por isso o controlo negativo 4, mais abaixo, planta o
+# defeito exactamente dentro desta raiz.
+raizes = [
+    pathlib.Path('apps/web/app'),
+    pathlib.Path('apps/web/src'),
+    pathlib.Path('packages/ui/src'),
+]
 for raiz in raizes:
     for f in raiz.rglob('*.tsx'):
         if '.next' in f.parts:
@@ -133,6 +146,33 @@ else
   vermelho "a forma condicional voltou a ser invisível — a leitura está a vigiar um estilo"
 fi
 cp "$COPIA" "$ALVO"
+
+echo "4. CONTROLO NEGATIVO — a raiz que a guarda NAO lia"
+# Este controlo existe por um defeito encontrado a 04/09, no E15: a leitura só
+# percorria `apps/web/app` e `packages/ui/src`. Todo o `apps/web/src` ficava de
+# fora — os componentes de cliente do produto, lá desde o E02 — e a guarda dizia
+# «167 classes usadas, todas definidas» sem ter lido metade do JSX que existe.
+# Seis classes do E15 estavam a ser usadas sem CSS nenhum, e nada acendeu.
+#
+# Os controlos 2 e 3 plantavam sempre no MESMO ficheiro, dentro de uma raiz que
+# era lida. Provavam que o detector reconhece a FORMA, e nunca que ele ALCANÇA o
+# alvo — que é a diferença entre um detector calibrado ao sintoma e um que mede a
+# propriedade. Este planta noutra raiz de propósito, e é ele que impede a
+# cegueira de voltar sem barulho.
+ALVO2="apps/web/src/staff/PainelDaFila.tsx"
+COPIA2=$(mktemp); cp "$ALVO2" "$COPIA2"
+trap 'cp "$COPIA" "$ALVO"; cp "$COPIA2" "$ALVO2"; rm -f "$COPIA" "$COPIA2"' EXIT INT TERM
+python3 -c '
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
+p.write_text(s.replace("className=\"bo-fila\"", "className=\"bo-fila bo-fora-do-alcance\"", 1), encoding="utf-8")
+' "$ALVO2"
+if grep -q '^FALTA bo-fora-do-alcance' <<<"$(ler)"; then
+  verde "alcança apps/web/src — os componentes de cliente são lidos"
+else
+  vermelho "apps/web/src voltou a ficar fora do alcance: a guarda conta zero em vez de falhar"
+fi
+cp "$COPIA2" "$ALVO2"
 
 echo
 if (( falhas == 0 )); then printf '\033[32m%s\033[0m\n' "0 falhas"

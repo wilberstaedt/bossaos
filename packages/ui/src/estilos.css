@@ -558,6 +558,41 @@ p { margin: 0; }
 }
 .bo-staff__conteudo { flex: 1; padding: var(--bo-espaco-lg); display: flex; flex-direction: column; gap: var(--bo-espaco-lg); }
 .bo-staff .bo-botao { min-height: var(--bo-toque-operacao); }
+/* A navegação do Staff é alvo de OPERAÇÃO, e não alvo público: usa-se em pé,
+   com uma mão, e às vezes com luvas. 44 px é o mínimo de acessibilidade; 48 é o
+   que esta superfície pede, e é o mesmo número dos botões acima. */
+.bo-staff .bo-publico__seccoes a { min-height: var(--bo-toque-operacao); }
+.bo-staff .bo-publico__lista a { min-height: var(--bo-toque-operacao); align-items: center; }
+
+/* A fila local (E15). Estas classes estavam a ser usadas desde o primeiro dia do
+   E15 e NÃO existiam no CSS — a guarda `validar-classes.sh` não lia
+   `apps/web/src/`, onde vivem os componentes de cliente, e por isso dizia verde.
+   O navegador também não se queixa: o elemento aparece sem estilo e herda o que
+   o pai lhe der. */
+.bo-fila { display: grid; gap: var(--bo-espaco-md); }
+.bo-fila__ligacao {
+  display: inline-flex; align-items: center; gap: var(--bo-espaco-sm);
+  padding: var(--bo-espaco-sm) var(--bo-espaco-md);
+  border-radius: var(--bo-raio-capsula); border: 1px solid var(--bo-borda);
+  overflow-wrap: anywhere;
+}
+/* O estado da ligação distingue-se por TEXTO — a cor é reforço, nunca o sinal.
+   Quem não distingue as duas cores lê as palavras, que estão lá sempre. */
+.bo-fila__ligacao--ligado { border-color: var(--bo-estado-sucesso); }
+.bo-fila__ligacao--desligado { border-color: var(--bo-estado-aviso); }
+.bo-fila__suspensas { overflow-wrap: anywhere; }
+.bo-staff__zonas { display: grid; gap: var(--bo-espaco-md); }
+.bo-staff__total { font-size: 18px; }
+/* Os dois preços LADO A LADO a partir de 480 px, e empilhados abaixo disso: a
+   360 px duas colunas de dinheiro põem a página a rolar na horizontal, e a régua
+   reprova isso à cabeça. */
+.bo-staff__divergencia { display: grid; gap: var(--bo-espaco-sm); margin-top: var(--bo-espaco-sm); }
+.bo-staff__divergencia dt { font-size: 14px; color: var(--bo-texto-secundario); }
+.bo-staff__divergencia dd { font-weight: 700; overflow-wrap: anywhere; }
+@media (min-width: 480px) {
+  .bo-staff__divergencia { grid-template-columns: 1fr 1fr; }
+  .bo-staff__divergencia p { grid-column: 1 / -1; }
+}
 
 /* ── KDS / TPV ──────────────────────────────────────────────────────────────
    Lê-se a um metro e meio, com as mãos ocupadas: fundo escuro, corpo maior,

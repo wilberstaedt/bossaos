@@ -41,7 +41,8 @@ function portas(orgSlug: string): PortasDeRede {
     async enviar(entrada) {
       const corpo = new URLSearchParams();
       const p = entrada.payload as {
-        idioma: string; locationSlug: string; linhas: { productId: string; quantidade: number }[];
+        idioma: string; locationSlug: string;
+        linhas: { productId: string; quantidade: number; precoPropostoMenor?: number }[];
         orderId?: string;
       };
       corpo.set('idioma', p.idioma);
@@ -53,6 +54,14 @@ function portas(orgSlug: string): PortasDeRede {
       for (const l of p.linhas) {
         corpo.append('productId', l.productId);
         corpo.append('quantidade', String(l.quantidade));
+        // ── Três listas PARALELAS, e por isso esta linha não tem `if` ──────
+        //
+        // O servidor casa-as por posição. Um `append` condicional deslocava
+        // todas as linhas seguintes — a segunda linha ficava com o preço da
+        // terceira, e ninguém veria erro nenhum: veria preços trocados. A cadeia
+        // vazia é o que quer dizer «este rascunho não propôs preço».
+        corpo.append('precoPropostoMenor',
+          typeof l.precoPropostoMenor === 'number' ? String(l.precoPropostoMenor) : '');
       }
 
       // SABE-SE que não sai: o aparelho está offline. Não se tenta, e a entrada

@@ -545,6 +545,16 @@ export function listarPedidos(
         select: {
           id: true, nome: true, quantidade: true, precoMenor: true, moeda: true,
           estado: true, motivoRejeicao: true,
+          // ── O preço PROPOSTO viaja com a linha, e o E15 precisa dele ────
+          //
+          // A régua do E15: *«se a divergência só aparecer num log, o E14 foi
+          // bem implementado e mal entregue»*. A linha rejeitada por preço tem
+          // de mostrar os DOIS números lado a lado, e com um só deles quem está
+          // na mesa não consegue decidir nada — que é exactamente o que se lhe
+          // está a pedir. Faltava aqui: a coluna existia desde o E14 e esta
+          // leitura não a trazia.
+          precoPropostoMenor: true,
+          linhaPaiId: true,
         },
         orderBy: { createdAt: 'asc' },
       },

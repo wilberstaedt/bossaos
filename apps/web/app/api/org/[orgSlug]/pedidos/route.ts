@@ -67,7 +67,27 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
   const linhasDoFormulario = () => {
     const produtos = dados.getAll('productId').filter((p): p is string => typeof p === 'string');
     const quantidades = dados.getAll('quantidade').map((q) => Number(q) || 1);
-    return produtos.map((productId, i) => ({ productId, quantidade: quantidades[i] ?? 1 }));
+    // ── O preço PROPOSTO, quando o cliente trouxe um ───────────────────────
+    //
+    // É o que um rascunho escrito offline guardou de quando foi escrito, e é
+    // contra ele que o servidor confere a carta do momento em que aceita. Vem
+    // como lista paralela às outras duas e casa-se por posição.
+    //
+    // **Vazio é ausência, não é zero.** Um `Number('')` dá 0, e zero aqui era um
+    // cliente a propor que o prato é grátis — que o servidor então rejeitaria por
+    // divergência, sobre uma proposta que ninguém fez. `undefined` faz o motor
+    // não comparar preço nenhum, que é o comportamento certo de quem não propôs.
+    const propostos = dados.getAll('precoPropostoMenor').map((v) => {
+      const bruto = typeof v === 'string' ? v.trim() : '';
+      if (bruto === '') return undefined;
+      const n = Number(bruto);
+      return Number.isInteger(n) ? n : undefined;
+    });
+    return produtos.map((productId, i) => ({
+      productId,
+      quantidade: quantidades[i] ?? 1,
+      ...(propostos[i] === undefined ? {} : { precoPropostoMenor: propostos[i] }),
+    }));
   };
 
   if (accao === 'enviar' || accao === 'acrescentar') {

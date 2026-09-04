@@ -339,6 +339,51 @@ export async function revogarDispositivo(
   };
 }
 
+/**
+ * O dispositivo declara quantos rascunhos tem por enviar (E15).
+ *
+ * ── A pendência que o E13 deixou escrita, e que a fila local fecha ────────
+ *
+ * O contrato dizia: *«`devices.rascunhos_por_enviar` é o campo que o dispositivo
+ * preenche, e quem o preenche é a fila local — que nasce no E15/E16. Até lá o
+ * valor é `null` em todos os aparelhos»*. É esta função. O ecrã de revogar já
+ * sabia mostrar o número e ler a ausência; faltava alguém a escrever.
+ *
+ * ── Um NÚMERO, e nunca o conteúdo ────────────────────────────────────────
+ *
+ * Regra 3: quem revoga não é o dono, e não pode ler o trabalho dele. Um número
+ * chega para decidir e não revela nada — é a mesma linha que o DEV-004 traça, e
+ * traça-se aqui outra vez porque uma regra que vive só no ecrã é uma regra que o
+ * próximo ecrã não tem.
+ *
+ * ── E `ultimoVistoEm` sobe junto, porque é a mesma frase ─────────────────
+ *
+ * «O que o dispositivo declarou na última vez que falou» só quer dizer alguma
+ * coisa se se souber quando foi. Um número de ontem sobre um tablet que não fala
+ * desde ontem é uma informação diferente do mesmo número de agora.
+ */
+export async function declararRascunhos(
+  db: ClienteComEscopo,
+  deviceId: string,
+  quantos: number,
+): Promise<{ ok: true } | { ok: false; motivo: 'dispositivo_desconhecido' | 'numero_invalido' }> {
+  // Negativo ou fraccionário não é «zero por defeito»: é um cliente a mandar
+  // lixo, e escrevê-lo punha um número inventado onde o ecrã de revogar promete
+  // um número medido. Recusa-se, e o campo fica como estava.
+  if (!Number.isInteger(quantos) || quantos < 0) return { ok: false, motivo: 'numero_invalido' };
+
+  const escrito = await db.device.updateMany({
+    // O escopo da consulta já limita à organização da sessão. `estado` fora da
+    // condição de propósito: um aparelho revogado que ainda consiga falar deve
+    // poder actualizar o número — a revogação fecha os comandos, e o número é
+    // informação sobre o que lá ficou.
+    where: { id: deviceId },
+    data: { rascunhosPorEnviar: quantos, ultimoVistoEm: new Date() },
+  });
+  if (escrito.count === 0) return { ok: false, motivo: 'dispositivo_desconhecido' };
+  return { ok: true };
+}
+
 export function listarDispositivos(db: ClienteComEscopo, locationId: string) {
   return db.device.findMany({
     where: { locationId }, orderBy: [{ estado: 'asc' }, { nome: 'asc' }],

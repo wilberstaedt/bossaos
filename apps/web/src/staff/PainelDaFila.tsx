@@ -37,7 +37,7 @@ export interface Mensagens {
   porEnviar: string; suspensos: string; suspensosAjuda: string;
   comandos: string; semComandos: string;
   accaoSincronizar: string; accaoCompor: string;
-  semRede: string; semRedeTitulo: string;
+  semRede: string; semRedeTitulo: string; pagamentoNoServidor: string;
 }
 
 export function PainelDaFila({
@@ -48,13 +48,22 @@ export function PainelDaFila({
   locationSlug: string;
   idioma: string;
   m: Mensagens;
-  /** Um produto para compor, quando o ecrã oferece isso. */
-  produtoDeTeste?: { id: string; nome: string } | null;
+  /**
+   * O produto que este ecrã oferece compor, com o preço da carta AGORA.
+   *
+   * O preço vai no rascunho como **proposta**, e é o que o servidor confere ao
+   * aceitar. `null` é um prato sem preço na carta — que não é grátis, e por isso
+   * não vira zero pelo caminho.
+   */
+  produtoDeTeste?: {
+    id: string; nome: string; precoMenor?: number | null; moeda?: string | null;
+  } | null;
 }) {
   const [entradas, setEntradas] = useState<EntradaDaFila[]>([]);
   const [suspensas, setSuspensas] = useState<EntradaDaFila[]>([]);
   const [online, setOnline] = useState(true);
   const [recusa, setRecusa] = useState<string | null>(null);
+  const [noServidor, setNoServidor] = useState<string | null>(null);
 
   const recarregar = useCallback(async () => {
     const fila = await lerFila(particao);
@@ -81,7 +90,15 @@ export function PainelDaFila({
     if (!produtoDeTeste) return;
     await compor(particao, 'pedido.enviar', {
       idioma, locationSlug,
-      linhas: [{ productId: produtoDeTeste.id, quantidade: 1 }],
+      linhas: [{
+        productId: produtoDeTeste.id,
+        quantidade: 1,
+        // O preço de QUANDO SE ESCREVEU. Guardá-lo é o que torna a divergência
+        // detectável mais tarde: sem ele o servidor aceitava a qualquer preço, e
+        // quem estava na mesa nunca saberia que a carta tinha mudado.
+        ...(typeof produtoDeTeste.precoMenor === 'number'
+          ? { precoPropostoMenor: produtoDeTeste.precoMenor } : {}),
+      }],
     });
     // Gravou. **Só depois** se tenta enviar — e o ecrã reflecte o que está
     // gravado, não o que se esperava que acontecesse.
@@ -90,10 +107,23 @@ export function PainelDaFila({
   };
 
   const tentarAccaoFinanceira = () => {
-    const r = podeOffline('pagamento');
-    // Offline não faz pagamento **por desenho**. A recusa é dita, e não
-    // enfileirada: enfileirar prometia que ia acontecer.
-    setRecusa(r.pode ? null : m.semRede);
+    // ── Duas coisas diferentes, e é preciso cruzá-las ────────────────────
+    //
+    // `podeOffline` responde sobre a ACÇÃO: pagamento exige servidor, logo
+    // devolve sempre «não». Mostrar essa recusa sem olhar à rede fazia o ecrã
+    // dizer «não se pode fazer sem conexão» **com conexão** — e, pior, fazia o
+    // caso de prova do E15 dar verde a clicar no botão com a rede ligada.
+    //
+    // Uma prova que passa com e sem a lógica que diz medir não está a medir
+    // nada. O defeito era meu e estava na entrega e no instrumento ao mesmo
+    // tempo, que é a combinação que não faz barulho nenhum a passar.
+    const exige = !podeOffline('pagamento').pode;
+    const semRede = typeof navigator !== 'undefined' && navigator.onLine === false;
+    // Sem rede: recusa com o motivo, e **nada entra na fila** — enfileirar
+    // prometia que ia acontecer. Com rede: a verdade, que é que quem cobra é o
+    // servidor e este ecrã não cobra.
+    setRecusa(exige && semRede ? m.semRede : null);
+    setNoServidor(exige && !semRede ? m.pagamentoNoServidor : null);
   };
 
   const sincronizar = async () => {
@@ -147,6 +177,12 @@ export function PainelDaFila({
       {recusa ? (
         <p className="bo-aviso bo-aviso--perigo" role="alert" data-teste="recusa-offline">
           <strong>{m.semRedeTitulo}</strong> — {recusa}
+        </p>
+      ) : null}
+
+      {noServidor ? (
+        <p className="bo-aviso bo-aviso--info" role="alert" data-teste="pagamento-no-servidor">
+          <strong>{m.semRedeTitulo}</strong> — {noServidor}
         </p>
       ) : null}
 

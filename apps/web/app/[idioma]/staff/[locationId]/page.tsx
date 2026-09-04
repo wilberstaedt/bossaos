@@ -30,7 +30,7 @@ export default async function TurnoDoStaff({
   const m = mensagensDe(idioma);
   const s = m.staffE15;
   const { sessao, unidade, orgSlug, particao, actor } = await carregarStaff(idioma, locationId);
-  const produto = await primeiroProduto(sessao);
+  const produto = await primeiroProduto(sessao, unidade.id);
 
   return (
     <div className="bo-pagina">
@@ -60,6 +60,7 @@ export default async function TurnoDoStaff({
           suspensosAjuda: s.suspensosAjuda, comandos: s.comandos, semComandos: s.semComandos,
           accaoSincronizar: s.accaoSincronizar, accaoCompor: s.accaoCompor,
           semRede: s.semRede, semRedeTitulo: s.semRedeTitulo,
+          pagamentoNoServidor: s.pagamentoNoServidor,
         }}
       />
     </div>

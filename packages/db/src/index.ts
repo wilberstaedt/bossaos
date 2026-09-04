@@ -207,7 +207,7 @@ export {
 
 export {
   dispositivoPodeComandar, definirPin, entrarComPin, criarPareamento, usarPareamento,
-  revogarDispositivo, listarDispositivos, turnoAberto, resumirToken,
+  revogarDispositivo, listarDispositivos, turnoAberto, resumirToken, declararRascunhos,
   type ResultadoDoPin, type ResultadoDoPareamento, type ResultadoDaRevogacao,
 } from './dispositivos.ts';
 

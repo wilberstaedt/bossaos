@@ -1,5 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
-import { listarUnidades, listarProdutos } from '@bossaos/db';
+import {
+  listarUnidades, listarProdutos, obterProduto, precoEfectivo, estaDisponivel,
+} from '@bossaos/db';
 import { comEscopoDoPedido, resolverPedido, actorDoPedido, organizacoesDoActor } from '../sessao.ts';
 
 /**
@@ -44,11 +46,88 @@ export async function carregarStaff(idioma: string, locationId: string) {
   notFound();
 }
 
-/** Um produto para compor, quando a tela oferece isso. Sem catálogo, `null`. */
+/**
+ * Um produto para compor, quando a tela oferece isso. Sem catálogo, `null`.
+ *
+ * Traz o **preço da carta agora**, porque é ele que vai no rascunho como
+ * proposta. Sem preço aqui, o servidor nunca teria contra o que comparar e a
+ * divergência do E14 não podia acontecer — passaria a estar bem implementada e
+ * mal entregue, que é o que a régua do E15 reprova pelo nome.
+ */
 export async function primeiroProduto(
   sessao: Awaited<ReturnType<typeof carregarStaff>>['sessao'],
-): Promise<{ id: string; nome: string } | null> {
-  const produtos = await comEscopoDoPedido(sessao, (db) => listarProdutos(db, {}));
-  const p = produtos[0];
-  return p ? { id: p.id, nome: p.nome } : null;
+  locationId: string,
+): Promise<ProdutoParaCompor | null> {
+  const produtos = await produtosParaCompor(sessao, locationId);
+  return produtos[0] ?? null;
+}
+
+/** O que o Staff precisa de um produto para o poder compor. */
+export interface ProdutoParaCompor {
+  id: string;
+  nome: string;
+  /** O preço da carta AGORA. É o que o aparelho vai propor, e pode envelhecer. */
+  precoMenor: number | null;
+  moeda: string | null;
+  disponivel: boolean;
+  motivo?: string;
+}
+
+/**
+ * O catálogo desta unidade, com o preço efectivo de cada prato.
+ *
+ * ── Porque é que o preço vem daqui e não do aparelho ──────────────────────
+ *
+ * O preço que o telemóvel guarda num rascunho é uma **proposta**: é o que a
+ * carta dizia no momento em que alguém escreveu o pedido. Sai daqui porque é o
+ * servidor que o sabe — e volta ao servidor no envio, para ele conferir contra a
+ * carta do momento em que aceita. Se divergirem, a linha é rejeitada com o
+ * motivo e os dois números aparecem no ecrã. É a decisão do
+ * `preco-de-um-pedido-escrito-offline.md`, e é o E14 a aterrar aqui.
+ *
+ * **Sem preço é `null`, nunca zero.** Um prato sem preço na carta não custa
+ * nada: é um prato que não se pode cobrar, e são coisas diferentes.
+ */
+export async function produtosParaCompor(
+  sessao: Awaited<ReturnType<typeof carregarStaff>>['sessao'],
+  locationId: string,
+): Promise<ProdutoParaCompor[]> {
+  return comEscopoDoPedido(sessao, async (db) => {
+    const produtos = await listarProdutos(db, { estado: 'ACTIVO' });
+    return Promise.all(produtos.map(async (p: { id: string; nome: string }) => {
+      const preco = await precoEfectivo(db, p.id, locationId, 'SALA');
+      const disp = await estaDisponivel(db, p.id, locationId);
+      return {
+        id: p.id,
+        nome: p.nome,
+        precoMenor: preco.ok ? preco.preco.montanteMenor : null,
+        moeda: preco.ok ? preco.preco.moeda : null,
+        disponivel: disp.disponivel,
+        ...(disp.motivo ? { motivo: disp.motivo } : {}),
+      };
+    }));
+  });
+}
+
+/** Um prato, com tudo o que o STAFF-007 mostra. Ausência dá `null`. */
+export async function produtoParaCompor(
+  sessao: Awaited<ReturnType<typeof carregarStaff>>['sessao'],
+  produtoId: string,
+  locationId: string,
+): Promise<(ProdutoParaCompor & { descricao: string | null }) | null> {
+  return comEscopoDoPedido(sessao, async (db) => {
+    const p = await obterProduto(db, produtoId);
+    if (!p) return null;
+    const preco = await precoEfectivo(db, p.id, locationId, 'SALA');
+    const disp = await estaDisponivel(db, p.id, locationId);
+    return {
+      id: p.id,
+      nome: p.nome,
+      descricao: p.descricao ?? null,
+      precoMenor: preco.ok ? preco.preco.montanteMenor : null,
+      moeda: preco.ok ? preco.preco.moeda : null,
+      disponivel: disp.disponivel,
+      ...(disp.motivo ? { motivo: disp.motivo } : {}),
+    };
+  });
 }
