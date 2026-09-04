@@ -60,7 +60,8 @@ export function PainelDaFila({
   } | null;
 }) {
   const [entradas, setEntradas] = useState<EntradaDaFila[]>([]);
-  const [suspensas, setSuspensas] = useState<EntradaDaFila[]>([]);
+  // Um NÚMERO, e não a lista: as de outra pessoa não se leem, contam-se.
+  const [suspensas, setSuspensas] = useState(0);
   const [online, setOnline] = useState(true);
   const [recusa, setRecusa] = useState<string | null>(null);
   const [noServidor, setNoServidor] = useState<string | null>(null);
@@ -68,7 +69,7 @@ export function PainelDaFila({
   const recarregar = useCallback(async () => {
     const fila = await lerFila(particao);
     setEntradas(fila.entradas);
-    setSuspensas(fila.suspensas);
+    setSuspensas(fila.suspensasNoAparelho);
   }, [particao]);
 
   useEffect(() => {
@@ -129,7 +130,7 @@ export function PainelDaFila({
   const sincronizar = async () => {
     const fila = await sincronizarAgora(particao, orgSlug);
     setEntradas(fila.entradas);
-    setSuspensas(fila.suspensas);
+    setSuspensas(fila.suspensasNoAparelho);
   };
 
   const porEnviar = entradas.filter(
@@ -166,11 +167,11 @@ export function PainelDaFila({
         </ul>
       )}
 
-      {suspensas.length > 0 ? (
+      {suspensas > 0 ? (
         <p className="bo-fila__suspensas" data-teste="suspensas">
           {/* Contadas, nunca apagadas. Uma fila que suspende em silêncio parece
               vazia — e o dono conclui que perdeu o trabalho. */}
-          {m.suspensos}: {suspensas.length} — {m.suspensosAjuda}
+          {m.suspensos}: {suspensas} — {m.suspensosAjuda}
         </p>
       ) : null}
 

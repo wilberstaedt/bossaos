@@ -1,7 +1,8 @@
 import { expect, test as preparar } from '@playwright/test';
 import { Client } from 'pg';
 import {
-  EMAIL_DO_ARNES, EMAIL_DO_ARNES_B, FICHEIRO_DE_SESSAO, FICHEIRO_DE_SESSAO_B,
+  EMAIL_DO_ARNES, EMAIL_DO_ARNES_B, EMAIL_DO_ARNES_C,
+  FICHEIRO_DE_SESSAO, FICHEIRO_DE_SESSAO_B, FICHEIRO_DE_SESSAO_C,
 } from './caminhos.ts';
 
 /**
@@ -204,6 +205,31 @@ preparar('e a sessão do inquilino B, que é o que dá sentido à recusa', async
       // A unidade de B: é o recurso que a prova de isolamento vai pedir pelas duas
       // sessões, e é aqui que se confirma que esta sessão abre mesmo alguma coisa.
       '/es-ES/app/marina-barcelona/organization/unidades/bbbb2222-2222-4222-8222-333333333333',
+    );
+  } finally {
+    await pedido.dispose();
+  }
+});
+
+preparar('e uma SEGUNDA pessoa no inquilino A, que é o que mede a troca de utilizador', async ({
+  playwright, baseURL,
+}) => {
+  preparar.setTimeout(120_000);
+  // ── Porque é que a conta B não servia para isto ─────────────────────────
+  //
+  // B vive noutra organização. A troca A→B mede a partição por **inquilino** — e
+  // uma fila particionada só por inquilino passava esse caso e continuava a
+  // mandar os rascunhos de A com a sessão de B **na mesma unidade**, que é
+  // exactamente o cenário que decide o desenho do `offline-e-fila-local.md`.
+  //
+  // Esta conta muda **uma coisa só**: a pessoa. Mesma organização, mesma
+  // unidade. É a única forma de a partição por utilizador ser medida no produto
+  // em vez de só na lógica.
+  const pedido = await playwright.request.newContext({ baseURL: baseURL ?? '' });
+  try {
+    await abrirSessao(
+      pedido, baseURL ?? '', EMAIL_DO_ARNES_C, ORG_A, MARCA_A, FICHEIRO_DE_SESSAO_C,
+      '/es-ES/app/marina-oropesa/puerto/website',
     );
   } finally {
     await pedido.dispose();

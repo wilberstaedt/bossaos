@@ -8,6 +8,9 @@ import {
   aplicarEvento, exigeRede, podeOffline, sincronizar,
   type PortasDeRede, type RespostaDoEnvio,
 } from './sincronizacao.ts';
+import {
+  chaveDoArmazem, porEnviarNoAparelho, porEnviarNoutrasParticoes,
+} from './navegador.ts';
 
 /**
  * Os seis casos que o `offline-e-fila-local.md` manda testar no E15/E16, pelo
@@ -318,5 +321,73 @@ describe('o estado é gravado a CADA transição, e não só no fim', () => {
     const { entradas } = await promessa;
     assert.equal(entradas[0]!.estado, 'CONFIRMADO');
     assert.deepEqual(gravacoes.at(-1), ['CONFIRMADO']);
+  });
+});
+
+/**
+ * O ARMAZÉM tem baldes por partição — e é isso que fazia as suspensas sumirem.
+ *
+ * ── O defeito que só apareceu no navegador ───────────────────────────────
+ *
+ * A partição é a chave: os rascunhos de outra pessoa estão noutro balde, e uma
+ * leitura distraída não os traz. Certo, e é a regra 1 a funcionar.
+ *
+ * A consequência não estava vista: `suspensas()` filtra **dentro do que lhe
+ * dão**, e o que a interface lhe dava era o balde da pessoa actual. As suspensas
+ * eram sempre zero no produto — e o ecrã dizia «nada pendente» sobre trabalho que
+ * estava ali ao lado, que é a regra 2 quebrada onde ela mais dói.
+ *
+ * Os testes acima não podiam ver isto: dão a `sincronizar` um array já
+ * misturado, que é o cenário certo para medir a REGRA e o cenário errado para
+ * medir o ARMAZÉM. Encontrou-o a prova de navegador, ao trocar de utilizador no
+ * mesmo aparelho — e por isso a contagem passou a ser medida aqui também.
+ */
+describe('as suspensas de OUTRAS partições contam-se, e não se leem', () => {
+  /** Um `localStorage` de mentira. É a porta, e a porta é para isto. */
+  function armazenamentoFalso(dados: Record<string, string>): Storage {
+    const chaves = () => Object.keys(dados);
+    return {
+      get length() { return chaves().length; },
+      key: (i: number) => chaves()[i] ?? null,
+      getItem: (k: string) => dados[k] ?? null,
+      setItem: (k: string, v: string) => { dados[k] = v; },
+      removeItem: (k: string) => { delete dados[k]; },
+      clear: () => { for (const k of chaves()) delete dados[k]; },
+    } as Storage;
+  }
+
+  const baldes = () => armazenamentoFalso({
+    [chaveDoArmazem(A)]: JSON.stringify([rascunho('a1', A), rascunho('a2', A)]),
+    [chaveDoArmazem(B)]: JSON.stringify([rascunho('b1', B)]),
+    // Um comando JÁ CONFIRMADO não está à espera de ninguém.
+    [`${chaveDoArmazem(B)}.outro`]: JSON.stringify([]),
+  });
+
+  it('quem está no aparelho vê o NÚMERO do que é dos outros', () => {
+    // B está no aparelho. Os dois de A estão noutro balde: contam-se, e é tudo.
+    assert.equal(porEnviarNoutrasParticoes(baldes(), B), 2);
+    // E de A para B a conta é a outra metade, pela mesma regra.
+    assert.equal(porEnviarNoutrasParticoes(baldes(), A), 1);
+  });
+
+  it('e não conta o balde de quem está — senão contava-se a si próprio', () => {
+    // Sem esta exclusão, o ecrã dizia «à espera do dono» sobre os rascunhos do
+    // próprio dono, que estão à espera da rede e não de uma pessoa.
+    const total = porEnviarNoAparelho(baldes());
+    assert.equal(total, 3);
+    assert.equal(porEnviarNoutrasParticoes(baldes(), A) + 2, total);
+  });
+
+  it('um balde ILEGÍVEL não conta como zero: não se sabe', () => {
+    // Zero é uma afirmação. «Não consegui ler» não é zero — e devolver zero aqui
+    // dizia a quem revoga o aparelho que não há nada a descartar.
+    const partido = armazenamentoFalso({
+      [chaveDoArmazem(A)]: '{isto não é json',
+      [chaveDoArmazem(B)]: JSON.stringify([rascunho('b1', B)]),
+    });
+    // Não estoira, e não inventa: o balde ilegível fica de fora da soma.
+    assert.equal(porEnviarNoutrasParticoes(partido, B), 0);
+    // E o balde legível continua a ser contado a partir do outro lado.
+    assert.equal(porEnviarNoutrasParticoes(partido, A), 1);
   });
 });

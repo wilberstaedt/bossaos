@@ -98,6 +98,47 @@ export function limparConteudoLegivel(
 }
 
 /**
+ * Quantos comandos por enviar estão neste aparelho **fora** da partição actual.
+ *
+ * ── Porque é que isto precisa de existir ─────────────────────────────────
+ *
+ * A partição é a **chave**, e é isso que faz a regra 1 ser inesquecível: os
+ * rascunhos de outra pessoa estão noutro balde, e uma leitura distraída não os
+ * traz. Mas tem uma consequência que só apareceu quando a troca de utilizador
+ * foi medida **no navegador**: `suspensas()` filtra dentro do que lhe dão, e o
+ * que lhe davam era o balde da pessoa actual. As suspensas eram, portanto,
+ * **sempre zero no produto** — e o ecrã dizia «nada pendente» sobre trabalho que
+ * estava ali ao lado.
+ *
+ * Isso é a regra 2 quebrada onde ela mais importa: *«uma fila que suspende em
+ * silêncio parece vazia, e o dono conclui que perdeu tudo»*. Os testes da lógica
+ * não podiam ver isto — davam a `sincronizar` um array já misturado, que é o
+ * cenário certo para a regra e o cenário errado para o armazém.
+ *
+ * ── E devolve um NÚMERO, nunca as entradas ───────────────────────────────
+ *
+ * Quem está no aparelho agora pode não ser o dono. Regra 3: não lê nome de
+ * cliente, linhas nem totais. Um número diz-lhe que há trabalho de alguém à
+ * espera — que é o que ele precisa de saber — e não lhe mostra nada.
+ */
+export function porEnviarNoutrasParticoes(
+  armazenamento: Storage,
+  particao: { organizationId: string; locationId: string; utilizadorId: string },
+): number {
+  const minha = chaveDoArmazem(particao);
+  let total = 0;
+  for (const chave of chavesNoAparelho(armazenamento)) {
+    if (chave === minha) continue;
+    try {
+      const entradas = JSON.parse(armazenamento.getItem(chave) ?? '[]') as EntradaDaFila[];
+      total += entradas.filter(
+        (e) => e.estado === 'NAO_ENVIADO' || e.estado === 'PENDENTE_DE_CONFIRMACAO').length;
+    } catch { /* balde ilegível não conta como zero nem como um: não se sabe */ }
+  }
+  return total;
+}
+
+/**
  * Quantos comandos por enviar este aparelho tem, somando todas as partições.
  *
  * É o número que o DEV-004 do E13 mostra ao revogar — «a revogação descarta, e

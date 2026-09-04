@@ -35,7 +35,7 @@ export function FimDoTurno({
     const fila = await lerFila(particao);
     setPorEnviar(fila.entradas.filter(
       (e) => e.estado === 'NAO_ENVIADO' || e.estado === 'PENDENTE_DE_CONFIRMACAO').length);
-    setSuspensas(fila.suspensas.length);
+    setSuspensas(fila.suspensasNoAparelho);
   }, [particao]);
 
   useEffect(() => { void recarregar(); }, [recarregar]);

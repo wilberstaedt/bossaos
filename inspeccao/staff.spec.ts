@@ -224,24 +224,257 @@ test.describe('«nunca mostre enviado» — o controlo negativo a sério', () =>
   });
 });
 
-test.describe('offline não paga', () => {
+
+/**
+ * A TROCA DE UTILIZADOR, no produto — e o par sem o qual não valia nada.
+ *
+ * ── É a família de defeito que já apareceu três vezes neste projecto ─────
+ *
+ * A régua nomeia-a: *«trocar de utilizador não mostra rascunhos do anterior — e
+ * o par: o anterior volta e os rascunhos dele ainda lá estão. Uma implementação
+ * que apague ao trocar passa a primeira metade e destrói trabalho.»*
+ *
+ * ── O que torna isto uma medição e não uma encenação ─────────────────────
+ *
+ * **Um contexto só**, portanto **um `localStorage` só** — que é o que um tablet
+ * de sala é. O que muda entre os dois momentos é a bolacha da sessão, e mais
+ * nada. Duas janelas separadas teriam dois armazéns, e o cenário do contrato —
+ * «A compõe, fica sem rede, sai; B entra» — deixava de existir.
+ *
+ * E a segunda pessoa está na **mesma organização e na mesma unidade** que a
+ * primeira. Com a conta do outro inquilino, isto media a partição por inquilino
+ * e passava com uma fila que ignorasse quem é a pessoa — que é precisamente o
+ * defeito.
+ */
+test.describe.serial('troca de utilizador no mesmo aparelho', () => {
   test.use({ viewport: { width: 390, height: 780 } });
 
-  test('a acção financeira é RECUSADA, e não enfileirada', async ({ page }) => {
+  /** As bolachas de uma sessão guardada, sem lhe tocar no `localStorage`. */
+  async function bolachasDe(ficheiro: string) {
+    const { readFile } = await import('node:fs/promises');
+    const estado = JSON.parse(await readFile(ficheiro, 'utf8')) as {
+      cookies: Parameters<import('@playwright/test').BrowserContext['addCookies']>[0];
+    };
+    return estado.cookies;
+  }
+
+  test('os rascunhos de A não seguem com a sessão de C, e voltam com A', async ({ page }) => {
+    const { FICHEIRO_DE_SESSAO, FICHEIRO_DE_SESSAO_C } = await import('./caminhos.ts');
+    const contexto = page.context();
+    const deA = await bolachasDe(FICHEIRO_DE_SESSAO);
+    const deC = await bolachasDe(FICHEIRO_DE_SESSAO_C);
+
+    await contexto.setOffline(false);
+    await page.goto(rotaDoStaff(alvos));
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    expect(await comandosNoAparelho(page), 'o aparelho já tinha comandos').toBe(0);
+
+    // ── A compõe DOIS rascunhos, sem rede ────────────────────────────────
+    await contexto.setOffline(true);
+    await page.locator('[data-teste="compor"]').click();
+    await expect(page.locator('[data-teste="entrada"]')).toHaveCount(1);
+    await page.locator('[data-teste="compor"]').click();
+    await expect(page.locator('[data-teste="entrada"]')).toHaveCount(2);
+    await contexto.setOffline(false);
+
+    const doA = await comandosNoAparelho(page);
+    expect(doA, 'A não deixou dois rascunhos no aparelho').toBe(2);
+
+    // ── C entra NO MESMO APARELHO. Só a bolacha muda ─────────────────────
+    await contexto.clearCookies();
+    await contexto.addCookies(deC);
+    await page.reload();
+
+    // 1ª metade: C não vê os rascunhos de A.
+    await expect(page.locator('[data-teste="entrada"]'), 'C está a ver os rascunhos de A')
+      .toHaveCount(0);
+
+    // E o aparelho CONTINUA a ter os dois. Esta é a asserção que separa
+    // «suspendeu» de «apagou» — e apagar era destruir o trabalho de alguém.
+    expect(await comandosNoAparelho(page), 'os rascunhos de A foram APAGADOS ao trocar de pessoa')
+      .toBe(doA);
+
+    // E contam-se: uma fila que suspende em silêncio parece vazia, e o dono
+    // conclui que perdeu tudo.
+    await expect(page.locator('[data-teste="suspensas"]'), 'as suspensas não são declaradas a C')
+      .toContainText(String(doA));
+
+    // ── E o PAR: A volta, e o que era dele ainda lá está ─────────────────
+    //
+    // Sem isto, tudo acima passava com uma implementação que apaga a fila em
+    // cada troca — que esconde os rascunhos de A com perfeição e perde o
+    // trabalho dele.
+    await contexto.clearCookies();
+    await contexto.addCookies(deA);
+    await page.reload();
+
+    await expect(page.locator('[data-teste="entrada"]'), 'A voltou e os rascunhos dele sumiram')
+      .toHaveCount(2);
+    expect(await estadosNoEcra(page)).toEqual(['NAO_ENVIADO', 'NAO_ENVIADO']);
+  });
+});
+
+/**
+ * Offline não paga — e agora a prova consegue ficar VERMELHA.
+ *
+ * ── O caso que estava aqui não media nada ────────────────────────────────
+ *
+ * O caso anterior punha a rede **ligada**, carregava no botão e verificava a
+ * recusa. Passava — e passava porque a recusa era incondicional: `podeOffline`
+ * responde sobre a **acção** (pagamento exige servidor), não sobre a rede, e o
+ * ecrã mostrava-a sempre. Apagar a lógica de offline inteira deixava o caso
+ * exactamente igual.
+ *
+ * É o que a régua reprova pelo nome — *«uma suite que não consegue ficar
+ * vermelha»* — e estava do meu lado, na entrega e no instrumento ao mesmo tempo.
+ *
+ * Agora as duas metades são medidas e são **diferentes**: sem rede é recusa, com
+ * rede é a verdade sobre quem cobra. Um teste que corra só num dos estados falha
+ * a metade que interessa.
+ */
+test.describe('offline não paga, e com rede a resposta é OUTRA', () => {
+  test.use({ viewport: { width: 390, height: 780 } });
+
+  test('SEM rede: recusa com motivo, e nada entra na fila', async ({ page }) => {
     await page.context().setOffline(false);
     await page.goto(rotaDoStaff(alvos));
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     const antes = await comandosNoAparelho(page);
-    expect(antes).toBe(0);
+    expect(antes, 'o aparelho já tinha comandos').toBe(0);
 
+    await page.context().setOffline(true);
     await page.locator('[data-teste="pagar"]').click();
-    const recusa = page.locator('[data-teste="recusa-offline"]');
-    await expect(recusa).toBeVisible();
-    // Recusada COM o motivo. «Bloqueado» sem motivo faz tentar outra vez.
-    await expect(recusa).toContainText(/conexión|conex|connection/i);
 
+    const recusa = page.locator('[data-teste="recusa-offline"]');
+    await expect(recusa, 'sem rede não houve recusa nenhuma').toBeVisible();
+    await expect(recusa).toContainText(/conexión|conex|connection/i);
     // E NÃO ficou na fila: enfileirar prometia que ia acontecer.
     expect(await comandosNoAparelho(page), 'a acção financeira foi enfileirada').toBe(antes);
+
+    await page.context().setOffline(false);
+  });
+
+  test('COM rede: não diz que falta conexão — diz quem decide', async ({ page }) => {
+    // Este é o controlo negativo do caso acima. Com a implementação antiga — a
+    // recusa incondicional — este caso REPROVA, porque o ecrã mostrava
+    // «recusa-offline» com a rede ligada.
+    await page.context().setOffline(false);
+    await page.goto(rotaDoStaff(alvos));
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+
+    await page.locator('[data-teste="pagar"]').click();
+
+    await expect(page.locator('[data-teste="pagamento-no-servidor"]')).toBeVisible();
+    await expect(
+      page.locator('[data-teste="recusa-offline"]'),
+      'com rede, o ecrã continua a dizer que falta conexão',
+    ).toHaveCount(0);
+    expect(await comandosNoAparelho(page), 'a acção financeira foi enfileirada').toBe(0);
+  });
+});
+
+/**
+ * A DIVERGÊNCIA DE PREÇO, ponta a ponta — e é o E14 a aterrar no ecrã.
+ *
+ * ── O que a régua exige, e porque é que uma semente não chegava ──────────
+ *
+ * *«Um rascunho escrito offline e aceite mais tarde vale o preço do servidor no
+ * momento em que aceita, e a divergência é rejeitada com motivo. Isso tem de
+ * estar visível no ecrã do empregado — a linha rejeitada fica, com o preço
+ * proposto e o oficial lado a lado. Se a divergência só aparecer num log, o E14
+ * foi bem implementado e mal entregue.»*
+ *
+ * A semeadura tem uma linha divergente para o painel ter o que desenhar às cinco
+ * larguras. **Isso mede o desenho, não o mecanismo**: uma linha escrita à mão na
+ * base aparece na mesma se o motor de preços não existir.
+ *
+ * Este caso faz a coisa acontecer: compõe-se com a rede cortada — o aparelho
+ * guarda o preço de AGORA como proposta —, muda-se a carta enquanto o rascunho
+ * está no telemóvel, e liga-se a rede. O que o servidor faz com isso é o que
+ * está a ser medido, e a carta volta ao que era no fim.
+ */
+test.describe.serial('a carta muda enquanto o rascunho está no telemóvel', () => {
+  test.use({ viewport: { width: 390, height: 780 } });
+
+  /** Muda o preço do prato que o STAFF-001 oferece compor. Devolve como reverter. */
+  async function mexerNoPreco(delta: number): Promise<{ repor: () => Promise<void> }> {
+    const { Client } = await import('pg');
+    const url = process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL;
+    if (!url) throw new Error('MIGRATION_DATABASE_URL em falta');
+    const sql = new Client({ connectionString: url });
+    await sql.connect();
+    // O MESMO prato que a tela oferece: o primeiro por nome, que é como o
+    // `produtosParaCompor` os ordena. Escolher outro media um preço que ninguém
+    // propôs, e a linha voltava aceite — verde sobre o caso errado.
+    const { rows } = await sql.query(
+      `SELECT pr.id, pr.montante_menor FROM price_rules pr
+         JOIN products p ON p.id = pr.product_id
+        WHERE p.nome LIKE 'insp-%' AND p.estado = 'ACTIVO'
+        ORDER BY p.nome ASC LIMIT 1`);
+    const regra = rows[0] as { id: string; montante_menor: number } | undefined;
+    if (!regra) throw new Error('não há regra de preço para o prato do Staff');
+    await sql.query('UPDATE price_rules SET montante_menor = $1 WHERE id = $2',
+      [regra.montante_menor + delta, regra.id]);
+    await sql.end();
+    return {
+      repor: async () => {
+        const outro = new Client({ connectionString: url });
+        await outro.connect();
+        await outro.query('UPDATE price_rules SET montante_menor = $1 WHERE id = $2',
+          [regra.montante_menor, regra.id]);
+        await outro.end();
+      },
+    };
+  }
+
+  test('o preço mudou: a linha é REJEITADA e o ecrã mostra os dois números', async ({ page }) => {
+    await page.context().setOffline(false);
+    await page.goto(rotaDoStaff(alvos));
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    expect(await comandosNoAparelho(page), 'o aparelho já tinha comandos').toBe(0);
+
+    // 1. Compõe-se SEM rede. O preço que fica no rascunho é o de agora.
+    await page.context().setOffline(true);
+    await page.locator('[data-teste="compor"]').click();
+    await expect(page.locator('[data-teste="entrada"][data-estado="NAO_ENVIADO"]')).toHaveCount(1);
+    expect(await comandosNoAparelho(page), 'o rascunho não ficou no aparelho').toBe(1);
+
+    // 2. A carta muda enquanto o rascunho está no telemóvel.
+    const carta = await mexerNoPreco(500);
+    try {
+      // 3. A rede volta e o rascunho sai.
+      await page.context().setOffline(false);
+      await page.locator('[data-teste="sincronizar"]').click();
+      await expect(page.locator('[data-teste="entrada"][data-estado="CONFIRMADO"]')).toHaveCount(1);
+
+      // 4. E no ecrã do empregado a linha está REJEITADA, com os dois preços.
+      await page.goto(`/es-ES/staff/${alvos.unidadeDoStaff}/andamento`);
+      await page.waitForLoadState('networkidle');
+
+      const divergentes = page.locator('[data-teste="linha"][data-motivo="PRECO_DIVERGENTE"]');
+      await expect(divergentes, 'a divergência não chegou ao ecrã do empregado')
+        .not.toHaveCount(0);
+
+      const primeira = divergentes.first();
+      const proposto = await primeira.locator('[data-teste="preco-proposto"]').innerText();
+      const oficial = await primeira.locator('[data-teste="preco-oficial"]').innerText();
+      // Os dois números existem, e são DIFERENTES. Iguais, não havia divergência
+      // nenhuma para mostrar — e o painel estaria a desenhar ruído.
+      expect(proposto.trim().length, 'o preço proposto está vazio').toBeGreaterThan(0);
+      expect(oficial.trim().length, 'o preço oficial está vazio').toBeGreaterThan(0);
+      expect(proposto, 'os dois preços são iguais: isto não é uma divergência')
+        .not.toBe(oficial);
+      // E diz-se porquê, por palavras: um número riscado sem frase não explica
+      // a quem está na mesa o que tem de decidir.
+      await expect(primeira.locator('[data-teste="divergiu"]')).toBeVisible();
+    } finally {
+      // A carta volta ao que era, sempre. Uma prova que deixa a base mexida põe
+      // a seguinte a medir um cenário que ninguém escreveu.
+      await carta.repor();
+    }
   });
 });

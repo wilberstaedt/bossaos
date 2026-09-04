@@ -21,19 +21,23 @@ if [[ "$NODE_ACTUAL" != "$NODE_ESPERADO" ]]; then
   exit 2
 fi
 
-GRUPOS_ESPERADOS=10
-CASOS_ESPERADOS=21
+GRUPOS_ESPERADOS=11
+CASOS_ESPERADOS=24
 falhas=0
 
 FILA=packages/fila/src/fila.ts
 SINC=packages/fila/src/sincronizacao.ts
-ORIG_FILA=$(mktemp); ORIG_SINC=$(mktemp)
-cp "$FILA" "$ORIG_FILA"; cp "$SINC" "$ORIG_SINC"
+NAVEG=packages/fila/src/navegador.ts
+ORIG_FILA=$(mktemp); ORIG_SINC=$(mktemp); ORIG_NAVEG=$(mktemp)
+cp "$FILA" "$ORIG_FILA"; cp "$SINC" "$ORIG_SINC"; cp "$NAVEG" "$ORIG_NAVEG"
 
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
-restaurar() { cp "$ORIG_FILA" "$FILA"; cp "$ORIG_SINC" "$SINC"; rm -f "$ORIG_FILA" "$ORIG_SINC"; }
+restaurar() {
+  cp "$ORIG_FILA" "$FILA"; cp "$ORIG_SINC" "$SINC"; cp "$ORIG_NAVEG" "$NAVEG"
+  rm -f "$ORIG_FILA" "$ORIG_SINC" "$ORIG_NAVEG"
+}
 trap restaurar EXIT INT TERM
 
 correr() {
@@ -257,7 +261,35 @@ exigir_vermelho "caiu a gravação a cada transição" \
 cp "$ORIG_SINC" "$SINC"
 
 echo
-echo "11. Reposto — tem de voltar ao verde"
+echo "11. CONTROLO NEGATIVO — a contagem das suspensas volta a ignorar os outros baldes"
+# O defeito REAL que a prova de navegador encontrou a 04/09, reposto de propósito.
+#
+# A partição é a chave do balde, portanto os rascunhos de outra pessoa estão
+# noutro sítio do armazenamento — e `suspensas()` filtra dentro do que lhe dão.
+# A interface dava-lhe o balde da pessoa actual, e por isso as suspensas eram
+# SEMPRE ZERO no produto: o ecrã dizia «nada pendente» sobre trabalho que estava
+# ali ao lado.
+#
+# Os outros dez grupos não podiam ver isto: dão a `sincronizar` um array já
+# misturado, que é o cenário certo para medir a REGRA e o errado para medir o
+# ARMAZÉM. É por isso que este controlo existe, e é por isso que ele planta o
+# defeito na FUNÇÃO DO ARMAZÉM e não na regra.
+python3 - <<'PYOUTROS'
+import io
+p = 'packages/fila/src/navegador.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "    if (chave === minha) continue;"
+assert antigo in s, 'a exclusao do proprio balde nao esta onde se esperava'
+# Passa a saltar TODOS os baldes: a conta das outras partições dá sempre zero,
+# que é exactamente o que o produto fazia antes.
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, "    if (chave !== '') continue;"))
+PYOUTROS
+exigir_vermelho "caiu a contagem do que é dos outros: o ecrã voltaria a parecer vazio" \
+  'NÚMERO do que é dos outros' /tmp/bossaos-fila-outros.txt
+cp "$ORIG_NAVEG" "$NAVEG"
+
+echo
+echo "12. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-fila-reposto.txt; then
   read -r grupos casos <<<"$(analisar /tmp/bossaos-fila-reposto.txt)"
   if (( grupos != GRUPOS_ESPERADOS )) || (( casos != CASOS_ESPERADOS )); then

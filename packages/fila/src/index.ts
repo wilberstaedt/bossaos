@@ -12,5 +12,5 @@ export {
 
 export {
   armazemDoNavegador, chaveDoArmazem, chavesNoAparelho, limparConteudoLegivel,
-  porEnviarNoAparelho,
+  porEnviarNoAparelho, porEnviarNoutrasParticoes,
 } from './navegador.ts';

@@ -68,7 +68,7 @@ export function EsteAparelho({
   }, [idioma, locationId, orgSlug]);
 
   useEffect(() => {
-    let guardado: string | null = null;
+    let guardado: string | null;
     try { guardado = window.localStorage.getItem(chave); } catch { guardado = null; }
     setEscolhido(guardado);
     setMontado(true);

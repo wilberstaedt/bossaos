@@ -563,6 +563,15 @@ p { margin: 0; }
    que esta superfície pede, e é o mesmo número dos botões acima. */
 .bo-staff .bo-publico__seccoes a { min-height: var(--bo-toque-operacao); }
 .bo-staff .bo-publico__lista a { min-height: var(--bo-toque-operacao); align-items: center; }
+/* O índice do STAFF-022 tinha ligações de 22 px de altura — e é ele que dá o
+   único caminho a dez das telas. A prova de navegador apanhou-o; nada mais
+   apanhava, porque uma ligação pequena não é um erro em lado nenhum: é uma
+   ligação que funciona e que ninguém consegue acertar de pé. */
+.bo-staff .bo-lista a {
+  display: flex; align-items: center;
+  min-height: var(--bo-toque-operacao);
+  overflow-wrap: anywhere;
+}
 
 /* A fila local (E15). Estas classes estavam a ser usadas desde o primeiro dia do
    E15 e NÃO existiam no CSS — a guarda `validar-classes.sh` não lia

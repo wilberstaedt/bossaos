@@ -46,3 +46,19 @@ export const EMAIL_DO_ARNES = 'painel@inspeccao.example';
  */
 export const EMAIL_DO_ARNES_B = 'painel-b@inspeccao.example';
 export const FICHEIRO_DE_SESSAO_B = 'inspeccao/.sessao/estado-b.json';
+
+/**
+ * A TERCEIRA conta — e é a única que mede a partição por UTILIZADOR.
+ *
+ * A conta B vive noutra organização, e por isso a troca A→B mede a partição por
+ * **organização**: uma implementação que particionasse só por inquilino passava
+ * o caso e continuava a mandar os rascunhos de A com a sessão de B na mesma
+ * unidade. Que é o cenário que decide o desenho inteiro do contrato — o tablet
+ * partilhado entre o turno da tarde e o da noite.
+ *
+ * Esta vive **na mesma organização e na mesma unidade** que A. É outra pessoa, e
+ * mais nada muda. Sem ela, «trocar de utilizador» não tinha como ser medido no
+ * produto.
+ */
+export const EMAIL_DO_ARNES_C = 'painel-c@inspeccao.example';
+export const FICHEIRO_DE_SESSAO_C = 'inspeccao/.sessao/estado-c.json';

@@ -31,14 +31,14 @@ export function RevisaoDaFila({
   };
 }) {
   const [entradas, setEntradas] = useState<EntradaDaFila[]>([]);
-  const [suspensas, setSuspensas] = useState<EntradaDaFila[]>([]);
+  const [suspensas, setSuspensas] = useState(0);
   const [lido, setLido] = useState(false);
 
   useEffect(() => {
     void (async () => {
       const fila = await lerFila(particao);
       setEntradas(fila.entradas);
-      setSuspensas(fila.suspensas);
+      setSuspensas(fila.suspensasNoAparelho);
       setLido(true);
     })();
   }, [particao]);
@@ -62,8 +62,8 @@ export function RevisaoDaFila({
           ))}
         </ul>
       )}
-      {suspensas.length > 0 ? (
-        <p data-teste="suspensas">{m.suspensos}: {suspensas.length} — {m.suspensosAjuda}</p>
+      {suspensas > 0 ? (
+        <p data-teste="suspensas">{m.suspensos}: {suspensas} — {m.suspensosAjuda}</p>
       ) : null}
     </section>
   );

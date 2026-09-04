@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  armazemDoNavegador, opacar, paraEnviar, sincronizar, suspensas,
+  armazemDoNavegador, opacar, paraEnviar, porEnviarNoutrasParticoes, sincronizar, suspensas,
   type EntradaDaFila, type Particao, type PortasDeRede,
 } from '@bossaos/fila';
 
@@ -21,7 +21,24 @@ import {
 
 export interface FilaViva {
   entradas: EntradaDaFila[];
+  /** Suspensas DENTRO deste balde: registos sem partição completa, que são lixo. */
   suspensas: EntradaDaFila[];
+  /**
+   * Quantas estão à espera do dono — somando as deste balde e as dos outros.
+   *
+   * ── Porque é que é um número e não uma lista ─────────────────────────────
+   *
+   * As de outras partições não se leem: são de outra pessoa, e a regra 3 diz que
+   * o operador seguinte não vê o conteúdo do anterior. O que ele **tem** de ver
+   * é que existem — senão a fila parece vazia, e o dono conclui que perdeu tudo.
+   */
+  suspensasNoAparelho: number;
+}
+
+/** O número que a interface mostra: as deste balde mais as dos outros. */
+function contarSuspensas(entradas: EntradaDaFila[], particao: Particao): number {
+  return suspensas(entradas, particao).length
+    + porEnviarNoutrasParticoes(window.localStorage, particao);
 }
 
 function portas(orgSlug: string): PortasDeRede {
@@ -97,7 +114,11 @@ function portas(orgSlug: string): PortasDeRede {
 export async function lerFila(particao: Particao): Promise<FilaViva> {
   const armazem = armazemDoNavegador(window.localStorage, particao);
   const entradas = await armazem.ler();
-  return { entradas, suspensas: suspensas(entradas, particao) };
+  return {
+    entradas,
+    suspensas: suspensas(entradas, particao),
+    suspensasNoAparelho: contarSuspensas(entradas, particao),
+  };
 }
 
 /**
@@ -135,7 +156,12 @@ export async function sincronizarAgora(
     antes, particao, portas(orgSlug), sessaoValida,
     (parciais) => armazem.escrever([...parciais]));
   await armazem.escrever(entradas);
-  return { entradas, suspensas: suspensas(entradas, particao), resumo };
+  return {
+    entradas,
+    suspensas: suspensas(entradas, particao),
+    suspensasNoAparelho: contarSuspensas(entradas, particao),
+    resumo,
+  };
 }
 
 /** Ao sair: o conteúdo deixa de ser legível, e nada se apaga. */

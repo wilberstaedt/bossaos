@@ -27,13 +27,13 @@ export function DiagnosticoDaLigacao({
 }) {
   const [online, setOnline] = useState(true);
   const [entradas, setEntradas] = useState<EntradaDaFila[] | null>(null);
-  const [suspensas, setSuspensas] = useState<EntradaDaFila[]>([]);
+  const [suspensas, setSuspensas] = useState(0);
 
   useEffect(() => {
     void (async () => {
       const fila = await lerFila(particao);
       setEntradas(fila.entradas);
-      setSuspensas(fila.suspensas);
+      setSuspensas(fila.suspensasNoAparelho);
     })();
     const ligar = () => setOnline(true);
     const desligar = () => setOnline(false);
@@ -72,7 +72,7 @@ export function DiagnosticoDaLigacao({
         </div>
         <div>
           <dt>{m.suspensos}</dt>
-          <dd data-teste="conta-suspensas">{entradas === null ? '—' : suspensas.length}</dd>
+          <dd data-teste="conta-suspensas">{entradas === null ? '—' : suspensas}</dd>
           <dd className="bo-campo__ajuda">{m.suspensosAjuda}</dd>
         </div>
       </dl>

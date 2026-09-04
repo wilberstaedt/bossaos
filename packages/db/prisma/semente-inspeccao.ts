@@ -490,7 +490,7 @@ async function principal(): Promise<void> {
       data: {
         organizationId: IDS.orgA, orderId: pedidoInsp.id,
         commandId: `${PREFIXO}comando-de-inspeccao`,
-        payloadHash: 'insp', resposta: { aceites: 1, rejeitadas: 1 } as object,
+        payloadHash: 'insp', resposta: { aceites: 1, rejeitadas: 2 } as object,
         criadoPor: 'inspeccao@exemplo.example',
       },
       select: { id: true },
@@ -507,6 +507,24 @@ async function principal(): Promise<void> {
           organizationId: IDS.orgA, orderId: pedidoInsp.id, submissionId: envioInsp.id,
           nome: `${PREFIXO}Pulpo a la gallega`,
           quantidade: 1, estado: 'REJEITADA', motivoRejeicao: 'ESGOTADO',
+        },
+        // ── Uma linha rejeitada por PREÇO, com os dois números ──────────
+        //
+        // É o que o E15 tem de mostrar no ecrã do empregado: o preço que o
+        // aparelho propôs — de quando o rascunho foi escrito, sem rede — e o
+        // oficial, de quando o servidor aceitou. A régua do E15 é literal: «se a
+        // divergência só aparecer num log, o E14 foi bem implementado e mal
+        // entregue».
+        //
+        // Sem esta linha na semeadura, as cinco larguras mediam a tela SEM o
+        // painel de divergência — verde sobre a metade fácil. A prova
+        // ponta-a-ponta da divergência é outra, e está em `staff.spec.ts`: esta
+        // existe para o painel ter o que desenhar em todas as larguras.
+        {
+          organizationId: IDS.orgA, orderId: pedidoInsp.id, submissionId: envioInsp.id,
+          nome: `${PREFIXO}Tortilla de patatas con cebolla caramelizada`,
+          quantidade: 1, precoMenor: 1150, moeda: 'EUR', precoPropostoMenor: 950,
+          estado: 'REJEITADA', motivoRejeicao: 'PRECO_DIVERGENTE',
         },
       ],
     });
