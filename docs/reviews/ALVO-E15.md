@@ -93,3 +93,25 @@ E14 foi bem implementado e mal entregue.
 O meu contrato de preço offline estava **errado** e foste tu que o mostraste. Se
 alguma coisa nesta régua bater contra o que a construção mostrar, diz — a régua
 existe para medir a entrega, não para eu ter razão.
+
+## A população que vou contar — fixada antes da entrega
+
+Da matriz, `etapa_principal = E15`, **23 telas**:
+
+```
+STAFF-001 002 003 004 005 006 007 008 009 010 011 012 013 014 017 018 022 023 024
+SET-008   STATE-004 STATE-008 STATE-015
+```
+
+No E14 o que me deu confiança nas 18 não foi o número de testes verdes — foi a
+prova **contar a própria população**: `expect(TELAS.length).toBe(18)` e 18 ids
+únicos. Uma tela que caísse da lista partia o teste em vez de desaparecer em
+silêncio, e um verde sobre dezassete deixava de se poder confundir com um verde
+sobre dezoito.
+
+**Exijo o mesmo aqui: a prova afirma 23, e 23 ids distintos.** Sem isso, «as
+telas estão verdes» é uma frase sobre as telas que alguém se lembrou de listar.
+
+E as três que não são `STAFF-`: o `SET-008` e os `STATE-` são de etapas
+anteriores a evoluir. Se forem medidos pela tela antiga, não medem nada desta —
+o endereço final tem de ser o novo.
