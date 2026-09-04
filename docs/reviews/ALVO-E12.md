@@ -76,6 +76,29 @@ coisas em vez de uma:
 dele responde a uma pergunta que a minha régua não sabia fazer. Fica registado
 aqui porque a régua é minha e estava incompleta.
 
+## Revisão em curso — o que MEDI e o que NÃO MEDI, 04/09
+
+**Medido, e passa:** `provar-tema.sh` a 0 falhas com **sete** controlos negativos,
+e dois deles são exactamente os que esta régua nomeou como perigosos:
+
+- **o fuso da unidade** na descida — a asserção cai quando volta a agendar à
+  meia-noite UTC. É o defeito do E06, e não voltou;
+- **a imutabilidade das revisões** — a asserção cai quando o runtime recupera o
+  poder de apagar. O aceite 3 deixou de ser intenção e passou a **permissão**.
+
+E ainda o portão do plano, o bloqueio por contraste, os tokens não temáveis e a
+cor escrita tal e qual no CSS.
+
+**NÃO medido:** a prova de navegador — a leitura da cor **calculada**, que é o
+ataque central desta régua. Duas tentativas, duas leituras inúteis: a primeira
+deu um vermelho que **não era o esperado**, e a segunda nem arrancou o servidor.
+Fui à causa e não era o produto: **os dois builds colidiram**, e o segundo apanhou
+o `.next` do primeiro a meio.
+
+**Não chamo defeito ao que não consegui medir**, e não é a primeira vez hoje que
+esta distinção me salva de uma acusação errada. Fica pendente para a passagem
+seguinte, com o recurso livre e **uma** corrida só.
+
 ## O que reprova à cabeça
 
 - **Cor lida do formulário e não da página servida.**
