@@ -67,7 +67,11 @@ export function FormaEntrar({ textos, hrefRecuperar, idiomas }: {
         <option value="dispositivo">{textos.soNesteDispositivo}</option>
       </Seletor>
       <Botao type="submit" aCarregar={estado === 'a-enviar'} largo>{textos.accao}</Botao>
-      <a href={hrefRecuperar}>{textos.esqueci}</a>
+      {/* Alvo de toque de 44 px: a inspecção do marco E11 apanhou-o a render
+          328×24. Não é uma ligação dentro de texto corrido — está sozinha por
+          baixo do botão, e no telemóvel é o que se carrega quando a
+          palavra-passe não entra. A isenção da WCAG não a cobre. */}
+      <a className="bo-ligacao-alvo" href={hrefRecuperar}>{textos.esqueci}</a>
     </form>
   );
 }

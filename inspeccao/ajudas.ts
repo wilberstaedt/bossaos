@@ -56,8 +56,30 @@ export async function alvosPequenos(pagina: Page, minimo: number): Promise<strin
       // Ligações dentro de um parágrafo de texto corrido estão isentas na
       // WCAG 2.2 e não são alvos de toque no sentido do padrão interno.
       if (el.tagName === 'A' && el.closest('p')) continue;
-      if (r.height < min - 0.5 || r.width < min - 0.5) {
-        maus.push(`${el.tagName.toLowerCase()} "${(el.textContent ?? '').trim().slice(0, 30)}" ${Math.round(r.width)}×${Math.round(r.height)} < ${min}`);
+
+      // ── O alvo é a ÁREA CLICÁVEL, e nem sempre é a caixa ─────────────────
+      //
+      // Uma caixa de verificação de 20 px dentro de um `<label>` de 44 px é o
+      // padrão certo, e não um defeito: carregar em qualquer ponto do rótulo
+      // marca a caixa. A WCAG 2.2 mede o alvo, não o desenho da caixa.
+      //
+      // A primeira versão disto media sempre o `input`, e acusava esse padrão.
+      // Corrigir o CSS para calar o instrumento teria dado caixas de 44 px —
+      // uma tela pior por causa de uma medição errada.
+      //
+      // O rótulo só conta se ELE PRÓPRIO chegar ao mínimo: senão, envolver a
+      // caixa num rótulo pequeno passava a ser a maneira de escapar à guarda.
+      let rect = r;
+      if (el.tagName === 'INPUT' || el.tagName === 'SELECT') {
+        const rotulo = el.closest('label');
+        if (rotulo) {
+          const rr = rotulo.getBoundingClientRect();
+          if (rr.height >= min - 0.5 && rr.width >= min - 0.5) rect = rr;
+        }
+      }
+
+      if (rect.height < min - 0.5 || rect.width < min - 0.5) {
+        maus.push(`${el.tagName.toLowerCase()} "${(el.textContent ?? '').trim().slice(0, 30)}" ${Math.round(rect.width)}×${Math.round(rect.height)} < ${min}`);
       }
     }
     return maus;

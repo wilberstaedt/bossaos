@@ -673,7 +673,19 @@ p { margin: 0; }
 .bo-planos__nome { font-family: var(--bo-fonte-titulo); font-size: 30px; line-height: 1.1; margin: 0; }
 .bo-planos__promessa { color: var(--bo-texto-secundario); margin: 0; }
 .bo-planos__lista { list-style: none; margin: var(--bo-espaco-sm) 0 0; padding: 0; display: grid; gap: var(--bo-espaco-md); }
+/* Quando este item É um rótulo com uma caixa dentro, ele é o alvo de toque —
+   e nas preferências alimentares e nos alérgenos um toque errado muda uma
+   declaração com valor legal. A caixa fica do tamanho de uma caixa; o rótulo é
+   que tem de chegar aos 44 px. Apanhado a 13×13 pela inspecção do marco E11. */
 .bo-planos__item { display: flex; align-items: flex-start; gap: var(--bo-espaco-md); }
+label.bo-planos__item {
+  align-items: center; min-height: var(--bo-toque-publico); cursor: pointer;
+}
+label.bo-planos__item input[type="checkbox"],
+label.bo-planos__item input[type="radio"] {
+  inline-size: 20px; block-size: 20px; flex-shrink: 0;
+  accent-color: var(--bo-primaria);
+}
 /* O visto é `aria-hidden` no componente: a linha inteira já se lê sem ele. */
 .bo-planos__visto { color: var(--bo-estado-sucesso); font-weight: 700; }
 .bo-planos__preco { color: var(--bo-texto-secundario); font-size: 14px; margin: var(--bo-espaco-sm) 0 0; }
@@ -931,10 +943,19 @@ p { margin: 0; }
    a 13×13 px, e a inspecção apanhou-o: num telemóvel isso é um alvo que se falha
    e se acerta por acaso, e o que ela liga aqui é uma página ficar visível no site
    público — um clique errado publica ou esconde. */
+/* A caixa mantém o tamanho de uma caixa; quem cresce é o RÓTULO, que é onde se
+   carrega. Estas caixas ligam uma página a ficar visível no site público, e um
+   alvo que se falha e se acerta por acaso é caro — mas uma caixa de 44 px seria
+   pior desenho, e a WCAG mede a área clicável e não a caixa. */
 .bo-campo input[type="checkbox"] {
-  inline-size: var(--bo-toque-publico);
-  block-size: var(--bo-toque-publico);
+  inline-size: 20px;
+  block-size: 20px;
+  flex-shrink: 0;
   accent-color: var(--bo-primaria);
+}
+.bo-campo__rotulo:has(input[type="checkbox"]) {
+  display: inline-flex; align-items: center; gap: var(--bo-espaco-sm);
+  min-height: var(--bo-toque-publico); cursor: pointer;
 }
 .bo-publico__formulario textarea {
   width: 100%; min-height: 8rem; padding: var(--bo-espaco-md);
@@ -972,4 +993,21 @@ p { margin: 0; }
 .bo-mkt__tabela-envolve th, .bo-mkt__tabela-envolve td {
   padding: var(--bo-espaco-sm) var(--bo-espaco-md);
   border-bottom: 1px solid var(--bo-borda); text-align: left; vertical-align: top;
+}
+
+/* Uma ligação que está sozinha, e não dentro de um parágrafo, é um alvo de
+   toque como qualquer outro — 44 px, o mesmo que os botões ao lado dela. A
+   isenção da WCAG 2.2 é para ligações dentro de texto corrido. */
+.bo-ligacao-alvo {
+  display: inline-flex; align-items: center;
+  min-height: var(--bo-toque-publico);
+}
+
+/* Uma ligação dentro de uma célula de tabela é o que se carrega para abrir a
+   linha — é o alvo de toque daquela linha, e não uma ligação em texto corrido.
+   A inspecção do marco E11 apanhou-as a render 101×24 na lista de organizações
+   da plataforma, e a regra vale para todas as tabelas do produto. */
+.bo-tabela td a {
+  display: inline-flex; align-items: center;
+  min-height: var(--bo-toque-publico);
 }

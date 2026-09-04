@@ -14,119 +14,18 @@
 #
 
 # E04
-AUTH-001
-AUTH-003
-AUTH-004
-AUTH-005
-AUTH-006
-AUTH-007
-AUTH-008
-AUTH-009
-ONB-009
+
+# ── 04/09: 63 das 66 foram PAGAS ─────────────────────────────────────────
+#
+# A revisão do marco E11 reprovou o aceite 1 por causa desta lista. As 63 abaixo
+# saíram MEDIDAS, no arnês que o E10 construiu, nas cinco larguras — e a medição
+# encontrou quatro defeitos de alvo de toque que nunca ninguém tinha visto.
+#
+# Restam TRÊS, e não saíram por não terem sido tentadas: saíram da lista de
+# medíveis porque a rota delas devolve 500. É um defeito real, tem causa
+# identificada e está no relatório. Ficam aqui porque continuam por medir — que
+# é o que esta lista existe para não deixar esquecer.
+
 ORG-007
 ORG-008
 STATE-014
-
-# E05
-ONB-004
-ORG-010
-ORG-013
-ORG-014
-PLAT-002
-PLAT-003
-PLAT-004
-PLAT-006
-PLAT-010
-PLAT-011
-STATE-006
-THEME-001
-
-# E06
-ONB-001
-ONB-002
-ONB-003
-ONB-010
-ORG-001
-ORG-002
-ORG-003
-ORG-004
-ORG-005
-ORG-006
-ORG-015
-SET-001
-SET-002
-STATE-013
-
-# E07
-CAT-001
-CAT-002
-CAT-003
-CAT-004
-CAT-005
-CAT-006
-CAT-007
-CAT-008
-CAT-009
-CAT-010
-CAT-011
-CAT-012
-CAT-013
-CAT-016
-CAT-017
-CAT-018
-CAT-019
-CAT-022
-
-# E08
-CAT-014
-CAT-015
-CAT-023
-CAT-024
-CAT-025
-CAT-026
-CAT-027
-ONB-005
-ONB-006
-SET-012
-
-# E09 — E ESTA É A PIOR DÍVIDA DA LISTA, declarada 04/09
-#
-# São a CARTA PÚBLICA e o QR: lidas num telemóvel, apontadas por um código
-# impresso na mesa. Se há telas neste produto onde o móvel não é opcional, são
-# estas. Carregá-las aqui é o contrário do instinto certo, e escrevo-o para que
-# ninguém as leia como as outras 66.
-#
-# Porque não estão medidas hoje, em concreto: a prova do E09 CRIA e DESTRÓI o
-# seu próprio endereço público (`public_slug` volta a NULL no fim), por isso não
-# existe carta persistente para o navegador visitar; e a inspecção de larguras
-# não semeia base nenhuma. Medi-las exige semeadura no arnês do navegador — que
-# é o mesmo trabalho que o E10 vai precisar de fazer para os sites públicos.
-#
-# PRAZO, e é bloqueante e não desejo: saem daqui no E10, na mesma passagem em que
-# o arnês ganhar semeadura. Se o E10 fechar sem estas onze medidas, o marco E11
-# não passa — está escrito em ALVO-E11.md e em ALVO-E10.md.
-#
-# 04/09 — SEIS SAÍRAM. O arnês ganhou semeadura (`inspeccao/semear.ts` +
-# `packages/db/prisma/semente-inspeccao.ts`) e as seis telas PÚBLICAS estão
-# medidas em `inspeccao/publico.spec.ts`: cinco larguras, transbordo, elementos
-# fora do ecrã, alvos de toque a 44 px, contraste, e os catorze alérgenos a caber
-# num ecrã de 360 px.
-#
-# A primeira passagem encontrou um defeito a sério: o `/r/` está fora de
-# `app/[idioma]/` e **não tinha moldura**, logo a carta pública era servida sem
-# folha de estilos. O sintoma foi um alvo de toque de 18 px onde o CSS declara
-# 44. `pnpm build` verde, `validar-classes.sh` verde — as classes existiam, o
-# ficheiro é que não chegava à página.
-#
-# AS CINCO QUE FICAM exigem SESSÃO no navegador (CHAN-001, QR-001/003/004,
-# REP-001). O arnês não autentica hoje, e isso é trabalho próprio: cookie real
-# emitido pela biblioteca, como a prova de acesso do E04 faz por HTTP. Continua
-# a ser bloqueante para o E11 e continua com o mesmo prazo — o E10.
-# As cinco do E09 saíram a 04/09, e saíram PAGAS: foram medidas, não
-# desassinadas. O que as bloqueava era uma coisa só — o arnês do navegador não
-# sabia entrar —, e passou a saber. A evidência de cada uma diz o que foi medido.
-#
-# CHAN-001, QR-001, QR-003, QR-004 e REP-001 — medidas em cinco larguras, com
-# sessão real. A medição encontrou dois defeitos que ninguém tinha visto: o QR
-# de 320 px fixos esticava a página a 360, e `.bo-pagina` crescia com o conteúdo
-# em vez de o conter.

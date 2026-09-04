@@ -60,6 +60,9 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     DELETE FROM price_rules       WHERE product_id IN (SELECT id FROM products WHERE nome LIKE '${PREFIXO}%');
     DELETE FROM products          WHERE nome LIKE '${PREFIXO}%';
     DELETE FROM categories        WHERE nome LIKE '${PREFIXO}%';
+    DELETE FROM modifier_groups   WHERE nome LIKE '${PREFIXO}%';
+    DELETE FROM invitations       WHERE email LIKE '%@inspeccao.example';
+    DELETE FROM locations         WHERE slug LIKE '${PREFIXO}%';
     DELETE FROM leads             WHERE email LIKE '%@inspeccao.example';
     DELETE FROM demo_requests     WHERE email LIKE '%@inspeccao.example';
     DELETE FROM site_publications WHERE site_id IN (SELECT id FROM sites WHERE seo_titulo LIKE '${PREFIXO}%');
@@ -83,6 +86,8 @@ export async function restos(prisma: PrismaClient): Promise<number> {
     + (SELECT count(*) FROM locations          WHERE public_slug LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM public_slug_owners WHERE slug LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM sites              WHERE seo_titulo LIKE '${PREFIXO}%')
+    + (SELECT count(*) FROM modifier_groups    WHERE nome LIKE '${PREFIXO}%')
+    + (SELECT count(*) FROM locations          WHERE slug LIKE '${PREFIXO}%')
   ) AS total`);
   return Number(r[0]?.total ?? 0);
 }

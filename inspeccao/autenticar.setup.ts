@@ -125,6 +125,23 @@ async function abrirSessao(
          SELECT 1 FROM role_assignments WHERE organization_id = $1 AND membership_id = $2)`,
       [organizationId, (filiacao[0] as { id: string }).id],
     );
+    // ── Acesso de plataforma, só para a conta de A ────────────────────────
+    //
+    // Seis das 66 telas da dívida são a superfície interna de plataforma
+    // (PLAT-002 a 011). Sem esta linha, a medição delas mede a RECUSA — que está
+    // certa e não é a tela — e as seis ficariam verdes sobre o ecrã errado.
+    //
+    // `platform_staff` é escrita só pela credencial de migração, e o runtime nem
+    // `SELECT` tem nela: é a decisão do E05 e continua inteira. O arnês escreve
+    // pela mesma porta que o `scripts/plataforma.mjs` usa.
+    if (organizationId === ORG_A) {
+      await sql.query(
+        `INSERT INTO platform_staff (user_id, motivo)
+         SELECT $1, 'arnes de inspeccao: medir as telas PLAT em movel'
+         WHERE NOT EXISTS (SELECT 1 FROM platform_staff WHERE user_id = $1)`,
+        [userId],
+      );
+    }
   } finally {
     await sql.end();
   }

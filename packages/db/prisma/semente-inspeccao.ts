@@ -23,11 +23,15 @@
  * consoante a ordem por que se correram os comandos.
  */
 
+import { createHash } from 'node:crypto';
 import { projectarSite } from '@bossaos/domain';
 import { IDS } from './fixtures.ts';
 import { abrirPrisma, limpar, PREFIXO, SLUG_DE_INSPECCAO } from './inspeccao-comum.ts';
 
 export { SLUG_DE_INSPECCAO };
+
+/** O convite que a tela AUTH-006 abre. Fixo, para a rota ser fixa. */
+export const TOKEN_DE_INSPECCAO = 'insp-convite-para-medir';
 
 async function principal(): Promise<void> {
   const prisma = abrirPrisma();
@@ -148,6 +152,52 @@ async function principal(): Promise<void> {
     if (resultado !== 'ok') {
       throw new Error(`não consegui reservar o endereço de inspecção: ${resultado}`);
     }
+
+    // ── O que as 66 telas da dívida de móvel precisam de encontrar ────────
+    //
+    // A revisão do marco E11 mandou medir em móvel 66 telas que nunca foram
+    // renderizadas. Vinte e sete são do catálogo e várias vivem em rotas com
+    // identificador — sem dados, mediriam a página de "não encontrado" e diriam
+    // verde, que é a classe de erro que este projecto passa o tempo a fechar.
+    //
+    // Tudo o que nasce aqui leva o prefixo `insp-` e sai pela mesma porta.
+    // Sem `upsert`: a tabela não tem chave única pelo nome, e inventar uma para
+    // o arnês seria mudar o modelo por causa de um teste.
+    const grupoExistente = await prisma.modifierGroup.findFirst({
+      where: { nome: `${PREFIXO}Punto de la carne` }, select: { id: true },
+    });
+    if (!grupoExistente) {
+      await prisma.modifierGroup.create({
+        data: {
+          organizationId: IDS.orgA, brandId: IDS.marcaA,
+          nome: `${PREFIXO}Punto de la carne`, minimo: 1, maximo: 1, obrigatorio: true,
+        },
+      });
+    }
+
+    // Um convite por aceitar, para a tela AUTH-006 ter um endereço real.
+    //
+    // A base guarda o RESUMO do token e nunca o token — é a decisão do E04, e é
+    // a certa: quem tiver a base não fica com os convites em aberto. Por isso o
+    // arnês guarda o mesmo resumo que o produto calcularia, com a mesma função,
+    // em vez de inventar uma coluna ou de baixar a exigência.
+    const resumo = createHash('sha256').update(TOKEN_DE_INSPECCAO, 'utf8').digest('hex');
+    await prisma.$executeRawUnsafe(`
+      INSERT INTO invitations (id, organization_id, email, papel, token_hash,
+                               expires_at, convidado_por_id, updated_at)
+      VALUES (gen_random_uuid(), '${IDS.orgA}', 'convidado@inspeccao.example', 'WAITER',
+              '${resumo}', now() + interval '7 days', '${IDS.utilizadorA}', now())
+      ON CONFLICT (token_hash) DO UPDATE SET
+        expires_at = now() + interval '7 days', accepted_at = NULL, revoked_at = NULL`);
+
+    // Uma unidade ARQUIVADA, para o estado STATE-013 poder ser visto. Não se
+    // arquiva uma das fixtures: outras provas contam com elas vivas, e uma prova
+    // que estraga o cenário de outra é o defeito que o E06 já pagou uma vez.
+    await prisma.$executeRawUnsafe(`
+      INSERT INTO locations (id, organization_id, brand_id, nome, slug, moeda, fuso, archived_at, updated_at)
+      VALUES ('cccc9999-9999-4999-8999-999999999999', '${IDS.orgA}', '${IDS.marcaA}',
+              '${PREFIXO}Marina Cerrada', 'insp-cerrada', 'EUR', 'Europe/Madrid', now(), now())
+      ON CONFLICT (id) DO UPDATE SET archived_at = now(), updated_at = now()`);
 
     // ── O SITE do restaurante (E10), publicado ────────────────────────────
     //
