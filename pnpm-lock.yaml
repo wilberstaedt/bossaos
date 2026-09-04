@@ -56,6 +56,9 @@ importers:
       '@bossaos/domain':
         specifier: workspace:*
         version: link:../../packages/domain
+      '@bossaos/fila':
+        specifier: workspace:*
+        version: link:../../packages/fila
       '@bossaos/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
@@ -184,6 +187,15 @@ importers:
 
   packages/domain:
     devDependencies:
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+
+  packages/fila:
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.1
+        version: 22.20.1
       typescript:
         specifier: 5.9.3
         version: 5.9.3
