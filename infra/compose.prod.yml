@@ -14,6 +14,6 @@ services:
     # Só ao anfitrião: quem serve ao mundo é o Caddy, como faz aos outros três
     # produtos desta caixa.
     ports:
-      - "127.0.0.1:8130:8130"
+      - "127.0.0.1:8140:8140"
     extra_hosts:
       - "host.docker.internal:host-gateway"

@@ -46,7 +46,19 @@ VPS="root@31.220.111.39"
 CHAVE="$HOME/.deploys/ilora/ilora_vps_ed25519"
 SSH="ssh -i $CHAVE -o ConnectTimeout=20 $VPS"
 RAIZ="/root/bossaos"
-PORTA="8130"            # o TPV antigo do piloto está no 8124
+# ── 8140, e a porta anterior quase custou caro ──────────────────────────────
+# Escolhi 8130 dizendo "livre: o TPV antigo está no 8124". Olhei para o vizinho
+# de UM serviço e presumi o resto. O 8130 é do **norte_web** — a aplicação
+# Norte do Matheus, em produção há três dias.
+#
+# O arranque falhou com "port is already allocated" e eu ia matar o docker-proxy
+# que o segurava, a pensar que era resíduo das minhas tentativas. Foi ver a
+# IDADE do processo que travou isso: três dias, não trinta minutos. Um número
+# que eu podia perfeitamente não ter pedido.
+#
+# Ocupadas nesta caixa quando medi: 22 53 80 443 2019 3005 5433 5434 8087 8088
+# 8124 8130 8131 65529. O 8140 foi VERIFICADO livre, não deduzido.
+PORTA="8140"
 DOMINIO="bossaos.mwdeveloper.tech"
 
 erro() { echo "ERRO: $1" >&2; exit 1; }

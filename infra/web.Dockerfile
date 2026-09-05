@@ -46,8 +46,8 @@ RUN pnpm --filter web build
 
 FROM build AS runtime
 ENV NODE_ENV=production
-ENV PORT=8130
-EXPOSE 8130
+ENV PORT=8140
+EXPOSE 8140
 # A versão vem de fora e fica na imagem: é o que o portão 4 do publicar.sh
 # compara com o que responde no ar.
 ARG VERSAO=desconhecida
