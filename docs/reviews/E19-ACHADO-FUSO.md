@@ -126,3 +126,61 @@ não pode ser comparado directamente com `inicio` em sítio nenhum.
 
 As duas são defensáveis. **A que não é defensável é a de agora**, que tem metade
 do produto numa e a comparação com o relógio na outra.
+
+---
+
+# A peça que fecha o achado — e a falha é da minha assinatura
+
+Fui verificar a segunda coisa que tinha deixado por medir: se a resolução de
+hora de Verão do E18 chega a ser aplicada. **Não chega.**
+
+```
+$ grep -rn "resolverHoraLocal" packages/ apps/ | grep -v test
+packages/db/src/reservas.ts:810:export async function resolverHoraLocal(
+packages/db/src/index.ts:255:  resolverHoraLocal, agoraDaBase, segredoDeGestao,
+```
+
+Uma definição e uma reexportação. **Zero chamadas.** A função existe, está certa,
+vai buscar a resposta à tabela de fusos da base por `instante_local(fuso, local)`,
+distingue `NORMAL` de `INEXISTENTE` e de `AMBIGUA`, e tem o comentário exacto
+sobre porque é que o estado importa — *«resolver 02h30 em silêncio para 03h30 é
+resolver, mas quem marcou tem de saber que a casa entendeu outra hora»*.
+
+E a porta pública, a três ficheiros de distância, faz ``new Date(`${dia}T${hora}:00Z`)``.
+
+**Caminho morto** — uma das quatro formas de verde vazio: a máquina certa,
+construída e provada, que nada invoca.
+
+## Isto é uma falha da MINHA assinatura do E18
+
+Eu assinei o E18 há poucas horas e escrevi, na tabela dos aceites:
+
+> **A hora de Verão.** Grupo 8, e é onde ele foi além do pedido (…) ele escreveu
+> sozinho o discriminador.
+
+Tudo verdade, e **insuficiente**. Verifiquei que a função estava certa e que a
+prova sabia ficar vermelha. Nunca verifiquei que alguém a chamava.
+
+Depois do E15 escrevi esta regra para mim, precisamente para isto:
+
+> Para cada aceite, apontar a **linha de produto** que o exercita **e** a
+> asserção que fica vermelha se ela desaparecer.
+
+**Não a apliquei ao aceite da hora de Verão.** Se eu a tivesse aplicado, tinha
+procurado a linha de produto, não a tinha encontrado, e o E18 tinha sido retido
+por isto em vez de assinado. A regra estava escrita; falhei a executá-la.
+
+## O que isto melhora no pedido
+
+A boa notícia é que o pedido fica **mais pequeno**, não maior. Já não é
+«construir tratamento de fusos»: é **chamar o que já existe e já está provado**.
+
+A porta pública recebe `dia` e `hora` como hora local da casa — que é o que o
+cliente escolheu — e passa por `resolverHoraLocal(db, unidade.fuso, ...)` antes
+de haver instante nenhum. O `estado` que ela devolve deixa de ser desperdiçado:
+`INEXISTENTE` e `AMBIGUA` são exactamente os dois casos que a tela tem de dizer
+à pessoa em vez de escolher em silêncio.
+
+E a prova que impede o remendo: **a mesma "20:00" em duas unidades com fusos
+diferentes tem de produzir instantes diferentes.** Se produzir o mesmo, o fuso
+continua a não entrar, por muito que a função apareça no meio do caminho.
