@@ -129,6 +129,31 @@ declaradas=$(ls packages/db/prisma/migrations | grep -c '^[0-9]' || echo 0)
 echo "==> $aplicadas de $declaradas migracoes aplicadas"
 [ "$aplicadas" = "$declaradas" ] || { echo "FALHA: a base de revisao nao tem o schema todo." >&2; exit 1; }
 
+# ── A BASE TEM DE SAIR DAQUI UTILIZAVEL ─────────────────────────────────────
+#
+# Quando fiz a base nascer vazia (para as revogacoes das migracoes ficarem por
+# cima do GRANT em massa), corrigi as concessoes e PARTI a semente: o script
+# passou a devolver uma base impecavel e inutil. Descobri-o a validar o E22, com
+# quatro vermelhos que nao eram do produto — o ultimo foi
+# `bills_organization_id_fkey`, tres comandos depois, ja longe da causa.
+#
+# Consertei uma propriedade e parti outra que ninguem media. E' a critica que
+# faco as etapas, aplicada aqui: a unica garantia que aguenta e a que alguem
+# mede. Por isso a semente entra no script, e o script DIZ quantas organizacoes
+# ficaram — se disser zero, quem le sabe imediatamente, em vez de descobrir por
+# uma chave estrangeira.
+if [ "${SEMEAR:-1}" = "1" ]; then
+  echo "==> Semente"
+  if DATABASE_URL="$U_APP" MIGRATION_DATABASE_URL="$U_MIG" AUTH_DATABASE_URL="$U_AUTH" \
+       node --experimental-strip-types packages/db/prisma/fixtures.ts >/dev/null 2>&1; then
+    orgs=$(psql "$U_MIG" -tAc "SELECT count(*) FROM organizations" 2>/dev/null || echo "?")
+    echo "==> $orgs organizacoes na base"
+    [ "$orgs" = "0" ] && echo "AVISO: a semente correu e a base ficou VAZIA." >&2
+  else
+    echo "AVISO: a semente FALHOU — a base esta vazia e as provas vao morrer em chave estrangeira." >&2
+  fi
+fi
+
 cat <<TXT
 
   Pronto. Para correr uma prova contra ela, sem tocar na base do JR:
