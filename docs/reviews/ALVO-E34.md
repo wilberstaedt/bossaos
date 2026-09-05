@@ -7,7 +7,33 @@
 
 ## O que o E34 herda, e cada item tem endereço
 
-### 1. O menu da PLATAFORMA nunca foi medido
+### 1. O menu da PLATAFORMA nunca foi medido — MEDIDO a 05/09, com dono
+
+**As três entradas são do E33** — `PLAT-007` (casos de suporte), `PLAT-016`
+(gerir incidente) e `PLAT-013` (registo de administração). Não são portas
+esquecidas: são portas por construir sem o dizerem. A correcção é
+`porConstruir: 'E33'` nas três, e é do JR, porque é código de produto que eu vou
+verificar depois.
+
+**A classe ficou fechada por `validar-portas-mortas.sh`**, que **descobre** os
+layouts em vez de nomear um. A `provar-portas.sh` tinha o ficheiro escrito à mão:
+
+```
+LAYOUT='apps/web/app/[idioma]/app/[orgSlug]/layout.tsx'
+```
+
+Por isso o critério viveu um mês aplicado a metade do produto sem ninguém
+reparar. **Terceira lista à mão a desalinhar hoje**, depois das provas na CI e do
+índice de contratos.
+
+E cometi, dentro dela, o defeito que ela caça: a primeira versão imprimia as três
+FALHAS e **saía a zero**, porque `printf | while` corre num sub-shell e as
+contagens morriam lá dentro. **Imprimir o defeito e devolver verde é a forma mais
+pura do verde vazio.** Corrigido, e o código de saída verificado à mão.
+
+---
+
+*O que esta dívida dizia quando foi aberta:*
 
 O marco do Restaurant mediu `app/[orgSlug]`. A `platform` tem `#` em Suporte,
 Incidentes e Auditoria, **sem `porConstruir`** a dizer que etapa os faz — o

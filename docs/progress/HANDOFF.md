@@ -11,6 +11,13 @@ movimento converte, porque `movimentarPontos` está tipada em `number`. Apanhado
 pela `validar-dinheiro` depois de eu assinar. **É do JR** — quem assina não
 escreve o código que assinou. Detalhe em `docs/reviews/E27.md`.
 
+
+**⚠ Segundo item do JR, do E34 (sem pressa do E28):**
+`apps/web/app/[idioma]/platform/layout.tsx` linhas 52, 53 e 56 — três entradas
+`href: '#'` sem `porConstruir`. São do **E33** (`PLAT-007`, `PLAT-016`,
+`PLAT-013`). A `validar-portas-mortas.sh` está vermelha sobre elas de propósito,
+até serem marcadas. É metadado de menu, não lógica.
+
 **Porque é que esta etapa é diferente:** até aqui um defeito estragava um número.
 Aqui **manda uma mensagem a uma pessoa que não a pediu**, e isso não se desfaz.
 Por isso a garantia central foi para a FORMA: o gatilho
