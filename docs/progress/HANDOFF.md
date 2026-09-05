@@ -3,6 +3,14 @@
 **Etapa atual:** E28 — Equipa, escalas e ponto (**11 telas**, HR-001 a 011).
 **Estado:** **EM CURSO.** O JR começou a 05/09 (`packages/db/src/ponto.ts`, `scripts/provar-ponto.sh`, `scripts/validar-horas.sh`). Régua em `docs/reviews/ALVO-E28.md`, escrita antes de existir código.
 
+
+**⚠ Defeito aberto do E27, a corrigir ANTES de declarar o E28:**
+`packages/db/src/crm.ts:428` converte o `BigInt` de `custoPontos` para vírgula
+flutuante (`Number(...)`). A comparação de saldo logo acima está certa; só o
+movimento converte, porque `movimentarPontos` está tipada em `number`. Apanhado
+pela `validar-dinheiro` depois de eu assinar. **É do JR** — quem assina não
+escreve o código que assinou. Detalhe em `docs/reviews/E27.md`.
+
 **Porque é que esta etapa é diferente:** até aqui um defeito estragava um número.
 Aqui **manda uma mensagem a uma pessoa que não a pediu**, e isso não se desfaz.
 Por isso a garantia central foi para a FORMA: o gatilho

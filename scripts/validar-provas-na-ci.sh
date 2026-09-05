@@ -30,6 +30,12 @@ ok()   { printf '  \033[32mok\033[0m   %s\n' "$1"; }
 # Formato: nome do ficheiro, dois pontos, o porque. Uma linha.
 declare -a EXCEPCOES=(
   "provar-tudo.sh:e o corredor de todas as outras; correr-se a si proprio na CI duplicava tudo"
+  # Os agregadores de marco respondem a outra pergunta: nao e "as provas passam?"
+  # mas "o marco AINDA esta aprovado?". Chamam provas que a CI ja corre, por isso
+  # aqui so duplicariam o tempo pela mesma informacao. Correm-se a mao quando
+  # alguem poe o marco em duvida - foi assim que o E21 foi reprovado e reaberto.
+  "provar-marco-e11.sh:agregador de marco; chama provas que a CI ja corre, e a pergunta dele faz-se a mao"
+  "provar-marco-e21.sh:agregador de marco; chama provas que a CI ja corre, e a pergunta dele faz-se a mao"
 )
 
 motivo_da_excepcao() {
@@ -55,13 +61,57 @@ echo "Toda a prova corre na CI, ou declara porque nao?"
 # dez minutos depois de eu o nomear no cabecalho deste ficheiro: vigiar a FORMA
 # DE ESCRITA em vez da propriedade. Um nome mencionado nao e' um passo corrido.
 conteudo_ci="$(sed 's/#.*//' "$CI")"
-total=0; na_ci=0; declaradas=0
+total=0; na_ci=0; declaradas=0; descobertas=0
+
+# DESCOBERTA E' DECISAO — a mesma regra que esta guarda ja aceita nas guardas.
+# Ate 05/09 exigia o NOME de cada prova escrito no ci.yml, e por isso 45 das 56
+# nao tinham decisao nenhuma: o ci.yml descobria as guardas por glob e listava as
+# provas a mao, metade convertida e metade por converter no mesmo ficheiro.
+# Exigir a lista a mao para sempre era exigir aquilo que envelheceu.
+#
+# Uma prova esta decidida se o ci.yml CORRE o classificador para a categoria
+# dela. A categoria vem do conteudo do ficheiro, nao do nome — quatro provas
+# usam Playwright sem o sufixo `-no-navegador`.
+#
+# Cuidado que quase falhei: procurar so "provas-por-categoria.sh" dava por
+# decidida uma prova de navegador num ci.yml que so descobrisse as de base.
+# Pergunta-se pela CATEGORIA, nao pela ferramenta.
+# As tres listas calculam-se UMA vez. A primeira versao chamava o classificador
+# tres vezes por prova, 177 vezes ao todo, e pior: com `| grep -q`. O `grep -q`
+# sai ao primeiro achado, fecha o tubo, o classificador leva SIGPIPE e o
+# `pipefail` transforma isso em falha da pipeline — so passavam as provas cujo
+# achado calhava ser o ultimo. Dizia "2 por descoberta" onde sao 51, e eu ia a
+# tempo de ler isso como "a ligacao a CI nao funcionou" em vez de "nao medi".
+LISTA_BASE="$(./scripts/provas-por-categoria.sh base || true)"
+LISTA_APP="$(./scripts/provas-por-categoria.sh app || true)"
+LISTA_NAV="$(./scripts/provas-por-categoria.sh navegador || true)"
+
+coberta_por_descoberta() {
+  cat=""
+  case "
+$LISTA_BASE" in *"
+scripts/$1"*) cat=base ;; esac
+  [ -n "$cat" ] || case "
+$LISTA_APP" in *"
+scripts/$1"*) cat=app ;; esac
+  [ -n "$cat" ] || case "
+$LISTA_NAV" in *"
+scripts/$1"*) cat=navegador ;; esac
+  [ -n "$cat" ] || return 1
+  # Pergunta-se pela CATEGORIA, nao pela ferramenta: procurar so o nome do
+  # classificador daria por decidida uma prova de navegador num ci.yml que so
+  # descobrisse as de base.
+  printf '%s' "$conteudo_ci" | grep -qE "provas-por-categoria\\.sh +$cat([^a-z]|$)" || return 1
+  printf '%s' "$cat"
+}
 
 for f in scripts/provar-*.sh; do
   nome="$(basename "$f")"
   total=$((total+1))
   if printf '%s' "$conteudo_ci" | grep -qF "$nome"; then
     na_ci=$((na_ci+1))
+  elif cat=$(coberta_por_descoberta "$nome"); then
+    descobertas=$((descobertas+1))
   elif motivo=$(motivo_da_excepcao "$nome"); then
     declaradas=$((declaradas+1))
     echo "  ── $nome fora da CI: $motivo"
@@ -71,7 +121,7 @@ for f in scripts/provar-*.sh; do
 done
 
 echo
-echo "  $total provas: $na_ci na CI, $declaradas declaradas fora."
+echo "  $total provas: $na_ci nomeadas na CI, $descobertas por descoberta, $declaradas declaradas fora."
 
 # ── CONTROLO NEGATIVO, por dentro ────────────────────────────────────────────
 # Uma guarda que nunca viu a avaria nao e uma guarda. Invento um ficheiro que

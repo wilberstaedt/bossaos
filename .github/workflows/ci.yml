@@ -310,6 +310,18 @@ jobs:
         # aparecer em teste nenhum.
         run: ./scripts/provar-acesso.sh
 
+      - name: Prova — as jornadas fazem-se de ponta a ponta
+        # Estava escrita e NAO corria na CI. Descobri-o a 05/09 ao converter as
+        # provas para descoberta: e a unica da categoria `app` que ninguem tinha
+        # listado. Custa notar porque a prova existe, passa localmente e tem
+        # controlos — so nunca era perguntada aqui.
+        #
+        # E e' das que menos podiam faltar: e a terceira escala do "verde nao e
+        # alcance". A funcao sem chamador apanha-se no codigo, a tela sem porta
+        # no menu, e a jornada sem percurso SO se apanha andando o caminho.
+        run: ./scripts/provar-jornada.sh
+
+
       - name: Prova — catálogo, alérgenos, preços e modificadores
         # A regra do produto inteiro onde o erro tem consequência física:
         # ausência de dados sobre alérgenos não significa ausência de alérgenos.
@@ -462,6 +474,34 @@ jobs:
       - name: Migrações aplicadas e sem desvio
         run: pnpm db:migrate:status
 
+      # ── as provas POR DESCOBERTA ──────────────────────────────────────────
+      # As guardas eram descobertas por glob desde 04/09; as provas continuavam
+      # listadas a mao, e a lista envelheceu ate 45 das 56 nao terem decisao
+      # nenhuma aqui. Metade convertida e metade por converter, no mesmo
+      # ficheiro. Isto converte a outra metade.
+      #
+      # A categoria vem do CONTEUDO de cada prova, nunca do nome: quatro provas
+      # usam Playwright sem o sufixo `-no-navegador`, e classifica-las pelo nome
+      # mandava-as para um trabalho sem navegador. O classificador sai a 3 se o
+      # glob nao casar nada, para que uma lista vazia nao passe por verde.
+      - name: Provas de base — por descoberta, nao por lista
+        run: |
+          set -euo pipefail
+          # A lista vem para uma variavel ANTES do `for`. Escrita como
+          # `for s in $(...)`, uma saida a 3 do classificador dava lista vazia,
+          # o `for` corria zero vezes e o passo saia VERDE - a forma de verde
+          # que o proprio classificador existe para impedir, derrotada pela
+          # maneira de o chamar. Assim a falha dele derruba o passo.
+          lista=$(./scripts/provas-por-categoria.sh base)
+          [ -n "$lista" ] || { echo "lista de provas vazia"; exit 1; }
+          falhadas=""
+          for s in $lista; do
+            if "$s"; then echo "ok    $(basename "$s")"
+            else echo "FALHA $(basename "$s")"; falhadas="$falhadas $(basename "$s")"; fi
+          done
+          if [ -n "$falhadas" ]; then echo "FALHARAM:$falhadas"; exit 1; fi
+
+
 
   navegador:
     name: Navegador — inspecção visual
@@ -543,3 +583,25 @@ jobs:
         run: pnpm inspeccionar
 
 
+
+
+      # ── as de navegador, tambem por descoberta ────────────────────────────
+      # Mesma regra, outra categoria. Uma prova nova de navegador passa a correr
+      # aqui sem ninguem editar este ficheiro - foi a falha de nao editar que
+      # deixou 45 provas sem decisao.
+      - name: Provas de navegador — por descoberta, nao por lista
+        run: |
+          set -euo pipefail
+          # A lista vem para uma variavel ANTES do `for`. Escrita como
+          # `for s in $(...)`, uma saida a 3 do classificador dava lista vazia,
+          # o `for` corria zero vezes e o passo saia VERDE - a forma de verde
+          # que o proprio classificador existe para impedir, derrotada pela
+          # maneira de o chamar. Assim a falha dele derruba o passo.
+          lista=$(./scripts/provas-por-categoria.sh navegador)
+          [ -n "$lista" ] || { echo "lista de provas vazia"; exit 1; }
+          falhadas=""
+          for s in $lista; do
+            if "$s"; then echo "ok    $(basename "$s")"
+            else echo "FALHA $(basename "$s")"; falhadas="$falhadas $(basename "$s")"; fi
+          done
+          if [ -n "$falhadas" ]; then echo "FALHARAM:$falhadas"; exit 1; fi

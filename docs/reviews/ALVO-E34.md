@@ -38,7 +38,32 @@ validação» e acendeu **por a etapa ter avançado** para «validado». Já cor
 **O E34 varre as restantes à procura da mesma forma:** alguma casa por texto de
 estado em vez de casar pela propriedade que quer garantir?
 
-### 5. 35 das 48 provas não correm na CI
+### 5. ~~35 das 48 provas não correm na CI~~ — PAGA a 05/09
+
+**Resolvida.** A CI passou a descobrir as provas como já descobria as guardas,
+e a `validar-provas-na-ci` aprendeu que **descoberta é decisão**. De 45 provas
+sem decisão para **nenhuma esquecida**: 13 nomeadas, 43 por descoberta, 3
+declaradas fora (o corredor e os dois agregadores de marco).
+
+Três coisas que só apareceram por fazer o trabalho, e nenhuma se via de fora:
+
+- **A categoria não se deduz do nome.** Quatro provas usam Playwright sem o
+  sufixo `-no-navegador`; classificá-las pelo nome mandava-as para um trabalho
+  sem navegador. O classificador lê o conteúdo. E a derivação **concorda com o
+  que a CI já fazia à mão** nas cinco que precisam da aplicação de pé — a
+  melhor confirmação de que lê a coisa certa.
+- **`provar-jornada.sh` nunca correu na CI.** Existe, passa, tem controlos, e
+  ninguém a perguntava. É a terceira escala do «verde não é alcance», a única
+  que só se apanha andando o caminho. Ligada.
+- **Escrevi o passo com o defeito que o classificador existe para impedir.**
+  `for s in $(...)`: com o classificador a sair a 3, a lista vinha vazia, o
+  ciclo corria zero vezes e o passo saía verde. Corrigido para capturar a lista
+  antes e exigi-la não-vazia.
+
+Fica por converter a categoria `app`: as cinco estão espalhadas por três
+trabalhos e convertê-las exige ver a CI correr, que a facturação bloqueia.
+**Declarado, não escondido.**
+
 
 E a causa é estrutural: a CI **glob-a as guardas** e **lista as provas à mão**.
 O conserto existe — o `provar-tudo.sh` descobre — e a CI menciona-o num

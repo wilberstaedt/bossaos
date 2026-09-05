@@ -64,6 +64,20 @@ async function gatilhos(estado: 'DISABLE' | 'ENABLE') {
 
 async function limpar() {
   await gatilhos('DISABLE');
+  // ── As CORRECÇÕES primeiro, e a ordem não é arrumação ──────────────────
+  //
+  // `corrige_id` é `ON DELETE RESTRICT`: apagar a marcação original enquanto a
+  // correcção lhe aponta falha com violação de chave estrangeira. A primeira
+  // versão apagava tudo numa instrução, a limpeza rebentava, e a suite inteira
+  // ficava cancelada por hook falhado — o que se via era «0 casos», não um erro.
+  //
+  // O `RESTRICT` está certo: é ele que impede alguém de apagar a marcação
+  // original e deixar a correcção a apontar ao vazio.
+  await sql.query(
+    `DELETE FROM time_entries
+      WHERE corrige_id IS NOT NULL AND (origem = $1 OR motivo LIKE $2
+            OR corrige_id IN (SELECT id FROM time_entries WHERE origem = $1))`,
+    [PREFIXO, `${PREFIXO}%`]);
   await sql.query(
     `DELETE FROM time_entries WHERE origem = $1 OR motivo LIKE $2`, [PREFIXO, `${PREFIXO}%`]);
   await sql.query(`DELETE FROM shifts WHERE nota LIKE '${PREFIXO}%'`);
@@ -82,8 +96,28 @@ before(async () => {
   pessoa = rows[0].id; encarregado = rows[1].id;
   await limpar();
 });
+// Se a limpeza entre casos falhar, o caso seguinte falha por sujidade — que é
+// um vermelho legível. O que não pode é ficar pendurada.
 beforeEach(limpar);
-after(async () => { await limpar(); await sql.end(); await prisma.$disconnect(); });
+/**
+ * ── A saída fecha SEMPRE, mesmo quando a limpeza falha ────────────────────
+ *
+ * Com a restrição desligada por um controlo negativo, a limpeza pode rebentar —
+ * e a primeira versão disto deixava as ligações abertas quando isso acontecia.
+ * O node não saía, o guião ficava parado, e um VERMELHO passava a parecer «ainda
+ * a correr». Um arnês que pendura transforma uma falha medida numa falha
+ * invisível.
+ */
+after(async () => {
+  try {
+    await limpar();
+  } catch (e) {
+    console.error('limpeza final falhou:', e instanceof Error ? e.message : e);
+  } finally {
+    await sql.end();
+    await prisma.$disconnect();
+  }
+});
 
 describe('1 · o dia de serviço não é o dia do calendário', () => {
   it('quem saiu às 00h42 de sábado trabalhou na SEXTA', () => {
