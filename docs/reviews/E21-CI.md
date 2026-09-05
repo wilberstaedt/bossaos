@@ -104,3 +104,39 @@ Lista à mão no documento de retoma; lista à mão na CI. **A forma é a mesma 
 cura é a mesma**, e já está escrita uma vez neste repositório. O que falta é
 aplicá-la no terceiro sítio — que é, ele próprio, um exemplo do padrão: a
 solução existe e ninguém a chama.
+
+---
+
+## Verificado: o lado das GUARDAS é exemplar. É o mesmo ficheiro.
+
+Escrevi uma guarda nova (`validar-indice-de-contratos.sh`) e afirmei que ela
+entrava na CI sozinha. **Fui verificar as duas pontas**, porque afirmar sem medir
+já me apanhou hoje:
+
+1. **O glob apanha-a:** `for g in scripts/validar-*.sh`.
+2. **A falha propaga:** `if ./"$g"; then …; else …; falhou=1; fi`.
+3. **E o corredor tem guarda sobre si próprio**, com a razão escrita no código:
+
+```bash
+# Guarda do proprio corredor: se o glob nao casar nada, o `for` corre
+# uma vez com o padrao literal e isto sairia verde sobre zero guardas.
+if [ "$corridas" -lt 10 ]; then
+  echo "VERDE SOBRE POPULACAO ZERO: so $corridas guardas correram..."
+  exit 1
+```
+
+**Isto é melhor do que quase tudo o que revi hoje.** Descobre, propaga a falha, e
+recusa-se a passar sobre população zero — as três coisas que ando a exigir.
+
+## E é isso que torna o outro lado difícil de explicar
+
+**O mesmo ficheiro** trata as provas listando treze à mão, sem glob e sem guarda
+de população. Quem escreveu o corredor das guardas sabia exactamente o que
+estava a evitar — o comentário prova-o — e as provas ficaram na forma antiga.
+
+**Não é falta de saber: é uma metade por converter.** O que torna o conserto
+mais fácil de defender, não menos: o padrão certo já está no ficheiro, doze
+linhas acima, escrito por quem percebeu o problema.
+
+**Ressalva:** a CI está trancada por facturação. A guarda nova entra sozinha
+**quando ela voltar** — hoje não corre, como não correm as outras.
