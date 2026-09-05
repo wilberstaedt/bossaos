@@ -101,6 +101,13 @@ export interface Alvos {
   clienteQueConsentiu: string;
   clienteSoServico: string;
   campanhaDoCrm: string;
+  /**
+   * E28: a pertença de quem trabalhou o turno atravessado.
+   *
+   * É a que tem a entrada corrigida POR TERCEIRO e a saída às 00h42 — sem ela,
+   * a prova media um dia que corre bem, que é o que a régua reprova.
+   */
+  pessoaDoPonto: string;
 }
 
 const PREFIXO = 'insp-';
@@ -281,6 +288,11 @@ export async function resolverAlvos(): Promise<Alvos> {
       campanhaDoCrm: await um(
         sql, `SELECT id FROM campaigns WHERE nome = '${PREFIXO}Otoño'`,
         'a campanha insp-Otoño'),
+      pessoaDoPonto: await um(
+        sql,
+        `SELECT t.membership_id AS id FROM time_entries t
+          WHERE t.corrige_id IS NOT NULL ORDER BY t.criado_em DESC LIMIT 1`,
+        'a pertença de quem tem a marcação corrigida'),
     };
   } finally {
     await sql.end();

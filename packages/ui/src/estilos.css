@@ -886,7 +886,15 @@ label.bo-planos__item input[type="radio"] {
  * mexer no que outra régua já mediu.
  */
 .bo-lista__ligacao {
-  display: inline-flex; align-items: center; min-height: var(--bo-toque-publico);
+  display: inline-flex; align-items: center; justify-content: flex-start;
+  min-height: var(--bo-toque-publico);
+  /* ── E a LARGURA também, que a primeira versão esqueceu ────────────────
+   *
+   * Um alvo de toque tem duas dimensões. «Ana» dava 29×44: alto que chegue e
+   * estreito de mais, e o dedo falha na mesma. Medido a 05/09 na HR-001, onde
+   * os nomes curtos da equipa o destaparam — as listas anteriores tinham todas
+   * nomes longos, e por isso passavam por sorte. */
+  min-width: var(--bo-toque-publico);
 }
 
 /*
@@ -905,7 +913,13 @@ label.bo-planos__item input[type="radio"] {
   display: flex; flex-wrap: wrap; align-items: baseline;
   gap: var(--bo-espaco-xs) var(--bo-espaco-sm);
 }
-.bo-lista--colunas li > * { min-width: 0; }
+/*
+ * O `min-width: 0` deixa as colunas encolherem — mas NÃO a ligação, que é um
+ * alvo de toque e tem um mínimo por baixo. Sem o `:not`, esta regra ganhava por
+ * especificidade e devolvia à HR-001 os alvos de 29 px de largura que a classe
+ * do toque existe para impedir. Duas regras minhas a discordarem, medido a 05/09.
+ */
+.bo-lista--colunas li > *:not(.bo-lista__ligacao) { min-width: 0; }
 
 /* ── Carta pública (E09) ──────────────────────────────────────────────────────
    A primeira superfície que um estranho vê, e a única que se lê a uma mão, com

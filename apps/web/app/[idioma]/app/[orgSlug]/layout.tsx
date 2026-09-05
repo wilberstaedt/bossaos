@@ -72,7 +72,7 @@ export default async function LayoutDaOrganizacao({
     { href: `/${idioma}/app/${orgSlug}/ir/stock`, rotulo: m.navegacao.inventario, accao: 'stock.ler' },
     { href: `/${idioma}/app/${orgSlug}/ir/compras`, rotulo: m.comprasE26.compras, accao: 'stock.gerir' },
     { href: `/${idioma}/app/${orgSlug}/ir/clientes`, rotulo: m.navegacao.clientes, accao: 'clientes.ler' },
-    { href: `/${idioma}/app/${orgSlug}/organization`, rotulo: m.navegacao.equipa, accao: 'equipa.ler' },
+    { href: `/${idioma}/app/${orgSlug}/ir/equipa`, rotulo: m.navegacao.equipa, accao: 'equipa.ler' },
     { href: `/${idioma}/app/${orgSlug}/ir/relatorios`, rotulo: m.navegacao.relatorios, accao: 'relatorios.ler' },
   ]
     .filter((l) => l.accao === null || permitidas.has(l.accao as never))

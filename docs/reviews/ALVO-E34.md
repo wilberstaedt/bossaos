@@ -83,7 +83,41 @@ apagam por estatística de uso).
 As funções do `qr.ts` e o `sobrepoe` existem para **verificar** o produto, não
 para o servir. Não é defeito; é peso num pacote que se publica.
 
-### 8. As assinaturas mudaram de sítio a meio, e isso engana quem procura
+### 8. As assinaturas mudaram de sítio a meio — e era PIOR do que isto dizia
+
+> **Reescrita a 05/09, depois de a medir.** O que estava aqui em baixo descrevia
+> um problema de arrumação: as quatro assinaturas na pasta antiga. A verdade era
+> outra e mais grave, e só apareceu por eu ir abrir os ficheiros em vez de
+> confiar na minha própria nota.
+
+**Três dos quatro documentos declaravam, no cabeçalho, «implementado, aguardando
+validação»** — e o do E12 anunciava uma assinatura retirada. As quatro etapas
+estavam validadas havia um dia, cada uma com commit próprio: `83d0a2b`,
+`1aac55d`, `d96ae76` e `8da8df4`. O que ficou por actualizar foi o cabeçalho,
+depois da segunda passagem.
+
+**A tabela e o documento respondiam à mesma pergunta de maneiras opostas — e
+quem lê abre o documento.** Um leitor novo conclui uma de duas coisas, ambas
+falsas: que quatro etapas passaram sem assinatura, ou que a tabela inflaciona a
+percentagem. Fui verificar essa segunda hipótese à história antes de soar o
+alarme, e a tabela estava certa — mas **ter de ir à história para saber qual das
+duas versões vale já é o defeito.**
+
+**Paga.** Os três cabeçalhos dizem agora o estado verdadeiro e o commit que o
+deu, e a história da volta perdida fica onde ensina, mais abaixo. E a classe
+ficou fechada com uma guarda, `validar-registo-coerente.sh`: uma etapa marcada
+`validado` na tabela não pode declarar-se à espera no seu próprio documento.
+Nasceu vermelha sobre os três, com controlo negativo, e entra na CI sozinha pelo
+glob das guardas.
+
+**Uma nota sobre como quase a estraguei.** As minhas notas de correcção citavam
+a frase proibida a contar a história, e a guarda acusou-me a mim — o mesmo que me
+aconteceu de manhã com a `validar-silenciadores` e um comentário do JR. A saída
+fácil era afrouxar a guarda para me acomodar. Reescrevi a nota. **Uma guarda que
+se alarga para deixar passar quem a escreveu deixa de ser uma guarda.**
+
+O resto, que era o que esta dívida dizia antes:
+
 
 **E09, E10, E12 e E13 estão validadas e não têm `docs/reviews/E##.md`.** Fui
 verificar se as assinei sem rever: **não.** A evidência está lá — réguas,

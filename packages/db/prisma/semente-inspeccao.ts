@@ -1207,6 +1207,97 @@ async function principal(): Promise<void> {
       ],
     });
 
+    // ── E28 · ponto: um turno ATRAVESSADO, uma correcção e um esquecimento ─
+    //
+    // «Uma prova que só use o turno que corre bem» é reprovação à cabeça. A
+    // semeadura põe as três formas: quem entrou às 18h07 e saiu às 00h42 da
+    // madrugada seguinte (turno atravessado, com divergência), uma correcção
+    // feita POR TERCEIRO, e alguém que entrou e nunca picou a saída.
+    const membrosDaCasa = await prisma.membership.findMany({
+      where: { organizationId: IDS.orgA }, select: { id: true }, orderBy: { createdAt: 'asc' },
+      take: 2,
+    });
+    if (membrosDaCasa.length >= 2) {
+      const trabalhador = membrosDaCasa[0]!.id;
+      const chefe = membrosDaCasa[1]!.id;
+      // ── O dia de serviço de HOJE, e não uma data fixa ─────────────────
+      //
+      // As telas abrem no dia de serviço corrente. Semear numa data fixa punha
+      // a prova a medir ecrãs vazios a partir do dia seguinte — verde sobre
+      // zero marcações, que é reprovação à cabeça.
+      //
+      // O corte é às 05h: antes disso, ainda é o dia anterior.
+      const FUSO_DA_CASA = 'Europe/Madrid';
+      const agora = new Date();
+      const diaCorrente = new Intl.DateTimeFormat('en-CA', {
+        timeZone: FUSO_DA_CASA, year: 'numeric', month: '2-digit', day: '2-digit',
+      }).format(new Date(agora.getTime() - 300 * 60_000));
+      const DIA = new Date(`${diaCorrente}T00:00:00Z`);
+      /** Um instante em hora da CASA, no dia de serviço semeado. */
+      const naCasa = (horas: number, minutos: number, diaSeguinte = false) => {
+        const base = new Date(DIA.getTime() + (diaSeguinte ? 86_400_000 : 0));
+        const civil = base.toISOString().slice(0, 10);
+        // A hora de parede convertida pelo fuso, sem `Z` colado: é a forma
+        // exacta do defeito que o E28 existe para não repetir.
+        const comoUtc = new Date(
+          `${civil}T${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:00Z`);
+        const local = new Date(comoUtc.toLocaleString('sv-SE', { timeZone: FUSO_DA_CASA })
+          .replace(' ', 'T') + 'Z');
+        return new Date(comoUtc.getTime() + (comoUtc.getTime() - local.getTime()));
+      };
+
+      const funcaoDeSala = await prisma.teamRole.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          nome: `${PREFIXO}Sala`,
+        },
+      });
+      await prisma.shift.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          membershipId: trabalhador, roleId: funcaoDeSala.id, diaDeServico: DIA,
+          // Das 18h às 24h. O turno atravessado do E28 usa minutos > 1440.
+          inicioMinutos: 1080, fimMinutos: 1440, nota: `${PREFIXO}sexta à noite`,
+        },
+      });
+      // Entrou às 18h07 e saiu às 00h42 do dia seguinte — dia de serviço, sexta.
+      const entrada = await prisma.timeEntry.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          membershipId: trabalhador, autorMembershipId: trabalhador,
+          tipo: 'ENTRADA', momento: naCasa(18, 7),
+          diaDeServico: DIA, origem: 'insp',
+        },
+      });
+      await prisma.timeEntry.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          membershipId: trabalhador, autorMembershipId: trabalhador,
+          tipo: 'SAIDA', momento: naCasa(0, 42, true),
+          diaDeServico: DIA, origem: 'insp',
+        },
+      });
+      // A correcção, feita pelo CHEFE — não é autocorrecção, e vê-se.
+      await prisma.timeEntry.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          membershipId: trabalhador, autorMembershipId: chefe,
+          tipo: 'ENTRADA', momento: naCasa(18, 0),
+          diaDeServico: DIA, corrigeId: entrada.id,
+          motivo: 'o relógio da porta estava atrasado sete minutos',
+        },
+      });
+      // E o chefe entrou e nunca picou a saída: jornada ABERTA, não de zero.
+      await prisma.timeEntry.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          membershipId: chefe, autorMembershipId: chefe,
+          tipo: 'ENTRADA', momento: naCasa(17, 0),
+          diaDeServico: DIA, origem: 'insp',
+        },
+      });
+    }
+
     // ── E18 · reservas: uma linha em cada lista, e nenhuma vazia ──────────
     //
     // As seis telas desta etapa são listas. Uma lista vazia mede o estado
