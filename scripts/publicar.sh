@@ -58,11 +58,20 @@ erro() { echo "ERRO: $1" >&2; exit 1; }
 AGUARDA="$(bash scripts/estado.sh 2>/dev/null | grep -oE 'AGUARDA=[0-9]+' | cut -d= -f2)"
 [ "${AGUARDA:-1}" = "0" ] || erro "há ${AGUARDA:-?} etapa(s) por validar — assina antes de publicar"
 
-# ── PORTÃO 2: árvore limpa ──────────────────────────────────────────────────
-[ -z "$(git status --porcelain | grep -vE 'capturas/|\.png$')" ] \
-  || erro "árvore suja — publicar daqui põe no ar o que não existe em commit nenhum"
-
-VERSAO="$(git rev-parse --short HEAD)"
+# ── PORTÃO 2: publica-se um COMMIT, não a árvore ────────────────────────────
+# A primeira versão exigia árvore limpa e depois fazia `rsync ./`, que envia o
+# disco. Duas coisas erradas na mesma linha: a verificação era uma *promessa* de
+# que o disco e o commit coincidiam, e o motor tem dois agentes a mexer na mesma
+# árvore — a minha nunca está limpa quando o JR trabalha.
+#
+# Agora publica-se por CONSTRUÇÃO: `git archive` de um commit. O que vai para o
+# ar existe em git porque não há outra maneira de lá chegar. É a mesma figura
+# que exijo ao produto — garantia por impossibilidade, não por regra.
+#
+# Por omissão, o último commit; ou o que for passado no primeiro argumento.
+REF="${1:-HEAD}"
+git rev-parse --verify --quiet "$REF^{commit}" >/dev/null || erro "commit inválido: $REF"
+VERSAO="$(git rev-parse --short "$REF")"
 echo "==> a publicar $VERSAO em $DOMINIO"
 
 # ── PORTÃO 3: os segredos vivem no servidor ─────────────────────────────────
@@ -76,14 +85,13 @@ $SSH "[ -f $RAIZ/.env.prod ]" \
 # ficheiro estático que o Next serve, escrito antes de construir. Se o build não
 # pegar, o servidor antigo continua a servir a marca ANTIGA — que é precisamente
 # a diferença que quero medir.
-mkdir -p apps/web/public
-echo "$VERSAO" > apps/web/public/versao.txt
-
-# `--delete` está fora de propósito e o `--exclude` do env é a segunda defesa da
-# mesma coisa: já comeu um .env noutro projecto deste vault.
-rsync -az --exclude='.git' --exclude='node_modules' --exclude='.next' \
-      --exclude='*.env*' -e "ssh -i $CHAVE" ./ "$VPS:$RAIZ/"
-rm -f apps/web/public/versao.txt
+# O envio: o commit inteiro, e nada do disco. Sem `--delete` em lado nenhum e
+# sem tocar no `.env.prod`, que vive lá e nunca sobe daqui.
+git archive --format=tar "$REF" | $SSH "mkdir -p $RAIZ && tar -x -C $RAIZ"
+# A marca da versão, escrita DEPOIS de extrair e ANTES de construir. Se o build
+# não pegar, o contentor antigo continua a servir a marca antiga — que é
+# precisamente a diferença que o portão 4 mede.
+$SSH "mkdir -p $RAIZ/apps/web/public && echo '$VERSAO' > $RAIZ/apps/web/public/versao.txt"
 
 # ── Base, migrações e build, tudo no servidor ───────────────────────────────
 # Docker, como os outros tres produtos desta caixa. A primeira versao usava
