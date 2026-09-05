@@ -1,7 +1,7 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E28 — equipa, escalas e ponto (**11 telas**).
-**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — as duas fatias.**
+**Etapa atual:** E29 — Financeiro e conciliação (**11 telas**, FIN-001 a 011).
+**Estado:** **EM CURSO.** E28 assinado a 05/09 em `7d12db9` (`docs/reviews/E28.md`). Contrato `conciliacao-e-fecho.md` e régua `ALVO-E29.md` escritos **antes** do código.
 
 **O que muda:** esta etapa mexe no **salário de quem trabalha na casa**, e quem é
 prejudicado por um defeito aqui é a pessoa com menos poder para o contestar. Um
