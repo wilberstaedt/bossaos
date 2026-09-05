@@ -8,6 +8,60 @@
 
 ---
 
+## O QUE MUDOU A 05/09 — lê isto antes do prompt
+
+Este ficheiro era de 03/09 e não sabia nada do que se segue. Um documento de
+emergência só é lido na emergência, que é o pior momento para descobrir que está
+velho.
+
+### As regras que passaram a valer, e porquê
+
+- **Verificação de alcance EXAUSTIVA por etapa, nunca amostrada.** Assinei o E20
+  dizendo que verifiquei o alcance tendo verificado **cinco funções de oito**.
+  Escolher a olho reproduz o viés que a varredura existe para eliminar: olha-se
+  para as funções de que nos lembramos, e as esquecidas são as que ninguém chama.
+- **Para cada aceite, apontar a linha de PRODUTO que o exercita.** O E19 tinha a
+  suite verde com 35 controlos negativos e o `enfileirar` com zero chamadas — o
+  histórico de mensagens estava sempre vazio. **Verde não é alcance.**
+- **Fixar os critérios de reabertura ANTES de ver a correcção, e escrever também
+  o que NÃO se exige.** A lista negativa é o que impede acrescentar condições ao
+  ver a entrega.
+- **Um vermelho que aparece uma vez é observação, não achado.** Repetir antes de
+  chamar defeito — e sobretudo antes de chamar defeito de segurança.
+- **Não concluir de árvore suja.** Quebrei esta hoje e apanhei-me por acaso.
+
+### O aparelho de revisão: três armadilhas que já custaram horas
+
+1. **Os `provar-*.sh` carregam `.env` na linha 14, DEPOIS das exportações.** O
+   `.env` da árvore de revisão apontava para `bossaos_dev` — a base do JR — e
+   todas as provas por script batiam nela enquanto ele escrevia. Corrigido no
+   `.env` da árvore; se voltar a haver vermelhos que mudam de sítio, é o primeiro
+   sítio a olhar.
+2. **A base de revisão tem de NASCER VAZIA.** O `dev-db.sh` concede
+   `DELETE ON ALL TABLES` e 23 migrações revogam por cima; numa base já migrada o
+   GRANT volta a correr e os REVOKE não. O `base-de-revisao.sh` já apaga e recria,
+   **e semeia no fim** — se disser «0 organizacoes», parar.
+3. **Silenciar `stderr` transforma uma recusa numa medição.** Perdi medições com
+   `git checkout` recusado e `prisma generate` falhado, os dois mandados para
+   `/dev/null`. Num passo de preparação, silencia-se o sucesso, nunca o erro.
+
+### O estado, e o que está por fechar
+
+- **63% das etapas (23/36), 71% das telas (285/396).** E18–E20, E22, E23
+  assinados. E21 é revisão minha, feita. E24 em curso.
+- **O marco do Restaurant foi REPROVADO e reaprovado à 2ª.** Reprovei porque as
+  254 telas estavam certas e ninguém chegava lá. A reaprovação é executável:
+  `scripts/provar-marco-e21.sh`, que responde aos três bloqueios pelo nome.
+- **35 das 48 provas não correm na CI**, e a CI está trancada por facturação. A
+  causa é a CI listar as provas à mão; o `provar-tudo.sh` já descobre por glob e
+  não é chamado. `docs/reviews/E21-CI.md`.
+- **O E00 continua por assinar** — é meu, e só o JR o pode julgar. O dossiê tem
+  a prova a favor **e** a prova contra.
+- **Sete decisões são do Matheus**, incluindo os requisitos fiscais por confirmar
+  na fonte: `docs/progress/DECISOES-DO-MATHEUS.md`.
+
+---
+
 ## Prompt (colar a partir daqui)
 
 És o **Lúmen sénior** no BossaOS, `~/Developer/projects/bossaos`. Não implementas: o
