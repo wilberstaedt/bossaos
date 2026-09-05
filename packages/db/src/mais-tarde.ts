@@ -394,3 +394,50 @@ export async function agendadosEmRisco(
     }))
     .filter((p) => p.itensEsgotados.length > 0);
 }
+
+/**
+ * A fila de um canal: o que está aceite e ainda não saiu.
+ *
+ * ── Um só banco de pedidos, e um filtro por canal ─────────────────────────
+ *
+ * «Crie filtros e telas por canal sem manter bancos de pedidos independentes.»
+ * Isto é uma consulta com `canal` no `where` — e é tudo. Um pedido de takeaway
+ * continua a ser um `Order`, com as mesmas linhas, as mesmas tarefas de produção
+ * e os mesmos números no relatório.
+ *
+ * ── E não traz a morada ───────────────────────────────────────────────────
+ *
+ * «Não exponha endereços ou telefones nas telas públicas de fila.» A morada vive
+ * noutra tabela e esta consulta não lhe toca: não é uma coluna que alguém tenha
+ * de se lembrar de não seleccionar.
+ */
+export async function filaDoCanal(
+  db: ClienteComEscopo, locationId: string, canal: 'TAKEAWAY' | 'DELIVERY',
+): Promise<{
+  id: string; numero: string; estado: string;
+  entregarAs: Date | null; producaoEm: Date | null; naCozinha: boolean;
+}[]> {
+  const [agora] = await db.$queryRaw<{ agora: Date }[]>`SELECT now() AS agora`;
+  const linhas = await db.order.findMany({
+    where: { locationId, canal, estado: { in: ['ACEITE', 'EM_PREPARO', 'PRONTO'] } },
+    orderBy: [{ producaoEm: 'asc' }, { createdAt: 'asc' }],
+    select: { id: true, numero: true, estado: true, entregarAs: true, producaoEm: true },
+  });
+  return linhas.map((l) => ({
+    ...l,
+    // Já entrou na cozinha? A mesma pergunta que o KDS faz, com o mesmo relógio.
+    naCozinha: l.producaoEm === null || l.producaoEm <= agora!.agora,
+  }));
+}
+
+/** Marca a saída — retirado ao balcão, ou entregue à porta. */
+export async function marcarSaida(
+  db: ClienteComEscopo, orderId: string, canal: 'TAKEAWAY' | 'DELIVERY',
+): Promise<void> {
+  if (canal === 'DELIVERY') {
+    await db.orderDelivery.updateMany({
+      where: { orderId }, data: { entregueEm: new Date() },
+    });
+  }
+  await db.order.update({ where: { id: orderId }, data: { estado: 'ENTREGUE' } });
+}

@@ -63,6 +63,8 @@ export interface Alvos {
   esperaViva: string;
   /** E19: a reserva de HOJE, com mesa. Sem ela, as telas do host mediam a agenda vazia. */
   reservaDeHoje: string;
+  /** E20: o pedido de takeaway JÁ na cozinha. Sem ele, o TAKE-002 media um 404. */
+  pedidoParaLevar: string;
 }
 
 const PREFIXO = 'insp-';
@@ -141,7 +143,19 @@ export async function resolverAlvos(): Promise<Alvos> {
       // media o ecrã de um aparelho que a primeira já tinha retirado.
       deviceId: await um(sql, `SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%' AND estado = 'ACTIVO' LIMIT 1`, 'um dispositivo activo'),
       deviceRevogavelId: await um(sql, `SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%' AND estado = 'PENDENTE' LIMIT 1`, 'um dispositivo por aprovar'),
-      orderId: await um(sql, `SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' LIMIT 1`, 'um pedido'),
+      // ── `LIMIT 1` sem ordem não é um alvo, é uma lotaria ─────────────────
+      //
+      // Isto era `numero LIKE '${PREFIXO}%' LIMIT 1`, e havia **nove** pedidos a
+      // casar: A001, C001, quatro do KDS e os três do E20. Só o A001 tem a linha
+      // aceite e a rejeitada lado a lado, que é o que o `pedidos.spec` mede — os
+      // outros oito fazem-no ficar vermelho a dizer «a linha aceite desapareceu».
+      //
+      // Passava por sorte da ordem física das linhas, e já eram seis bilhetes
+      // antes do E20; as três linhas novas só mudaram o baralho. Um resultado que
+      // depende da ordem em que a base devolve linhas não é um resultado.
+      //
+      // O alvo passa a dizer o nome do pedido que significa.
+      orderId: await um(sql, `SELECT id FROM orders WHERE numero = '${PREFIXO}A001'`, 'o pedido insp-A001'),
       unidadeDoStaff: await um(
         sql,
         `SELECT id FROM locations WHERE organization_id = '${ORG_A}'
@@ -193,6 +207,10 @@ export async function resolverAlvos(): Promise<Alvos> {
         `SELECT id FROM reservations
           WHERE chave_idempotente = '${PREFIXO}reserva-de-hoje' LIMIT 1`,
         'a reserva de hoje do arnês'),
+      pedidoParaLevar: await um(
+        sql,
+        `SELECT id FROM orders WHERE numero = '${PREFIXO}L0' LIMIT 1`,
+        'o pedido de takeaway do arnês'),
     };
   } finally {
     await sql.end();

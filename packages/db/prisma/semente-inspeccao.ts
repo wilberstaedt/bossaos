@@ -769,6 +769,54 @@ async function principal(): Promise<void> {
     }
     void expo;
 
+    // ── E20 · takeaway e entrega, com dados para as telas medirem ─────────
+    //
+    // «Verde sobre fila de retirada vazia» é o que a régua reprova à cabeça. Sem
+    // estas linhas, as sete telas mediam «não há pedidos», «nenhuma zona» e
+    // «nenhum produto mapeado» — ecrãs reais, e os ecrãs FÁCEIS.
+    //
+    // Um pedido JÁ na cozinha e outro que AINDA não entrou: são os dois estados
+    // que a fila separa, e sem os dois a separação não se vê.
+    await prisma.deliveryArea.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Puerto`, codigoPostal: '12594', taxaMenor: 250, moeda: 'EUR',
+      },
+    });
+    const produtoParaMapear = await prisma.product.findFirst({
+      where: { nome: { startsWith: PREFIXO } }, select: { id: true },
+    });
+    if (produtoParaMapear) {
+      await prisma.externalCatalogMapping.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          canalExterno: 'parceiro', idExterno: 'burger-4', productId: produtoParaMapear.id,
+        },
+      });
+    }
+    for (const [i, minutos] of [-30, 180].entries()) {
+      const entregarAs = new Date(Date.now() + minutos * 60 * 1000);
+      await prisma.order.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          canal: i === 0 ? 'TAKEAWAY' : 'DELIVERY',
+          numero: `${PREFIXO}L${i}`, estado: 'ACEITE',
+          abertoPor: 'painel@inspeccao.example',
+          entregarAs, preparoMin: 25,
+        },
+      });
+    }
+    // E um de takeaway que ainda não entrou na cozinha, para a lista «por entrar»
+    // ter o que mostrar.
+    await prisma.order.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        canal: 'TAKEAWAY', numero: `${PREFIXO}L2`, estado: 'ACEITE',
+        abertoPor: 'painel@inspeccao.example',
+        entregarAs: new Date(Date.now() + 180 * 60 * 1000), preparoMin: 25,
+      },
+    });
+
     // ── E18 · reservas: uma linha em cada lista, e nenhuma vazia ──────────
     //
     // As seis telas desta etapa são listas. Uma lista vazia mede o estado

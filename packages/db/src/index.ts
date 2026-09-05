@@ -293,6 +293,7 @@ export {
   areaQueServe, guardarArea, listarAreas, marcarParaEntrega,
   conectorDeEntrega, guardarConectorDeEntrega, guardarMapaExterno,
   listarMapasExternos, receberPedidoExterno, agendadosEmRisco,
+  filaDoCanal, marcarSaida,
   type HoraDeEntrega, type RecusaDeAgendamento, type ResultadoDaArea,
   type ConectorDeEntrega, type ResultadoExterno, type PedidoEmRisco,
 } from './mais-tarde.ts';

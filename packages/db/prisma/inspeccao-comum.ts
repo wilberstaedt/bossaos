@@ -110,7 +110,17 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     DELETE FROM order_events         WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example');
     DELETE FROM order_lines          WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example');
     DELETE FROM order_submissions    WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example');
+    DELETE FROM order_deliveries     WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example');
     DELETE FROM orders               WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example';
+    -- ── O crachá é o PRODUTO, e não a unidade ──────────────────────────
+    --
+    -- As unidades são fixtures e não levam prefixo: puerto, e não insp-alguma.
+    -- Filtrar por locations LIKE insp- não apanhava nada, e o mapa ficava a
+    -- prender o produto por chave estrangeira. É o mesmo erro que os pedidos me
+    -- fizeram no E17, na mesma tabela de fixtures.
+    DELETE FROM external_catalog_mappings WHERE product_id IN (SELECT id FROM products WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM delivery_connectors  WHERE provedor LIKE '${PREFIXO}%';
+    DELETE FROM delivery_areas       WHERE nome LIKE '${PREFIXO}%';
     DELETE FROM reservation_allocations WHERE location_id IN (SELECT id FROM locations WHERE slug LIKE '${PREFIXO}%') OR table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%');
     DELETE FROM reservations         WHERE criada_por LIKE '%@inspeccao.example' OR criada_por = 'publico';
     DELETE FROM reservation_settings WHERE location_id IN (SELECT id FROM locations WHERE slug LIKE '${PREFIXO}%');
@@ -197,6 +207,8 @@ export async function restos(prisma: PrismaClient): Promise<number> {
     + (SELECT count(*) FROM service_windows     WHERE nome LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM reservations        WHERE criada_por LIKE '%@inspeccao.example')
     + (SELECT count(*) FROM reservation_blocks  WHERE motivo LIKE '${PREFIXO}%')
+    + (SELECT count(*) FROM delivery_areas      WHERE nome LIKE '${PREFIXO}%')
+    + (SELECT count(*) FROM external_catalog_mappings WHERE product_id IN (SELECT id FROM products WHERE nome LIKE '${PREFIXO}%'))
     + (SELECT count(*) FROM guest_sessions      WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%'))
   ) AS total`);
   return Number(r[0]?.total ?? 0);

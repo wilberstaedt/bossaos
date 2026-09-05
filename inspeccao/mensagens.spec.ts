@@ -67,7 +67,18 @@ test('e AS 28 DO E19 estão todas na matriz como feitas', async () => {
   const csv = await readFile('docs/progress/coverage.csv', 'utf8');
   const linhas = csv.split('\n').slice(1).map(colunas).filter((c) => c[6] === 'E19');
   expect(linhas.length, 'a matriz não tem 28 telas no E19').toBe(28);
-  const feitas = linhas.filter((c) => c[16] === 'implementado aguardando validação');
+  // ── «Feita» tem mais que um nome, e o segundo é MELHOR que o primeiro ──
+  //
+  // Isto exigia a palavra `implementado aguardando validação`, que era o estado
+  // do E19 no dia em que a guarda foi escrita. Quando o sénior assinou o E19 e
+  // passou as 28 a `validado` (3ee1383), a guarda ficou vermelha por a etapa ter
+  // AVANÇADO — mediu o nome do estado, não o facto de a tela estar feita.
+  //
+  // Não é calibrar ao que existe: `validado` é uma forma mais forte de feita, e o
+  // conjunto continua a excluir `planejado` e `em execução`. Uma tela por
+  // construir continua a acender isto — é o controlo negativo desta linha.
+  const DECLARADAS = new Set(['implementado aguardando validação', 'validado']);
+  const feitas = linhas.filter((c) => DECLARADAS.has(c[16] ?? ''));
   expect(feitas.length, 'nem todas as 28 estão declaradas').toBe(28);
 
   const daMatriz = linhas.map((c) => c[0]?.trim() ?? '')

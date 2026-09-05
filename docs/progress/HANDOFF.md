@@ -1,8 +1,8 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E20 — Takeaway e delivery (**7 telas**).
-**Estado desta fatia:** **MIGRAÇÃO E MOTOR — IMPLEMENTADO, AGUARDANDO
-VALIDAÇÃO.** Declarado pelo JR; não assinado. **As 7 telas não estão feitas.**
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — etapa completa, as duas
+fatias.** Declarado pelo JR; não assinado.
 **Contratos que mandam:** `pedidos-para-mais-tarde.md` (escrito para esta etapa)
 e `kds-e-tempo-real.md`. Régua: `docs/reviews/ALVO-E20.md`.
 **Detalhe e achados:** `docs/progress/E20.md`.
@@ -35,15 +35,72 @@ guarda é a **deriva**, não o fuso), e o controlo negativo foi construído em c
 dessa razão errada e ficou verde por isso; e o caso do «maior das linhas» media
 um pedido de **uma** linha, onde máximo e soma são o mesmo número.
 
+## As 7 telas, e o que elas NÃO fazem
+
+**STAFF-021, TAKE-001/002/003, DEL-001/002/003.** A fila não calcula nada:
+pergunta à base e mostra. O «já entrou na cozinha?» vem do `now()` da **base**,
+não do relógio do navegador — duas pessoas em dois postos vêem a mesma fila
+porque a pergunta é feita ao mesmo relógio.
+
+**O canal é um argumento da mesma consulta**, não uma tela separada, e é por isso
+que o par da régua passa: o filtro **esconde da sala sem tirar da cozinha**. As
+tarefas de produção do E16 continuam a ver o pedido.
+
+**A morada não chega à fila porque não está na consulta.** `filaDoCanal` lê
+`orders`; a morada vive em `order_deliveries`. Garantia por **ausência** — o
+controlo negativo tem de a acrescentar à mão para a tela a mostrar.
+
+**O formulário manda dia e hora SEPARADOS** e a rota passa-os assim a
+`agendarPedido`, que os resolve no fuso da unidade. A rota nunca constrói
+`new Date('…Z')`: era aí que a hora de parede virava UTC.
+
+**Achado meu, e é da prova.** O controlo do filtro por canal **não compilava**:
+a âncora do plante era `SELECT now() AS agora`, que aparece **três vezes** no
+ficheiro, e o `replace(…, 1)` acertou na primeira — outra função, onde `canal`
+nem existe. O vermelho vinha de um ficheiro partido, e um ficheiro partido passa
+por controlo negativo sem provar nada. Passou a recortar a função pelo nome.
+Segundo achado do mesmo lote: o controlo da fila vazia apagava os **dois**
+pedidos semeados e levava com eles o alvo que o arnês resolve no arranque — a
+suite morria no `beforeAll` e o vermelho era da guarda do arnês. Passou a apagar
+só a entrega.
+
+E um erro de medição que não chegou a ficheiro nenhum: verifiquei âncoras do
+guião **com a suite a correr** e li um ficheiro no instante em que estava
+plantado. Não se mede um ficheiro que a prova está a mutar.
+
 **O que está pronto para medir** — códigos de saída lidos directamente:
 `pnpm verificar` (**0**) · `./scripts/provar-mais-tarde.sh` (5 grupos, **26
-casos, 11 defeitos plantados**, 0) · `provar-producao.sh` (0) ·
-`provar-pedidos.sh` (0) · `provar-produto.sh` (0) ·
-`provar-migracoes-do-zero.sh` (0).
+casos, 11 defeitos plantados**, 0) · `./scripts/provar-levar-no-navegador.sh`
+(**24 casos**, 7 telas × 5 larguras + toque, contraste e 3 idiomas, **7
+controlos negativos**, 0) · `provar-producao.sh` (0) · `provar-pedidos.sh` (0) ·
+`provar-produto.sh` (0) · `provar-migracoes-do-zero.sh` (0) ·
+`./scripts/provar-alvos-e-matriz.sh` (33 casos, 2 controlos negativos, 0) ·
+`pnpm inspeccionar` (**538 casos, 0**).
 
-**O que NÃO está feito:** as **7 telas**, e por isso **nenhuma medição de
-navegador** nesta fatia. O pagamento é a E23. **Nenhum pedido externo real** — o
-conector está desligado e nada finge ter recebido de um parceiro.
+**À PRIMEIRA o `pnpm inspeccionar` deu 1**, com 536 verdes e DUAS vermelhas — e
+nenhuma delas era do E20.** Isso é pior do que se fossem, e as duas são a mesma
+forma: uma guarda que media a circunstância em vez do facto.
+
+A primeira: o alvo `orderId` do arnês era `numero LIKE 'insp-%' LIMIT 1`, **sem
+ordem**, com **nove** pedidos a casar — e só o `insp-A001` tem a linha aceite e a
+rejeitada lado a lado. Passava por sorte da ordem física das linhas, e já eram
+seis bilhetes antes do E20; as minhas três só mudaram o baralho. `LIMIT 1` sem
+`ORDER BY` não é um alvo, é uma lotaria. O alvo passa a dizer o nome do pedido.
+
+A segunda: a guarda das 28 telas do E19 exigia a palavra `implementado aguardando
+validação`. Quando o E19 foi assinado e passou a `validado` (`3ee1383`), ela ficou
+vermelha **por a etapa ter avançado** — media o nome do estado, não o facto de a
+tela estar feita. Passa a aceitar as duas palavras, e continua a excluir
+`planejado` e `em execução`, que é o controlo negativo dela.
+
+**Pendência declarada, medida e não corrigida:** os alvos `productId` (**5**
+linhas a casar), `menuId` (**2**), `categoryId` e `groupId` têm a mesma forma de
+lotaria. Não lhes toquei porque servem provas de etapas já assinadas e mudá-los
+sem necessidade era arriscar o que está verde. Fica para o sénior decidir.
+
+**O que NÃO está feito:** o pagamento, que é a E23 — estas telas registam o
+pedido e não cobram. **Nenhum pedido externo real** — o conector está desligado e
+nada finge ter recebido de um parceiro.
 
 **A prova foi LOCAL.** A CI continua trancada por facturação do GitHub.
 
