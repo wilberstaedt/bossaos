@@ -44,6 +44,25 @@ cozinha**.
 
 ---
 
+## A dívida de móvel deixou de estar vazia — 05/09
+
+**46 telas** estão em `docs/progress/DIVIDA-MOVEL.txt`, e fui **eu** que as
+lá pus. A `validar-movel.sh` apanhou que assinei telas sem **afirmar** que medi o
+móvel — as provas medem-no (360×780 e 390), mas a assinatura calava-o.
+
+Afirmei as que tinha corrido e visto verdes; **declarei o resto em vez de o
+afirmar de memória**. Saem quando alguém correr a prova de navegador da etapa.
+
+Se este prompt afirmar que já não há nada em `DIVIDA-MOVEL.txt`, está
+desactualizado — a `validar-handoff.sh` verifica isso e foi ela que me apanhou.
+
+*(Escrevi esta nota com a frase que a própria guarda procura, e ela acusou-me de
+dizer que a dívida não existia. Um detector que casa a frase sem ler o sentido é
+a família que passei a sessão a apanhar; reescrevi a frase em vez de afrouxar o
+detector.)*
+
+---
+
 ## Prompt (colar a partir daqui)
 
 És o **Lúmen JR**. Trabalhas no BossaOS, em `~/Developer/projects/bossaos`, e não estás
@@ -149,7 +168,7 @@ Aponta-se, não se copia: um documento lido só na emergência envelhece sem nin
 isso — já aconteceu com o prompt do sénior a 03/09, que listava como pendente uma coisa
 feita há uma hora.
 
-- **`docs/progress/DIVIDA-MOVEL.txt` — a dívida está VAZIA desde 04/09.** As 112 telas até
+- **`docs/progress/DIVIDA-MOVEL.txt` — a dívida NÃO está vazia (46 itens) desde 04/09.** As 112 telas até
   ao marco estão validadas **e** medidas em móvel. A `validar-movel.sh` continua a reprovar
   dívida **nova**, e a `validar-movel-real.sh` cruza a frase «móvel medido» com os specs que
   a medem — sem esse cruzamento, pagar a dívida era escrever seis palavras na coluna certa.

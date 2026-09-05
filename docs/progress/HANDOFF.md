@@ -1,6 +1,6 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E25 — stock e fichas técnicas (**12 telas**).
+**Etapa atual:** E26 — fornecedores e compras (**6 telas**).
 **Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — as duas fatias.**
 
 **O núcleo:** o stock **não é uma coluna**, é um saldo derivado de movimentos —
@@ -64,11 +64,15 @@ conhecida é uma guarda que as pessoas aprendem a saltar.
 **Contrato:** `docs/architecture/stock-e-fichas.md`, escrito antes do código.
 **Detalhe:** `docs/progress/E25.md`.
 
-## O texto anterior, mantido por baixo
+## O texto anterior, mantido por baixo — HISTÓRICO, não estado
+
+> As linhas abaixo descrevem etapas **já assinadas**. Ficam para se ver a
+> sequência, e nenhuma delas é o estado de agora. O estado está no topo, e vem
+> de `scripts/estado.sh`.
 
 
 **Etapa atual:** E24 — documentos e integração fiscal (**5 telas**).
-**Estado:** **RETIDO por ALCANCE e CONSERTADO — reentregue, aguardando validação.**
+**Estado (histórico, E24):** foi retido por alcance, consertado e **assinado**.
 
 **A retenção:** o ciclo do documento fiscal não tinha porta, e arrastava a dívida
 do E23 — `receberWebhook`, `reconciliarComProvedor` e `acontecimentosDaConta`
@@ -253,7 +257,7 @@ quem dispara é a que compara o `href`.
 ---
 
 **Etapa atual:** E22 — TPV, contas e caixa (**19 telas**).
-**Estado:** **RETIDO e CONSERTADO — reentregue, aguardando validação.** Declarado
+**Estado (histórico):** retido, consertado e **assinado**. Declarado
 pelo JR; não assinado.
 
 **A retenção foi UMA coisa, e não era do dinheiro: as 19 telas não tinham porta.**
@@ -475,8 +479,8 @@ desta vez a régua **não** precedeu todo o código e dizê-lo é o que a manté
 | E06 — onboarding e configuração do restaurante | **validado à 2ª** · `docs/progress/E06.md`. A 1ª validação foi retirada pela CI: a cadeia de migrações não se aplicava do zero. |
 | E07 — catálogo, produtos, preços e opções | **validado à 1ª** · `docs/reviews/E07.md` |
 | E08 — média, traduções, importação e publicação | **validado à 2ª** · `docs/reviews/E08.md` |
-| E09 — carta pública e QR de consulta | implementado, **aguardando validação** · `docs/progress/E09.md`. As cinco telas internas da dívida de móvel saíram pagas no E10. |
-| E10 — sites dos restaurantes e landing | implementado, **aguardando validação** · `docs/progress/E10.md`. 29 telas, medidas em cinco larguras. |
+| E09 — carta pública e QR de consulta | **validado** · `docs/progress/E09.md`. As cinco telas internas da dívida de móvel saíram pagas no E10. |
+| E10 — sites dos restaurantes e landing | **validado** · `docs/progress/E10.md`. 29 telas, medidas em cinco larguras. |
 
 **Primeiras telas.** O E02 é a primeira etapa que toca `coverage.csv`: STATE 001-003,
 005, 007 e 016. Até aqui o medidor de telas esteve a 0 % e isso era verdade, não uma
