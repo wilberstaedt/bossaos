@@ -128,10 +128,12 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     ALTER TABLE time_entries ENABLE TRIGGER USER;
     DELETE FROM shifts               WHERE nota LIKE '${PREFIXO}%';
     DELETE FROM team_roles           WHERE nome LIKE '${PREFIXO}%';
+    DELETE FROM financial_movements  WHERE location_id IN (SELECT id FROM locations WHERE slug LIKE '${PREFIXO}%');
     DELETE FROM reconciliations      WHERE bank_line_id IN (SELECT id FROM bank_lines WHERE account_id IN (SELECT id FROM bank_accounts WHERE nome LIKE '${PREFIXO}%'));
     DELETE FROM bank_lines           WHERE account_id IN (SELECT id FROM bank_accounts WHERE nome LIKE '${PREFIXO}%');
     DELETE FROM statement_imports    WHERE account_id IN (SELECT id FROM bank_accounts WHERE nome LIKE '${PREFIXO}%');
     DELETE FROM bank_accounts        WHERE nome LIKE '${PREFIXO}%';
+    DELETE FROM locations            WHERE slug LIKE '${PREFIXO}canarias' OR slug LIKE '${PREFIXO}sin-datos';
     DELETE FROM financial_movements  WHERE conceito LIKE '${PREFIXO}%';
     DELETE FROM exchange_rates       WHERE fonte LIKE '${PREFIXO}%';
     DELETE FROM campaign_deliveries  WHERE customer_id IN (SELECT id FROM customers WHERE nome LIKE '${PREFIXO}%');

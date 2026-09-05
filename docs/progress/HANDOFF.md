@@ -1,45 +1,54 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E30 — Analytics, relatórios e gestão multiunidade (**9 telas**).
-**Estado:** **EM CURSO.** E29 assinado a 06/09 em `d90310b` (`docs/reviews/E29.md`), retido à primeira e devolvido com duas portas fechadas. Contrato `relatorios-e-agregacao.md` e régua `ALVO-E30.md` escritos **antes** do código.
+**Etapa atual:** E30 — analytics, relatórios e gestão multiunidade (**9 telas**).
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — com pendência de MÁQUINA.**
 
-**A retenção, e o sénior tinha razão:** a rota fazia
-`montanteMenor: Number(l.montante)` antes de chamar o motor, e o `BigInt()` do
-motor corria **depois** — já sobre um número aproximado. O sítio é o pior
-possível: a importação de extracto é **a única porta por onde entra dado
-externo**, e a validação `/^-?\d+$/` aceita trinta dígitos.
+**O que muda:** todas as anteriores produziam factos; **esta produz opiniões
+sobre factos**. E é a primeira em que o defeito muda o comportamento de uma
+**pessoa** e não do sistema — um relatório errado faz um gerente fechar um turno,
+com o código verde enquanto a decisão é tomada.
 
-**A cura é a do E27 — tirar a necessidade, não gerir o risco.** O tipo alargou-se
-para aceitar a **cadeia validada**, que viaja inteira até ao `BigInt()`.
+**Ausência não é zero**, e nada aqui devolve um número solto: todo o agregado é
+`Medido<T>`. `0 €` ao almoço diz que a casa abriu e não vendeu; sem dados diz que
+ninguém sabe. As duas escrevem-se diferente no ecrã, lado a lado.
 
-**E o defeito estava numa SEGUNDA porta que não constava da retenção:** o
-`registar_despesa` convertia da mesma maneira. A lição é da fronteira, e a
-fronteira tem duas portas — o dinheiro passou a ter leitor próprio
-(`dinheiroEmTexto`), separado do dos inteiros pequenos.
+**O denominador viaja com o numerador** — e não existe `mediaDeMedias`, não por
+ser difícil mas porque existir era convidar alguém a chamá-la. **O período
+resolve-se por unidade** com a regra do E28. **Duas organizações não se somam.**
 
-**O local que era seguro mudou na mesma.** `Number(b - a)` num comparador é
-exacto, mas **seguro-com-explicação é pior do que desnecessário**: é uma linha
-que alguém copia para onde não é segura, e obriga a guarda a tolerar excepções.
-A `validar-dinheiro.sh` está agora a zero **sem nenhuma**.
+**A última entrada morta do menu de gestão está fechada.** O `início` leva à
+comparação entre unidades, e o ramo que propagava o `porConstruir` ficou código
+morto — apanhado pelo typecheck e removido. O controlo de portas passa a ter o
+produto inteiro do lado de dentro.
 
-**E o meu primeiro caso de prova media a coisa errada:** vinte e cinco dígitos
-caem fora do `BIGINT` e o caso falhava com «out of range» — media o limite da
-**coluna**, não a perda de precisão. A janela real é entre 2⁵³ e 2⁶³. Um teste
-que falha pela razão errada não é um teste, e há agora um caso que mede que o
-defeito era possível naquele valor.
-
-**O resto da etapa mantém-se:** identidade derivada com índice único e a **ordem
-no dia** pelo par; nada se auto-confirma; conciliado **derivado** (terceira vez);
-fechar proíbe por gatilho e não copia totais; moedas não se somam. E **quatro**
-funções que estavam sem chamador — `importarExtracto`, `sugerirCorrespondencia`,
-`fecharPeriodo`, `converterTotal` — foram ligadas com casos a medi-las.
+**Achados:** escrevi por cima do `relatorios.ts` do E14 e apaguei seis
+exportações — **criar um ficheiro sem verificar se ele existe é uma escrita
+destrutiva disfarçada de escrita nova**. Uma guarda minha lia prosa em vez de
+código. A guarda das rotas voltou a mandar funções puras para o domínio, como no
+E28. E **duas vezes um plante tirou uma instância do caso e não o caso** — o
+controlo ficou verde nas duas.
 
 **Provas (LOCAIS — a CI continua trancada pela facturação do GitHub):**
-`provas/financeiro.test.ts` **0** (**28 casos**, repetível) ·
-`provar-financeiro.sh` **0** (**13 controlos**, dois deles da precisão nas duas
-portas) · `provar-financeiro-no-navegador.sh` **0** (**31 casos, 9 controlos**) ·
-`validar-dinheiro.sh` **0** sem excepções ·
-`pnpm verificar` **0** · `pnpm inspeccionar` **0** (**740 casos**).
+`provas/analitica.test.ts` **0** (**14 casos**, repetível) ·
+`provar-analitica.sh` **0** (**8 controlos**) ·
+`inspeccao/analitica.spec.ts` **0** (**28 casos**, 5 larguras, ES/PT/EN, 44 px) ·
+`provar-analitica-no-navegador.sh` **0** (**8 controlos**) ·
+`pnpm verificar` **0**.
+
+## ⚠ PENDÊNCIA DE MÁQUINA — `pnpm inspeccionar` não correu sobre esta árvore
+
+`mac-health.sh` dá **PERIGO**: 3,1 GB disponíveis, 61 MB livres, uma aplicação de
+2,7 GB aberta. **Três corridas do portão foram mortas a meio por falta de
+memória** — nenhuma com teste vermelho. Não lancei a inspecção completa nesse
+estado e **não uso o número da corrida anterior**, que é anterior aos consertos
+desta fatia.
+
+E a interrupção deixou rasto: um plante do guarda de classes ficou no
+`catalogo/page.tsx`. Reposto do git, e os outros modificados varridos — nenhum
+mais. **Um guião morto a meio deixa o artefacto com o defeito plantado.**
+
+**Contrato:** `docs/architecture/relatorios-e-agregacao.md` (do sénior, por fronteira).
+**Detalhe:** `docs/progress/E30.md`.
 
 ## ⚠ PENDÊNCIA DECLARADA — sem contabilidade legal e sem leitor de formatos
 

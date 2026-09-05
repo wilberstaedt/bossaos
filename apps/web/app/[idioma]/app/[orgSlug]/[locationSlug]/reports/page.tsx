@@ -81,6 +81,21 @@ export default async function Relatorio({
         <a href={`/${idioma}/app/${orgSlug}/${locationSlug}/reports/cozinha`} data-seccao="REP-009">
           {m.kdsE16.temposDeCozinha}
         </a>
+        {/* ── As sete do E30, e a porta de cada uma ────────────────────────
+            Sete telas atrás de uma entrada só seriam sete telas sem porta —
+            foi o que o E27 apanhou com catorze. */}
+        {([
+          ['trabalho', m.analiticaE30.trabalho],
+          ['pagamentos', m.analiticaE30.pagamentos],
+          ['armazem', m.analiticaE30.armazem],
+          ['custos', m.analiticaE30.custos],
+          ['recorrencia', m.analiticaE30.recorrencia],
+          ['campanhas', m.analiticaE30.campanhas],
+          ['medida', m.analiticaE30.medida],
+        ] as const).map(([caminho, rotulo]) => (
+          <a key={caminho} data-seccao={caminho}
+             href={`/${idioma}/app/${orgSlug}/${locationSlug}/reports/${caminho}`}>{rotulo}</a>
+        ))}
       </nav>
 
       {dados.total === 0 ? (

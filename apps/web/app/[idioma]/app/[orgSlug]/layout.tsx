@@ -47,7 +47,9 @@ export default async function LayoutDaOrganizacao({
     // Fica marcado com o E30, que é quem faz a gestão multiunidade e revisita
     // as ORG-002/004 — é a etapa mais próxima, e está declarado no E22.md que
     // esta é a atribuição menos certa das quatro.
-    { href: '#', rotulo: m.navegacao.inicio, accao: null, porConstruir: 'E30' },
+    // A última entrada morta do menu de gestão, fechada no E30: leva à
+    // comparação entre unidades, que é onde um painel de gestão começa.
+    { href: `/${idioma}/app/${orgSlug}`, rotulo: m.navegacao.inicio, accao: null },
     { href: `/${idioma}/app/${orgSlug}/catalogo`, rotulo: m.navegacao.catalogo, accao: 'catalogo.ler' },
     { href: `/${idioma}/app/${orgSlug}/ir/reservas`, rotulo: m.navegacao.reservas, accao: 'reservas.ler' },
     { href: `/${idioma}/app/${orgSlug}/ir/sala`, rotulo: m.navegacao.salaPedidos, accao: 'sala.ler' },
@@ -77,12 +79,17 @@ export default async function LayoutDaOrganizacao({
     { href: `/${idioma}/app/${orgSlug}/ir/relatorios`, rotulo: m.navegacao.relatorios, accao: 'relatorios.ler' },
   ]
     .filter((l) => l.accao === null || permitidas.has(l.accao as never))
-    .map(({ href, rotulo, ...resto }) => ({
-      href, rotulo,
-      // Sem isto, o marcador perdia-se aqui e voltava a ser um `#` que
-      // parece clicável — o defeito exacto que o contrato nomeia.
-      ...('porConstruir' in resto ? { porConstruir: resto.porConstruir } : {}),
-    }));
+    // ── O ramo do `porConstruir` saiu daqui, e é o E30 a fechar-se ────────
+    //
+    // Ele existia para propagar a marca das entradas que não levavam a lado
+    // nenhum. Depois do E30 **não há nenhuma**: o `início` era a última, e
+    // passou a levar à comparação entre unidades.
+    //
+    // Ficou código morto, e o typecheck disse-o — `porConstruir?: unknown`,
+    // porque já não há nenhum membro do array que o tenha. O tipo continua em
+    // `EstruturaAdmin` para quem venha a precisar dele; o que sai é o ramo que
+    // aqui não tem o que propagar.
+    .map(({ href, rotulo }) => ({ href, rotulo }));
 
   return (
     <EstruturaAdmin

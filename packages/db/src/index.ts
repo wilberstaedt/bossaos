@@ -348,3 +348,10 @@ export {
   type LinhaDoFicheiro, type RecusaFinanceira, type ResultadoDaImportacao,
   type TotalPorMoeda,
 } from './financeiro.ts';
+export {
+  estadoDosPagamentos, evolucaoDeCustos, janelasDasUnidades,
+  movimentosDeArmazem, porCampanha, previsaoDaClonagem, recorrencia,
+  totalDaOrganizacao, trabalhoPorFuncao, vendasPorUnidade,
+  type Diferenca, type IndicadorDaUnidade, type JanelaDaUnidade,
+  type LinhaDeIndicador,
+} from './analitica.ts';

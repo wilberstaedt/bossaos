@@ -1386,6 +1386,65 @@ async function principal(): Promise<void> {
       },
     });
 
+    // ── E30 · analítica: a unidade NOUTRO FUSO e a unidade SEM DADOS ──────
+    //
+    // «Sem uma unidade sem dados nenhuns e dois fusos, o painel mede o caminho
+    // feliz» — e o caminho feliz de um relatório é precisamente aquele onde
+    // todos os números parecem certos.
+    //
+    // As Canárias não são um exemplo inventado: Espanha tem duas horas legais,
+    // e um grupo com uma casa em Madrid e outra em Las Palmas é o caso normal
+    // deste produto.
+    const marcaDaOrg = await prisma.brand.findFirst({
+      where: { organizationId: IDS.orgA }, select: { id: true },
+    });
+    if (marcaDaOrg) {
+      await prisma.location.upsert({
+        where: { id: '00000030-0000-4000-8000-000000000030' },
+        update: {},
+        create: {
+          id: '00000030-0000-4000-8000-000000000030',
+          organizationId: IDS.orgA, brandId: marcaDaOrg.id,
+          nome: `${PREFIXO}Las Palmas`, slug: `${PREFIXO}canarias`,
+          moeda: 'EUR', fuso: 'Atlantic/Canary',
+        },
+      });
+      // E esta fica SEM movimento nenhum, de propósito: é a que tem de aparecer
+      // como «sem dados» e nunca como zero.
+      await prisma.location.upsert({
+        where: { id: '00000030-0000-4000-8000-000000000031' },
+        update: {},
+        create: {
+          id: '00000030-0000-4000-8000-000000000031',
+          organizationId: IDS.orgA, brandId: marcaDaOrg.id,
+          nome: `${PREFIXO}Sin datos`, slug: `${PREFIXO}sin-datos`,
+          moeda: 'EUR', fuso: 'Europe/Madrid',
+        },
+      });
+      // Denominadores desiguais: muitas linhas pequenas numa, poucas grandes
+      // noutra. Sem isto a média ponderada dá o mesmo que a média de médias.
+      for (let i = 0; i < 8; i += 1) {
+        await prisma.financialMovement.create({
+          data: {
+            organizationId: IDS.orgA, locationId: IDS.unidadeA2, tipo: 'RECEITA',
+            conceito: `${PREFIXO}menu ${i}`, montanteMenor: BigInt(1500),
+            ocorrenciaEm: new Date('2026-09-12T00:00:00Z'),
+            valorEm: new Date('2026-09-12T00:00:00Z'),
+            origemTipo: 'bill', origemId: IDS.unidadeA2,
+          },
+        });
+      }
+      await prisma.financialMovement.create({
+        data: {
+          organizationId: IDS.orgA, locationId: '00000030-0000-4000-8000-000000000030',
+          tipo: 'RECEITA', conceito: `${PREFIXO}banquete`, montanteMenor: BigInt(40000),
+          ocorrenciaEm: new Date('2026-09-12T00:00:00Z'),
+          valorEm: new Date('2026-09-12T00:00:00Z'),
+          origemTipo: 'bill', origemId: '00000030-0000-4000-8000-000000000030',
+        },
+      });
+    }
+
     // ── E18 · reservas: uma linha em cada lista, e nenhuma vazia ──────────
     //
     // As seis telas desta etapa são listas. Uma lista vazia mede o estado

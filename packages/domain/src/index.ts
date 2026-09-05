@@ -177,3 +177,7 @@ export {
 export {
   CORTE_DO_SERVICO_MINUTOS, diaDeServicoDe, minutosNoDiaDeServico,
 } from './ponto.ts';
+export {
+  mediaPonderada, medido, porLinhaMenor, SEM_DADOS,
+  type Agregado, type Medido,
+} from './agregacao.ts';
