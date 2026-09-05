@@ -1,69 +1,51 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E29 — Financeiro e conciliação (**11 telas**, FIN-001 a 011).
-**Estado:** **EM CURSO.** E28 assinado a 05/09 em `7d12db9` (`docs/reviews/E28.md`). Contrato `conciliacao-e-fecho.md` e régua `ALVO-E29.md` escritos **antes** do código.
+**Etapa atual:** E29 — financeiro e conciliação (**11 telas**).
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — as duas fatias.**
 
-**O que muda:** esta etapa mexe no **salário de quem trabalha na casa**, e quem é
-prejudicado por um defeito aqui é a pessoa com menos poder para o contestar. Um
-erro de stock descobre-se no inventário; um erro de ponto descobre-se no recibo.
+**O que muda:** as anteriores erravam para dentro. **Aqui o erro sai para fora e
+bate num banco** — e um sistema financeiro errado **dá números certos**: não
+parte, não estoira, soma bem uma realidade que não existe.
 
-**A marcação é um facto, e a base não a deixa reescrever:** `time_entries` leva a
-mesma `registo_imutavel()` que o E22 pôs na caixa. A correcção é um **registo
-novo**, com autor e motivo obrigatório por `CHECK`. E há um segundo gatilho que
-protege o **sentido**: uma «correcção» não pode trocar a pessoa nem o tipo —
+**A identidade de uma linha não vem do banco.** É derivada — conta, data-valor,
+montante, referência e a **ordem dentro do dia** — com índice único. A ordem
+existe por causa do **par**: duas linhas legítimas iguais no mesmo dia entram as
+duas, e sem ela o detector de duplicados apagaria factos verdadeiros.
 
-**⚠ Sexto item do JR, e o de pior consequência de todos:**
-O produto capta leads no site público (`guardarLeadPublico`, 3 chamadores) e
-**ninguém os consegue ler**: `leadsDaUnidade` tem zero chamadores e não há tela
-nenhuma no atlas, em etapa nenhuma, que os liste. Não cria cliente no CRM, não
-notifica, não manda email. E a `MKT-011` diz ao visitante «Tu solicitud está
-enviada». O restaurante quebra uma promessa ao cliente dele sem saber.
-Detalhe em `docs/reviews/E34-ALCANCE-TOTAL.md`.
+**Nada se auto-confirma**, nem a 100%: `CHECK` que exige autor e momento.
+**Conciliado é derivado** — terceira vez, depois do stock e dos pontos.
+**Fechar proíbe por gatilho** e não copia totais; **reabrir exige motivo**.
+**As moedas não se somam**: agrupa-se, ou converte-se com fonte e data à vista.
 
+**Achado que vale a etapa:** **quatro** funções tinham zero chamadores —
+`importarExtracto`, `sugerirCorrespondencia`, `fecharPeriodo` e `converterTotal`.
+O núcleo estava escrito, provado e **inalcançável a partir do produto**: o
+extracto só entrava pela semeadura, e não havia por onde fechar um período.
+Ligadas, com quatro casos novos a medi-las.
 
-**Nota para a revisão do E29 (erro meu, não dele):** o esquema financeiro
-entrou em `c5f09e0`, um commit meu com assunto `E30:`, por eu ter feito
-`git add -A` sobre a árvore dele. O intervalo da varredura do E29 tem de
-incluir esse commit, ou mede uma etapa a que falta a base.
-
-
-**⚠ Quinto item do JR — e é o irmão do `revogarConvite`:**
-`apagarExcepcao` não tem chamador. A rota `unidades/[locationId]/horarios/route.ts`
-importa e chama `guardarExcepcao`, e **não importa a de apagar**. Uma casa marca
-«fechado a 25 de Dezembro» e não consegue desmarcar — o site público mostra-a
-fechada num dia em que abre, e ninguém reserva. A guarda nova
-`validar-desfazer.sh` está vermelha sobre este e sobre o `revogarConvite`, e fica
-vermelha até os dois estarem ligados.
-
-sem ele o rasto ficava impecável a documentar o que nunca aconteceu.
-
-**A REGRA DE FRONTEIRA está escrita:** o dia de serviço é a data civil, no fuso da
-unidade, do instante **menos o corte**, resolvida **na escrita**, uma vez. Escrita
-assim por causa do veredicto do E00 — a secção Tempo do `capacidade-e-reservas.md`
-dizia a propriedade certa e não impediu o defeito do fuso porque não dizia o que
-fazer na fronteira.
-
-**Achado que vale a etapa:** um controlo ficou **VERDE com o defeito plantado** —
-o pior resultado possível, porque parece bom. O caso corrigia a entrada para mais
-cedo e o emparelhamento usa a mais antiga, por isso o total dava igual com e sem
-o defeito. Passou a corrigir para mais tarde: 360 contra 300.
-
-**E as telas mostravam UTC.** A picagem das 18h07 de Madrid aparecia como «16:07»
-a quem trabalhou nela. Apanhado pela varredura: o `minutosNoDiaDeServico` estava
-escrito, provado e **sem chamador** — não era código a mais, era a conversão que
-faltava. Ao ligá-lo, a guarda das rotas acusou o formatador de tocar na base, e a
-cura foi as duas funções **puras** mudarem-se para `@bossaos/domain`.
+**E três achados sobre os meus próprios controlos:** um caso falhava antes de
+chegar à sua própria pergunta; um plante pela metade nunca criou o defeito; e um
+plante que não compila mede um ficheiro partido.
 
 **Provas (LOCAIS — a CI continua trancada pela facturação do GitHub):**
-`provas/ponto.test.ts` **0** (**22 casos**, repetível) ·
-`provar-ponto.sh` **0** (**10 controlos**) ·
-`provar-ponto-no-navegador.sh` **0** (**25 casos, 9 controlos**) ·
-`validar-horas.sh` **0** (guarda nova, com controlo negativo próprio) ·
-`pnpm verificar` **0** · `pnpm inspeccionar` **0** (**712 casos**) ·
+`provas/financeiro.test.ts` **0** (**22 casos**, repetível) ·
+`provar-financeiro.sh` **0** (**11 controlos**) ·
+`provar-financeiro-no-navegador.sh` **0** (**31 casos, 9 controlos**) ·
+`pnpm verificar` **0** · `pnpm inspeccionar` **0** (**740 casos**) ·
 `varrer-alcance-da-etapa.sh` → **a correr depois do commit**.
 
-**Dívida do E27 paga:** o `Number()` sobre o `BigInt` de `custoPontos` saiu do
-`resgatar` — a cura foi a assinatura de `movimentarPontos` deixar de o exigir.
+O controlo que o contrato põe em primeiro lugar cai nos dois lados — motor e
+ecrã: **os dois relatórios passam a concordar, e é aí que está errado.**
+
+## ⚠ PENDÊNCIA DECLARADA — sem contabilidade legal e sem leitor de formatos
+
+Taxas, impostos e percentagens são **configuração**, não regra inventada pelo
+produto. E a importação recebe linhas em texto cru
+(`AAAA-MM-DD;montante;referência`): inventar um leitor de OFX ou CAMT agora era
+prometer que se lê o que não se leu.
+
+**Contrato:** `docs/architecture/conciliacao-e-fecho.md` (do sénior, por fronteira).
+**Detalhe:** `docs/progress/E29.md`.
 
 ## ⚠ PENDÊNCIA DECLARADA — não há cálculo de salário
 

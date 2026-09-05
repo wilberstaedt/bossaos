@@ -1298,6 +1298,94 @@ async function principal(): Promise<void> {
       });
     }
 
+    // ── E29 · financeiro: o CASO MAU, que a régua exige ───────────────────
+    //
+    // «Sem uma linha duplicada legítima e sem uma devolução a atravessar o mês,
+    // a prova mede só o caminho feliz.» A semeadura põe as duas:
+    //
+    //  · duas linhas de extracto iguais no mesmo dia — legítimas as duas;
+    //  · uma venda de 28 de Setembro com devolução a 3 de Outubro, que entra no
+    //    caixa de Outubro e no resultado de Setembro.
+    //
+    // Sem a segunda, os dois relatórios concordariam — e concordar é o sinal de
+    // avaria desta etapa.
+    const contaDoBanco = await prisma.bankAccount.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Cuenta principal`, moeda: 'EUR',
+      },
+    });
+    const importacao = await prisma.statementImport.create({
+      data: {
+        organizationId: IDS.orgA, accountId: contaDoBanco.id,
+        ficheiro: `${PREFIXO}setembro.csv`, novas: 3, jaVistas: 2,
+        importadoPor: 'painel@inspeccao.example',
+      },
+    });
+    await prisma.bankLine.createMany({
+      data: [
+        // As duas iguais no mesmo dia: ordem 1 e 2, e entram as duas.
+        { organizationId: IDS.orgA, accountId: contaDoBanco.id, importId: importacao.id,
+          dataValor: new Date('2026-09-28T00:00:00Z'), montanteMenor: BigInt(4500),
+          referencia: 'TPV', ordemNoDia: 1, descricao: `${PREFIXO}menu do dia` },
+        { organizationId: IDS.orgA, accountId: contaDoBanco.id, importId: importacao.id,
+          dataValor: new Date('2026-09-28T00:00:00Z'), montanteMenor: BigInt(4500),
+          referencia: 'TPV', ordemNoDia: 2, descricao: `${PREFIXO}menu do dia` },
+        { organizationId: IDS.orgA, accountId: contaDoBanco.id, importId: importacao.id,
+          dataValor: new Date('2026-10-03T00:00:00Z'), montanteMenor: BigInt(-3000),
+          referencia: 'DEV', ordemNoDia: 1, descricao: `${PREFIXO}devolução` },
+      ],
+    });
+    const venda = await prisma.financialMovement.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2, tipo: 'RECEITA',
+        conceito: `${PREFIXO}venda de 28 de Setembro`, montanteMenor: BigInt(10000),
+        ocorrenciaEm: new Date('2026-09-28T00:00:00Z'),
+        valorEm: new Date('2026-09-28T00:00:00Z'),
+        origemTipo: 'bill', origemId: IDS.unidadeA2,
+      },
+    });
+    await prisma.financialMovement.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2, tipo: 'DEVOLUCAO',
+        conceito: `${PREFIXO}devolução de 3 de Outubro`, montanteMenor: BigInt(3000),
+        // Aconteceu sobre a venda de Setembro; o dinheiro mexeu-se em Outubro.
+        ocorrenciaEm: new Date('2026-09-28T00:00:00Z'),
+        valorEm: new Date('2026-10-03T00:00:00Z'),
+        origemTipo: 'refund', origemId: IDS.unidadeA2,
+      },
+    });
+    // Uma despesa em dólares, para o total ter de agrupar por moeda.
+    await prisma.financialMovement.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2, tipo: 'DESPESA',
+        conceito: `${PREFIXO}vinho importado`, montanteMenor: BigInt(5000), moeda: 'USD',
+        ocorrenciaEm: new Date('2026-09-20T00:00:00Z'),
+        valorEm: new Date('2026-09-20T00:00:00Z'),
+        origemTipo: 'manual', origemId: IDS.unidadeA2, centroDeCusto: 'sala',
+      },
+    });
+    // Uma correspondência SUGERIDA a 100: continua sugestão, e é isso que se mede.
+    const linhaDaVenda = await prisma.bankLine.findFirst({
+      where: { accountId: contaDoBanco.id, ordemNoDia: 1, referencia: 'TPV' },
+      select: { id: true },
+    });
+    if (linhaDaVenda) {
+      await prisma.reconciliation.create({
+        data: {
+          organizationId: IDS.orgA, bankLineId: linhaDaVenda.id, movementId: venda.id,
+          semelhanca: 100,
+        },
+      });
+    }
+    await prisma.exchangeRate.create({
+      data: {
+        organizationId: IDS.orgA, de: 'USD', para: 'EUR',
+        taxaMicro: BigInt(920000), fonte: `${PREFIXO}BCE`,
+        emVigorDe: new Date('2026-09-01T00:00:00Z'),
+      },
+    });
+
     // ── E18 · reservas: uma linha em cada lista, e nenhuma vazia ──────────
     //
     // As seis telas desta etapa são listas. Uma lista vazia mede o estado

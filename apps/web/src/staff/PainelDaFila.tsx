@@ -144,7 +144,7 @@ export function PainelDaFila({
     (e) => e.estado === 'NAO_ENVIADO' || e.estado === 'PENDENTE_DE_CONFIRMACAO');
 
   return (
-    <section className="bo-fila bo-fora-do-alcance" aria-labelledby="fila">
+    <section className="bo-fila" aria-labelledby="fila">
       <h2 id="fila">{m.comandos}</h2>
 
       {/* STATE-004 · «Estamos sem conexión». Um estado, e não um toast: fica no

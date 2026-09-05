@@ -1,5 +1,5 @@
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
-import { Botao } from '@bossaos/ui';
+import { Botao, Campo, Seletor } from '@bossaos/ui';
 import { carregarConta } from '../../../../../../../../src/financeiro/pagina.ts';
 
 export const dynamic = 'force-dynamic';
@@ -63,6 +63,29 @@ export default async function Conciliar({
           ))}
         </ul>
       )}
+
+      {/* Sugerir é um passo separado de confirmar: uma sugestão não concilia
+          nada, e é por isso que os dois botões existem. */}
+      <form method="post" action={`/api/org/${orgSlug}/financeiro`} className="bo-forma">
+        <input type="hidden" name="idioma" value={idioma} />
+        <input type="hidden" name="accao" value="sugerir" />
+        <input type="hidden" name="accountId" value={accountId} />
+        <input type="hidden" name="locationSlug" value={locationSlug} />
+        <Seletor rotulo={t.extracto} name="bankLineId" required>
+          {b.linhas.filter((l) => !l.conciliada).map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.dataValor.toISOString().slice(0, 10)} · {String(l.montanteMenor)}
+            </option>
+          ))}
+        </Seletor>
+        <Seletor rotulo={t.conceito} name="movementId" required>
+          {b.resultado.map((m) => (
+            <option key={m.movimentoId} value={m.movimentoId}>{m.conceito}</option>
+          ))}
+        </Seletor>
+        <Campo rotulo={t.semelhanca} name="semelhanca" type="text" inputMode="numeric" />
+        <Botao type="submit">{t.sugestao}</Botao>
+      </form>
     </div>
   );
 }

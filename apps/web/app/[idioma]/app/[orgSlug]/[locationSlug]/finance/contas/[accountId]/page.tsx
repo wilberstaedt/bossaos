@@ -1,4 +1,5 @@
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
+import { Botao, Campo } from '@bossaos/ui';
 import { carregarConta } from '../../../../../../../../src/financeiro/pagina.ts';
 
 export const dynamic = 'force-dynamic';
@@ -57,6 +58,20 @@ export default async function Extracto({
           {t.conciliar}
         </a>
       </nav>
+
+      {/* ── O extracto entra por aqui, e a contagem volta ao ecrã ─────────
+          Formato cru — `AAAA-MM-DD;montante;referência` — de propósito: um
+          leitor de formatos de banco é outra etapa, e inventar um agora era
+          prometer que se lê o que não se leu. */}
+      <form method="post" action={`/api/org/${orgSlug}/financeiro`} className="bo-forma">
+        <input type="hidden" name="idioma" value={idioma} />
+        <input type="hidden" name="accao" value="importar" />
+        <input type="hidden" name="accountId" value={accountId} />
+        <input type="hidden" name="locationSlug" value={locationSlug} />
+        <Campo rotulo={t.ficheiro} name="ficheiro" maxLength={120} />
+        <Campo rotulo={t.extracto} name="linhas" maxLength={4000} required />
+        <Botao type="submit">{t.importar}</Botao>
+      </form>
     </div>
   );
 }

@@ -108,6 +108,11 @@ export interface Alvos {
    * a prova media um dia que corre bem, que é o que a régua reprova.
    */
   pessoaDoPonto: string;
+  /**
+   * E29: a conta bancária com o caso mau — duas linhas iguais no mesmo dia e
+   * uma correspondência a 100 que continua sugestão.
+   */
+  contaDoBanco: string;
 }
 
 const PREFIXO = 'insp-';
@@ -293,6 +298,9 @@ export async function resolverAlvos(): Promise<Alvos> {
         `SELECT t.membership_id AS id FROM time_entries t
           WHERE t.corrige_id IS NOT NULL ORDER BY t.criado_em DESC LIMIT 1`,
         'a pertença de quem tem a marcação corrigida'),
+      contaDoBanco: await um(
+        sql, `SELECT id FROM bank_accounts WHERE nome = '${PREFIXO}Cuenta principal'`,
+        'a conta bancária da inspecção'),
     };
   } finally {
     await sql.end();

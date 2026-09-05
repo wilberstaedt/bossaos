@@ -58,6 +58,19 @@ export default async function Documentos({
         <Campo rotulo={t.ate} name="ate" type="text" defaultValue={b.periodo.ate} required />
         <Botao type="submit">{t.guardar}</Botao>
       </form>
+      {/* Fechar PROÍBE movimentos novos com data dentro. Não copia totais:
+          se copiasse, passavam a ser uma segunda verdade que envelhece. */}
+      <form method="post" action={`/api/org/${orgSlug}/financeiro`} className="bo-forma">
+        <input type="hidden" name="idioma" value={idioma} />
+        <input type="hidden" name="accao" value="fechar" />
+        <input type="hidden" name="locationSlug" value={locationSlug} />
+        <Seletor rotulo={t.periodo} name="periodId" required>
+          {b.periodos.filter((p) => p.estado === 'ABERTO').map((p) => (
+            <option key={p.id} value={p.id}>{p.de.toISOString().slice(0, 10)}</option>
+          ))}
+        </Seletor>
+        <Botao type="submit">{t.fechar}</Botao>
+      </form>
       <form method="post" action={`/api/org/${orgSlug}/financeiro`} className="bo-forma">
         <input type="hidden" name="idioma" value={idioma} />
         <input type="hidden" name="accao" value="reabrir" />

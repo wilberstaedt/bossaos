@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import {
-  confirmarCorrespondencia, criarConta, criarPeriodo, listarUnidades,
-  reabrirPeriodo, registarMovimento,
+  confirmarCorrespondencia, criarConta, criarPeriodo, fecharPeriodo,
+  importarExtracto, listarUnidades, reabrirPeriodo, registarMovimento,
+  sugerirCorrespondencia,
 } from '@bossaos/db';
 import { corpoDaResposta, estadoHttp, exigirAccao } from '@bossaos/domain';
 import { comEscopoDoPedido, resolverPedido, actorDoPedido } from '../../../../../src/sessao.ts';
@@ -99,6 +100,59 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
         origemTipo: 'manual', origemId: locationId,
       }));
       return voltarPara(`${raiz()}/despesas`, { ok: 'despesa' });
+    }
+
+    if (accao === 'importar') {
+      // ── O extracto entra por AQUI, e a contagem volta para o ecrã ───────
+      //
+      // O formulário traz as linhas em texto, uma por linha:
+      // `AAAA-MM-DD;montante;referência`. É cru de propósito — um leitor de
+      // formatos de banco é outra etapa, e inventar um agora era prometer que
+      // se lê o que não se leu.
+      const accountId = texto(dados, 'accountId') ?? '';
+      const ficheiro = texto(dados, 'ficheiro') ?? 'colado';
+      const bruto = texto(dados, 'linhas') ?? '';
+      const linhas = bruto.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
+        const [data, montante, referencia] = l.split(';');
+        return { data: data ?? '', montante: montante ?? '', referencia: referencia ?? '' };
+      });
+      const validas = linhas.filter(
+        (l) => DATA.test(l.data) && /^-?\d+$/.test(l.montante));
+      if (validas.length === 0) {
+        return voltarPara(`${raiz()}/contas/${accountId}`, { erro: 'linhas' });
+      }
+      const r = await comEscopoDoPedido(sessao, (db) => importarExtracto(db, {
+        organizationId, accountId, ficheiro, importadoPor: actor.email,
+        linhas: validas.map((l) => ({
+          dataValor: l.data, montanteMenor: Number(l.montante),
+          ...(l.referencia ? { referencia: l.referencia } : {}),
+        })),
+      }));
+      // A contagem volta no endereço: quem carregou tem de saber quantas
+      // entraram e quantas foram ignoradas. O silêncio é que é o defeito.
+      return voltarPara(`${raiz()}/contas/${accountId}`,
+        { ok: `novas:${r.novas}:ja-vistas:${r.jaVistas}` });
+    }
+
+    if (accao === 'sugerir') {
+      // Nasce SUGERIDA, sempre. Confirmar é outro passo, com autor.
+      const bankLineId = texto(dados, 'bankLineId') ?? '';
+      const movementId = texto(dados, 'movementId') ?? '';
+      const accountId = texto(dados, 'accountId') ?? '';
+      const semelhanca = inteiroComSinal(dados, 'semelhanca') ?? 0;
+      await comEscopoDoPedido(sessao, (db) => sugerirCorrespondencia(db, {
+        organizationId, bankLineId, movementId, semelhanca,
+      }));
+      return voltarPara(`${raiz()}/conciliar/${accountId}`, { ok: 'sugerida' });
+    }
+
+    if (accao === 'fechar') {
+      // Fechar PROÍBE movimentos novos com data dentro. Não copia totais.
+      const periodId = texto(dados, 'periodId') ?? '';
+      await comEscopoDoPedido(sessao, (db) => fecharPeriodo(db, {
+        organizationId, periodId, autor: actor.email,
+      }));
+      return voltarPara(`${raiz()}/documentos`, { ok: 'fechado' });
     }
 
     if (accao === 'criar_periodo') {
