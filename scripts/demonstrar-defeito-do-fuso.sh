@@ -33,12 +33,29 @@ const { rows } = await adm.query(
   `SELECT id, organization_id AS "organizationId", fuso FROM locations ORDER BY fuso NULLS LAST LIMIT 1`);
 if (!rows.length) { console.log('SEM_UNIDADE'); await adm.end(); process.exit(3); }
 let u = rows[0];
+// ── O QUE SE MEXE, REPOE-SE ──────────────────────────────────────────────
+// A primeira versao punha o fuso e deixava-o la. A `provar-publico` falhou
+// logo a seguir numa assercao que passou na corrida seguinte, e a causa mais
+// provavel era esta escrita minha a sobreviver a medicao. Um instrumento de
+// revisao que deixa rasto contamina a proxima medicao e faz-se passar por
+// defeito do produto. O `provar-mais-tarde.sh` do JR faz isto bem, com
+// `trap restaurar EXIT INT TERM`; copio o padrao.
+let repor = null;
 if (!u.fuso) {
   await adm.query(`UPDATE locations SET fuso = 'Europe/Madrid' WHERE id = $1`, [u.id]);
+  repor = u.id;
   u.fuso = 'Europe/Madrid';
   console.log('    [cenario] pus Europe/Madrid nesta unidade: a semente nao traz fuso');
 }
-await adm.end();
+const limpar = async () => {
+  if (repor) {
+    await adm.query(`UPDATE locations SET fuso = NULL WHERE id = $1`, [repor]);
+    console.log('    [cenario] fuso reposto a NULL — nao deixo rasto na base');
+  }
+  await adm.end();
+};
+process.on('SIGINT', async () => { await limpar(); process.exit(130); });
+process.on('SIGTERM', async () => { await limpar(); process.exit(143); });
 
 const prisma = obterPrisma(process.env.DATABASE_URL);
 const dia = '2026-07-15', hora = '20:00';           // Julho: Madrid em +02:00
@@ -56,11 +73,11 @@ console.log(`    o produto grava ............ ${iso(doProduto.instante)}  (${doP
 console.log(`    a leitura ingenua daria .... ${iso(ingenuo)}`);
 console.log(`    [controlo] o mesmo em UTC .. ${iso(emUtc.instante)}`);
 
-if (iso(doProduto.instante) === iso(emUtc.instante) && u.fuso !== 'UTC') {
-  console.log('CEGO'); process.exit(2);
-}
-console.log(iso(doProduto.instante) !== iso(ingenuo) ? 'PASSA' : 'FALHA');
-process.exit(0);
+const cego = iso(doProduto.instante) === iso(emUtc.instante) && u.fuso !== 'UTC';
+const veredicto = cego ? 'CEGO' : (iso(doProduto.instante) !== iso(ingenuo) ? 'PASSA' : 'FALHA');
+await limpar();
+console.log(veredicto);
+process.exit(cego ? 2 : 0);
 JS
 
 saida=$(node --experimental-strip-types ./.fuso-produto.mjs 2>&1); rm -f ./.fuso-produto.mjs
