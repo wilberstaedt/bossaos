@@ -33,6 +33,16 @@ export const CAPACIDADES = {
   'stock': 'booleana',
   'pagamentos': 'booleana',
   'kiosk': 'booleana',
+  // ── E20 · takeaway e delivery são DUAS, e é por desenho ────────────────
+  //
+  // «Delivery e kiosk exigem concessões próprias quando o pacote comercial assim
+  // definir; não os inclua silenciosamente em todos os planos.»
+  //
+  // Uma só capacidade faria quem compra o levantamento receber a entrega de
+  // borla — e, pior, faria uma prova do takeaway parecer uma prova do delivery.
+  // São dois negócios: um precisa de um balcão, o outro de alguém na estrada.
+  'takeaway': 'booleana',
+  'delivery': 'booleana',
   // Quantitativas: precisam de um número, e o número vem de configuração.
   // E06: a estrutura multimarca existe em todos os planos; o que a limita é a
   // quota concedida, tal como nas unidades. Sem concessão, fica a marca do

@@ -18,7 +18,19 @@ import {
  *    nada aqui a converte em `NAO_CONTEM` pelo caminho.
  */
 
-export const CANAIS = ['CARTA', 'SITE', 'SALA', 'TPV', 'TAKEAWAY', 'KIOSK'] as const;
+export const CANAIS = [
+  'CARTA', 'SITE', 'SALA', 'TPV', 'TAKEAWAY', 'KIOSK',
+  // ── E20 · o canal é uma DIMENSÃO, e não uma tabela ─────────────────────
+  //
+  // «A tentação é uma tabela de takeaway ao lado — parece mais simples e é a
+  // decisão mais cara do projecto depois de tomada.» Com duas tabelas, o filtro
+  // por canal passa e o KDS parte; ou pior, passam os dois e os números do
+  // relatório deixam de bater.
+  //
+  // O `DELIVERY` entra aqui, ao lado dos outros, e por isso um pedido de entrega
+  // já sabe fazer tudo o que um pedido sabe fazer — preço por canal incluído.
+  'DELIVERY',
+] as const;
 export type Canal = (typeof CANAIS)[number];
 
 // ── Conflito de versão ──────────────────────────────────────────────────────

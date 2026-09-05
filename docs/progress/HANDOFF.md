@@ -1,104 +1,54 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E19 — Reserva pública, host e lista de espera. A maior etapa do
-projecto.
-**Estado:** **AS 28 TELAS ESTÃO FEITAS**, mais o `FLOOR-006` revisitado.
-**IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** Declarado pelo JR; não assinado —
-ninguém assina a revisão do próprio código.
-**Contratos que mandam:** `lista-de-espera.md` (escrito para esta etapa),
-`capacidade-e-reservas.md` (o motor, do E18) e `qr-da-mesa-e-o-visitante.md` (que
-esta etapa alargou, por decisão escrita antes do código). Régua: `ALVO-E19.md`.
-**Detalhe e achados:** `docs/progress/E19.md`.
+**Etapa atual:** E20 — Takeaway e delivery (**7 telas**).
+**Estado desta fatia:** **MIGRAÇÃO E MOTOR — IMPLEMENTADO, AGUARDANDO
+VALIDAÇÃO.** Declarado pelo JR; não assinado. **As 7 telas não estão feitas.**
+**Contratos que mandam:** `pedidos-para-mais-tarde.md` (escrito para esta etapa)
+e `kds-e-tempo-real.md`. Régua: `docs/reviews/ALVO-E20.md`.
+**Detalhe e achados:** `docs/progress/E20.md`.
 
-**Aviso do JR:** as quatro fatias assentam umas nas outras e **nenhuma está
-assinada**. Se o modelo mudar na revisão, o resto segue-o.
+**O momento de produção é DERIVADO e o gatilho é quem o garante.** Hora de
+entrega menos o preparo; um valor escrito de fora é **substituído**. Sem isso era
+mais uma coluna, e a primeira vez que alguém a escrevesse errada a comida saía à
+hora errada sem nada dar erro. O preparo é o **maior** das linhas e não a soma —
+as estações trabalham em paralelo.
 
-## A retenção, e o que ela corrigiu
+**A passagem é por RELÓGIO, e o relógio é o da BASE.** A tarefa existe desde que
+o pedido é aceite, com o mesmo id: atravessar o momento duas vezes não cria duas
+entradas porque não há nada que se crie na passagem.
 
-Duas máquinas construídas, correctas, provadas com controlo negativo — e **sem
-ninguém que as chamasse**. `resolverHoraLocal` e `enfileirar` tinham zero
-chamadas em produto, e a suite não deu por nada porque **as provas chamavam as
-funções**.
+**A hora de entrega é hora da casa, e aqui arranca o fogão.** 20:30 com 25
+minutos entra em produção às 20:05 **locais**; com hora de parede entraria às
+22:05. Sem fuso **recusa-se**, e uma hora que não existe é recusada — não
+empurrada para a seguinte.
 
-**O fuso.** O instante nascia de hora de parede lida como UTC: duas horas de
-desvio em Madrid. O que isso anulava não era a antecedência — era o aviso do
-`FLOOR-006`: às 19:00 a mesa das 20:00 não aparecia como reservada, que é o
-minuto exacto em que o host a dá a um walk-in. A hora passa a viajar como local e
-resolve-se onde a unidade é conhecida; **sem fuso, recusa-se**; e o `estado`
-chega ao ecrã, porque `INEXISTENTE` e `AMBIGUA` são os dois casos em que a casa
-entendeu outra hora.
+**A prova mede hora ABSOLUTA contra o relógio da base**, como a régua exige:
+pergunta à base qual é o instante das 20:05 em Madrid e compara com o que ficou
+gravado. Nenhuma asserção conta minutos relativos, porque «entra 25 minutos
+antes» é verdade em qualquer fuso. **E o par:** a mesma hora de entrega em dois
+fusos dá momentos **diferentes**.
 
-**A mensageria.** O contrato ganhou a secção que corrige a chave que eu tinha
-escrito: `(reserva, tipo)` engole envios legítimos — «a sua mesa está pronta»
-sai duas vezes na mesma noite quando a pessoa não vem à primeira. **A chave é o
-ACONTECIMENTO**, e agora há quem enfileire: a reserva confirmada, a mesa pronta
-(dentro de `chamarDaEspera`, onde o facto acontece) e o cancelamento.
+**Três achados meus, e os três são sobre a prova:** escrevi `new Date()` três
+linhas abaixo do comentário que o proíbe; a justificação que eu tinha dado para o
+proibir era **falsa** (`Date.now()` é UTC absoluto — o que o relógio da base
+guarda é a **deriva**, não o fuso), e o controlo negativo foi construído em cima
+dessa razão errada e ficou verde por isso; e o caso do «maior das linhas» media
+um pedido de **uma** linha, onde máximo e soma são o mesmo número.
 
-**A prova que mede o produto.** `provas/produto-fuso-e-mensagens.test.ts` não
-chama nenhuma das duas funções: entra pela porta do ecrã. E
-`scripts/provar-produto.sh` apaga a **chamada no produto** em cada controlo — se
-a asserção ficar verde sem ela, não mede o produto.
+**O que está pronto para medir** — códigos de saída lidos directamente:
+`pnpm verificar` (**0**) · `./scripts/provar-mais-tarde.sh` (5 grupos, **26
+casos, 11 defeitos plantados**, 0) · `provar-producao.sh` (0) ·
+`provar-pedidos.sh` (0) · `provar-produto.sh` (0) ·
+`provar-migracoes-do-zero.sh` (0).
 
-## As quatro decisões que esta etapa tomou
-
-**1. Uma lista de espera NÃO é uma fila, e a garantia é uma AUSÊNCIA.** Não há
-coluna `posicao`, nem `numero_na_fila`, nem `senha` — «ninguém pode mostrar um
-número errado se o número não existe em lado nenhum para ser mostrado». A posição
-deriva-se, e agrupa pelo **conjunto de mesas** que serve o grupo: «é o 2.º dos
-grupos de 5 ou 6» sobrevive ao de 2 passar à frente, «é o 3.º» não sobrevive a
-nada. Quem não cabe em mesa nenhuma tem posição `null`, e não o último lugar.
-
-**2. A porta da reserva pública fica FORA de `/r/`.** O E18 fechou essa pasta com
-«nada sem sessão de visitante», e quem reserva está em casa três dias antes. A
-razão que pôs a outra porta lá dentro, lida ao contrário: o que justifica o âmbito
-no endereço é **haver uma credencial que não pode viajar**, e um formulário
-anónimo não tem nenhuma. O que a protege é o limite por unidade e janela (com
-lock, na base), a chave idempotente que nasce no HTML, e não confirmar existência.
-
-**3. Chegar não é estar sentado.** Se o check-in sentar, a mesa fica ocupada
-enquanto os anteriores lá estão e o mapa mente a quem serve; se não houver
-check-in, a única forma de registar a chegada é sentar, e a tolerância de atraso
-conta contra quem já está lá. Dois actos, dois carimbos, e a base exige `chegou_em`
-em `CHEGOU` **e** em `SENTADA`.
-
-**4. A identidade de uma mensagem é o ACONTECIMENTO que a causou.** A mensagem
-existe uma vez por acontecimento; as tentativas penduram-se nela. Reentregar usa
-o mesmo acontecimento e deduplica; o host chamar segunda vez cunha outro, logo
-entrega — que é o par, e sai de graça.
-
-## O que os ecrãs dizem por palavras, porque a régua o exige lá
-
-- a **estimativa** diz que é uma estimativa e que pode mudar; o **facto** muda o
-  verbo e a estimativa **desaparece** — nunca aparecem juntas;
-- a lista de horas diz-se **orientativa** antes de a pessoa escolher, e a recusa
-  leva **alternativas** consigo; sem alternativa nenhuma há a lista de espera —
-  nunca um beco;
-- as **atrasadas** são ditas, e a agenda diz que o sistema **não libertou** nenhuma;
-- o check-in diz que **não senta**, e a sugestão de mesa diz **porquê** em cada uma;
-- cada número do relatório traz a sua **definição** ao lado, e as duas telas que o
-  mostram dizem o **mesmo** — a conta é uma só;
-- o conector de mensageria está **desligado e visível como desligado**, com a
-  consequência escrita: nada é enviado, e nenhuma mensagem aparecerá como enviada.
-
-**O que está pronto para medir** — códigos de saída lidos directamente, sem canos:
-`pnpm verificar` (**0**) · `provar-espera.sh` (18 casos, **8 plantados**, 0) ·
-`provas/reserva-publica.test.ts` (13 casos, 0) ·
-`provar-reserva-publica-no-navegador.sh` (23 casos, **9 plantados**, 0) ·
-`provar-host.sh` (17 casos, **7 plantados**, 0) ·
-`provar-host-no-navegador.sh` (22 casos, **6 plantados**, 0) ·
-`provar-mensagens.sh` (12 casos, **7 plantados**, 0) ·
-`provar-mensagens-no-navegador.sh` (24 casos, **6 plantados**, 0) ·
-`provar-produto.sh` (11 casos, **4 chamadas de produto apagadas**, 0) ·
-`bash scripts/demonstrar-defeito-do-fuso.sh` (**PASSA**, e pela porta) ·
-`provar-reservas.sh` (0) · `provar-publico.sh` (0) · `provar-sala-no-navegador.sh`
-(0) · `provar-migracoes-do-zero.sh` (0) · **`pnpm inspeccionar` (517 casos, 0)**.
-
-**Fica declarado como NÃO feito:** **nenhuma mensagem foi entregue a ninguém**. Não
-há provedor; o conector está desligado e a prova usa um transporte de mentira para
-medir o comportamento. A integração externa é **pendência declarada**, como o
-enunciado manda — nada finge ter enviado.
+**O que NÃO está feito:** as **7 telas**, e por isso **nenhuma medição de
+navegador** nesta fatia. O pagamento é a E23. **Nenhum pedido externo real** — o
+conector está desligado e nada finge ter recebido de um parceiro.
 
 **A prova foi LOCAL.** A CI continua trancada por facturação do GitHub.
+
+**O E19 ficou ASSINADO** a 05/09 em `e3482e5` — 28 telas, e com ele 62% das telas
+do produto (247 de 396) e **zero telas a aguardar** pela primeira vez.
 
 **O E18 ficou VALIDADO** a 05/09 em `cfafed7` — 6 telas, 13 asserções no motor e
 19 nas telas, 17 controlos negativos. Passámos os 50 por cento das telas.

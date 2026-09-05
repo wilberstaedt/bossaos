@@ -227,13 +227,39 @@ export async function criarTarefasDasLinhas(
  * pergunta — e o total contado deixava de bater com o enviado. É exactamente o
  * erro que o `kds-e-tempo-real.md` descreve: parece limpo, e é comida que nunca
  * é feita.
+ *
+ * ── E20 · o que não é para agora NÃO está aqui ───────────────────────────
+ *
+ * «Um pedido para as 20h não é trabalho para agora.» A passagem é por RELÓGIO:
+ * a pergunta «chegou a hora?» responde-se comparando `now()` da BASE com o
+ * momento de produção, e não «alguém abriu o ecrã e nós aproveitámos».
+ *
+ * Se dependesse de alguém olhar, o pedido das 8h da manhã esperava pelo primeiro
+ * cozinheiro que chega às 11h.
+ *
+ * A tarefa **existe** desde que o pedido é aceite — é a mesma tarefa, com o
+ * mesmo id — e por isso atravessar o momento duas vezes não cria duas entradas:
+ * não há nada que se crie na passagem.
  */
-export function tarefasDaEstacao(
+export async function tarefasDaEstacao(
   db: ClienteComEscopo,
   locationId: string,
   stationId: string | null,
-  filtro: { incluirResolvidas?: boolean } = {},
+  filtro: { incluirResolvidas?: boolean; incluirFuturas?: boolean } = {},
 ) {
+  // ── O agora vem da BASE, e a razão NÃO é o fuso ───────────────────────
+  //
+  // Escrevi `new Date()` à primeira, e justifiquei-o com «dois servidores em
+  // fusos diferentes». Isso é falso: `Date.now()` é UTC absoluto, e o fuso do
+  // processo não lhe toca.
+  //
+  // A razão verdadeira é outra e é mais chata: o que se compara é com carimbos
+  // guardados pela BASE, e entre o relógio da aplicação e o dela há **deriva**.
+  // Alguns segundos chegam para um pedido entrar na fila um instante antes ou
+  // depois do que devia; um servidor com o relógio mal acertado transforma isso
+  // em minutos. Perguntar as horas a quem guarda os carimbos tira a questão.
+  const [linha] = await db.$queryRaw<{ agora: Date }[]>`SELECT now() AS agora`;
+  const agora = linha!.agora;
   return db.productionTask.findMany({
     where: {
       locationId,
@@ -241,6 +267,10 @@ export function tarefasDaEstacao(
       ...(filtro.incluirResolvidas
         ? {}
         : { estado: { in: ['POR_INICIAR', 'EM_PREPARO'] as EstadoDaProducao[] } }),
+      // Um pedido sem `producaoEm` é para agora: entra sempre.
+      ...(filtro.incluirFuturas ? {} : {
+        pedido: { OR: [{ producaoEm: null }, { producaoEm: { lte: agora } }] },
+      }),
     },
     include: {
       linha: { select: { id: true, nome: true, quantidade: true, estado: true } },

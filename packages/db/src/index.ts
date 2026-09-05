@@ -286,3 +286,13 @@ export {
   listarTemplates, guardarTemplate, guardarConector,
   type Conector, type ResultadoDaMensagem, type MensagemNoHistorico,
 } from './mensagens.ts';
+
+// ── E20 · pedidos para mais tarde, takeaway e entrega ──
+export {
+  horaDeEntrega, preparoDoPedido, agendarPedido, agendadosPorEntrar,
+  areaQueServe, guardarArea, listarAreas, marcarParaEntrega,
+  conectorDeEntrega, guardarConectorDeEntrega, guardarMapaExterno,
+  listarMapasExternos, receberPedidoExterno, agendadosEmRisco,
+  type HoraDeEntrega, type RecusaDeAgendamento, type ResultadoDaArea,
+  type ConectorDeEntrega, type ResultadoExterno, type PedidoEmRisco,
+} from './mais-tarde.ts';

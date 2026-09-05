@@ -152,6 +152,10 @@ model Organization {
   tentativasDeMensagem ReservationMessageAttempt[]
   templatesDeMensagem  MessageTemplate[]
   conectores           MessagingConnector[]
+  areasDeEntrega       DeliveryArea[]
+  entregas             OrderDelivery[]
+  conectoresDeEntrega  DeliveryConnector[]
+  mapasExternos        ExternalCatalogMapping[]
   @@map("organizations")
   revisoes        MenuRevision[]
   publicacoes     MenuPublication[]
@@ -285,6 +289,9 @@ model Location {
   esperas             WaitlistEntry[]
   templatesDeMensagem MessageTemplate[]
   conector            MessagingConnector?
+  areasDeEntrega      DeliveryArea[]
+  conectorDeEntrega   DeliveryConnector?
+  mapasExternos       ExternalCatalogMapping[]
   @@unique([organizationId, id], name: "location_por_organizacao")
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -974,6 +981,7 @@ enum Canal {
   TPV
   TAKEAWAY
   KIOSK
+  DELIVERY
 }
 
 /// Contém, pode conter, não contém.
@@ -1094,6 +1102,12 @@ model Product {
   sku            String?
   estado         EstadoDeCatalogo @default(RASCUNHO)
 
+  /// ── E20 · quanto tempo demora a fazer ─────────────────────────────────
+  ///
+  /// Sem isto o momento de produção não é derivável. Fica no produto porque é do
+  /// produto: um bife demora o que demora, em qualquer canal.
+  preparoMin Int @default(15) @map("preparo_min")
+
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   version   Int       @default(1)
@@ -1110,6 +1124,7 @@ model Product {
   alergenios     ProductAllergen[]
   preferencias   ProductDietaryTag[]
   canais         ProductChannel[]
+  mapasExternos  ExternalCatalogMapping[]
   disponibilidades ProductAvailability[]
   media            ProductMedia[]
 
@@ -2487,12 +2502,31 @@ model Order {
   /// que mudou e a versão actual, para a pessoa continuar em vez de refazer.
   versao         Int    @default(1)
 
+  // ── E20 · um pedido para as 20h não é trabalho para agora ─────────────
+  /// A hora combinada com a pessoa. UTC, sempre — resolvida pelo fuso da unidade
+  /// antes de chegar aqui. Nula quer dizer «é para agora».
+  entregarAs DateTime? @map("entregar_as") @db.Timestamptz(6)
+  /// ── DERIVADO, e nunca escrito por quem pede ─────────────────────────
+  ///
+  /// Hora de entrega menos o preparo. Há um gatilho na base a derivá-lo: um
+  /// valor vindo de fora é substituído, não recusado — quem o mandou não estava
+  /// a atacar, estava a copiar um exemplo.
+  producaoEm DateTime? @map("producao_em") @db.Timestamptz(6)
+  /// O maior preparo das linhas, no momento em que o pedido foi aceite.
+  /// Recalcular a partir do catálogo mais tarde daria um momento de produção que
+  /// muda sozinho quando alguém edita um produto.
+  preparoMin Int? @map("preparo_min")
+  /// A identidade do pedido no sistema de quem o mandou.
+  externoId    String? @map("externo_id")
+  externoCanal String? @map("externo_canal")
+
   abertoPor String   @map("aberto_por")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  entrega      OrderDelivery?
   linhas       OrderLine[]
   envios       OrderSubmission[]
   eventos      OrderEvent[]
@@ -2500,6 +2534,7 @@ model Order {
   tarefas ProductionTask[]
   @@unique([organizationId, id], name: "pedido_por_organizacao")
   @@unique([locationId, numero], name: "numero_por_unidade")
+  @@index([locationId, producaoEm])
   @@index([organizationId, locationId, estado])
   @@index([tableSessionId])
   @@map("orders")
@@ -3542,4 +3577,110 @@ model WaitlistArea {
   @@unique([waitlistId, areaId], name: "uma_zona_por_espera")
   @@index([waitlistId])
   @@map("waitlist_areas")
+}
+
+
+/// A área que a unidade entrega, e a taxa dela.
+///
+/// «Se não houver taxa definida para aquela área, o sistema não escolhe uma.» A
+/// taxa é obrigatória **na área**: uma área existe com o seu preço, ou não
+/// existe. Não há linha sem preço, que seria o sítio exacto onde o zero por
+/// omissão nasceria.
+model DeliveryArea {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  nome           String
+  codigoPostal   String @map("codigo_postal")
+  taxaMenor      Int    @map("taxa_menor")
+  moeda          String
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  entregas     OrderDelivery[]
+
+  @@unique([organizationId, id], name: "area_por_organizacao")
+  @@unique([locationId, codigoPostal], name: "uma_area_por_codigo_postal")
+  @@map("delivery_areas")
+}
+
+/// A entrega de um pedido.
+///
+/// A morada vive AQUI, e não no pedido: «não exponha endereços ou telefones nas
+/// telas públicas de fila». A projecção da fila lê `orders`, e a morada não está
+/// lá — não é uma coluna que alguém tem de se lembrar de não seleccionar.
+model OrderDelivery {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  orderId        String  @unique @map("order_id") @db.Uuid
+  areaId         String? @map("area_id") @db.Uuid
+  morada         String
+  codigoPostal   String  @map("codigo_postal")
+  contacto       String
+  notas          String?
+  /// A taxa COBRADA, copiada da área no momento do pedido. Ler a área mais tarde
+  /// daria um pedido cujo preço muda quando alguém edita a tabela.
+  taxaMenor  Int       @map("taxa_menor")
+  moeda      String
+  entregueEm DateTime? @map("entregue_em") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  pedido       Order         @relation(fields: [organizationId, orderId], references: [organizationId, id], onDelete: Cascade)
+  area         DeliveryArea? @relation(fields: [organizationId, areaId], references: [organizationId, id], onDelete: Restrict)
+
+  @@unique([organizationId, id], name: "entrega_por_organizacao")
+  @@unique([organizationId, orderId], name: "uma_entrega_por_pedido")
+  @@map("order_deliveries")
+}
+
+/// O conector de entrega externa. **Nasce desligado.**
+///
+/// Mesma forma do conector de mensageria do E19: `activo` sem `provedor` não é um
+/// estado, e há um `CHECK` a impedi-lo. «Uma integração que finge é pior do que
+/// uma que falta, porque a que falta vê-se.»
+model DeliveryConnector {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  locationId     String  @unique @map("location_id") @db.Uuid
+  provedor       String?
+  activo         Boolean @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, id], name: "conector_de_entrega_por_organizacao")
+  @@map("delivery_connectors")
+}
+
+/// O que lá fora se chama «Burger 4» é aqui um produto.
+///
+/// Sem este mapa, cada pedido externo obrigava alguém a adivinhar — e adivinhar
+/// num pedido é servir outra coisa.
+model ExternalCatalogMapping {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  canalExterno   String @map("canal_externo")
+  idExterno      String @map("id_externo")
+  productId      String @map("product_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  produto      Product      @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Restrict)
+
+  @@unique([organizationId, id], name: "mapa_por_organizacao")
+  @@unique([locationId, canalExterno, idExterno], name: "um_mapa_por_id_externo")
+  @@map("external_catalog_mappings")
 }
