@@ -119,3 +119,50 @@ export function somar(parcelas: readonly Dinheiro[]): Dinheiro | ErroDeSoma {
   }, 0);
   return { montanteMenor: total, moeda: moedas[0]! };
 }
+
+/**
+ * Dividir dinheiro em partes iguais, sem perder nem inventar um cêntimo.
+ *
+ * ── A ordem do resíduo escreve-se ANTES, e é esta ──────────────────────────
+ *
+ * «10,00 € por três dá 3,34 + 3,33 + 3,33. Não 3,33 × 3 com um cêntimo a
+ * evaporar-se, e não 3,34 × 3 com um cêntimo inventado.» O resíduo vai para as
+ * **primeiras** partes, uma unidade a cada, e pára quando acaba.
+ *
+ * Escolher a ordem depois de ver a diferença é escolher a ordem que faz a conta
+ * bater naquele caso — e é por isso que o contrato manda escrevê-la primeiro.
+ *
+ * A asserção que isto tem de passar **não é** «cada parte é 3,33»: é a **soma
+ * das partes ser exactamente o total**. Um teste que soma três valores que ele
+ * próprio escolheu para somarem certo não mede nada; o caso que interessa é o
+ * que não divide bem.
+ */
+export function dividirEmPartes(total: Dinheiro, partes: number): Dinheiro[] {
+  if (!Number.isInteger(partes) || partes < 1) return [];
+  const base = Math.trunc(total.montanteMenor / partes);
+  const resto = total.montanteMenor - base * partes;
+  return Array.from({ length: partes }, (_, i) => ({
+    montanteMenor: base + (i < resto ? 1 : 0),
+    moeda: total.moeda,
+  }));
+}
+
+/**
+ * Dividir por pesos — é a divisão por item e por pessoa desigual.
+ *
+ * O resíduo segue a mesma ordem: às primeiras. E há uma diferença que não é
+ * detalhe: aqui o resto pode ser maior do que numa divisão igual, porque o
+ * truncar acontece em cada peso. Continua a somar ao total, que é a propriedade
+ * que se mede.
+ */
+export function dividirPorPesos(total: Dinheiro, pesos: readonly number[]): Dinheiro[] {
+  const soma = pesos.reduce((a, b) => a + b, 0);
+  if (soma <= 0 || pesos.some((p) => p < 0)) return [];
+  const brutos = pesos.map((p) => Math.trunc((total.montanteMenor * p) / soma));
+  let resto = total.montanteMenor - brutos.reduce((a, b) => a + b, 0);
+  return brutos.map((m) => {
+    const extra = resto > 0 ? 1 : 0;
+    resto -= extra;
+    return { montanteMenor: m + extra, moeda: total.moeda };
+  });
+}

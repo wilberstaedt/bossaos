@@ -22,8 +22,23 @@ falhas=0
 erro() { echo "  FALHA $1"; falhas=$((falhas+1)); }
 ok()   { echo "  ok    $1"; }
 
+# ── O sufixo `Menor`, que e o reconhecedor ESTRUTURAL ──────────────────────
+#
+# A 05/09, no E22, a guarda passou a verde sobre `devidoMenor`, `unitarioMenor` e
+# `recebidoMenor` - tres campos de dinheiro novos que ela NAO VIA, porque nenhum
+# deles tem um dos substantivos da lista. Verde por cegueira, nao por limpeza.
+#
+# A lista de substantivos e um vocabulario que tem de crescer a cada etapa, e o
+# que nao cresceu fica invisivel em silencio. Mas TODOS os campos de dinheiro
+# deste projecto acabam em `Menor`: e a convencao que a propria dinheiro.md manda,
+# e por isso reconhece-se pela FORMA e nao pelo assunto.
+#
+# Isto e' estritamente aditivo: alarga o que a seccao 1 ve, e nao mexe na seccao
+# das conversoes - onde alargar poderia tirar protecao a nomes ja vigiados.
+SUFIXO_MENOR="[a-zA-Z]+Menor"
+
 echo "1. Campos de dinheiro no schema"
-campos=$(grep -nE "^[[:space:]]+[a-zA-Z]*(${NOME_DINHEIRO})[a-zA-Z]*[[:space:]]+" "$SCHEMA" 2>/dev/null \
+campos=$(grep -nE "^[[:space:]]+([a-zA-Z]*(${NOME_DINHEIRO})[a-zA-Z]*|${SUFIXO_MENOR})[[:space:]]+" "$SCHEMA" 2>/dev/null \
   | grep -vE "\[\]" || true)
 n=$(printf '%s\n' "$campos" | grep -c . || true)
 # Controlo negativo do leitor: sem campos, tudo "passa" e o verde e vacuo.
@@ -33,7 +48,13 @@ else
   ok "${n} campos com cara de dinheiro"
 fi
 
-maus=$(printf '%s\n' "$campos" | grep -E "[[:space:]](Float|Decimal|Real|Double)[[:space:]?]" || true)
+# ── O `$` nao e detalhe: era um buraco ────────────────────────────────────
+#
+# Isto exigia espaco DEPOIS do tipo, e por isso so via campos com atributo a
+# seguir. `devidoMenor Float` no fim da linha — que e Prisma valido — passava.
+# Apanhado a 05/09 pelo controlo negativo desta seccao, que ate ai nao existia.
+TIPOS_MAUS="[[:space:]](Float|Decimal|Real|Double)([[:space:]?]|$)"
+maus=$(printf '%s\n' "$campos" | grep -E "$TIPOS_MAUS" || true)
 if [ -n "$maus" ]; then
   erro "dinheiro em virgula flutuante no schema:"
   printf '%s\n' "$maus" | sed 's/^/          /'
@@ -111,6 +132,23 @@ ve() { printf 'export const f = (x: any) => %s;\n' "$1" > "$SONDA/s.ts"
          | grep -E "parseFloat|(Number|parseInt)\s*\(\s*[A-Za-z_$.]*(${NOME_DINHEIRO})" \
          | grep -vEi "centimos|centavos|cents|minor|emUnidadeMinima" | grep -q . ; }
 c_falha=0
+
+# ── O controlo da seccao 1: um campo de dinheiro em virgula flutuante ─────
+#
+# A seccao 1 nunca tinha provado que reprova. Passava por nunca haver um Float no
+# schema — e uma guarda que so mostra verde sobre codigo limpo nao mostra nada.
+ve_schema() {  # $1 linha de schema; verdadeiro se a guarda a apanha
+  printf 'model Sonda {\n%s\n}\n' "$1" > "$SONDA/schema.prisma"
+  grep -nE "^[[:space:]]+([a-zA-Z]*(${NOME_DINHEIRO})[a-zA-Z]*|${SUFIXO_MENOR})[[:space:]]+" \
+    "$SONDA/schema.prisma" | grep -vE "\[\]" | grep -qE "$TIPOS_MAUS"
+}
+for mau in '  devidoMenor Float' '  totalMenor Decimal @map("t")' '  precoDaLinha Float?'; do
+  ve_schema "$mau" || { echo "  FALHA controlo: schema deixou passar$mau"; c_falha=1; }
+done
+for bom in '  devidoMenor Int' '  quantidade Float' '  pesoEmGramas Decimal @db.Decimal(6,2)'; do
+  ve_schema "$bom" && { echo "  FALHA controlo: schema acusou$bom, que e legitimo"; c_falha=1; }
+done
+
 for mau in 'parseFloat(t)' 'Number(precoTexto)' 'parseInt(valorBruto, 10)'; do
   ve "$mau" || { echo "  FALHA controlo: deixou passar $mau"; c_falha=1; }
 done
@@ -118,7 +156,8 @@ for bom in 'Number(pagina)' 'Number(totalEmCentimos)' 'parseInt(idDaLinha, 10)';
   ve "$bom" && { echo "  FALHA controlo: acusou $bom, que e legitimo"; c_falha=1; }
 done
 if [ "$c_falha" -eq 0 ]; then
-  ok "controlo negativo: apanha as tres conversoes de dinheiro e nao acusa as tres legitimas"
+  ok "controlo negativo do schema: apanha os tres campos em virgula flutuante e nao acusa os tres legitimos"
+  ok "controlo negativo das conversoes: apanha as tres de dinheiro e nao acusa as tres legitimas"
 else
   falhas=$((falhas+1))
 fi

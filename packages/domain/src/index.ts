@@ -52,6 +52,7 @@ export {
 
 export {
   escalaDaMoeda, moedaValida, deTextoParaMenor, deMenorParaTexto, somar,
+  dividirEmPartes, dividirPorPesos,
   type Dinheiro, type ErroDeSoma,
 } from './dinheiro.ts';
 

@@ -59,3 +59,33 @@ reembolsa, se se telefona, é do restaurante. O sistema deve **saber** e
 3. **Atravessar o momento duas vezes não cria duas entradas na fila.**
 4. **Um item esgotado antes da hora** deixa o pedido marcado como problemático
    *antes* do momento de produção, e não no instante em que a cozinha ia começar.
+
+---
+
+## O que ficou por fechar, e o que BLOQUEIA abrir isto ao público
+
+Escrito na assinatura do E20 (`332e9f2`). Nenhuma destas reteve a etapa, e a
+razão importa: a régua do E20 não as exigia, e reter por uma coisa que não foi
+pedida é mudar as balizas a meio.
+
+### BLOQUEANTE para a etapa que abrir o takeaway ao público
+
+**A hora de entrega não tem limite nenhum — nem passado, nem casa fechada.** Uma
+hora no passado dá `producao_em` no passado, e o pedido entra **já** na cozinha
+enquanto a pessoa julga tê-lo agendado. Combinar uma coisa e fazer outra, outra
+vez, agora pelo outro lado.
+
+Hoje não retém porque as sete telas do E20 são todas `/app/` e `/staff/`: quem
+escreve a hora é gente da casa, e o staff é o filtro. **No dia em que o cliente
+escrever a hora, o filtro desaparece** — e aí isto passa a ser condição de
+entrada da etapa, não uma aresta.
+
+### Duas arestas do `preparoDoPedido`
+
+- **A quantidade não entra na conta.** Dez do mesmo prato dão o mesmo preparo que
+  um. Pode estar certo (as estações trabalham em paralelo, e é a mesma panela) ou
+  pode estar errado (dez são dez), mas neste momento não é uma decisão — é uma
+  ausência.
+- **Uma linha livre conta zero.** Um item escrito à mão não tem produto, logo não
+  tem `preparo_min`, logo não empurra o momento de produção. O pedido com uma
+  linha livre pesada entra em produção como se não a tivesse.

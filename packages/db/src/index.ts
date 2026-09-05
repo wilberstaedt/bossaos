@@ -297,3 +297,9 @@ export {
   type HoraDeEntrega, type RecusaDeAgendamento, type ResultadoDaArea,
   type ConectorDeEntrega, type ResultadoExterno, type PedidoEmRisco,
 } from './mais-tarde.ts';
+export * from './contas.ts';
+export {
+  abrirCaixa, contar, corrigirMovimento, entrarPagamentoEmDinheiro, esperadoNaGaveta,
+  estadoDaCaixa, fecharCaixa, historicoDeCaixas, movimentar, rastoDaCaixa, reabrirCaixa,
+  resumoDaCaixa, RecusaDaCaixa, type EstadoDaCaixa, type RecusaDeCaixa,
+} from './caixa.ts';

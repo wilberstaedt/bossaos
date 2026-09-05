@@ -56,6 +56,15 @@ model Organization {
   slug      String   @unique
   /// Nome comercial. É o que aparece na interface.
   nome      String
+  contas          Bill[]
+  linhasDeConta   BillLine[]
+  ajustesDeConta  BillAdjustment[]
+  tentativas      PaymentAttempt[]
+  pagamentos      Payment[]
+  devolucoes      Refund[]
+  caixas           CashRegister[]
+  acontecimentosDeCaixa CashRegisterEvent[]
+  movimentosDeCaixa CashMovement[]
 
   // ── E06: perfil. TODOS opcionais, e isso é a decisão da etapa ─────────────
   //
@@ -243,6 +252,8 @@ model Location {
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   version        Int       @default(1)
   archivedAt     DateTime? @map("archived_at") @db.Timestamptz(6)
+  contas Bill[]
+  caixas CashRegister[]
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   /// COMPOSTA: a marca tem de ser da mesma organização. É a base que recusa.
@@ -315,6 +326,11 @@ model User {
   twoFactorEnabled Boolean @default(false) @map("two_factor_enabled")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  ajustesAutorizados   BillAdjustment[]
+  devolucoesAutorizadas Refund[]
+  acontecimentosDeCaixa CashRegisterEvent[] @relation("actorDoAcontecimento")
+  divergenciasAutorizadas CashRegisterEvent[] @relation("autorDaDivergencia")
+  movimentosDeCaixa CashMovement[] @relation("actorDoMovimento")
 
   memberships   Membership[]
   sessions      Session[]
@@ -2251,6 +2267,7 @@ model TableSession {
   abertaEm       DateTime       @default(now()) @map("aberta_em") @db.Timestamptz(6)
   fechadaPor     String?        @map("fechada_por")
   fechadaEm      DateTime?      @map("fechada_em") @db.Timestamptz(6)
+  contas Bill[]
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -2550,6 +2567,7 @@ model OrderLine {
   /// O produto do catálogo. Anulável porque o produto pode ser arquivado depois,
   /// e a linha servida continua a valer — é a razão de haver instantâneo.
   productId      String? @map("product_id") @db.Uuid
+  linhasDeConta BillLine[]
 
   /// ── O INSTANTÂNEO, que é o aceite 3 escrito em colunas ─────────────────
   ///
@@ -3683,4 +3701,279 @@ model ExternalCatalogMapping {
   @@unique([organizationId, id], name: "mapa_por_organizacao")
   @@unique([locationId, canalExterno, idExterno], name: "um_mapa_por_id_externo")
   @@map("external_catalog_mappings")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E22 — contas, pagamentos e devoluções
+// ═══════════════════════════════════════════════════════════════════════════
+
+enum EstadoDaTentativa {
+  CRIADA
+  PROCESSANDO
+  /// Saiu e não se sabe se chegou. **Não é um erro, é um estado** — e é o mais
+  /// perigoso: criar outra cobrança antes de o reconciliar é cobrar duas vezes.
+  INDETERMINADA
+  CONFIRMADA
+  FALHOU
+  CANCELADA
+}
+
+enum MeioDePagamento {
+  DINHEIRO
+  CARTAO
+  /// «Pago fora da BossaOS», com responsável e motivo. Não cria receita
+  /// processada nem documento fiscal — CT-08 e D08.
+  FORA_DA_BOSSAOS
+}
+
+enum TipoDeAjuste {
+  DESCONTO
+  CORTESIA
+}
+
+enum BaseDoAjuste {
+  LINHA
+  CONTA
+}
+
+/// A conta: a **obrigação**, e não o que se recebeu.
+///
+/// ── Não há coluna de estado, de propósito ─────────────────────────────────
+///
+/// «É derivado dos pagamentos, não escrito na conta.» Uma coluna `estado` é um
+/// sítio onde alguém escreve «liquidada» sem existir um pagamento — uma
+/// afirmação sem prova. É a mesma decisão da posição na lista de espera do E19.
+model Bill {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  locationId     String  @map("location_id") @db.Uuid
+  sessionId      String? @map("session_id") @db.Uuid
+  numero         String
+  moeda          String  @db.Char(3)
+  /// Derivado por gatilho a partir das linhas e dos ajustes. Um valor escrito
+  /// aqui de fora é substituído: não é uma regra, é uma coisa que não se
+  /// consegue fazer.
+  devidoMenor    Int     @default(0) @map("devido_menor")
+  fechadaEm      DateTime? @map("fechada_em") @db.Timestamptz(6)
+  fechadaPor     String?   @map("fechada_por") @db.Uuid
+
+  criadaEm      DateTime @default(now()) @map("criada_em") @db.Timestamptz(6)
+  actualizadaEm DateTime @default(now()) @map("actualizada_em") @db.Timestamptz(6)
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location      @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  sessao       TableSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  linhas       BillLine[]
+  ajustes      BillAdjustment[]
+  tentativas   PaymentAttempt[]
+  pagamentos   Payment[]
+
+  @@unique([locationId, numero], name: "um_numero_de_conta_por_unidade")
+  @@map("bills")
+}
+
+/// A linha da conta, com o preço que valia quando entrou.
+///
+/// Copia-se em vez de se ler mais tarde, pela mesma razão da taxa de entrega do
+/// E20: uma conta cujo valor muda quando alguém edita a carta não é uma conta.
+model BillLine {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  billId         String  @map("bill_id") @db.Uuid
+  orderLineId    String? @map("order_line_id") @db.Uuid
+  nome           String
+  quantidade     Int     @default(1)
+  unitarioMenor  Int     @map("unitario_menor")
+  criadaEm       DateTime @default(now()) @map("criada_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  conta        Bill         @relation(fields: [billId], references: [id], onDelete: Cascade)
+  linhaDoPedido OrderLine?  @relation(fields: [orderLineId], references: [id], onDelete: SetNull)
+  ajustes      BillAdjustment[]
+
+  @@map("bill_lines")
+}
+
+/// Desconto e cortesia: uma linha ao lado, nunca um `UPDATE` no preço.
+///
+/// «Desconto/estorno não reescrevem a venda original.» A venda fica como foi, e
+/// o que se tirou vê-se — com quem autorizou e porquê.
+model BillAdjustment {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  billId         String  @map("bill_id") @db.Uuid
+  billLineId     String? @map("bill_line_id") @db.Uuid
+  tipo           TipoDeAjuste
+  base           BaseDoAjuste
+  montanteMenor  Int     @map("montante_menor")
+  /// Obrigatório. Um desconto sem motivo é indistinguível de um erro de dedo, e
+  /// é o campo que o gerente lê quando a caixa não bate.
+  motivo         String
+  autorizadoPor  String  @map("autorizado_por") @db.Uuid
+  /// A linha que este ajuste ANULA. Corrigir é um registo novo — imutável sem
+  /// reversão não é rigor, é uma armadilha: um desconto por engano ficaria para
+  /// sempre. As duas linhas continuam a ver-se; o que muda é o que conta.
+  reverteId      String? @unique @map("reverte_id") @db.Uuid
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  conta        Bill         @relation(fields: [billId], references: [id], onDelete: Cascade)
+  linha        BillLine?    @relation(fields: [billLineId], references: [id], onDelete: Cascade)
+  autor        User         @relation(fields: [autorizadoPor], references: [id], onDelete: Restrict)
+  reverte      BillAdjustment?  @relation("reversao", fields: [reverteId], references: [id], onDelete: Restrict)
+  revertidoPor BillAdjustment?  @relation("reversao")
+
+  @@map("bill_adjustments")
+}
+
+/// A tentativa: saiu daqui. **Não prova que chegou.**
+model PaymentAttempt {
+  id                String @id @default(uuid()) @db.Uuid
+  organizationId    String @map("organization_id") @db.Uuid
+  billId            String @map("bill_id") @db.Uuid
+  estado            EstadoDaTentativa @default(CRIADA)
+  meio              MeioDePagamento
+  montanteMenor     Int    @map("montante_menor")
+  chaveIdempotente  String @map("chave_idempotente")
+  criadaEm          DateTime  @default(now()) @map("criada_em") @db.Timestamptz(6)
+  resolvidaEm       DateTime? @map("resolvida_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  conta        Bill         @relation(fields: [billId], references: [id], onDelete: Cascade)
+  pagamento    Payment?
+
+  @@unique([organizationId, chaveIdempotente], name: "uma_tentativa_por_chave")
+  @@map("payment_attempts")
+}
+
+/// O pagamento: o confirmado.
+///
+/// Não tem estado — **existir é estar confirmado**. Um `Payment` com
+/// `estado = falhou` seria dinheiro que se desconta a somar, e somar o que
+/// falhou é como as contas passam a mentir. Imutável por gatilho.
+model Payment {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  billId         String @map("bill_id") @db.Uuid
+  attemptId      String @unique @map("attempt_id") @db.Uuid
+  meio           MeioDePagamento
+  montanteMenor  Int    @map("montante_menor")
+  /// Só em dinheiro físico. Guarda-se o RECEBIDO e o troco deriva-se: guardar a
+  /// subtracção era guardar um número que pode discordar das parcelas.
+  recebidoMenor  Int?   @map("recebido_menor")
+  confirmadoEm   DateTime @default(now()) @map("confirmado_em") @db.Timestamptz(6)
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  conta        Bill           @relation(fields: [billId], references: [id], onDelete: Cascade)
+  tentativa    PaymentAttempt @relation(fields: [attemptId], references: [id], onDelete: Restrict)
+  devolucoes   Refund[]
+
+  @@map("payments")
+}
+
+/// A devolução, que **não é um pagamento negativo**.
+///
+/// Parcial é saldo derivado do capturado ainda não devolvido — não há coluna
+/// `devolvido`, que era onde duas devoluções concorrentes se escreviam por cima.
+model Refund {
+  id               String @id @default(uuid()) @db.Uuid
+  organizationId   String @map("organization_id") @db.Uuid
+  paymentId        String @map("payment_id") @db.Uuid
+  montanteMenor    Int    @map("montante_menor")
+  motivo           String
+  autorizadoPor    String @map("autorizado_por") @db.Uuid
+  chaveIdempotente String @map("chave_idempotente")
+  criadoEm         DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  pagamento    Payment      @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  autor        User         @relation(fields: [autorizadoPor], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, chaveIdempotente], name: "uma_devolucao_por_chave")
+  @@map("refunds")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E22 — caixa
+// ═══════════════════════════════════════════════════════════════════════════
+
+enum AcontecimentoDeCaixa {
+  ABERTURA
+  CONTAGEM
+  FECHO
+  REABERTURA
+}
+
+enum TipoDeMovimento {
+  ENTRADA
+  SAIDA
+}
+
+/// A caixa: identidade, fundo e moeda. **Mais nada.**
+///
+/// O estado não é uma coluna — deriva-se dos acontecimentos. Sem coluna, não há
+/// sítio onde alguém feche uma caixa sem ficar registo.
+model CashRegister {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  nome           String
+  moeda          String @db.Char(3)
+  fundoMenor     Int    @map("fundo_menor")
+  criadaEm       DateTime @default(now()) @map("criada_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  acontecimentos CashRegisterEvent[]
+  movimentos     CashMovement[]
+
+  @@map("cash_registers")
+}
+
+/// O rasto que não se apaga: abrir, contar, fechar, reabrir. Imutável.
+model CashRegisterEvent {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  registerId     String @map("register_id") @db.Uuid
+  tipo           AcontecimentoDeCaixa
+  actor          String @db.Uuid
+  /// O ÚNICO número que um humano escreve. O esperado e a diferença derivam-se:
+  /// uma diferença guardada é uma diferença que se pode editar até dar zero.
+  contadoMenor   Int?    @map("contado_menor")
+  motivo         String?
+  autorizadoPor  String? @map("autorizado_por") @db.Uuid
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  caixa        CashRegister @relation(fields: [registerId], references: [id], onDelete: Cascade)
+  quemFez      User         @relation("actorDoAcontecimento", fields: [actor], references: [id], onDelete: Restrict)
+  quemAutorizou User?       @relation("autorDaDivergencia", fields: [autorizadoPor], references: [id], onDelete: Restrict)
+
+  @@map("cash_register_events")
+}
+
+/// Movimento de dinheiro **físico**.
+///
+/// Não há coluna de meio de pagamento, de propósito: tudo o que está aqui é
+/// dinheiro. Não é uma regra que alguém tenha de respeitar ao escrever a
+/// consulta; é uma coluna que não existe.
+model CashMovement {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  registerId     String  @map("register_id") @db.Uuid
+  tipo           TipoDeMovimento
+  montanteMenor  Int     @map("montante_menor")
+  motivo         String
+  actor          String  @db.Uuid
+  paymentId      String? @unique @map("payment_id") @db.Uuid
+  corrigeId      String? @unique @map("corrige_id") @db.Uuid
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  caixa        CashRegister @relation(fields: [registerId], references: [id], onDelete: Cascade)
+  quemFez      User         @relation("actorDoMovimento", fields: [actor], references: [id], onDelete: Restrict)
+  corrige      CashMovement?  @relation("correccao", fields: [corrigeId], references: [id], onDelete: Restrict)
+  corrigidoPor CashMovement?  @relation("correccao")
+
+  @@map("cash_movements")
 }
