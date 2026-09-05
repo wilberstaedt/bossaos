@@ -72,4 +72,5 @@ uma destas, o documento é que está errado.
 - [`stock-e-fichas.md`](./stock-e-fichas.md) — Stock e fichas técnicas
 - [`compras-e-fornecedores.md`](./compras-e-fornecedores.md) — Compras e fornecedores: encomendado, recebido e facturado são três números; só a recepção mexe no stock; a unidade de compra não é a de uso
 - [`consentimento-e-campanhas.md`](./consentimento-e-campanhas.md) — Consentimento por finalidade e por canal, derivado de acontecimentos; a retirada vale antes do próximo envio porque é um gatilho que a faz valer; audiência por regra, nunca por lista colada; pontos com saldo derivado
+- [`ponto-e-escalas.md`](./ponto-e-escalas.md) — A marcação é um facto que a base não deixa reescrever; quem corrige fica registado; previsto e real são dois números; minutos inteiros; e a REGRA DE FRONTEIRA do dia de serviço, que não é o dia civil
 - [`tarefas-de-producao-e-estacoes.md`](./tarefas-de-producao-e-estacoes.md) — Uma linha de pedido não é uma tarefa de estação

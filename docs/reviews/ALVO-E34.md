@@ -79,3 +79,24 @@ mudança de convenção a meio do projecto.
 - **Critérios fixados antes de ver, e a lista do que NÃO exijo.**
 - **A reaprovação executável**, como `provar-marco-e21.sh` — a leitura não se
   reexecuta.
+
+## Dívida 9 — a prova de larguras parece global e não é
+
+`inspeccao/larguras.spec.ts` corre sobre um `PAGINAS` de **seis caminhos escritos
+à mão** (`ajudas.ts:6`) que nunca cresceu: `inicio`, `catalogo` e quatro
+estruturas. O produto tem 322 telas validadas.
+
+Não é um buraco de cobertura — desde o E20 cada etapa mede as suas próprias
+larguras dentro da própria prova, e foi assim que o E27 mediu as catorze. **É
+pior do que um buraco: é um instrumento que parece cobrir tudo e cobre seis.**
+Quem o ler para decidir se o móvel está medido tira a conclusão errada.
+
+**Quinta lista à mão a desalinhar no mesmo dia** — depois dos documentos de
+retoma, da lista de provas na CI, do índice de arquitectura e da linha de etapa
+do HANDOFF. O padrão já não é anedota: **onde há uma lista escrita à mão de coisas
+que crescem, ela está desactualizada.** A correcção é sempre a mesma — descobrir
+em vez de listar.
+
+Fica: `larguras.spec.ts` passa a descobrir as telas a partir do `coverage.csv`
+(as validadas, com rota), como a CI já descobre as guardas por padrão. Controlo
+negativo: acrescentar uma tela nova ao coverage e ver a prova crescer sozinha.

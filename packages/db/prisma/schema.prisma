@@ -198,6 +198,9 @@ model Organization {
   campanhas         Campaign[]
   enviosDeCampanha  CampaignDelivery[]
   respostas         FeedbackEntry[]
+  funcoesDeEquipa TeamRole[]
+  turnosDeEquipa  Shift[]
+  marcacoes       TimeEntry[]
 }
 
 /// Marca: catálogo e identidade comercial. Pertence a uma organização.
@@ -346,6 +349,9 @@ model Location {
   modelosDeCampanha CampaignTemplate[]
   campanhas         Campaign[]
   respostas         FeedbackEntry[]
+  funcoesDeEquipa TeamRole[]
+  turnosDeEquipa  Shift[]
+  marcacoes       TimeEntry[]
 }
 
 /// Identidade GLOBAL. Excepção documentada (CT-04): não leva `organization_id`,
@@ -495,6 +501,9 @@ model Membership {
   @@unique([organizationId, userId])
   @@index([userId])
   @@map("memberships")
+  turnos            Shift[]
+  jornadas          TimeEntry[] @relation("jornadaDoMembro")
+  marcacoesQueFez   TimeEntry[] @relation("autorDaMarcacao")
 }
 
 /// Papéis do CT-04. O nome fica em maiúsculas porque é vocabulário do contrato.
@@ -4702,4 +4711,102 @@ model FeedbackEntry {
   cliente      Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   @@map("feedback_entries")
+}
+
+// ── E28 · Equipa, escalas e ponto ──────────────────────────────────────────
+//
+// Contrato: `docs/architecture/ponto-e-escalas.md`.
+//
+// Esta etapa mexe no salário de quem trabalha na casa. A marcação é um FACTO:
+// `time_entries` é imutável por gatilho, como os movimentos de caixa do E22, e
+// a correcção é um registo NOVO que aponta ao que corrige.
+
+enum TipoDeMarcacao {
+  ENTRADA
+  SAIDA
+}
+
+/// A função que alguém faz na casa — cozinha, sala, barra. É de ESCALA, e não
+/// de permissão: quem pode o quê continua a ser o `RoleAssignment` do E04.
+model TeamRole {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  nome           String
+  cor            String?
+  arquivadaEm    DateTime? @map("arquivada_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  turnos       Shift[]
+
+  @@unique([locationId, nome], name: "uma_funcao_por_nome")
+  @@map("team_roles")
+}
+
+/// O turno PREVISTO. Não é o ponto real — são dois números, como o encomendado
+/// e o recebido no E26.
+model Shift {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  membershipId   String @map("membership_id") @db.Uuid
+  roleId         String? @map("role_id") @db.Uuid
+  /// O DIA DE SERVIÇO, e não a data civil. Um turno que atravessa a meia-noite
+  /// pertence ao dia em que começou.
+  diaDeServico   DateTime @map("dia_de_servico") @db.Date
+  /// Minutos desde a meia-noite do dia de serviço, na hora da casa. As 18h são
+  /// `1080`; as 00h30 do dia seguinte são `1470`. Inteiros, sempre.
+  inicioMinutos  Int @map("inicio_minutos")
+  fimMinutos     Int @map("fim_minutos")
+  nota           String?
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  membro       Membership   @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  funcao       TeamRole?    @relation(fields: [roleId], references: [id], onDelete: SetNull)
+
+  @@index([locationId, diaDeServico])
+  @@map("shifts")
+}
+
+/// A MARCAÇÃO. Imutável — a correcção é um registo novo.
+model TimeEntry {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  /// De quem é a jornada.
+  membershipId   String @map("membership_id") @db.Uuid
+  tipo           TipoDeMarcacao
+  /// O instante, em UTC. A conversão para hora da casa é apresentação.
+  momento        DateTime @db.Timestamptz(6)
+  /// ── Resolvido na FRONTEIRA, e gravado ─────────────────────────────────
+  ///
+  /// A data civil, no fuso da unidade, do instante menos o corte do serviço.
+  /// Nunca se recalcula na leitura a partir de um instante lido como hora de
+  /// parede — que foi exactamente o defeito do fuso.
+  diaDeServico   DateTime @map("dia_de_servico") @db.Date
+  /// ── Quem REGISTOU, que pode não ser de quem é a jornada ───────────────
+  ///
+  /// Uma autocorrecção é `autor = membro`. Não se proíbe; distingue-se.
+  autorMembershipId String @map("autor_membership_id") @db.Uuid
+  /// A marcação que esta corrige. `null` é uma marcação original.
+  corrigeId      String? @unique @map("corrige_id") @db.Uuid
+  /// Obrigatório quando corrige. Uma correcção sem razão não se explica a
+  /// ninguém — e é a quem foi corrigido que ela tem de ser explicada.
+  motivo         String?
+  origem         String?
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  membro       Membership   @relation("jornadaDoMembro", fields: [membershipId], references: [id], onDelete: Cascade)
+  autor        Membership   @relation("autorDaMarcacao", fields: [autorMembershipId], references: [id], onDelete: Restrict)
+  corrige      TimeEntry?   @relation("correccaoDeMarcacao", fields: [corrigeId], references: [id], onDelete: Restrict)
+  correccao    TimeEntry?   @relation("correccaoDeMarcacao")
+
+  @@index([membershipId, diaDeServico])
+  @@index([locationId, diaDeServico])
+  @@map("time_entries")
 }

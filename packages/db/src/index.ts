@@ -331,3 +331,10 @@ export {
   type CanalDeContacto, type Finalidade, type RecusaDeCrm, type RegraDeSegmento,
   type ResultadoDaCampanha,
 } from './crm.ts';
+export {
+  corrigir, correccoesDaUnidade, criarFuncao, criarTurno, diaDeServicoDe,
+  equipaDaUnidade, funcoesDaUnidade, jornadaDoDia, jornadasDaUnidade,
+  marcacoesDoDia, minutosNoDiaDeServico, picar, turnosDaSemana,
+  RecusaDoPonto, CORTE_DO_SERVICO_MINUTOS,
+  type JornadaDoDia, type MarcacaoLida, type RecusaDePonto,
+} from './ponto.ts';
