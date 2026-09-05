@@ -1,5 +1,47 @@
 # HANDOFF — estado do motor BossaOS
 
+**Etapa atual:** E23 — pagamentos, webhooks e reembolsos (**12 telas**).
+**Estado:** **EM CURSO — fatia 1 (a fronteira).** As 12 telas não estão feitas.
+**Régua:** `docs/reviews/ALVO-E23.md`, escrita **antes de existir código**.
+**Detalhe:** `docs/progress/E23.md`.
+
+**A identidade é a do ACONTECIMENTO, e a garantia é um índice** — não há «procura
+e se não existir insere», porque entre a procura e a inserção cabe o segundo
+processo. O par: o mesmo acontecimento duas vezes tem **um** efeito, dois
+acontecimentos diferentes têm **dois**.
+
+**Não há máquina de transições.** Guarda-se o estado que o provedor autoriza com
+o instante que **ele** carimbou, e o estado deriva-se do conjunto: a ordem de
+chegada não decide porque **não entra na conta**. A devolução que chega antes da
+captura não se perde nem se inventa.
+
+**A assinatura verifica-se antes de qualquer efeito**, com `timingSafeEqual`,
+sobre o corpo **cru**, e a recusa **não diz porquê** — um erro que explica o que
+faltou à assinatura é um manual de como a forjar.
+
+**O segredo não tem onde morar na base:** a tabela do conector não tem coluna
+para chave, e há uma prova que as procura no `information_schema` e exige zero. O
+conector **não liga sem provedor E merchant**, por `CHECK`.
+
+**Dois achados, e os dois são da prova.** O meu controlo da ordem não plantava o
+defeito que descrevia — trocava duas *leituras*, e a assinatura continuava a ser
+verificada antes de escrever. E ao consertá-lo vi que **a transacção nos protege
+por acidente**: o `throw` desfaz a escrita, mas isso é desenho de outra camada, e
+no dia em que um efeito sair da transacção a protecção desaparece sem ninguém
+tocar nesta função. **E a varredura das duas ordens não tinha guarda** que
+notasse se as duas fossem a mesma — pus o plante a correr a mesma ordem nas duas
+voltas e a suite ficou verde.
+
+**Portões, códigos de saída lidos directamente:** `pnpm verificar` (**0**) ·
+`./scripts/provar-adquirente.sh` (**21 casos, 8 controlos negativos**, 0).
+
+**PENDÊNCIA DECLARADA:** não há credenciais de adquirente nenhum. Está
+implementada a **porta** e as provas determinísticas; a integração fica
+**pendente** e o pagamento real **não** está declarado pronto. Nada finge ter
+falado com um provedor.
+
+---
+
 **Etapa atual:** **AS PORTAS** — a condição que o E21 pôs para reabrir o marco do
 Restaurant. Não é uma etapa; é o que falta antes do E23.
 **Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** Detalhe em

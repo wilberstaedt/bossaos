@@ -65,6 +65,8 @@ model Organization {
   caixas           CashRegister[]
   acontecimentosDeCaixa CashRegisterEvent[]
   movimentosDeCaixa CashMovement[]
+  acontecimentosDoProvedor ProviderEvent[]
+  conectoresDePagamento PaymentConnector[]
 
   // ── E06: perfil. TODOS opcionais, e isso é a decisão da etapa ─────────────
   //
@@ -254,6 +256,7 @@ model Location {
   archivedAt     DateTime? @map("archived_at") @db.Timestamptz(6)
   contas Bill[]
   caixas CashRegister[]
+  conectorDePagamento PaymentConnector?
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   /// COMPOSTA: a marca tem de ser da mesma organização. É a base que recusa.
@@ -3756,6 +3759,7 @@ model Bill {
   devidoMenor    Int     @default(0) @map("devido_menor")
   fechadaEm      DateTime? @map("fechada_em") @db.Timestamptz(6)
   fechadaPor     String?   @map("fechada_por") @db.Uuid
+  acontecimentos ProviderEvent[]
 
   criadaEm      DateTime @default(now()) @map("criada_em") @db.Timestamptz(6)
   actualizadaEm DateTime @default(now()) @map("actualizada_em") @db.Timestamptz(6)
@@ -3837,6 +3841,7 @@ model PaymentAttempt {
   chaveIdempotente  String @map("chave_idempotente")
   criadaEm          DateTime  @default(now()) @map("criada_em") @db.Timestamptz(6)
   resolvidaEm       DateTime? @map("resolvida_em") @db.Timestamptz(6)
+  acontecimentos ProviderEvent[]
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   conta        Bill         @relation(fields: [billId], references: [id], onDelete: Cascade)
@@ -3861,6 +3866,11 @@ model Payment {
   /// Só em dinheiro físico. Guarda-se o RECEBIDO e o troco deriva-se: guardar a
   /// subtracção era guardar um número que pode discordar das parcelas.
   recebidoMenor  Int?   @map("recebido_menor")
+  /// A gorjeta é dinheiro que NÃO é da casa. Somá-la à venda faz o relatório de
+  /// receita mentir e a partilha da equipa desaparecer.
+  gorjetaMenor   Int    @default(0) @map("gorjeta_menor")
+  provedor       String?
+  provedorRef    String? @map("provedor_ref")
   confirmadoEm   DateTime @default(now()) @map("confirmado_em") @db.Timestamptz(6)
 
   organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -3883,6 +3893,7 @@ model Refund {
   motivo           String
   autorizadoPor    String @map("autorizado_por") @db.Uuid
   chaveIdempotente String @map("chave_idempotente")
+  provedorRef      String? @unique @map("provedor_ref")
   criadoEm         DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -3976,4 +3987,66 @@ model CashMovement {
   corrigidoPor CashMovement?  @relation("correccao")
 
   @@map("cash_movements")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E23 — a fronteira: adquirente, webhooks e devoluções
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// O acontecimento como o adquirente o conta.
+///
+/// A identidade é a do ACONTECIMENTO — a mesma forma da mensageria do E19. Um
+/// reenvio traz o mesmo `eventoId` e deduplica; um facto novo traz identidade
+/// nova e entra. A garantia é o índice único, e não um `if já existe`: entre a
+/// procura e a inserção cabe o segundo processo.
+model ProviderEvent {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  provedor       String
+  eventoId       String  @map("evento_id")
+  tipo           String
+  billId         String? @map("bill_id") @db.Uuid
+  attemptId      String? @map("attempt_id") @db.Uuid
+  /// O estado que o PROVEDOR autoriza, e não a nossa transição. É isto que
+  /// permite reconciliar eventos fora de ordem sem perder nenhum.
+  estadoProvedor String  @map("estado_provedor")
+  montanteMenor  Int?    @map("montante_menor")
+  /// O instante que o provedor carimbou. A ordenação é por aqui, nunca pela
+  /// chegada — que é precisamente o que não é de confiança.
+  ocorridoEm     DateTime @map("ocorrido_em") @db.Timestamptz(6)
+  recebidoEm     DateTime @default(now()) @map("recebido_em") @db.Timestamptz(6)
+  /// O corpo, para auditoria. A assinatura NUNCA: um segredo em registo é um
+  /// segredo publicado.
+  corpo          Json?
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  conta        Bill?           @relation(fields: [billId], references: [id], onDelete: SetNull)
+  tentativa    PaymentAttempt? @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+
+  @@unique([provedor, eventoId], name: "um_acontecimento_por_provedor")
+  @@index([attemptId, ocorridoEm])
+  @@map("provider_events")
+}
+
+/// A ligação ao adquirente, por unidade.
+///
+/// «Não presuma que a conta do SaaS pode receber vendas dos restaurantes.» Não
+/// há aqui coluna para chave secreta, de propósito: segredo vive no ambiente,
+/// nunca na base nem num endereço.
+model PaymentConnector {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  locationId     String  @unique @map("location_id") @db.Uuid
+  provedor       String?
+  merchantId     String? @map("merchant_id")
+  /// Ligado exige provedor E merchant — por `CHECK`. Um conector ligado sem
+  /// titularidade era declarar pagamento real pronto sem o ser.
+  activo         Boolean @default(false)
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  actualizadoEm  DateTime @default(now()) @map("actualizado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@map("payment_connectors")
 }

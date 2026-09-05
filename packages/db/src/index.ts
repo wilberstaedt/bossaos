@@ -303,3 +303,8 @@ export {
   estadoDaCaixa, fecharCaixa, historicoDeCaixas, movimentar, rastoDaCaixa, reabrirCaixa,
   resumoDaCaixa, RecusaDaCaixa, type EstadoDaCaixa, type RecusaDeCaixa,
 } from './caixa.ts';
+export {
+  acontecimentosDaConta, assinaturaConfere, conectorDePagamento, estadoAutorizado,
+  guardarConectorDePagamento, receberWebhook, reconciliarComProvedor, RecusaDeWebhook,
+  type AcontecimentoDoProvedor, type RecusaDoAdquirente, type ResultadoDoWebhook,
+} from './adquirente.ts';
