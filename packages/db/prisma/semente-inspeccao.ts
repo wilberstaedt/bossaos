@@ -912,6 +912,34 @@ async function principal(): Promise<void> {
     });
     console.log(`semeado: recibo público ${pagamentoDaProva.reciboPublico}`);
 
+    // ── E24 · um documento ACEITE e um REJEITADO ─────────────────────────
+    //
+    // «Verde sobre zero documentos» é reprovação à cabeça. E não chega um: sem o
+    // aceite, a tela media só «nada é documento fiscal»; sem o rejeitado, o
+    // motivo da rejeição nunca apareceria e ninguém notava que não se mostra.
+    const docAceite = await prisma.fiscalDocument.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2, billId: contaDaProva.id,
+        acontecimento: `${PREFIXO}doc-aceite`, estado: 'ACEITE',
+        numeroProvedor: 'FAC-INSP-0001', provedor: 'homologado-de-inspeccao',
+        respondidoEm: new Date(),
+      },
+    });
+    await prisma.fiscalDocument.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        acontecimento: `${PREFIXO}doc-rejeitado`, estado: 'REJEITADO',
+        motivoRejeicao: 'NIF del cliente inválido', anteriorId: docAceite.id,
+        respondidoEm: new Date(),
+      },
+    });
+    await prisma.fiscalConnector.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        provedor: null, ambiente: 'SANDBOX', nif: null, activo: false,
+      },
+    });
+
     // ── E18 · reservas: uma linha em cada lista, e nenhuma vazia ──────────
     //
     // As seis telas desta etapa são listas. Uma lista vazia mede o estado

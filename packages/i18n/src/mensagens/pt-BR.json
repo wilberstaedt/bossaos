@@ -1944,5 +1944,33 @@
     "semAdquirente": "Ainda não há gateway de pagamento ligado: o pagamento é feito com uma pessoa.",
     "semRecibo": "Não encontramos esse comprovante.",
     "verConta": "Ver a conta"
+  },
+  "fiscalE24": {
+    "aceite": "Aceito",
+    "ambiente": "Ambiente",
+    "anulado": "Anulado",
+    "configuracao": "Configuração fiscal",
+    "corrigeO": "Retifica o",
+    "corrigir": "Retificar",
+    "eDocumento": "Documento fiscal aceito",
+    "emissaoBloqueada": "Emissão real BLOQUEADA: não há provedor homologado ligado.",
+    "enviado": "Enviado",
+    "fiscal": "Documentos fiscais",
+    "guardar": "Guardar",
+    "impostos": "Impostos e taxas",
+    "motivo": "Motivo da rejeição",
+    "naoEDocumento": "Isto NÃO é um documento fiscal.",
+    "nif": "NIF",
+    "numero": "Número",
+    "pendente": "Pendente",
+    "porConfirmar": "Requisitos do regime POR CONFIRMAR na fonte oficial. Ver ADR 0002.",
+    "producao": "Produção",
+    "provedor": "Provedor",
+    "recibo": "Recibo",
+    "rejeitado": "Rejeitado",
+    "sandbox": "Testes",
+    "semDocumentos": "Ainda não há documentos",
+    "semImpostos": "Não há impostos configurados",
+    "taxa": "Alíquota"
   }
 }

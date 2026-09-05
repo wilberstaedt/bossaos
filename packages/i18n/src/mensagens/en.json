@@ -1944,5 +1944,33 @@
     "semAdquirente": "No payment provider connected yet: payment is taken by a person.",
     "semRecibo": "We could not find that receipt.",
     "verConta": "See the bill"
+  },
+  "fiscalE24": {
+    "aceite": "Accepted",
+    "ambiente": "Environment",
+    "anulado": "Voided",
+    "configuracao": "Fiscal settings",
+    "corrigeO": "Rectifies",
+    "corrigir": "Rectify",
+    "eDocumento": "Accepted fiscal document",
+    "emissaoBloqueada": "Real issuance BLOCKED: no approved provider connected.",
+    "enviado": "Sent",
+    "fiscal": "Fiscal documents",
+    "guardar": "Save",
+    "impostos": "Taxes and rates",
+    "motivo": "Rejection reason",
+    "naoEDocumento": "This is NOT a fiscal document.",
+    "nif": "Tax ID",
+    "numero": "Number",
+    "pendente": "Pending",
+    "porConfirmar": "Regime requirements TO BE CONFIRMED at the official source. See ADR 0002.",
+    "producao": "Production",
+    "provedor": "Provider",
+    "recibo": "Receipt",
+    "rejeitado": "Rejected",
+    "sandbox": "Sandbox",
+    "semDocumentos": "No documents yet",
+    "semImpostos": "No taxes configured",
+    "taxa": "Rate"
   }
 }

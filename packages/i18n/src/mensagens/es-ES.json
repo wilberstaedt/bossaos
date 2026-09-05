@@ -1944,5 +1944,33 @@
     "semAdquirente": "Todavía no hay pasarela de pago conectada: el cobro se hace con una persona.",
     "semRecibo": "No encontramos ese comprobante.",
     "verConta": "Ver la cuenta"
+  },
+  "fiscalE24": {
+    "aceite": "Aceptado",
+    "ambiente": "Entorno",
+    "anulado": "Anulado",
+    "configuracao": "Configuración fiscal",
+    "corrigeO": "Rectifica a",
+    "corrigir": "Rectificar",
+    "eDocumento": "Documento fiscal aceptado",
+    "emissaoBloqueada": "Emisión real BLOQUEADA: no hay proveedor homologado conectado.",
+    "enviado": "Enviado",
+    "fiscal": "Documentos fiscales",
+    "guardar": "Guardar",
+    "impostos": "Impuestos y tasas",
+    "motivo": "Motivo del rechazo",
+    "naoEDocumento": "Esto NO es un documento fiscal.",
+    "nif": "NIF",
+    "numero": "Número",
+    "pendente": "Pendiente",
+    "porConfirmar": "Requisitos del régimen POR CONFIRMAR en la fuente oficial. Ver ADR 0002.",
+    "producao": "Producción",
+    "provedor": "Proveedor",
+    "recibo": "Recibo",
+    "rejeitado": "Rechazado",
+    "sandbox": "Pruebas",
+    "semDocumentos": "Todavía no hay documentos",
+    "semImpostos": "No hay impuestos configurados",
+    "taxa": "Tipo"
   }
 }

@@ -309,3 +309,8 @@ export {
   type AcontecimentoDoProvedor, type RecusaDoAdquirente, type ResultadoDoWebhook,
 } from './adquirente.ts';
 export { reciboPublico } from './visitante.ts';
+export {
+  conectorFiscal, corrigirDocumento, eDocumentoFiscal, enviarDocumento, filaFiscal,
+  guardarConectorFiscal, pedirDocumento, responderDocumento, RecusaDoFiscal,
+  type RecusaFiscal,
+} from './fiscal.ts';

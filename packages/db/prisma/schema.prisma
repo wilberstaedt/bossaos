@@ -67,6 +67,8 @@ model Organization {
   movimentosDeCaixa CashMovement[]
   acontecimentosDoProvedor ProviderEvent[]
   conectoresDePagamento PaymentConnector[]
+  documentosFiscais FiscalDocument[]
+  conectoresFiscais FiscalConnector[]
 
   // ── E06: perfil. TODOS opcionais, e isso é a decisão da etapa ─────────────
   //
@@ -257,6 +259,8 @@ model Location {
   contas Bill[]
   caixas CashRegister[]
   conectorDePagamento PaymentConnector?
+  documentosFiscais FiscalDocument[]
+  conectorFiscal FiscalConnector?
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   /// COMPOSTA: a marca tem de ser da mesma organização. É a base que recusa.
@@ -3760,6 +3764,7 @@ model Bill {
   fechadaEm      DateTime? @map("fechada_em") @db.Timestamptz(6)
   fechadaPor     String?   @map("fechada_por") @db.Uuid
   acontecimentos ProviderEvent[]
+  documentosFiscais FiscalDocument[]
 
   criadaEm      DateTime @default(now()) @map("criada_em") @db.Timestamptz(6)
   actualizadaEm DateTime @default(now()) @map("actualizada_em") @db.Timestamptz(6)
@@ -4052,4 +4057,85 @@ model PaymentConnector {
   location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
 
   @@map("payment_connectors")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E24 — documentos fiscais
+// ═══════════════════════════════════════════════════════════════════════════
+
+enum EstadoDoDocumento {
+  PENDENTE
+  /// Saiu e não há resposta. É o estado que dói, e é o que costuma ser
+  /// colapsado em «falhou» — a mesma lição do indeterminado do E22.
+  ENVIADO
+  /// **Só aqui é um documento fiscal.** Antes disto é um ficheiro.
+  ACEITE
+  REJEITADO
+  ANULADO
+}
+
+enum TipoDeDocumento {
+  FACTURA
+  RECTIFICATIVA
+  ANULACAO
+}
+
+/// Um documento fiscal.
+///
+/// ── O que a base garante, e o que ela deliberadamente NÃO sabe ────────────
+///
+/// Garante a **forma**: identidade por acontecimento, estados, encadeamento,
+/// imutabilidade. Não sabe o **formato** — o conteúdo do QR, o algoritmo do
+/// hash, a estrutura do registo. A ordem técnica que os define não foi lida, e
+/// está dito no ADR 0002 com a data em que se foi ver.
+model FiscalDocument {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  locationId     String  @map("location_id") @db.Uuid
+  billId         String? @map("bill_id") @db.Uuid
+  tipo           TipoDeDocumento   @default(FACTURA)
+  estado         EstadoDoDocumento @default(PENDENTE)
+  /// A identidade. Uma emissão repetida traz o mesmo e devolve o MESMO
+  /// documento; uma correcção é um facto novo, e sai.
+  acontecimento  String
+  anteriorId     String? @map("anterior_id") @db.Uuid
+  resumo         String?
+  motivoRejeicao String? @map("motivo_rejeicao")
+  corrigeId      String? @unique @map("corrige_id") @db.Uuid
+  numeroProvedor String? @map("numero_provedor")
+  provedor       String?
+  criadoEm       DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+  enviadoEm      DateTime? @map("enviado_em") @db.Timestamptz(6)
+  respondidoEm   DateTime? @map("respondido_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  conta        Bill?        @relation(fields: [billId], references: [id], onDelete: SetNull)
+  anterior     FiscalDocument?  @relation("cadeia", fields: [anteriorId], references: [id], onDelete: Restrict)
+  seguinte     FiscalDocument[] @relation("cadeia")
+  corrige      FiscalDocument?  @relation("correccao", fields: [corrigeId], references: [id], onDelete: Restrict)
+  corrigidoPor FiscalDocument?  @relation("correccao")
+
+  @@unique([organizationId, acontecimento], name: "um_documento_por_acontecimento")
+  @@map("fiscal_documents")
+}
+
+/// A ligação ao fornecedor homologado. Sem ela, a emissão real fica bloqueada.
+model FiscalConnector {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  locationId     String  @unique @map("location_id") @db.Uuid
+  provedor       String?
+  /// `SANDBOX` ou `PRODUCAO`. Escrever o ambiente evita a pior confusão desta
+  /// área: julgar que se emitiu a sério contra um servidor de ensaio.
+  ambiente       String?
+  nif            String?
+  activo         Boolean @default(false)
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  actualizadoEm  DateTime @default(now()) @map("actualizado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@map("fiscal_connectors")
 }

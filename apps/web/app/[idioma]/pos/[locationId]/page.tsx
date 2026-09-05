@@ -37,6 +37,9 @@ export default async function HomeDoTpv({
             provadas a que ninguém chega, que é o que o marco já reprovou. */}
         <a data-seccao="pagamentos" href={`/${idioma}/pos/${locationId}/pagamentos`}>{t.caixa}</a>
         <a data-seccao="terminais" href={`/${idioma}/pos/${locationId}/terminais`}>{t.operador}</a>
+        {/* A porta do E24. Sem ela, as 5 telas seriam telas provadas a que
+            ninguém chega — o que já custou um marco reprovado. */}
+        <a data-seccao="fiscal" href={`/${idioma}/pos/${locationId}/fiscal`}>{t.conta}</a>
       </nav>
       <h2>{t.contasAbertas}</h2>
       <p data-teste="quantas">{contas.length}</p>

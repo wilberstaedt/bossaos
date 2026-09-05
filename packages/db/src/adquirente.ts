@@ -156,6 +156,16 @@ export async function receberWebhook(
       },
     });
   } catch (e) {
+    // ── E porque é que aqui o `catch` ainda serve ─────────────────────────
+    //
+    // Porque não há mais nada depois dele: devolve-se e acabou. Se houvesse uma
+    // consulta a seguir, ela falharia com `25P02` — a transacção fica abortada
+    // pelo erro, e o `catch` corre mas já não pode ler nada. Foi medido no E24,
+    // onde a mesma forma partiu por ter uma leitura a seguir.
+    //
+    // Fica anotado por ser frágil: no dia em que alguém acrescentar uma linha
+    // aqui, parte sem aviso. O E24 usa `ON CONFLICT DO NOTHING`, que é a forma
+    // que não tem esse pé de barro.
     const codigo = (e as { code?: string }).code;
     if (codigo === 'P2002') return { eventoId: evento.eventoId, repetido: true };
     throw e;

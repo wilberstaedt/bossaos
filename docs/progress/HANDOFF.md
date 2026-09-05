@@ -1,5 +1,51 @@
 # HANDOFF — estado do motor BossaOS
 
+**Etapa atual:** E24 — documentos e integração fiscal (**5 telas**).
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — as duas fatias.**
+**Régua:** `docs/reviews/ALVO-E24.md` · **Fontes:** `adr/0002-fiscal-espanha.md`.
+**Detalhe:** `docs/progress/E24.md`.
+
+## ⚠ PENDÊNCIA EXTERNA — antes do primeiro talão a um cliente real
+
+**Os requisitos concretos do regime têm de ser confirmados na fonte por quem
+tenha acesso e responsabilidade.** Não foi lida a Orden HAC/1177/2024 — a que traz
+o formato do registo, o conteúdo do QR e o algoritmo —, não há fornecedor
+homologado contratado, e a classificação fiscal da entidade do piloto não está
+confirmada. Está no ADR em destaque **e nos ecrãs**: INT-006, POS-020, POS-021 e
+CAT-021 dizem-no por palavras.
+
+**Fui às fontes e escrevi de onde tirei.** Duas consultas a 2026-09-05: a página
+da AEAT (dá os diplomas, **não** dá prazos nem requisitos técnicos) e o texto
+consolidado do RD 1007/2023 no BOE — encadeamento por parte do hash do anterior
+(**10.1.ñ**), QR obrigatório (**6.5.a**), a frase «VERI\*FACTU» só para quem
+remete (**6.5.b**), e os prazos **2027-01-01** e **2027-07-01**. O piloto cai no
+segundo.
+
+**Construiu-se a FORMA, não o formato.** Só é documento fiscal o que está
+`ACEITE` **e** com número do fornecedor; emitir duas vezes devolve o mesmo e uma
+correcção é documento novo com os dois a ficar; a rejeição é estado com motivo
+obrigatório; e apagar, mudar o que identifica o documento ou fazer um aceite
+voltar atrás são recusados **por gatilho**.
+
+**Achado que vale para lá desta etapa:** apanhar a colisão de um índice único
+**dentro de uma transacção** não serve — o Postgres aborta-a e tudo o que venha a
+seguir falha com `25P02`. Passou a `ON CONFLICT DO NOTHING`. O E23 usa a mesma
+forma e **funciona por acidente**, porque não há nada depois do `catch`; ficou
+anotado no código.
+
+**E três lições sobre medir:** um controlo que cai não é um controlo que mede
+(o da identidade era bruto demais e fazia tudo falhar); sem a guarda do motor a
+recusa continua a acontecer pela base — **degrada-se a legibilidade do erro, não
+a segurança**; e **medir o comprimento de um texto não é medir o que ele diz** —
+o rótulo «Motivo del rechazo» sozinho satisfazia a asserção.
+
+**Portões, códigos de saída lidos directamente:** `pnpm verificar` (**0**) ·
+`./scripts/provar-fiscal.sh` (**20 casos, 8 controlos negativos**, 0) ·
+`./scripts/provar-fiscal-no-navegador.sh` (**23 casos, 8 controlos**, 0) ·
+`pnpm inspeccionar` (**609 casos, 0**). Prova **LOCAL**.
+
+---
+
 **Etapa atual:** E23 — pagamentos, webhooks e reembolsos (**12 telas**).
 **Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — as duas fatias.**
 **Régua:** `docs/reviews/ALVO-E23.md`, escrita **antes de existir código**.

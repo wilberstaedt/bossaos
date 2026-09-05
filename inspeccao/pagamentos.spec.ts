@@ -31,7 +31,6 @@ interface Tela { id: string; caminho: string }
 function telas(a: Alvos): Tela[] {
   const POS = `/es-ES/pos/${a.unidadeDoStaff}`;
   const CONTA = `${POS}/conta/${a.contaDoTpv}`;
-  const MESA = '/es-ES/r/insp-marina-oropesa/es-ES/mesa';
   return [
     { id: 'POS-005', caminho: `${CONTA}/cobrar` },
     { id: 'POS-007', caminho: `${CONTA}/cartao` },

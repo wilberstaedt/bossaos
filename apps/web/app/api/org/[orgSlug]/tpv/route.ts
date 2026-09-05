@@ -3,7 +3,8 @@ import {
   abrirCaixa, abrirConta, ajustar, anular, comContaTrancada, confirmarPagamento, contar,
   contasAbertas, devolver, entrarPagamentoEmDinheiro, fecharCaixa, fecharConta,
   listarUnidades, somasDaConta,
-  corrigirMovimento, guardarConectorDePagamento, juntarLinhasDoPedido, movimentar,
+  corrigirMovimento, guardarConectorDePagamento, guardarConectorFiscal,
+  juntarLinhasDoPedido, movimentar,
   obterPrisma, reabrirCaixa,
   reconciliar, reverterAjuste, tentarPagar, transferirLinha,
 } from '@bossaos/db';
@@ -182,6 +183,19 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
         });
       });
       return voltarPara(`${paraConta(billId)}/cartao`, { ok: 'tentativa' });
+    }
+
+    if (accao === 'guardar_conector_fiscal') {
+      // Provedor, NIF e ambiente. NÃO há campo de credencial, porque não há
+      // coluna: o segredo vive no ambiente do servidor.
+      await comEscopoDoPedido(sessao, (db) => guardarConectorFiscal(db, {
+        organizationId, locationId: unidade.id,
+        ...(texto(dados, 'provedor') ? { provedor: texto(dados, 'provedor')! } : {}),
+        ...(texto(dados, 'nif') ? { nif: texto(dados, 'nif')! } : {}),
+        ...(texto(dados, 'ambiente') ? { ambiente: texto(dados, 'ambiente')! } : {}),
+        activo: texto(dados, 'activo') === 'on',
+      }));
+      return voltarPara(`${paraTpv()}/fiscal/configuracao`, { ok: 'fiscal' });
     }
 
     if (accao === 'ajustar') {

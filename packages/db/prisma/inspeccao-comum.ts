@@ -114,6 +114,7 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     -- ajustes e movimentos — e recusam bem: é essa a garantia da etapa. A saída
     -- NÃO é enfraquecer o gatilho; é dizer que isto é manutenção, e o dono da
     -- tabela pode desligá-los nas suas.
+    ALTER TABLE fiscal_documents      DISABLE TRIGGER USER;
     ALTER TABLE provider_events       DISABLE TRIGGER USER;
     ALTER TABLE cash_movements        DISABLE TRIGGER USER;
     ALTER TABLE cash_register_events  DISABLE TRIGGER USER;
@@ -121,6 +122,8 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     ALTER TABLE bill_adjustments      DISABLE TRIGGER USER;
     ALTER TABLE payments              DISABLE TRIGGER USER;
     ALTER TABLE refunds               DISABLE TRIGGER USER;
+    DELETE FROM fiscal_documents     WHERE acontecimento LIKE '${PREFIXO}%';
+    DELETE FROM fiscal_connectors    WHERE location_id IN (SELECT id FROM locations);
     DELETE FROM provider_events      WHERE evento_id LIKE '${PREFIXO}%' OR bill_id IN (SELECT id FROM bills WHERE numero LIKE '${PREFIXO}%');
     DELETE FROM payment_connectors   WHERE location_id IN (SELECT id FROM locations WHERE organization_id IN (SELECT id FROM organizations));
     DELETE FROM cash_movements       WHERE register_id IN (SELECT id FROM cash_registers WHERE nome LIKE '${PREFIXO}%');
@@ -132,6 +135,7 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     DELETE FROM bill_adjustments     WHERE bill_id IN (SELECT id FROM bills WHERE numero LIKE '${PREFIXO}%');
     DELETE FROM bill_lines           WHERE bill_id IN (SELECT id FROM bills WHERE numero LIKE '${PREFIXO}%');
     DELETE FROM bills                WHERE numero LIKE '${PREFIXO}%';
+    ALTER TABLE fiscal_documents      ENABLE TRIGGER USER;
     ALTER TABLE provider_events       ENABLE TRIGGER USER;
     ALTER TABLE cash_movements        ENABLE TRIGGER USER;
     ALTER TABLE cash_register_events  ENABLE TRIGGER USER;
@@ -245,6 +249,7 @@ export async function restos(prisma: PrismaClient): Promise<number> {
     + (SELECT count(*) FROM delivery_areas      WHERE nome LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM bills               WHERE numero LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM cash_registers      WHERE nome LIKE '${PREFIXO}%')
+    + (SELECT count(*) FROM fiscal_documents    WHERE acontecimento LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM external_catalog_mappings WHERE product_id IN (SELECT id FROM products WHERE nome LIKE '${PREFIXO}%'))
     + (SELECT count(*) FROM guest_sessions      WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%'))
   ) AS total`);
