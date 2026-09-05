@@ -79,3 +79,42 @@ que ainda não começaram, três e duas etapas à frente.
 **Continua a não me competir avaliá-lo.** Junto a prova; a decisão é tua, e
 reprovar continua a ser resposta válida — os três assuntos que tiveram de nascer
 depois não desaparecem porque estes dois acertaram.
+
+## Prova nova de 05/09 — e uma parte dela é CONTRA o E00
+
+Passaram-se o E19 e metade do E20 desde que escrevi isto. Junto o que aconteceu,
+dos dois lados, porque um dossiê que só junta o que confirma não serve para
+assinar nada.
+
+### A favor: contratos escritos antes foram lidos e cumpridos
+
+- **`lista-de-espera.md`**, escrito enquanto construías o E19. A decisão central
+  era não guardar coluna `posicao` — derivar, e derivar dentro do grupo que cabe
+  nas mesmas mesas. Cumpriste-a, e a tua prova chama-se «a ordem de chegada não
+  é a de sentar».
+- **`capacidade-e-reservas.md`**, a identidade da mensagem ser a do
+  acontecimento. Apareceu no código como `acontecimento()`, e o controlo
+  negativo «caiu a identidade: a segunda chamada foi engolida pela primeira»
+  mede exactamente o par que o contrato exigia.
+- **`pedidos-para-mais-tarde.md`**, o momento de produção derivado da entrega
+  menos o preparo, por relógio. Não só o cumpriste como o puseste **num gatilho
+  da base** — mais forte do que o contrato pedia.
+
+### Contra: o defeito mais caro da noite passou por baixo de 25 contratos
+
+O fuso. A hora escolhida por uma pessoa nascia com um `Z` colado, em **todo o
+produto**, desde antes do E19. Nenhum dos 25 documentos de arquitectura dizia
+«uma hora escolhida por uma pessoa passa pelo fuso da unidade» — eu só o escrevi
+**depois** de o encontrar, e marquei-o com a data para não fingir previdência.
+
+Pior: o E18 construiu e provou o `resolverHoraLocal`, com a hora de Verão
+resolvida correctamente, e **nada o chamava**. Eu assinei essa etapa.
+
+**O que isto diz sobre a promessa do E00**, e é a pergunta que te faço: contrato
+escrito antes reduz defeitos — as três linhas de cima são prova disso — mas
+**não os elimina, e falha justamente onde ninguém pensou em escrever contrato
+nenhum.** A ausência de um contrato não faz barulho. Um contrato errado
+discute-se; um contrato inexistente não tem quem o defenda.
+
+Se achares que isto reprova o E00, reprova. Prefiro o E00 recusado com esta
+prova à frente do que aceite sem ela.
