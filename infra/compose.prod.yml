@@ -1,0 +1,19 @@
+# A aplicação. O Postgres está em infra/postgres.yml, separado de propósito:
+# derrubar a aplicação para a reconstruir não pode derrubar a base.
+services:
+  bossaos-web:
+    build:
+      context: ..
+      dockerfile: infra/web.Dockerfile
+      args:
+        VERSAO: ${VERSAO:-desconhecida}
+    image: bossaos-web:${VERSAO:-latest}
+    container_name: bossaos_web
+    restart: unless-stopped
+    env_file: ../.env.prod
+    # Só ao anfitrião: quem serve ao mundo é o Caddy, como faz aos outros três
+    # produtos desta caixa.
+    ports:
+      - "127.0.0.1:8130:8130"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

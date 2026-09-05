@@ -86,13 +86,21 @@ rsync -az --exclude='.git' --exclude='node_modules' --exclude='.next' \
 rm -f apps/web/public/versao.txt
 
 # ── Base, migrações e build, tudo no servidor ───────────────────────────────
-$SSH "cd $RAIZ && docker compose -f infra/postgres.yml up -d"
-$SSH "cd $RAIZ && set -a && . ./.env.prod && set +a && corepack enable \
-      && pnpm install --frozen-lockfile \
-      && (cd packages/db && ./node_modules/.bin/prisma generate) \
-      && pnpm db:migrate:deploy \
-      && pnpm --filter web build"
-$SSH "systemctl restart bossaos && sleep 6"
+# Docker, como os outros tres produtos desta caixa. A primeira versao usava
+# systemd: fui ver e NAO ha uma unica unidade systemd no servidor - ilora, Norte
+# e o TPV antigo correm todos em contentor com `restart: unless-stopped`. Mais
+# uma suposicao minha que a maquina desmentiu.
+#
+# `-p bossaos` nos dois ficheiros de propósito: partilham a rede do projecto, e
+# e por isso que o .env.prod aponta a `bossaos-db:5432` e nao a 127.0.0.1:5434.
+# Dentro do contentor, 127.0.0.1 e o proprio contentor - a base ficaria
+# inalcancavel e o erro sairia como "connection refused", que se le como base em
+# baixo em vez de endereco errado.
+$SSH "cd $RAIZ && docker compose -p bossaos -f infra/postgres.yml up -d"
+$SSH "cd $RAIZ && VERSAO=$VERSAO docker compose -p bossaos -f infra/compose.prod.yml build"
+$SSH "cd $RAIZ && docker compose -p bossaos -f infra/compose.prod.yml run --rm --entrypoint sh bossaos-web -c 'pnpm db:migrate:deploy'"
+$SSH "cd $RAIZ && VERSAO=$VERSAO docker compose -p bossaos -f infra/compose.prod.yml up -d --force-recreate"
+sleep 8
 
 # ── PORTÃO 4: a versão no ar é a que acabei de construir ────────────────────
 # Um 200 não é uma entrega e um deploy sem erro não é uma publicação. Sem isto,
