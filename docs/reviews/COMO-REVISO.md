@@ -702,3 +702,42 @@ remendar por texto.
 - **Não acusar o ambiente de outro agente sem construir o meu do zero primeiro.**
   Escrevi que ia avisar o JR de um problema que era meu. Duas vezes em dois dias
   atribuí a outros um defeito do meu instrumento.
+
+## Os cinco instrumentos desta sessão, e a regra que eles partilham — 05/09
+
+Construí cinco coisas hoje: `varrer-alcance-da-etapa.sh`, `provar-marco-e21.sh`,
+`validar-indice-de-contratos.sh`, `validar-silenciadores.sh` e
+`demonstrar-defeito-do-fuso.sh`.
+
+**Os cinco têm as mesmas duas propriedades**, e verifiquei-o em vez de o assumir:
+
+| Instrumento | trata «não medi» | controla-se a si próprio |
+| --- | --- | --- |
+| `varrer-alcance-da-etapa` | sim | sim |
+| `provar-marco-e21` | sim | sim |
+| `validar-indice-de-contratos` | sim | sim |
+| `validar-silenciadores` | sim | sim |
+| `demonstrar-defeito-do-fuso` | sim | sim |
+
+**Não foi disciplina: foi cicatriz.** Os dois primeiros nasceram sem isso e
+mentiram-me:
+
+- o **detector do fuso** rebentou por falta de uma função na base, saiu com
+  código 1, e eu li esse 1 como o defeito. Anunciou FALHA por uma razão que não
+  tinha nada que ver com o produto;
+- o **`provar-marco-e21`** apanhou um `Terminated: 15` e **anunciou regressão do
+  marco**. Se eu tivesse acreditado, vinha dizer que o marco caiu e mandava o JR
+  caçar uma regressão inexistente.
+
+**A regra, e vale para qualquer instrumento que eu escreva:**
+
+> **Há três respostas — certo, errado e NÃO MEDI — e a terceira é a mais
+> frequente.** Um instrumento escrito com duas transforma qualquer interrupção
+> num alarme. E o zero de «tudo bem» e o zero de «não medi» escrevem-se igual:
+> por isso o leitor tem de se controlar a si próprio e dizer que está cego,
+> em vez de devolver silêncio e deixar quem lê chamar-lhe verde.
+
+E a extensão que aprendi ao ver o JR: **um controlo negativo é melhor do que um
+script.** O meu `varrer-alcance` tem de ser corrido por alguém que se lembre; o
+controlo dele — «caiu o alcance: o motor de stock ficou desligado do produto» —
+acende sozinho sempre que a etapa se prova.
