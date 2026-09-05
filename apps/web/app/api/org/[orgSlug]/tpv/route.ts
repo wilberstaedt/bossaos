@@ -3,7 +3,8 @@ import {
   abrirCaixa, abrirConta, ajustar, anular, comContaTrancada, confirmarPagamento, contar,
   contasAbertas, devolver, entrarPagamentoEmDinheiro, fecharCaixa, fecharConta,
   listarUnidades, somasDaConta,
-  corrigirMovimento, guardarConectorDePagamento, guardarConectorFiscal,
+  corrigirDocumento, corrigirMovimento, enviarDocumento,
+  guardarConectorDePagamento, guardarConectorFiscal, pedirDocumento, responderDocumento,
   juntarLinhasDoPedido, movimentar,
   obterPrisma, reabrirCaixa,
   reconciliar, reverterAjuste, tentarPagar, transferirLinha,
@@ -196,6 +197,54 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
         activo: texto(dados, 'activo') === 'on',
       }));
       return voltarPara(`${paraTpv()}/fiscal/configuracao`, { ok: 'fiscal' });
+    }
+
+    // ── O ciclo do documento fiscal ────────────────────────────────────────
+    //
+    // Sem estas quatro acções, o motor do E24 era uma máquina construída,
+    // provada e sem ninguém que a chamasse — e nesta etapa isso é mais grave do
+    // que nas outras, porque o documento fiscal é a razão de a etapa existir.
+    if (accao === 'pedir_documento') {
+      const billId = texto(dados, 'billId') ?? '';
+      // A identidade é a do ACONTECIMENTO, e o acontecimento aqui é «esta conta,
+      // este tipo de documento». Dois cliques no mesmo botão trazem o mesmo, e o
+      // índice único devolve o documento que já existe.
+      const tipo = texto(dados, 'tipo') === 'ANULACAO' ? 'ANULACAO' : 'FACTURA';
+      const r = await comEscopoDoPedido(sessao, (db) => pedirDocumento(db, {
+        organizationId, locationId: unidade.id,
+        acontecimento: `conta:${billId}:${tipo}`,
+        ...(billId ? { billId } : {}), tipo,
+      }));
+      return voltarPara(`${paraTpv()}/fiscal`, { ok: r.repetido ? 'repetido' : 'pedido' });
+    }
+
+    if (accao === 'enviar_documento') {
+      await comEscopoDoPedido(sessao, (db) =>
+        enviarDocumento(db, texto(dados, 'documentoId') ?? ''));
+      return voltarPara(`${paraTpv()}/fiscal`, { ok: 'enviado' });
+    }
+
+    if (accao === 'responder_documento') {
+      // A resposta do fornecedor entra por aqui enquanto não há integração: é a
+      // porta que permite exercer o ciclo inteiro em sandbox, e está declarada
+      // como tal. Uma rejeição SEM motivo é recusada pelo motor e pela base.
+      const aceite = texto(dados, 'aceite') === 'sim';
+      await comEscopoDoPedido(sessao, (db) => responderDocumento(db, {
+        documentoId: texto(dados, 'documentoId') ?? '', aceite,
+        ...(texto(dados, 'numeroProvedor') ? { numeroProvedor: texto(dados, 'numeroProvedor')! } : {}),
+        ...(texto(dados, 'motivo') ? { motivo: texto(dados, 'motivo')! } : {}),
+      }));
+      return voltarPara(`${paraTpv()}/fiscal`, { ok: aceite ? 'aceite' : 'rejeitado' });
+    }
+
+    if (accao === 'corrigir_documento') {
+      // «Corrige-se com outro documento, e os dois ficam.» Esta é a porta que
+      // faz a correcção do jeito certo — a base recusa qualquer outro.
+      const documentoId = texto(dados, 'documentoId') ?? '';
+      await comEscopoDoPedido(sessao, (db) => corrigirDocumento(db, {
+        documentoId, acontecimento: `rectifica:${documentoId}`,
+      }));
+      return voltarPara(`${paraTpv()}/fiscal`, { ok: 'corrigido' });
     }
 
     if (accao === 'ajustar') {

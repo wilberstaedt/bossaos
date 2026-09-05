@@ -34,6 +34,12 @@ const EXCEPCOES = new Map<string, string>([
     'leitura de um convite antes de haver conta: a credencial é o token, ' +
       'e sem ela a tela AUTH-006 pediria para aceitar às cegas',
   ],
+  [
+    'app/api/webhooks/pagamentos/[provedor]/route.ts',
+    'o adquirente não tem sessão: não traz bolacha, não traz utilizador e não ' +
+      'escolhe organização. A credencial é a ASSINATURA, e a excepção não a ' +
+      'dispensa — troca a exigência, e o caso abaixo verifica-a',
+  ],
 ]);
 
 /**
@@ -206,7 +212,46 @@ describe('rotas: dados de inquilino só através da porta', () => {
       assert.ok(razao.length > 20, `a excepção de ${caminho} precisa de uma razão escrita`);
     }
     // Uma excepção a mais é uma porta a mais: obriga a olhar.
-    assert.equal(EXCEPCOES.size, 5, 'cada excepção nova tem de ser justificada aqui');
+    //
+    // Subiu para 6 no E24, conscientemente: a rota do webhook do adquirente.
+    // Quem bate lá não tem sessão — não traz bolacha, não traz utilizador e não
+    // escolhe organização. A credencial é a ASSINATURA, e o caso «a rota do
+    // webhook verifica a ASSINATURA, e lê o corpo cru» é a exigência trocada.
+    assert.equal(EXCEPCOES.size, 6, 'cada excepção nova tem de ser justificada aqui');
+  });
+
+  /**
+   * ── A excepção do webhook, verificada ────────────────────────────────────
+   *
+   * Isentar a rota da porta não a isenta de ter uma credencial. Aqui a
+   * credencial é a assinatura, e o que se verifica é a ORDEM: a rota entrega o
+   * corpo **cru** e o segredo a `receberWebhook`, que confere a assinatura antes
+   * de qualquer efeito.
+   *
+   * E verifica-se que o corpo NÃO é lido como JSON pela rota: `.json()` devolve
+   * um objecto, e reconverter um objecto para texto dá outra ordem de chaves —
+   * a assinatura do adquirente nunca bateria, ou pior, bateria sobre outra
+   * coisa. Esta linha tranca essa decisão.
+   */
+  it('a rota do webhook verifica a ASSINATURA, e lê o corpo cru', () => {
+    const conteudo = readFileSync(
+      join(WEB, 'app/api/webhooks/pagamentos/[provedor]/route.ts'), 'utf8');
+    assert.ok(
+      conteudo.includes('receberWebhook'),
+      'o webhook tem de passar pela porta que confere a assinatura antes de tudo',
+    );
+    assert.ok(
+      conteudo.includes('await pedido.text()'),
+      'o corpo tem de ser lido CRU: reconvertê-lo muda a ordem das chaves',
+    );
+    assert.ok(
+      !/pedido\.json\(\)/.test(conteudo),
+      'a rota lê o corpo como JSON: a assinatura deixaria de bater',
+    );
+    assert.ok(
+      conteudo.includes('process.env['),
+      'o segredo do adquirente tem de vir do ambiente, nunca da base',
+    );
   });
 
   it('a rota sem sessão valida mesmo o token — a excepção não é um cheque em branco', () => {

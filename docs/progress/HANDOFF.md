@@ -1,7 +1,27 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E24 — documentos e integração fiscal (**5 telas**).
-**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — as duas fatias.**
+**Estado:** **RETIDO por ALCANCE e CONSERTADO — reentregue, aguardando validação.**
+
+**A retenção:** o ciclo do documento fiscal não tinha porta, e arrastava a dívida
+do E23 — `receberWebhook`, `reconciliarComProvedor` e `acontecimentosDaConta`
+também sem chamador. Nenhum webhook do adquirente podia chegar ao produto, e a
+`provar-adquirente` jurava que o reenvio deduplicava **numa porta que não
+existia**.
+
+**Duas portas novas:** a do webhook (fora de `/api/org/`, porque o adquirente não
+tem sessão — a credencial é a assinatura, o corpo lê-se cru, e responde-se 200
+depois de gravar para o adquirente não martelar a porta) e as quatro acções do
+ciclo fiscal na rota do TPV, com botões só onde fazem sentido.
+
+**A excepção da guarda não dispensa, troca:** o contador subiu de 5 para 6
+conscientemente, e em troca há um caso que verifica a assinatura, o corpo cru, a
+ausência de `.json()` e o segredo vindo do ambiente.
+
+**E a prova mede o ALCANCE:** `provar-portas-do-dinheiro.sh` (**10 casos, 8
+controlos**, 0), com cada plante a apagar a **chamada** e não o comportamento.
+`varrer-alcance-da-etapa.sh 2c1a18f HEAD` → **1 sem chamador**, o `esquecerPrisma`
+do E01. O intervalo inteiro do E23 dá o mesmo único.
 **Régua:** `docs/reviews/ALVO-E24.md` · **Fontes:** `adr/0002-fiscal-espanha.md`.
 **Detalhe:** `docs/progress/E24.md`.
 
@@ -42,6 +62,7 @@ o rótulo «Motivo del rechazo» sozinho satisfazia a asserção.
 **Portões, códigos de saída lidos directamente:** `pnpm verificar` (**0**) ·
 `./scripts/provar-fiscal.sh` (**20 casos, 8 controlos negativos**, 0) ·
 `./scripts/provar-fiscal-no-navegador.sh` (**23 casos, 8 controlos**, 0) ·
+`./scripts/provar-portas-do-dinheiro.sh` (**10 casos, 8 controlos**, 0) ·
 `pnpm inspeccionar` (**609 casos, 0**). Prova **LOCAL**.
 
 ---

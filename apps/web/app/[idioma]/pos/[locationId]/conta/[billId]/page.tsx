@@ -1,5 +1,7 @@
 import { Botao, Campo, Seletor } from '@bossaos/ui';
 import { mensagensDe, formatarDinheiro, type Idioma } from '@bossaos/i18n';
+import { acontecimentosDaConta } from '@bossaos/db';
+import { comEscopoDoPedido } from '../../../../../../src/sessao.ts';
 import { contaDoTpv } from '../../../../../../src/tpv/pagina.ts';
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +23,15 @@ export default async function ContaNoTpv({
 }: { params: Promise<{ idioma: Idioma; locationId: string; billId: string }> }) {
   const { idioma, locationId, billId } = await params;
   const t = mensagensDe(idioma).tpvE22;
-  const { conta, somas, estado, orgSlug } = await contaDoTpv(idioma, locationId, billId);
+  const { conta, somas, estado, orgSlug, sessao } = await contaDoTpv(idioma, locationId, billId);
+  // ── O que o adquirente disse sobre esta conta ───────────────────────────
+  //
+  // «Eventos fora de ordem devem ser reconciliados com o estado autorizado do
+  // provedor» — e quem tem de reconciliar precisa de os VER. Sem este trilho, o
+  // que o banco disse ficava só na base, e a conta mostrava o resultado sem a
+  // razão. Por ordem do PROVEDOR, que é a que conta.
+  const doAdquirente = await comEscopoDoPedido(sessao,
+    (db) => acontecimentosDaConta(db, billId));
   const d = (menor: number) => formatarDinheiro({ montanteMenor: menor, moeda: conta.moeda }, idioma);
   const anulados = new Set(conta.ajustes.map((a) => a.reverteId).filter(Boolean));
   const rotulo = { ABERTA: t.estadoAberta, PARCIALMENTE_LIQUIDADA: t.estadoParcial, LIQUIDADA: t.estadoLiquidada };
@@ -94,6 +104,17 @@ export default async function ContaNoTpv({
               <span>−{d(a.montanteMenor)}</span>
               <span data-teste="ajuste-motivo">{a.motivo}</span>
               {(a.reverteId || anulados.has(a.id)) && <span data-teste="ajuste-anulado">✕</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {doAdquirente.length > 0 && (
+        <ul className="bo-lista" data-teste="acontecimentos">
+          {doAdquirente.map((e) => (
+            <li key={e.eventoId}>
+              <span>{e.tipo}</span>
+              <span data-teste="estado-provedor">{e.estadoProvedor}</span>
             </li>
           ))}
         </ul>
