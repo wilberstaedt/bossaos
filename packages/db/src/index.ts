@@ -43,11 +43,6 @@ export function obterPrisma(databaseUrl: string): PrismaClient {
   return cliente;
 }
 
-/** Só para testes: força a próxima chamada a construir um cliente novo. */
-export function esquecerPrisma(): void {
-  cliente = undefined;
-}
-
 export type EstadoBase =
   | { ok: true; migrado: boolean; schemaVersion: string | null }
   | { ok: false; erro: string };

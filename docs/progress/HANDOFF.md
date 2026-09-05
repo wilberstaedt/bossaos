@@ -55,7 +55,11 @@ comportamento) ·
 `validar-quantidades.sh` **0** (5 campos, 2 controlos) ·
 `provar-stock-no-navegador.sh` **0** (**26 casos, 8 controlos**) ·
 `pnpm verificar` **0** · `pnpm inspeccionar` **0** (**632 casos**) ·
-`varrer-alcance-da-etapa.sh 665b027 HEAD` → **a correr depois do commit**.
+`varrer-alcance-da-etapa.sh 665b027 HEAD` → **0 sem chamador**. Acusou dois: o
+`consumirPelaLinha` desta etapa (ligado ao KDS) e o `esquecerPrisma` do E01, que
+tinha zero referências em todo o repositório e foi **apagado** — o E24 já o
+reportara e assinara por cima, e uma guarda que acusa sempre a mesma coisa
+conhecida é uma guarda que as pessoas aprendem a saltar.
 
 **Contrato:** `docs/architecture/stock-e-fichas.md`, escrito antes do código.
 **Detalhe:** `docs/progress/E25.md`.
