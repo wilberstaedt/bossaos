@@ -1717,7 +1717,9 @@
     "semLugar": "For a group your size we have no table tonight. We'd rather say so now.",
     "desligado": "We're not taking bookings here right now.",
     "muitos": "We're getting a lot of bookings. Try again in a few minutes.",
-    "naoEncontrada": "We couldn't find this booking."
+    "naoEncontrada": "We couldn't find this booking.",
+    "horaInexistente": "That time doesn't exist that night (clocks go forward). We booked you at",
+    "horaAmbigua": "That time happens twice that night (clocks go back). We booked you at"
   },
   "hostE19": {
     "agenda": "Today's bookings",
@@ -1763,7 +1765,8 @@
     "verDia": "View the day",
     "voltar": "Back",
     "naoChegou": "This group hasn't arrived yet.",
-    "mesaOcupada": "That table is already taken."
+    "mesaOcupada": "That table is already taken.",
+    "chamar": "Tell them the table is ready"
   },
   "mensagensE19": {
     "mensagens": "Booking messages",

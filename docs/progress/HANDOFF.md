@@ -13,6 +13,32 @@ esta etapa alargou, por decisão escrita antes do código). Régua: `ALVO-E19.md
 **Aviso do JR:** as quatro fatias assentam umas nas outras e **nenhuma está
 assinada**. Se o modelo mudar na revisão, o resto segue-o.
 
+## A retenção, e o que ela corrigiu
+
+Duas máquinas construídas, correctas, provadas com controlo negativo — e **sem
+ninguém que as chamasse**. `resolverHoraLocal` e `enfileirar` tinham zero
+chamadas em produto, e a suite não deu por nada porque **as provas chamavam as
+funções**.
+
+**O fuso.** O instante nascia de hora de parede lida como UTC: duas horas de
+desvio em Madrid. O que isso anulava não era a antecedência — era o aviso do
+`FLOOR-006`: às 19:00 a mesa das 20:00 não aparecia como reservada, que é o
+minuto exacto em que o host a dá a um walk-in. A hora passa a viajar como local e
+resolve-se onde a unidade é conhecida; **sem fuso, recusa-se**; e o `estado`
+chega ao ecrã, porque `INEXISTENTE` e `AMBIGUA` são os dois casos em que a casa
+entendeu outra hora.
+
+**A mensageria.** O contrato ganhou a secção que corrige a chave que eu tinha
+escrito: `(reserva, tipo)` engole envios legítimos — «a sua mesa está pronta»
+sai duas vezes na mesma noite quando a pessoa não vem à primeira. **A chave é o
+ACONTECIMENTO**, e agora há quem enfileire: a reserva confirmada, a mesa pronta
+(dentro de `chamarDaEspera`, onde o facto acontece) e o cancelamento.
+
+**A prova que mede o produto.** `provas/produto-fuso-e-mensagens.test.ts` não
+chama nenhuma das duas funções: entra pela porta do ecrã. E
+`scripts/provar-produto.sh` apaga a **chamada no produto** em cada controlo — se
+a asserção ficar verde sem ela, não mede o produto.
+
 ## As quatro decisões que esta etapa tomou
 
 **1. Uma lista de espera NÃO é uma fila, e a garantia é uma AUSÊNCIA.** Não há
@@ -35,10 +61,10 @@ check-in, a única forma de registar a chegada é sentar, e a tolerância de atr
 conta contra quem já está lá. Dois actos, dois carimbos, e a base exige `chegou_em`
 em `CHEGOU` **e** em `SENTADA`.
 
-**4. Reenviar não entrega duas vezes, e a forma é que o garante.** A mensagem
-existe uma vez por `(reserva, tipo)`; as tentativas penduram-se nela. A entrega é
-um carimbo, e um carimbo que já existe não se escreve de novo. **E o par:** uma
-mensagem diferente para a mesma reserva **é** enviada.
+**4. A identidade de uma mensagem é o ACONTECIMENTO que a causou.** A mensagem
+existe uma vez por acontecimento; as tentativas penduram-se nela. Reentregar usa
+o mesmo acontecimento e deduplica; o host chamar segunda vez cunha outro, logo
+entrega — que é o par, e sai de graça.
 
 ## O que os ecrãs dizem por palavras, porque a régua o exige lá
 
@@ -62,6 +88,8 @@ mensagem diferente para a mesma reserva **é** enviada.
 `provar-host-no-navegador.sh` (22 casos, **6 plantados**, 0) ·
 `provar-mensagens.sh` (12 casos, **7 plantados**, 0) ·
 `provar-mensagens-no-navegador.sh` (24 casos, **6 plantados**, 0) ·
+`provar-produto.sh` (11 casos, **4 chamadas de produto apagadas**, 0) ·
+`bash scripts/demonstrar-defeito-do-fuso.sh` (**PASSA**, e pela porta) ·
 `provar-reservas.sh` (0) · `provar-publico.sh` (0) · `provar-sala-no-navegador.sh`
 (0) · `provar-migracoes-do-zero.sh` (0) · **`pnpm inspeccionar` (517 casos, 0)**.
 

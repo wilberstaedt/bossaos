@@ -38,10 +38,17 @@ const ESCOPO = { organizationId: IDS.orgA };
 const comA = <T>(fn: Parameters<typeof comEscopo<T>>[2]) => comEscopo(prisma, ESCOPO, fn);
 
 let zonaId = '';
-const NOITE = new Date(Date.UTC(2027, 5, 12, 20, 0, 0));
+// ── A porta recebe hora LOCAL, e não um instante ─────────────────────────
+//
+// Era `new Date(Date.UTC(...))`, que é o defeito pelo qual a etapa foi retida:
+// hora de parede lida como UTC. A prova acompanha o produto — o dia e a hora são
+// os que a pessoa escreve, e quem os resolve é o fuso da unidade.
+const DIA = '2027-06-12';
+const HORA = '20:00';
 
 async function semear(ligadas = true) {
-  await sql.query(`UPDATE locations SET public_slug = $1 WHERE id = $2`, [SLUG, IDS.unidadeA]);
+  await sql.query(`UPDATE locations SET public_slug = $1, fuso = COALESCE(fuso, 'Europe/Madrid')
+                    WHERE id = $2`, [SLUG, IDS.unidadeA]);
   const { rows: z } = await sql.query(
     `INSERT INTO service_areas (id, organization_id, location_id, nome, tipo, ordem, updated_at)
      VALUES (gen_random_uuid(), $1, $2, $3, 'SALA', 1, now()) RETURNING id`,
@@ -58,6 +65,10 @@ async function semear(ligadas = true) {
 
 async function limpar() {
   const mesas = `(SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%')`;
+  // A porta enfileira uma mensagem por reserva confirmada: sai com elas.
+  await sql.query(`DELETE FROM reservation_message_attempts WHERE message_id IN
+     (SELECT id FROM reservation_messages WHERE location_id = $1)`, [IDS.unidadeA]);
+  await sql.query(`DELETE FROM reservation_messages WHERE location_id = $1`, [IDS.unidadeA]);
   await sql.query(`DELETE FROM waitlist_areas WHERE waitlist_id IN
      (SELECT id FROM waitlist_entries WHERE nome LIKE '${PREFIXO}%')`);
   await sql.query(`DELETE FROM waitlist_entries WHERE nome LIKE '${PREFIXO}%'`);
@@ -81,8 +92,8 @@ beforeEach(async () => { await limpar(); await semear(); });
 let n = 0;
 const chave = () => `${PREFIXO}${Date.now()}-${(n += 1)}`;
 
-const reservar = (pessoas: number, inicio = NOITE) => reservarDaRua(prisma, SLUG, {
-  pessoas, inicio, nome: `${PREFIXO}cliente`, contacto: 'rua@inspeccao.example',
+const reservar = (pessoas: number, hora = HORA) => reservarDaRua(prisma, SLUG, {
+  pessoas, dia: DIA, hora, nome: `${PREFIXO}cliente`, contacto: 'rua@inspeccao.example',
   chaveIdempotente: chave() });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -101,7 +112,7 @@ describe('1. A porta só conhece unidades PUBLICADAS', () => {
 
   it('um endereço inventado não confirma existência de nada', async () => {
     const r = await reservarDaRua(prisma, 'nao-existe-de-certeza', {
-      pessoas: 2, inicio: NOITE, nome: 'x', contacto: 'x@inspeccao.example',
+      pessoas: 2, dia: DIA, hora: HORA, nome: 'x', contacto: 'x@inspeccao.example',
       chaveIdempotente: chave() });
     assert.equal(r.ok, false);
     if (!r.ok) assert.equal(r.motivo, 'DESCONHECIDA');
@@ -133,8 +144,9 @@ describe('3. O limite da janela, e o par que o contrato exige', () => {
         `INSERT INTO reservations (id, organization_id, location_id, estado, origem, pessoas,
            inicio, fim, nome, contacto, chave_idempotente, criada_por, updated_at)
          VALUES (gen_random_uuid(), $1, $2, 'CONFIRMADA', 'PUBLICO', 2,
-           $3, $4, 'enche', 'x@inspeccao.example', $5, 'publico', now())`,
-        [IDS.orgA, IDS.unidadeA, NOITE, new Date(NOITE.getTime() + 3600_000), chave()]);
+           $3::timestamptz, $3::timestamptz + interval '1 hour',
+           'enche', 'x@inspeccao.example', $4, 'publico', now())`,
+        [IDS.orgA, IDS.unidadeA, `${DIA}T${HORA}:00Z`, chave()]);
     }
     const r = await reservar(2);
     assert.equal(r.ok, false);
@@ -156,17 +168,18 @@ describe('3. O limite da janela, e o par que o contrato exige', () => {
 describe('4. O caso feio: o ecrã ofereceu, e entretanto foi tomada', () => {
   it('a consulta oferece a hora — é informativa e di-lo', async () => {
     const u = (await unidadePublica(prisma, SLUG))!;
-    const horas = await horariosPublicos(prisma, u, NOITE, 2);
+    const horas = await horariosPublicos(prisma, u, new Date(`${DIA}T00:00:00Z`), 2);
     assert.ok(horas.length > 0, 'a consulta não ofereceu hora nenhuma');
     assert.ok(horas.some((h) => h.cabe), 'nenhuma hora cabe: o cenário está vazio');
   });
 
   it('depois de a última mesa ir, a MESMA hora é recusada com alternativas', async () => {
     const u = (await unidadePublica(prisma, SLUG))!;
-    const antes = await horariosPublicos(prisma, u, NOITE, 2);
+    const antes = await horariosPublicos(prisma, u, new Date(`${DIA}T00:00:00Z`), 2);
+    // A hora oferecida é a LOCAL: em Madrid, as 20h locais são 18h UTC.
     const oferecida = antes.find((h) => h.cabe
-      && h.quando.getTime() === NOITE.getTime());
-    assert.ok(oferecida, 'o ecrã não ofereceu as 20h: não há o que disputar');
+      && h.quando.toISOString().slice(11, 16) === '18:00');
+    assert.ok(oferecida, 'o ecrã não ofereceu as 20h locais: não há o que disputar');
 
     // Alguém ficou com ela entre a oferta e o toque no botão.
     const primeiro = await reservar(2);
@@ -188,11 +201,11 @@ describe('5. Dois toques no botão dão UMA reserva', () => {
   it('a mesma chave devolve a mesma reserva', async () => {
     const k = chave();
     const um = await reservarDaRua(prisma, SLUG, {
-      pessoas: 2, inicio: NOITE, nome: `${PREFIXO}c`, contacto: 'rua@inspeccao.example',
-      chaveIdempotente: k });
+      pessoas: 2, dia: DIA, hora: HORA, nome: `${PREFIXO}c`,
+      contacto: 'rua@inspeccao.example', chaveIdempotente: k });
     const dois = await reservarDaRua(prisma, SLUG, {
-      pessoas: 2, inicio: NOITE, nome: `${PREFIXO}c`, contacto: 'rua@inspeccao.example',
-      chaveIdempotente: k });
+      pessoas: 2, dia: DIA, hora: HORA, nome: `${PREFIXO}c`,
+      contacto: 'rua@inspeccao.example', chaveIdempotente: k });
     assert.ok(um.ok && dois.ok);
     assert.equal(dois.reservaId, um.reservaId, 'o duplo toque criou duas reservas');
     const { rows } = await sql.query(

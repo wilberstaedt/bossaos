@@ -27,12 +27,24 @@ export default async function ReservaConfirmada({
   const p = mensagensDe(locale).reservaE19;
   const unidade = await unidadeDoEndereco(publicLocationSlug);
   const segredo = typeof busca.t === 'string' ? busca.t : '';
+  const estadoDaHora = typeof busca.hora === 'string' ? busca.hora : '';
+  const entendida = typeof busca.entendida === 'string' ? busca.entendida : '';
   const base = `/r/${publicLocationSlug}/${locale}/reserve`;
 
   return (
     <div className="bo-publico__conteudo">
       <h1 data-tela="RES-C-006">{p.confirmada}</h1>
       <p data-teste="facto">{p.confirmadaTexto}</p>
+      {/* ── O que a casa ENTENDEU da hora escrita ────────────────────────
+          «INEXISTENTE e AMBIGUA são os dois casos em que a casa entendeu outra
+          hora.» Quem escreveu 02h30 numa noite de mudança de hora tem de saber
+          que a mesa ficou às 03h30 — senão aparece à hora que escreveu. */}
+      {estadoDaHora !== '' ? (
+        <p data-teste="hora-entendida">
+          {estadoDaHora === 'INEXISTENTE' ? p.horaInexistente : p.horaAmbigua}
+          {entendida !== '' ? ` ${entendida.slice(11, 16)}` : ''}
+        </p>
+      ) : null}
       <p className="bo-campo__ajuda">{unidade.nome}</p>
       {segredo ? (
         <a className="bo-botao bo-botao--secundario" data-teste="gerir"

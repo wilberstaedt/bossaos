@@ -4,6 +4,7 @@ import {
 } from '@bossaos/domain';
 import type { ClienteComEscopo } from './escopo.ts';
 import { lerDefinicoes } from './reservas.ts';
+import { acontecimento, enfileirar } from './mensagens.ts';
 
 /**
  * A lista de espera, do lado da base.
@@ -184,14 +185,29 @@ export async function chamarDaEspera(
   const definicoes = await lerDefinicoes(db, locationId);
   const [agora] = await db.$queryRaw<{ agora: Date }[]>`SELECT now() AS agora`;
   const expira = new Date(agora!.agora.getTime() + definicoes.retencaoMin * 60_000);
-  await db.waitlistEntry.update({
+  const espera = await db.waitlistEntry.update({
     where: { id: esperaId },
     data: {
       estado: 'COM_OFERTA', ofertaTableId: tableId,
       ofertaInicio: inicio, ofertaFim: fim, ofertaExpiraEm: expira,
       chamadoEm: agora!.agora,
     },
+    select: { organizationId: true, reservationId: true },
   });
+
+  // ── O ACONTECIMENTO: a mesa ficou pronta ──────────────────────────────
+  //
+  // Vive AQUI, onde o facto acontece, e não na rota — uma chamada da lista de
+  // espera é sempre uma chamada, venha de que ecrã vier.
+  //
+  // É o caso que o contrato usa para explicar a chave: «a sua mesa está pronta»
+  // pode ter de sair DUAS VEZES na mesma noite — a pessoa não veio à primeira e o
+  // host volta a chamar. Cada chamada cunha identidade nova, logo entrega. Com a
+  // chave antiga a segunda desaparecia em silêncio.
+  if (espera.reservationId) {
+    await enfileirar(db, espera.organizationId, locationId, espera.reservationId,
+      acontecimento(), 'mesa-pronta', 'es-ES');
+  }
   return expira;
 }
 

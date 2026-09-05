@@ -50,8 +50,13 @@ export async function POST(pedido: Request) {
     return voltarPara(`${base}/inicio`, { erro: 'quando' });
   }
 
+  // ── A hora vai como LOCAL, e quem a resolve é a porta ────────────────
+  //
+  // Aqui construía-se `new Date(dia + 'T' + hora + 'Z')`: hora de parede lida
+  // como UTC. Passa a viajar como o que é — uma hora local — e o fuso da unidade
+  // resolve-a onde a unidade é conhecida.
   const r = await reservarDaRua(obterBase(), slug, {
-    pessoas: Math.round(pessoas), inicio: new Date(`${dia}T${hora}:00Z`),
+    pessoas: Math.round(pessoas), dia, hora,
     nome, contacto,
     notas: texto(dados, 'notas') ?? null,
     // ── O `false` só é verdade se for alguém a NÃO marcar ────────────────
@@ -75,6 +80,14 @@ export async function POST(pedido: Request) {
     return voltarPara(`${base}/sem-mesa`, { erro: r.motivo, pessoas: String(Math.round(pessoas)), dia });
   }
 
-  // O segredo vai UMA vez, no endereço de regresso. A base guarda o resumo.
-  return voltarPara(`${base}/confirmada`, r.segredoDeGestao ? { t: r.segredoDeGestao } : {});
+  // ── O segredo vai UMA vez, e o ESTADO da hora vai com ele ────────────
+  //
+  // «INEXISTENTE e AMBIGUA são os dois casos em que a casa entendeu outra hora e
+  // a pessoa tem de o saber.» Sem isto, quem escreveu 02h30 numa noite de
+  // mudança de hora aparece às 02h30 e a mesa está marcada às 03h30.
+  return voltarPara(`${base}/confirmada`, {
+    ...(r.segredoDeGestao ? { t: r.segredoDeGestao } : {}),
+    ...(r.horaEntendida.estado !== 'NORMAL' ? { hora: r.horaEntendida.estado } : {}),
+    entendida: r.horaEntendida.instante.toISOString(),
+  });
 }

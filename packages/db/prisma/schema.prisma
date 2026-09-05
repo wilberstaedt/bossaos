@@ -3332,6 +3332,19 @@ model ReservationMessage {
   estado EstadoDaMensagem
   erro   String?
 
+  /// ── A identidade da mensagem é a do ACONTECIMENTO que a causou ───────
+  ///
+  /// «A sua mesa está pronta» pode ter de sair duas vezes na mesma noite: a
+  /// pessoa não veio à primeira, e o host volta a chamar. Com a chave
+  /// `(reserva, tipo)` a segunda chamada desaparecia em silêncio — e a mesa
+  /// ficava vazia com gente à porta.
+  ///
+  /// Cada facto que justifica avisar alguém nasce com identidade própria no
+  /// momento em que acontece, e a mensagem herda-a. Daí sai tudo o resto sem
+  /// mais regras: reentregar usa o mesmo acontecimento e deduplica; chamar
+  /// segunda vez é outro acontecimento e entrega.
+  eventoId String @unique @map("evento_id") @db.Uuid
+
   assunto String?
   corpo   String?
 
@@ -3350,9 +3363,6 @@ model ReservationMessage {
   tentativas   ReservationMessageAttempt[]
 
   @@unique([organizationId, id], name: "mensagem_de_reserva_por_organizacao")
-  /// A chave da deduplicação: uma mensagem por reserva e tipo. Uma mensagem
-  /// DIFERENTE para a mesma reserva tem chave diferente, logo é enviada.
-  @@unique([reservationId, tipo], name: "uma_mensagem_por_reserva_e_tipo")
   @@index([organizationId, reservationId])
   @@map("reservation_messages")
 }

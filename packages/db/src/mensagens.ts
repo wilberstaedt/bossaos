@@ -65,18 +65,28 @@ export async function templateDe(
  */
 export async function enfileirar(
   db: ClienteComEscopo, organizationId: string, locationId: string,
-  reservaId: string, tipo: string, idioma: string,
+  reservaId: string,
+  /**
+   * A identidade do ACONTECIMENTO que causou esta mensagem.
+   *
+   * Quem chama cunha-a no momento em que o facto acontece: a reserva foi
+   * confirmada, a mesa ficou pronta, o host chamou outra vez, a casa cancelou.
+   * A mensagem não tem identidade própria — herda esta.
+   */
+  eventoId: string,
+  tipo: string, idioma: string,
   entregar?: (assunto: string, corpo: string) => Promise<{ ok: boolean; erro?: string }>,
 ): Promise<ResultadoDaMensagem> {
   const conector = await conectorDaUnidade(db, locationId);
   const texto = await templateDe(db, locationId, tipo, idioma);
 
-  // A mensagem existe uma vez. `upsert` na chave (reserva, tipo) é o que faz o
-  // reenvio cair na mesma linha em vez de criar outra.
+  // Uma mensagem por acontecimento. O `upsert` nesta chave é o que faz a
+  // reentrega cair na mesma linha, e o que faz uma segunda chamada — que é outro
+  // acontecimento — nascer numa linha nova.
   const mensagem = await db.reservationMessage.upsert({
-    where: { uma_mensagem_por_reserva_e_tipo: { reservationId: reservaId, tipo } },
+    where: { eventoId },
     create: {
-      organizationId, locationId, reservationId: reservaId, tipo, idioma,
+      organizationId, locationId, reservationId: reservaId, tipo, idioma, eventoId,
       estado: 'PENDENTE',
       assunto: texto?.assunto ?? null, corpo: texto?.corpo ?? null,
     },
@@ -215,4 +225,19 @@ export async function guardarConector(
     update: dados,
   });
   return { ok: true };
+}
+
+
+/**
+ * A identidade de um acontecimento.
+ *
+ * Existe para que quem avisa não tenha de saber como se cunha uma: chama isto no
+ * momento em que o facto acontece, e passa o resultado ao `enfileirar`.
+ *
+ * É deliberadamente **um por chamada**. Uma função que devolvesse a mesma
+ * identidade para o mesmo par (reserva, tipo) seria a chave antiga com outro
+ * nome, e voltaria a engolir a segunda chamada da mesma noite.
+ */
+export function acontecimento(): string {
+  return crypto.randomUUID();
 }

@@ -23,7 +23,7 @@
  * consoante a ordem por que se correram os comandos.
  */
 
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { projectarSite } from '@bossaos/domain';
 import { IDS } from './fixtures.ts';
 import {
@@ -910,6 +910,9 @@ async function principal(): Promise<void> {
         data: {
           organizationId: IDS.orgA, locationId: IDS.unidadeA2,
           reservationId: reservaDeHoje.id, tipo: 'confirmacao', idioma: 'es-ES',
+          // A identidade é a do ACONTECIMENTO que a causou. Aqui é semeadura, e
+          // por isso cunha-se uma: não há facto anterior a que a ligar.
+          eventoId: randomUUID(),
           estado: 'PENDENTE', erro: 'sem provedor configurado',
           assunto: `${PREFIXO}Mesa reservada`, corpo: 'Te esperamos en Marina Puerto.',
         },

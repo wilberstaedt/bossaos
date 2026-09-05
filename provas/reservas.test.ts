@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { Client } from 'pg';
 import {
   cancelar, comEscopo, confirmarReserva, disponibilidade, entrarNaEspera,
-  guardarDefinicoes, lerDefinicoes, listarReservas, mensagensDaReserva,
-  obterPrisma, ocupacaoNoIntervalo, chamarDaEspera, reagendar, registarMensagem,
+  acontecimento, enfileirar, guardarConector, guardarDefinicoes, historicoDeMensagens,
+  lerDefinicoes, listarReservas, obterPrisma, ocupacaoNoIntervalo, chamarDaEspera, reagendar,
   registarNaoCompareceu, resolverHoraLocal, varrerRetencoesExpiradas,
 } from '../packages/db/src/index.ts';
 import { sobrepoe, intervaloEfectivo, opcoesDeAlocacao } from '../packages/domain/src/reservas.ts';
@@ -90,6 +90,10 @@ async function semear() {
 }
 
 async function limpar() {
+  await sql.query(`DELETE FROM reservation_message_attempts WHERE message_id IN
+     (SELECT id FROM reservation_messages WHERE location_id = $1)`, [IDS.unidadeA]);
+  await sql.query(`DELETE FROM reservation_messages WHERE location_id = $1`, [IDS.unidadeA]);
+  await sql.query(`DELETE FROM messaging_connectors WHERE location_id = $1`, [IDS.unidadeA]);
   const mesasDoArnes = `(SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%')`;
   await sql.query(`DELETE FROM waitlist_entries WHERE oferta_table_id IN ${mesasDoArnes}`);
   await sql.query(`DELETE FROM waitlist_entries WHERE nome LIKE '${PREFIXO}%'`);
@@ -499,12 +503,21 @@ describe('9. A mensagem é um resultado SEPARADO', () => {
   it('o email falha e a reserva continua CONFIRMADA', async () => {
     const r = await pedir(NOITE, 2);
     assert.ok(r.ok);
-    await comA((db) => registarMensagem(
-      db, IDS.orgA, r.reservaId, 'confirmacao', 'FALHADA', 'sem ligação'));
+    // ── Pela porta ÚNICA, que é a mesma que o produto usa ──────────────
+    //
+    // Havia duas funções a escrever uma mensagem, e esta prova usava a que não
+    // sabia de acontecimentos. Ficou uma — e a prova passa a exercitar o que o
+    // produto exercita, que é a lição inteira desta retenção.
+    await comA(async (db) => {
+      await guardarConector(db, IDS.orgA, IDS.unidadeA, {
+        provedor: 'provedor-de-prova', activo: true });
+      return enfileirar(db, IDS.orgA, IDS.unidadeA, r.reservaId, acontecimento(),
+        'confirmacao', 'es-ES', async () => ({ ok: false, erro: 'sem ligação' }));
+    });
 
     const { rows } = await sql.query(`SELECT estado FROM reservations WHERE id = $1`, [r.reservaId]);
     assert.equal(rows[0].estado, 'CONFIRMADA', 'a falha de envio desfez a reserva');
-    const msgs = await comA((db) => mensagensDaReserva(db, r.reservaId));
+    const msgs = await comA((db) => historicoDeMensagens(db, IDS.unidadeA));
     assert.equal(msgs[0]!.estado, 'FALHADA', 'a falha não ficou registada em lado nenhum');
   });
 });

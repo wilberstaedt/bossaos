@@ -706,37 +706,6 @@ export async function sentar(db: ClienteComEscopo, reservaId: string): Promise<v
 }
 
 // ──────────────────────────────────────────────────────────────────────────
-// Mensagem — resultado SEPARADO
-// ──────────────────────────────────────────────────────────────────────────
-
-/**
- * «Uma reserva confirmada com email por enviar continua confirmada. Falha de
- * envio não desfaz a reserva, e sucesso de envio não a confirma.»
- *
- * Duas linhas em duas tabelas. Se isto fosse uma coluna `email_enviado` na
- * reserva, o dia em que o envio falhasse seria o dia em que alguém escrevia
- * `estado = 'FALHADA'` na reserva inteira.
- */
-export async function registarMensagem(
-  db: ClienteComEscopo, organizationId: string, reservaId: string,
-  tipo: string, estado: 'ENVIADA' | 'FALHADA', erro?: string,
-): Promise<void> {
-  await db.reservationMessage.create({
-    data: { organizationId, reservationId: reservaId, tipo, estado, erro: erro ?? null },
-  });
-}
-
-export async function mensagensDaReserva(
-  db: ClienteComEscopo, reservaId: string,
-): Promise<{ tipo: string; estado: string; erro: string | null }[]> {
-  return db.reservationMessage.findMany({
-    where: { reservationId: reservaId },
-    select: { tipo: true, estado: true, erro: true },
-    orderBy: { createdAt: 'asc' },
-  });
-}
-
-// ──────────────────────────────────────────────────────────────────────────
 // Lista de espera e retenção
 // ──────────────────────────────────────────────────────────────────────────
 

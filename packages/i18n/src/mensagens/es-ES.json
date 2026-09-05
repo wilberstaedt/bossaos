@@ -1717,7 +1717,9 @@
     "semLugar": "Con el tamaño de tu grupo no tenemos ninguna mesa esta noche. Preferimos decírtelo ahora.",
     "desligado": "Ahora mismo no aceptamos reservas por aquí.",
     "muitos": "Estamos recibiendo muchas reservas. Inténtalo en unos minutos.",
-    "naoEncontrada": "No encontramos esta reserva."
+    "naoEncontrada": "No encontramos esta reserva.",
+    "horaInexistente": "Esa hora no existe esa noche (el reloj se adelanta). Te hemos apuntado a las",
+    "horaAmbigua": "Esa hora ocurre dos veces esa noche (el reloj se atrasa). Te hemos apuntado a las"
   },
   "hostE19": {
     "agenda": "Reservas de hoy",
@@ -1763,7 +1765,8 @@
     "verDia": "Ver el día",
     "voltar": "Volver",
     "naoChegou": "Este grupo aún no ha llegado.",
-    "mesaOcupada": "Esa mesa ya está ocupada."
+    "mesaOcupada": "Esa mesa ya está ocupada.",
+    "chamar": "Avisar que la mesa está lista"
   },
   "mensagensE19": {
     "mensagens": "Mensajes de reservas",

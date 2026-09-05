@@ -1,10 +1,11 @@
 import type { PrismaClient } from '@prisma/client';
 import { comEscopo } from './escopo.ts';
 import {
-  confirmarReserva, disponibilidade, lerDefinicoes,
+  confirmarReserva, disponibilidade, lerDefinicoes, resolverHoraLocal,
   type ResultadoDaConfirmacao,
 } from './reservas.ts';
 import { entrarNaEspera, esperaEstimada, posicaoNaEspera } from './espera.ts';
+import { acontecimento, enfileirar } from './mensagens.ts';
 
 /**
  * A reserva pública: quem chega pela internet aberta, sem sessão nenhuma.
@@ -50,6 +51,8 @@ export async function unidadePublica(
 export interface HorarioOferecido {
   quando: Date;
   cabe: boolean;
+  /** A hora local acontece duas vezes nesta noite. Quem escolhe tem de o saber. */
+  ambigua?: true;
 }
 
 /**
@@ -66,20 +69,38 @@ export interface HorarioOferecido {
 export async function horariosPublicos(
   prisma: PrismaClient, unidade: UnidadePublica, dia: Date, pessoas: number,
 ): Promise<HorarioOferecido[]> {
+  // Sem fuso não há hora local que resolver. Adivinhar UTC é o defeito que esta
+  // correcção existe para tirar — e uma unidade por configurar não oferece horas.
+  if (!unidade.fuso) return [];
   return comEscopo(prisma, { organizationId: unidade.organizationId }, async (db) => {
     const definicoes = await lerDefinicoes(db, unidade.locationId);
     if (!definicoes.activo) return [];
     const saida: HorarioOferecido[] = [];
-    // De meia em meia hora, das 12h às 23h locais da unidade. É uma grelha de
-    // piloto e está declarada como tal: os turnos do RES-B-014 mandam mais do
-    // que isto, e ligá-los é a fatia seguinte.
+    // ── A grelha é de horas LOCAIS, e resolve-se pelo fuso da unidade ────
+    //
+    // «Instantes em UTC; regras recorrentes em fuso IANA.» As 20h de um
+    // restaurante em Madrid são as 20h de Madrid. Construir a grelha com
+    // `Date.UTC` oferecia horas certas em Londres e duas horas erradas aqui — e
+    // o pior é que ninguém via: a lista parecia perfeita e a reserva nascia com
+    // o instante trocado.
+    //
+    // De meia em meia hora, das 12h às 23h. É uma grelha de piloto e está
+    // declarada como tal: os turnos do RES-B-014 mandam mais do que isto.
+    const diaLocal = dia.toISOString().slice(0, 10);
     for (let h = 12; h <= 23; h += 1) {
       for (const m of [0, 30]) {
-        const quando = new Date(Date.UTC(
-          dia.getUTCFullYear(), dia.getUTCMonth(), dia.getUTCDate(), h, m, 0));
+        const local = `${diaLocal} ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
+        const { instante: quando, estado } = await resolverHoraLocal(db, unidade.fuso!, local);
+        // Uma hora que NÃO EXISTE não se oferece. Numa noite de mudança de hora,
+        // as 02h30 não são uma hora: oferecê-la é prometer um instante que o
+        // relógio saltou.
+        if (estado === 'INEXISTENTE') continue;
         const d = await disponibilidade(
           db, unidade.locationId, quando, definicoes.duracaoPadraoMin, definicoes);
-        saida.push({ quando, cabe: d.livres.some((mesa) => mesa.capacidade >= pessoas) });
+        saida.push({
+          quando, cabe: d.livres.some((mesa) => mesa.capacidade >= pessoas),
+          ...(estado === 'AMBIGUA' ? { ambigua: true as const } : {}),
+        });
       }
     }
     return saida;
@@ -90,10 +111,21 @@ export type RecusaPublica =
   | { ok: false; motivo: 'DESCONHECIDA' }
   | { ok: false; motivo: 'DESLIGADO' }
   | { ok: false; motivo: 'MUITOS_PEDIDOS' }
+  | { ok: false; motivo: 'SEM_FUSO' }
   | { ok: false; motivo: 'SEM_MESA'; alternativas: Date[] };
 
 export type ResultadoPublico =
-  | { ok: true; reservaId: string; segredoDeGestao: string | undefined; repetida: boolean }
+  | {
+      ok: true; reservaId: string; segredoDeGestao: string | undefined; repetida: boolean;
+      /**
+       * O que a casa entendeu da hora que a pessoa escreveu.
+       *
+       * `INEXISTENTE` e `AMBIGUA` são os dois casos em que o relógio da casa não
+       * bate com o que foi escrito — e quem reservou tem de o saber, senão
+       * aparece a uma hora e a mesa está marcada noutra.
+       */
+      horaEntendida: { instante: Date; estado: 'NORMAL' | 'INEXISTENTE' | 'AMBIGUA' };
+    }
   | RecusaPublica;
 
 /**
@@ -108,7 +140,12 @@ export type ResultadoPublico =
 export async function reservarDaRua(
   prisma: PrismaClient, slug: string,
   pedido: {
-    pessoas: number; inicio: Date; nome: string; contacto: string;
+    pessoas: number;
+    /** `AAAA-MM-DD`, hora LOCAL da unidade. */
+    dia: string;
+    /** `HH:MM`, hora LOCAL da unidade. */
+    hora: string;
+    nome: string; contacto: string;
     notas?: string | null; aceitaMarketing?: boolean; chaveIdempotente: string;
   },
 ): Promise<ResultadoPublico> {
@@ -127,12 +164,26 @@ export async function reservarDaRua(
   `;
   if (!cabe?.cabe_no_limite_publico) return { ok: false, motivo: 'MUITOS_PEDIDOS' };
 
+  // ── A hora resolve-se ANTES de existir instante ───────────────────────
+  //
+  // O instante nascia de `new Date(dia + 'T' + hora + 'Z')`, que é hora de
+  // parede lida como UTC. Num restaurante de Madrid dava duas horas de desvio, e
+  // o que isso anula não é a antecedência — é o aviso da sala: às 19h a mesa das
+  // 20h não aparecia como reservada, que é o minuto exacto em que o host a dá a
+  // um walk-in.
+  //
+  // Sem fuso não se adivinha: recusa-se. Adivinhar é o defeito.
+  if (!unidade.fuso) return { ok: false, motivo: 'SEM_FUSO' };
+  const horaEntendida = await comEscopo(
+    prisma, { organizationId: unidade.organizationId },
+    (db) => resolverHoraLocal(db, unidade.fuso!, `${pedido.dia} ${pedido.hora}:00`));
+
   const r: ResultadoDaConfirmacao = await confirmarReserva(
     prisma, { organizationId: unidade.organizationId },
     {
       locationId: unidade.locationId,
       pessoas: pedido.pessoas,
-      inicio: pedido.inicio,
+      inicio: horaEntendida.instante,
       nome: pedido.nome,
       contacto: pedido.contacto,
       notas: pedido.notas ?? null,
@@ -143,7 +194,29 @@ export async function reservarDaRua(
     });
 
   if (!r.ok) return { ok: false, motivo: 'SEM_MESA', alternativas: r.alternativas };
-  return { ok: true, reservaId: r.reservaId, segredoDeGestao: r.segredoDeGestao, repetida: r.repetida };
+
+  // ── O ACONTECIMENTO: a reserva foi confirmada ─────────────────────────
+  //
+  // Aqui é que a mensagem nasce, e é por isto que a fila deixa de ser uma
+  // máquina sem chamador. A identidade é cunhada NESTE momento — o momento do
+  // facto — e a mensagem herda-a.
+  //
+  // Fora da transacção da reserva, de propósito: «uma reserva confirmada com
+  // email por enviar continua confirmada». Uma falha de envio aqui não pode
+  // desfazer o que já ficou.
+  //
+  // Uma repetição não avisa outra vez: a reserva é a mesma, e a chave
+  // idempotente já a devolveu — não houve facto novo.
+  if (!r.repetida) {
+    await comEscopo(prisma, { organizationId: unidade.organizationId }, (db) =>
+      enfileirar(db, unidade.organizationId, unidade.locationId, r.reservaId,
+        acontecimento(), 'confirmacao', 'es-ES'));
+  }
+
+  return {
+    ok: true, reservaId: r.reservaId, segredoDeGestao: r.segredoDeGestao,
+    repetida: r.repetida, horaEntendida,
+  };
 }
 
 /** Entrar na lista de espera a partir da rua. */

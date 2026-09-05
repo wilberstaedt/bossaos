@@ -249,7 +249,6 @@ export {
   lerDefinicoes, guardarDefinicoes,
   ocupacaoNoIntervalo, mesasBloqueadas, disponibilidade, comensaisPorZona,
   confirmarReserva, reagendar, cancelar, registarNaoCompareceu, sentar,
-  registarMensagem, mensagensDaReserva,
   varrerRetencoesExpiradas,
   listarTurnos, listarCapacidades, listarBloqueios, listarReservas,
   resolverHoraLocal, agoraDaBase, segredoDeGestao,
@@ -277,12 +276,13 @@ export {
 export {
   agendaDoDia, chegadasPorHora, reservasAChegar, atrasadas,
   marcarChegada, sentarReserva, abrirWalkIn, reservaPorId, relatorioDeReservas,
+  horaDaCasa,
   type ReservaDoDia, type NumeroComDefinicao,
 } from './host.ts';
 
 // ── E19 · mensagens ──
 export {
-  conectorDaUnidade, templateDe, enfileirar, historicoDeMensagens,
+  conectorDaUnidade, templateDe, enfileirar, historicoDeMensagens, acontecimento,
   listarTemplates, guardarTemplate, guardarConector,
   type Conector, type ResultadoDaMensagem, type MensagemNoHistorico,
 } from './mensagens.ts';

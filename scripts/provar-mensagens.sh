@@ -23,7 +23,7 @@ if [[ "$NODE_ACTUAL" != "$NODE_ESPERADO" ]]; then
 fi
 
 GRUPOS_ESPERADOS=5
-CASOS_ESPERADOS=12
+CASOS_ESPERADOS=13
 falhas=0
 
 MSG=packages/db/src/mensagens.ts
@@ -49,9 +49,18 @@ ALTER TABLE "messaging_connectors" DROP CONSTRAINT IF EXISTS "conector_activo_ex
 ALTER TABLE "messaging_connectors"
   ADD CONSTRAINT "conector_activo_exige_provedor" CHECK (
     "activo" = false OR "provedor" IS NOT NULL);
+-- ── A chave é o ACONTECIMENTO, e este restauro tinha ficado para trás ────
+--
+-- Recriava `(reservation_id, tipo)` — a chave que a migração seguinte removeu
+-- por engolir a segunda chamada da mesma noite. O guião repunha um esquema que já
+-- não existe, e a prova ficava vermelha depois dos controlos, num erro que não
+-- era sobre código nenhum.
+--
+-- Um restauro calibrado ao esquema antigo é uma forma de guarda a mentir.
 DROP INDEX IF EXISTS "uma_mensagem_por_reserva_e_tipo";
-CREATE UNIQUE INDEX "uma_mensagem_por_reserva_e_tipo"
-  ON "reservation_messages"("reservation_id", "tipo");
+DROP INDEX IF EXISTS "reservation_messages_evento_id_key";
+CREATE UNIQUE INDEX "reservation_messages_evento_id_key"
+  ON "reservation_messages"("evento_id");
 PSQL
 }
 
@@ -125,26 +134,32 @@ antigo = "  if (mensagem.entregueEm) {"
 assert antigo in s, 'a guarda da entrega repetida nao esta onde se esperava'
 io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, "  if (false && mensagem.entregueEm) {", 1))
 PYDUPLO
-exigir_vermelho "caiu a deduplicação: o cliente recebeu duas vezes" \
-  'SEGUNDA não chega ao transporte' /tmp/bossaos-msg-duplo.txt \
+exigir_vermelho "caiu a deduplicação: a reentrega chegou ao cliente outra vez" \
+  'REENTREGA do mesmo acontecimento' /tmp/bossaos-msg-duplo.txt \
   'mensagem DIFERENTE para a mesma reserva'
 cp "$ORIG_MSG" "$MSG"
 
 echo
-echo "3. CONTROLO NEGATIVO — a deduplicação ENGOLE tudo o que se parece"
-# A outra metade, e a que se esquece: a chave passa a ser só a reserva, e o
-# lembrete nunca é enviado porque a confirmação já foi.
+echo "3. CONTROLO NEGATIVO — a chave volta a ser (reserva, tipo)"
+# ── A resposta fácil que o contrato nomeia ────────────────────────────────
+#
+# «A sua mesa está pronta» pode ter de sair DUAS VEZES na mesma noite. Com esta
+# chave a segunda desaparece em silêncio, e a mesa fica vazia com gente à porta.
 python3 - <<'PYENGOLE'
 import io
 p = 'packages/db/src/mensagens.ts'
 s = io.open(p, encoding='utf-8').read()
-antigo = "    where: { uma_mensagem_por_reserva_e_tipo: { reservationId: reservaId, tipo } },"
-assert antigo in s, 'a chave da deduplicacao nao esta onde se esperava'
-novo = "    where: { uma_mensagem_por_reserva_e_tipo: { reservationId: reservaId, tipo: 'confirmacao' } },"
+antigo = "    where: { eventoId },"
+assert antigo in s, 'a chave do acontecimento nao esta onde se esperava'
+# A resposta facil que o contrato nomeia: a chave volta a ser (reserva, tipo).
+novo = """    where: { eventoId: (await db.reservationMessage.findFirst({
+      where: { reservationId: reservaId, tipo }, select: { eventoId: true },
+    }))?.eventoId ?? eventoId },"""
 io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, novo, 1))
 PYENGOLE
-exigir_vermelho "caiu o par: a segunda mensagem foi engolida pela primeira" \
-  'mensagem DIFERENTE para a mesma reserva' /tmp/bossaos-msg-engole.txt
+exigir_vermelho "caiu a identidade: o segundo aviso foi engolido pelo primeiro" \
+  'acontecimento NOVO, É enviado outra vez' /tmp/bossaos-msg-engole.txt \
+  'não finge que enviou'
 cp "$ORIG_MSG" "$MSG"
 
 echo

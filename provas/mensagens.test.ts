@@ -2,8 +2,8 @@ import { after, before, beforeEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from 'pg';
 import {
-  comEscopo, conectorDaUnidade, enfileirar, guardarConector, guardarTemplate,
-  historicoDeMensagens, obterPrisma,
+  acontecimento, comEscopo, conectorDaUnidade, enfileirar, guardarConector,
+  guardarTemplate, historicoDeMensagens, obterPrisma,
 } from '../packages/db/src/index.ts';
 import { IDS } from '../packages/db/prisma/fixtures.ts';
 
@@ -79,8 +79,17 @@ function transporteQueEntrega() {
 const ligar = () => comA((db) => guardarConector(
   db, IDS.orgA, IDS.unidadeA, { provedor: 'provedor-de-prova', activo: true }));
 
-const enviar = (tipo: string, t?: { entregar: (a: string, c: string) => Promise<{ ok: boolean; erro?: string }> }) =>
-  comA((db) => enfileirar(db, IDS.orgA, IDS.unidadeA, reservaId, tipo, 'es-ES', t?.entregar));
+/**
+ * ── O acontecimento é um ARGUMENTO, e é isso que mudou ────────────────────
+ *
+ * A chave deixou de ser `(reserva, tipo)`. Quem avisa cunha a identidade do
+ * facto e passa-a; reentregar usa a MESMA, e um facto novo cunha outra.
+ */
+const enviar = (
+  tipo: string, evento: string,
+  t?: { entregar: (a: string, c: string) => Promise<{ ok: boolean; erro?: string }> },
+) => comA((db) => enfileirar(
+  db, IDS.orgA, IDS.unidadeA, reservaId, evento, tipo, 'es-ES', t?.entregar));
 
 // ═══════════════════════════════════════════════════════════════════════════
 describe('1. O conector nasce DESLIGADO e é visível como desligado', () => {
@@ -112,7 +121,7 @@ describe('1. O conector nasce DESLIGADO e é visível como desligado', () => {
 describe('2. Sem provedor, a mensagem fica PENDENTE — e nunca ENVIADA', () => {
   it('não finge que enviou', async () => {
     const t = transporteQueEntrega();
-    const r = await enviar('confirmacao', t);
+    const r = await enviar('confirmacao', acontecimento(), t);
     assert.equal(r.ok, false);
     if (!r.ok) assert.equal(r.motivo, 'SEM_PROVEDOR');
     assert.equal(t.chamadas.length, 0, 'chamou o transporte sem provedor configurado');
@@ -126,7 +135,7 @@ describe('2. Sem provedor, a mensagem fica PENDENTE — e nunca ENVIADA', () => 
   it('PENDENTE não é FALHADA — e a distinção fica no histórico', async () => {
     // Falhar é ter tentado e não ter conseguido. Chamar-lhe falha manda alguém
     // procurar um erro que não existe.
-    await enviar('confirmacao');
+    await enviar('confirmacao', acontecimento());
     const h = await comA((db) => historicoDeMensagens(db, IDS.unidadeA));
     assert.equal(h[0]!.estado, 'PENDENTE');
     assert.equal(h[0]!.tentativas[0]!.resultado, 'SEM_PROVEDOR');
@@ -139,16 +148,18 @@ describe('3. Reenviar não entrega duas vezes', () => {
   it('a primeira entrega chega ao transporte', async () => {
     await ligar();
     const t = transporteQueEntrega();
-    const r = await enviar('confirmacao', t);
+    const r = await enviar('confirmacao', acontecimento(), t);
     assert.ok(r.ok);
     assert.equal(t.chamadas.length, 1, 'não entregou');
   });
 
-  it('a SEGUNDA não chega ao transporte, e fica no histórico', async () => {
+  it('a REENTREGA do mesmo acontecimento não chega ao transporte', async () => {
+    // Reentregar é a MESMA tentativa, não uma nova: usa o mesmo acontecimento.
     await ligar();
     const t = transporteQueEntrega();
-    await enviar('confirmacao', t);
-    const r = await enviar('confirmacao', t);
+    const evento = acontecimento();
+    await enviar('confirmacao', evento, t);
+    const r = await enviar('confirmacao', evento, t);
 
     assert.equal(t.chamadas.length, 1, 'o cliente recebeu duas vezes');
     assert.equal(r.ok, false);
@@ -160,12 +171,26 @@ describe('3. Reenviar não entrega duas vezes', () => {
     assert.equal(h[0]!.tentativas[1]!.resultado, 'JA_ENTREGUE');
   });
 
+  it('o MESMO tipo, num acontecimento NOVO, É enviado outra vez', async () => {
+    // ── O caso que a chave antiga engolia ────────────────────────────────
+    //
+    // «A sua mesa está pronta» pode ter de sair duas vezes na mesma noite: a
+    // pessoa não veio à primeira, e o host volta a chamar. Com `(reserva, tipo)`
+    // a segunda desaparecia em silêncio, e a mesa ficava vazia com gente à porta.
+    await ligar();
+    const t = transporteQueEntrega();
+    await enviar('confirmacao', acontecimento(), t);
+    const r = await enviar('confirmacao', acontecimento(), t);
+    assert.equal(r.ok, true, 'o segundo aviso foi engolido pelo primeiro');
+    assert.equal(t.chamadas.length, 2);
+  });
+
   it('E O PAR: uma mensagem DIFERENTE para a mesma reserva É enviada', async () => {
     // ── Sem isto, «engole tudo o que se parece» passa os dois acima ──────
     await ligar();
     const t = transporteQueEntrega();
-    await enviar('confirmacao', t);
-    const r = await enviar('lembrete', t);
+    await enviar('confirmacao', acontecimento(), t);
+    const r = await enviar('lembrete', acontecimento(), t);
 
     assert.equal(r.ok, true, 'a segunda mensagem foi engolida pela deduplicação');
     assert.equal(t.chamadas.length, 2);
@@ -178,7 +203,7 @@ describe('3. Reenviar não entrega duas vezes', () => {
 describe('4. O resultado do provedor é guardado, e a reserva sobrevive', () => {
   it('a falha do provedor fica registada com o erro', async () => {
     await ligar();
-    const r = await enviar('confirmacao', {
+    const r = await enviar('confirmacao', acontecimento(), {
       entregar: async () => ({ ok: false, erro: 'ligação recusada' }) });
     assert.equal(r.ok, false);
     if (!r.ok) assert.equal(r.motivo, 'FALHOU');
@@ -190,7 +215,7 @@ describe('4. O resultado do provedor é guardado, e a reserva sobrevive', () => 
 
   it('e a RESERVA continua confirmada', async () => {
     await ligar();
-    await enviar('confirmacao', { entregar: async () => ({ ok: false, erro: 'x' }) });
+    await enviar('confirmacao', acontecimento(), { entregar: async () => ({ ok: false, erro: 'x' }) });
     const { rows } = await sql.query(`SELECT estado FROM reservations WHERE id = $1`, [reservaId]);
     assert.equal(rows[0].estado, 'CONFIRMADA', 'a falha de envio desfez a reserva');
   });
@@ -200,9 +225,10 @@ describe('4. O resultado do provedor é guardado, e a reserva sobrevive', () => 
     // ainda não recebeu, e recusar o reenvio deixava o cliente sem mensagem
     // nenhuma para sempre.
     await ligar();
-    await enviar('confirmacao', { entregar: async () => ({ ok: false, erro: 'x' }) });
+    const evento = acontecimento();
+    await enviar('confirmacao', evento, { entregar: async () => ({ ok: false, erro: 'x' }) });
     const t = transporteQueEntrega();
-    const r = await enviar('confirmacao', t);
+    const r = await enviar('confirmacao', evento, t);
     assert.equal(r.ok, true, 'o reenvio de uma mensagem FALHADA foi recusado');
     assert.equal(t.chamadas.length, 1);
   });
@@ -211,7 +237,7 @@ describe('4. O resultado do provedor é guardado, e a reserva sobrevive', () => 
 // ═══════════════════════════════════════════════════════════════════════════
 describe('5. A base exige o carimbo de uma ENVIADA', () => {
   it('marcar entregue sem hora é recusado', async () => {
-    const r = await enviar('confirmacao');
+    const r = await enviar('confirmacao', acontecimento());
     await assert.rejects(
       () => sql.query(
         `UPDATE reservation_messages SET estado = 'ENVIADA' WHERE id = $1`, [r.mensagemId]),

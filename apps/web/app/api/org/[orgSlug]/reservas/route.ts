@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import {
   abrirWalkIn, cancelar, confirmarReserva, guardarDefinicoes, listarUnidades,
   marcarChegada, reagendar, registarNaoCompareceu, sentarReserva,
-  guardarConector, guardarTemplate,
+  guardarConector, guardarTemplate, horaDaCasa, acontecimento, enfileirar,
+  chamarDaEspera,
 } from '@bossaos/db';
 import { corpoDaResposta, estadoHttp, exigirAccao } from '@bossaos/domain';
 import { comEscopoDoPedido, resolverPedido } from '../../../../../src/sessao.ts';
@@ -186,13 +187,19 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
     // abrir a transacção ele próprio. Passar-lhe um cliente que já está dentro de
     // uma faria a serialização acontecer na transacção errada — e a contagem da
     // zona deixava de estar protegida sem ninguém dar por isso.
+    // A hora que o host escreveu é LOCAL, e resolve-se pelo fuso da unidade
+    // antes de existir instante. Sem fuso não se adivinha.
+    const entendida = await comEscopoDoPedido(sessao, (db) =>
+      horaDaCasa(db, unidade.id, dia, hora));
+    if (!entendida) return voltarPara(`${paraAgenda()}/nova`, { erro: 'SEM_FUSO' });
+
     const r = await confirmarReserva(
       (await import('../../../../../src/servidor.ts')).obterBase(),
       { organizationId },
       {
         locationId: unidade.id,
         pessoas: inteiro(dados, 'pessoas', 2),
-        inicio: new Date(`${dia}T${hora}:00Z`),
+        inicio: entendida.instante,
         nome: texto(dados, 'nome') ?? '',
         contacto: texto(dados, 'contacto') ?? '',
         notas: texto(dados, 'notas') ?? null,
@@ -203,7 +210,16 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
         criadaPor: sessao.actor.email,
       });
     if (!r.ok) return voltarPara(`${paraAgenda()}/nova`, { erro: r.motivo });
-    return voltarPara(paraReserva(r.reservaId), { guardado: '1' });
+    // O ACONTECIMENTO: a reserva foi confirmada. A mesma porta que a rua usa.
+    if (!r.repetida) {
+      await comEscopoDoPedido(sessao, (db) => enfileirar(
+        db, organizationId, unidade.id, r.reservaId, acontecimento(),
+        'confirmacao', idioma));
+    }
+    return voltarPara(paraReserva(r.reservaId), {
+      guardado: '1',
+      ...(entendida.estado !== 'NORMAL' ? { hora: entendida.estado } : {}),
+    });
   }
 
   if (accao === 'chegou') {
@@ -227,9 +243,36 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
   }
 
   if (accao === 'cancelar_reserva') {
-    await comEscopoDoPedido(sessao, (db) =>
-      cancelar(db, texto(dados, 'reservaId') ?? '', sessao.actor.email));
+    const reservaId = texto(dados, 'reservaId') ?? '';
+    await comEscopoDoPedido(sessao, async (db) => {
+      await cancelar(db, reservaId, sessao.actor.email);
+      // O ACONTECIMENTO: a casa cancelou. Avisar é o mínimo que se deve a quem
+      // ia jantar fora — e a mensagem nasce aqui, no momento do facto.
+      await enfileirar(db, organizationId, unidade.id, reservaId, acontecimento(),
+        'cancelamento', idioma);
+    });
     return voltarPara(paraAgenda(), { guardado: '1' });
+  }
+
+  if (accao === 'chamar_espera') {
+    // ── O ACONTECIMENTO: a mesa ficou pronta ────────────────────────────
+    //
+    // É o caso que o contrato usa para explicar a chave: «a sua mesa está
+    // pronta» pode ter de sair DUAS VEZES na mesma noite — a pessoa não veio à
+    // primeira, e o host volta a chamar meia hora depois.
+    //
+    // Cada chamada é um acontecimento novo, com identidade nova, logo entrega.
+    // Com a chave antiga a segunda desaparecia em silêncio e a mesa ficava vazia
+    // com gente à porta.
+    const esperaId = texto(dados, 'esperaId') ?? '';
+    const tableId = texto(dados, 'tableId') ?? '';
+    await comEscopoDoPedido(sessao, async (db) => {
+      const agora = new Date();
+      await chamarDaEspera(db, unidade.id, esperaId, tableId,
+        agora, new Date(agora.getTime() + 90 * 60_000));
+      // `chamarDaEspera` avisa: o acontecimento vive onde o facto acontece.
+    });
+    return voltarPara(`${paraAgenda()}/espera`, { guardado: '1' });
   }
 
   if (accao === 'mover') {
@@ -239,9 +282,12 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dia) || !/^\d{2}:\d{2}$/.test(hora)) {
       return voltarPara(`${paraReserva(reservaId)}/mover`, { erro: 'quando' });
     }
+    const nova = await comEscopoDoPedido(sessao, (db) =>
+      horaDaCasa(db, unidade.id, dia, hora));
+    if (!nova) return voltarPara(`${paraReserva(reservaId)}/mover`, { erro: 'SEM_FUSO' });
     const r = await reagendar(
       (await import('../../../../../src/servidor.ts')).obterBase(), { organizationId },
-      unidade.id, reservaId, new Date(`${dia}T${hora}:00Z`));
+      unidade.id, reservaId, nova.instante);
     // A anterior sobrevive: o motor garante-o dentro da transacção, e o regresso
     // leva o motivo para a tela o poder dizer.
     if (!r.ok) return voltarPara(`${paraReserva(reservaId)}/mover`, { erro: r.motivo });

@@ -1,5 +1,5 @@
 import type { ClienteComEscopo } from './escopo.ts';
-import { agoraDaBase, lerDefinicoes } from './reservas.ts';
+import { agoraDaBase, lerDefinicoes, resolverHoraLocal } from './reservas.ts';
 
 /**
  * O que o host vê, e o que o host faz.
@@ -273,4 +273,28 @@ export async function relatorioDeReservas(
       valor: vivas.length === 0 ? 0 : Math.round((doPublico.length / vivas.length) * 100),
       definicao: 'defOrigem' },
   ];
+}
+
+
+/**
+ * A hora que o host escreveu, resolvida pelo fuso da unidade.
+ *
+ * ── Existe para haver UM sítio onde a hora local vira instante ────────────
+ *
+ * O host escreve «20:00» a pensar na sala dele. Construir o instante com
+ * `new Date(dia + 'T' + hora + 'Z')` lê isso como UTC, e num restaurante de
+ * Madrid dá duas horas de desvio — que é o que anula o aviso da sala.
+ *
+ * Devolve o `estado` junto com o instante: `INEXISTENTE` e `AMBIGUA` são os dois
+ * casos em que a casa entendeu outra hora, e quem marcou tem de o saber.
+ */
+export async function horaDaCasa(
+  db: ClienteComEscopo, locationId: string, dia: string, hora: string,
+): Promise<{ instante: Date; estado: 'NORMAL' | 'INEXISTENTE' | 'AMBIGUA' } | null> {
+  const unidade = await db.location.findFirst({
+    where: { id: locationId }, select: { fuso: true },
+  });
+  // Sem fuso não se adivinha. Adivinhar é o defeito que isto tira.
+  if (!unidade?.fuso) return null;
+  return resolverHoraLocal(db, unidade.fuso, `${dia} ${hora}:00`);
 }
