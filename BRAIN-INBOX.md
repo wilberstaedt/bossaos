@@ -138,3 +138,50 @@ recuperável. Três saídas nomeadas, nenhuma escolhida — é decisão de produ
   desbloqueia. 12 provas não correm lá desde 04/09.
 - **E00 continua por assinar** — é meu, e só o JR o pode julgar. O dossiê está
   em `docs/reviews/E00-PROVA-PARA-O-JR.md`, agora com a prova que joga contra.
+
+---
+
+## [2026-09-05 · tarde] — E20 assinado, E21 fechado, MARCO DO RESTAURANT NÃO APROVADO
+
+### Mudança de status do projecto
+- **58% das etapas (21/36), 64% das telas (254/396).**
+- **O marco do Restaurant está NÃO APROVADO**, e não por defeito de correcção:
+  as 254 telas estão certas uma a uma e **ninguém chega lá**. Quem entra fica na
+  página da equipa; sete das oito entradas do menu são `href: '#'`, incluindo
+  reservas, catálogo, sala e caixa — todas construídas e assinadas.
+
+### Decisões técnicas
+- **Um módulo entregue tem porta**, e uma porta é uma ligação seguível a partir
+  da sessão iniciada, sem escrever endereços. Contrato em
+  `docs/architecture/portas-e-navegacao.md`.
+- **A verificação de alcance é exaustiva por etapa, não amostrada.** Escolher
+  funções a olho reproduz o viés que a varredura existe para eliminar.
+
+### Learnings
+- **O mesmo defeito apareceu em três escalas na mesma noite:** função sem
+  chamador (código), tela sem porta (ecrã), jornada sem percurso (operação).
+  **Verde não é alcance** — uma prova responde à pergunta que lhe fizeram e
+  nunca diz que ninguém lhe perguntou pelo caminho.
+- **Numa varredura de 30 funções sem chamador, 15 eram duplicados a APAGAR, não
+  a ligar.** Entregá-las como «liguem-nas» teria criado segundos caminhos para
+  coisas que já funcionam. A varredura diz onde olhar; só a leitura diz o que
+  fazer, e as duas conclusões são opostas.
+- **A regra pensada fica no domínio, e o produto reimplementa-a em linha** —
+  alergénios, preços por canal, domínios. Nos três a versão inline está certa
+  hoje; nos três, a pensada é a que não tem provas. Duas implementações da mesma
+  regra divergem sempre pela que ninguém corre.
+- **Verificar as minhas próprias afirmações antes de as publicar.** Contei 35
+  cliques nas provas e quase desmenti o meu achado com um `grep` mal apontado:
+  eram todos botões, e `getByRole('link')` aparece zero vezes.
+
+### O que foi feito
+- **E20 VALIDADO** (`ba5619c`) — 48 controlos negativos; corrigido depois com a
+  admissão de que verifiquei 5 funções de 8.
+- **E21 fechado**: 30 funções sem chamador triadas e lidas, achado da navegação
+  medido do login ao menu, e a entrada directa confirmada **autorizada** (não é
+  buraco de segurança, é alcance).
+
+### Próximo passo
+- O JR fecha o E22 (TPV, contas e caixa) e **recebe o conserto da navegação
+  antes do E23** — é o que reabre o marco.
+- **A CI continua trancada por facturação.** Só o Matheus desbloqueia.
