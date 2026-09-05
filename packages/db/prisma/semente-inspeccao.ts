@@ -1010,6 +1010,105 @@ async function principal(): Promise<void> {
       },
     });
 
+    // ── E26 · compras: os TRÊS números em desacordo, que é o normal ───────
+    //
+    // «Uma prova que só use o caminho onde tudo bate não é uma prova.» Por isso
+    // a semeadura põe uma encomenda de 10 sacos com 8 recebidos e 10
+    // facturados — e uma SEGUNDA linha onde tudo bate, sem a qual «marca sempre
+    // divergência» passava despercebido.
+    //
+    // E o saco é de 25 kg, não de 1: sem o factor, a tela media um stock de 8
+    // onde entraram 200 kg, e a diferença só apareceria no inventário.
+    const fornecedor = await prisma.supplier.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Distribuidor`, contacto: 'pedidos@distribuidor.example',
+        nif: 'B12345678',
+      },
+    });
+    const artigoSaco = await prisma.supplierItem.create({
+      data: {
+        organizationId: IDS.orgA, supplierId: fornecedor.id, itemId: tomate.id,
+        unidadeDeCompra: `${PREFIXO}saco 25 kg`,
+        factorMili: BigInt(25_000_000), precoMenor: BigInt(1800),
+      },
+    });
+    const artigoGarrafa = await prisma.supplierItem.create({
+      data: {
+        organizationId: IDS.orgA, supplierId: fornecedor.id, itemId: azeite.id,
+        unidadeDeCompra: `${PREFIXO}garrafa 5 L`,
+        factorMili: BigInt(5_000_000), precoMenor: BigInt(2200),
+      },
+    });
+    const encomenda = await prisma.purchaseOrder.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        supplierId: fornecedor.id, numero: `${PREFIXO}C-100`,
+        criadaPor: 'painel@inspeccao.example',
+      },
+    });
+    const linhaSaco = await prisma.purchaseOrderLine.create({
+      data: {
+        organizationId: IDS.orgA, purchaseOrderId: encomenda.id,
+        supplierItemId: artigoSaco.id, encomendadoMili: BigInt(10_000_000),
+      },
+    });
+    const linhaGarrafa = await prisma.purchaseOrderLine.create({
+      data: {
+        organizationId: IDS.orgA, purchaseOrderId: encomenda.id,
+        supplierItemId: artigoGarrafa.id, encomendadoMili: BigInt(4_000_000),
+      },
+    });
+    const recepcao = await prisma.receipt.create({
+      data: {
+        organizationId: IDS.orgA, purchaseOrderId: encomenda.id,
+        recebidaPor: 'painel@inspeccao.example', nota: 'faltaram dois sacos',
+      },
+    });
+    // Chegaram 8 dos 10 sacos: a diferença que a tela tem de mostrar.
+    const recebidaSaco = await prisma.receiptLine.create({
+      data: {
+        organizationId: IDS.orgA, receiptId: recepcao.id,
+        purchaseOrderLineId: linhaSaco.id,
+        recebidoMili: BigInt(8_000_000), custoTotalMenor: BigInt(14_400),
+      },
+    });
+    // E as 4 garrafas chegaram todas: o PAR sem o qual «marca sempre
+    // divergência» ficava por apanhar.
+    const recebidaGarrafa = await prisma.receiptLine.create({
+      data: {
+        organizationId: IDS.orgA, receiptId: recepcao.id,
+        purchaseOrderLineId: linhaGarrafa.id,
+        recebidoMili: BigInt(4_000_000), custoTotalMenor: BigInt(8_800),
+      },
+    });
+    await prisma.stockMovement.createMany({
+      data: [
+        { organizationId: IDS.orgA, itemId: tomate.id, tipo: 'ENTRADA',
+          quantidadeMili: BigInt(200_000_000), motivo: 'recepção de compra',
+          receiptLineId: recebidaSaco.id },
+        { organizationId: IDS.orgA, itemId: azeite.id, tipo: 'ENTRADA',
+          quantidadeMili: BigInt(20_000_000), motivo: 'recepção de compra',
+          receiptLineId: recebidaGarrafa.id },
+      ],
+    });
+    // A factura diz 10 sacos. Chegaram 8. É esta a diferença que se paga sem
+    // ninguém dar por ela quando o produto colapsa os três números num só.
+    await prisma.supplierInvoice.create({
+      data: {
+        organizationId: IDS.orgA, supplierId: fornecedor.id,
+        purchaseOrderId: encomenda.id, numero: `${PREFIXO}F-900`,
+        linhas: {
+          create: [
+            { organizationId: IDS.orgA, supplierItemId: artigoSaco.id,
+              facturadoMili: BigInt(10_000_000), totalMenor: BigInt(18_000) },
+            { organizationId: IDS.orgA, supplierItemId: artigoGarrafa.id,
+              facturadoMili: BigInt(4_000_000), totalMenor: BigInt(8_800) },
+          ],
+        },
+      },
+    });
+
     // ── E18 · reservas: uma linha em cada lista, e nenhuma vazia ──────────
     //
     // As seis telas desta etapa são listas. Uma lista vazia mede o estado

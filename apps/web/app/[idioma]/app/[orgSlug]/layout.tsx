@@ -70,6 +70,7 @@ export default async function LayoutDaOrganizacao({
     // ser um `#`: «um `#` num módulo entregue não é marcador, é uma porta que
     // ninguém abriu».
     { href: `/${idioma}/app/${orgSlug}/ir/stock`, rotulo: m.navegacao.inventario, accao: 'stock.ler' },
+    { href: `/${idioma}/app/${orgSlug}/ir/compras`, rotulo: m.comprasE26.compras, accao: 'stock.gerir' },
     { href: '#', rotulo: m.navegacao.clientes, accao: 'clientes.ler', porConstruir: 'E27' },
     { href: `/${idioma}/app/${orgSlug}/organization`, rotulo: m.navegacao.equipa, accao: 'equipa.ler' },
     { href: `/${idioma}/app/${orgSlug}/ir/relatorios`, rotulo: m.navegacao.relatorios, accao: 'relatorios.ler' },

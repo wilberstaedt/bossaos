@@ -27,6 +27,7 @@ const DESTINOS: Record<string, { rotulo: (m: ReturnType<typeof mensagensDe>) => 
   entrega: { rotulo: (m) => m.navegacao.levar, caminho: 'delivery' },
   relatorios: { rotulo: (m) => m.navegacao.relatorios, caminho: 'reports' },
   stock: { rotulo: (m) => m.navegacao.inventario, caminho: 'inventory' },
+  compras: { rotulo: (m) => m.comprasE26.compras, caminho: 'purchases' },
 };
 
 export default async function EscolherUnidade({

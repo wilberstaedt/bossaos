@@ -3,66 +3,50 @@
 **Etapa atual:** E26 — fornecedores e compras (**6 telas**).
 **Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — as duas fatias.**
 
-**O núcleo:** o stock **não é uma coluna**, é um saldo derivado de movimentos —
-e a garantia está na FORMA, não numa convenção: `stock_saldo_nao_se_escreve()`
-repõe o número de quem tentar escrevê-lo, como o `producao_em` do E20. A ficha
-técnica é uma **árvore**, o consumo desce por ela, e o ciclo recusa-se **na
-escrita** (`ficha_recusa_ciclo()`, CTE recursivo) — em serviço um ciclo não se
-veria como ciclo, via-se como o sistema a parar às 21h.
+**O núcleo:** encomendado, recebido e facturado são **três números** e não três
+estados de um. Vivem em três tabelas porque são três factos, ditos por gente
+diferente, em momentos diferentes — e as diferenças **derivam-se** da
+comparação, como o saldo de stock e o estado da conta. Não há coluna
+`divergencia`, e o estado da encomenda é só `ABERTA`/`FECHADA`: um `RECEBIDA`
+obrigava a escolher entre «recebida» e «recebida a menos», e a escolha apagava a
+informação por que a tela existe.
 
-**Das três saídas para o negativo, duas defendem-se e uma reprova-se.**
-Impossível trava o serviço com o cliente à frente e a equipa lança um ajuste
-inventado para desbloquear; visível deixa a equipa ver e corrigir. **Silencioso**
-é a que ninguém nota, e é a que o controlo negativo 2 planta para provar que a
-prova a apanha.
+**Só a recepção mexe no stock, e a garantia é pela AUSÊNCIA:** o movimento ganhou
+`receipt_line_id` e **não** ganhou `purchase_order_line_id` nem
+`supplier_invoice_line_id` — uma coluna que não existe não pode apontar para o
+sítio errado. Mais o gatilho `compra_so_entra_por_recepcao()` e o índice único
+parcial que faz do reenvio **uma** entrada.
 
-**Quantidade é inteiro em milésimos**, com sufixo `Mili`, pela mesma razão que o
-dinheiro é inteiro em unidade menor — e com a sua própria guarda,
-`validar-quantidades.sh`, deliberadamente separada da do dinheiro.
+**A unidade de compra não é a de uso:** `factor_mili` é `NOT NULL` com
+`CHECK > 0`, e a conta é inteira de ponta a ponta — 8 sacos × 25 kg dão 200 kg, e
+nunca 8. Sem factor, recusa-se: adivinhar é o defeito, a mesma regra da densidade.
 
-**Consumo ao SERVIR, e uma vez só:** um pedido cancelado antes de produzir não
-consome; produzido e devolvido **consome**, porque devolvê-la não a repõe no
-frigorífico — se foi para o lixo é uma **quebra**, com razão escrita. Servir duas
-vezes a mesma linha é **um** consumo: índice único parcial sobre
-`(order_line_id, item_id)`. A identidade é a do acontecimento, outra vez.
+**O custeio está ESCRITO — média ponderada móvel, derivada das entradas.**
+Ponderada e não PEPS porque a farinha do saco novo e a do velho estão no mesmo
+balde: um método que finge saber qual saiu produz um número exacto que está
+errado.
 
-**A porta, antes de eu declarar e não depois:** o menu `inventário` deixou de ser
-`#` e passa por `/app/<org>/ir/stock`, com `stock` na tabela `DESTINOS`. O
-controlo negativo 6 remove-o e as doze telas ficam só alcançáveis a escrever o
-endereço — foi o que reteve o E22 e o E24.
+**Achado que vale a etapa:** a PUR-003 rolava na horizontal a 360 px, e a causa
+não era o CSS — **o JSX remove o espaço entre elementos irmãos escritos em linhas
+separadas**, e os seis `<span>` da conferência ficavam um bloco contínuo sem
+sítio onde quebrar. A quebra passou a ser dada pela caixa e não por espaços no
+texto: um `{' '}` entre spans resolvia o sintoma e voltava a partir-se na
+primeira coluna nova.
 
-**Achado que vale a etapa:** a asserção das folhas media um **nome**. Só exigia
-que «Salsa de tomate» não aparecesse — mas a tela mostra o identificador em cru
-quando não resolve o nome, por isso uma sub-receita a passar por insumo aparecia
-como **UUID** e a asserção ficava verde por cima do defeito. Descoberto com o
-defeito plantado. Passou a exigir que **toda** a folha resolva para um insumo.
-Mesma família do «Motivo del rechazo» que satisfazia um `length > 10` no E24.
-
-**O ALCANCE, medido ANTES de declarar:** `consumirPelaLinha` tinha **zero
-chamadores** — o motor de stock escrito, provado, e desligado do produto: servir
-um prato não mexia no frigorífico. É a dívida que o E23 deixou e o E24 pagou, e
-desta vez apareceu antes da assinatura. Ligado em `transitarTarefa` na passagem a
-`ENTREGUE`, o único sítio onde uma linha passa a servida. **Ligar partiu à
-primeira:** `stock_movements.actor` é chave estrangeira para `User.id` e o KDS só
-conhece o email — e a correcção não foi arranjar um id qualquer, foi reconhecer
-que **o consumo não é acção de ninguém, é consequência de uma**; quem serviu está
-no `production_events.actorEmail`, na mesma tarefa.
+**E o guião de controlos apanhou um defeito dele próprio:** o `extrair-sql.py`
+leva dois argumentos e eu passei um; o `2>/dev/null` engoliu o `IndexError` e a
+base ficou sem gatilho. O silenciador era metade do defeito.
 
 **Provas (LOCAIS — a CI continua trancada pela facturação do GitHub):**
-`provas/stock.test.ts` **0** (**23 casos**, com o grupo 6 do alcance) ·
-`provar-stock.sh` **0** (**10 controlos**, dois deles a apagar a CHAMADA e não o
-comportamento) ·
-`validar-quantidades.sh` **0** (5 campos, 2 controlos) ·
-`provar-stock-no-navegador.sh` **0** (**26 casos, 8 controlos**) ·
-`pnpm verificar` **0** · `pnpm inspeccionar` **0** (**632 casos**) ·
-`varrer-alcance-da-etapa.sh 665b027 HEAD` → **0 sem chamador**. Acusou dois: o
-`consumirPelaLinha` desta etapa (ligado ao KDS) e o `esquecerPrisma` do E01, que
-tinha zero referências em todo o repositório e foi **apagado** — o E24 já o
-reportara e assinara por cima, e uma guarda que acusa sempre a mesma coisa
-conhecida é uma guarda que as pessoas aprendem a saltar.
+`provas/compras.test.ts` **0** (**22 casos**, repetível) ·
+`provar-compras.sh` **0** (**9 controlos**) ·
+`provar-compras-no-navegador.sh` **0** (**26 casos, 8 controlos**) ·
+`validar-quantidades.sh` **0** · `validar-dinheiro.sh` **0** ·
+`pnpm verificar` **0** · `pnpm inspeccionar` **0** (**655 casos**) ·
+`varrer-alcance-da-etapa.sh` → **a correr depois do commit**.
 
-**Contrato:** `docs/architecture/stock-e-fichas.md`, escrito antes do código.
-**Detalhe:** `docs/progress/E25.md`.
+**Contrato:** `docs/architecture/compras-e-fornecedores.md`, escrito antes do código.
+**Detalhe:** `docs/progress/E26.md`.
 
 ## O texto anterior, mantido por baixo — HISTÓRICO, não estado
 

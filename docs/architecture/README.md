@@ -70,4 +70,5 @@ uma destas, o documento é que está errado.
 - [`qr-da-mesa-e-o-visitante.md`](./qr-da-mesa-e-o-visitante.md) — O QR da mesa é um token ao portador, colado num sítio público
 - [`quantidades-e-unidades.md`](./quantidades-e-unidades.md) — Quantidades e unidades
 - [`stock-e-fichas.md`](./stock-e-fichas.md) — Stock e fichas técnicas
+- [`compras-e-fornecedores.md`](./compras-e-fornecedores.md) — Compras e fornecedores: encomendado, recebido e facturado são três números; só a recepção mexe no stock; a unidade de compra não é a de uso
 - [`tarefas-de-producao-e-estacoes.md`](./tarefas-de-producao-e-estacoes.md) — Uma linha de pedido não é uma tarefa de estação

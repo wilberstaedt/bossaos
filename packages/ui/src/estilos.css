@@ -889,6 +889,24 @@ label.bo-planos__item input[type="radio"] {
   display: inline-flex; align-items: center; min-height: var(--bo-toque-publico);
 }
 
+/*
+ * A linha de lista com VÁRIAS COLUNAS de números.
+ *
+ * O JSX remove o espaço entre elementos irmãos escritos em linhas separadas —
+ * por isso seis `<span>` seguidos ficam um bloco contínuo, sem sítio onde
+ * quebrar, e a 360 px empurram a página inteira para o lado. Medido a 05/09 na
+ * PUR-003, onde encomendado, recebido, facturado e as duas diferenças somam
+ * mais do que a largura de um telemóvel.
+ *
+ * A quebra é dada pela caixa, e não por espaços no texto: um `{' '}` entre
+ * spans resolvia o sintoma e voltava a partir-se na primeira coluna nova.
+ */
+.bo-lista--colunas li {
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  gap: var(--bo-espaco-xs) var(--bo-espaco-sm);
+}
+.bo-lista--colunas li > * { min-width: 0; }
+
 /* ── Carta pública (E09) ──────────────────────────────────────────────────────
    A primeira superfície que um estranho vê, e a única que se lê a uma mão, com
    uma só barra de rede, em pé, com o telemóvel a 30 cm da mesa. Por isso:

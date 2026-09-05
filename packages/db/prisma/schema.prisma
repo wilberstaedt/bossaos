@@ -181,6 +181,14 @@ model Organization {
   tarefas         OutboxTask[]
   consultas       MenuView[]
   enderecos       PublicSlugOwner[]
+  fornecedores      Supplier[]
+  artigosDeCompra   SupplierItem[]
+  encomendas        PurchaseOrder[]
+  linhasDeEncomenda PurchaseOrderLine[]
+  recepcoes         Receipt[]
+  linhasDeRecepcao  ReceiptLine[]
+  facturasDeCompra  SupplierInvoice[]
+  linhasDeFactura   SupplierInvoiceLine[]
 }
 
 /// Marca: catálogo e identidade comercial. Pertence a uma organização.
@@ -321,6 +329,8 @@ model Location {
   @@index([organizationId])
   @@index([organizationId, brandId])
   @@map("locations")
+  fornecedores Supplier[]
+  encomendas   PurchaseOrder[]
 }
 
 /// Identidade GLOBAL. Excepção documentada (CT-04): não leva `organization_id`,
@@ -4187,6 +4197,7 @@ model StockItem {
   location     Location        @relation(fields: [locationId], references: [id], onDelete: Cascade)
   movimentos   StockMovement[]
   emFichas     RecipeLine[]
+  deFornecedores SupplierItem[]
 
   @@unique([locationId, nome], name: "um_insumo_por_nome_e_unidade")
   @@map("stock_items")
@@ -4204,12 +4215,20 @@ model StockMovement {
   motivo         String
   actor          String? @db.Uuid
   orderLineId    String? @map("order_line_id") @db.Uuid
+  /// ── A linha de RECEPÇÃO que trouxe esta entrada ────────────────────────
+  ///
+  /// Repare-se no que NÃO existe aqui: não há `purchase_order_line_id` nem
+  /// `supplier_invoice_line_id`. Uma encomenda é uma intenção e uma factura é
+  /// papel; só a recepção mexe no stock, e a garantia é **pela ausência** —
+  /// uma coluna que não existe não pode apontar para o sítio errado.
+  receiptLineId  String? @map("receipt_line_id") @db.Uuid
   criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   item         StockItem    @relation(fields: [itemId], references: [id], onDelete: Cascade)
   quemFez      User?        @relation(fields: [actor], references: [id], onDelete: SetNull)
   linhaDoPedido OrderLine?  @relation(fields: [orderLineId], references: [id], onDelete: SetNull)
+  linhaDaRecepcao ReceiptLine? @relation(fields: [receiptLineId], references: [id], onDelete: SetNull)
 
   @@map("stock_movements")
 }
@@ -4252,4 +4271,185 @@ model RecipeLine {
   subFicha     Recipe?      @relation("subReceita", fields: [subRecipeId], references: [id], onDelete: Restrict)
 
   @@map("recipe_lines")
+}
+
+// ── E26 · Compras e fornecedores ───────────────────────────────────────────
+//
+// Contrato: `docs/architecture/compras-e-fornecedores.md`.
+//
+// Encomendado, recebido e facturado vivem em três sítios porque são três factos
+// ditos por gente diferente em momentos diferentes. As diferenças **derivam-se**
+// da comparação — não há coluna `divergencia`, pela mesma razão que não há
+// coluna de saldo de stock nem de estado da conta.
+
+model Supplier {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  nome           String
+  contacto       String?
+  nif            String?
+  arquivadoEm    DateTime? @map("arquivado_em") @db.Timestamptz(6)
+  criadoEm       DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location        @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  artigos      SupplierItem[]
+  encomendas   PurchaseOrder[]
+  facturas     SupplierInvoice[]
+
+  @@unique([locationId, nome], name: "um_fornecedor_por_nome")
+  @@map("suppliers")
+}
+
+/// O artigo **deste** fornecedor: a embalagem que ele vende e o que ela dá.
+///
+/// A ligação é por fornecedor E por insumo, porque o mesmo insumo comprado a
+/// dois fornecedores tem duas embalagens e dois preços.
+model SupplierItem {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  supplierId     String @map("supplier_id") @db.Uuid
+  itemId         String @map("item_id") @db.Uuid
+  /// O nome do que se compra: «saco 25 kg», «caixa 12».
+  unidadeDeCompra String @map("unidade_de_compra")
+  /// ── Quantos milésimos da unidade de USO dá UMA unidade de compra ───────
+  ///
+  /// Um saco de 25 kg é `25_000_000`, na escala do E25 (1 kg = 1 000 000).
+  ///
+  /// `NOT NULL` com `CHECK > 0`, e não uma validação que alguém tem de se
+  /// lembrar de escrever: **sem factor, recusa-se**. Um saco lido como uma
+  /// unidade dá stock de 1 onde há 25 000 g, e o inventário só o revela ao fim
+  /// do mês — sem causa aparente.
+  factorMili     BigInt @map("factor_mili")
+  /// O preço de tabela, em unidade menor. É referência, não verdade: a verdade
+  /// do custo é o que vem na recepção.
+  precoMenor     BigInt? @map("preco_menor")
+  moeda          String  @default("EUR")
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  fornecedor   Supplier     @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  insumo       StockItem    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  linhas       PurchaseOrderLine[]
+
+  @@unique([supplierId, itemId], name: "um_artigo_por_fornecedor_e_insumo")
+  @@map("supplier_items")
+  linhasDeFactura SupplierInvoiceLine[]
+}
+
+/// A ENCOMENDA — uma intenção. Não move stock nenhum.
+model PurchaseOrder {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  supplierId     String @map("supplier_id") @db.Uuid
+  numero         String
+  /// `ABERTA` ou `FECHADA`. **Não** há `RECEBIDA`: obrigaria a escolher entre
+  /// «recebida» e «recebida a menos», e a escolha apagava a diferença que a
+  /// casa precisa de ver. O que se recebeu deriva-se das recepções.
+  estado         String   @default("ABERTA")
+  criadaEm       DateTime @default(now()) @map("criada_em") @db.Timestamptz(6)
+  criadaPor      String?  @map("criada_por")
+
+  organization Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location            @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  fornecedor   Supplier            @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  linhas       PurchaseOrderLine[]
+  recepcoes    Receipt[]
+  facturas     SupplierInvoice[]
+
+  @@unique([locationId, numero], name: "um_numero_por_unidade")
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderLine {
+  id              String @id @default(uuid()) @db.Uuid
+  organizationId  String @map("organization_id") @db.Uuid
+  purchaseOrderId String @map("purchase_order_id") @db.Uuid
+  supplierItemId  String @map("supplier_item_id") @db.Uuid
+  /// Milésimos de **unidades de compra**. 10 sacos são `10_000_000`.
+  encomendadoMili BigInt @map("encomendado_mili")
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  encomenda    PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  artigo       SupplierItem  @relation(fields: [supplierItemId], references: [id], onDelete: Restrict)
+  recebidas    ReceiptLine[]
+
+  @@unique([purchaseOrderId, supplierItemId], name: "um_artigo_por_encomenda")
+  @@map("purchase_order_lines")
+}
+
+/// A RECEPÇÃO — um facto. É a única coisa que mexe no stock.
+///
+/// Várias por encomenda, porque a entrega parcial é o normal e não a excepção.
+model Receipt {
+  id              String @id @default(uuid()) @db.Uuid
+  organizationId  String @map("organization_id") @db.Uuid
+  purchaseOrderId String @map("purchase_order_id") @db.Uuid
+  recebidaEm      DateTime @default(now()) @map("recebida_em") @db.Timestamptz(6)
+  recebidaPor     String?  @map("recebida_por")
+  nota            String?
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  encomenda    PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  linhas       ReceiptLine[]
+
+  @@map("receipts")
+}
+
+model ReceiptLine {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  receiptId      String @map("receipt_id") @db.Uuid
+  purchaseOrderLineId String @map("purchase_order_line_id") @db.Uuid
+  /// Milésimos de **unidades de compra** — o que se contou à porta.
+  recebidoMili   BigInt @map("recebido_mili")
+  /// O custo da LINHA INTEIRA, em unidade menor. Não o unitário: um unitário
+  /// por milésimo arredondava para zero em qualquer artigo barato, e o erro
+  /// acumulava-se em silêncio a cada entrada.
+  custoTotalMenor BigInt @map("custo_total_menor")
+  moeda          String  @default("EUR")
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  recepcao     Receipt           @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  linha        PurchaseOrderLine @relation(fields: [purchaseOrderLineId], references: [id], onDelete: Cascade)
+  movimentos   StockMovement[]
+
+  @@map("receipt_lines")
+}
+
+/// A FACTURA — a versão do fornecedor. É papel: não move stock.
+model SupplierInvoice {
+  id              String @id @default(uuid()) @db.Uuid
+  organizationId  String @map("organization_id") @db.Uuid
+  supplierId      String @map("supplier_id") @db.Uuid
+  purchaseOrderId String? @map("purchase_order_id") @db.Uuid
+  numero          String
+  emitidaEm       DateTime @default(now()) @map("emitida_em") @db.Timestamptz(6)
+
+  organization Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  fornecedor   Supplier             @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  encomenda    PurchaseOrder?       @relation(fields: [purchaseOrderId], references: [id], onDelete: SetNull)
+  linhas       SupplierInvoiceLine[]
+
+  @@unique([supplierId, numero], name: "um_numero_por_fornecedor")
+  @@map("supplier_invoices")
+}
+
+model SupplierInvoiceLine {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  invoiceId      String @map("invoice_id") @db.Uuid
+  supplierItemId String @map("supplier_item_id") @db.Uuid
+  /// Milésimos de **unidades de compra** — o que o fornecedor DIZ que entregou.
+  facturadoMili  BigInt @map("facturado_mili")
+  totalMenor     BigInt @map("total_menor")
+  moeda          String @default("EUR")
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  factura      SupplierInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  artigo       SupplierItem    @relation(fields: [supplierItemId], references: [id], onDelete: Restrict)
+
+  @@map("supplier_invoice_lines")
 }

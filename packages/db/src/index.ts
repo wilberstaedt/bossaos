@@ -314,3 +314,10 @@ export {
   folhasDaFicha, insumosDaUnidade, juntarLinhaDaFicha, movimentarStock,
   movimentosDoInsumo, RecusaDoStock, MILI, type RecusaDeStock,
 } from './stock.ts';
+export {
+  artigosDoFornecedor, conferirEncomenda, converterParaUso, criarEncomenda,
+  criarFornecedor, custoDoInsumo, encomendasDaUnidade, fornecedoresDaUnidade,
+  juntarLinhaDaEncomenda, ligarArtigo, receber, registarFactura,
+  RecusaDaCompra, UMA_UNIDADE,
+  type CustoDoInsumo, type LinhaConferida, type RecusaDeCompra,
+} from './compras.ts';

@@ -80,6 +80,16 @@ export interface Alvos {
    */
   insumoDoStock: string;
   fichaDoStock: string;
+  /**
+   * E26: o fornecedor e a encomenda que NÃO bate.
+   *
+   * A encomenda tem duas linhas de propósito — uma com 10 pedidos e 8
+   * recebidos, outra onde tudo bate. Sem a segunda, «marca sempre divergência»
+   * passava a prova das três colunas; sem a primeira, a diferença não teria
+   * onde aparecer.
+   */
+  fornecedorDeCompras: string;
+  encomendaDeCompras: string;
 }
 
 const PREFIXO = 'insp-';
@@ -245,6 +255,12 @@ export async function resolverAlvos(): Promise<Alvos> {
       fichaDoStock: await um(
         sql, `SELECT id FROM recipes WHERE nome = '${PREFIXO}Pasta al pomodoro'`,
         'a ficha insp-Pasta al pomodoro, a que tem sub-receita'),
+      fornecedorDeCompras: await um(
+        sql, `SELECT id FROM suppliers WHERE nome = '${PREFIXO}Distribuidor'`,
+        'o fornecedor insp-Distribuidor'),
+      encomendaDeCompras: await um(
+        sql, `SELECT id FROM purchase_orders WHERE numero = '${PREFIXO}C-100'`,
+        'a encomenda insp-C-100, a que tem uma linha a menos e outra certa'),
     };
   } finally {
     await sql.end();
