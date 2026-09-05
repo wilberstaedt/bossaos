@@ -601,3 +601,52 @@ E o efeito colateral que interessa: **a história ficou a mentir sobre quem fez 
 quê.** Nenhuma linha de código mudou, mas uma decisão de arquitectura dele — mover
 a porta do visitante para dentro da pasta pública — aparece assinada por um
 commit meu sobre pedidos futuros.
+
+## O vermelho que quase virou incidente de segurança — 05/09
+
+A primeira corrida do `provar-publico.sh` contra o E18 corrigido deu isto:
+
+```
+not ok 1 - NEM SKU NEM CUSTO saem — medido no JSON, não no ecrã
+```
+
+Numa fase chamada **«1. Com tudo ligado»**, com os três controlos negativos
+daquela corrida a acender. Ou seja: a prova estava calibrada, disse-o com todas
+as letras, e acusou fuga de custo numa resposta pública. Se eu a tivesse lido
+como verdade, tinha escrito ao Matheus que o produto expõe preço de custo a
+quem lê um QR, e o JR passava a noite a caçar um defeito que não existe.
+
+**Não existia.** Duas medições independentes desmentiram-na:
+
+1. o teste corrido directamente — `node --test provas/publico.test.ts` — deu
+   `ok 1` na **mesma** asserção;
+2. a segunda corrida do mesmo script, sem eu tocar em nada, deu `0 falhas`.
+
+A diferença: o script **semeia de fresco** antes de correr, e a minha corrida
+directa usou o estado que ele próprio deixou. Dois estados, um deles produz o
+vermelho. É ordenação de estado entre corridas, não produto.
+
+### A regra que fica
+
+**Um vermelho que aparece uma vez não é um achado, é uma observação.** Antes de
+lhe chamar defeito — e sobretudo antes de lhe chamar defeito de segurança —
+repetir a medição. Repetir custa minutos; um incidente falso custa a noite de
+outra pessoa e a credibilidade de todos os vermelhos seguintes.
+
+E a parte que não é sobre este vermelho: **os controlos negativos a acender
+provam que a prova sabe ficar vermelha, não que este vermelho é verdadeiro.**
+Eu tratei-os como se fossem a segunda coisa. São a primeira. Uma prova
+calibrada continua a poder falhar por estado sujo, por memória, por árvore
+suja — hoje já me deu onze falsos vermelhos numa árvore suja e três por pressão
+de memória, e agora este.
+
+### Onde isto encaixa no resto
+
+É a terceira forma da mesma família que apanhei em dois dias:
+
+- o instrumento que mede **a forma da escrita** em vez da propriedade;
+- o detector **calibrado pelo critério** que verifica, e por isso confirma o
+  critério e não o facto;
+- e agora o vermelho **verdadeiro sobre um estado que não é o do produto**.
+
+Nas três, a saída é a mesma pergunta: *o que MAIS produziria este resultado?*
