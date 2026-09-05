@@ -57,3 +57,54 @@ concluir*.
 **A verificação de alcance é exaustiva por etapa, não amostrada.** Escolher a
 olho reproduz o viés que a varredura existe para eliminar — eu olho para as
 funções de que me lembro, e as esquecidas são justamente as que ninguém chama.
+
+---
+
+# Segunda passagem: as categorias, tiradas da leitura e não inventadas antes
+
+Comecei a ler as 30 e as três categorias que eu tinha previsto eram **três de
+quatro**. A que faltava só apareceu ao ler.
+
+## 1. Instrumento de verificação — NÃO é defeito (5 classificadas)
+
+`descodificar`, `sindromes`, `penalidadePorMascara`, `modulosDeDadosDaVersao`
+(`qr.ts`) e `sobrepoe` (`domain/reservas.ts`).
+
+Existem para **verificar** o produto, não para o servir. O cabeçalho do `qr.ts`
+explica porquê: não há biblioteca de QR nas dependências, e acrescentar uma «é
+uma decisão que não é minha». Sem descodificador de referência, a prova lê a
+matriz de volta com o `descodificar` e confirma que o QR é **real** — «não um
+desenho que parece um QR». O `sobrepoe` é a mesma ideia: a referência de
+matemática pura contra a qual se mede o que o produto resolve em SQL.
+
+**Nada a consertar.** Fica uma pergunta menor para o E34: código que só serve
+para verificar mora no pacote `domain`, que é publicado. Não é defeito; é peso.
+
+## 2. Duplicado superado — APAGAR, não ligar (1 classificada)
+
+`listarReservas` (`db/reservas.ts`). A capacidade existe: a tela de reservas usa
+`agendaDoDia`, `atrasadas` e `carregarReservas`, todas alcançáveis. **Ligar o
+`listarReservas` seria errado** — passaria a haver dois caminhos para a mesma
+coisa, e o segundo sem provas de tela. Sai.
+
+**Esta categoria não estava na minha lista de três.** Só apareceu ao ler, e é a
+razão de a leitura não se poder automatizar: a varredura diz *onde olhar*; o que
+distingue «ligar» de «apagar» é saber se a capacidade já existe por outro
+caminho.
+
+## 3. Higiene por ligar (1 classificada)
+
+`varrerRetencoesExpiradas`. Não retém capacidade — o E18 prova que ela se
+liberta pelo relógio — mas a lista cresce para sempre.
+
+## 4. Capacidade prometida que não existe — DEFEITO (1 classificada)
+
+`receberPedidoExterno`. Não há porta por onde um pedido externo chegue. É a
+classe do `enfileirar` do E19, e a prova jura que «com provedor e mapa, o pedido
+externo ENTRA» chamando a função directamente.
+
+## Estado: 8 de 30 classificadas
+
+**22 por ler.** Não as adivinho, e não as conto como limpas nem como sujas. A
+proporção que já se vê — 5 instrumentos, 1 duplicado, 1 higiene, 1 defeito — diz
+que apresentar as 30 como defeitos teria sido errado em pelo menos sete casos.
