@@ -221,3 +221,53 @@ O conserto foi obrigar a um **veredicto explícito** na saída (`PASSA`, `FALHA`
 ou `CEGO`) e tratar a ausência dele como **NÃO MEDI**, com o código 3 e uma
 mensagem que diz que não é prova de defeito nem de ausência dele. Há três
 respostas, não duas, e a terceira é a mais frequente.
+
+---
+
+# A consequência que fecha o círculo: o aviso da sala chega tarde de mais
+
+Fui rever a fatia 3 e o `FLOOR-006` está bem feito — ele até citou o raciocínio
+que eu tinha posto na régua, e a condição é a certa:
+
+```tsx
+{!mesa.sessao && aChegar.get(mesa.id) ? … }   // mesa livre COM reserva a chegar
+```
+
+`host.ts:94` calcula a janela assim:
+
+```ts
+const agora = await agoraDaBase(db);                        // instante VERDADEIRO
+const ate   = new Date(agora.getTime() + dentroDeMinutos * 60_000);   // 120 min
+…  reserva: { …, inicio: { gte: agora, lt: ate } }
+```
+
+**A aritmética, em Castellão no Verão (+2h), para uma reserva das 20:00:**
+
+| Hora real na casa | `agora` (UTC) | Janela | `inicio` gravado | Aparece na sala? |
+| --- | --- | --- | --- | --- |
+| 19:00 | 17:00Z | 17:00–19:00Z | 20:00Z | **não** |
+| 19:59 | 17:59Z | 17:59–19:59Z | 20:00Z | **não** |
+| 20:00 (chegam) | 18:00Z | 18:00–20:00Z | 20:00Z | entra agora |
+| 21:30 | 19:30Z | 19:30–21:30Z | 20:00Z | ainda diz «a chegar» |
+
+O aviso **aparece no instante em que os clientes chegam** — quando já não serve
+para nada — e continua a dizer «a chegar» durante as duas horas seguintes, com a
+mesa já ocupada por eles ou já perdida.
+
+## Porque é que isto importa mais do que o resto
+
+Eu acrescentei o `FLOOR-006` à régua com esta frase:
+
+> uma reserva confirmada para as 20h tem de aparecer na sala **antes** das 20h,
+> senão o host vê a mesa livre e senta lá um walk-in
+
+**É exactamente o que acontece hoje.** O mecanismo que pus na régua para impedir
+o defeito é anulado pelo defeito do fuso: às 19:00 a mesa aparece livre e sem
+aviso nenhum, que é o momento em que o host a dá a outra pessoa.
+
+Nem o código do host está errado, nem a régua estava errada. **A representação
+por baixo é que está**, e por isso a fatia parece correcta em revisão de código e
+falha em serviço. É a mesma família do resto da noite: a coisa que se lê certa e
+mede errado.
+
+Isto sobe a prioridade do conserto acima de qualquer tela nova.
