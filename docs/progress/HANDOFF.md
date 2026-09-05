@@ -12,6 +12,15 @@ mesma `registo_imutavel()` que o E22 pôs na caixa. A correcção é um **regist
 novo**, com autor e motivo obrigatório por `CHECK`. E há um segundo gatilho que
 protege o **sentido**: uma «correcção» não pode trocar a pessoa nem o tipo —
 
+**⚠ Sexto item do JR, e o de pior consequência de todos:**
+O produto capta leads no site público (`guardarLeadPublico`, 3 chamadores) e
+**ninguém os consegue ler**: `leadsDaUnidade` tem zero chamadores e não há tela
+nenhuma no atlas, em etapa nenhuma, que os liste. Não cria cliente no CRM, não
+notifica, não manda email. E a `MKT-011` diz ao visitante «Tu solicitud está
+enviada». O restaurante quebra uma promessa ao cliente dele sem saber.
+Detalhe em `docs/reviews/E34-ALCANCE-TOTAL.md`.
+
+
 **Nota para a revisão do E29 (erro meu, não dele):** o esquema financeiro
 entrou em `c5f09e0`, um commit meu com assunto `E30:`, por eu ter feito
 `git add -A` sobre a árvore dele. O intervalo da varredura do E29 tem de

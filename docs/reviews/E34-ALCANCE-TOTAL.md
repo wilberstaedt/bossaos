@@ -162,3 +162,45 @@ packages/db/src/index.ts:132    guardarExcepcao, apagarExcepcao,
 Só à terceira, a seguir o **bloco** e não a linha, apareceram os dois. **As três
 falhas foram do instrumento, e são exactamente o assunto da guarda:** uma coisa
 parece ligada porque aparece escrita algures.
+
+---
+
+## O terceiro caso, e é de forma nova: escrever sem ler
+
+`leads.ts` tem quatro exportações. Duas estão ligadas e duas não:
+
+| Função | Chamadores | O que faz |
+| --- | --- | --- |
+| `guardarLeadPublico` | **3** | o site público escreve o contacto |
+| `registarPedidoDeDemo` | **2** | idem, para pedidos de demonstração |
+| `leadsDaUnidade` | **0** | **listaria** os contactos de uma unidade |
+| `guardarLead` | 0 | escrita interna |
+
+**O produto capta contactos e ninguém os consegue ler.** Verifiquei o corpo do
+`guardarLeadPublico` linha a linha antes de o dizer: valida, calcula chave de
+idempotência, e faz `INSERT INTO leads`. **Não cria cliente no CRM, não enfileira
+notificação, não manda email.** E não existe tela nenhuma no atlas — em etapa
+nenhuma, nem futura — que leia leads. Procurei por `lead`, `contacto` e
+`solicitud` nas 396: só aparecem `MKT-011`, as `PUB-*` e duas do CRM, todas
+validadas e todas do lado de quem escreve.
+
+**O que torna este pior do que os outros dois:** o `MKT-011` chama-se **«Tu
+solicitud está enviada»**. É uma tela validada que promete a um visitante que o
+pedido chegou. Chegou a uma tabela que ninguém abre.
+
+Os outros dois defeitos prejudicam o restaurante. **Este faz o restaurante
+quebrar uma promessa ao cliente dele sem saber que a quebrou** — e o cliente que
+não recebe resposta não reclama, muda de sítio.
+
+### Três formas, e a terceira não era procurável pelas duas primeiras
+
+| Forma | Exemplo | Como se vê |
+| --- | --- | --- |
+| criar sem desfazer | `revogarConvite`, `apagarExcepcao` | par de verbos, um ligado outro não |
+| **escrever sem ler** | `leadsDaUnidade` | um modelo com escrita e sem leitura |
+| regra num sítio, uso noutro | `avisoDeSeguranca` | a guarda vigia o lado que não corre |
+
+A `validar-desfazer.sh` apanha a primeira e **não apanharia esta**: `guardar` e
+`listar` não são verbos opostos. Fica escrito, porque é a lição: **cada guarda
+que escrevo apanha a forma do defeito que já vi.** A varredura de alcance é o
+que continua a apanhar os que ainda não têm nome.
