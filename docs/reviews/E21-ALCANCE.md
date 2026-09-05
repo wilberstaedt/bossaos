@@ -175,3 +175,40 @@ classifiquei. A diferença importa: `avisoDeSeguranca` num módulo de alergénio
 pode ser exactamente o tipo de coisa que não pode faltar.
 
 **Estado: 24 de 30 medidas, 16 classificadas, 8 por ler.**
+
+## Os alergénios: a capacidade está intacta, mas a regra vive em dois sítios
+
+Fui ler `avisoDeSeguranca` e `estadoDoAlergenio` (E07) a contar encontrar o pior
+— alergénios são segurança alimentar, com peso legal. **Não é o pior. É bom.**
+
+A cadeia segura de ponta a ponta, sem passar por elas:
+
+1. `publicacao.ts:137` — `alergenos: ficha.map((l) => ({ codigo, estado }))`.
+   O **estado viaja**, `DESCONHECIDO` incluído. E a linha 136 conta os
+   `alergenosPorDeclarar` explicitamente.
+2. A tela pública mostra os **quatro** estados com tratamento distinto —
+   `CONTEM` perigo, `PODE_CONTER` aviso, `NAO_CONTEM` sucesso, resto neutro —
+   e com um comentário sobre usar texto e não só cor, «para quem não distingue
+   vermelho de verde».
+
+**O «desconhecido» não desaparece nem vira «não contém».** É exactamente o que
+`avisoDeSeguranca` existe para garantir, implementado noutro sítio.
+
+### O risco que fica, e não é defeito
+
+**A mesma regra de segurança está escrita em dois lugares:** no módulo de
+domínio (com o raciocínio explicado — *«a inferência não é proibida aqui: é
+impossível»*, porque a assinatura não aceita o nome nem a descrição) e em linha,
+na publicação e na tela. A versão do domínio **não tem chamador nem provas**.
+
+Duas implementações de uma regra de segurança divergem — e a que vai divergir é
+a que ninguém corre. Pior: quem ler o módulo de domínio primeiro pensa que é ali
+que a regra vive, muda-a lá, e não muda nada.
+
+**Ou se apaga o módulo, ou se liga.** Deixar os dois é a forma como uma regra de
+segurança se perde sem ninguém dar por isso. **Não decido eu qual** — a
+inferência de alergénios é decisão de produto e tem consequências legais.
+
+**Estado: 24 de 30 medidas, 18 classificadas, 6 por ler**
+(`precosPorCanal`, `unidadesAfectadasPelaBase`, `identificadorAdivinhavel`,
+`linhasParaGravar`, `leadsDaUnidade`, `serveConteudo`).
