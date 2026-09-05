@@ -52,6 +52,39 @@ o servidor recusa com uma mensagem que serve à pessoa. Uma prova que só teste 
 caminho onde o ecrã está actualizado não mede isto — e é este o caso que acontece
 num sábado às 21h.
 
+## 5. A hora da casa — ACRESCENTADO A 05/09, depois de ver as fatias 2 e 3
+
+**Digo já que esta secção não foi escrita antes do código, ao contrário das
+outras quatro.** Nasceu de um achado durante a construção, e escondê-lo entre as
+outras faria a régua parecer mais previdente do que foi. Fica com a data.
+
+O aceite é: **a hora que o cliente escolhe é hora da casa, e só vira instante
+passando pelo fuso da unidade.**
+
+Não é pedido novo de arquitectura — a máquina existe e está provada desde o E18:
+`resolverHoraLocal(db, fuso, local)`, apoiada em `instante_local()` na base.
+Tem **zero chamadas**. O aceite é chamá-la.
+
+E o `estado` que ela devolve não se deita fora: `INEXISTENTE` e `AMBIGUA` são os
+dois casos em que a casa entendeu **outra hora** do que a pessoa escreveu, e a
+pessoa tem de o saber. Resolver 02h30 para 03h30 em silêncio é resolver — e é
+mentir por omissão na única noite do ano em que isso acontece.
+
+**Reprovo à cabeça:**
+
+- **Um instante nascido de `new Date(...Z)` ou de `Date.UTC(...)`** em qualquer
+  caminho onde a hora veio de uma pessoa.
+- **Uma prova que compare uma unidade só.** O par que exige: a mesma «20:00» em
+  duas unidades com fusos diferentes tem de produzir **instantes diferentes**.
+  Se produzir o mesmo, o fuso não entrou — por muito que a função apareça a meio
+  do caminho.
+- **O aviso da sala medido só «existe/não existe».** Tem de ser medido **na
+  janela certa**: às 19:00 locais, uma reserva das 20:00 aparece; às 21:30,
+  já não diz «a chegar».
+
+Análise, medição ao vivo e detector: `docs/reviews/E19-ACHADO-FUSO.md` e
+`scripts/demonstrar-defeito-do-fuso.sh`.
+
 ## O que reprovo à cabeça
 
 - **Verde sobre agenda vazia**, e com 28 telas isso é fácil de esconder.
