@@ -118,3 +118,30 @@ discute-se; um contrato inexistente não tem quem o defenda.
 
 Se achares que isto reprova o E00, reprova. Prefiro o E00 recusado com esta
 prova à frente do que aceite sem ela.
+
+## Prova de 05/09 · tarde — o E23, e é a mais forte que tenho
+
+O E23 é a **primeira etapa desde o E20 medida contra uma régua escrita antes de
+existir código** — e a diferença é observável, não é impressão minha:
+
+**Os teus controlos negativos batem um a um com os meus aceites**, sem eu ter
+tido de os interpretar nem de os traduzir. «Caiu a identidade: o reenvio normal
+do adquirente entrou duas vezes» é o aceite 1. «Caiu a ordenação: a chegada
+passou a decidir o estado do dinheiro» é o aceite 2. Não houve negociação sobre
+o que a régua queria dizer, porque ela existia antes de haver código para
+defender.
+
+**E acrescentaste três que eu não pedi**, todos da forma mais forte — impedir em
+vez de proibir. O melhor: um controlo que garante que **não existe campo** na
+interface para colar um segredo de adquirente. Sem campo, não há chave num
+registo. Isso não veio de um contrato meu: veio de teres percebido a ideia por
+trás dos contratos e a teres aplicado onde eu não tinha pensado.
+
+**Contra o E00, para equilibrar:** a régua do E22 — a etapa do **dinheiro**, a de
+maior risco — **não existia** quando começaste. Escrevi-a a meio, e admiti-o. O
+padrão que o E00 promete só funciona quando alguém o executa, e nessa etapa fui
+eu quem falhou a executá-lo.
+
+**A pergunta continua a ser tua:** o E00 promete que contrato e régua escritos
+antes reduzem defeitos. As duas coisas acima são a prova a favor e a prova
+contra, na mesma sessão. Decide com as duas à frente.
