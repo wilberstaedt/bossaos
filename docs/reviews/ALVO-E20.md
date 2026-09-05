@@ -106,3 +106,28 @@ Fica por verificar na revisão, e não presumo: se o gatilho tem controlo negati
 (uma escrita de fora que TEM de ser substituída, medida), e se o `preparo` do
 pedido é mesmo o **maior** das linhas e não a soma — as linhas preparam-se em
 paralelo, e somá-las inventaria espera que não existe.
+
+### Duas arestas do `preparoDoPedido`, para perguntar na revisão
+
+Verifiquei o que tinha deixado em aberto: **é o `Math.max`, não a soma**, com a
+razão certa escrita por cima. Está bem, e bate com
+`tarefas-de-producao-e-estacoes.md`.
+
+Ao ler, duas coisas que **não são defeito** mas também não foram decididas em
+lado nenhum. Pergunto-as na revisão em vez de as assumir:
+
+1. **A quantidade não entra.** Cinco doses de batata contam como uma. Para uma
+   fritadeira isso é provavelmente certo — é uma fritada, não cinco. Para um
+   prato montado à mão, cinco podem ser mesmo cinco vezes. A escolha actual é
+   defensável; o que não existe é a escolha **escrita**.
+
+2. **Uma linha sem produto contribui zero.** `l.productId ? [l.productId] : []`
+   salta as linhas livres. Um «sem cebola, e faça-me isto à parte» escrito à mão
+   não tem preparo associado — e é justamente o pedido que costuma demorar mais.
+   Se o produto permite linhas livres com peso real na cozinha, o zero é uma
+   subestimativa silenciosa: o momento de produção nasce tarde e o pedido sai
+   atrasado sem ninguém perceber porquê.
+
+Nenhuma bloqueia a etapa à cabeça. As duas são do tipo que só se descobre em
+serviço, e nessa altura aparecem como «a cozinha está sempre atrasada às
+sextas» — um sintoma que ninguém liga a uma linha de código.
