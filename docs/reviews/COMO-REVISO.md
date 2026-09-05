@@ -650,3 +650,55 @@ de memória, e agora este.
 - e agora o vermelho **verdadeiro sobre um estado que não é o do produto**.
 
 Nas três, a saída é a mesma pergunta: *o que MAIS produziria este resultado?*
+
+## A noite em que o meu aparelho mediu a base do outro — 05/09
+
+O sintoma apareceu três vezes e eu tratei-o duas como estado sujo: **o script
+falha, o teste passa sozinho.** À terceira fui ver porquê, e estava na linha 14
+de **todos** os `provar-*.sh`:
+
+```bash
+if [[ -f .env ]]; then set -a; . ./.env; set +a; fi
+```
+
+O `.env` da árvore de revisão apontava para `bossaos_dev` — **a base do JR**. Os
+scripts carregam-no DEPOIS das minhas exportações e nada o repõe. Construí base
+separada, árvore separada, porta separada e guarda de CPU, e tudo isso foi
+anulado por uma linha dentro dos scripts que uso como autoridade.
+
+O `base-de-revisao.sh` até tem um comentário a avisar que, se a ordem se
+inverter, «as provas iam bater na base do JR — que é exactamente o que este
+ficheiro existe para impedir». O aviso estava certo e a defesa estava no sítio
+errado.
+
+**Isto explica quase todo o ruído da noite:** o falso alarme do SKU, a
+«regressão» na retenção, os vermelhos que mudavam de sítio. Não era estado sujo
+aleatório — era outro agente a escrever na base a meio da minha medição.
+
+### E depois estraguei quatro vezes a tentar consertar
+
+Vale mais escrever isto do que o conserto:
+
+1. **Reapliquei as revogações colando `FROM bossaos_app` em todas** — oito eram
+   do `bossaos_auth`. Deixei `allergens` sem SELECT e a suite morreu na
+   preparação.
+2. **Corrigi o papel e apanhei um `REVOKE … ON language c`.** «permission denied
+   for language c».
+3. **Pus o `DROP DATABASE` depois do `dev-db.sh`** — apaguei a base que ele
+   acabara de preparar; o Prisma recriou-a nua, sem papéis nem concessões por
+   omissão. 43 concessões onde a receita dá 67.
+4. **Acusei a base do JR de estar mal endurecida.** Não estava. 67 é o número de
+   uma construção limpa; as anomalias (92, 96, 43) eram todas minhas.
+
+A solução era a simples e estava à minha frente desde o início: **a base nasce
+vazia.** O `provar-migracoes-do-zero.sh` já demonstrava que as 39 migrações
+aplicam limpas contra uma base vazia. Eu tinha a prova na mão e continuei a
+remendar por texto.
+
+### As duas regras que ficam
+
+- **Um remendo que traz um defeito novo é um sinal, não um contratempo.** Ao
+  segundo, parar e procurar a solução que não precisa de remendo.
+- **Não acusar o ambiente de outro agente sem construir o meu do zero primeiro.**
+  Escrevi que ia avisar o JR de um problema que era meu. Duas vezes em dois dias
+  atribuí a outros um defeito do meu instrumento.
