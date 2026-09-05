@@ -33,11 +33,25 @@ export default async function LayoutDaOrganizacao({
   const { accoesPermitidas } = await import('@bossaos/domain');
   const permitidas = new Set(accoesPermitidas(sessao.concessoes));
 
+  // ── Uma porta por módulo ENTREGUE, e um marcador honesto no resto ───────
+  //
+  // «Um `#` num módulo entregue não é marcador: é uma porta que ninguém abriu.»
+  // Os módulos que já existem passam a ter ligação; os que ainda não existem
+  // levam `porConstruir` com a etapa que os vai fazer — sem `href`, visivelmente
+  // inertes, fora do alcance de `getByRole('link')`.
+  //
+  // Um restaurante que chega à caixa e não chega às reservas é um restaurante
+  // que não se usa.
   const navegacao = [
-    { href: '#', rotulo: m.navegacao.inicio, accao: null },
-    { href: '#', rotulo: m.navegacao.catalogo, accao: 'catalogo.ler' },
-    { href: '#', rotulo: m.navegacao.reservas, accao: 'reservas.ler' },
-    { href: '#', rotulo: m.navegacao.salaPedidos, accao: 'sala.ler' },
+    // Medido: NENHUMA das 396 telas do atlas é o painel de topo do inquilino.
+    // Fica marcado com o E30, que é quem faz a gestão multiunidade e revisita
+    // as ORG-002/004 — é a etapa mais próxima, e está declarado no E22.md que
+    // esta é a atribuição menos certa das quatro.
+    { href: '#', rotulo: m.navegacao.inicio, accao: null, porConstruir: 'E30' },
+    { href: `/${idioma}/app/${orgSlug}/catalogo`, rotulo: m.navegacao.catalogo, accao: 'catalogo.ler' },
+    { href: `/${idioma}/app/${orgSlug}/ir/reservas`, rotulo: m.navegacao.reservas, accao: 'reservas.ler' },
+    { href: `/${idioma}/app/${orgSlug}/ir/sala`, rotulo: m.navegacao.salaPedidos, accao: 'sala.ler' },
+    { href: `/${idioma}/app/${orgSlug}/ir/levar`, rotulo: m.navegacao.levar, accao: 'sala.ler' },
     // ── A porta do TPV ────────────────────────────────────────────────────
     //
     // «Um `#` num módulo entregue não é marcador: é uma porta que ninguém
@@ -50,13 +64,18 @@ export default async function LayoutDaOrganizacao({
     // As outras entradas continuam em `#` de propósito — são módulos de etapas
     // que ainda não existem, e é esse o `#` legítimo do contrato.
     { href: `/${idioma}/pos`, rotulo: m.navegacao.caixa, accao: 'caixa.ler' },
-    { href: '#', rotulo: m.navegacao.inventario, accao: 'stock.ler' },
-    { href: '#', rotulo: m.navegacao.clientes, accao: 'clientes.ler' },
+    { href: '#', rotulo: m.navegacao.inventario, accao: 'stock.ler', porConstruir: 'E25' },
+    { href: '#', rotulo: m.navegacao.clientes, accao: 'clientes.ler', porConstruir: 'E27' },
     { href: `/${idioma}/app/${orgSlug}/organization`, rotulo: m.navegacao.equipa, accao: 'equipa.ler' },
-    { href: '#', rotulo: m.navegacao.relatorios, accao: 'relatorios.ler' },
+    { href: `/${idioma}/app/${orgSlug}/ir/relatorios`, rotulo: m.navegacao.relatorios, accao: 'relatorios.ler' },
   ]
     .filter((l) => l.accao === null || permitidas.has(l.accao as never))
-    .map(({ href, rotulo }) => ({ href, rotulo }));
+    .map(({ href, rotulo, ...resto }) => ({
+      href, rotulo,
+      // Sem isto, o marcador perdia-se aqui e voltava a ser um `#` que
+      // parece clicável — o defeito exacto que o contrato nomeia.
+      ...('porConstruir' in resto ? { porConstruir: resto.porConstruir } : {}),
+    }));
 
   return (
     <EstruturaAdmin
@@ -71,10 +90,16 @@ export default async function LayoutDaOrganizacao({
       topoDireita={<Etiqueta tom="sucesso">{m.comum.enLinea}</Etiqueta>}
       rodapeLateral={<span>{m.comum.ayudaSoporte}</span>}
       utilizador={{ iniciais: sessao.actor.email.slice(0, 2).toUpperCase(), nome: sessao.actor.nome || sessao.actor.email }}
+      // ── No telemóvel, três itens mortos passam a três destinos reais ────
+      //
+      // `trabalho` e `mais` não são módulos por construir: não existem em etapa
+      // nenhuma do atlas. Um marcador exige a etapa que o vai substituir, e sem
+      // ela não é marcador — é um resto. Ficam os módulos entregues, que é o que
+      // uma barra inferior serve para alcançar.
       navegacaoInferior={[
-        { href: '#', rotulo: m.navegacao.inicio, activa: true },
-        { href: '#', rotulo: m.navegacao.trabalho },
-        { href: '#', rotulo: m.navegacao.mais },
+        { href: `/${idioma}/app/${orgSlug}/ir/sala`, rotulo: m.navegacao.salaPedidos, activa: true },
+        { href: `/${idioma}/pos`, rotulo: m.navegacao.caixa },
+        { href: `/${idioma}/app/${orgSlug}/ir/reservas`, rotulo: m.navegacao.reservas },
       ]}
     >
       {children}

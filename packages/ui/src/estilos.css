@@ -455,6 +455,15 @@ p { margin: 0; }
 }
 .bo-admin__ligacao:hover { background: rgba(255,255,255,0.08); }
 .bo-admin__ligacao[aria-current='page'] { background: var(--bo-realce); color: var(--bo-primaria); font-weight: 600; }
+
+/* ── O marcador de um módulo por construir ───────────────────────────────────
+ *
+ * NÃO parece clicável, de propósito: sem cursor de mão, sem realce ao passar, e
+ * esbatido. «Um item que parece uma ligação e não faz nada ensina a pessoa a
+ * desconfiar do menu inteiro.» A etapa que o vai construir aparece ao lado. */
+.bo-admin__ligacao--inerte { opacity: 0.55; cursor: default; }
+.bo-admin__ligacao--inerte:hover { background: none; }
+.bo-admin__etapa { margin-left: auto; font-size: 11px; opacity: 0.8; letter-spacing: 0.04em; }
 .bo-admin__rodape { display: flex; flex-direction: column; gap: var(--bo-espaco-md); font-size: 14px; }
 .bo-admin__principal { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .bo-admin__topo {

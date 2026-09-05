@@ -7,6 +7,21 @@ export interface LigacaoDeNavegacao {
   href: string;
   rotulo: string;
   activa?: boolean;
+  /**
+   * A etapa que vai construir este módulo — e a marca de que ele **ainda não
+   * existe**.
+   *
+   * ── Porque é que isto é um campo e não um `href: '#'` ────────────────────
+   *
+   * «Um item que parece uma ligação e não faz nada ensina a pessoa a desconfiar
+   * do menu inteiro, e a partir daí ela deixa de tentar os que funcionam.»
+   *
+   * Com este campo, o item deixa de ser uma ligação: não tem `href`, não
+   * responde a `getByRole('link')`, e diz ao lado quem o vai construir. Um `#`
+   * num módulo entregue continua a ser o que sempre foi — uma porta que ninguém
+   * abriu — e é isso que a prova de navegação apanha.
+   */
+  porConstruir?: string;
 }
 
 /**
@@ -91,7 +106,21 @@ export function EstruturaAdmin({
         </button>
 
         <nav className="bo-admin__navegacao" aria-label={migalha}>
-          {navegacao.map((l) => (
+          {navegacao.map((l) => (l.porConstruir ? (
+            // Não é uma ligação, e por isso não se comporta como uma: sem
+            // `href`, fora do alcance de `getByRole('link')`, e a dizer quem o
+            // vai construir. É a diferença entre um marcador honesto e uma porta
+            // que não abre.
+            <span
+              key={l.rotulo}
+              className="bo-admin__ligacao bo-admin__ligacao--inerte"
+              data-por-construir={l.porConstruir}
+            >
+              <MarcaDeNavegacao />
+              {l.rotulo}
+              <small className="bo-admin__etapa">{l.porConstruir}</small>
+            </span>
+          ) : (
             <a
               key={l.href}
               href={l.href}
@@ -101,7 +130,7 @@ export function EstruturaAdmin({
               <MarcaDeNavegacao />
               {l.rotulo}
             </a>
-          ))}
+          )))}
         </nav>
 
         {rodapeLateral || utilizador ? (

@@ -1,5 +1,52 @@
 # HANDOFF — estado do motor BossaOS
 
+**Etapa atual:** **AS PORTAS** — a condição que o E21 pôs para reabrir o marco do
+Restaurant. Não é uma etapa; é o que falta antes do E23.
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** Detalhe em
+`docs/progress/PORTAS.md`. Contrato: `docs/architecture/portas-e-navegacao.md`.
+
+**O E22 fechou com o TPV a ter porta e mais nada.** O menu ainda levava dez
+entradas em `href: '#'`, e entre elas **reservas** — as 34 telas assinadas — e a
+**sala inteira**. Um restaurante que chega à caixa e não chega às reservas não se
+usa.
+
+**Seis módulos entregues passaram a ter porta:** catálogo, reservas, sala e
+pedidos, takeaway e entrega, relatórios, e a caixa que já a tinha. A escolha saiu
+de **medir a matriz** por família de rota — e foi essa medição que mostrou que o
+`relatorios` estava marcado como por construir **e não estava**: as REP-001 a 008
+são do E14 e estão validadas desde então. Eu ia escrever «E29» ao lado de um
+módulo que já existe.
+
+**Uma regra, e não uma por módulo.** Quatro dos seis vivem dentro de uma unidade
+e o contrato exige um sítio onde a unidade se escolha — isso seriam quatro
+páginas quase iguais, que são quatro regras no dia em que uma mudar. Há uma só,
+`/app/<org>/ir/<modulo>`, e um módulo fora da tabela dá **ausência**.
+
+**O `#` legítimo passou a ser outra coisa.** Era um `<a href="#">`: com cursor de
+mão e apanhável por `getByRole('link')` — parecia uma porta. Agora é um campo
+próprio, `porConstruir`, sem `href`, esbatido e com a etapa ao lado. Ficam
+**inventário → E25** e **clientes → E27**.
+
+**Duas coisas ficam DECLARADAS por não darem para marcar honestamente:** nenhuma
+das 396 telas do atlas é o painel de topo do inquilino — o `início` ficou com o
+E30, que é a atribuição menos certa das quatro; e `trabalho`/`mais` na barra do
+telemóvel não existem em etapa nenhuma, por isso não são marcadores mas restos —
+a barra passou a levar três destinos reais.
+
+**A prova mede o CAMINHO e o plante estraga o MENU, nunca a tela** — é a única
+forma de não medir outra vez a existência da tela, que já está medida vinte
+etapas atrás. Dois consertos meus pelo caminho: a chegada media-se por
+`data-tela`, que **só existe em 61 ficheiros** e que a raiz da sala, do catálogo e
+dos relatórios nunca adoptou (exigi-lo era exigir que esses módulos mudassem para
+a prova passar), e o matcher esperava a frase da asserção de visibilidade quando
+quem dispara é a que compara o `href`.
+
+**Portões, códigos de saída lidos directamente:** `pnpm verificar` (**0**) ·
+`./scripts/provar-portas.sh` (**11 casos, 7 controlos negativos**, 0) ·
+`pnpm inspeccionar` (**568 casos, 0**).
+
+---
+
 **Etapa atual:** E22 — TPV, contas e caixa (**19 telas**).
 **Estado:** **RETIDO e CONSERTADO — reentregue, aguardando validação.** Declarado
 pelo JR; não assinado.
