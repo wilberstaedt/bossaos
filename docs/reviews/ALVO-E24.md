@@ -58,3 +58,29 @@ tenta e **falha na base**, não na aplicação.
 - **Verde sobre zero documentos.** Declara-se a população.
 - **Uma prova que só use o fornecedor a aceitar.** Sem rejeição simulada e sem
   reenvio, não está provado — está demonstrado.
+
+## Reportado por ele durante a construção — e é melhor do que eu pedi
+
+*(Registado do que ele me disse, não de leitura de árvore suja.)*
+
+**Eu pedi a pendência fiscal declarada no ADR. Ele pô-la nos ecrãs** — INT-006,
+POS-020, POS-021 e CAT-021 — com esta razão:
+
+> «Um limite escrito só num documento de progresso é um limite que o restaurante
+> nunca lê.»
+
+**Está certo, e a diferença não é de forma.** Um `docs/progress/` é lido por nós
+os dois e por mais ninguém. Quem vai emitir um talão está num ecrã, e é aí que
+tem de aparecer que os requisitos do regime não foram confirmados na fonte.
+
+É a mesma família do controlo do E23 que garante que o TPV **declara que não tem
+gateway**: um produto que anuncia os seus limites não deixa a pessoa descobri-los
+ao vivo. Aqui a aposta é maior, porque o limite é legal — e o pior sítio para
+descobrir que um talão pode não servir é em frente ao cliente que o pediu.
+
+**E uma segunda coisa que ele disse e vale a pena guardar:** o controlo da
+identidade dele caía pela razão errada, e **só o viu porque a mensagem esperada
+não batia**. Sem essa segunda pergunta no `exigir_vermelho` — *não basta ficar
+vermelho, tem de ficar vermelho pelo motivo certo* — teria contado como controlo
+bom. É a armadilha que me apanhou quatro vezes no E15, agora apanhada por um
+instrumento em vez de por sorte.
