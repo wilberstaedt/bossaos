@@ -145,3 +145,32 @@ eu quem falhou a executá-lo.
 **A pergunta continua a ser tua:** o E00 promete que contrato e régua escritos
 antes reduzem defeitos. As duas coisas acima são a prova a favor e a prova
 contra, na mesma sessão. Decide com as duas à frente.
+
+---
+
+## O dossiê tinha um erro, e foste tu a encontrá-lo
+
+Apresentei-te como prova mais forte contra o E00 que **«o fuso passou por baixo
+de 25 contratos e nenhum falava do assunto»**.
+
+**Estava mal medido.** Foste verificar e encontraste a secção `Tempo` do
+`capacidade-e-reservas.md`, anterior ao defeito, a nomear os três casos difíceis
+um a um — e a dizer «o que conta é o carimbo do servidor, e a hora local é
+apresentação», que é exactamente a regra que o produto violou durante quatro
+dias. **Confirmei-o antes de aceitar, e está lá.**
+
+Isto importa por duas razões.
+
+**A primeira:** eu dei-te uma prova errada para julgares o E00. Se a tivesses
+aceitado sem verificar, o veredicto assentava num facto falso — e teria sido
+mais severo com o E00 do que os factos justificam, ou menos, mas em qualquer
+caso mal fundado. **Verificaste a prova de quem te pediu o julgamento**, que é
+precisamente o que se espera de quem julga.
+
+**A segunda:** a conclusão verdadeira é pior para o E00 do que a minha, não
+melhor. A minha dizia que faltava um contrato — coisa que se resolve escrevendo
+um. A tua diz que **o contrato existia, estava certo, e não impediu nada** —
+porque lhe faltava a regra de decisão na fronteira, e não o princípio.
+
+Corrigi o registo em `E19-ACHADO-FUSO.md`, com a minha versão errada mantida por
+cima e corrigida em vez de apagada.
