@@ -740,42 +740,6 @@ export async function mensagensDaReserva(
 // Lista de espera e retenção
 // ──────────────────────────────────────────────────────────────────────────
 
-/** Entrar na lista **não reserva nada**. */
-export async function entrarNaEspera(
-  db: ClienteComEscopo, organizationId: string, locationId: string,
-  dados: { nome: string; contacto: string; pessoas: number },
-): Promise<string> {
-  const linha = await db.waitlistEntry.create({
-    data: { organizationId, locationId, ...dados },
-    select: { id: true },
-  });
-  return linha.id;
-}
-
-/**
- * Oferece uma vaga com retenção.
- *
- * A oferta consome capacidade **enquanto dura**, e a duração vem das definições
- * da casa. O fim é um INSTANTE gravado agora, contra o relógio da base — não um
- * contador que alguém tem de decrementar.
- */
-export async function oferecerVaga(
-  db: ClienteComEscopo, locationId: string, esperaId: string,
-  tableId: string, inicio: Date, fim: Date,
-): Promise<Date> {
-  const definicoes = await lerDefinicoes(db, locationId);
-  const agora = await agoraDaBase(db);
-  const expira = new Date(agora.getTime() + definicoes.retencaoMin * 60_000);
-  await db.waitlistEntry.update({
-    where: { id: esperaId },
-    data: {
-      estado: 'COM_OFERTA', ofertaTableId: tableId,
-      ofertaInicio: inicio, ofertaFim: fim, ofertaExpiraEm: expira,
-    },
-  });
-  return expira;
-}
-
 /**
  * Varre as retenções que já passaram da hora.
  *

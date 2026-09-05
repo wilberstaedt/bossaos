@@ -1,96 +1,58 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E18 — Motor de reservas e capacidade concorrente (**6 telas**).
-**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** Declarado pelo JR; não
-assinado — ninguém assina a revisão do próprio código.
-**Contrato que manda:** `docs/architecture/capacidade-e-reservas.md` (E00, escrito
-antes desta etapa) e o CT-10. Não foi preciso contrato novo.
-**Régua:** `docs/reviews/ALVO-E18.md` — anunciada pelo sénior, chega antes da
-validação.
-**Detalhe e achados:** `docs/progress/E18.md`.
+**Etapa atual:** E19 — Reserva pública, host e lista de espera (**28 telas
+novas**, mais o `FLOOR-006` que o E19 revisita). A maior etapa do projecto.
+**Estado desta fatia:** **MIGRAÇÃO E MOTOR DA ESPERA — IMPLEMENTADO, AGUARDANDO
+VALIDAÇÃO.** Declarado pelo JR; não assinado. **As 28 telas não estão feitas** e
+são a maior parte da etapa.
+**Contratos que mandam:** `lista-de-espera.md` (escrito para esta etapa) e
+`capacidade-e-reservas.md` (o motor, do E18). Régua: `docs/reviews/ALVO-E19.md`.
+**Detalhe e achados:** `docs/progress/E19.md`.
 
-**As garantias vivem em três sítios, e saber qual é qual decide as provas:**
+**A regra que o contrato decide vive numa AUSÊNCIA.** Não há coluna `posicao`,
+nem `numero_na_fila`, nem `senha` — «ninguém pode mostrar um número errado se o
+número não existe em lado nenhum para ser mostrado». É a mesma garantia por
+ausência do E17, e tem caso próprio a ler o `information_schema` mais um controlo
+negativo que **põe a coluna de volta**.
 
-1. **A base**, na exclusão `uma_mesa_um_intervalo` com `tstzrange(inicio, fim,
-   '[)')`. O `'[)'` **é** a regra do intervalo semiaberto — escrita ali, não pode
-   ser escrita ao contrário noutro sítio, porque não existe outro sítio.
-2. **A forma da alocação: uma linha por MESA.** Uma combinação 3+4 escreve duas
-   linhas, uma por componente, e por isso «3+4 e depois só a 3» bate na mesma
-   exclusão que qualquer outra sobreposição — sem caso especial em lado nenhum.
-3. **O lock por unidade**, para o que nenhuma restrição exprime: a **contagem** de
-   comensais por zona. Duas confirmações em mesas diferentes passam ambas na
-   exclusão e lêem ambas a mesma soma antiga.
+**A posição agrupa pelo CONJUNTO DE MESAS que serve o grupo.** Numa sala de 2, 4
+e 6, um grupo de 5 e um de 6 servem-se das mesmas mesas — e é por isso que «é o
+2.º dos grupos de 5 ou 6» sobrevive ao grupo de 2 passar à frente, e «é o 3.º»
+não sobrevive a nada. A preferência de zona entra na mesma chave. E **quem não
+cabe em mesa nenhuma não tem posição** (`null`, não o último lugar): dizer «é o
+7.º» a um grupo de 20 numa sala cuja maior mesa tem 6 é a promessa mais falsa de
+todas.
 
-**O controlo obrigatório mudou, e mudou por MEDIÇÃO.** O contrato manda desligar
-o lock e ver o teste de concorrência ficar vermelho. Medi as quatro combinações,
-oito corridas cada:
+**O par que decide a etapa está provado nos dois sentidos:** sentar o grupo de 2
+muda a posição do outro de 2, **e não muda** a do grupo de 6. Sem a segunda
+metade, «tudo sobe» — que é uma fila — passava o teste.
 
-| 2 hosts | com lock | sem lock |
-| --- | --- | --- |
-| `serializable` | 1 aceite | **1 aceite** |
-| `read committed` | 1 aceite | **2 aceites** |
+**O controlo obrigatório do contrato acende, e está confinado.** Fazer a
+derivação ignorar o tamanho do grupo derruba quase todo esse grupo de casos, e
+isso por si só não prova nada; o que o confina é a **sugestão ao host**, noutra
+função, que tem de ficar verde. Se cair, o plante escorregou para fora da
+derivação.
 
-Sem o lock mas com `serializable`, o teste fica verde **com razão** — o SSI apanha
-o mesmo desvio e o retry transforma o aborto numa resposta de negócio. São duas
-propriedades colapsadas numa. O controlo desliga por isso a **serialização
-inteira**, e é isso que acende. As duas ficam na produção: a diferença é que com
-o lock quem chega em segundo ouve «não há capacidade» em vez de um `40001`.
+**Um achado: a restrição encontrou uma duplicação antes de qualquer pessoa.** O
+`CHECK` novo exige `chamado_em` num `COM_OFERTA`, e a prova do E18 ficou vermelha
+— havia duas funções a escrever essa transição, e uma delas não carimbava. Ficou
+uma. O mesmo com a entrada na espera, que o E18 tinha sem zonas.
 
-**E o cenário do teste estava errado antes disso:** dois grupos de 4 escolhiam a
-MESMA mesa, a exclusão separava-os, e o teste media a exclusão a chamar-lhe
-contagem. Agora pede 2 e 4, que caem em mesas diferentes.
+**O que está pronto para medir** — códigos de saída lidos directamente:
+`pnpm verificar` (**0**) · `./scripts/provar-espera.sh` (6 grupos, **18 casos, 8
+defeitos plantados**, 0) · `./scripts/provar-reservas.sh` (0) ·
+`./scripts/provar-migracoes-do-zero.sh` (0).
 
-**A guarda mais forte era a que nada alcançava.** Larguei a exclusão e não caiu
-teste nenhum: com o lock ligado, o motor nunca tenta escrever uma sobreposição.
-Há agora dois casos que escrevem **directamente na base**, como uma importação ou
-uma correcção à mão fariam — um exige que ela recuse a sobreposição, outro que
-aceite o encosto. Sem o segundo, «recusa tudo» passava o primeiro.
-
-**A retenção expira por RELÓGIO.** `oferta_expira_em > now()` na leitura da
-ocupação: a mesa fica livre sem que ninguém abra ecrã nenhum. O varredor existe
-por higiene — se nunca correr, a resposta continua certa.
-
-**O que está pronto para medir** — códigos de saída lidos directamente, sem canos:
-`pnpm verificar` (**0**) · `./scripts/provar-reservas.sh` (12 grupos, **35 casos,
-10 defeitos plantados**, 0) · `./scripts/provar-reservas-no-navegador.sh` (**19
-casos, 6 defeitos plantados**, 0) · `provar-migracoes-do-zero.sh` (0) · `pnpm inspeccionar` (456 verdes, 0 — e a
-corrida do achado acima fê-lo cair uma vez em três; as três corridas estão
-escritas no `E18.md`, incluindo a que falhou).
-
-**Fica declarado como NÃO feito:** nenhuma reserva foi feita por um cliente — as
-telas desta etapa são de configuração, e a reserva pública, o host e a lista de
-espera são o E19; o envio de email não existe (a separação está provada, o
-transporte não); `ultimaEntradaMin` está no modelo e não tem ecrã, porque o
-contrato não decide como se apresenta.
-
-**UM ACHADO QUE NÃO É DESTA ETAPA, e é o mais importante para quem vier a
-seguir.** A carga da suite completa fez cair um caso do E15 (`staff.spec.ts:90`),
-e a causa está no registo do servidor: `Unique constraint failed on
-orders_location_id_numero_key`, em `prisma.order.create()`. O `proximoNumero`
-(`packages/db/src/pedidos.ts:362`) lê o maior número do dia e soma um, sem
-serialização — duas submissões simultâneas na mesma unidade escrevem o mesmo
-número. É **a mesma classe de defeito que o E18 existe para impedir**, uma etapa
-acima. O caso passa sozinho (18/18) e só cai sob carga, que é o sintoma de uma
-corrida. **Não lhe toquei** — é do E14 e a etapa autorizada era esta. Enquanto
-existir, `pnpm inspeccionar` não é um portão fiável sob carga.
-
-**RETIDO e corrigido: uma asserção de segurança anterior ficou falsa em
-silêncio.** O E17 trouxe a porta do visitante para dentro de `apps/web/app/r`, a
-pasta que a `provar-publico.sh` declara só de leitura. Não é buraco — a porta
-exige a credencial da visita antes de escrever —, mas nem o E17 nem o E18
-correram essa prova, e a asserção ficou falsa sem aparecer em lado nenhum.
-
-**A decisão veio primeiro, e depois a prova.** `qr-da-mesa-e-o-visitante.md` diz
-agora que a pasta pública pode conter escrita desde que autenticada por sessão de
-visitante, com a razão: manter o âmbito do inquilino no endereço é melhor do que
-uma `/api/publico` global, porque uma bolacha em `path=/` viaja para os outros
-restaurantes do mesmo domínio. A regra passou de «nada além de ler» para **«nada
-sem sessão de visitante»**, com par dos dois lados — estático (`provar-publico.sh`
-6b e o novo 6bb) e vivo (`provar-visitante-no-navegador.sh`, controlo 9: escrita
-sem bolacha recusada e ausente da base). Trocar a asserção sem escrever a decisão
-seria calibrar a guarda ao que existe.
+**O que NÃO está feito, e é a maior parte da etapa:** as **28 telas** (nenhuma
+existe), o `FLOOR-006` a mostrar as reservas confirmadas antes da hora, a fila de
+mensagens com reenvio deduplicado, o relatório com as definições ao lado dos
+números, e o caso feio do ecrã que oferece um horário entretanto ocupado.
+**Nenhuma medição de navegador** — não há telas para medir.
 
 **A prova foi LOCAL.** A CI continua trancada por facturação do GitHub.
+
+**O E18 ficou VALIDADO** a 05/09 em `cfafed7` — 6 telas, 13 asserções no motor e
+19 nas telas, 17 controlos negativos. Passámos os 50 por cento das telas.
 
 **O E17 ficou VALIDADO** a 04/09 — 16 telas, prova **local**, 17 controlos
 negativos, e com ele passámos metade das telas do produto: 213 de 396. Levou

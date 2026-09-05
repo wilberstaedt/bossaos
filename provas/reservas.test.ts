@@ -4,7 +4,7 @@ import { Client } from 'pg';
 import {
   cancelar, comEscopo, confirmarReserva, disponibilidade, entrarNaEspera,
   guardarDefinicoes, lerDefinicoes, listarReservas, mensagensDaReserva,
-  obterPrisma, ocupacaoNoIntervalo, oferecerVaga, reagendar, registarMensagem,
+  obterPrisma, ocupacaoNoIntervalo, chamarDaEspera, reagendar, registarMensagem,
   registarNaoCompareceu, resolverHoraLocal, varrerRetencoesExpiradas,
 } from '../packages/db/src/index.ts';
 import { sobrepoe, intervaloEfectivo, opcoesDeAlocacao } from '../packages/domain/src/reservas.ts';
@@ -397,7 +397,7 @@ describe('6. A retenção expira por RELÓGIO, não por evento', () => {
   it('uma oferta viva OCUPA a mesa', async () => {
     const esperaId = await comA((db) => entrarNaEspera(db, IDS.orgA, IDS.unidadeA, {
       nome: `${PREFIXO}espera`, contacto: 'y@inspeccao.example', pessoas: 2 }));
-    await comA((db) => oferecerVaga(db, IDS.unidadeA, esperaId, mesa2Id, as(19), as(20, 30)));
+    await comA((db) => chamarDaEspera(db, IDS.unidadeA, esperaId, mesa2Id, as(19), as(20, 30)));
 
     const ocupada = await comA((db) => lerDefinicoes(db, IDS.unidadeA).then((d) =>
       ocupacaoNoIntervalo(db, IDS.unidadeA, as(19), as(20), d)));
@@ -408,7 +408,7 @@ describe('6. A retenção expira por RELÓGIO, não por evento', () => {
   it('passada a hora, a mesa está livre SEM ninguém abrir ecrã nenhum', async () => {
     const esperaId = await comA((db) => entrarNaEspera(db, IDS.orgA, IDS.unidadeA, {
       nome: `${PREFIXO}espera`, contacto: 'y@inspeccao.example', pessoas: 2 }));
-    await comA((db) => oferecerVaga(db, IDS.unidadeA, esperaId, mesa2Id, as(19), as(20, 30)));
+    await comA((db) => chamarDaEspera(db, IDS.unidadeA, esperaId, mesa2Id, as(19), as(20, 30)));
 
     // O relógio anda. Ninguém chama nada — é esse o ponto.
     await sql.query(`UPDATE waitlist_entries SET oferta_expira_em = now() - interval '1 minute'
@@ -423,7 +423,7 @@ describe('6. A retenção expira por RELÓGIO, não por evento', () => {
   it('o varredor é HIGIENE: limpa a lista, e a capacidade já estava livre', async () => {
     const esperaId = await comA((db) => entrarNaEspera(db, IDS.orgA, IDS.unidadeA, {
       nome: `${PREFIXO}espera`, contacto: 'y@inspeccao.example', pessoas: 2 }));
-    await comA((db) => oferecerVaga(db, IDS.unidadeA, esperaId, mesa2Id, as(19), as(20, 30)));
+    await comA((db) => chamarDaEspera(db, IDS.unidadeA, esperaId, mesa2Id, as(19), as(20, 30)));
     await sql.query(`UPDATE waitlist_entries SET oferta_expira_em = now() - interval '1 minute'
                       WHERE id = $1`, [esperaId]);
     const varridas = await comA((db) => varrerRetencoesExpiradas(db, IDS.unidadeA));

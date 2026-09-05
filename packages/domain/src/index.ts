@@ -168,3 +168,8 @@ export {
   type IntervaloDeReserva, type RecusaDeAntecedencia,
   type MesaDisponivel, type CombinacaoDisponivel,
 } from './reservas.ts';
+
+export {
+  mesasQueServem, posicaoDerivada, quemCabeNaMesa, estimativaEmMinutos,
+  type MesaParaEspera, type NaEspera,
+} from './espera.ts';

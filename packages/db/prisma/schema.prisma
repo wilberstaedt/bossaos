@@ -148,6 +148,7 @@ model Organization {
   alocacoes           ReservationAllocation[]
   mensagensDeReserva  ReservationMessage[]
   esperas             WaitlistEntry[]
+  zonasDeEspera       WaitlistArea[]
   @@map("organizations")
   revisoes        MenuRevision[]
   publicacoes     MenuPublication[]
@@ -2083,6 +2084,7 @@ model ServiceArea {
   // ── E18 ──
   capacidades        CapacityRule[]
   bloqueiosDeReserva ReservationBlock[]
+  esperas            WaitlistArea[]
 
   @@unique([organizationId, id], name: "zona_por_organizacao")
   @@index([organizationId, locationId])
@@ -2241,6 +2243,7 @@ model TableSession {
   visitantes   GuestSession[]
 
   chamadas GuestCall[]
+  esperas  WaitlistEntry[]
   @@unique([organizationId, id], name: "sessao_por_organizacao")
   @@index([organizationId, locationId, estado])
   @@index([tableId])
@@ -3321,8 +3324,10 @@ model ReservationMessage {
 
 enum EstadoDaEspera {
   A_ESPERA
+  /// O «chamado» do contrato, mais a vaga concreta que a chamada carrega — e é
+  /// essa vaga que consome capacidade enquanto a retenção dura.
   COM_OFERTA
-  ACEITE
+  SENTADO
   DESISTIU
 
   @@map("estado_da_espera")
@@ -3360,6 +3365,26 @@ model WaitlistEntry {
   /// A reserva que a oferta virou, se foi aceite.
   reservationId String? @map("reservation_id") @db.Uuid
 
+  // ── E19 ──
+  /// Os carimbos de que o relatório de tempos de espera vive. Um `SENTADO` sem
+  /// `sentadoEm` é uma linha que diz que alguém se sentou e não sabe quando — a
+  /// base tem um `CHECK` a impedi-lo.
+  chamadoEm      DateTime? @map("chamado_em") @db.Timestamptz(6)
+  sentadoEm      DateTime? @map("sentado_em") @db.Timestamptz(6)
+  desistiuEm     DateTime? @map("desistiu_em") @db.Timestamptz(6)
+  /// A sessão de mesa onde o grupo se sentou. É o que liga a espera à sala.
+  tableSessionId String?   @map("table_session_id") @db.Uuid
+  notas          String?
+
+  /// ── E o que NÃO existe aqui é a garantia ──────────────────────────────
+  ///
+  /// Não há `posicao`, nem `numeroNaFila`, nem `senha`. «Ninguém pode mostrar um
+  /// número errado se o número não existe em lado nenhum para ser mostrado.»
+  ///
+  /// A posição deriva-se, e deriva-se dentro do grupo que cabe nas MESMAS
+  /// MESAS: «é o 2.º dos grupos de 5 ou 6» sobrevive ao grupo de 2 passar à
+  /// frente; «é o 3.º» não sobrevive a nada.
+
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -3367,9 +3392,34 @@ model WaitlistEntry {
   location     Location      @relation(fields: [locationId], references: [id], onDelete: Restrict)
   mesaOferecida ServiceTable? @relation(fields: [organizationId, ofertaTableId], references: [organizationId, id], onDelete: Restrict)
   reserva       Reservation?  @relation(fields: [organizationId, reservationId], references: [organizationId, id], onDelete: Restrict)
+  sessaoDeMesa  TableSession? @relation(fields: [organizationId, tableSessionId], references: [organizationId, id], onDelete: Restrict)
+  zonas         WaitlistArea[]
 
   @@unique([organizationId, id], name: "espera_por_organizacao")
   @@index([organizationId, locationId, estado])
   @@index([ofertaTableId, ofertaExpiraEm])
   @@map("waitlist_entries")
+}
+
+/// As zonas que servem um grupo à espera.
+///
+/// É uma PREFERÊNCIA, e por isso é uma tabela e não uma coluna: um grupo pode
+/// aceitar o terraço e o salão, e uma coluna só deixaria escolher um.
+///
+/// Sem linhas, a espera aceita a unidade inteira. Ausência é ausência — «não
+/// disse nada» não é «só quer o salão».
+model WaitlistArea {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  waitlistId     String @map("waitlist_id") @db.Uuid
+  areaId         String @map("area_id") @db.Uuid
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  espera       WaitlistEntry @relation(fields: [organizationId, waitlistId], references: [organizationId, id], onDelete: Cascade)
+  zona         ServiceArea   @relation(fields: [organizationId, areaId], references: [organizationId, id], onDelete: Restrict)
+
+  @@unique([organizationId, id], name: "zona_da_espera_por_organizacao")
+  @@unique([waitlistId, areaId], name: "uma_zona_por_espera")
+  @@index([waitlistId])
+  @@map("waitlist_areas")
 }

@@ -250,10 +250,17 @@ export {
   ocupacaoNoIntervalo, mesasBloqueadas, disponibilidade, comensaisPorZona,
   confirmarReserva, reagendar, cancelar, registarNaoCompareceu, sentar,
   registarMensagem, mensagensDaReserva,
-  entrarNaEspera, oferecerVaga, varrerRetencoesExpiradas,
+  varrerRetencoesExpiradas,
   listarTurnos, listarCapacidades, listarBloqueios, listarReservas,
   resolverHoraLocal, agoraDaBase, segredoDeGestao,
   type DefinicoesDeReserva, type Ocupacao, type Disponibilidade,
   type PedidoDeReserva, type ResultadoDaConfirmacao, type ResultadoDoReagendamento,
   type MotivoDeRecusa,
 } from './reservas.ts';
+
+// ── E19 · lista de espera ──
+export {
+  entrarNaEspera, esperaDaUnidade, posicaoNaEspera, esperaEstimada,
+  sugestoesParaMesa, chamarDaEspera, sentarQuemEsperava, desistir,
+  type EntradaNaEspera,
+} from './espera.ts';
