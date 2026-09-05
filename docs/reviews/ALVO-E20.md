@@ -131,3 +131,25 @@ lado nenhum. Pergunto-as na revisão em vez de as assumir:
 Nenhuma bloqueia a etapa à cabeça. As duas são do tipo que só se descobre em
 serviço, e nessa altura aparecem como «a cozinha está sempre atrasada às
 sextas» — um sintoma que ninguém liga a uma linha de código.
+
+### Varredura dos aceites 2 a 4, antes da declaração
+
+Fui verificar os restantes em vez de esperar. Nenhum é veredicto — a etapa não
+foi declarada — mas nenhum me levanta bandeira:
+
+- **Aceite 4, o conector desligado.** Grupo 4 tem o par: *«um pedido externo com
+  o conector desligado é RECUSADO»* e *«E O PAR: com provedor e mapa, ENTRA»*,
+  mais o discriminador de idempotência *«um id externo DIFERENTE é um pedido
+  novo»*. E o produto **recusa**, em vez de aceitar e pôr de lado — que é a
+  diferença que separa um erro visível de pedidos a desaparecer em silêncio.
+- **Aceite 3, a taxa.** Lida de `area.taxaMenor`, em unidade menor inteira, sem
+  literal nem valor por omissão em lado nenhum do caminho. Está como o contrato
+  do dinheiro exige.
+- **Aceite 2, a cozinha só vê o que é para agora.** Com o par por relógio: *«o
+  MESMO pedido aparece quando o momento chega — sem ninguém abrir nada»*, e
+  *«atravessar o momento DUAS VEZES não cria duas entradas»*.
+
+**E um grupo que eu não pedi:** «5. O item que esgota ANTES da hora». Um prato
+encomendado para as 20:30 que acaba às 19:00 é um problema só dos pedidos
+agendados — não existe no serviço à mesa, onde se pede e faz-se. Não estava na
+minha régua e devia estar.
