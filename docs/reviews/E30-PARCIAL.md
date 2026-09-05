@@ -51,3 +51,34 @@ telas, e cuja dívida de móvel só se paga a olhar para elas.
 
 **Fica para a primeira janela em que a máquina aguente.** Ou, se voltar a
 apertar, corre-se contra o staging no VPS, que tem 6,6 GB livres e carga a zero.
+
+---
+
+## Tentei e tive de parar — e a primeira decisão é que estava certa
+
+01h50. Revi o *holding* de cima com este argumento: o banner dizia ATENÇÃO e não
+PERIGO, os *kernel panics* de Julho foram com 27 agentes e 67 MB, e nós estamos
+com quatro agentes e 442 processos. **Um Chromium não é um lote.** E o JR estava
+parado à espera do veredicto, o que tem custo real.
+
+Lancei. **Em menos de dois minutos a máquina caiu de ATENÇÃO para PERIGO** — 63
+MB livres, 7,3 GB comprimidos, swap a subir. Parei a prova, e libertaram-se 1,5
+GB de imediato: era mesmo o navegador.
+
+**A primeira decisão estava certa e a revisão estava errada**, e o que a desfez
+não foi um argumento melhor — foi um número, sessenta segundos depois. O meu
+raciocínio sobre os 27 agentes de Julho era correcto em tudo menos no que
+interessava: esta máquina já está a comprimir 5 GB, e o que a mata não é a
+contagem de processos, é a falta de memória física para mais um.
+
+**Fica registado como aviso a mim próprio:** um argumento plausível sobre
+histórico não substitui a leitura de agora. Foi exactamente o erro que apanhei ao
+`docker-proxy` de três dias, na direcção contrária.
+
+## O estado, sem ambiguidade
+
+- Motor: **verde**, 14 casos, 8 controlos, reposto.
+- Alcance: **zero**, sétima etapa seguida.
+- Portas do menu de gestão: **zero mortas**.
+- Navegador das nove telas: **NÃO MEDIDO**.
+- Assinatura: **não dada**.
