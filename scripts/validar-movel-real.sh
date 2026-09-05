@@ -45,10 +45,18 @@ for linha in sys.argv[1].splitlines():
 alega = {l['id'].strip() for l in csv.DictReader(
     open('docs/progress/coverage.csv', encoding='utf-8-sig')) if PROVA.search(l['evidencia'] or '')}
 
-specs = list(pathlib.Path('inspeccao').glob('*.spec.ts'))
+# So contam os specs que MEDEM LARGURA. A primeira versao juntava os 30 ficheiros
+# num so texto e perguntava se o ID aparecia nesse bolo - ou seja, aceitava um ID
+# citado num spec que so verifica permissoes como prova de que o movel foi medido.
+# Verificado a 05/09: hoje os 30 medem todos, portanto o buraco nao tem vitimas.
+# Fecha-se por ser latente, nao por ter mordido - a proxima inspeccao escrita sem
+# larguras abriria a porta em silencio, e o silencio e o que custa a ver depois.
+MEDE = re.compile(r'LARGURAS|transbordaNaHorizontal|elementosForaDoEcra|setViewportSize|viewport')
+todos = list(pathlib.Path('inspeccao').glob('*.spec.ts'))
+specs = [q for q in todos if MEDE.search(q.read_text(encoding='utf-8'))]
 if len(specs) < 3:
     print(f'LEITOR_CEGO {len(specs)}'); raise SystemExit(2)
-texto = ''.join(p.read_text(encoding='utf-8') for p in specs)
+texto = ''.join(q.read_text(encoding='utf-8') for q in specs)
 # DUAS letras no mínimo: `QR-001` existe e a primeira versão desta guarda não o via.
 nomeados = set(re.findall(r'\b[A-Z]{2,8}-[0-9]{3}\b', texto))
 

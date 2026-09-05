@@ -361,9 +361,25 @@ export function modelosDaUnidade(db: ClienteComEscopo, locationId: string) {
 export async function movimentarPontos(db: ClienteComEscopo, dados: {
   organizationId: string; customerId: string;
   tipo: 'GANHO' | 'RESGATE' | 'AJUSTE' | 'EXPIRACAO';
-  pontos: number; motivo: string;
+  /**
+   * ── `bigint` também, e é por isso que aceita os dois ──────────────────
+   *
+   * Tipada só em `number`, esta função obrigava quem lhe passasse um valor
+   * vindo da base a fazer `Number(bigint)` — e foi o que aconteceu no
+   * `resgatar`, apanhado pela `validar-dinheiro.sh` DEPOIS de o E27 estar
+   * assinado. Um custo de recompensa acima de 2^53 passava a ser aproximado,
+   * em silêncio, no sítio onde se desconta valor a uma pessoa.
+   *
+   * A cura não é converter com cuidado: é a assinatura deixar de o exigir.
+   */
+  pontos: number | bigint; motivo: string;
 }) {
-  if (!Number.isInteger(dados.pontos) || dados.pontos <= 0) {
+  if (typeof dados.pontos === 'number' && !Number.isInteger(dados.pontos)) {
+    throw new RecusaDoCrm('PONTOS_INVALIDOS',
+      `os pontos são inteiros e positivos — o sinal vem do tipo, e veio ${dados.pontos}`);
+  }
+  const pontos = BigInt(dados.pontos);
+  if (pontos <= 0n) {
     throw new RecusaDoCrm('PONTOS_INVALIDOS',
       `os pontos são inteiros e positivos — o sinal vem do tipo, e veio ${dados.pontos}`);
   }
@@ -373,7 +389,7 @@ export async function movimentarPontos(db: ClienteComEscopo, dados: {
   return db.loyaltyMovement.create({
     data: {
       organizationId: dados.organizationId, customerId: dados.customerId,
-      tipo: dados.tipo, pontos: BigInt(dados.pontos), motivo: dados.motivo.trim(),
+      tipo: dados.tipo, pontos, motivo: dados.motivo.trim(),
     },
   });
 }
@@ -425,7 +441,8 @@ export async function resgatar(db: ClienteComEscopo, dados: {
   }
   return movimentarPontos(db, {
     organizationId: dados.organizationId, customerId: dados.customerId,
-    tipo: 'RESGATE', pontos: Number(recompensa.custoPontos),
+    // O `BigInt` viaja inteiro até à base. Era aqui que estava o `Number()`.
+    tipo: 'RESGATE', pontos: recompensa.custoPontos,
     motivo: `resgate: ${recompensa.nome}`,
   });
 }
