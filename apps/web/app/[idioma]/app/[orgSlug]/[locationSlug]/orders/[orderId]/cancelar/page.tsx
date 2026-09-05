@@ -60,7 +60,7 @@ export default async function CancelarLinhas({
           <ul className="bo-publico__lista">
             {canceláveis.map((l) => (
               <li key={l.id} className="bo-publico__produto">
-                <form method="post" action={`/api/org/${orgSlug}/pedidos`}>
+                <form method="post" action={`/api/org/${orgSlug}/pedidos`} className="bo-forma">
                   <input type="hidden" name="idioma" value={idioma} />
                   <input type="hidden" name="locationSlug" value={locationSlug} />
                   <input type="hidden" name="accao" value="cancelar_linha" />

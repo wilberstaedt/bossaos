@@ -817,6 +817,61 @@ async function principal(): Promise<void> {
       },
     });
 
+    // ── E22 · uma conta, uma caixa, e nenhuma vazia ──────────────────────
+    //
+    // Uma lista vazia mede o estado «ainda não abriu», que é um ecrã real mas é
+    // o ecrã FÁCIL: cabe em qualquer largura, não tem contraste para medir e não
+    // tem alvos de toque. Cinco larguras verdes sobre três frases é verde sobre
+    // nada — a mesma razão do E18.
+    //
+    // A conta leva um DESCONTO com motivo, para a tela do POS-004 ter o par que
+    // interessa: o total já abatido E a linha que diz porquê. Sem o ajuste, a
+    // prova de que «o que se tirou vê-se» media um ecrã onde não se tirou nada.
+    const contaDaProva = await prisma.bill.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        numero: `${PREFIXO}C1`, moeda: 'EUR',
+      },
+    });
+    await prisma.billLine.createMany({
+      data: [
+        { organizationId: IDS.orgA, billId: contaDaProva.id,
+          nome: `${PREFIXO}Arroz de sepia`, quantidade: 2, unitarioMenor: 1890 },
+        { organizationId: IDS.orgA, billId: contaDaProva.id,
+          nome: `${PREFIXO}Agua con gas`, quantidade: 3, unitarioMenor: 250 },
+      ],
+    });
+    await prisma.billAdjustment.create({
+      data: {
+        organizationId: IDS.orgA, billId: contaDaProva.id, tipo: 'DESCONTO',
+        base: 'CONTA', montanteMenor: 500, motivo: 'cliente habitual',
+        autorizadoPor: IDS.utilizadorA,
+      },
+    });
+
+    // Uma caixa ABERTA com movimentos dos dois lados: sem uma saída, a subtracção
+    // do esperado nunca era exercida e a tela passava com uma soma.
+    const caixaDaProva = await prisma.cashRegister.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Caja 1`, moeda: 'EUR', fundoMenor: 15000,
+      },
+    });
+    await prisma.cashRegisterEvent.create({
+      data: {
+        organizationId: IDS.orgA, registerId: caixaDaProva.id,
+        tipo: 'ABERTURA', actor: IDS.utilizadorA,
+      },
+    });
+    await prisma.cashMovement.createMany({
+      data: [
+        { organizationId: IDS.orgA, registerId: caixaDaProva.id, tipo: 'ENTRADA',
+          montanteMenor: 4300, motivo: 'venta de barra', actor: IDS.utilizadorA },
+        { organizationId: IDS.orgA, registerId: caixaDaProva.id, tipo: 'SAIDA',
+          montanteMenor: 1200, motivo: 'compra de hielo', actor: IDS.utilizadorA },
+      ],
+    });
+
     // ── E18 · reservas: uma linha em cada lista, e nenhuma vazia ──────────
     //
     // As seis telas desta etapa são listas. Uma lista vazia mede o estado

@@ -65,6 +65,9 @@ export interface Alvos {
   reservaDeHoje: string;
   /** E20: o pedido de takeaway JÁ na cozinha. Sem ele, o TAKE-002 media um 404. */
   pedidoParaLevar: string;
+  /** E22: a conta com desconto, e a caixa aberta com movimentos dos dois lados. */
+  contaDoTpv: string;
+  caixaDoTpv: string;
 }
 
 const PREFIXO = 'insp-';
@@ -211,6 +214,14 @@ export async function resolverAlvos(): Promise<Alvos> {
         sql,
         `SELECT id FROM orders WHERE numero = '${PREFIXO}L0' LIMIT 1`,
         'o pedido de takeaway do arnês'),
+      // Nomeados, e não `LIKE ... LIMIT 1`: um alvo sem ordem é uma lotaria que
+      // passa por sorte da ordem física das linhas. Aprendido no E20, à custa
+      // de uma prova do E16 que caiu por causa de três linhas novas.
+      contaDoTpv: await um(
+        sql, `SELECT id FROM bills WHERE numero = '${PREFIXO}C1'`, 'a conta insp-C1'),
+      caixaDoTpv: await um(
+        sql, `SELECT id FROM cash_registers WHERE nome = '${PREFIXO}Caja 1'`,
+        'a caixa insp-Caja 1'),
     };
   } finally {
     await sql.end();

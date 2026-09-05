@@ -61,7 +61,7 @@ export default async function NovoPedido({
         <Aviso titulo={p.produto}>{p.semDados}</Aviso>
       ) : (
         <Cartao titulo={p.novo}>
-          <form method="post" action={`/api/org/${orgSlug}/pedidos`}>
+          <form method="post" action={`/api/org/${orgSlug}/pedidos`} className="bo-forma">
             <input type="hidden" name="idioma" value={idioma} />
             <input type="hidden" name="locationSlug" value={locationSlug} />
             <input type="hidden" name="accao" value="enviar" />

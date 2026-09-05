@@ -82,7 +82,7 @@ export default async function EditarPedido({
           motivoRejeicao: l.motivoRejeicao ? String(l.motivoRejeicao) : null,
         }))} />
 
-        <form method="post" action={`/api/org/${orgSlug}/pedidos`}>
+        <form method="post" action={`/api/org/${orgSlug}/pedidos`} className="bo-forma">
           <input type="hidden" name="idioma" value={idioma} />
           <input type="hidden" name="locationSlug" value={locationSlug} />
           <input type="hidden" name="accao" value="guardar" />

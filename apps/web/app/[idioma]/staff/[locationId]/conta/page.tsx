@@ -72,7 +72,7 @@ export default async function ContaDoStaff({
                 </ul>
               )}
               <TotalDoPedido total={totalDoPedido(linhas)} idioma={idioma} s={s} />
-              <form method="post" action={`/api/org/${orgSlug}/staff`}>
+              <form method="post" action={`/api/org/${orgSlug}/staff`} className="bo-forma">
                 <input type="hidden" name="idioma" value={idioma} />
                 <input type="hidden" name="locationId" value={locationId} />
                 <input type="hidden" name="accao" value="pedir_conta" />

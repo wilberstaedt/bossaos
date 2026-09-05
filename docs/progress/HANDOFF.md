@@ -1,111 +1,73 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E20 — Takeaway e delivery (**7 telas**).
-**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — etapa completa, as duas
-fatias.** Declarado pelo JR; não assinado.
-**Contratos que mandam:** `pedidos-para-mais-tarde.md` (escrito para esta etapa)
-e `kds-e-tempo-real.md`. Régua: `docs/reviews/ALVO-E20.md`.
-**Detalhe e achados:** `docs/progress/E20.md`.
+**Etapa atual:** E22 — TPV, contas e caixa (**19 telas**).
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — as três fatias.** Declarado
+pelo JR; não assinado.
+**Régua:** `docs/architecture/dinheiro.md`, escrita no E00 **antes** desta etapa,
+e CT-11. **Detalhe e achados:** `docs/progress/E22.md`.
 
-**O momento de produção é DERIVADO e o gatilho é quem o garante.** Hora de
-entrega menos o preparo; um valor escrito de fora é **substituído**. Sem isso era
-mais uma coluna, e a primeira vez que alguém a escrevesse errada a comida saía à
-hora errada sem nada dar erro. O preparo é o **maior** das linhas e não a soma —
-as estações trabalham em paralelo.
+**Quatro entidades, e nenhuma colapsada.** A conta é a obrigação; a tentativa saiu
+daqui; o pagamento é o confirmado; a devolução não é um pagamento negativo. O
+pagamento **não tem estado** — existir É estar confirmado, porque um `Payment`
+com `estado = falhou` seria dinheiro que se desconta a somar.
 
-**A passagem é por RELÓGIO, e o relógio é o da BASE.** A tarefa existe desde que
-o pedido é aceite, com o mesmo id: atravessar o momento duas vezes não cria duas
-entradas porque não há nada que se crie na passagem.
+**O estado da conta e o da caixa NÃO são colunas.** Derivam-se — dos pagamentos e
+dos acontecimentos. O devido deriva-se por gatilho das linhas menos os ajustes. É
+a mesma decisão da posição na lista de espera do E19: sem coluna, ninguém
+consegue mostrar um número errado.
 
-**A hora de entrega é hora da casa, e aqui arranca o fogão.** 20:30 com 25
-minutos entra em produção às 20:05 **locais**; com hora de parede entraria às
-22:05. Sem fuso **recusa-se**, e uma hora que não existe é recusada — não
-empurrada para a seguinte.
+**Na caixa, o único número que um humano escreve é o CONTADO.** O esperado sai dos
+movimentos e a diferença é a subtracção — e a prova procura uma coluna de
+diferença no `information_schema` e exige **zero**, porque uma diferença guardada
+é uma diferença que se pode editar até dar zero. Os movimentos **não têm coluna
+de meio de pagamento**: tudo o que lá está é dinheiro, e isso não é uma regra, é
+uma coluna que não existe.
 
-**A prova mede hora ABSOLUTA contra o relógio da base**, como a régua exige:
-pergunta à base qual é o instante das 20:05 em Madrid e compara com o que ficou
-gravado. Nenhuma asserção conta minutos relativos, porque «entra 25 minutos
-antes» é verdade em qualquer fuso. **E o par:** a mesma hora de entrega em dois
-fusos dá momentos **diferentes**.
+**O achado que mais vale: a recusa da concorrência era da BASE, não do negócio.**
+Apaguei o limite do devido e o caso ficou verde. Medido: com `Serializable` +
+cadeado a segunda cobrança cai com `40001`, porque o Postgres tira o retrato da
+transacção na **primeira instrução** — o `set_config` do escopo — e quando o
+segundo chega ao cadeado o retrato já é anterior ao commit do primeiro. **O
+cadeado fá-lo esperar; não o faz ver.** E `40001` diz «tente outra vez», que numa
+sala cheia gera chave nova: o caminho por onde se cobra duas vezes. Em
+`READ COMMITTED` recusa com `EXCEDE_O_DEVIDO`, e a prova passou a exigir o motivo.
 
-**Três achados meus, e os três são sobre a prova:** escrevi `new Date()` três
-linhas abaixo do comentário que o proíbe; a justificação que eu tinha dado para o
-proibir era **falsa** (`Date.now()` é UTC absoluto — o que o relógio da base
-guarda é a **deriva**, não o fuso), e o controlo negativo foi construído em cima
-dessa razão errada e ficou verde por isso; e o caso do «maior das linhas» media
-um pedido de **uma** linha, onde máximo e soma são o mesmo número.
+**Imutável sem reversão não é rigor, é uma armadilha.** O gatilho impedia apagar
+um ajuste — e bem — mas um desconto por engano ficava para sempre. A correcção é
+um registo novo que aponta para o que anula, com índice único.
 
-## As 7 telas, e o que elas NÃO fazem
+**O ALCANCE foi verificado ANTES das provas**, como o sénior fez no E20. Havia
+**quatro máquinas construídas, provadas e sem chamador** — `juntarLinhasDoPedido`,
+`reconciliar`, `corrigirMovimento` e `dividirPorPesos`. Era a retenção do E19
+outra vez. Estão ligadas; a medição dá zero órfãs.
 
-**STAFF-021, TAKE-001/002/003, DEL-001/002/003.** A fila não calcula nada:
-pergunta à base e mostra. O «já entrou na cozinha?» vem do `now()` da **base**,
-não do relógio do navegador — duas pessoas em dois postos vêem a mesma fila
-porque a pergunta é feita ao mesmo relógio.
+**Três defeitos meus no ARNÊS, e os três faziam ausência de medição parecer
+sucesso:** um plante cujo `assert` falhava e o guião seguia sem `set -e`, correndo
+a suite com o ficheiro intacto; um `exigir_vermelho` que não distinguia «ficou
+verde» de «caiu no caso errado»; e um guião que morria no arranque — o bash do
+macOS é o 3.2 e não tem `declare -A` — e saía com código **0**. Há agora uma
+guarda `CHEGOU_AO_FIM`, provada a acender com uma morte simulada.
 
-**O canal é um argumento da mesma consulta**, não uma tela separada, e é por isso
-que o par da régua passa: o filtro **esconde da sala sem tirar da cozinha**. As
-tarefas de produção do E16 continuam a ver o pedido.
+**E a guarda do dinheiro estava cega aos campos desta etapa.** `devidoMenor`,
+`unitarioMenor` e `recebidoMenor` não têm nenhum dos substantivos da lista dela.
+Passou a reconhecer pela **forma** — o sufixo `Menor`, que a própria `dinheiro.md`
+manda — e subiu de 10 para 13 campos. O controlo negativo dessa secção, que nunca
+existira, destapou um segundo buraco: o padrão exigia espaço depois do tipo, e
+`devidoMenor Float` no fim da linha passava.
 
-**A morada não chega à fila porque não está na consulta.** `filaDoCanal` lê
-`orders`; a morada vive em `order_deliveries`. Garantia por **ausência** — o
-controlo negativo tem de a acrescentar à mão para a tela a mostrar.
+**Portões, códigos de saída lidos directamente:** `pnpm verificar` (**0**) ·
+`./scripts/provar-contas.sh` (39 casos, **9 controlos negativos**, 0) ·
+`./scripts/provar-caixa.sh` (19 casos, **8 controlos**, 0) ·
+`./scripts/provar-tpv-no-navegador.sh` (19 telas, 24 casos, **8 controlos**, 0) ·
+`./scripts/validar-dinheiro.sh` (13 campos, 2 controlos, 0) ·
+`pnpm inspeccionar` (**559 casos, 0**).
 
-**O formulário manda dia e hora SEPARADOS** e a rota passa-os assim a
-`agendarPedido`, que os resolve no fuso da unidade. A rota nunca constrói
-`new Date('…Z')`: era aí que a hora de parede virava UTC.
-
-**Achado meu, e é da prova.** O controlo do filtro por canal **não compilava**:
-a âncora do plante era `SELECT now() AS agora`, que aparece **três vezes** no
-ficheiro, e o `replace(…, 1)` acertou na primeira — outra função, onde `canal`
-nem existe. O vermelho vinha de um ficheiro partido, e um ficheiro partido passa
-por controlo negativo sem provar nada. Passou a recortar a função pelo nome.
-Segundo achado do mesmo lote: o controlo da fila vazia apagava os **dois**
-pedidos semeados e levava com eles o alvo que o arnês resolve no arranque — a
-suite morria no `beforeAll` e o vermelho era da guarda do arnês. Passou a apagar
-só a entrega.
-
-E um erro de medição que não chegou a ficheiro nenhum: verifiquei âncoras do
-guião **com a suite a correr** e li um ficheiro no instante em que estava
-plantado. Não se mede um ficheiro que a prova está a mutar.
-
-**O que está pronto para medir** — códigos de saída lidos directamente:
-`pnpm verificar` (**0**) · `./scripts/provar-mais-tarde.sh` (5 grupos, **26
-casos, 11 defeitos plantados**, 0) · `./scripts/provar-levar-no-navegador.sh`
-(**24 casos**, 7 telas × 5 larguras + toque, contraste e 3 idiomas, **7
-controlos negativos**, 0) · `provar-producao.sh` (0) · `provar-pedidos.sh` (0) ·
-`provar-produto.sh` (0) · `provar-migracoes-do-zero.sh` (0) ·
-`./scripts/provar-alvos-e-matriz.sh` (33 casos, 2 controlos negativos, 0) ·
-`pnpm inspeccionar` (**538 casos, 0**).
-
-**À PRIMEIRA o `pnpm inspeccionar` deu 1**, com 536 verdes e DUAS vermelhas — e
-nenhuma delas era do E20.** Isso é pior do que se fossem, e as duas são a mesma
-forma: uma guarda que media a circunstância em vez do facto.
-
-A primeira: o alvo `orderId` do arnês era `numero LIKE 'insp-%' LIMIT 1`, **sem
-ordem**, com **nove** pedidos a casar — e só o `insp-A001` tem a linha aceite e a
-rejeitada lado a lado. Passava por sorte da ordem física das linhas, e já eram
-seis bilhetes antes do E20; as minhas três só mudaram o baralho. `LIMIT 1` sem
-`ORDER BY` não é um alvo, é uma lotaria. O alvo passa a dizer o nome do pedido.
-
-A segunda: a guarda das 28 telas do E19 exigia a palavra `implementado aguardando
-validação`. Quando o E19 foi assinado e passou a `validado` (`3ee1383`), ela ficou
-vermelha **por a etapa ter avançado** — media o nome do estado, não o facto de a
-tela estar feita. Passa a aceitar as duas palavras, e continua a excluir
-`planejado` e `em execução`, que é o controlo negativo dela.
-
-**Pendência declarada, medida e não corrigida:** os alvos `productId` (**5**
-linhas a casar), `menuId` (**2**), `categoryId` e `groupId` têm a mesma forma de
-lotaria. Não lhes toquei porque servem provas de etapas já assinadas e mudá-los
-sem necessidade era arriscar o que está verde. Fica para o sénior decidir.
-
-**O que NÃO está feito:** o pagamento, que é a E23 — estas telas registam o
-pedido e não cobram. **Nenhum pedido externo real** — o conector está desligado e
-nada finge ter recebido de um parceiro.
+**PENDÊNCIAS DECLARADAS, e nenhuma simulada:** **nenhum provedor de pagamento
+real** — não há webhook, não há assinatura verificada, `CARTAO` é um meio
+registado e não uma integração, e o ecrã diz isso por palavras. E **nada de
+fiscal**, que é o E24: não há recibo que se pareça com documento fiscal.
 
 **A prova foi LOCAL.** A CI continua trancada por facturação do GitHub.
-
-**O E19 ficou ASSINADO** a 05/09 em `e3482e5` — 28 telas, e com ele 62% das telas
-do produto (247 de 396) e **zero telas a aguardar** pela primeira vez.
 
 **O E18 ficou VALIDADO** a 05/09 em `cfafed7` — 6 telas, 13 asserções no motor e
 19 nas telas, 17 controlos negativos. Passámos os 50 por cento das telas.

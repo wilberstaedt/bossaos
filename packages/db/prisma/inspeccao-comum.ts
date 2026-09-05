@@ -104,6 +104,37 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     -- por todas as passagens anteriores, a prender as estações da inspecção por
     -- chave estrangeira. Quem estoirava era a LIMPEZA da prova SEGUINTE, longe
     -- de quem a causou — e por isso o vermelho aparecia sempre na prova errada.
+    -- ── E22 · o dinheiro sai ANTES dos pedidos ──────────────────────────
+    --
+    -- As linhas de conta apontam para linhas de pedido; os movimentos apontam
+    -- para pagamentos. Apagar por outra ordem prendia tudo por chave estrangeira
+    -- e o vermelho aparecia na prova seguinte, longe de quem o causou.
+    --
+    -- E os gatilhos de imutabilidade recusam apagar pagamentos, devoluções,
+    -- ajustes e movimentos — e recusam bem: é essa a garantia da etapa. A saída
+    -- NÃO é enfraquecer o gatilho; é dizer que isto é manutenção, e o dono da
+    -- tabela pode desligá-los nas suas.
+    ALTER TABLE cash_movements        DISABLE TRIGGER USER;
+    ALTER TABLE cash_register_events  DISABLE TRIGGER USER;
+    ALTER TABLE bill_lines            DISABLE TRIGGER USER;
+    ALTER TABLE bill_adjustments      DISABLE TRIGGER USER;
+    ALTER TABLE payments              DISABLE TRIGGER USER;
+    ALTER TABLE refunds               DISABLE TRIGGER USER;
+    DELETE FROM cash_movements       WHERE register_id IN (SELECT id FROM cash_registers WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM cash_register_events WHERE register_id IN (SELECT id FROM cash_registers WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM cash_registers       WHERE nome LIKE '${PREFIXO}%';
+    DELETE FROM refunds              WHERE payment_id IN (SELECT id FROM payments WHERE bill_id IN (SELECT id FROM bills WHERE numero LIKE '${PREFIXO}%'));
+    DELETE FROM payments             WHERE bill_id IN (SELECT id FROM bills WHERE numero LIKE '${PREFIXO}%');
+    DELETE FROM payment_attempts     WHERE bill_id IN (SELECT id FROM bills WHERE numero LIKE '${PREFIXO}%');
+    DELETE FROM bill_adjustments     WHERE bill_id IN (SELECT id FROM bills WHERE numero LIKE '${PREFIXO}%');
+    DELETE FROM bill_lines           WHERE bill_id IN (SELECT id FROM bills WHERE numero LIKE '${PREFIXO}%');
+    DELETE FROM bills                WHERE numero LIKE '${PREFIXO}%';
+    ALTER TABLE cash_movements        ENABLE TRIGGER USER;
+    ALTER TABLE cash_register_events  ENABLE TRIGGER USER;
+    ALTER TABLE bill_lines            ENABLE TRIGGER USER;
+    ALTER TABLE bill_adjustments      ENABLE TRIGGER USER;
+    ALTER TABLE payments              ENABLE TRIGGER USER;
+    ALTER TABLE refunds               ENABLE TRIGGER USER;
     DELETE FROM guest_calls          WHERE table_session_id IN (SELECT id FROM table_sessions WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%'));
     DELETE FROM production_events    WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example');
     DELETE FROM production_tasks     WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example');
@@ -208,6 +239,8 @@ export async function restos(prisma: PrismaClient): Promise<number> {
     + (SELECT count(*) FROM reservations        WHERE criada_por LIKE '%@inspeccao.example')
     + (SELECT count(*) FROM reservation_blocks  WHERE motivo LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM delivery_areas      WHERE nome LIKE '${PREFIXO}%')
+    + (SELECT count(*) FROM bills               WHERE numero LIKE '${PREFIXO}%')
+    + (SELECT count(*) FROM cash_registers      WHERE nome LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM external_catalog_mappings WHERE product_id IN (SELECT id FROM products WHERE nome LIKE '${PREFIXO}%'))
     + (SELECT count(*) FROM guest_sessions      WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%'))
   ) AS total`);
