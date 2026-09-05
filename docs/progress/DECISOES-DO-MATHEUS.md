@@ -3,6 +3,28 @@
 > Reunido a 05/09. Estava espalhado por seis documentos, que é como as decisões
 > se perdem. Nenhuma destas é técnica — todas têm custo, risco legal ou dinheiro
 > do lado de lá, e nenhuma é minha para tomar.
+>
+> *Renumerado a 05/09: havia um salto do 5 para o 7. Num ficheiro que existe
+> para não se perderem decisões, um número em falta é a pergunta «e a 6, onde
+> está?» — a que ninguém sabe responder daqui a um mês.*
+
+## Se só tiveres cinco minutos
+
+Por **quando bloqueia**, não por ordem de descoberta:
+
+| | Decisão | Bloqueia |
+| --- | --- | --- |
+| **1º** | **6.** Requisitos fiscais espanhóis | **antes do primeiro talão a um cliente real** — e não se resolve depressa |
+| 2º | **1.** Facturação da CI | já: 5 trabalhos criados morrem em 3s com zero passos |
+| 3º | **7.** Provedor de envio | na primeira campanha real |
+| 4º | **8.** Convenção de salário | antes do primeiro recibo real |
+| 5º | **2.** Domínio próprio | quando o piloto for público |
+| 6º | **3.** Alergénios em dois sítios | é regra de negócio, não de código |
+| — | **4.** e **5.** | adiadas, com gatilho escrito |
+
+**As duas primeiras não dependem uma da outra** e podem ir em paralelo. A fiscal
+é a única que depende de alguém de fora, e por isso é a que tem de começar
+primeiro mesmo sendo a que demora.
 
 ## 1. A CI está trancada por facturação — e é a mais barata de resolver
 
@@ -90,7 +112,7 @@ põe o pedido **já** na cozinha, com a pessoa a julgar tê-lo agendado.
 que abrir o takeaway ao público** — aí o staff deixa de ser o filtro. Registo-o
 aqui para não ser esquecido quando essa etapa chegar.
 
-## 7. Os requisitos fiscais espanhóis — PENDÊNCIA EXTERNA, e é a mais séria
+## 6. Os requisitos fiscais espanhóis — PENDÊNCIA EXTERNA, e é a mais séria
 
 **Nem eu nem o JR conseguimos confirmar o regime fiscal na fonte oficial.** Eu
 recusei escrevê-los de cabeça na régua do E24, e mantenho a recusa: um requisito
@@ -120,3 +142,28 @@ JR à fonte oficial sem verificar se ele tem acesso à web. Dei-lhe uma ordem e 
 proibição que se fechavam uma sobre a outra — *não inventes* e *vai confirmar
 onde não podes ir* — e ele parou, que era o correcto. Um agente que parasse menos
 teria inventado os requisitos para desbloquear.
+
+## 7. O provedor de envio das campanhas — email e SMS
+
+O E27 entrega o consentimento por finalidade e por canal, com a base a fazê-lo
+valer. **O que não existe é por onde enviar.** Os envios ficam `POR_ENVIAR` e a
+tela di-lo por palavras, que é o comportamento certo — o produto anuncia o que
+não faz em vez de deixar alguém descobri-lo com uma campanha por enviar.
+
+**A decisão é tua porque tem custo e tem remetente.** Provedor (Resend, SES,
+outro), domínio de envio e quem assina as mensagens. Já tens contas Resend, e a
+regra de uma conta por domínio no plano gratuito é capaz de decidir isto sozinha.
+
+**Quando bloqueia:** na primeira campanha real. Até lá o produto está honesto.
+
+## 8. A convenção de salário — converter tempo em dinheiro
+
+O E28 guarda e mostra **tempo**. Não calcula salário, e o JR declarou-o sem eu
+pedir. Concordo com a recusa: converter horas em dinheiro é **convenção
+laboral**, não aritmética, e escrever uma que não foi verificada é o erro do E24
+num sítio onde custa mais — aqui o prejudicado é quem trabalha na casa e tem
+menos poder para contestar o recibo.
+
+**Precisa de fonte:** convénio aplicável em Espanha para hostelaria, com
+nocturnidade, horas extraordinárias e feriados. **Bloqueia antes do primeiro
+recibo real**, não antes do piloto.
