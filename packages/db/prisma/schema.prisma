@@ -201,6 +201,14 @@ model Organization {
   funcoesDeEquipa TeamRole[]
   turnosDeEquipa  Shift[]
   marcacoes       TimeEntry[]
+  contasBancarias   BankAccount[]
+  importacoesDeExtracto StatementImport[]
+  linhasDeBanco     BankLine[]
+  movimentosFinanceiros FinancialMovement[]
+  correspondencias  Reconciliation[]
+  periodos          AccountingPeriod[]
+  acontecimentosDePeriodo PeriodEvent[]
+  taxasDeCambio     ExchangeRate[]
 }
 
 /// Marca: catálogo e identidade comercial. Pertence a uma organização.
@@ -352,6 +360,9 @@ model Location {
   funcoesDeEquipa TeamRole[]
   turnosDeEquipa  Shift[]
   marcacoes       TimeEntry[]
+  contasBancarias   BankAccount[]
+  movimentosFinanceiros FinancialMovement[]
+  periodos          AccountingPeriod[]
 }
 
 /// Identidade GLOBAL. Excepção documentada (CT-04): não leva `organization_id`,
@@ -4809,4 +4820,227 @@ model TimeEntry {
   @@index([membershipId, diaDeServico])
   @@index([locationId, diaDeServico])
   @@map("time_entries")
+}
+
+// ── E29 · Financeiro e conciliação ─────────────────────────────────────────
+//
+// Contrato: `docs/architecture/conciliacao-e-fecho.md`, escrito por FRONTEIRA.
+//
+// Um sistema financeiro errado dá números CERTOS: não parte, não estoira, soma
+// bem uma realidade que não existe. Por isso todas as garantias desta etapa
+// vivem na base, e nenhuma delas é uma coluna que alguém escreve.
+
+enum EstadoDaCorrespondencia {
+  SUGERIDA
+  CONFIRMADA
+  RECUSADA
+}
+
+enum TipoDeMovimentoFinanceiro {
+  RECEITA
+  DESPESA
+  DEVOLUCAO
+  TAXA
+  AJUSTE
+}
+
+model BankAccount {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  nome           String
+  moeda          String @default("EUR")
+  arquivadaEm    DateTime? @map("arquivada_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  linhas       BankLine[]
+  importacoes  StatementImport[]
+
+  @@unique([locationId, nome], name: "uma_conta_por_nome")
+  @@map("bank_accounts")
+}
+
+/// Uma importação de extracto. **Guarda as contagens**, porque uma importação
+/// que ignora 200 linhas em silêncio é indistinguível de uma que não leu o
+/// ficheiro — e as duas mostram o mesmo zero.
+model StatementImport {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  accountId      String @map("account_id") @db.Uuid
+  ficheiro       String
+  novas          Int @default(0)
+  jaVistas       Int @default(0) @map("ja_vistas")
+  importadoPor   String? @map("importado_por")
+  importadoEm    DateTime @default(now()) @map("importado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  conta        BankAccount  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  linhas       BankLine[]
+
+  @@map("statement_imports")
+}
+
+/// Uma linha de extracto.
+///
+/// ── A identidade NÃO vem do banco ─────────────────────────────────────────
+///
+/// Bancos repetem referências, mudam formatos e reemitem extractos. A
+/// identidade é derivada — conta, data-valor, montante, referência e a **ordem
+/// dentro do dia** — e a ordem existe porque **duas linhas iguais no mesmo dia
+/// são um caso real**, não um erro. Sem ela, um detector de duplicados apaga
+/// factos verdadeiros.
+///
+/// A garantia é o índice único sobre esses cinco, na BASE. Não é uma coisa que
+/// o código se tem de lembrar de verificar.
+model BankLine {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  accountId      String @map("account_id") @db.Uuid
+  importId       String? @map("import_id") @db.Uuid
+  dataValor      DateTime @map("data_valor") @db.Date
+  montanteMenor  BigInt   @map("montante_menor")
+  moeda          String   @default("EUR")
+  referencia     String?
+  /// A ordem desta linha dentro do dia, no ficheiro. É o que distingue duas
+  /// linhas legítimas iguais — e o que impede o duplicado de passar.
+  ordemNoDia     Int      @map("ordem_no_dia")
+  descricao      String?
+  criadaEm       DateTime @default(now()) @map("criada_em") @db.Timestamptz(6)
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  conta        BankAccount      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  importacao   StatementImport? @relation(fields: [importId], references: [id], onDelete: SetNull)
+  correspondencias Reconciliation[]
+
+  @@index([accountId, dataValor])
+  @@map("bank_lines")
+}
+
+/// O movimento na visão financeira, com as TRÊS datas.
+///
+/// Não são intermutáveis: caixa usa a **data-valor**, resultado usa a
+/// **ocorrência**. «Quanto entrou em Setembro» e «quanto vendi em Setembro» são
+/// perguntas diferentes com respostas diferentes, e as duas estão certas.
+model FinancialMovement {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  tipo           TipoDeMovimentoFinanceiro
+  conceito       String
+  montanteMenor  BigInt @map("montante_menor")
+  moeda          String @default("EUR")
+  /// Quando a coisa aconteceu — a venda, o serviço.
+  ocorrenciaEm   DateTime @map("ocorrencia_em") @db.Date
+  /// Quando o dinheiro se mexeu — a liquidação no banco.
+  valorEm        DateTime @map("valor_em") @db.Date
+  /// Quando ficou escrito no sistema. Carimbo do servidor, sempre.
+  registoEm      DateTime @default(now()) @map("registo_em") @db.Timestamptz(6)
+  /// A transacção de origem, para o total descer até ela. Um total que não
+  /// desce à origem é uma opinião.
+  origemTipo     String?  @map("origem_tipo")
+  origemId       String?  @map("origem_id") @db.Uuid
+  centroDeCusto  String?  @map("centro_de_custo")
+  /// Um ajuste pós-fecho aponta ao período fechado que corrige. O passado não
+  /// se reescreve: acrescenta-se-lhe.
+  ajustaPeriodoId String? @map("ajusta_periodo_id") @db.Uuid
+  motivo         String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  ajustaPeriodo AccountingPeriod? @relation(fields: [ajustaPeriodoId], references: [id], onDelete: SetNull)
+  correspondencias Reconciliation[]
+
+  @@index([locationId, valorEm])
+  @@index([locationId, ocorrenciaEm])
+  @@map("financial_movements")
+}
+
+/// A correspondência entre uma linha de banco e um movimento.
+///
+/// **Nunca automática, nem com semelhança perfeita.** A confirmação é um
+/// acontecimento com autor e momento — quem concilia responde pelo que
+/// conciliou, e daqui a um ano alguém vai perguntar quem foi.
+///
+/// E **não há coluna `conciliado`**: existe correspondência confirmada, logo
+/// está conciliado. Terceira vez que esta lei aparece — stock, pontos, e agora.
+model Reconciliation {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  bankLineId     String @map("bank_line_id") @db.Uuid
+  movementId     String @map("movement_id") @db.Uuid
+  estado         EstadoDaCorrespondencia @default(SUGERIDA)
+  /// Zero a 100. É uma sugestão, e 100 continua a ser sugestão.
+  semelhanca     Int @default(0)
+  confirmadaPor  String?   @map("confirmada_por")
+  confirmadaEm   DateTime? @map("confirmada_em") @db.Timestamptz(6)
+  criadaEm       DateTime  @default(now()) @map("criada_em") @db.Timestamptz(6)
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  linha        BankLine          @relation(fields: [bankLineId], references: [id], onDelete: Cascade)
+  movimento    FinancialMovement @relation(fields: [movementId], references: [id], onDelete: Cascade)
+
+  @@unique([bankLineId, movementId], name: "uma_correspondencia_por_par")
+  @@map("reconciliations")
+}
+
+/// Um período contabilístico. **Fechar proíbe, não congela.**
+///
+/// Não guarda totais: se guardasse, passavam a ser uma segunda verdade que
+/// envelhece — a mesma lei do número derivado, outra vez.
+model AccountingPeriod {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  de             DateTime @db.Date
+  ate            DateTime @db.Date
+  /// `ABERTO` ou `FECHADO`. O estado deriva do último acontecimento, mas
+  /// guarda-se aqui porque é o gatilho da base que o lê a cada inserção.
+  estado         String @default("ABERTO")
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location            @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  acontecimentos PeriodEvent[]
+  ajustes      FinancialMovement[]
+
+  @@unique([locationId, de], name: "um_periodo_por_inicio")
+  @@map("accounting_periods")
+}
+
+/// Fechar e reabrir são ACONTECIMENTOS, com autor e motivo. Nunca um interruptor.
+model PeriodEvent {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  periodId       String @map("period_id") @db.Uuid
+  /// `FECHO` ou `REABERTURA`.
+  tipo           String
+  autor          String
+  motivo         String?
+  momento        DateTime @default(now()) @db.Timestamptz(6)
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  periodo      AccountingPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+
+  @@map("period_events")
+}
+
+/// A taxa de câmbio usada num total convertido, com FONTE e DATA.
+///
+/// Um número em euros que veio de dólares sem dizer a que câmbio é uma opinião
+/// com aspecto de facto.
+model ExchangeRate {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  de             String
+  para           String
+  /// Milionésimos: 1 USD = 0,92 EUR é `920000`. Inteiro, como tudo o resto.
+  taxaMicro      BigInt @map("taxa_micro")
+  fonte          String
+  emVigorDe      DateTime @map("em_vigor_de") @db.Date
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, de, para, emVigorDe], name: "uma_taxa_por_dia")
+  @@map("exchange_rates")
 }

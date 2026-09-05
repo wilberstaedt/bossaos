@@ -68,6 +68,7 @@ uma destas, o documento é que está errado.
 - [`portas-e-navegacao.md`](./portas-e-navegacao.md) — Portas: como se chega a um módulo
 - [`preco-de-um-pedido-escrito-offline.md`](./preco-de-um-pedido-escrito-offline.md) — Que preço paga um pedido escrito offline
 - [`qr-da-mesa-e-o-visitante.md`](./qr-da-mesa-e-o-visitante.md) — O QR da mesa é um token ao portador, colado num sítio público
+- [`relatorios-e-agregacao.md`](./relatorios-e-agregacao.md) — Relatórios e agregação: ausência não é zero; o denominador viaja com o numerador; o período resolve-se por unidade antes de somar; e pertencer a duas organizações dá direito a ver as duas, não a somá-las.
 - [`quantidades-e-unidades.md`](./quantidades-e-unidades.md) — Quantidades e unidades
 - [`stock-e-fichas.md`](./stock-e-fichas.md) — Stock e fichas técnicas
 - [`compras-e-fornecedores.md`](./compras-e-fornecedores.md) — Compras e fornecedores: encomendado, recebido e facturado são três números; só a recepção mexe no stock; a unidade de compra não é a de uso
