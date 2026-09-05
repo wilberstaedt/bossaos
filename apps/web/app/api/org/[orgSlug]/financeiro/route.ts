@@ -20,12 +20,32 @@ export const dynamic = 'force-dynamic';
  * que escreva um total de fecho. Conciliado deriva-se de haver correspondência
  * confirmada, e confirmar exige **quem** — que sai da sessão, não do formulário.
  */
-function inteiroComSinal(dados: FormData, campo: string): number | null {
+/**
+ * Um inteiro pequeno — para coisas que não são dinheiro.
+ *
+ * A semelhança de uma correspondência vai de 0 a 100 e cabe num `number` com
+ * folga. Dinheiro **não** passa por aqui: tem leitor próprio, uma linha abaixo.
+ */
+function inteiroPequeno(dados: FormData, campo: string): number | null {
   const bruto = (texto(dados, campo) ?? '').trim();
-  // Aceita negativo: uma despesa lançada à mão pode vir com sinal. O que não
-  // se aceita é vírgula — `parseFloat` aqui era a porta que a guarda não vigia.
   if (!/^-?\d+$/.test(bruto)) return null;
   return Number(bruto);
+}
+
+/**
+ * ── O dinheiro sai daqui como CADEIA, e nunca como `number` ───────────────
+ *
+ * Este padrão aceita trinta dígitos, e um `Number` de trinta dígitos é uma
+ * aproximação — em silêncio. A cadeia validada viaja inteira até ao `BigInt()`
+ * do motor, que a lê exacta.
+ *
+ * Aceita negativo: uma despesa lançada à mão pode vir com sinal. O que não se
+ * aceita é vírgula — `parseFloat` aqui era a porta que a guarda não vigia.
+ */
+function dinheiroEmTexto(dados: FormData, campo: string): string | null {
+  const bruto = (texto(dados, campo) ?? '').trim();
+  if (!/^-?\d+$/.test(bruto)) return null;
+  return bruto;
 }
 
 const DATA = /^\d{4}-\d{2}-\d{2}$/;
@@ -83,7 +103,7 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
 
     if (accao === 'registar_despesa') {
       const conceito = texto(dados, 'conceito') ?? '';
-      const montante = inteiroComSinal(dados, 'montante');
+      const montante = dinheiroEmTexto(dados, 'montante');
       const moeda = texto(dados, 'moeda') ?? '';
       const ocorrenciaEm = (texto(dados, 'ocorrenciaEm') ?? '').trim();
       const valorEm = (texto(dados, 'valorEm') ?? '').trim();
@@ -124,7 +144,12 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
       const r = await comEscopoDoPedido(sessao, (db) => importarExtracto(db, {
         organizationId, accountId, ficheiro, importadoPor: actor.email,
         linhas: validas.map((l) => ({
-          dataValor: l.data, montanteMenor: Number(l.montante),
+          // ── A cadeia VALIDADA viaja inteira até ao `BigInt()` ─────────
+          //
+          // `Number(l.montante)` perdia precisão em silêncio: o `/^-?\d+$/`
+          // acima aceita trinta dígitos, e um `Number` de trinta dígitos é uma
+          // aproximação. Aqui não se converte nada — a cadeia passa como está.
+          dataValor: l.data, montanteMenor: l.montante,
           ...(l.referencia ? { referencia: l.referencia } : {}),
         })),
       }));
@@ -139,7 +164,7 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
       const bankLineId = texto(dados, 'bankLineId') ?? '';
       const movementId = texto(dados, 'movementId') ?? '';
       const accountId = texto(dados, 'accountId') ?? '';
-      const semelhanca = inteiroComSinal(dados, 'semelhanca') ?? 0;
+      const semelhanca = inteiroPequeno(dados, 'semelhanca') ?? 0;
       await comEscopoDoPedido(sessao, (db) => sugerirCorrespondencia(db, {
         organizationId, bankLineId, movementId, semelhanca,
       }));

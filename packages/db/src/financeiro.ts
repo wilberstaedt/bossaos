@@ -37,7 +37,20 @@ export class RecusaDoFinanceiro extends Error {
 
 export interface LinhaDoFicheiro {
   dataValor: string;
-  montanteMenor: number | bigint;
+  /**
+   * ── `string` também, e é por isso que aceita as três formas ───────────
+   *
+   * A importação é a **única porta por onde entra dado externo**, e a rota
+   * validava o montante com `/^-?\d+$/` — que aceita trinta dígitos. Tipada só
+   * em `number`, esta interface obrigava a rota a fazer `Number(texto)` antes
+   * de chegar aqui, e o `BigInt()` cá dentro já lia um número aproximado: a
+   * linha do banco entrava errada, em silêncio.
+   *
+   * A cura é a mesma do E27, e é melhor do que converter com cuidado: a cadeia
+   * validada viaja inteira até ao `BigInt()`, que a lê exacta. **Tira-se a
+   * necessidade em vez de gerir o risco.**
+   */
+  montanteMenor: number | bigint | string;
   moeda?: string;
   referencia?: string;
   descricao?: string;
@@ -250,7 +263,9 @@ export function correspondenciasDaConta(db: ClienteComEscopo, accountId: string)
 export function registarMovimento(db: ClienteComEscopo, dados: {
   organizationId: string; locationId: string;
   tipo: 'RECEITA' | 'DESPESA' | 'DEVOLUCAO' | 'TAXA' | 'AJUSTE';
-  conceito: string; montanteMenor: number | bigint; moeda?: string;
+  /** `string` pela mesma razão do `LinhaDoFicheiro`: a cadeia validada na
+   *  fronteira viaja inteira até ao `BigInt()`, sem passar por `Number`. */
+  conceito: string; montanteMenor: number | bigint | string; moeda?: string;
   ocorrenciaEm: string; valorEm: string;
   origemTipo?: string; origemId?: string; centroDeCusto?: string;
   ajustaPeriodoId?: string; motivo?: string;
@@ -490,5 +505,12 @@ export async function centrosDeCusto(db: ClienteComEscopo, dados: {
     moeda: l.moeda,
     totalMenor: l._sum.montanteMenor ?? 0n,
     linhas: l._count._all,
-  })).sort((a, b) => Number(b.totalMenor - a.totalMenor));
+  // ── O sinal calcula-se em BigInt, e não se converte nada ──────────────
+  //
+  // `Number(b - a)` era seguro — a subtracção é exacta e só o sinal conta — mas
+  // seguro-com-explicação é pior do que desnecessário. Um `Number()` sobre um
+  // BigInt neste ficheiro é uma linha que alguém vai copiar para onde não é
+  // seguro, e a guarda do dinheiro deixa de poder acusar sem excepções.
+  })).sort((a, b) => (b.totalMenor > a.totalMenor ? 1
+    : b.totalMenor < a.totalMenor ? -1 : 0));
 }

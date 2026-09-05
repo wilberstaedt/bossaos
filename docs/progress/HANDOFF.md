@@ -1,41 +1,54 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E29 — financeiro e conciliação (**11 telas**).
-**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — as duas fatias.**
+**Estado:** **RETIDO por PRECISÃO e CONSERTADO — reentregue, aguardando validação.**
 
-**O que muda:** as anteriores erravam para dentro. **Aqui o erro sai para fora e
-bate num banco** — e um sistema financeiro errado **dá números certos**: não
-parte, não estoira, soma bem uma realidade que não existe.
+**A retenção, e o sénior tinha razão:** a rota fazia
+`montanteMenor: Number(l.montante)` antes de chamar o motor, e o `BigInt()` do
+motor corria **depois** — já sobre um número aproximado. O sítio é o pior
+possível: a importação de extracto é **a única porta por onde entra dado
+externo**, e a validação `/^-?\d+$/` aceita trinta dígitos.
 
-**A identidade de uma linha não vem do banco.** É derivada — conta, data-valor,
-montante, referência e a **ordem dentro do dia** — com índice único. A ordem
-existe por causa do **par**: duas linhas legítimas iguais no mesmo dia entram as
-duas, e sem ela o detector de duplicados apagaria factos verdadeiros.
+**A cura é a do E27 — tirar a necessidade, não gerir o risco.** O tipo alargou-se
+para aceitar a **cadeia validada**, que viaja inteira até ao `BigInt()`.
 
-**Nada se auto-confirma**, nem a 100%: `CHECK` que exige autor e momento.
-**Conciliado é derivado** — terceira vez, depois do stock e dos pontos.
-**Fechar proíbe por gatilho** e não copia totais; **reabrir exige motivo**.
-**As moedas não se somam**: agrupa-se, ou converte-se com fonte e data à vista.
+**E o defeito estava numa SEGUNDA porta que não constava da retenção:** o
+`registar_despesa` convertia da mesma maneira. A lição é da fronteira, e a
+fronteira tem duas portas — o dinheiro passou a ter leitor próprio
+(`dinheiroEmTexto`), separado do dos inteiros pequenos.
 
-**Achado que vale a etapa:** **quatro** funções tinham zero chamadores —
-`importarExtracto`, `sugerirCorrespondencia`, `fecharPeriodo` e `converterTotal`.
-O núcleo estava escrito, provado e **inalcançável a partir do produto**: o
-extracto só entrava pela semeadura, e não havia por onde fechar um período.
-Ligadas, com quatro casos novos a medi-las.
+**O local que era seguro mudou na mesma.** `Number(b - a)` num comparador é
+exacto, mas **seguro-com-explicação é pior do que desnecessário**: é uma linha
+que alguém copia para onde não é segura, e obriga a guarda a tolerar excepções.
+A `validar-dinheiro.sh` está agora a zero **sem nenhuma**.
 
-**E três achados sobre os meus próprios controlos:** um caso falhava antes de
-chegar à sua própria pergunta; um plante pela metade nunca criou o defeito; e um
-plante que não compila mede um ficheiro partido.
+**E o meu primeiro caso de prova media a coisa errada:** vinte e cinco dígitos
+caem fora do `BIGINT` e o caso falhava com «out of range» — media o limite da
+**coluna**, não a perda de precisão. A janela real é entre 2⁵³ e 2⁶³. Um teste
+que falha pela razão errada não é um teste, e há agora um caso que mede que o
+defeito era possível naquele valor.
+
+**O resto da etapa mantém-se:** identidade derivada com índice único e a **ordem
+no dia** pelo par; nada se auto-confirma; conciliado **derivado** (terceira vez);
+fechar proíbe por gatilho e não copia totais; moedas não se somam. E **quatro**
+funções que estavam sem chamador — `importarExtracto`, `sugerirCorrespondencia`,
+`fecharPeriodo`, `converterTotal` — foram ligadas com casos a medi-las.
 
 **Provas (LOCAIS — a CI continua trancada pela facturação do GitHub):**
-`provas/financeiro.test.ts` **0** (**22 casos**, repetível) ·
-`provar-financeiro.sh` **0** (**11 controlos**) ·
-`provar-financeiro-no-navegador.sh` **0** (**31 casos, 9 controlos**) ·
-`pnpm verificar` **0** · `pnpm inspeccionar` **0** (**740 casos**) ·
-`varrer-alcance-da-etapa.sh` → **a correr depois do commit**.
+`provas/financeiro.test.ts` **0** (**28 casos**, repetível) ·
+`provar-financeiro.sh` **0** (**13 controlos**, dois deles da precisão nas duas
+portas) · `provar-financeiro-no-navegador.sh` **0** (**31 casos, 9 controlos**) ·
+`validar-dinheiro.sh` **0** sem excepções ·
+`pnpm verificar` **0** · `pnpm inspeccionar` **0** (**740 casos**).
 
-O controlo que o contrato põe em primeiro lugar cai nos dois lados — motor e
-ecrã: **os dois relatórios passam a concordar, e é aí que está errado.**
+## ⚠ PENDÊNCIA DECLARADA — sem contabilidade legal e sem leitor de formatos
+
+Taxas, impostos e percentagens são **configuração**, não regra inventada pelo
+produto. E a importação recebe linhas em texto cru: inventar um leitor de OFX ou
+CAMT agora era prometer que se lê o que não se leu.
+
+**Contrato:** `docs/architecture/conciliacao-e-fecho.md` (do sénior, por fronteira).
+**Detalhe:** `docs/progress/E29.md`.
 
 ## ⚠ PENDÊNCIA DECLARADA — sem contabilidade legal e sem leitor de formatos
 

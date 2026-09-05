@@ -124,6 +124,94 @@ describe('1 · importar duas vezes não duplica, e o par não apaga factos', () 
     });
 });
 
+describe('1b · a precisão atravessa a fronteira inteira', () => {
+  // ── O defeito que reteve o E29, e a forma dele ─────────────────────────
+  //
+  // A importação é a única porta por onde entra dado externo, e a validação da
+  // rota aceita trinta dígitos. Com a interface tipada só em `number`, a rota
+  // era obrigada a converter antes de chegar ao motor — e o `BigInt()` do motor
+  // já lia um número aproximado. A linha do banco entrava errada, em silêncio.
+  //
+  // Estes casos passam a CADEIA, que é o que a rota faz agora, e exigem o valor
+  // exacto do outro lado. Um `Number` no meio faz os dois ficarem vermelhos.
+
+  /**
+   * ── O valor tem de cair na JANELA onde o defeito é silencioso ─────────
+   *
+   * A primeira versão usava vinte e cinco dígitos e o caso caía com «out of
+   * range for type bigint»: media o limite da COLUNA, e não a perda de
+   * precisão. Um teste que falha pela razão errada não é um teste.
+   *
+   * A janela real é entre 2^53 (onde o `number` começa a aproximar) e 2^63
+   * (onde o `BIGINT` acaba). `123456789012345678` cabe na coluna, e
+   * `Number()` devolve `...680` em vez de `...678` — em silêncio.
+   */
+  const ENORME = '123456789012345678';
+
+  it('um montante de vinte e cinco dígitos entra EXACTO', async () => {
+    const c = await conta();
+    await comA((db) => importarExtracto(db, {
+      organizationId: IDS.orgA, accountId: c.id, ficheiro: 'grande.csv',
+      linhas: [{ dataValor: '2026-09-28', montanteMenor: ENORME, referencia: 'BIG' }],
+    }));
+    const [linha] = await comA((db) => extractoDaConta(db, c.id));
+    assert.equal(String(linha!.montanteMenor), ENORME,
+      'a precisão perdeu-se na fronteira: a linha do banco entrou errada');
+  });
+
+  it('e o PAR: um montante pequeno continua a entrar certo', async () => {
+    // Sem este par, «guarda sempre a cadeia crua» passava o caso de cima — e um
+    // motor que ignorasse números legítimos ficava por apanhar.
+    const c = await conta();
+    await comA((db) => importarExtracto(db, {
+      organizationId: IDS.orgA, accountId: c.id, ficheiro: 'pequena.csv',
+      linhas: [{ dataValor: '2026-09-28', montanteMenor: 4500, referencia: 'TPV' }],
+    }));
+    const [linha] = await comA((db) => extractoDaConta(db, c.id));
+    assert.equal(String(linha!.montanteMenor), '4500');
+  });
+
+  it('e a SEGUNDA porta — o movimento à mão — também o aguenta', async () => {
+    // O `registar_despesa` tinha o mesmo defeito e não estava na retenção: a
+    // lição é da fronteira, e a fronteira tem duas portas.
+    const m = await comA((db) => registarMovimento(db, {
+      organizationId: IDS.orgA, locationId: IDS.unidadeA, tipo: 'DESPESA',
+      conceito: `${PREFIXO}enorme`, montanteMenor: ENORME,
+      ocorrenciaEm: '2026-09-10', valorEm: '2026-09-10',
+    }));
+    assert.equal(String(m.montanteMenor), ENORME,
+      'a segunda porta perde precisão: o defeito estava nos dois sítios');
+  });
+
+  it('e o `Number` DAQUELE valor perde mesmo dígitos — a janela é real', () => {
+    // Sem esta asserção, os casos acima passariam num valor onde o defeito não
+    // existe, e ninguém saberia. Mede-se que o defeito era possível.
+    assert.notEqual(String(Number(ENORME)), ENORME,
+      'o valor escolhido não perde precisão: os casos acima não medem nada');
+    assert.equal(String(BigInt(ENORME)), ENORME);
+  });
+
+  it('e um valor acima do BIGINT é recusado pela base, e não truncado', async () => {
+    // Fora da janela, a coluna recusa — e recusar é melhor do que guardar
+    // aproximado. Fica medido para ninguém supor que se trunca em silêncio.
+    await assert.rejects(comA((db) => registarMovimento(db, {
+      organizationId: IDS.orgA, locationId: IDS.unidadeA, tipo: 'DESPESA',
+      conceito: `${PREFIXO}fora-do-alcance`,
+      montanteMenor: '12345678901234567890123456',
+      ocorrenciaEm: '2026-09-10', valorEm: '2026-09-10',
+    })), /out of range/i);
+  });
+
+  it('e uma cadeia que não é inteiro é recusada pela BASE', async () => {
+    // A cadeia viaja crua, por isso a recusa tem de existir do outro lado.
+    await assert.rejects(comA((db) => registarMovimento(db, {
+      organizationId: IDS.orgA, locationId: IDS.unidadeA, tipo: 'DESPESA',
+      conceito: `${PREFIXO}mau`, montanteMenor: '12,50',
+      ocorrenciaEm: '2026-09-10', valorEm: '2026-09-10',
+    })));
+  });
+});
+
 describe('2 · conciliado é DERIVADO, e nada se auto-confirma', () => {
   async function cenario() {
     const c = await conta();

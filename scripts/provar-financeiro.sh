@@ -332,7 +332,45 @@ cp "${COPIAS[1]}" "$PROVA"
 repor_sql
 
 echo
-echo "13. Reposto — tem de voltar ao verde"
+echo "13. CONTROLO NEGATIVO — a fronteira volta a converter com Number"
+# ── O defeito que reteve o E29 ────────────────────────────────────────────
+#
+# A importação é a única porta por onde entra dado externo, e a validação aceita
+# trinta dígitos. Um `Number` no caminho perde dígitos EM SILÊNCIO: a linha do
+# banco entra errada e todos os totais continuam a bater certo entre si.
+plantar <<'PYPRECISAO' || true
+import io
+p = 'packages/db/src/financeiro.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "    const montante = BigInt(l.montanteMenor);"
+assert antigo in s, 'a leitura do montante nao esta onde se esperava'
+io.open(p, 'w', encoding='utf-8').write(
+    s.replace(antigo, "    const montante = BigInt(Number(l.montanteMenor));", 1))
+PYPRECISAO
+correr /tmp/bossaos-fin-precisao.txt
+exigir_vermelho "caiu a precisão: a linha do banco entrou errada, e em silêncio" \
+  'vinte e cinco dígitos entra EXACTO' \
+  'a precisão perdeu-se na fronteira' /tmp/bossaos-fin-precisao.txt
+cp "${COPIAS[0]}" "$FIN"
+
+echo
+echo "14. CONTROLO NEGATIVO — a SEGUNDA porta volta a converter"
+plantar <<'PYSEGUNDA' || true
+import io
+p = 'packages/db/src/financeiro.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = "      montanteMenor: BigInt(dados.montanteMenor),"
+assert antigo in s, 'a leitura do movimento nao esta onde se esperava'
+io.open(p, 'w', encoding='utf-8').write(
+    s.replace(antigo, "      montanteMenor: BigInt(Number(dados.montanteMenor)),", 1))
+PYSEGUNDA
+correr /tmp/bossaos-fin-segunda.txt
+exigir_vermelho "caiu a segunda porta: o movimento à mão perdeu dígitos" \
+  'SEGUNDA porta' 'o defeito estava nos dois sítios' /tmp/bossaos-fin-segunda.txt
+cp "${COPIAS[0]}" "$FIN"
+
+echo
+echo "15. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-fin-reposto.txt; then
   passou=$(grep -oE '^# pass [0-9]+' /tmp/bossaos-fin-reposto.txt | grep -oE '[0-9]+')
   verde "reposto: ${passou:-0} casos verdes"
