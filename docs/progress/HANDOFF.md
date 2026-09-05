@@ -12,6 +12,12 @@ mesma `registo_imutavel()` que o E22 pôs na caixa. A correcção é um **regist
 novo**, com autor e motivo obrigatório por `CHECK`. E há um segundo gatilho que
 protege o **sentido**: uma «correcção» não pode trocar a pessoa nem o tipo —
 
+**Nota para a revisão do E29 (erro meu, não dele):** o esquema financeiro
+entrou em `c5f09e0`, um commit meu com assunto `E30:`, por eu ter feito
+`git add -A` sobre a árvore dele. O intervalo da varredura do E29 tem de
+incluir esse commit, ou mede uma etapa a que falta a base.
+
+
 **⚠ Quinto item do JR — e é o irmão do `revogarConvite`:**
 `apagarExcepcao` não tem chamador. A rota `unidades/[locationId]/horarios/route.ts`
 importa e chama `guardarExcepcao`, e **não importa a de apagar**. Uma casa marca

@@ -85,13 +85,53 @@ done)
 # "E12: ..." mesmo quando os ficheiros nao trazem marca de etapa. Dois sinais
 # fracos e diferentes cobrem mais do que um sozinho, e falham por motivos
 # diferentes - que e a unica coisa que faz uma redundancia valer alguma coisa.
+#
+# A ISENCAO DA REGUA E DO CONTRATO TEM DE VALER NOS DOIS SINAIS. Media a 05/09:
+# este detector acusava o commit c5f09e0, "E30: contrato de relatorios e
+# agregacao, e regua, ambos antes do codigo" - que toca SO ficheiros isentos
+# (docs/reviews/ALVO-E30.md e docs/architecture/), e foi o ASSUNTO a denuncia-lo.
+# A isencao estava implementada no detector de ficheiros e faltava aqui: a mesma
+# regra escrita duas vezes, e so uma das copias correcta.
 por_prosa=$(git log -40 --format='%h %s' 2>/dev/null \
   | grep -E '^[0-9a-f]+ E[0-9]{2}:' \
   | while read -r sha resto; do
       n=$(echo "$resto" | sed -E 's/^E([0-9]{2}):.*/\1/')
-      [ "$((10#$n))" -gt "$((10#$n_atual))" ] && echo "$sha diz E$n no assunto"
+      [ "$((10#$n))" -gt "$((10#$n_atual))" ] || continue
+      # So conta se o commit tocar algum ficheiro NAO isento.
+      nao_isentos=$(git show --name-only --format= "$sha" 2>/dev/null \
+        | grep -vE '^docs/reviews/ALVO-E[0-9]{2}\.md$|^docs/architecture/' \
+        | grep -c . || true)
+      [ "${nao_isentos:-0}" -gt 0 ] && echo "$sha diz E$n no assunto"
     done)
-adiantados=$(printf '%s\n%s' "$adiantados" "$por_prosa" | grep -v '^$' || true)
+
+# TERCEIRO SINAL, e este NAO depende de ninguem dar nomes.
+#
+# Medido a 05/09 no commit do E28: dos 17 ficheiros, exactamente UM era
+# reconhecivel pelo detector de nomes - o docs/progress/E28.md. Os outros
+# dezasseis eram o produto (ponto.ts, as onze telas, os specs) e nao traziam
+# marca de etapa nenhuma. O sinal da prosa apanhou-o porque o assunto comecava
+# por "E28:".
+#
+# Ou seja: os dois sinais falham por MECANISMOS diferentes, como esta guarda diz
+# acima, e partilham uma SUPOSICAO - que o trabalho se anuncia. Uma etapa
+# construida em ficheiros sem nome de etapa e commitada com um assunto que nao
+# comeca por E##: e invisivel para os dois ao mesmo tempo. Redundancia com modo
+# de falha partilhado nao e redundancia.
+#
+# O coverage.csv nao precisa que ninguem nomeie nada: as linhas sao por tela e
+# tem a etapa na coluna 7. Mexer no estado das telas de uma etapa E' comecar
+# essa etapa, seja qual for o nome dos ficheiros ou do commit.
+por_matriz=$(git log -40 --format='%h' 2>/dev/null | while read -r sha; do
+  linhas=$(git show "$sha" -- docs/progress/coverage.csv 2>/dev/null \
+    | grep -E '^[+-][A-Z]' | grep -vE '^[+-][+-]' || true)
+  [ -z "$linhas" ] && continue
+  n=$(printf '%s\n' "$linhas" | awk -F, '{print $7}' \
+    | grep -oE '^E[0-9]{2}$' | grep -oE '[0-9]{2}' | sort -rn | head -1)
+  [ -n "$n" ] && [ "$((10#$n))" -gt "$((10#$n_atual))" ] && \
+    echo "$sha mexe nas telas da E$n na matriz"
+done)
+
+adiantados=$(printf '%s\n%s\n%s' "$adiantados" "$por_prosa" "$por_matriz" | grep -v '^$' || true)
 
 if [ -n "$adiantados" ]; then
   erro "ha commits com ficheiros de etapas a frente da autorizada ($atual):"

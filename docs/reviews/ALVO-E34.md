@@ -185,3 +185,29 @@ em vez de listar.
 Fica: `larguras.spec.ts` passa a descobrir as telas a partir do `coverage.csv`
 (as validadas, com rota), como a CI já descobre as guardas por padrão. Controlo
 negativo: acrescentar uma tela nova ao coverage e ver a prova crescer sozinha.
+
+## Dívida 10 — o meu `git add -A`, duas vezes no mesmo dia
+
+**05/09, commit `091c53a`:** varri as onze telas de equipa do E28 do JR para
+dentro de um commit meu sobre coerência do registo. Emendei a mensagem.
+
+**05/09, commit `c5f09e0`:** varri o **esquema do E29** dele — `BankAccount`,
+`StatementImport`, `BankLine`, `Reconciliation`, `AccountingPeriod` e mais três —
+para dentro do meu commit do contrato do E30.
+
+A segunda foi apanhada pela `validar-ordem.sh`, e apanhou-a **pela razão certa**:
+o commit diz `E30:` no assunto e contém trabalho do E29. Não é trabalho
+adiantado — o E29 é a etapa autorizada — é trabalho **mal etiquetado**, por
+minha causa. Fica declarado aqui e sai da janela de 40 commits sozinho. Não lhe
+abro excepção: a etiqueta errada é minha e o registo tem de a mostrar.
+
+> **O que isto ensina sobre mim é mais útil do que o incidente.** O índice do
+> git é estado partilhado entre os dois agentes; escrevi-o na lista de estados
+> partilhados de manhã, apanhei-me a violá-lo à tarde, disse que não voltaria a
+> acontecer, e voltou a acontecer três horas depois. **Uma intenção não é um
+> controlo.** A regra que fica não é «ter cuidado»: é `git add` com caminhos
+> explícitos, sempre, porque essa não depende de eu me lembrar.
+
+**Consequência para a revisão do E29:** o esquema financeiro está em `c5f09e0` e
+não no commit que o JR vier a declarar. A varredura do E29 tem de cobrir o
+intervalo que inclui os dois, ou mede uma etapa a que falta a base.
