@@ -112,7 +112,7 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     DELETE FROM order_submissions    WHERE order_id IN (SELECT id FROM orders WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example');
     DELETE FROM orders               WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example';
     DELETE FROM reservation_allocations WHERE location_id IN (SELECT id FROM locations WHERE slug LIKE '${PREFIXO}%') OR table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%');
-    DELETE FROM reservations         WHERE criada_por LIKE '%@inspeccao.example';
+    DELETE FROM reservations         WHERE criada_por LIKE '%@inspeccao.example' OR criada_por = 'publico';
     DELETE FROM reservation_settings WHERE location_id IN (SELECT id FROM locations WHERE slug LIKE '${PREFIXO}%');
     DELETE FROM routing_rules        WHERE station_id IN (SELECT id FROM production_stations WHERE nome LIKE '${PREFIXO}%');
     DELETE FROM production_stations  WHERE nome LIKE '${PREFIXO}%';

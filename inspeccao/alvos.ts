@@ -61,6 +61,8 @@ export interface Alvos {
   visitanteVivo: string;
   /** E19: a espera VIVA. Sem ela, o RES-C-010 media «não temos mesa para o teu grupo». */
   esperaViva: string;
+  /** E19: a reserva de HOJE, com mesa. Sem ela, as telas do host mediam a agenda vazia. */
+  reservaDeHoje: string;
 }
 
 const PREFIXO = 'insp-';
@@ -186,6 +188,11 @@ export async function resolverAlvos(): Promise<Alvos> {
         `SELECT id FROM waitlist_entries
           WHERE nome LIKE '${PREFIXO}%' AND estado = 'A_ESPERA' LIMIT 1`,
         'uma espera viva'),
+      reservaDeHoje: await um(
+        sql,
+        `SELECT id FROM reservations
+          WHERE chave_idempotente = '${PREFIXO}reserva-de-hoje' LIMIT 1`,
+        'a reserva de hoje do arnês'),
     };
   } finally {
     await sql.end();

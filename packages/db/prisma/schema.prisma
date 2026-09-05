@@ -3178,6 +3178,12 @@ enum EstadoDeReserva {
   CONFIRMADA
   CANCELADA
   NAO_COMPARECEU
+  /// ── Chegar não é estar sentado ────────────────────────────────────────
+  ///
+  /// O grupo está à porta e a mesa ainda não se levantou. Sem este estado, a
+  /// única forma de registar que alguém apareceu era sentá-lo — e o mapa de
+  /// sala passava a mentir a quem serve.
+  CHEGOU
   SENTADA
 
   @@map("estado_de_reserva")
@@ -3232,6 +3238,9 @@ model Reservation {
   canceladaEm  DateTime? @map("cancelada_em") @db.Timestamptz(6)
   canceladaPor String?   @map("cancelada_por")
   noShowEm     DateTime? @map("no_show_em") @db.Timestamptz(6)
+  /// O momento em que o grupo apareceu à porta. É o número de que a tolerância
+  /// de atraso vive, e a base exige-o em `CHEGOU` e em `SENTADA`.
+  chegouEm     DateTime? @map("chegou_em") @db.Timestamptz(6)
   sentadaEm    DateTime? @map("sentada_em") @db.Timestamptz(6)
 
   criadaPor String   @map("criada_por")

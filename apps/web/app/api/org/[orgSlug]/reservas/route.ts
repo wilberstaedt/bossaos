@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
-import { guardarDefinicoes, listarUnidades } from '@bossaos/db';
+import {
+  abrirWalkIn, cancelar, confirmarReserva, guardarDefinicoes, listarUnidades,
+  marcarChegada, reagendar, registarNaoCompareceu, sentarReserva,
+} from '@bossaos/db';
 import { corpoDaResposta, estadoHttp, exigirAccao } from '@bossaos/domain';
 import { comEscopoDoPedido, resolverPedido } from '../../../../../src/sessao.ts';
 import { texto, voltarPara } from '../../../../../src/formulario.ts';
@@ -159,6 +162,97 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
     await comEscopoDoPedido(sessao, (db) => db.reservationBlock.deleteMany({
       where: { id: texto(dados, 'bloqueioId') ?? '', locationId: unidade.id } }));
     return voltarPara(paraSeccao('/bloqueios'), { guardado: '1' });
+  }
+
+  // ── E19 · a operação do host ──────────────────────────────────────────
+  //
+  // Tudo passa pelo MESMO motor da reserva pública: a antecedência, a capacidade
+  // da zona, a exclusão da mesa. Um caminho «do host» que saltasse as
+  // verificações seria a forma mais rápida de duas famílias à porta — quem
+  // atende o telefone não vê a sala.
+  const paraAgenda = () => `/${idioma}/app/${orgSlug}/${locationSlug}/reservations`;
+  const paraReserva = (id: string) => `${paraAgenda()}/${id}`;
+
+  if (accao === 'nova_reserva') {
+    const dia = texto(dados, 'dia') ?? '';
+    const hora = texto(dados, 'hora') ?? '';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dia) || !/^\d{2}:\d{2}$/.test(hora)) {
+      return voltarPara(`${paraAgenda()}/nova`, { erro: 'quando' });
+    }
+    // ── O motor abre a SUA transacção, e por isso recebe o cliente cru ────
+    //
+    // `confirmarReserva` corre em `serializable` com lock por unidade: precisa de
+    // abrir a transacção ele próprio. Passar-lhe um cliente que já está dentro de
+    // uma faria a serialização acontecer na transacção errada — e a contagem da
+    // zona deixava de estar protegida sem ninguém dar por isso.
+    const r = await confirmarReserva(
+      (await import('../../../../../src/servidor.ts')).obterBase(),
+      { organizationId },
+      {
+        locationId: unidade.id,
+        pessoas: inteiro(dados, 'pessoas', 2),
+        inicio: new Date(`${dia}T${hora}:00Z`),
+        nome: texto(dados, 'nome') ?? '',
+        contacto: texto(dados, 'contacto') ?? '',
+        notas: texto(dados, 'notas') ?? null,
+        origem: 'HOST',
+        // A chave sai do que o host escreveu: dois toques no botão dão UMA
+        // reserva, exactamente como na porta da rua.
+        chaveIdempotente: `host|${unidade.id}|${dia}|${hora}|${texto(dados, 'contacto') ?? ''}`,
+        criadaPor: sessao.actor.email,
+      });
+    if (!r.ok) return voltarPara(`${paraAgenda()}/nova`, { erro: r.motivo });
+    return voltarPara(paraReserva(r.reservaId), { guardado: '1' });
+  }
+
+  if (accao === 'chegou') {
+    await comEscopoDoPedido(sessao, (db) => marcarChegada(db, texto(dados, 'reservaId') ?? ''));
+    return voltarPara(paraReserva(texto(dados, 'reservaId') ?? ''), { guardado: '1' });
+  }
+
+  if (accao === 'sentar') {
+    const r = await comEscopoDoPedido(sessao, (db) => sentarReserva(
+      db, organizationId, unidade.id,
+      texto(dados, 'reservaId') ?? '', texto(dados, 'tableId') ?? '', sessao.actor.email));
+    const destino = `${paraReserva(texto(dados, 'reservaId') ?? '')}/mesa`;
+    if (!r.ok) return voltarPara(destino, { erro: r.motivo });
+    return voltarPara(paraReserva(texto(dados, 'reservaId') ?? ''), { guardado: '1' });
+  }
+
+  if (accao === 'nao_compareceu') {
+    await comEscopoDoPedido(sessao, (db) =>
+      registarNaoCompareceu(db, texto(dados, 'reservaId') ?? ''));
+    return voltarPara(paraAgenda(), { guardado: '1' });
+  }
+
+  if (accao === 'cancelar_reserva') {
+    await comEscopoDoPedido(sessao, (db) =>
+      cancelar(db, texto(dados, 'reservaId') ?? '', sessao.actor.email));
+    return voltarPara(paraAgenda(), { guardado: '1' });
+  }
+
+  if (accao === 'mover') {
+    const dia = texto(dados, 'dia') ?? '';
+    const hora = texto(dados, 'hora') ?? '';
+    const reservaId = texto(dados, 'reservaId') ?? '';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dia) || !/^\d{2}:\d{2}$/.test(hora)) {
+      return voltarPara(`${paraReserva(reservaId)}/mover`, { erro: 'quando' });
+    }
+    const r = await reagendar(
+      (await import('../../../../../src/servidor.ts')).obterBase(), { organizationId },
+      unidade.id, reservaId, new Date(`${dia}T${hora}:00Z`));
+    // A anterior sobrevive: o motor garante-o dentro da transacção, e o regresso
+    // leva o motivo para a tela o poder dizer.
+    if (!r.ok) return voltarPara(`${paraReserva(reservaId)}/mover`, { erro: r.motivo });
+    return voltarPara(paraReserva(reservaId), { guardado: '1' });
+  }
+
+  if (accao === 'walk_in') {
+    const r = await comEscopoDoPedido(sessao, (db) => abrirWalkIn(
+      db, organizationId, unidade.id, texto(dados, 'tableId') ?? '',
+      inteiro(dados, 'pessoas', 2), sessao.actor.email));
+    if (!r.ok) return voltarPara(`${paraAgenda()}/walk-in`, { erro: r.motivo });
+    return voltarPara(`${paraAgenda()}/mapa`, { guardado: '1' });
   }
 
   return NextResponse.json({ erro: 'accao_desconhecida' }, { status: 400 });

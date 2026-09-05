@@ -2,10 +2,11 @@
 
 **Etapa atual:** E19 — Reserva pública, host e lista de espera (**28 telas
 novas**, mais o `FLOOR-006` que o E19 revisita). A maior etapa do projecto.
-**Estado:** **FATIAS 1 e 2 — IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** Declarado
-pelo JR; não assinado. Feitas: a migração e o motor da espera (fatia 1) e a porta
-mais as **11 telas do fluxo público** (fatia 2). **Faltam 17 telas** — toda a
-superfície do host e a mensageria — e o `FLOOR-006`.
+**Estado:** **FATIAS 1, 2 e 3 — IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** Declarado
+pelo JR; não assinado. Feitas: a migração e o motor da espera; a porta e as 11
+telas do fluxo público; o motor do host, as **11 telas do host** e o
+**`FLOOR-006` revisitado**. **22 das 28 telas.** Faltam 6: `RES-B-017..019`,
+`REP-008`, `INT-004`, `SET-009` — a mensageria e o relatório.
 
 **Aviso do JR:** a fatia 2 foi construída sobre a fatia 1, que ainda não está
 assinada. Se o modelo mudar na revisão, as telas seguem-no.
@@ -66,18 +67,38 @@ alternativa nenhuma há sempre a lista de espera — nunca um beco.
 pacote da base, e as cinco funções novas entram na lista de portas do público
 **pela lista** — uma excepção seria uma porta.
 
+**A FATIA 3 obrigou a outra decisão de modelo: chegar não é estar sentado.** O
+grupo está à porta e a mesa ainda não se levantou, e isso não era representável.
+Se o check-in sentar, a mesa fica marcada como ocupada enquanto os anteriores lá
+estão e o mapa mente a quem serve; se não houver check-in, a única forma de
+registar a chegada é sentar, e a tolerância de atraso conta contra quem já está
+lá. Dois actos, dois carimbos, e a base exige `chegou_em` em `CHEGOU` **e** em
+`SENTADA`.
+
+**E a ponte entre o motor e a sala está fechada.** O `FLOOR-006` anuncia a
+reserva que chega dentro de duas horas numa mesa que está **mesmo** livre — era
+por aí que a reserva se perdia. Com o par: uma reserva de amanhã não aparece hoje,
+e uma já sentada deixa de ser anunciada.
+
+**As atrasadas são ditas e não varridas**, e a agenda diz isso por palavras — sem
+a frase, um host razoável assume que o sistema já tratou do assunto.
+
 **O que está pronto para medir** — códigos de saída lidos directamente:
 `pnpm verificar` (**0**) · `./scripts/provar-espera.sh` (6 grupos, **18 casos, 8
 defeitos plantados**, 0) · `provas/reserva-publica.test.ts` (6 grupos, **13
 casos**, 0) · `./scripts/provar-reserva-publica-no-navegador.sh` (**23 casos, 9
 defeitos plantados**, 0) · `./scripts/provar-publico.sh` (0) ·
-`./scripts/provar-reservas.sh` (0) · `./scripts/provar-migracoes-do-zero.sh` (0).
+`./scripts/provar-host.sh` (5 grupos, **17 casos, 7 defeitos plantados**, 0) ·
+`./scripts/provar-host-no-navegador.sh` (**22 casos, 6 defeitos plantados**, 0) ·
+`./scripts/provar-sala-no-navegador.sh` (0 — o `FLOOR-006` mudou e o E13 continua
+verde) · `./scripts/provar-reservas.sh` (0) ·
+`./scripts/provar-migracoes-do-zero.sh` (0).
 
-**O que NÃO está feito:** **17 telas** — `RES-B-001..011`, `RES-B-017..019`,
-`REP-008`, `INT-004`, `SET-009`, que são toda a superfície do host e a
-mensageria —, o `FLOOR-006` a mostrar as reservas confirmadas antes da hora, a
-fila de mensagens com reenvio deduplicado, e o relatório com as definições ao
-lado dos números.
+**O que NÃO está feito:** **6 telas** — `RES-B-017` (templates), `RES-B-018`
+(histórico), `RES-B-019` (relatório), `REP-008`, `INT-004` e `SET-009` —, a fila
+de mensagens com reenvio deduplicado (ponto 2 da régua) e o relatório com as
+definições ao lado dos números (ponto 3). O conector de mensageria continua
+**desligado e visível como desligado**: nada finge ter enviado.
 
 **A prova foi LOCAL.** A CI continua trancada por facturação do GitHub.
 

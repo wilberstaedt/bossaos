@@ -1,6 +1,6 @@
 import { Aviso, Etiqueta } from '@bossaos/ui';
 import { formatarHora, mensagensDe, type Idioma } from '@bossaos/i18n';
-import { salaAgora } from '@bossaos/db';
+import { reservasAChegar, salaAgora } from '@bossaos/db';
 import { comEscopoDoPedido } from '../../../../../../src/sessao.ts';
 import { carregarSala } from '../../../../../../src/sala-da-pagina.ts';
 import { NavegacaoDaSala } from '../../../../../../src/componentes/NavegacaoDaSala.tsx';
@@ -32,7 +32,18 @@ export default async function SalaEmTempoReal({
   const m = mensagensDe(idioma);
   const s = m.salaE13;
   const { sessao, unidade } = await carregarSala(idioma, orgSlug, locationSlug);
-  const mesas = await comEscopoDoPedido(sessao, (db) => salaAgora(db, unidade.id, sessao.contexto.organizationId));
+  // ── E19 · uma mesa livre com reserva a chegar NÃO é uma mesa livre ─────
+  //
+  // «Uma reserva confirmada para as 20h tem de aparecer na sala antes das 20h,
+  // senão o host vê a mesa livre e senta lá um walk-in.»
+  //
+  // A mesa está mesmo livre — não há sessão aberta — e é essa a armadilha: este
+  // ecrã dizia a verdade sobre o presente e escondia o que aí vinha. É por aqui
+  // que a reserva se perde entre o motor e a sala.
+  const { mesas, aChegar } = await comEscopoDoPedido(sessao, async (db) => ({
+    mesas: await salaAgora(db, unidade.id, sessao.contexto.organizationId),
+    aChegar: await reservasAChegar(db, unidade.id, 120),
+  }));
   const base = `/${idioma}/app/${orgSlug}/${locationSlug}/floor`;
 
   const abertas = mesas.filter((x) => x.sessao).length;
@@ -86,6 +97,13 @@ export default async function SalaEmTempoReal({
                     ? `${s.comensais}: ${mesa.sessao.comensais} · ${s.abertaEm} ${formatarHora(mesa.sessao.abertaEm, idioma)} · ${mesa.sessao.abertaPor}`
                     : `${s.capacidade}: ${mesa.capacidade}`}
                 </p>
+                {!mesa.sessao && aChegar.get(mesa.id) ? (
+                  <p className="bo-publico__descricao" data-teste="reserva-a-chegar">
+                    {`${m.hostE19.aChegar}: ${aChegar.get(mesa.id)!.nome} · `
+                     + `${aChegar.get(mesa.id)!.pessoas} · `
+                     + formatarHora(aChegar.get(mesa.id)!.inicio, idioma)}
+                  </p>
+                ) : null}
               </li>
             ))}
           </ul>

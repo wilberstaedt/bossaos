@@ -272,3 +272,10 @@ export {
   reservaPorSegredo,
   type UnidadePublica, type HorarioOferecido, type ResultadoPublico, type RecusaPublica,
 } from './reserva-publica.ts';
+
+// ── E19 · o host ──
+export {
+  agendaDoDia, chegadasPorHora, reservasAChegar, atrasadas,
+  marcarChegada, sentarReserva, abrirWalkIn, reservaPorId,
+  type ReservaDoDia,
+} from './host.ts';

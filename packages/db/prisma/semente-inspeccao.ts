@@ -851,6 +851,56 @@ async function principal(): Promise<void> {
           gestaoExpiraEm: new Date('2027-06-13T20:00:00Z'),
         },
       });
+
+      // ── Uma reserva de HOJE, com mesa, para o host ter o que ver ────────
+      //
+      // A agenda, a linha do tempo e o mapa são todos de hoje. Com a reserva de
+      // 2027 apenas, as onze telas do host mediam «hoje não há reservas» — que é
+      // um ecrã real e é o ecrã fácil.
+      //
+      // A hora é daqui a uma hora: tem de estar no futuro para o mapa a anunciar
+      // como «a chegar», e é isso que o FLOOR-006 revisitado mede.
+      const daquiAUmaHora = new Date(Date.now() + 60 * 60 * 1000);
+      const reservaDeHoje = await prisma.reservation.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          pessoas: 2, origem: 'HOST',
+          inicio: daquiAUmaHora,
+          fim: new Date(daquiAUmaHora.getTime() + 90 * 60 * 1000),
+          nome: `${PREFIXO}Familia de hoy`, contacto: 'hoy@inspeccao.example',
+          chaveIdempotente: `${PREFIXO}reserva-de-hoje`,
+          criadaPor: 'painel@inspeccao.example',
+        },
+        select: { id: true },
+      });
+      // ── A mesa tem de estar LIVRE, e é esse o ponto ────────────────────
+      //
+      // Escolhi primeiro a primeira por código, e calhou a `insp-07`, que já tem
+      // sessão aberta do E17. O mapa não a anunciava — e com razão: uma mesa
+      // ocupada não é uma mesa livre com reserva à vista.
+      //
+      // O caso inteiro é sobre uma mesa que está MESMO livre e que o host
+      // sentaria a um walk-in se ninguém lhe dissesse o que aí vem.
+      const mesaParaAReserva = await prisma.serviceTable.findFirst({
+        where: {
+          locationId: IDS.unidadeA2, codigo: { startsWith: PREFIXO },
+          sessoes: { none: { estado: { not: 'FECHADA' } } },
+        },
+        orderBy: { codigo: 'asc' }, select: { id: true },
+      });
+      if (!mesaParaAReserva) {
+        throw new Error('a semeadura do E19 precisa de uma mesa livre para a reserva a chegar');
+      }
+      if (mesaParaAReserva) {
+        await prisma.reservationAllocation.create({
+          data: {
+            organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+            reservationId: reservaDeHoje.id, tableId: mesaParaAReserva.id,
+            inicio: daquiAUmaHora,
+            fim: new Date(daquiAUmaHora.getTime() + 105 * 60 * 1000),
+          },
+        });
+      }
     }
 
     // ── O SITE do restaurante (E10), publicado ────────────────────────────
