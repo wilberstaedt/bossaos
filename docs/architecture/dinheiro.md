@@ -24,6 +24,37 @@ depois de aparecer a diferença. E a asserção que cobre isto não é "cada par
 Descontos, cortesias e impostos entram no mesmo cálculo, com o mesmo teste: as partes
 somam, ao cêntimo.
 
+### A ordem do resíduo, escrita — 05/09
+
+Este documento e o `overview.md` dizem, os dois, que **a ordem de distribuição do
+resíduo se escreve antes do checkout**. Nenhum a escrevia. Escrevo-a agora, com o
+E22 em construção, porque uma instrução repetida duas vezes e nunca cumprida é
+pior do que não existir: dá a impressão de que a decisão está tomada.
+
+**O cêntimo a mais vai para as primeiras partes, por ordem posicional.**
+`1000 ÷ 3` dá `[334, 333, 333]`. `1000 ÷ 6` dá `[167, 167, 167, 167, 166, 166]`
+— quatro partes absorvem o resíduo de 4, e as duas últimas não.
+
+**Porquê a posição, e não outra coisa:**
+
+- **É determinista.** A mesma conta dividida duas vezes dá exactamente o mesmo
+  resultado. Uma regra aleatória, ou baseada em quem paga primeiro, muda os
+  valores entre dois ecrãs abertos ao mesmo tempo na mesma mesa — e aí a conta
+  passa a depender de quem carregou primeiro.
+- **Não se manipula.** Não depende da ordem de pagamento, que ninguém conhece no
+  momento da divisão, nem de nada que o cliente escolha.
+- **É explicável em voz alta.** «Uma das partes leva um cêntimo a mais» é uma
+  frase que um empregado diz a uma mesa sem se sentir mal.
+
+**O que o ecrã tem de fazer, e é metade da regra:** mostrar os valores **como
+são**. Nunca «3,33 cada» quando uma das partes é 3,34. O cêntimo aparece, ou a
+regra é boa e a interface mente por cima dela.
+
+**A asserção que prova isto** não é «cada parte é 333». É **a soma das partes ser
+exactamente o total**, mais a **distribuição verificada** — e o par: uma divisão
+exacta (`900 ÷ 3`) continua exacta, `[300, 300, 300]`, senão «soma sempre ao
+primeiro» passa o caso do resto e falha o outro.
+
 ## Quatro entidades, e cada uma existe porque as outras não servem
 
 | Entidade | O que é | O que **não** é |
