@@ -9,6 +9,41 @@
 
 ---
 
+## ANTES DE TUDO — o defeito aberto no E19, que se agrava sozinho
+
+Se estás a retomar a meio do E19, **lê isto antes de escrever uma linha**, senão
+constróis mais telas em cima de uma representação errada.
+
+**A hora que o cliente escolhe não passa pelo fuso da unidade.** A porta pública
+faz ``new Date(`${dia}T${hora}:00Z`)`` e a grelha de horários faz
+`Date.UTC(...)`. As telas leem de volta com `toISOString().slice(11,16)` e com
+`getUTCHours()`, por isso **tudo parece coerente** — e é essa coerência que o
+esconde.
+
+Parte onde o instante é comparado com o relógio verdadeiro (`agoraDaBase`):
+
+- a **antecedência mínima** de 60 min é atravessável durante toda a janela do
+  desvio (medido ao vivo: 1111 min calculados onde faltavam 991);
+- o **aviso da sala** (`FLOOR-006`) só aparece **à hora da reserva** e fica a
+  dizer «a chegar» durante mais duas horas — que é exactamente o cenário que o
+  aviso existe para evitar.
+
+**A máquina certa já existe e está provada:** `resolverHoraLocal(db, fuso, local)`
+em `packages/db/src/reservas.ts:810`, apoiada em `instante_local()` na base.
+**Tem zero chamadas.** É caminho morto. O conserto é chamá-la, e usar o `estado`
+que ela devolve — `INEXISTENTE` e `AMBIGUA` são os dois casos que a tela tem de
+dizer à pessoa em vez de escolher em silêncio.
+
+Detector: `bash scripts/demonstrar-defeito-do-fuso.sh` (fora da suite de
+propósito). Falha hoje, passa quando o conserto entrar; diz `NAO MEDI` se a base
+não estiver migrada, em vez de mentir. Análise completa em
+`docs/reviews/E19-ACHADO-FUSO.md`.
+
+**Não é defeito teu:** a convenção atravessa o produto desde antes do E19, e o
+sénior assinou etapas em cima dela sem a ver. Está escrito lá com o nome dele.
+
+---
+
 ## Prompt (colar a partir daqui)
 
 És o **Lúmen JR**. Trabalhas no BossaOS, em `~/Developer/projects/bossaos`, e não estás
