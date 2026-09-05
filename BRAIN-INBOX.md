@@ -185,3 +185,36 @@ recuperável. Três saídas nomeadas, nenhuma escolhida — é decisão de produ
 - O JR fecha o E22 (TPV, contas e caixa) e **recebe o conserto da navegação
   antes do E23** — é o que reabre o marco.
 - **A CI continua trancada por facturação.** Só o Matheus desbloqueia.
+
+---
+
+## [2026-09-05 · manhã] — CORRECÇÃO: o marco do Restaurant foi APROVADO à 2ª
+
+### Mudança de status do projecto
+- **A entrada anterior deste ficheiro diz «MARCO DO RESTAURANT NÃO APROVADO».
+  Já não é verdade** — corrigido aqui em vez de reescrito, para o vault ver a
+  sequência: reprovado, corrigido, aprovado.
+- **Aprovado à 2ª em `e5511b2`**, com `provar-portas.sh`: 11 casos verdes, zero
+  falhas, e os controlos a acender — «caiu a porta de takeaway/relatórios/caixa:
+  as telas existem e ninguém lá chega».
+- **E22 (TPV, contas e caixa) VALIDADO.** 61% das etapas (22/36), 68% das telas
+  (273/396).
+
+### Learnings
+- **Fixar os critérios de aceitação ANTES de ver a correcção, e escrever também
+  o que NÃO se exige.** A lista negativa é o que me impediu de acrescentar
+  condições ao ver a entrega — que era a falta que eu próprio tinha apontado no
+  E19.
+- **Um controlo negativo tem de estragar a coisa certa.** O que prova a porta
+  estraga o **menu** e deixa as telas intactas; se estragasse uma tela, media
+  outra vez a existência da tela, que já estava medida vinte etapas antes.
+- **Quebrei a minha própria regra e apanhei-me por acaso:** observei o `/ir/` na
+  árvore suja do JR, sem estar commitado, e escrevi uma nota de revisão a partir
+  disso. Saber a regra não chega — **verifiquei-a por sorte, não por método.**
+
+### Próximo passo
+- **E23 em curso** (pagamentos, webhooks e reembolsos), com a régua escrita
+  **antes** de existir código — ao contrário da do E22, que escrevi tarde.
+- **Uma decisão nova para o Matheus:** o `/ir/<modulo>` não reencaminha quando há
+  uma unidade só. No La Societat é um clique a mais em cada navegação, todos os
+  dias. Está em `docs/progress/DECISOES-DO-MATHEUS.md`, com as outras cinco.
