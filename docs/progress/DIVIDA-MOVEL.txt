@@ -39,3 +39,66 @@
 #
 # A lista está VAZIA. Ela existe para não deixar esquecer o que não foi medido —
 # e neste momento não há nada.
+
+# ── Acrescentado a 05/09 pelo senior ────────────────────────────────────────
+# A guarda apanhou-me: assinei estas telas sem AFIRMAR que medi o movel.
+#
+# As provas de navegador destas etapas medem cinco larguras, duas delas de
+# movel (360x780 e 390) — isso e' verdade e esta nos `inspeccao/*.spec.ts`.
+# O que NAO fiz foi afirma-lo por tela na assinatura, e a guarda tem razao:
+# «nao basta a rota existir na inspeccao — quem assinou tem de afirmar que
+# mediu ESTA tela».
+#
+# Afirmei as 43 cujas provas de navegador corri NESTA sessao e vi verdes
+# (E22, E23, E25). Estas 46 sao de etapas que assinei mais cedo e cujas
+# corridas nao tenho a mao: declaro-as em vez de as afirmar de memoria.
+# Uma afirmacao de memoria e' exactamente o que esta guarda existe para
+# impedir.
+#
+# Saem daqui quando eu correr a prova de navegador da etapa e a vir verde.
+CAT-021
+DEL-001
+DEL-002
+DEL-003
+INT-004
+INT-006
+POS-012
+POS-020
+POS-021
+PUB-003
+REP-008
+RES-B-001
+RES-B-002
+RES-B-003
+RES-B-004
+RES-B-005
+RES-B-006
+RES-B-007
+RES-B-008
+RES-B-009
+RES-B-010
+RES-B-011
+RES-B-012
+RES-B-013
+RES-B-014
+RES-B-015
+RES-B-016
+RES-B-017
+RES-B-018
+RES-B-019
+RES-C-001
+RES-C-002
+RES-C-003
+RES-C-004
+RES-C-005
+RES-C-006
+RES-C-007
+RES-C-008
+RES-C-009
+RES-C-010
+SET-007
+SET-009
+STAFF-021
+TAKE-001
+TAKE-002
+TAKE-003
