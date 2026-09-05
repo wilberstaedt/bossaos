@@ -72,3 +72,69 @@ E12 em curso — o ataque está preparado em `inspeccao/sonda-tema.ts`: ler a co
 sete fixos não. A pergunta aberta do E13 está no contrato: **a revogação fecha a
 porta por onde a regra 2 mandava sair**, e o rascunho fica nem enviado nem
 recuperável. Três saídas nomeadas, nenhuma escolhida — é decisão de produto.
+
+---
+
+## [2026-09-05] — E18 e E19 assinados, e a noite em que o meu aparelho mediu a base errada
+
+### Decisões técnicas
+- **A identidade de uma mensagem é o ACONTECIMENTO que a causou**, não `(reserva,
+  tipo)` nem `(reserva, tipo, momento)`. A primeira engole a segunda chamada
+  legítima do host — «a sua mesa está pronta» sai duas vezes na mesma noite. A
+  segunda não deduplica nada. Contrato em `capacidade-e-reservas.md`.
+- **Uma lista de espera NÃO guarda posição.** A ordem de chegada não é a ordem de
+  sentar: um grupo de 6 não bloqueia um de 2 quando vaga uma mesa de 2. Sem
+  coluna, ninguém consegue mostrar um número errado. Deriva-se, dentro do grupo
+  que cabe nas mesmas mesas.
+- **O contacto de quem esperou tem finalidade que ACABA.** O registo da visita
+  fica (é o que diz ao dono se perde gente à porta); o telefone não. Campo que se
+  esvazia sem destruir a linha, senão o produto escolhe sempre guardar o número.
+- **Toda a hora escolhida por uma pessoa passa pelo fuso da unidade antes de
+  existir instante.** E sem fuso configurado, recusa-se em vez de adivinhar.
+
+### Learnings
+- **Verde não é alcance.** O E19 tinha a suite inteiramente verde, 35 controlos
+  negativos a acender, e o `enfileirar` com ZERO chamadas — o histórico de
+  mensagens estava sempre vazio. As provas alcançavam as funções directamente.
+  Uma prova responde à pergunta que lhe fizeram; o silêncio dela sobre o resto
+  parece aprovação. **Para cada aceite, apontar a linha de PRODUTO que o
+  exercita** — a regra existia desde o E15 e eu não a executei sempre.
+- **O meu isolamento de revisão estava anulado por uma linha.** Os `provar-*.sh`
+  carregam `.env` na linha 14, depois das minhas exportações, e o `.env` da
+  árvore de revisão apontava para a base do JR. Todas as provas por script
+  bateram na base viva dele, que ele estava a escrever. Explicou o falso alarme
+  do SKU, a «regressão» na retenção e os vermelhos que mudavam de sítio.
+- **Um vermelho que aparece uma vez é observação, não achado.** Quase reportei
+  fuga de custo numa resposta pública, e depois quase reportei que a porta
+  pública deixava apagar reservas — as duas falsas, as duas do meu ambiente.
+- **Um remendo que traz um defeito novo é sinal para parar.** Fiz quatro seguidos
+  a tentar consertar concessões de base: revoguei ao papel errado, revoguei um
+  `language c`, apaguei a base depois de a receita a preparar, e acusei o
+  ambiente do JR de um defeito que era meu. A solução simples — a base nasce
+  vazia — estava provada desde o início num script que eu já tinha.
+- **Um instrumento que deixa rasto contamina a medição seguinte** e faz-se passar
+  por defeito do produto. O meu detector escrevia na base e não repunha.
+
+### O que foi feito
+- **E18 VALIDADO** (`cfafed7`): 13+19 verdes, 17 controlos negativos.
+- **E19 VALIDADO** (`e3482e5`) depois de retido por duas máquinas provadas sem
+  chamador: 5 provas verdes, 39 controlos negativos, base reconstruída do zero.
+- Contratos novos: `lista-de-espera.md`, os cinco números do relatório, a
+  identidade da mensagem, a retenção do contacto.
+- Aparelho de revisão consertado: `.env` da árvore, base a nascer vazia,
+  detector a repor o que mexe.
+- **52% das etapas (19/36), 62% das telas (247/396), zero telas a aguardar.**
+
+### Mudança de status do projecto
+- Passou de metade. O E20 (takeaway e delivery) está em curso, com o momento de
+  produção derivado por **gatilho da base** — um valor escrito de fora é
+  substituído.
+
+### Próximo passo
+- Fechar o E20. Depois o **E21, que é revisão minha**, e onde entra a pergunta
+  que nenhuma prova faz: *o produto chega aqui?* — com a varredura de funções
+  exportadas sem chamador, triando as de etapas já assinadas.
+- **A CI continua parada por facturação do GitHub Actions.** Só o Matheus
+  desbloqueia. 12 provas não correm lá desde 04/09.
+- **E00 continua por assinar** — é meu, e só o JR o pode julgar. O dossiê está
+  em `docs/reviews/E00-PROVA-PARA-O-JR.md`, agora com a prova que joga contra.
