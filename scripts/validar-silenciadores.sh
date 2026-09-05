@@ -46,7 +46,20 @@ for f in scripts/*.sh; do
     fi
     achados="$achados
     $(basename "$f"): $linha"
-  done < <(grep -nE "2>\s*/dev/null" "$f" 2>/dev/null | grep -iE "$CRITICOS" || true)
+  # ── COMENTARIOS FORA, E ISTO APANHOU-ME NO DIA EM QUE NASCEU ─────────────
+  #
+  # A 05/09, horas depois de escrever esta guarda, ela acusou uma linha do
+  # `provar-crm.sh` do JR que dizia:
+  #   «Repor o SQL da migracao, e falhar ALTO se nao repuser. O 2>/dev/null que...»
+  # Um COMENTARIO a explicar que ele fez a coisa certa. A guarda escrita para
+  # apanhar silenciadores estava a acusar quem os documentava.
+  #
+  # E' a mesma familia que a `validar-provas-na-ci.sh` ja tinha apanhado em si
+  # propria — vigiar a FORMA DE ESCRITA em vez da propriedade — e a cura e' a
+  # mesma que ela usa: cortar os comentarios ANTES de procurar.
+  # silenciador-ok: aqui o silencio e' do proprio grep a nao achar nada, e o
+  # `|| true` acima ja o declara.
+  done < <(sed 's/#.*//' "$f" | grep -nE "2>\s*/dev/null" | grep -iE "$CRITICOS" || true)
 done
 
 # Controlo do proprio leitor: zero scripts lidos e' cegueira, nao limpeza.
