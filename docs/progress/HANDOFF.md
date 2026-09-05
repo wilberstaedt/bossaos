@@ -1,104 +1,74 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E19 — Reserva pública, host e lista de espera (**28 telas
-novas**, mais o `FLOOR-006` que o E19 revisita). A maior etapa do projecto.
-**Estado:** **FATIAS 1, 2 e 3 — IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** Declarado
-pelo JR; não assinado. Feitas: a migração e o motor da espera; a porta e as 11
-telas do fluxo público; o motor do host, as **11 telas do host** e o
-**`FLOOR-006` revisitado**. **22 das 28 telas.** Faltam 6: `RES-B-017..019`,
-`REP-008`, `INT-004`, `SET-009` — a mensageria e o relatório.
-
-**Aviso do JR:** a fatia 2 foi construída sobre a fatia 1, que ainda não está
-assinada. Se o modelo mudar na revisão, as telas seguem-no.
-**Contratos que mandam:** `lista-de-espera.md` (escrito para esta etapa) e
-`capacidade-e-reservas.md` (o motor, do E18). Régua: `docs/reviews/ALVO-E19.md`.
+**Etapa atual:** E19 — Reserva pública, host e lista de espera. A maior etapa do
+projecto.
+**Estado:** **AS 28 TELAS ESTÃO FEITAS**, mais o `FLOOR-006` revisitado.
+**IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** Declarado pelo JR; não assinado —
+ninguém assina a revisão do próprio código.
+**Contratos que mandam:** `lista-de-espera.md` (escrito para esta etapa),
+`capacidade-e-reservas.md` (o motor, do E18) e `qr-da-mesa-e-o-visitante.md` (que
+esta etapa alargou, por decisão escrita antes do código). Régua: `ALVO-E19.md`.
 **Detalhe e achados:** `docs/progress/E19.md`.
 
-**A regra que o contrato decide vive numa AUSÊNCIA.** Não há coluna `posicao`,
-nem `numero_na_fila`, nem `senha` — «ninguém pode mostrar um número errado se o
-número não existe em lado nenhum para ser mostrado». É a mesma garantia por
-ausência do E17, e tem caso próprio a ler o `information_schema` mais um controlo
-negativo que **põe a coluna de volta**.
+**Aviso do JR:** as quatro fatias assentam umas nas outras e **nenhuma está
+assinada**. Se o modelo mudar na revisão, o resto segue-o.
 
-**A posição agrupa pelo CONJUNTO DE MESAS que serve o grupo.** Numa sala de 2, 4
-e 6, um grupo de 5 e um de 6 servem-se das mesmas mesas — e é por isso que «é o
-2.º dos grupos de 5 ou 6» sobrevive ao grupo de 2 passar à frente, e «é o 3.º»
-não sobrevive a nada. A preferência de zona entra na mesma chave. E **quem não
-cabe em mesa nenhuma não tem posição** (`null`, não o último lugar): dizer «é o
-7.º» a um grupo de 20 numa sala cuja maior mesa tem 6 é a promessa mais falsa de
-todas.
+## As quatro decisões que esta etapa tomou
 
-**O par que decide a etapa está provado nos dois sentidos:** sentar o grupo de 2
-muda a posição do outro de 2, **e não muda** a do grupo de 6. Sem a segunda
-metade, «tudo sobe» — que é uma fila — passava o teste.
+**1. Uma lista de espera NÃO é uma fila, e a garantia é uma AUSÊNCIA.** Não há
+coluna `posicao`, nem `numero_na_fila`, nem `senha` — «ninguém pode mostrar um
+número errado se o número não existe em lado nenhum para ser mostrado». A posição
+deriva-se, e agrupa pelo **conjunto de mesas** que serve o grupo: «é o 2.º dos
+grupos de 5 ou 6» sobrevive ao de 2 passar à frente, «é o 3.º» não sobrevive a
+nada. Quem não cabe em mesa nenhuma tem posição `null`, e não o último lugar.
 
-**O controlo obrigatório do contrato acende, e está confinado.** Fazer a
-derivação ignorar o tamanho do grupo derruba quase todo esse grupo de casos, e
-isso por si só não prova nada; o que o confina é a **sugestão ao host**, noutra
-função, que tem de ficar verde. Se cair, o plante escorregou para fora da
-derivação.
+**2. A porta da reserva pública fica FORA de `/r/`.** O E18 fechou essa pasta com
+«nada sem sessão de visitante», e quem reserva está em casa três dias antes. A
+razão que pôs a outra porta lá dentro, lida ao contrário: o que justifica o âmbito
+no endereço é **haver uma credencial que não pode viajar**, e um formulário
+anónimo não tem nenhuma. O que a protege é o limite por unidade e janela (com
+lock, na base), a chave idempotente que nasce no HTML, e não confirmar existência.
 
-**Um achado: a restrição encontrou uma duplicação antes de qualquer pessoa.** O
-`CHECK` novo exige `chamado_em` num `COM_OFERTA`, e a prova do E18 ficou vermelha
-— havia duas funções a escrever essa transição, e uma delas não carimbava. Ficou
-uma. O mesmo com a entrada na espera, que o E18 tinha sem zonas.
+**3. Chegar não é estar sentado.** Se o check-in sentar, a mesa fica ocupada
+enquanto os anteriores lá estão e o mapa mente a quem serve; se não houver
+check-in, a única forma de registar a chegada é sentar, e a tolerância de atraso
+conta contra quem já está lá. Dois actos, dois carimbos, e a base exige `chegou_em`
+em `CHEGOU` **e** em `SENTADA`.
 
-**A FATIA 2 obrigou a uma decisão, e escrevi-a antes do código.** O E18 fechou
-`apps/web/app/r` com «nada sem sessão de visitante»; quem reserva está em casa,
-três dias antes, e não tem essa sessão. A porta da reserva pública fica **fora de
-`/r/`**, em `/api/publico/reservar` — e fica lá pela razão que pôs a outra cá
-dentro, lida ao contrário: o que justifica o âmbito no endereço é **haver uma
-credencial que não pode viajar**, e um formulário anónimo não tem nenhuma.
+**4. Reenviar não entrega duas vezes, e a forma é que o garante.** A mensagem
+existe uma vez por `(reserva, tipo)`; as tentativas penduram-se nela. A entrega é
+um carimbo, e um carimbo que já existe não se escreve de novo. **E o par:** uma
+mensagem diferente para a mesma reserva **é** enviada.
 
-**O que protege uma escrita anónima** não é uma credencial: é o limite por unidade
-e por janela (com lock, na base), a chave idempotente que nasce no HTML e não no
-manipulador, e não confirmar existência. O par do contrato está provado — acima do
-limite recusa, **e a primeira passa**.
+## O que os ecrãs dizem por palavras, porque a régua o exige lá
 
-**O caso feio da régua está no ecrã:** a lista de horas diz-se orientativa no
-TEXTO, a confirmação recusa, e a recusa leva **alternativas** consigo. Sem
-alternativa nenhuma há sempre a lista de espera — nunca um beco.
+- a **estimativa** diz que é uma estimativa e que pode mudar; o **facto** muda o
+  verbo e a estimativa **desaparece** — nunca aparecem juntas;
+- a lista de horas diz-se **orientativa** antes de a pessoa escolher, e a recusa
+  leva **alternativas** consigo; sem alternativa nenhuma há a lista de espera —
+  nunca um beco;
+- as **atrasadas** são ditas, e a agenda diz que o sistema **não libertou** nenhuma;
+- o check-in diz que **não senta**, e a sugestão de mesa diz **porquê** em cada uma;
+- cada número do relatório traz a sua **definição** ao lado, e as duas telas que o
+  mostram dizem o **mesmo** — a conta é uma só;
+- o conector de mensageria está **desligado e visível como desligado**, com a
+  consequência escrita: nada é enviado, e nenhuma mensagem aparecerá como enviada.
 
-**A estimativa e o facto são medidos no texto, cada um sozinho**, e a estimativa
-**desaparece** quando a mesa está pronta: as duas frases nunca aparecem juntas.
+**O que está pronto para medir** — códigos de saída lidos directamente, sem canos:
+`pnpm verificar` (**0**) · `provar-espera.sh` (18 casos, **8 plantados**, 0) ·
+`provas/reserva-publica.test.ts` (13 casos, 0) ·
+`provar-reserva-publica-no-navegador.sh` (23 casos, **9 plantados**, 0) ·
+`provar-host.sh` (17 casos, **7 plantados**, 0) ·
+`provar-host-no-navegador.sh` (22 casos, **6 plantados**, 0) ·
+`provar-mensagens.sh` (12 casos, **7 plantados**, 0) ·
+`provar-mensagens-no-navegador.sh` (24 casos, **6 plantados**, 0) ·
+`provar-reservas.sh` (0) · `provar-publico.sh` (0) · `provar-sala-no-navegador.sh`
+(0) · `provar-migracoes-do-zero.sh` (0) · **`pnpm inspeccionar` (517 casos, 0)**.
 
-**Um achado:** pus `comEscopo` dentro de uma página pública e o
-`rotas-com-porta.test.ts` do E09 acendeu. Mudou-se para `reservaPorSegredo`, no
-pacote da base, e as cinco funções novas entram na lista de portas do público
-**pela lista** — uma excepção seria uma porta.
-
-**A FATIA 3 obrigou a outra decisão de modelo: chegar não é estar sentado.** O
-grupo está à porta e a mesa ainda não se levantou, e isso não era representável.
-Se o check-in sentar, a mesa fica marcada como ocupada enquanto os anteriores lá
-estão e o mapa mente a quem serve; se não houver check-in, a única forma de
-registar a chegada é sentar, e a tolerância de atraso conta contra quem já está
-lá. Dois actos, dois carimbos, e a base exige `chegou_em` em `CHEGOU` **e** em
-`SENTADA`.
-
-**E a ponte entre o motor e a sala está fechada.** O `FLOOR-006` anuncia a
-reserva que chega dentro de duas horas numa mesa que está **mesmo** livre — era
-por aí que a reserva se perdia. Com o par: uma reserva de amanhã não aparece hoje,
-e uma já sentada deixa de ser anunciada.
-
-**As atrasadas são ditas e não varridas**, e a agenda diz isso por palavras — sem
-a frase, um host razoável assume que o sistema já tratou do assunto.
-
-**O que está pronto para medir** — códigos de saída lidos directamente:
-`pnpm verificar` (**0**) · `./scripts/provar-espera.sh` (6 grupos, **18 casos, 8
-defeitos plantados**, 0) · `provas/reserva-publica.test.ts` (6 grupos, **13
-casos**, 0) · `./scripts/provar-reserva-publica-no-navegador.sh` (**23 casos, 9
-defeitos plantados**, 0) · `./scripts/provar-publico.sh` (0) ·
-`./scripts/provar-host.sh` (5 grupos, **17 casos, 7 defeitos plantados**, 0) ·
-`./scripts/provar-host-no-navegador.sh` (**22 casos, 6 defeitos plantados**, 0) ·
-`./scripts/provar-sala-no-navegador.sh` (0 — o `FLOOR-006` mudou e o E13 continua
-verde) · `./scripts/provar-reservas.sh` (0) ·
-`./scripts/provar-migracoes-do-zero.sh` (0).
-
-**O que NÃO está feito:** **6 telas** — `RES-B-017` (templates), `RES-B-018`
-(histórico), `RES-B-019` (relatório), `REP-008`, `INT-004` e `SET-009` —, a fila
-de mensagens com reenvio deduplicado (ponto 2 da régua) e o relatório com as
-definições ao lado dos números (ponto 3). O conector de mensageria continua
-**desligado e visível como desligado**: nada finge ter enviado.
+**Fica declarado como NÃO feito:** **nenhuma mensagem foi entregue a ninguém**. Não
+há provedor; o conector está desligado e a prova usa um transporte de mentira para
+medir o comportamento. A integração externa é **pendência declarada**, como o
+enunciado manda — nada finge ter enviado.
 
 **A prova foi LOCAL.** A CI continua trancada por facturação do GitHub.
 

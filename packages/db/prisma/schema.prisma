@@ -149,6 +149,9 @@ model Organization {
   mensagensDeReserva  ReservationMessage[]
   esperas             WaitlistEntry[]
   zonasDeEspera       WaitlistArea[]
+  tentativasDeMensagem ReservationMessageAttempt[]
+  templatesDeMensagem  MessageTemplate[]
+  conectores           MessagingConnector[]
   @@map("organizations")
   revisoes        MenuRevision[]
   publicacoes     MenuPublication[]
@@ -280,6 +283,8 @@ model Location {
   reservas            Reservation[]
   alocacoes           ReservationAllocation[]
   esperas             WaitlistEntry[]
+  templatesDeMensagem MessageTemplate[]
+  conector            MessagingConnector?
   @@unique([organizationId, id], name: "location_por_organizacao")
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -3300,6 +3305,10 @@ model ReservationAllocation {
 }
 
 enum EstadoDaMensagem {
+  /// Ainda não foi entregue — e é onde uma mensagem fica quando não há provedor
+  /// configurado. Não é `FALHADA`: falhar é ter tentado e não ter conseguido, e
+  /// chamar-lhe falha manda alguém procurar um erro que não existe.
+  PENDENTE
   ENVIADA
   FALHADA
 
@@ -3313,22 +3322,114 @@ enum EstadoDaMensagem {
 /// linhas em duas tabelas, e a UI diz as duas — a mesma regra do indeterminado
 /// no dinheiro.
 model ReservationMessage {
-  id             String @id @default(uuid()) @db.Uuid
-  organizationId String @map("organization_id") @db.Uuid
-  reservationId  String @map("reservation_id") @db.Uuid
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  locationId     String? @map("location_id") @db.Uuid
+  reservationId  String  @map("reservation_id") @db.Uuid
 
   tipo   String
+  idioma String @default("es-ES")
   estado EstadoDaMensagem
   erro   String?
 
+  assunto String?
+  corpo   String?
+
+  /// ── A entrega é um CARIMBO, e é isso que a deduplica ─────────────────
+  ///
+  /// Reenviar acrescenta uma tentativa; entregar outra vez é impossível, porque
+  /// um carimbo que já existe não se escreve de novo. A base exige-o em
+  /// `ENVIADA` — um histórico que diz «entregue» sem saber quando não se audita.
+  entregueEm DateTime? @map("entregue_em") @db.Timestamptz(6)
+
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   reserva      Reservation  @relation(fields: [organizationId, reservationId], references: [organizationId, id], onDelete: Cascade)
+  tentativas   ReservationMessageAttempt[]
 
   @@unique([organizationId, id], name: "mensagem_de_reserva_por_organizacao")
+  /// A chave da deduplicação: uma mensagem por reserva e tipo. Uma mensagem
+  /// DIFERENTE para a mesma reserva tem chave diferente, logo é enviada.
+  @@unique([reservationId, tipo], name: "uma_mensagem_por_reserva_e_tipo")
   @@index([organizationId, reservationId])
   @@map("reservation_messages")
+}
+
+/// Cada tentativa de entrega, com o resultado do provedor.
+///
+/// «O resultado do provedor é guardado, e uma falha dele não apaga o facto de a
+/// reserva existir.» Uma linha por envio dava um histórico e nenhuma
+/// deduplicação: nada distinguia «tentei outra vez» de «o cliente recebeu duas
+/// vezes».
+model ReservationMessageAttempt {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  messageId      String  @map("message_id") @db.Uuid
+  provedor       String?
+  resultado      String
+  erro           String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  mensagem     ReservationMessage @relation(fields: [organizationId, messageId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, id], name: "tentativa_por_organizacao")
+  @@index([messageId, createdAt])
+  @@map("reservation_message_attempts")
+}
+
+/// O texto de uma mensagem transaccional, por unidade, tipo e idioma.
+///
+/// O idioma faz parte da chave porque a mesma confirmação em espanhol e em
+/// inglês são dois textos, e não duas traduções de um — quem escreve o de inglês
+/// não está a traduzir, está a escrever para outra pessoa.
+model MessageTemplate {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  locationId     String  @map("location_id") @db.Uuid
+  tipo           String
+  idioma         String
+  assunto        String
+  corpo          String
+  activo         Boolean @default(true)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, id], name: "template_por_organizacao")
+  @@unique([locationId, tipo, idioma], name: "um_template_por_unidade_tipo_idioma")
+  @@map("message_templates")
+}
+
+/// O conector de mensageria da unidade. **Nasce desligado.**
+///
+/// «Sem provedor configurado, o conector fica desligado e visível como desligado
+/// — não a fingir que enviou.»
+///
+/// `activo` sem `provedor` não é um estado: há um `CHECK` a impedi-lo. É a
+/// garantia na forma — ninguém pode ligar o conector sem dizer quem entrega, e o
+/// «activo» sozinho seria exactamente o fingimento que o enunciado proíbe.
+model MessagingConnector {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  locationId     String  @unique @map("location_id") @db.Uuid
+  provedor       String?
+  activo         Boolean @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, id], name: "conector_por_organizacao")
+  @@map("messaging_connectors")
 }
 
 enum EstadoDaEspera {

@@ -222,3 +222,55 @@ export async function reservaPorId(
     chegouEm: r.chegouEm, sentadaEm: r.sentadaEm,
   };
 }
+
+/**
+ * Os cinco números do relatório de reservas.
+ *
+ * ── Cada um vem com a sua DEFINIÇÃO ────────────────────────────────────────
+ *
+ * «Cinco números que toda a gente acha que sabe o que são e ninguém define
+ * igual.» Um «no-show: 12» sem dizer se conta a reserva ou as pessoas, e a
+ * partir de que minuto, é um número que o dono vai usar para decidir e que
+ * ninguém consegue reproduzir.
+ *
+ * A definição não vive só no ecrã: vem daqui, ao lado do valor, para que não
+ * possa haver duas — uma no código e outra na legenda.
+ */
+export interface NumeroComDefinicao {
+  chave: string;
+  valor: number;
+  /** A chave da frase que descreve o que este número conta. */
+  definicao: string;
+}
+
+export async function relatorioDeReservas(
+  db: ClienteComEscopo, locationId: string, de: Date, ate: Date,
+): Promise<NumeroComDefinicao[]> {
+  const reservas = await db.reservation.findMany({
+    where: { locationId, inicio: { gte: de, lt: ate } },
+    select: { estado: true, pessoas: true, origem: true },
+  });
+
+  const vivas = reservas.filter((r) => r.estado !== 'CANCELADA');
+  const canceladas = reservas.filter((r) => r.estado === 'CANCELADA');
+  const naoCompareceram = reservas.filter((r) => r.estado === 'NAO_COMPARECEU');
+  const doPublico = vivas.filter((r) => r.origem === 'PUBLICO');
+
+  return [
+    // Covers conta PESSOAS, e não reservas: é o número que a cozinha usa.
+    { chave: 'covers', valor: vivas.reduce((t, r) => t + r.pessoas, 0),
+      definicao: 'defCovers' },
+    { chave: 'reservas', valor: vivas.length, definicao: 'defReservas' },
+    // Cancelamento é uma percentagem sobre TUDO o que foi pedido, incluindo o
+    // que foi cancelado — o denominador é a parte que ninguém define igual.
+    { chave: 'cancelamento',
+      valor: reservas.length === 0 ? 0
+        : Math.round((canceladas.length / reservas.length) * 100),
+      definicao: 'defCancelamento' },
+    // No-show conta RESERVAS, não pessoas, e só as que o host marcou.
+    { chave: 'noShow', valor: naoCompareceram.length, definicao: 'defNoShow' },
+    { chave: 'origemPublica',
+      valor: vivas.length === 0 ? 0 : Math.round((doPublico.length / vivas.length) * 100),
+      definicao: 'defOrigem' },
+  ];
+}

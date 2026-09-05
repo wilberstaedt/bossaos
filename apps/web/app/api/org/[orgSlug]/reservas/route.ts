@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import {
   abrirWalkIn, cancelar, confirmarReserva, guardarDefinicoes, listarUnidades,
   marcarChegada, reagendar, registarNaoCompareceu, sentarReserva,
+  guardarConector, guardarTemplate,
 } from '@bossaos/db';
 import { corpoDaResposta, estadoHttp, exigirAccao } from '@bossaos/domain';
 import { comEscopoDoPedido, resolverPedido } from '../../../../../src/sessao.ts';
@@ -253,6 +254,33 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
       inteiro(dados, 'pessoas', 2), sessao.actor.email));
     if (!r.ok) return voltarPara(`${paraAgenda()}/walk-in`, { erro: r.motivo });
     return voltarPara(`${paraAgenda()}/mapa`, { guardado: '1' });
+  }
+
+  if (accao === 'guardar_template') {
+    await comEscopoDoPedido(sessao, (db) => guardarTemplate(db, organizationId, unidade.id, {
+      tipo: texto(dados, 'tipo') ?? 'confirmacao',
+      idioma: texto(dados, 'idiomaDoTemplate') ?? idioma,
+      assunto: texto(dados, 'assunto') ?? '',
+      corpo: texto(dados, 'corpo') ?? '',
+    }));
+    return voltarPara(`${paraAgenda()}/mensagens`, { guardado: '1' });
+  }
+
+  if (accao === 'guardar_conector') {
+    // ── Ligar sem provedor não passa, e a recusa é uma resposta ──────────
+    //
+    // A base tem um `CHECK` a segurá-lo. Aqui devolve-se o motivo em vez de
+    // deixar rebentar: quem carregou tem de perceber o que falta, e um 500 não
+    // explica nada.
+    const provedor = texto(dados, 'provedor') ?? '';
+    const r = await comEscopoDoPedido(sessao, (db) => guardarConector(
+      db, organizationId, unidade.id, {
+        provedor: provedor === '' ? null : provedor,
+        activo: dados.get('activo') === '1',
+      }));
+    const destino = `/${idioma}/app/${orgSlug}/${locationSlug}/integrations/mensageria`;
+    if (!r.ok) return voltarPara(destino, { erro: r.motivo });
+    return voltarPara(destino, { guardado: '1' });
   }
 
   return NextResponse.json({ erro: 'accao_desconhecida' }, { status: 400 });

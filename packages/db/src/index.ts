@@ -276,6 +276,13 @@ export {
 // ── E19 · o host ──
 export {
   agendaDoDia, chegadasPorHora, reservasAChegar, atrasadas,
-  marcarChegada, sentarReserva, abrirWalkIn, reservaPorId,
-  type ReservaDoDia,
+  marcarChegada, sentarReserva, abrirWalkIn, reservaPorId, relatorioDeReservas,
+  type ReservaDoDia, type NumeroComDefinicao,
 } from './host.ts';
+
+// ── E19 · mensagens ──
+export {
+  conectorDaUnidade, templateDe, enfileirar, historicoDeMensagens,
+  listarTemplates, guardarTemplate, guardarConector,
+  type Conector, type ResultadoDaMensagem, type MensagemNoHistorico,
+} from './mensagens.ts';

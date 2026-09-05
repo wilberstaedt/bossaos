@@ -67,12 +67,30 @@ test('a população é 11 telas, e 11 ids DISTINTOS', () => {
   expect(new Set(lista.map((t) => t.id)).size, 'ids repetidos').toBe(QUANTAS_TELAS);
 });
 
-test('e são as 11 do fluxo público que a MATRIZ marca como feitas', async () => {
+/**
+ * ── «As declaradas» não era um conjunto, era um estado ────────────────────
+ *
+ * Isto filtrava por «implementado aguardando validação» e comparava com 11. Foi
+ * verdade enquanto só o fluxo público estava feito; quando as 28 ficaram
+ * declaradas, o conjunto passou a ter 28 e a prova acendeu.
+ *
+ * Acendeu bem: o que ela mede é o fluxo PÚBLICO, e o público é um conjunto fixo
+ * de ids — não «o que estiver feito hoje». A comparação passa a ser contra esse
+ * conjunto, e continua a ser conjunto a conjunto, que é o que impede uma tela
+ * trocada por outra.
+ */
+const DO_FLUXO_PUBLICO = new Set([
+  'PUB-003', 'RES-C-001', 'RES-C-002', 'RES-C-003', 'RES-C-004', 'RES-C-005',
+  'RES-C-006', 'RES-C-007', 'RES-C-008', 'RES-C-009', 'RES-C-010',
+]);
+
+test('e são as 11 do fluxo público que a MATRIZ tem no E19', async () => {
   const { readFile } = await import('node:fs/promises');
   const csv = await readFile('docs/progress/coverage.csv', 'utf8');
   const daMatriz = csv.split('\n').slice(1).map(colunas)
-    .filter((c) => c[6] === 'E19' && c[16] === 'implementado aguardando validação')
-    .map((c) => c[0]?.trim() ?? '').filter((id) => id !== '');
+    .filter((c) => c[6] === 'E19')
+    .map((c) => c[0]?.trim() ?? '')
+    .filter((id) => DO_FLUXO_PUBLICO.has(id));
   // Guarda de leitor cego: sem isto, dois conjuntos vazios comparam iguais.
   expect(daMatriz.length, 'não li a matriz — a comparação seria vazia').toBe(QUANTAS_TELAS);
   expect(telas(alvos).map((t) => t.id).sort()).toEqual([...daMatriz].sort());

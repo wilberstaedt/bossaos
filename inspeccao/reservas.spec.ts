@@ -213,10 +213,22 @@ test.describe('o SET-007 diz se a casa aceita reservas', () => {
 test.describe('cada tela é alcançável a partir das outras', () => {
   test.use({ viewport: { width: 1280, height: 900 } });
 
-  test('as cinco secções aparecem na navegação, e nenhuma é um data-tela', async ({ page }) => {
+  /**
+   * ── Eram cinco, e o E19 acrescentou cinco ─────────────────────────────
+   *
+   * Este caso é do E18, já assinado, e ficou vermelho quando o E19 pôs a
+   * operação — agenda, calendário, linha do tempo, espera, mapa — na mesma
+   * navegação. Acendeu bem: a contagem é a guarda de que nenhuma secção
+   * desaparece em silêncio, e ela mudou de propósito.
+   *
+   * O que NÃO muda é o resto da asserção: nenhuma ligação leva `data-tela`. Essa
+   * é a lição que o E15 pagou caro, e é a que tem de sobreviver a cada etapa que
+   * acrescente uma secção aqui.
+   */
+  test('as dez secções aparecem na navegação, e nenhuma é um data-tela', async ({ page }) => {
     await page.goto(`${PAINEL}/reservations/regras`);
     const ligacoes = page.locator('nav[data-teste="navegacao"] a[data-seccao]');
-    await expect(ligacoes).toHaveCount(5);
+    await expect(ligacoes).toHaveCount(10);
     expect(await page.locator('nav[data-teste="navegacao"] a[data-tela]').count(),
       'uma ligação leva data-tela: a página passa a anunciar-se como as outras').toBe(0);
   });

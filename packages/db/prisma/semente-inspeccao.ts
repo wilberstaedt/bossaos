@@ -891,6 +891,37 @@ async function principal(): Promise<void> {
       if (!mesaParaAReserva) {
         throw new Error('a semeadura do E19 precisa de uma mesa livre para a reserva a chegar');
       }
+      // ── E19 · uma mensagem com tentativas, e um texto escrito ──────────
+      //
+      // O RES-B-018 sem mensagens mede «ainda não há mensagens», e o RES-B-017
+      // sem textos mede «ainda não há textos escritos». São ecrãs reais e são os
+      // ecrãs fáceis.
+      //
+      // O conector fica DESLIGADO de propósito: é o estado por omissão do
+      // produto, e é o que as telas têm de saber dizer.
+      await prisma.messageTemplate.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          tipo: 'confirmacao', idioma: 'es-ES',
+          assunto: `${PREFIXO}Mesa reservada`, corpo: 'Te esperamos en Marina Puerto.',
+        },
+      });
+      const mensagemInsp = await prisma.reservationMessage.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          reservationId: reservaDeHoje.id, tipo: 'confirmacao', idioma: 'es-ES',
+          estado: 'PENDENTE', erro: 'sem provedor configurado',
+          assunto: `${PREFIXO}Mesa reservada`, corpo: 'Te esperamos en Marina Puerto.',
+        },
+        select: { id: true },
+      });
+      await prisma.reservationMessageAttempt.create({
+        data: {
+          organizationId: IDS.orgA, messageId: mensagemInsp.id,
+          resultado: 'SEM_PROVEDOR', erro: 'o conector de mensageria está desligado',
+        },
+      });
+
       if (mesaParaAReserva) {
         await prisma.reservationAllocation.create({
           data: {

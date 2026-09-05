@@ -67,13 +67,23 @@ test('a população é 11 telas do host, e 11 ids DISTINTOS', () => {
   expect(new Set(lista.map((t) => t.id)).size, 'ids repetidos').toBe(QUANTAS_TELAS);
 });
 
-test('e são exactamente as RES-B da MATRIZ que estão feitas', async () => {
+/**
+ * O conjunto é fixo, e não «o que estiver declarado». Filtrar por estado media o
+ * progresso, não a população — e quando as 28 ficaram declaradas, `RES-B-017` a
+ * `019` entraram nesta conta sem serem telas do host.
+ */
+const DO_HOST = new Set([
+  'RES-B-001', 'RES-B-002', 'RES-B-003', 'RES-B-004', 'RES-B-005', 'RES-B-006',
+  'RES-B-007', 'RES-B-008', 'RES-B-009', 'RES-B-010', 'RES-B-011',
+]);
+
+test('e são exactamente as 11 do host que a MATRIZ tem no E19', async () => {
   const { readFile } = await import('node:fs/promises');
   const csv = await readFile('docs/progress/coverage.csv', 'utf8');
   const daMatriz = csv.split('\n').slice(1).map(colunas)
-    .filter((c) => c[6] === 'E19' && c[16] === 'implementado aguardando validação')
+    .filter((c) => c[6] === 'E19')
     .map((c) => c[0]?.trim() ?? '')
-    .filter((id) => id.startsWith('RES-B-'));
+    .filter((id) => DO_HOST.has(id));
   expect(daMatriz.length, 'não li a matriz — a comparação seria vazia').toBe(QUANTAS_TELAS);
   expect(telas(alvos).map((t) => t.id).sort()).toEqual([...daMatriz].sort());
 });
