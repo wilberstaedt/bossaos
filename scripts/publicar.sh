@@ -118,6 +118,17 @@ $SSH "mkdir -p $RAIZ/apps/web/public && echo '$VERSAO' > $RAIZ/apps/web/public/v
 # inalcancavel e o erro sairia como "connection refused", que se le como base em
 # baixo em vez de endereco errado.
 $SSH "cd $RAIZ && docker compose -p bossaos --env-file .env.prod -f infra/postgres.yml up -d"
+# ── Os três papéis, criados AQUI e não à mão ────────────────────────────────
+# A separação do E01 são três papéis com senhas distintas: `bossaos_migrate`
+# mexe no esquema, `bossaos_app` só faz DML, `bossaos_auth` só vê identidade.
+#
+# Criei-os à mão na primeira montagem, e isso custou-me DUAS paragens: o passo
+# manual escondeu a dependência do `--env-file`, e deixou um contentor no
+# projecto errado que depois colidiu pelo nome.
+#
+# **Um passo que fica de fora do script fica de fora da próxima vez.**
+$SSH "cd $RAIZ && bash infra/papeis.sh"
+
 $SSH "cd $RAIZ && VERSAO=$VERSAO docker compose -p bossaos --env-file .env.prod -f infra/compose.prod.yml build"
 $SSH "cd $RAIZ && docker compose -p bossaos --env-file .env.prod -f infra/compose.prod.yml run --rm --entrypoint sh bossaos-web -c 'pnpm db:migrate:deploy'"
 $SSH "cd $RAIZ && VERSAO=$VERSAO docker compose -p bossaos --env-file .env.prod -f infra/compose.prod.yml up -d --force-recreate"
