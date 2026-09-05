@@ -38,7 +38,18 @@ export default async function LayoutDaOrganizacao({
     { href: '#', rotulo: m.navegacao.catalogo, accao: 'catalogo.ler' },
     { href: '#', rotulo: m.navegacao.reservas, accao: 'reservas.ler' },
     { href: '#', rotulo: m.navegacao.salaPedidos, accao: 'sala.ler' },
-    { href: '#', rotulo: m.navegacao.caixa, accao: 'caixa.ler' },
+    // ── A porta do TPV ────────────────────────────────────────────────────
+    //
+    // «Um `#` num módulo entregue não é marcador: é uma porta que ninguém
+    // abriu.» O módulo da caixa passou a existir no E22, e por isso esta linha
+    // deixou de poder ser um `#`.
+    //
+    // Aponta para `/pos` e não para uma unidade: quem tem três restaurantes tem
+    // de dizer em qual está antes de a caixa fazer sentido, e é lá que o diz.
+    //
+    // As outras entradas continuam em `#` de propósito — são módulos de etapas
+    // que ainda não existem, e é esse o `#` legítimo do contrato.
+    { href: `/${idioma}/pos`, rotulo: m.navegacao.caixa, accao: 'caixa.ler' },
     { href: '#', rotulo: m.navegacao.inventario, accao: 'stock.ler' },
     { href: '#', rotulo: m.navegacao.clientes, accao: 'clientes.ler' },
     { href: `/${idioma}/app/${orgSlug}/organization`, rotulo: m.navegacao.equipa, accao: 'equipa.ler' },

@@ -28,13 +28,14 @@ CONTAGEM='apps/web/app/[idioma]/pos/[locationId]/caixa/[registerId]/contagem/pag
 TPVHOME='apps/web/app/[idioma]/pos/[locationId]/page.tsx'
 SPEC=inspeccao/tpv.spec.ts
 SEMENTE=packages/db/prisma/semente-inspeccao.ts
+LAYOUT='apps/web/app/[idioma]/app/[orgSlug]/layout.tsx'
 
 # ── Sem `declare -A`: o bash do macOS é o 3.2 e não tem tabelas ───────────
 #
 # A primeira versão usava uma tabela associativa, morria aqui na linha 32 e o
 # guião saía com código **0** — um guião que morre no arranque e reporta sucesso
 # é pior do que um que falha. Ver a guarda `CHEGOU_AO_FIM` no fim do ficheiro.
-FICHEIROS=("$CONTA" "$DIVIDIR" "$DINHEIRO" "$MOVIMENTO" "$CONTAGEM" "$TPVHOME" "$SPEC" "$SEMENTE")
+FICHEIROS=("$CONTA" "$DIVIDIR" "$DINHEIRO" "$MOVIMENTO" "$CONTAGEM" "$TPVHOME" "$SPEC" "$SEMENTE" "$LAYOUT")
 COPIAS=()
 for f in "${FICHEIROS[@]}"; do
   c=$(mktemp); cp "$f" "$c"; COPIAS+=("$c")
@@ -268,7 +269,32 @@ exigir_vermelho "caiu a população: 18 telas deixaram de ser 19" \
 repor "$SPEC"
 
 echo
-echo "10. Reposto — tem de voltar ao verde"
+echo "10. CONTROLO NEGATIVO — a porta do TPV volta a ser um #"
+# ── O controlo que o contrato nomeia ──────────────────────────────────────
+#
+# «Voltar a pôr `#` num módulo vivo, e a prova tem de ficar vermelha. Se ficar
+# verde, ela está a medir a existência da tela outra vez, e não o caminho.»
+#
+# É o único controlo desta suite que não mexe numa tela: mexe no MENU. As 19
+# telas continuam todas lá, todas provadas, e a suite tem de acender na mesma —
+# porque uma tela a que ninguém chega é uma tela que não existe.
+plantar <<'PYPORTA' || true
+import io
+p = 'apps/web/app/[idioma]/app/[orgSlug]/layout.tsx'
+s = io.open(p, encoding='utf-8').read()
+antigo = "    { href: `/${idioma}/pos`, rotulo: m.navegacao.caixa, accao: 'caixa.ler' },"
+assert antigo in s, 'a porta do TPV nao esta onde se esperava'
+io.open(p, 'w', encoding='utf-8').write(
+    s.replace(antigo, "    { href: '#', rotulo: m.navegacao.caixa, accao: 'caixa.ler' },", 1))
+PYPORTA
+correr /tmp/bossaos-tpv-porta.txt
+exigir_vermelho "caiu a porta: as 19 telas existem e ninguém lá chega" \
+  'sem escrever um único endereço' 'uma porta que ninguém abriu' \
+  /tmp/bossaos-tpv-porta.txt
+repor "$LAYOUT"
+
+echo
+echo "11. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-tpv-reposto.txt; then
   passou=$(sed -e 's/\x1b\[[0-9;]*m//g' /tmp/bossaos-tpv-reposto.txt \
     | grep -oE '[0-9]+ passed' | grep -oE '[0-9]+' | tail -1)

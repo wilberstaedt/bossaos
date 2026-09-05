@@ -1,8 +1,29 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E22 — TPV, contas e caixa (**19 telas**).
-**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — as três fatias.** Declarado
+**Estado:** **RETIDO e CONSERTADO — reentregue, aguardando validação.** Declarado
 pelo JR; não assinado.
+
+**A retenção foi UMA coisa, e não era do dinheiro: as 19 telas não tinham porta.**
+Zero `href` para `/pos/` em todo o produto, e o item «caixa» do menu em `#`. As
+telas ligavam-se entre si e faltava a primeira — ninguém com sessão iniciada
+chegava ao TPV sem escrever o endereço à mão. «Uma tela provada a que ninguém
+chega é uma tela que não existe», e o contrato `portas-e-navegacao.md` que o diz
+foi escrito **antes** desta entrega, depois de o E21 ter reprovado o marco do
+Restaurant exactamente por aqui.
+
+**O conserto:** a POS-001 passou de `/pos/[locationId]/operador` para `/pos` — a
+entrada do módulo, com a escolha de unidade que o contrato exige. O nome dela no
+atlas é «Entra en tu caja»: descrevia a entrada desde o princípio e eu tinha-a
+feito ser outra coisa. O item «caixa» do menu deixou de ser `#`, **e só esse** —
+as outras entradas são módulos de etapas que ainda não existem, que é o `#`
+legítimo do contrato; não toquei na navegação do `/app/`.
+
+**E a prova mede o CAMINHO, não a tela.** Um único `goto`, para onde a sessão
+aterra; daí em diante tudo por cliques — menu, entrada, escolha de unidade, tela
+de trabalho — com guarda de leitor cego sobre o endereço final. O controlo
+negativo é o que o contrato nomeia: repor o `#` e a prova acende. É o único
+controlo da suite que não mexe numa tela: mexe no menu, e as 19 continuam lá.
 **Régua:** `docs/architecture/dinheiro.md`, escrita no E00 **antes** desta etapa,
 e CT-11. **Detalhe e achados:** `docs/progress/E22.md`.
 
@@ -58,9 +79,9 @@ existira, destapou um segundo buraco: o padrão exigia espaço depois do tipo, e
 **Portões, códigos de saída lidos directamente:** `pnpm verificar` (**0**) ·
 `./scripts/provar-contas.sh` (39 casos, **9 controlos negativos**, 0) ·
 `./scripts/provar-caixa.sh` (19 casos, **8 controlos**, 0) ·
-`./scripts/provar-tpv-no-navegador.sh` (19 telas, 24 casos, **8 controlos**, 0) ·
+`./scripts/provar-tpv-no-navegador.sh` (19 telas, **25 casos**, **9 controlos**, 0) ·
 `./scripts/validar-dinheiro.sh` (13 campos, 2 controlos, 0) ·
-`pnpm inspeccionar` (**559 casos, 0**).
+`pnpm inspeccionar` (**560 casos, 0**).
 
 **PENDÊNCIAS DECLARADAS, e nenhuma simulada:** **nenhum provedor de pagamento
 real** — não há webhook, não há assinatura verificada, `CARTAO` é um meio

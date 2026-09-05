@@ -34,7 +34,7 @@ function telas(a: Alvos): Tela[] {
   const CONTA = `${POS}/conta/${a.contaDoTpv}`;
   const CAIXA = `${POS}/caixa/${a.caixaDoTpv}`;
   return [
-    { id: 'POS-001', caminho: `${POS}/operador` },
+    { id: 'POS-001', caminho: '/es-ES/pos' },
     { id: 'POS-002', caminho: POS },
     { id: 'POS-003', caminho: `${POS}/balcao` },
     { id: 'POS-004', caminho: CONTA },
@@ -266,4 +266,58 @@ test.describe('o ecrã diz o que a régua manda dizer', () => {
       const motivo = await page.locator('[data-teste="ajuste-motivo"]').first().innerText();
       expect(motivo.trim().length, 'o desconto aparece sem dizer porquê').toBeGreaterThan(2);
     });
+});
+
+/**
+ * ── A PORTA, e é isto que o E21 reprovou uma etapa antes ──────────────────
+ *
+ * «Uma tela provada a que ninguém chega é uma tela que não existe.»
+ *
+ * Todas as outras medições desta suite visitam o endereço directamente. Isso
+ * responde à pergunta «a tela existe?» e nunca à pergunta «alguém lá chega?» —
+ * e o silêncio da segunda parece aprovação da primeira.
+ *
+ * Aqui há **um único `goto`**, e é para o sítio onde a sessão aterra. Daí em
+ * diante é tudo por cliques. Se alguém voltar a pôr `#` na entrada da caixa,
+ * este caso fica vermelho — e é esse o controlo negativo do guião.
+ */
+test.describe('a porta do TPV: da sessão iniciada até à caixa, por cliques', () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
+
+  test('sem escrever um único endereço', async ({ page }) => {
+    // O ÚNICO endereço escrito, e é onde quem entra aterra — não é uma tela do
+    // TPV, é o ponto de partida de quem já tem sessão.
+    await page.goto('/es-ES/app/marina-oropesa/organization');
+
+    // 1. O menu tem a caixa, e é uma ligação a sério — não um `#`.
+    const entrada = page.getByRole('link', { name: /caja|caixa|register/i }).first();
+    await expect(entrada, 'o menu não tem entrada para a caixa').toBeVisible();
+    const destino = await entrada.getAttribute('href');
+    expect(destino, 'a entrada da caixa é um `#`: uma porta que ninguém abriu')
+      .not.toBe('#');
+
+    await entrada.click();
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('h1[data-tela="POS-001"]'),
+      'o clique na caixa não chegou à entrada do TPV').toBeVisible();
+
+    // 2. A escolha de unidade: quem tem três restaurantes diz em qual está.
+    const unidade = page.locator('[data-seccao="entrar-no-tpv"]').first();
+    await expect(unidade, 'a entrada não deixa escolher a unidade').toBeVisible();
+    await unidade.click();
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('h1[data-tela="POS-002"]'),
+      'escolher a unidade não chegou ao TPV').toBeVisible();
+
+    // 3. E de dentro do TPV chega-se a uma tela de trabalho.
+    await page.locator('[data-seccao="caixa"]').first().click();
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('h1[data-tela="POS-019"]'),
+      'de dentro do TPV não se chega à caixa').toBeVisible();
+
+    // A guarda de leitor cego: se nada disto navegou, o endereço final ainda
+    // seria o de partida e as asserções acima podiam passar por engano.
+    expect(new URL(page.url()).pathname, 'não saiu do ponto de partida')
+      .toContain('/pos/');
+  });
 });
