@@ -160,7 +160,19 @@ sleep 8
 # Matheus que publiquei.
 VIVO="$($SSH "curl -sf http://localhost:$PORTA/api/health" || true)"
 [ -n "$VIVO" ] || erro "sem resposta em /api/health — docker logs bossaos_web"
-NO_AR="$($SSH "curl -sf http://localhost:$PORTA/versao.txt" || true)"
+# A sonda NÃO passa pelo router do produto. A primeira versão pedia
+# `/versao.txt` e recebeu `/es-ES/versao.txt`: o encaminhamento por idioma
+# apanhou o ficheiro estático. A sonda entrou pela porta da frente e mediu o
+# comportamento da casa em vez da versão.
+#
+# A etiqueta da imagem responde à pergunta certa — QUAL BUILD ESTÁ A CORRER — e
+# lê-se do Docker, não da aplicação. É mais forte do que perguntar à aplicação
+# que versão ela julga ser: se o `up` não recriasse o contentor, a etiqueta
+# seria a antiga e isto acusava.
+#
+# O que prova: o contentor no ar foi construído deste commit. Com o /api/health
+# acima, que prova que ele serve, são as duas metades da pergunta.
+NO_AR="$($SSH "docker inspect --format '{{ index .Config.Labels \"bossaos.versao\" }}' bossaos_web" 2>/dev/null | tr -d '\r' || true)"
 [ "$NO_AR" = "$VERSAO" ] \
   || erro "no ar está '${NO_AR:-nada}' e eu construí '$VERSAO' — o build não pegou"
 
