@@ -84,3 +84,34 @@ não batia**. Sem essa segunda pergunta no `exigir_vermelho` — *não basta fic
 vermelho, tem de ficar vermelho pelo motivo certo* — teria contado como controlo
 bom. É a armadilha que me apanhou quatro vezes no E15, agora apanhada por um
 instrumento em vez de por sorte.
+
+## Como julgo o aceite da fonte, decidido ANTES da declaração
+
+A régua exige «que fonte, que data, que versão». A resposta vai ser **«não foi
+possível confirmar»** — e isso aconteceu por uma instrução minha impossível de
+cumprir. Decido agora como o julgo, antes de ver a entrega, para não moldar o
+critério ao que chegar.
+
+**O aceite cumpre-se se a ausência estiver declarada, e reprova se for
+preenchida.** O que eu queria impedir não era a falta de confirmação: era a
+**invenção**. Um ADR que diga «POR CONFIRMAR, sem acesso à fonte» cumpre o
+espírito inteiro; um ADR com uma lista de campos plausível e sem origem
+reprova, mesmo que a lista esteja certa por acaso.
+
+**Três coisas que exijo para o dar por cumprido:**
+
+1. **A ausência nomeada**, não subentendida. «Por confirmar» escrito, com a razão.
+2. **A distinção entre o que vale sem o regime e o que depende dele.** As quatro
+   propriedades da régua não precisam de Espanha; se estiverem misturadas com o
+   que falta, ninguém saberá o que está garantido.
+3. **O limite visível a quem usa** — e isto ele já foi além, sem eu pedir: pôs a
+   pendência nos ecrãs, não só no ADR. *«Um limite escrito só num documento de
+   progresso é um limite que o restaurante nunca lê.»*
+
+**O que NÃO exijo:** os requisitos confirmados. Não os posso exigir de quem não
+tem acesso à fonte, e exigi-los seria repetir a instrução impossível que já o
+travou dezoito minutos.
+
+**E a nota que fica na assinatura**, se ela vier: esta etapa passa com uma
+pendência externa declarada, e a assinatura di-lo. Não é o mesmo que uma etapa
+completa, e não vou deixar parecer que é.
