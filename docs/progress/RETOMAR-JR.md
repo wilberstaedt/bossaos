@@ -9,38 +9,38 @@
 
 ---
 
-## ANTES DE TUDO — o defeito aberto no E19, que se agrava sozinho
+## O defeito do fuso: RESOLVIDO a 05/09 — não o voltes a consertar
 
-Se estás a retomar a meio do E19, **lê isto antes de escrever uma linha**, senão
-constróis mais telas em cima de uma representação errada.
+Este bloco dizia «defeito aberto». **Já não está.** Deixo-o corrigido em vez de
+apagado, porque quem retomar precisa de saber que o problema existiu e onde é
+que a guarda está — apagá-lo faria a próxima sessão redescobri-lo do zero, ou
+pior, consertá-lo outra vez por cima do conserto.
 
-**A hora que o cliente escolhe não passa pelo fuso da unidade.** A porta pública
-faz ``new Date(`${dia}T${hora}:00Z`)`` e a grelha de horários faz
-`Date.UTC(...)`. As telas leem de volta com `toISOString().slice(11,16)` e com
-`getUTCHours()`, por isso **tudo parece coerente** — e é essa coerência que o
-esconde.
+**O que era:** a hora escolhida pelo cliente virava instante com um `Z` colado
+(`new Date(dia+'T'+hora+'Z')`), sem passar pelo fuso da unidade. Duas horas de
+desvio em Madrid no Verão. O que isso anulava não era a antecedência: era o
+aviso da sala — às 19h a mesa das 20h não aparecia como reservada, que é o
+minuto exacto em que o host a dá a um walk-in.
 
-Parte onde o instante é comparado com o relógio verdadeiro (`agoraDaBase`):
+**Como está agora:** `resolverHoraLocal(db, unidade.fuso, local)` é chamado na
+**camada de dados**, não na rota; a porta passa `dia` e `hora` como a pessoa os
+escolheu. E uma unidade **sem** fuso recusa reservar em vez de adivinhar —
+«adivinhar é o defeito».
 
-- a **antecedência mínima** de 60 min é atravessável durante toda a janela do
-  desvio (medido ao vivo: 1111 min calculados onde faltavam 991);
-- o **aviso da sala** (`FLOOR-006`) só aparece **à hora da reserva** e fica a
-  dizer «a chegar» durante mais duas horas — que é exactamente o cenário que o
-  aviso existe para evitar.
+**A guarda que impede o regresso**, e é isto que interessa saber:
+`provas/produto-fuso-e-mensagens.test.ts`, com o controlo negativo **«caiu o
+fuso: a porta voltou a gravar hora de parede como UTC»**. Se um refactor
+reintroduzir o `Z`, essa prova fica vermelha sozinha. Não a apagues nem a
+enfraqueças.
 
-**A máquina certa já existe e está provada:** `resolverHoraLocal(db, fuso, local)`
-em `packages/db/src/reservas.ts:810`, apoiada em `instante_local()` na base.
-**Tem zero chamadas.** É caminho morto. O conserto é chamá-la, e usar o `estado`
-que ela devolve — `INEXISTENTE` e `AMBIGUA` são os dois casos que a tela tem de
-dizer à pessoa em vez de escolher em silêncio.
+**O que continua por ligar, e não bloqueia:** `sentar` e
+`varrerRetencoesExpiradas` não têm chamador (`E18-CAMINHOS-MORTOS.md`). O
+varredor é higiene — a capacidade liberta-se pelo relógio, não por ele.
 
-Detector: `bash scripts/demonstrar-defeito-do-fuso.sh` (fora da suite de
-propósito). Falha hoje, passa quando o conserto entrar; diz `NAO MEDI` se a base
-não estiver migrada, em vez de mentir. Análise completa em
-`docs/reviews/E19-ACHADO-FUSO.md`.
-
-**Não é defeito teu:** a convenção atravessa o produto desde antes do E19, e o
-sénior assinou etapas em cima dela sem a ver. Está escrito lá com o nome dele.
+**A regra geral que saiu daqui, e que vale para o E20 em diante:** toda a hora
+escolhida por uma pessoa passa pelo fuso da unidade antes de existir instante.
+No E20 isto pesa mais do que no E19: lá a hora não avisa ninguém, **arranca a
+cozinha**.
 
 ---
 
