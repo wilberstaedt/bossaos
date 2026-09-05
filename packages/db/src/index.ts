@@ -334,7 +334,7 @@ export {
 export {
   corrigir, correccoesDaUnidade, criarFuncao, criarTurno, diaDeServicoDe,
   equipaDaUnidade, funcoesDaUnidade, jornadaDoDia, jornadasDaUnidade,
-  marcacoesDoDia, minutosNoDiaDeServico, picar, turnosDaSemana,
+  marcacoesDoDia, picar, turnosDaSemana,
   RecusaDoPonto, CORTE_DO_SERVICO_MINUTOS,
   type JornadaDoDia, type MarcacaoLida, type RecusaDePonto,
 } from './ponto.ts';

@@ -172,7 +172,10 @@ test.describe('a marcação é um facto, e a correcção vê-se como correcção
     // saída às 00h42, e a correcção às 18h00. Se a original desaparecesse ao
     // ser corrigida, este ecrã mostrava duas.
     await page.goto(`${BASE}/${alvos.pessoaDoPonto}`);
-    const quantas = Number(await page.locator('[data-teste="quantas-marcacoes"]').innerText());
+    // Conta-se o que está DESENHADO, e não o comprimento do array que a tela
+    // recebeu. Um contador que lê a propriedade diz «3» com duas linhas no
+    // ecrã — foi o defeito que o E27 destapou, e aqui repetia-se.
+    const quantas = await page.locator('[data-teste="marcacoes"] li').count();
     expect(quantas, 'a original desapareceu ao ser corrigida — o rasto perdeu-se')
       .toBeGreaterThan(2);
     await expect(page.locator('[data-teste="corrigida"]').first(),
@@ -281,7 +284,17 @@ test.describe('as telas do E28 têm porta', () => {
       ];
       for (const [seccao, tela] of seccoes) {
         await page.goto(BASE);
-        await page.locator(`[data-seccao="${seccao}"]`).first().click();
+        // ── Verificar que a ligação EXISTE, antes de lhe carregar ───────
+        //
+        // Sem isto, uma secção em falta dá um tempo esgotado de 30 segundos com
+        // «locator.click» — e o que se lê é «demorou», não «a HR-011 ficou sem
+        // porta». Um teste que falha sem dizer o quê custa mais do que um que
+        // não existe, porque manda quem o lê à procura do sítio errado.
+        const ligacao = page.locator(`[data-seccao="${seccao}"]`);
+        expect(await ligacao.count(),
+          `a secção ${seccao} não tem ligação nenhuma: a ${tela} ficou sem porta`)
+          .toBeGreaterThan(0);
+        await ligacao.first().click();
         await page.waitForLoadState('networkidle');
         await expect(page.locator(`[data-tela="${tela}"]`),
           `a secção ${seccao} não leva à ${tela}`).toBeVisible();

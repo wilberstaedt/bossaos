@@ -1,14 +1,8 @@
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { carregarEscala, hojeDaCasa } from '../../../../../../../src/ponto/pagina.ts';
+import { horaDoMinuto } from '../../../../../../../src/ponto/horas.ts';
 
 export const dynamic = 'force-dynamic';
-
-/** Mostra `1470` como `24:30` — um turno até à 1h continua a ser um turno. */
-export function horaDoMinuto(m: number): string {
-  const h = Math.floor(m / 60);
-  const min = m % 60;
-  return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
-}
 
 /** HR-004 · «Planifica la semana» (atlas) */
 export default async function Escala({

@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { Client } from 'pg';
 import {
   comEscopo, corrigir, correccoesDaUnidade, criarFuncao, criarTurno, diaDeServicoDe,
-  jornadaDoDia, marcacoesDoDia, minutosNoDiaDeServico, obterPrisma, picar,
-  turnosDaSemana,
+  jornadaDoDia, marcacoesDoDia, obterPrisma, picar, turnosDaSemana,
 } from '../packages/db/src/index.ts';
+import { minutosNoDiaDeServico } from '../packages/domain/src/ponto.ts';
 import { IDS } from '../packages/db/prisma/fixtures.ts';
 
 /**

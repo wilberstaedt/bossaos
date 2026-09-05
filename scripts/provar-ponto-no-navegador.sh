@@ -214,7 +214,7 @@ io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, '', 1))
 PYSECCAO
 correr /tmp/bossaos-pnav-seccao.txt
 exigir_vermelho "caiu uma secção: a HR-011 ficou sem porta e ninguém dava por isso" \
-  'chega-se às oito secções' 'não leva à HR-011' /tmp/bossaos-pnav-seccao.txt
+  'chega-se às oito secções' 'ficou sem porta' /tmp/bossaos-pnav-seccao.txt
 repor "$PAINEL"
 
 echo

@@ -1,5 +1,6 @@
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { carregarPessoa } from '../../../../../../../src/ponto/pagina.ts';
+import { horaDaMarcacao } from '../../../../../../../src/ponto/horas.ts';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,7 @@ export default async function Pessoa({
           {b.marcacoes.map((m) => (
             <li key={m.id}>
               <span data-teste="tipo">{m.tipo === 'ENTRADA' ? t.entrada : t.saida}</span>
-              <span data-teste="momento">{m.momento.toISOString().slice(11, 16)}</span>
+              <span data-teste="momento">{horaDaMarcacao(m.momento, b.fuso, b.diaDeServico)}</span>
               {m.corrigida ? <span data-teste="corrigida">{t.corrigida}</span> : null}
               {m.ehCorreccao ? (
                 <span data-teste={m.autocorreccao ? 'autocorreccao' : 'por-terceiro'}>

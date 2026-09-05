@@ -1,5 +1,6 @@
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
-import { carregarCorreccoes } from '../../../../../../../src/ponto/pagina.ts';
+import { carregarCorreccoes, hojeDaCasa } from '../../../../../../../src/ponto/pagina.ts';
+import { horaDaMarcacao } from '../../../../../../../src/ponto/horas.ts';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +21,8 @@ export default async function Correccoes({
   const t = mensagensDe(idioma).pontoE28;
   const b = await carregarCorreccoes(idioma, orgSlug, locationSlug);
   const auto = b.correccoes.filter((c) => c.autorMembershipId === c.membershipId);
+  const fuso = b.unidade.fuso ?? 'Europe/Madrid';
+  const dia = hojeDaCasa(fuso);
 
   return (
     <div className="bo-pagina">
@@ -42,8 +45,9 @@ export default async function Correccoes({
                 ? 'autocorreccao' : 'por-terceiro'}>
                 {c.autorMembershipId === c.membershipId ? t.autocorreccao : t.porTerceiro}
               </span>
-              <span data-teste="de">{c.corrige?.momento.toISOString().slice(11, 16) ?? '—'}</span>
-              <span data-teste="para">{c.momento.toISOString().slice(11, 16)}</span>
+              <span data-teste="de">{c.corrige
+                ? horaDaMarcacao(c.corrige.momento, fuso, dia) : '—'}</span>
+              <span data-teste="para">{horaDaMarcacao(c.momento, fuso, dia)}</span>
               <span data-teste="motivo">{c.motivo}</span>
             </li>
           ))}

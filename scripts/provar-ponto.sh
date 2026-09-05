@@ -16,10 +16,17 @@ if [[ "$(node --version)" != "$NODE_ESPERADO" ]]; then
   echo "ERRO: esta prova exige o Node do .nvmrc ($NODE_ESPERADO)." >&2; exit 2
 fi
 
+# ── Duas funções puras vivem no DOMÍNIO, e os plantes seguem-nas ─────────
+#
+# O `diaDeServicoDe` mudou de `@bossaos/db` para `@bossaos/domain` quando a
+# guarda das rotas acusou um formatador de tocar na base. Os plantes ficaram a
+# apontar ao ficheiro antigo, e o `plantar()` disse-o: «a âncora mudou; isto
+# não mediu nada». É para isso que ele existe.
 PONTO=packages/db/src/ponto.ts
+PURO=packages/domain/src/ponto.ts
 PROVA=provas/ponto.test.ts
 MIGRACAO=packages/db/prisma/migrations/20260913900000_e28_equipa_e_ponto/migration.sql
-FICHEIROS=("$PONTO" "$PROVA")
+FICHEIROS=("$PONTO" "$PROVA" "$PURO")
 COPIAS=()
 for f in "${FICHEIROS[@]}"; do c=$(mktemp); cp "$f" "$c"; COPIAS+=("$c"); done
 CHEGOU_AO_FIM=0
@@ -157,7 +164,7 @@ echo
 echo "5. CONTROLO NEGATIVO — o dia de serviço passa a ser o dia CIVIL"
 plantar <<'PYDIA' || true
 import io
-p = 'packages/db/src/ponto.ts'
+p = 'packages/domain/src/ponto.ts'
 s = io.open(p, encoding='utf-8').read()
 antigo = "  const recuado = new Date(momento.getTime() - corteMinutos * 60_000);"
 assert antigo in s, 'o recuo do corte nao esta onde se esperava'
@@ -167,13 +174,13 @@ PYDIA
 correr /tmp/bossaos-ponto-dia.txt
 exigir_vermelho "caiu a fronteira: o turno da sexta foi cortado ao meio pela meia-noite" \
   'trabalhou na SEXTA' 'cortado ao meio pela data civil' /tmp/bossaos-ponto-dia.txt
-cp "${COPIAS[0]}" "$PONTO"
+cp "${COPIAS[2]}" "$PURO"
 
 echo
 echo "6. CONTROLO NEGATIVO — o fuso passa a ser um deslocamento FIXO"
 plantar <<'PYFUSO' || true
 import io
-p = 'packages/db/src/ponto.ts'
+p = 'packages/domain/src/ponto.ts'
 s = io.open(p, encoding='utf-8').read()
 antigo = """  return new Intl.DateTimeFormat('en-CA', {
     timeZone: fuso, year: 'numeric', month: '2-digit', day: '2-digit',
@@ -189,7 +196,7 @@ PYFUSO
 correr /tmp/bossaos-ponto-fuso.txt
 exigir_vermelho "caiu o fuso: um deslocamento fixo dá o dia errado em metade do ano" \
   'hora de VERÃO muda o dia de serviço' '' /tmp/bossaos-ponto-fuso.txt
-cp "${COPIAS[0]}" "$PONTO"
+cp "${COPIAS[2]}" "$PURO"
 
 echo
 echo "7. CONTROLO NEGATIVO — a autocorrecção deixa de se distinguir"

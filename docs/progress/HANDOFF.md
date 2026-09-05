@@ -1,85 +1,54 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E28 — Equipa, escalas e ponto (**11 telas**, HR-001 a 011).
-**Estado:** **EM CURSO.** O JR começou a 05/09 (`packages/db/src/ponto.ts`, `scripts/provar-ponto.sh`, `scripts/validar-horas.sh`). Régua em `docs/reviews/ALVO-E28.md`, escrita antes de existir código.
+**Etapa atual:** E28 — equipa, escalas e ponto (**11 telas**).
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — as duas fatias.**
 
+**O que muda:** esta etapa mexe no **salário de quem trabalha na casa**, e quem é
+prejudicado por um defeito aqui é a pessoa com menos poder para o contestar. Um
+erro de stock descobre-se no inventário; um erro de ponto descobre-se no recibo.
 
-**⚠ Defeito aberto do E27, a corrigir ANTES de declarar o E28:**
-`packages/db/src/crm.ts:428` converte o `BigInt` de `custoPontos` para vírgula
-flutuante (`Number(...)`). A comparação de saldo logo acima está certa; só o
-movimento converte, porque `movimentarPontos` está tipada em `number`. Apanhado
-pela `validar-dinheiro` depois de eu assinar. **É do JR** — quem assina não
-escreve o código que assinou. Detalhe em `docs/reviews/E27.md`.
+**A marcação é um facto, e a base não a deixa reescrever:** `time_entries` leva a
+mesma `registo_imutavel()` que o E22 pôs na caixa. A correcção é um **registo
+novo**, com autor e motivo obrigatório por `CHECK`. E há um segundo gatilho que
+protege o **sentido**: uma «correcção» não pode trocar a pessoa nem o tipo —
+sem ele o rasto ficava impecável a documentar o que nunca aconteceu.
 
+**A REGRA DE FRONTEIRA está escrita:** o dia de serviço é a data civil, no fuso da
+unidade, do instante **menos o corte**, resolvida **na escrita**, uma vez. Escrita
+assim por causa do veredicto do E00 — a secção Tempo do `capacidade-e-reservas.md`
+dizia a propriedade certa e não impediu o defeito do fuso porque não dizia o que
+fazer na fronteira.
 
-**⚠ Quarto item do JR — o de maior consequência dos quatro:**
-A tela pública do produto reimplementa a regra dos alergénios numa cadeia de
-ternários em vez de chamar `avisoDeSeguranca`. Está correcta hoje. Mas a
-`validar-alergenios.sh` guarda o módulo de domínio (que a tela não usa) e a prova
-pública só afirma `toHaveCount(14)` — protege contra **omitir** uma linha, não
-contra **rotular mal**. Trocar o último ternário para `sucesso` fazia `DESCONHECIDO`
-ler-se «não contém», com a contagem intacta e tudo verde. Liga a tela ao
-`avisoDeSeguranca`: o órfão deixa de o ser e o caminho vivo passa a ser o guardado.
-Detalhe em `docs/reviews/E34-ALCANCE-TOTAL.md`.
+**Achado que vale a etapa:** um controlo ficou **VERDE com o defeito plantado** —
+o pior resultado possível, porque parece bom. O caso corrigia a entrada para mais
+cedo e o emparelhamento usa a mais antiga, por isso o total dava igual com e sem
+o defeito. Passou a corrigir para mais tarde: 360 contra 300.
 
-
-**⚠ Terceiro item do JR, e é o mais sério dos três:**
-`revogarConvite` está implementada, correcta e **sem um único chamador**. A tela
-`ORG-007` já lista os convites pendentes, e `apps/web/app/api/org/[orgSlug]/
-convites/route.ts` importa `criarConvite, listarConvites, registar` — **e não
-`revogarConvite`**. Um convite enviado para o email errado dá acesso e só sai por
-caducidade. A base tem o estado `REVOGADO` que nenhum caminho do produto produz.
-Ligar a acção na rota e na tela. Detalhe em `docs/reviews/E34-ALCANCE-TOTAL.md`.
-
-
-**⚠ Segundo item do JR, do E34 (sem pressa do E28):**
-`apps/web/app/[idioma]/platform/layout.tsx` linhas 52, 53 e 56 — três entradas
-`href: '#'` sem `porConstruir`. São do **E33** (`PLAT-007`, `PLAT-016`,
-`PLAT-013`). A `validar-portas-mortas.sh` está vermelha sobre elas de propósito,
-até serem marcadas. É metadado de menu, não lógica.
-
-**Porque é que esta etapa é diferente:** até aqui um defeito estragava um número.
-Aqui **manda uma mensagem a uma pessoa que não a pediu**, e isso não se desfaz.
-Por isso a garantia central foi para a FORMA: o gatilho
-`envio_exige_consentimento_vivo` recusa gravar um envio de campanha para quem não
-tenha, **naquele instante**, consentimento vivo de campanha naquele canal. E
-grava-se antes de despachar — recusada a gravação, não há nada despachado.
-
-**Existir no CRM não é ter consentido.** Não há coluna nenhuma que diga «aceita
-campanhas», em modelo nenhum: uma coluna que não existe não pode ficar a `true`
-por omissão nem por uma caixa mal marcada. O consentimento é um **acontecimento**
-com origem e momento, e o estado deriva-se do último de cada
-`(pessoa, finalidade, canal)` — quatro respostas, nunca uma.
-
-**A finalidade de serviço ACABA.** Nasce com `expira_em`, e quem verifica é a
-base contra o relógio dela. O telefone deixado à porta deixa de autorizar quando
-a finalidade acaba — ninguém decide guardá-lo, é o que acontece quando nada o
-apaga.
-
-**A retirada vale antes do próximo envio** porque a pergunta se faz **por pessoa**
-no instante de gravar cada envio, e não uma vez ao construir a audiência. Entre
-uma coisa e a outra passam minutos.
-
-**Achado que vale a etapa:** `25P02` outra vez, e numa forma nova. Embrulhei a
-gravação num `try/catch` à espera da recusa do gatilho — a excepção **aborta a
-transacção** e apanhá-la em JavaScript não a desaborta. No E24 era colisão de
-índice e a saída foi `ON CONFLICT`; aqui é um `RAISE EXCEPTION`, que não tem
-`ON CONFLICT` nenhum. A pergunta passou a fazer-se antes, com a mesma função SQL
-que o gatilho usa.
-
-**E dois achados sobre as minhas próprias asserções:** a da população exigia
-«pelo menos um vivo e pelo menos um não vivo», verdade para quase qualquer
-pessoa; e o contador das quatro respostas lia o array que a tela recebeu, não o
-ecrã — dizia «4» com uma linha desenhada. **Nenhuma foi encontrada a pensar:**
-foram os controlos a cair no caso errado que as destaparam. Um controlo que cai
-no sítio errado está a dizer que a asserção não mede o que eu julgava.
+**E as telas mostravam UTC.** A picagem das 18h07 de Madrid aparecia como «16:07»
+a quem trabalhou nela. Apanhado pela varredura: o `minutosNoDiaDeServico` estava
+escrito, provado e **sem chamador** — não era código a mais, era a conversão que
+faltava. Ao ligá-lo, a guarda das rotas acusou o formatador de tocar na base, e a
+cura foi as duas funções **puras** mudarem-se para `@bossaos/domain`.
 
 **Provas (LOCAIS — a CI continua trancada pela facturação do GitHub):**
-`provas/crm.test.ts` **0** (**27 casos**, repetível) ·
-`provar-crm.sh` **0** (**9 controlos**) ·
-`provar-crm-no-navegador.sh` **0** (**38 casos, 10 controlos**) ·
-`pnpm verificar` **0** · `pnpm inspeccionar` **0** (**690 casos**) ·
+`provas/ponto.test.ts` **0** (**22 casos**, repetível) ·
+`provar-ponto.sh` **0** (**10 controlos**) ·
+`provar-ponto-no-navegador.sh` **0** (**25 casos, 9 controlos**) ·
+`validar-horas.sh` **0** (guarda nova, com controlo negativo próprio) ·
+`pnpm verificar` **0** · `pnpm inspeccionar` **0** (**712 casos**) ·
 `varrer-alcance-da-etapa.sh` → **a correr depois do commit**.
+
+**Dívida do E27 paga:** o `Number()` sobre o `BigInt` de `custoPontos` saiu do
+`resgatar` — a cura foi a assinatura de `movimentarPontos` deixar de o exigir.
+
+## ⚠ PENDÊNCIA DECLARADA — não há cálculo de salário
+
+Guarda-se e mostra-se **tempo**. Converter tempo em dinheiro é convenção laboral,
+e escrever uma que não foi verificada seria o erro do E24 outra vez, num sítio
+onde custa mais.
+
+**Contrato:** `docs/architecture/ponto-e-escalas.md`, escrito antes do código.
+**Detalhe:** `docs/progress/E28.md`.
 
 ## ⚠ PENDÊNCIA DECLARADA — não há provedor de envio
 

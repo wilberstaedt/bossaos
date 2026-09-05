@@ -1,5 +1,6 @@
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { carregarPessoa } from '../../../../../../../src/ponto/pagina.ts';
+import { horaDaMarcacao } from '../../../../../../../src/ponto/horas.ts';
 import { resolverPedido } from '../../../../../../../src/sessao.ts';
 import { notFound } from 'next/navigation';
 import { equipaDaUnidade } from '@bossaos/db';
@@ -51,7 +52,7 @@ export default async function MinhaJornada({
         {b.marcacoes.map((m) => (
           <li key={m.id}>
             <span data-teste="tipo">{m.tipo === 'ENTRADA' ? t.entrada : t.saida}</span>
-            <span data-teste="momento">{m.momento.toISOString().slice(11, 16)}</span>
+            <span data-teste="momento">{horaDaMarcacao(m.momento, b.fuso, b.diaDeServico)}</span>
             {m.corrigida ? <span data-teste="corrigida">{t.corrigida}</span> : null}
             {m.motivo ? <span data-teste="motivo">{m.motivo}</span> : null}
           </li>

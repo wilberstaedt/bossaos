@@ -1,6 +1,7 @@
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { Botao, Campo, Seletor } from '@bossaos/ui';
 import { carregarHoras, carregarPessoa } from '../../../../../../../src/ponto/pagina.ts';
+import { horaDaMarcacao } from '../../../../../../../src/ponto/horas.ts';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +45,7 @@ export default async function PedirCorreccao({
         <Seletor rotulo={t.original} name="marcacaoId" required>
           {(detalhe?.marcacoes ?? []).filter((m) => !m.corrigida).map((m) => (
             <option key={m.id} value={m.id}>
-              {m.tipo === 'ENTRADA' ? t.entrada : t.saida} · {m.momento.toISOString().slice(11, 16)}
+              {m.tipo === 'ENTRADA' ? t.entrada : t.saida} · {horaDaMarcacao(m.momento, b.fuso, b.diaDeServico)}
             </option>
           ))}
         </Seletor>

@@ -174,3 +174,6 @@ export {
   mesasQueServem, posicaoDerivada, quemCabeNaMesa, estimativaEmMinutos,
   type MesaParaEspera, type NaEspera,
 } from './espera.ts';
+export {
+  CORTE_DO_SERVICO_MINUTOS, diaDeServicoDe, minutosNoDiaDeServico,
+} from './ponto.ts';
