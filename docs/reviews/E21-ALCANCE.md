@@ -108,3 +108,31 @@ externo ENTRA» chamando a função directamente.
 **22 por ler.** Não as adivinho, e não as conto como limpas nem como sujas. A
 proporção que já se vê — 5 instrumentos, 1 duplicado, 1 higiene, 1 defeito — diz
 que apresentar as 30 como defeitos teria sido errado em pelo menos sete casos.
+
+## Mais quatro classificadas — e o E06 mostra a categoria 2 a funcionar bem
+
+`marcarPasso`, `progressoDoArranque`, `podeSeguirParaCatalogo` (E06) e
+`diasConfigurados` (E06). **Duplicado superado — apagar.**
+
+As telas de arranque **não leem progresso guardado**: derivam-no, listando o que
+existe (`listarUnidades`, `listarZonas`, `listarMesas`, `listarEstacoes`,
+`listarMarcas`). É a escolha certa, e é o mesmo princípio do contrato da lista de
+espera — **contar mesas é sempre verdade; um contador de progresso pode
+divergir**, e diverge no dia em que alguém apaga uma mesa por fora.
+
+Duas destas — `podeSeguirParaCatalogo` e `diasConfigurados` — não têm uso **nem
+sequer nas provas**. Isso separa-as das do `qr.ts`: não são instrumento de
+verificação, são restos.
+
+**O que isto diz do projecto, e é bom:** em pelo menos dois sítios o produto
+escolheu derivar em vez de guardar, e o mecanismo de guardar ficou para trás sem
+ninguém o apagar. O defeito aqui não é de correcção — é de arrumação. Mas código
+morto que uma leitura futura confunda com «a forma oficial de fazer isto» custa
+uma tarde a alguém, e é por isso que sai em vez de ficar.
+
+**Fica uma pergunta que não respondo aqui:** se ninguém chama
+`podeSeguirParaCatalogo`, existe **alguma** porta que impeça avançar no arranque
+antes de tempo, ou a tela mostra tudo e confia em quem a usa? Não medi. É
+pergunta de operação, e o E21 é exactamente onde ela se faz.
+
+**Estado: 12 de 30 classificadas. 18 por ler.**
