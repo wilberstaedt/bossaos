@@ -253,3 +253,41 @@ fica no módulo de domínio, e o produto reimplementa-a em linha.** Alergénios,
 preços por canal, domínios. Nos três casos a versão inline está certa hoje. Nos
 três, a versão pensada é a que não tem provas — e duas implementações da mesma
 regra divergem sempre pela que ninguém corre.
+
+---
+
+# Auditoria ao número que ando a citar: as 254 telas
+
+Ando a dizer «254 telas validadas» em cada assinatura. **O número vem do
+`coverage.csv`, que é declaração, não medição.** Fui verificá-lo.
+
+À primeira tentativa dei-me um susto e era meu: contei marcadores `data-tela` e
+achei 61 contra 254 declaradas — 212 «sem marcador». **O instrumento estava
+errado:** `data-tela` aparece 46 vezes nas provas e `data-teste` 171. Não é a
+convenção universal, é a de algumas etapas.
+
+Refeito pela pergunta certa — **quantas telas validadas são exercitadas por
+alguma prova**:
+
+```
+validadas ....................... 254
+nomeadas em provas/inspecção .... 247
+não nomeadas .....................  7
+```
+
+E as sete, lidas uma a uma:
+
+- **Seis são `STATE-*` do E02**, marcadas na matriz como **«estado transversal
+  (não é rota)»**. Não têm endereço para visitar. É correcto não aparecerem numa
+  prova de navegação.
+- **Uma é a `PUB-002`, a Carta pública** — e **está exercitada**, por
+  `goto('/r/insp-marina-oropesa/es-ES/menu')`. Só não é chamada pelo ID. O meu
+  detector de «não nomeada» era um proxy, e este foi o seu falso positivo.
+
+**O número aguenta: as 254 estão cobertas.** Duas tentativas erradas antes de
+chegar aqui, as duas do meu instrumento — e é por isso que a auditoria valia a
+pena: um número citado vinte vezes sem nunca ser verificado é exactamente o tipo
+de coisa que ninguém pensa em medir.
+
+**O que isto NÃO desmente:** as telas estão cobertas **por endereço**. A crítica
+do E21 é outra e mantém-se — ninguém verificou que se **chega** a elas.
