@@ -55,3 +55,19 @@ uma destas, o documento é que está errado.
    no ecrã não é escopo, e uma exportação nunca é mais generosa do que a vista.
 5. **O instrumento também é entrega.** Uma prova que não consegue falhar não prova nada, e
    uma que não consegue medir tem de dizê-lo alto em vez de contar zero.
+
+## Acrescentados ao índice a 05/09
+
+> Estavam escritos e fora do índice. Um contrato que ninguém encontra pelo
+> índice é um contrato que não existe — o mesmo defeito de alcance que reprovou
+> o E19 e o marco do Restaurant, aplicado à documentação.
+> A guarda `scripts/validar-indice-de-contratos.sh` impede que volte a acontecer.
+
+- [`lista-de-espera.md`](./lista-de-espera.md) — A lista de espera: o que é um lugar nela
+- [`pedidos-para-mais-tarde.md`](./pedidos-para-mais-tarde.md) — Um pedido para as 20h não é trabalho para agora
+- [`portas-e-navegacao.md`](./portas-e-navegacao.md) — Portas: como se chega a um módulo
+- [`preco-de-um-pedido-escrito-offline.md`](./preco-de-um-pedido-escrito-offline.md) — Que preço paga um pedido escrito offline
+- [`qr-da-mesa-e-o-visitante.md`](./qr-da-mesa-e-o-visitante.md) — O QR da mesa é um token ao portador, colado num sítio público
+- [`quantidades-e-unidades.md`](./quantidades-e-unidades.md) — Quantidades e unidades
+- [`stock-e-fichas.md`](./stock-e-fichas.md) — Stock e fichas técnicas
+- [`tarefas-de-producao-e-estacoes.md`](./tarefas-de-producao-e-estacoes.md) — Uma linha de pedido não é uma tarefa de estação
