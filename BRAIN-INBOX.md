@@ -265,3 +265,60 @@ recuperável. Três saídas nomeadas, nenhuma escolhida — é decisão de produ
 - **Sete decisões esperam pelo Matheus** (`DECISOES-DO-MATHEUS.md`), a mais
   barata sendo a **CI trancada por facturação**, e a mais séria os **requisitos
   fiscais por confirmar antes do primeiro talão real**.
+
+---
+
+## [2026-09-06] — A publicação do staging, e nove paragens que não foram do produto
+
+### Decisões técnicas
+- **Publica-se um COMMIT, não a árvore de trabalho.** A primeira versão do
+  `publicar.sh` exigia árvore limpa e depois fazia `rsync ./` — a verificação era
+  uma *promessa* de que o disco e o commit coincidiam. Passou a `git archive`: o
+  que vai para o ar existe em git porque não há outra maneira de lá chegar.
+  Garantia por impossibilidade em vez de por regra. **E resolveu um problema
+  real:** com dois agentes na mesma árvore, a minha nunca está limpa.
+- **O portão de publicação recusa se houver etapa por assinar.** O motor existe
+  para que nada passe sem segunda assinatura; publicar por cima disso desfazia-o
+  a partir de fora.
+- **Um deploy só está feito quando a versão que RESPONDE é a que foi construída.**
+  Não basta o `docker compose up` não dar erro. E a sonda não pode atravessar o
+  produto: a minha pedia `/versao.txt` e o router de idiomas devolvia
+  `/es-ES/versao.txt`. Passou a ler a etiqueta da imagem, pelo Docker.
+
+### Learnings
+- **Nove paragens, e só uma não foi minha.** As outras oito: um `grep` que
+  apanhava a variável errada, o `compose` a ler `.env` em vez de `.env.prod`, um
+  contentor que eu deixara no projecto errado, a variável do Prisma na fase
+  errada do Dockerfile, um `python` de edição **sem `assert`** que não mudou nada
+  e reportou sucesso, um `git commit` que não correu por causa de aspas, uma
+  porta escolhida por dedução, o `PORT` editado nos dois sítios que não mandam, e
+  a sonda que media o produto em vez do build.
+- **Um passo feito à mão esconde a dependência que o script tem.** Subi o
+  Postgres à mão com o ambiente já carregado na sessão — e isso escondeu que o
+  `docker compose` lê `.env` e não `.env.prod`, e deixou um contentor no projecto
+  errado que depois colidiu. Um passo fora do script fica fora da próxima vez.
+- **Pedir um número a mais evitou um incidente.** A porta que escolhi para o
+  staging era do `norte_web`, em produção. Ia matar o `docker-proxy` que a
+  segurava, a pensar que era lixo das minhas tentativas — o que travou foi ver a
+  **idade do processo**: três dias, não trinta minutos. Sem esse número, a
+  explicação errada era plausível e coerente com tudo o resto.
+- **Depois de mexer em infraestrutura partilhada, verifica-se o que NÃO se queria
+  mudar.** O Caddyfile serve quatro produtos; confirmei os quatro a 200 depois do
+  reload, não só o meu.
+- **«A semente correu OK» não é «o site funciona».** As duas semeaduras deram
+  `OK` e a carta pública dava 500 — faltavam duas variáveis de ambiente. Só
+  apareceu por eu abrir a página.
+- **Ter a lição escrita não é o mesmo que aplicá-la.** O README do ilora já dizia
+  «.env copiado ANTES do install: o prisma generate precisa dele». Li-o de
+  propósito, para copiar o padrão, e pus a variável na fase errada na mesma.
+
+### O que foi feito
+- `bossaos.mwdeveloper.tech` no ar: DNS, Postgres próprio no 5434, três papéis
+  separados com login **testado um a um**, migrações, build nativo no VPS,
+  contentor no 8140, Caddy com TLS, e o restaurante de demonstração semeado — a
+  carta pública serve 8 produtos.
+- E28 e E29 assinados. 83% das etapas (30/36), 86% das telas (344/396).
+- Contratos e réguas do E30, E31 e E32 escritos **antes do código**.
+
+### Próximo passo
+- O JR fecha o E30. Faltam seis etapas.
