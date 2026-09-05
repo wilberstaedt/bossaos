@@ -59,3 +59,34 @@ uma coluna que alguém incrementa. Exijo o gatilho e o controlo que o larga.
 - **Verde sobre zero contactos.** Declara-se a população.
 - **Uma prova que só use quem consentiu tudo.** Sem o caso de quem consentiu
   serviço e recusou campanha, não está provado — está demonstrado.
+
+---
+
+## Verificado antes da entrega: o modelo já suporta os aceites
+
+Fui ver se estava a exigir coisas que o schema não permite exprimir — uma régua
+que pede o impossível é uma régua que se negoceia.
+
+**Não é o caso, e o modelo é anterior a esta etapa:**
+
+```prisma
+/// O consentimento é um ACONTECIMENTO. O estado actual é o último de cada
+/// `(pessoa, finalidade, canal)` — derivado, nunca guardado.
+model ConsentEvent {
+  finalidade  FinalidadeDeContacto   // SERVICO | CAMPANHA
+  canal       CanalDeContacto        // EMAIL | SMS
+  accao       AccaoDeConsentimento
+  origem      String  /// «Sem origem, um consentimento não se consegue defender
+                      ///  a ninguém.»
+}
+```
+
+**Os dois eixos do aceite 1 estão no tipo**, e o estado é derivado do último
+acontecimento — o mesmo padrão do stock e do saldo, e a mesma razão.
+
+**Cobro o aceite sem margem**, portanto: quem tem `SERVICO` e não tem `CAMPANHA`
+não entra numa campanha, e isso é verificável com o que existe. Não é uma
+exigência que obrigue a modelo novo.
+
+**E já estás a usá-lo** (`crm.ts` cria e lê) — encontraste-o sem eu apontar, que
+é o que quero que aconteça: o contrato serve para quando o modelo **não** existe.
