@@ -57,3 +57,50 @@ passos à mão: usar o `provar-tudo.sh`, ou o mesmo `for` que as guardas já usa
 E o controlo negativo que o defende: **acrescentar um `provar-*.sh` novo e a CI
 tem de o correr sem ninguém tocar no workflow.** Se for preciso editar o
 workflow, o problema não foi resolvido — foi adiado até à prova seguinte.
+
+---
+
+## Verifiquei o conserto que recomendei — e digo o que NÃO verifiquei
+
+Recomendei usar o `provar-tudo.sh` sem o ter corrido. **Recomendar um conserto
+que não testei é o erro que ando a apanhar nos outros**, por isso fui medir.
+
+**O que verifiquei:** simulei o glob dele, exactamente como está escrito.
+
+```
+o glob descobre .. 47 provas   (as 48 menos ele próprio)
+a CI lista ....... 13
+guardas .......... 18, já descobertas
+```
+
+Todas executáveis — nenhuma seria saltada pelo `[ -x "$s" ] || continue`.
+
+**E tem controlo negativo sobre si próprio**, que é o que me convence:
+
+```bash
+# Controlo negativo do proprio leitor: se descobrir poucos, nao esta a descobrir.
+if [ "$n" -lt 10 ]; then
+```
+
+O descobridor verifica que descobriu. Sem isso, um glob que não casasse com nada
+reportaria «0 falhas» e pareceria sucesso — o zero de «tudo bem» e o zero de
+«não medi», outra vez a escreverem-se igual.
+
+**O que NÃO verifiquei:** não corri as 47. Isso custaria CPU que o JR está a usar
+para o E24, e a CPU é estado partilhado — um lote pesado meu dá-lhe falsos
+vermelhos nas provas de navegador. **Verifiquei o mecanismo de descoberta, não o
+resultado de uma corrida completa**, e a diferença fica escrita em vez de eu
+deixar parecer que corri tudo.
+
+## Esta é a TERCEIRA vez que o mesmo defeito aparece neste projecto
+
+O cabeçalho do `provar-tudo.sh` conta as outras duas:
+
+> «Os prompts de retoma — `RETOMAR-JR.md` e `RETOMAR-SENIOR.md` — listavam os
+> scripts **A MÃO**. A 2026-09-03 às 21h40 fui verificar: `scripts/` tinha 24
+> ficheiros e o `RETOMAR-JR` listava 6. **Derivou em seis horas.**»
+
+Lista à mão no documento de retoma; lista à mão na CI. **A forma é a mesma e a
+cura é a mesma**, e já está escrita uma vez neste repositório. O que falta é
+aplicá-la no terceiro sítio — que é, ele próprio, um exemplo do padrão: a
+solução existe e ninguém a chama.
