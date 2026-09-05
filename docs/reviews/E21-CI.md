@@ -140,3 +140,35 @@ linhas acima, escrito por quem percebeu o problema.
 
 **Ressalva:** a CI está trancada por facturação. A guarda nova entra sozinha
 **quando ela voltar** — hoje não corre, como não correm as outras.
+
+---
+
+## Podia ter apagado esta guarda vermelha em cinco minutos. Não apaguei.
+
+A `validar-provas-na-ci.sh` tem um mecanismo de excepção: um array `EXCEPCOES`
+com `nome:motivo`. Declarar as **43 provas sem decisão** deixava-a verde antes do
+fim deste tick.
+
+**Seria usar o mecanismo de excepção para calar um achado verdadeiro.** As 43
+não estão fora da CI por uma razão — estão fora por deriva, que é o contrário de
+uma decisão. Uma excepção declarada diz «pensámos nisto e escolhemos assim»; 43
+excepções escritas de uma vez para fazer parar o vermelho dizem «queríamos que
+se calasse».
+
+**A guarda está vermelha porque a coisa que ela vigia está partida.** É o
+comportamento correcto, e o desconforto é a função dela.
+
+### E o teste que me convence de que estou certo
+
+Se eu declarasse as 43, **o que mudava no produto?** Nada. A `provar-portas`
+continuava sem correr na CI, e uma regressão nas portas continuava a passar. O
+único efeito seria eu deixar de ver o problema — e é essa a definição de um
+verde vazio.
+
+**O conserto verdadeiro está identificado e verificado** (a CI descobrir, como
+já descobre as guardas), e é uma linha. Deixo a guarda vermelha até essa linha
+existir, para que o vermelho continue a apontar para o trabalho e não para a
+minha vontade de o ver desaparecer.
+
+**Excepção que eu aceitaria:** uma prova que genuinamente não pode correr na CI
+— por precisar de segredo de terceiro, ou de hardware. Nenhuma das 43 é assim.
