@@ -214,3 +214,25 @@ O ramo do MFA é 5m23s e não desce dividindo mais: é **uma prova**. Baixá-lo 
 prova — ela espera pelo Mailpit, e essa espera pode ser evento em vez de sondagem. Não é
 para hoje, e **não é urgente**: 369 s dá resposta em menos de seis minutos, e o `rápido`
 continua a falhar em dois quando o erro é de lint, tipos ou guarda.
+
+## A CI está PARADA por facturação — desde 04/09, confirmado a 05/09
+
+Nenhum destes tempos está a ser gasto, porque **nenhum job arranca**. As
+corridas aparecem como `failure` **aos 5 segundos**, e a verificação mostra
+porquê: `gh run view --log-failed` devolve `log not found`, e a consulta aos
+jobs não devolve passo nenhum. Um job que falhasse por código teria log e
+passos. Este não chega a existir.
+
+**Consequência prática:** enviar commits para o GitHub **não gasta minutos**,
+porque não corre nada. Mas também não protege nada — as 12 provas que só correm
+na CI não estão a correr desde então, e cada etapa validada daqui para a frente
+tem a prova **local** e não a remota.
+
+**Só o Matheus desbloqueia** (facturação do GitHub Actions). Não é dívida
+técnica nem defeito de etapa nenhuma; é dependência externa, e está registada
+aqui para não voltar a ser diagnosticada de raiz a cada tick.
+
+**O que fica em risco enquanto durar:** a guarda de cobertura dos 396 IDs, a
+varredura de segredos e a ordem das etapas correm só quando alguém as corre à
+mão. A assinatura de uma etapa continua válida — a prova local é a mesma — mas
+perde-se a rede que apanha o que a máquina local não vê.
