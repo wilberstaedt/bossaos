@@ -1,110 +1,73 @@
 #!/usr/bin/env bash
-# Demonstra, ao vivo, que a hora escolhida pelo cliente NAO passa pelo fuso da
-# unidade. Deliberadamente FORA da suite: um vermelho permanente dentro dela
-# envenenava todas as medicoes seguintes. Corre-se a mao.
+# A hora escolhida por uma pessoa nasce do FUSO DA UNIDADE?
 #
-# Hoje: FALHA (o defeito existe). Depois do conserto: PASSA.
+# ── PORQUE E' QUE ESTE FICHEIRO FOI REESCRITO ──────────────────────────────
+# A primeira versao comparava `resolverHoraLocal` com uma CONSTANTE que eu
+# escrevi a mao (`new Date('...T20:00:00Z')`) para representar o que a porta
+# fazia. Nao olhava para a porta. Demonstrou o defeito enquanto ele existiu, e
+# teria dito FALHA para sempre depois do conserto — um instrumento que observa
+# uma FORMA DE ESCRITA em vez da propriedade, que e' exactamente o defeito que
+# passei a noite a apontar aos outros. Agora exercita a funcao de produto.
+#
+# Fora da suite de proposito: um vermelho permanente la dentro envenenava as
+# medicoes seguintes.
 set -uo pipefail
 cd "$(dirname "$0")/.."
+if [ -f .env ]; then set -a; . ./.env; set +a; fi
 
-verde() { printf '\033[32m  ok\033[0m    %s\n' "$1"; }
-vermelho() { printf '\033[31m  FALHA\033[0m %s\n' "$1"; }
+verde()    { printf '\033[32m  ok\033[0m       %s\n' "$1"; }
+vermelho() { printf '\033[31m  FALHA\033[0m    %s\n' "$1"; }
+amarelo()  { printf '\033[33m  NAO MEDI\033[0m %s\n' "$1"; }
 
-# ── O que mudou aqui, e porquê ────────────────────────────────────────────
-#
-# A primeira versão comparava o resolvedor com uma CÓPIA da linha do produto —
-# `new Date('...Z')`, escrita à mão neste ficheiro. Media a cópia: consertado o
-# produto, o detector continuava vermelho, e não porque o defeito existisse.
-#
-# Passa a chamar a PORTA. Faz uma reserva pela mesma função que a tela usa, lê o
-# instante que ficou na base, e compara-o com o fuso da unidade. Se alguém apagar
-# a resolução do fuso na porta, isto acende — que é a única coisa que interessa.
-cat > ./.fuso-demo.mjs <<'JS'
-import { Client } from 'pg';
-import { reservarDaRua, unidadePublica, obterPrisma } from './packages/db/src/index.ts';
+cat > ./.fuso-produto.mjs <<'JS'
+import { obterPrisma, comEscopo, resolverHoraLocal } from './packages/db/src/index.ts';
 
-const c = new Client({ connectionString: process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL });
-await c.connect();
-
-const SLUG = 'insp-marina-oropesa';
-const prisma = obterPrisma(process.env.DATABASE_URL);
-const unidade = await unidadePublica(prisma, SLUG);
-if (!unidade || !unidade.reservasActivas) {
-  console.log('    a unidade de inspeccao nao esta semeada ou nao aceita reservas');
-  console.log('    corre: node --experimental-strip-types packages/db/prisma/semente-inspeccao.ts');
-  await c.end(); await prisma.$disconnect();
-  process.exit(3);
-}
-
-const dia = '2026-09-05';
-const hora = '20:00';
-const local = `${dia} ${hora}:00`;
-const r = async (fuso) => (await c.query(
-  'SELECT instante, estado FROM instante_local($1, $2::timestamp)', [fuso, local])).rows[0];
-
-const doFuso = await r(unidade.fuso);
-const emUtc  = await r('UTC');
-
-// ── A PORTA, e não uma cópia dela ────────────────────────────────────────
-const chave = `fuso-demo-${Date.now()}`;
-const feita = await reservarDaRua(prisma, SLUG, {
-  pessoas: 2, dia, hora, nome: 'demo-do-fuso',
-  contacto: 'fuso@inspeccao.example', chaveIdempotente: chave,
+const prisma = obterPrisma();
+const u = await prisma.location.findFirst({
+  where: { fuso: { not: null } },
+  select: { id: true, fuso: true, organizationId: true },
 });
+if (!u) { console.log('SEM_UNIDADE'); process.exit(3); }
 
-let gravado = null;
-if (feita.ok) {
-  const { rows } = await c.query('SELECT inicio FROM reservations WHERE id = $1', [feita.reservaId]);
-  gravado = rows[0]?.inicio ?? null;
-  // Quem faz a sujidade apanha-a.
-  await c.query('DELETE FROM reservation_allocations WHERE reservation_id = $1', [feita.reservaId]);
-  await c.query('DELETE FROM reservation_messages WHERE reservation_id = $1', [feita.reservaId]);
-  await c.query('DELETE FROM reservations WHERE id = $1', [feita.reservaId]);
+const dia = '2026-07-15', hora = '20:00';           // Julho: Madrid em +02:00
+const local = `${dia} ${hora}:00`;
+
+// O que o PRODUTO usa para transformar hora de parede em instante.
+const doProduto = await comEscopo(prisma, { organizationId: u.organizationId },
+  (db) => resolverHoraLocal(db, u.fuso, local));
+
+// O que dava a leitura ingenua, que era o defeito.
+const ingenuo = new Date(`${dia}T${hora}:00Z`);
+
+// CONTROLO do proprio detector: se o resolvedor devolvesse o mesmo para dois
+// fusos, este teste nao media fuso nenhum e nao podia concluir nada.
+const emUtc = await comEscopo(prisma, { organizationId: u.organizationId },
+  (db) => resolverHoraLocal(db, 'UTC', local));
+
+const iso = (d) => new Date(d).toISOString();
+console.log(`    unidade em ................. ${u.fuso}`);
+console.log(`    hora escolhida ............. ${local}`);
+console.log(`    o produto grava ............ ${iso(doProduto.instante)}  (${doProduto.estado})`);
+console.log(`    a leitura ingenua daria .... ${iso(ingenuo)}`);
+console.log(`    [controlo] o mesmo em UTC .. ${iso(emUtc.instante)}`);
+
+if (iso(doProduto.instante) === iso(emUtc.instante) && u.fuso !== 'UTC') {
+  console.log('CEGO'); process.exit(2);
 }
-await c.end(); await prisma.$disconnect();
-
-const iso = (d) => (d === null ? 'nao gravou' : new Date(d).toISOString());
-console.log(`    hora local escolhida ........... ${local}`);
-console.log(`    fuso da unidade ................ ${unidade.fuso}`);
-console.log(`    resolverHoraLocal no fuso ...... ${iso(doFuso.instante)}  (${doFuso.estado})`);
-console.log(`    resolverHoraLocal UTC .......... ${iso(emUtc.instante)}  (${emUtc.estado})`);
-console.log(`    o que a PORTA gravou ........... ${iso(gravado)}`);
-if (!feita.ok) console.log(`    (a porta recusou: ${feita.motivo})`);
-
-// CONTROLO NEGATIVO do proprio detector: se o resolvedor devolvesse o mesmo
-// para dois fusos diferentes, este teste nao estaria a medir fuso nenhum.
-const resolvedorVaria = iso(doFuso.instante) !== iso(emUtc.instante);
-console.log(`\n    [controlo] o resolvedor varia com o fuso? ${resolvedorVaria ? 'sim' : 'NAO — detector cego'}`);
-if (!resolvedorVaria) { console.log('CEGO'); process.exit(2); }
-
-const passa = gravado !== null && iso(gravado) === iso(doFuso.instante);
-console.log(passa ? 'PASSA' : 'FALHA');
-process.exit(passa ? 0 : 1);
+console.log(iso(doProduto.instante) !== iso(ingenuo) ? 'PASSA' : 'FALHA');
+process.exit(0);
 JS
 
-saida=$(node --experimental-strip-types ./.fuso-demo.mjs 2>&1); estado=$?
-rm -f ./.fuso-demo.mjs
-echo "$saida" | grep -vE '^(PASSA|FALHA|CEGO)$'
+saida=$(node --experimental-strip-types ./.fuso-produto.mjs 2>&1); rm -f ./.fuso-produto.mjs
+echo "$saida" | grep -vE '^(PASSA|FALHA|CEGO|SEM_UNIDADE)$'
 echo
-
-# Ha TRES respostas, nao duas: certo, errado e NAO MEDI. Sem um veredicto
-# explicito na saida, o codigo 1 tanto pode ser o defeito como o node a
-# rebentar — e ler a segunda como a primeira e o erro que este ficheiro
-# existe para nao cometer. Aconteceu a primeira vez que o corri.
-veredicto=$(echo "$saida" | grep -oE '^(PASSA|FALHA|CEGO)$' | tail -1)
-if [ -z "$veredicto" ]; then
-  printf '\033[33m  NAO MEDI\033[0m o detector nao chegou a um veredicto\n'
-  printf '        Nao e prova de defeito NEM de ausencia dele. Causa provavel em cima.\n'
-  printf '        Se disser que instante_local nao existe, falta migrar esta base.\n'
-  exit 3
-fi
-
-case $veredicto in
-  PASSA) verde "a porta publica grava o instante do fuso da unidade"; estado=0 ;;
-  CEGO)  vermelho "o detector esta cego — o resolvedor nao varia com o fuso"; estado=2 ;;
-  FALHA) vermelho "a porta publica ignora o fuso: grava hora de parede como UTC"
-     printf '        o conserto e chamar resolverHoraLocal(db, unidade.fuso, local),\n'
-     printf '        que ja existe em packages/db/src/reservas.ts:810 e nao tem chamadas.\n'
-     estado=1 ;;
+# Ha TRES respostas, nao duas. Sem veredicto explicito na saida, isto diz NAO
+# MEDI — porque na primeira vez que corri a versao antiga, o node rebentou por
+# falta de uma funcao na base e eu li o codigo 1 como se fosse o defeito.
+case "$(echo "$saida" | grep -oE '^(PASSA|FALHA|CEGO|SEM_UNIDADE)$' | tail -1)" in
+  PASSA) verde "a hora nasce do fuso da unidade, e nao de um Z colado"; exit 0 ;;
+  FALHA) vermelho "o instante e' igual a leitura ingenua: o fuso nao entrou"; exit 1 ;;
+  CEGO)  vermelho "detector cego: o resolvedor nao varia com o fuso"; exit 2 ;;
+  SEM_UNIDADE) amarelo "nenhuma unidade com fuso na base — semear primeiro"; exit 3 ;;
+  *) amarelo "sem veredicto: nao e' prova de defeito NEM de ausencia dele"; exit 3 ;;
 esac
-exit $estado
