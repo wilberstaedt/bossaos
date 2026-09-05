@@ -48,16 +48,32 @@ for s in scripts/validar-*.sh; do
 done
 
 echo
+marcos=""
 echo "PROVAS (base, browser, ponta a ponta)"
 for s in scripts/provar-*.sh; do
   [ -x "$s" ] || continue
   [ "$(basename "$s")" = "provar-tudo.sh" ] && continue
+  # Os `provar-marco-*.sh` sao AGREGADORES: chamam outras provas para responder
+  # a um parecer de marco. Corre-los aqui repete o trabalho — o `marco-e21`
+  # chama o `provar-portas`, que esta suite ja descobre por si. Uma suite de
+  # navegador com controlos negativos reconstroi o produto a cada plante; corre-la
+  # duas vezes e' o dobro do tempo pela mesma informacao.
+  # Saltam-se, E DIZ-SE, porque a pergunta deles ("o marco ainda esta aprovado?")
+  # nao e' a mesma que a desta suite ("as provas passam?") e alguem tem de a fazer.
+  case "$(basename "$s")" in
+    provar-marco-*) marcos="$marcos $(basename "$s")"; continue ;;
+  esac
   n=$((n+1)); nome=$(basename "$s")
   if "$s" >/dev/null 2>&1; then printf "  ok    %s\n" "$nome"
   else printf "  FALHA %s\n" "$nome"; falhados="$falhados $nome"; fi
 done
 
 echo
+if [ -n "$marcos" ]; then
+  echo "  --    marcos NAO corridos aqui (sao agregadores):$marcos"
+  echo "        correr a mao para responder a «o marco ainda esta aprovado?»"
+fi
+
 # Controlo negativo do proprio leitor: se descobrir poucos, nao esta a descobrir.
 if [ "$n" -lt 10 ]; then
   echo "  FALHA so encontrei $n scripts - o descobridor esta cego"
