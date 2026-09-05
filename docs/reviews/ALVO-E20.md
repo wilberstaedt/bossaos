@@ -153,3 +153,10 @@ foi declarada — mas nenhum me levanta bandeira:
 encomendado para as 20:30 que acaba às 19:00 é um problema só dos pedidos
 agendados — não existe no serviço à mesa, onde se pede e faz-se. Não estava na
 minha régua e devia estar.
+
+**Guarda do dinheiro, corrida a 05/09 contra a árvore do E20: 0 falhas.** O único
+`Number()` do `mais-tarde.ts` está numa contagem para gerar o número do pedido
+(`X00001`), e a guarda não o acusa — porque tem controlo dos dois lados: «apanha
+as três conversões de dinheiro **e não acusa as três legítimas**». É a
+calibração que exigi depois de ela ter acusado o `total` de zona no E18, que
+conta pessoas.
