@@ -23,6 +23,7 @@
 | **E13–E15** sala e PWA | [offline-e-fila-local](./offline-e-fila-local.md) | o tablet é **partilhado**: fila por org+unidade+utilizador |
 | **E14** pedidos | [state-machines](./state-machines.md) · [api-contracts](./api-contracts.md) | idempotência e outbox |
 - [`kiosk-e-impressao.md`](./kiosk-e-impressao.md) — Kiosk e impressão: entregue à ponte não é impresso, e não saber é um estado; dois clientes seguidos não partilham nada porque os dados nunca foram juntos; e sem aparelho real não se declara homologação.
+- [`integracoes-e-cobranca-do-saas.md`](./integracoes-e-cobranca-do-saas.md) — Integrações, API e cobrança: a chave mostra-se uma vez, o âmbito verifica-se por operação, a assinatura é sobre o corpo cru — e um webhook NUNCA muda concessões pelo `organization_id` que vem no corpo.
 | **E16** KDS | [kds-e-tempo-real](./kds-e-tempo-real.md) | nunca descartar por falta de espaço; tempo do servidor |
 | **E18–E19** reservas | [capacidade-e-reservas](./capacidade-e-reservas.md) | intervalo semiaberto; os **dois** lados do limite |
 | **E22–E24** dinheiro | [dinheiro](./dinheiro.md) | quatro entidades; indeterminado **não** é falhado |
