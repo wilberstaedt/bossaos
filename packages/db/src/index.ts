@@ -338,3 +338,13 @@ export {
   RecusaDoPonto, CORTE_DO_SERVICO_MINUTOS,
   type JornadaDoDia, type MarcacaoLida, type RecusaDePonto,
 } from './ponto.ts';
+export {
+  caixaDoPeriodo, centrosDeCusto, confirmarCorrespondencia, contasDaUnidade,
+  converterTotal, correspondenciasDaConta, criarConta, criarPeriodo,
+  extractoDaConta, fecharPeriodo, importacoesDaConta, importarExtracto,
+  periodosDaUnidade, reabrirPeriodo, registarMovimento, resultadoDoPeriodo,
+  sugerirCorrespondencia, totalizar, RecusaDoFinanceiro,
+  type Convertido, type LinhaConciliada, type LinhaDeRelatorio,
+  type LinhaDoFicheiro, type RecusaFinanceira, type ResultadoDaImportacao,
+  type TotalPorMoeda,
+} from './financeiro.ts';

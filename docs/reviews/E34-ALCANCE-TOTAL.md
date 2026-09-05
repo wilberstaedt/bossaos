@@ -111,3 +111,54 @@ escrito. Aí o número deixa de crescer em silêncio.
 | `passarClienteSemEscopoNaoCompila` | `packages/db/src/escopo.tipos.ts` |
 | `revogarConvite` | `packages/db/src/convites.ts` |
 | `sessoesVivas` | `packages/auth/src/revogacao.ts` |
+
+
+---
+
+## As 19, triadas — e uma classe que o instrumento não sabia ver
+
+**Quatro não são órfãs: são testes de tipo.** As de `escopo.tipos.ts` chamam-se
+`passarClienteSemEscopoNaoCompila` e afins. **Existem para o compilador as
+recusar, não para alguém as chamar** — a ausência de chamador é o objectivo
+delas. É uma classe de falso positivo que a minha varredura não sabe ver, e que
+nenhuma contagem revelaria: só se descobre a ler os nomes.
+
+**Uma é código à frente da etapa:** `listarAuditoria`, do E33.
+
+**Duas são defeito confirmado, e têm a MESMA forma:**
+
+| Criar — ligado na rota | Desfazer — sem chamador |
+| --- | --- |
+| `criarConvite` | `revogarConvite` |
+| `guardarExcepcao` | `apagarExcepcao` |
+
+Nos dois casos a função de desfazer está escrita, correcta e exportada, e **a
+rota que faz a acção não a importa**. O produto sabe fazer e não sabe desfazer, e
+o código diz que sabe as duas coisas.
+
+Consequências medidas: um convite para o email errado dá acesso até caducar; uma
+casa que marca «fechado a 25 de Dezembro» não consegue desmarcar, e o site
+público mostra-a fechada num dia em que abre.
+
+**Duas instâncias da mesma forma não são dois acidentes.** Ficou
+`validar-desfazer.sh`: agrupa as exportações pelo substantivo e acusa quando o
+verbo de criar tem chamador e o de desfazer não tem. Encontra os dois, e **nenhum
+falso positivo em 436 substantivos**.
+
+### A guarda mentiu-me duas vezes antes de funcionar, e as duas são o assunto dela
+
+**Primeira:** anunciou `0 pares` num repositório onde eu tinha acabado de
+encontrar dois à mão. A exclusão das barricas era uma heurística — «chama-se
+`index.ts` e tem `export` nos primeiros 400 caracteres».
+
+**Segunda:** substituí-a por uma regra por linha, e ainda deu zero. A ocorrência
+que a enganava estava numa **linha de continuação** de um `export { ... } from`
+de várias linhas:
+
+```
+packages/db/src/index.ts:132    guardarExcepcao, apagarExcepcao,
+```
+
+Só à terceira, a seguir o **bloco** e não a linha, apareceram os dois. **As três
+falhas foram do instrumento, e são exactamente o assunto da guarda:** uma coisa
+parece ligada porque aparece escrita algures.

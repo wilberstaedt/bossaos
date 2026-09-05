@@ -11,6 +11,15 @@ erro de stock descobre-se no inventário; um erro de ponto descobre-se no recibo
 mesma `registo_imutavel()` que o E22 pôs na caixa. A correcção é um **registo
 novo**, com autor e motivo obrigatório por `CHECK`. E há um segundo gatilho que
 protege o **sentido**: uma «correcção» não pode trocar a pessoa nem o tipo —
+
+**⚠ Quinto item do JR — e é o irmão do `revogarConvite`:**
+`apagarExcepcao` não tem chamador. A rota `unidades/[locationId]/horarios/route.ts`
+importa e chama `guardarExcepcao`, e **não importa a de apagar**. Uma casa marca
+«fechado a 25 de Dezembro» e não consegue desmarcar — o site público mostra-a
+fechada num dia em que abre, e ninguém reserva. A guarda nova
+`validar-desfazer.sh` está vermelha sobre este e sobre o `revogarConvite`, e fica
+vermelha até os dois estarem ligados.
+
 sem ele o rasto ficava impecável a documentar o que nunca aconteceu.
 
 **A REGRA DE FRONTEIRA está escrita:** o dia de serviço é a data civil, no fuso da
