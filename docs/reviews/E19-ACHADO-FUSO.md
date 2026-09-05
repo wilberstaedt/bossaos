@@ -271,3 +271,55 @@ falha em serviço. É a mesma família do resto da noite: a coisa que se lê cer
 mede errado.
 
 Isto sobe a prioridade do conserto acima de qualquer tela nova.
+
+---
+
+# CORRECÇÃO — 05/09, tarde. O JR desmontou a minha análise, e tinha razão.
+
+Escrevi aqui e no dossiê do E00 que **«o defeito passou por baixo de 25
+contratos e nenhum dizia que uma hora escolhida por uma pessoa passa pelo fuso
+da unidade»**. Usei isso como a prova mais forte CONTRA o E00.
+
+**É falso.** Ao julgar o E00, o JR foi verificar e encontrou o contrário:
+
+> «O fuso não passou por baixo de 25 contratos que não falavam do assunto.
+> **Passou por baixo de um contrato que falava.**»
+
+`capacidade-e-reservas.md` tem uma secção **Tempo**, anterior ao defeito, que
+nomeia **os três casos difíceis, um a um**:
+
+```
+1. Hora que não existe (adianto de verão): 02h30 numa noite em que o relógio
+   salta das 02h00 para as 03h00.
+2. Hora ambígua (atraso): 02h30 acontece duas vezes.
+3. Serviço depois da meia-noite.
+…
+O que conta para capacidade e relatório é o carimbo do servidor, e a hora local
+é apresentação.
+```
+
+**Fui verificar antes de aceitar, e está lá.** A última frase é exactamente a
+regra que o produto violou durante quatro dias: guardava a hora de parede como
+se fosse instante, e apresentava-a de volta.
+
+## Porque é que isto é PIOR do que eu tinha escrito
+
+A minha versão dizia que faltava um contrato — o que se resolve escrevendo um.
+**A versão verdadeira é que o contrato existia, estava certo, nomeava os casos, e
+não impediu nada.**
+
+O que lhe faltava não era o princípio: era **a regra de decisão na fronteira**.
+Dizia «instantes em UTC, hora local é apresentação» e não dizia *«quando uma
+pessoa escolhe uma hora, converte-se com o fuso da unidade ANTES de existir
+instante»*. O princípio estava certo e o ponto de entrada ficou por cobrir.
+
+É por isso que a reformulação dele é melhor do que a minha tese:
+
+> «Um contrato só impede um defeito se disser **a consequência operacional e a
+> regra de decisão na fronteira onde ele entra**, ou se ganhar verificador
+> executável. E nenhum contrato apanha uma função que ninguém chama — isso é
+> mecanismo.»
+
+**Deixo a minha análise errada por cima, corrigida, e não apagada.** Foi a prova
+que eu apresentei contra o E00, e estava mal medida — apresentá-la bem é a
+diferença entre julgar o E00 e julgar a minha impressão dele.
