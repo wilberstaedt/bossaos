@@ -44,6 +44,38 @@ dono tomada por nós.
 **dizer que está desligado** — não a aceitar pedidos que ninguém vai buscar. Uma
 integração que finge é pior do que uma que falta, porque a que falta vê-se.
 
+## 5. A hora de entrega é hora da casa — acrescentado a 05/09
+
+Escrito depois de encontrar o defeito no E19, e posto aqui **antes** de o E20
+começar, para não se repetir. Não é previdência: é a mesma pedra vista de cima.
+
+O E20 é a etapa mais exposta a isto de todo o projecto, porque aqui a hora não
+serve para *avisar* alguém — serve para **arrancar a cozinha**. O contrato
+`pedidos-para-mais-tarde.md` diz que a produção vê o pedido a partir do seu
+momento de produção, **derivado da hora de entrega menos o preparo**, e que a
+passagem é por **relógio**. Se a hora de entrega nascer errada, o momento de
+produção nasce errado com ela, e o erro chega ao fogão.
+
+Com o desvio de `Europe/Madrid`: um pedido para as **20:30** com 25 minutos de
+preparo devia entrar em produção às 20:05. Com a hora de parede gravada como
+UTC, entra às **22:05 locais** — comida feita duas horas depois de a pessoa a
+ter vindo buscar. No Inverno, uma hora. E na noite da mudança, ninguém sabe.
+
+**O aceite:** toda a hora escolhida por uma pessoa passa por
+`resolverHoraLocal(db, unidade.fuso, local)` antes de existir instante.
+
+**Reprovo à cabeça:**
+
+- **`new Date(...Z)` ou `Date.UTC(...)`** em qualquer caminho que receba hora de
+  uma pessoa.
+- **A prova do momento de produção medida só em minutos relativos.** «Entra 25
+  minutos antes» é verdade em qualquer fuso e não prova nada. Exijo a hora
+  **absoluta** verificada contra o relógio da base.
+- **Uma unidade só.** A mesma hora de entrega em dois fusos tem de produzir
+  momentos de produção diferentes.
+
+Contexto: `docs/reviews/E19-ACHADO-FUSO.md`.
+
 ## O que reprovo à cabeça
 
 - **Verde sobre fila de retirada vazia.** Declara quantos pedidos havia.
