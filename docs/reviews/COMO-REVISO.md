@@ -741,3 +741,33 @@ E a extensão que aprendi ao ver o JR: **um controlo negativo é melhor do que u
 script.** O meu `varrer-alcance` tem de ser corrido por alguém que se lembre; o
 controlo dele — «caiu o alcance: o motor de stock ficou desligado do produto» —
 acende sozinho sempre que a etapa se prova.
+
+## A guarda que se recusou a mentir sob contenção — 05/09
+
+Corri a `validar-testes.sh` três vezes em cinco minutos, com o JR a correr suites
+de navegador ao lado:
+
+```
+1ª  FALHA  auth: NAO MEDI — o corredor de testes nao chegou a escrever o sumario.
+           Isto NAO e o mesmo que zero testes.
+2ª  (li como vermelha, sem ver a razao)
+3ª  ok     9 pacotes, 322 testes no domain, 43 no ui … 0 falhas.  saida: 0
+```
+
+**A guarda comportou-se bem nas três.** Sob contenção de CPU não conseguiu ler o
+sumário do `auth` e disse **NÃO MEDI**, com a frase que a salva: *«isto não é o
+mesmo que zero testes»*. Não inventou um zero, não passou a verde, não acusou o
+produto.
+
+**Quem se portou mal fui eu, duas vezes seguidas e em direcções opostas:** disse
+«era transitório» sem prova, e a seguir disse «ainda vermelha» a partir de uma
+corrida que também estava contendida. **Só a terceira mediu.**
+
+**A regra que fica, e é a mesma da noite noutra escala:** quando o instrumento
+diz NÃO MEDI, a resposta não é repetir até dar o que eu quero — é repetir **com a
+máquina livre** e reportar a corrida limpa. Repetir até gostar do resultado é
+escolher a medição pelo resultado, e isso não é medir.
+
+**E o elogio que a guarda merece:** ela podia ter contado `0 testes` no `auth` e
+seguido. Um zero silencioso ali teria sido um verde vazio dentro de uma guarda
+escrita contra verdes vazios.
