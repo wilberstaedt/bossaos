@@ -77,7 +77,11 @@ echo "3. Declarar e convidar a rever — e nao se revê arvore suja"
 # so acontece na maquina de quem declara.
 if [ -n "${CI:-}" ] || [ -n "${GITHUB_ACTIONS:-}" ]; then
   ok "dentro da CI a arvore e do checkout — esta verificacao e para quem declara"
-elif grep -qiE '^\*\*Estado:\*\*.*aguardando valida' docs/progress/HANDOFF.md 2>/dev/null; then
+# So a PRIMEIRA linha de Estado conta: e a declaracao corrente. As outras vivem
+# na seccao de pendencia externa e sao registos historicos - a guarda lia-as e
+# nunca mais poderia ficar verde, que e o ruido que ela propria avisa acima que
+# ensina a ignora-la. Estreitada a 05/09, com controlo negativo por baixo.
+elif [ "$(grep -iE '^\*\*Estado:\*\*' docs/progress/HANDOFF.md 2>/dev/null | head -1 | grep -ciE 'aguardando valida' || true)" != "0" ]; then
   sujos=$(git status --porcelain 2>/dev/null | grep -cvE 'capturas/|\.png$' || true)
   sujos=${sujos:-0}
   if [ "$sujos" -gt 0 ]; then

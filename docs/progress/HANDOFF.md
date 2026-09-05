@@ -1,7 +1,7 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E27 — CRM, fidelidade e campanhas (**14 telas**).
-**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — as duas fatias.**
+**Etapa atual:** E28 — Equipa, escalas e ponto (**11 telas**, HR-001 a 011).
+**Estado:** **EM CURSO.** O JR começou a 05/09 (`packages/db/src/ponto.ts`, `scripts/provar-ponto.sh`, `scripts/validar-horas.sh`). Régua em `docs/reviews/ALVO-E28.md`, escrita antes de existir código.
 
 **Porque é que esta etapa é diferente:** até aqui um defeito estragava um número.
 Aqui **manda uma mensagem a uma pessoa que não a pediu**, e isso não se desfaz.
@@ -461,7 +461,7 @@ desta vez a régua **não** precedeu todo o código e dizê-lo é o que a manté
 
 | Etapa | Estado |
 | --- | --- |
-| E00 — contrato e leitura das fontes | implementado, **aguardando validação**. Sete documentos em `docs/architecture`. Quem os escreveu não os valida: a prova vem no E11, quando se vir se o E02-E10 se construíram a partir deles. |
+| E00 — contrato e leitura das fontes | **validado a 05/09, julgado pelo JR** (`docs/reviews/E00.md`), com veredicto dividido. 27 contratos em `docs/architecture`. Quem os escreveu não os validou — foi para isso que se montaram dois. |
 | E01 — repositório e verificação contínua | **validado** · `docs/reviews/E01.md` |
 | E02 — design system, responsividade e idiomas | **validado** à 2ª · `docs/reviews/E02.md`. A 1ª revisão apanhou o acento a pintar um indicador de estado a 2,77:1; corrigido com `acentoSinal` e uma guarda de lista de permissão. |
 | E03 — estrutura multi-tenant e isolamento | **validado** à 2ª · `docs/reviews/E03.md`. A 1ª revisão apanhou o verificador a dizer verde com zero medido; corrigido, e a mesma guarda aplicada às outras provas. |
@@ -476,7 +476,7 @@ desta vez a régua **não** precedeu todo o código e dizê-lo é o que a manté
 **Primeiras telas.** O E02 é a primeira etapa que toca `coverage.csv`: STATE 001-003,
 005, 007 e 016. Até aqui o medidor de telas esteve a 0 % e isso era verdade, não uma
 avaria — E00 a E01 são transversais e não entregam vista nenhuma. Estão agora a
-`implementado aguardando validação`; `scripts/validar-cobertura.sh` diz "Cobertura íntegra".
+**validadas**; `scripts/validar-cobertura.sh` diz "Cobertura íntegra".
 
 ## E02 — o que existe agora
 

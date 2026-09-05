@@ -107,13 +107,38 @@ export function funcoesDaUnidade(db: ClienteComEscopo, locationId: string) {
   });
 }
 
-export function equipaDaUnidade(db: ClienteComEscopo, organizationId: string) {
-  return db.membership.findMany({
+/**
+ * A equipa, com nomes — pela PORTA, e não por junção.
+ *
+ * ── Porque é que não se lê `membership.user` ──────────────────────────────
+ *
+ * `users` tem RLS de identidade própria: uma junção devolve o nome de quem está
+ * a ver e **nulo para toda a gente**. A primeira versão disto rebentou com
+ * «Cannot read properties of null» — e a mensagem era a isolação a funcionar,
+ * não um defeito dela.
+ *
+ * O produto já tinha a saída: `identidades_da_organizacao`, a mesma porta que o
+ * mapa de sala usa para mostrar quem é o responsável de cada mesa.
+ */
+export async function equipaDaUnidade(db: ClienteComEscopo, organizationId: string) {
+  const identidades = await db.$queryRawUnsafe<
+    { id: string; email: string; nome: string | null }[]
+  >('SELECT * FROM identidades_da_organizacao($1::uuid)', organizationId);
+  const porUtilizador = new Map(identidades.map((i) => [i.id, i]));
+  const pertencas = await db.membership.findMany({
     where: { organizationId, estado: 'ACTIVO' },
-    select: {
-      id: true,
-      user: { select: { id: true, email: true, nome: true } },
-    },
+    select: { id: true, userId: true },
+  });
+  return pertencas.map((m) => {
+    const quem = porUtilizador.get(m.userId);
+    return {
+      id: m.id,
+      userId: m.userId,
+      // Ausência é ausência: quem a porta não devolve fica sem nome, e nunca
+      // com o identificador a fazer de nome.
+      nome: quem?.nome ?? null,
+      email: quem?.email ?? '',
+    };
   });
 }
 
@@ -152,7 +177,7 @@ export function turnosDaSemana(db: ClienteComEscopo, dados: {
     orderBy: [{ diaDeServico: 'asc' }, { inicioMinutos: 'asc' }],
     select: {
       id: true, diaDeServico: true, inicioMinutos: true, fimMinutos: true, nota: true,
-      membro: { select: { id: true, user: { select: { nome: true, email: true } } } },
+      membro: { select: { id: true } },
       funcao: { select: { id: true, nome: true } },
     },
   });
@@ -231,7 +256,8 @@ export interface MarcacaoLida {
   ehCorreccao: boolean;
   /** Quem corrigiu foi a própria pessoa? Só faz sentido numa correcção. */
   autocorreccao: boolean;
-  autor: string;
+  /** A PERTENÇA de quem registou. O nome resolve-se pela porta das identidades. */
+  autorMembershipId: string;
   motivo: string | null;
 }
 
@@ -248,7 +274,6 @@ export async function marcacoesDoDia(db: ClienteComEscopo, dados: {
       id: true, tipo: true, momento: true, motivo: true, corrigeId: true,
       membershipId: true, autorMembershipId: true,
       correccao: { select: { id: true } },
-      autor: { select: { user: { select: { nome: true, email: true } } } },
     },
   });
   return linhas.map((l) => ({
@@ -258,7 +283,7 @@ export async function marcacoesDoDia(db: ClienteComEscopo, dados: {
     corrigida: l.correccao !== null,
     ehCorreccao: l.corrigeId !== null,
     autocorreccao: l.corrigeId !== null && l.autorMembershipId === l.membershipId,
-    autor: l.autor.user.nome ?? l.autor.user.email,
+    autorMembershipId: l.autorMembershipId,
     motivo: l.motivo,
   }));
 }
@@ -333,7 +358,7 @@ export async function jornadasDaUnidade(db: ClienteComEscopo, dados: {
   const equipa = await equipaDaUnidade(db, dados.organizationId);
   return Promise.all(equipa.map(async (m) => ({
     membershipId: m.id,
-    nome: m.user.nome ?? m.user.email,
+    nome: m.nome ?? m.email,
     jornada: await jornadaDoDia(db, {
       membershipId: m.id, locationId: dados.locationId,
       diaDeServico: dados.diaDeServico, fuso: dados.fuso,
@@ -349,8 +374,6 @@ export function correccoesDaUnidade(db: ClienteComEscopo, locationId: string) {
     select: {
       id: true, tipo: true, momento: true, motivo: true, criadoEm: true,
       membershipId: true, autorMembershipId: true,
-      membro: { select: { user: { select: { nome: true, email: true } } } },
-      autor: { select: { user: { select: { nome: true, email: true } } } },
       corrige: { select: { id: true, momento: true } },
     },
   });
