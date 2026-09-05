@@ -71,3 +71,34 @@ lado da reserva, e o E19 do lado da mensagem. Aqui prova-se do lado do dinheiro.
 - **Uma prova que só use o «caminho feliz» do fornecedor.** Se não houver
   simulação de resposta lenta, repetida e fora de ordem, não está provado — está
   demonstrado.
+
+---
+
+## Acrescentado a 05/09, com o E23 já em curso: o que JÁ EXISTE
+
+**Isto não é um aceite novo** — não acrescento exigências a meio, que é a falta
+que apontei a mim próprio no E19. É o contrário: aponto duas peças construídas e
+provadas, para não serem reinventadas.
+
+**1. Para o lado de SAÍDA (reenvio, reprocessamento): `OutboxTask`.**
+`schema.prisma`, e a razão está escrita no próprio modelo:
+
+> «A tarefa nasce **na mesma transacção** que o facto que a origina. Uma fila
+> fora da base aceita a tarefa e perde-a quando a transacção reverte, e o
+> resultado é uma publicação agendada para uma revisão que nunca existiu.»
+
+Um reembolso que se regista e depois falha a enfileirar o aviso é exactamente
+essa forma. A tabela já resolve isso; uma fila nova, não.
+
+**2. Para o lado de ENTRADA (webhook repetido): a identidade por acontecimento.**
+`capacidade-e-reservas.md`, e **já está implementada** — `acontecimento()`, no
+caminho das mensagens do E19, com o controlo negativo «caiu a identidade: a
+segunda chamada foi engolida pela primeira».
+
+O adquirente reenvia até ter a certeza de que ouvimos. Isso é o mesmo problema
+que resolveste na mensageria, visto do outro lado: lá decidias quando **enviar**
+outra vez; aqui decides quando **ignorar** o que chegou outra vez. **A chave é a
+mesma** — a identidade do acontecimento, não a do pagamento nem a do momento.
+
+**O que continua a ser aceite meu, e não muda:** a ordem não é garantida, e a
+assinatura verifica-se antes de qualquer efeito.
