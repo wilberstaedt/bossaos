@@ -106,3 +106,42 @@ tratamento de cancelamento. Não é uma funcionalidade em falta: é uma decisão
 | Retenção expirada, sem ninguém a abrir o ecrã | capacidade livre |
 | 02h30 em noite de mudança de hora | resolvido, não rebentado |
 | Email falha | reserva confirmada, envio marcado como falhado |
+
+## A identidade de uma mensagem é o ACONTECIMENTO que a causou
+
+A régua do E19 exige reenvio deduplicado com o par: a mesma mensagem não sai
+duas vezes, e uma mensagem **diferente** para a mesma reserva sai. Falta a peça
+que torna isso construível — **o que faz duas mensagens serem a mesma.**
+
+As duas respostas fáceis estão as duas erradas:
+
+- **`(reserva, tipo)`** engole envios legítimos. «A sua mesa está pronta» pode
+  ter de sair **duas vezes na mesma noite**: a pessoa não veio à primeira, o host
+  volta a chamar meia hora depois. Com esta chave, a segunda chamada desaparece
+  em silêncio, e a mesa fica vazia com gente à porta.
+- **`(reserva, tipo, momento)`** não deduplica nada. Duas tentativas de entrega
+  com um segundo de diferença são dois momentos, logo duas mensagens.
+
+**A chave é o acontecimento.** Cada facto que justifica avisar alguém — a
+reserva foi confirmada, a mesa ficou pronta, o host chamou outra vez, a casa
+cancelou — nasce com identidade própria no momento em que acontece. A mensagem
+não tem identidade: **herda a do acontecimento**.
+
+Daí sai tudo o resto sem mais regras:
+
+- **Reentregar** depois de o provedor falhar usa o mesmo acontecimento, logo
+  deduplica. É a mesma tentativa, não uma nova.
+- **O host chamar segunda vez** é um acontecimento novo, com identidade nova,
+  logo entrega. É o par que a régua exige, e sai de graça.
+- **Um tipo diferente** para a mesma reserva vem de outro acontecimento, logo
+  entrega.
+
+### O que isto obriga
+
+O resultado do provedor guarda-se **contra o acontecimento**, não contra a
+reserva. Uma falha de SMS é um facto sobre aquela tentativa; não é um facto
+sobre a reserva, e não a pode alterar. O E18 já garante isto do lado da reserva:
+a reserva existe independentemente de a mensagem ter chegado. Aqui garante-se o
+inverso — **o histórico da mensagem sobrevive à reserva mudar de estado**, senão
+ninguém consegue responder à única pergunta que interessa quando um cliente
+reclama: *avisámos, ou não avisámos?*
