@@ -1,0 +1,27 @@
+# Postgres do BossaOS no VPS. Só isto vai em contentor: a aplicação constrói-se
+# nativamente, pelas razões escritas em scripts/publicar.sh.
+#
+# A porta NÃO é exposta ao mundo: o 5434 é 127.0.0.1 e a aplicação corre na
+# mesma máquina. O TPV antigo do piloto já usa o 5433, e o ilora e o Norte têm
+# os seus — por isso 5434.
+services:
+  bossaos-db:
+    image: postgres:16-alpine
+    container_name: bossaos-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: bossaos
+      POSTGRES_USER: bossaos
+      # Vem do .env.prod que vive no servidor e nunca sobe daqui.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?define no .env.prod}
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - bossaos-dados:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bossaos -d bossaos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  bossaos-dados:
