@@ -51,3 +51,34 @@ Restaurant, e o marco era do Restaurant. Mas o critério que apliquei ali
 aplica-se aqui na mesma, e alguém tem de o aplicar. **Fica para o E34**, que é a
 minha revisão seguinte — e fica escrito que a aprovação do marco não cobriu esta
 árvore, em vez de deixar parecer que cobriu.
+
+---
+
+## Segundo limite da minha aprovação do marco: o `kds` e o `staff`
+
+A prova das portas mede **seis** módulos: catálogo, reservas, sala, takeaway,
+relatórios e caixa. Existem mais duas árvores entregues, e não estão lá.
+
+**O `kds` está bem.** Tem ligações a partir da configuração de estações —
+`/kds/<unidade>/<estacao>` — e é a porta natural: configura-se a estação e
+abre-se o ecrã dela. Ninguém procura o KDS num menu de gestão; procura-o na
+estação a que pertence.
+
+**O `staff` não tem ligação nenhuma em todo o produto.** Medido: zero ficheiros
+com `href` para `/staff/`.
+
+**Não reabro o veredicto**, e digo porquê em vez de o deixar implícito: o
+`/staff/` é superfície de **dispositivo** — o tablet do empregado, com entrada
+por PIN — e um tablet configura-se uma vez. Um endereço escrito uma vez na vida
+do aparelho não é a mesma falha que um módulo de gestão inalcançável todos os
+dias.
+
+**Mas é uma pergunta a sério, e fica escrita:** se ninguém liga para lá, como é
+que o tablet novo chega ao endereço? Alguém o escreve à mão a partir de um papel
+— e a partir daí a instalação de um posto depende de uma pessoa saber uma coisa
+que o produto não diz. **Fica para o E34**, com o menu da plataforma.
+
+**O que isto diz da minha aprovação:** aprovei o marco medindo o que os meus
+critérios diziam, e os meus critérios diziam «módulos entregues» sem enumerar
+quais. Enumerá-los era comigo. **A aprovação vale para os seis medidos** — e
+está escrito que não olhei para estes dois, em vez de ficar a parecer que olhei.
