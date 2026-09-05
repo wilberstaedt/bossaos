@@ -204,3 +204,36 @@ A `validar-desfazer.sh` apanha a primeira e **não apanharia esta**: `guardar` e
 `listar` não são verbos opostos. Fica escrito, porque é a lição: **cada guarda
 que escrevo apanha a forma do defeito que já vi.** A varredura de alcance é o
 que continua a apanhar os que ainda não têm nome.
+
+### Tentei dar detector a esta forma e não consegui — e isso é o resultado
+
+Escrevi a `validar-escrita-sem-leitura.sh`: para cada modelo do esquema, há
+escrita em produto e não há leitura? **Apaguei-a**, porque falha nas duas
+direcções e as duas razões valem mais do que a guarda valeria.
+
+**Falso negativo no `Lead` — o próprio defeito para que a escrevi.** O
+`leadsDaUnidade` *contém* um `findMany`, e vive em código de produto. A guarda
+perguntava «existe uma leitura escrita?» quando a pergunta é «a leitura é
+**alcançável**?». **Quarta vez hoje que um instrumento meu confunde existir com
+ser alcançável** — a mesma confusão que o projecto inteiro existe para caçar.
+
+**Falsos positivos em quem é lido por relação.** Acusou seis modelos. Fui ver o
+`ProductTranslation`: é lido em `conteudo.ts`, dentro de um `include` pelo nome
+do campo (`traducoes`), que não contém o nome do modelo em lado nenhum. Qualquer
+modelo lido só através do pai cai nesta armadilha.
+
+**Uma guarda que mente é pior do que não haver guarda**, e hoje isso custou-me
+tempo três vezes. Fica escrito em vez de ficar instalado.
+
+### O que fica no lugar, e é sólido
+
+A varredura de alcance **já encontra** o `leadsDaUnidade` — está nas 19. O que
+faltava não era detecção, era **ordenação por gravidade**. A regra que fica:
+
+> **Uma função de leitura sem chamador, sobre um modelo que o produto escreve
+> activamente, não é código morto: é uma promessa que o produto não cumpre.**
+
+Aplicada às 19, esta regra separa `leadsDaUnidade` — que tem dados reais a
+entrar por trás dela — de um `euProprio` que ninguém escreve nem lê. É a
+diferença entre uma gaveta vazia esquecida e uma gaveta que enche todos os dias e
+que ninguém abre.
