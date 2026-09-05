@@ -20,29 +20,34 @@ vermelho() { printf '\033[31m  FALHA\033[0m    %s\n' "$1"; }
 amarelo()  { printf '\033[33m  NAO MEDI\033[0m %s\n' "$1"; }
 
 cat > ./.fuso-produto.mjs <<'JS'
+import { Client } from 'pg';
 import { obterPrisma, comEscopo, resolverHoraLocal } from './packages/db/src/index.ts';
 
-const prisma = obterPrisma();
-const u = await prisma.location.findFirst({
-  where: { fuso: { not: null } },
-  select: { id: true, fuso: true, organizationId: true },
-});
-if (!u) { console.log('SEM_UNIDADE'); process.exit(3); }
+// O cliente do RUNTIME nao ve nada sem escopo — a RLS filtra, e ainda bem.
+// Para MONTAR o cenario uso o papel de migracao; para MEDIR uso o do runtime,
+// sob escopo, que e' o caminho do produto. Arranjar a precondicao nao e'
+// falsear a medicao: o que se mede continua a ser a funcao de produto.
+const adm = new Client({ connectionString: process.env.MIGRATION_DATABASE_URL });
+await adm.connect();
+const { rows } = await adm.query(
+  `SELECT id, organization_id AS "organizationId", fuso FROM locations ORDER BY fuso NULLS LAST LIMIT 1`);
+if (!rows.length) { console.log('SEM_UNIDADE'); await adm.end(); process.exit(3); }
+let u = rows[0];
+if (!u.fuso) {
+  await adm.query(`UPDATE locations SET fuso = 'Europe/Madrid' WHERE id = $1`, [u.id]);
+  u.fuso = 'Europe/Madrid';
+  console.log('    [cenario] pus Europe/Madrid nesta unidade: a semente nao traz fuso');
+}
+await adm.end();
 
+const prisma = obterPrisma(process.env.DATABASE_URL);
 const dia = '2026-07-15', hora = '20:00';           // Julho: Madrid em +02:00
 const local = `${dia} ${hora}:00`;
+const esc = { organizationId: u.organizationId };
 
-// O que o PRODUTO usa para transformar hora de parede em instante.
-const doProduto = await comEscopo(prisma, { organizationId: u.organizationId },
-  (db) => resolverHoraLocal(db, u.fuso, local));
-
-// O que dava a leitura ingenua, que era o defeito.
-const ingenuo = new Date(`${dia}T${hora}:00Z`);
-
-// CONTROLO do proprio detector: se o resolvedor devolvesse o mesmo para dois
-// fusos, este teste nao media fuso nenhum e nao podia concluir nada.
-const emUtc = await comEscopo(prisma, { organizationId: u.organizationId },
-  (db) => resolverHoraLocal(db, 'UTC', local));
+const doProduto = await comEscopo(prisma, esc, (db) => resolverHoraLocal(db, u.fuso, local));
+const emUtc     = await comEscopo(prisma, esc, (db) => resolverHoraLocal(db, 'UTC', local));
+const ingenuo   = new Date(`${dia}T${hora}:00Z`);
 
 const iso = (d) => new Date(d).toISOString();
 console.log(`    unidade em ................. ${u.fuso}`);
