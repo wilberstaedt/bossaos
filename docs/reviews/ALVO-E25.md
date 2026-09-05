@@ -66,3 +66,47 @@ Exijo a escolha feita, escrita, e provada nos dois sentidos.
   dinheiro; **as quantidades precisam da mesma disciplina** e ainda não têm
   guarda — se inventares uma, digo-o na assinatura.
 - **As 12 telas sem navegador**, cinco larguras, ES/PT/EN.
+
+---
+
+## O que JÁ EXISTE e serve de molde — acrescentado a 05/09
+
+**Não é aceite novo.** A régua acima não muda; isto poupa-te desenho, como fiz
+no E23 com o `OutboxTask`.
+
+**O `Dinheiro` já resolve a forma do problema que as quantidades têm**
+(`packages/domain/src/dinheiro.ts:22`):
+
+```ts
+export interface Dinheiro {
+  /** Unidades mínimas. `1250` é 12,50 €, e `1250` é 1250 ¥. */
+  montanteMenor: number;
+  /** ISO 4217, maiúsculas. */
+  moeda: string;
+}
+```
+
+**Uma quantidade é a mesma coisa com outra etiqueta:** valor na unidade mínima
+mais a unidade. `3500` + `g`.
+
+**E o `somar` mostra as duas decisões que interessam:**
+
+```ts
+export function somar(parcelas: readonly Dinheiro[]): Dinheiro | ErroDeSoma {
+  if (parcelas.length === 0) throw new Error('somar sem parcelas: qual moeda?');
+  …
+  if (moedas.length > 1) return { erro: 'moedas_diferentes', moedas };
+```
+
+1. **Misturar moedas devolve um ERRO como valor**, não uma excepção — quem chama
+   tem de o tratar, e o tipo obriga-o. Para quantidades: misturar `g` com `ml`
+   devolve erro, e é a minha exigência de «impossível, não proibido».
+2. **Somar zero parcelas ATIRA**, e a mensagem diz porquê: «qual moeda?». Uma
+   soma vazia não tem unidade, portanto não é um dado inválido — é um erro de
+   quem programou. Para quantidades vale igual, e é a distinção que a maioria
+   dos códigos não faz.
+
+**E o padrão de tipo nominal já existe duas vezes** — `marcaDeEscopo` e
+`marcaDeIdentidade` em `packages/db/src/escopo.ts`, com `unique symbol`. Se
+precisares de impedir que um `g` seja passado onde se espera um `ml`, o molde
+está ali e não é preciso inventá-lo.
