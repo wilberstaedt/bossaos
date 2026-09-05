@@ -103,15 +103,24 @@ $SSH "mkdir -p $RAIZ/apps/web/public && echo '$VERSAO' > $RAIZ/apps/web/public/v
 # e o TPV antigo correm todos em contentor com `restart: unless-stopped`. Mais
 # uma suposicao minha que a maquina desmentiu.
 #
+# `--env-file .env.prod` em TODAS as chamadas: o `docker compose` lê `.env` por
+# omissão e o nosso chama-se `.env.prod`. A primeira corrida parou aqui com
+# "required variable POSTGRES_PASSWORD is missing" - e eu não o tinha visto
+# antes porque subi a base à mão, com o ambiente já carregado na sessão.
+#
+# `--env-file` resolve a INTERPOLAÇÃO do `${...}` no ficheiro de compose; o
+# `env_file:` de dentro do serviço resolve o ambiente do CONTENTOR. São duas
+# coisas e precisam-se as duas.
+#
 # `-p bossaos` nos dois ficheiros de propósito: partilham a rede do projecto, e
 # e por isso que o .env.prod aponta a `bossaos-db:5432` e nao a 127.0.0.1:5434.
 # Dentro do contentor, 127.0.0.1 e o proprio contentor - a base ficaria
 # inalcancavel e o erro sairia como "connection refused", que se le como base em
 # baixo em vez de endereco errado.
-$SSH "cd $RAIZ && docker compose -p bossaos -f infra/postgres.yml up -d"
-$SSH "cd $RAIZ && VERSAO=$VERSAO docker compose -p bossaos -f infra/compose.prod.yml build"
-$SSH "cd $RAIZ && docker compose -p bossaos -f infra/compose.prod.yml run --rm --entrypoint sh bossaos-web -c 'pnpm db:migrate:deploy'"
-$SSH "cd $RAIZ && VERSAO=$VERSAO docker compose -p bossaos -f infra/compose.prod.yml up -d --force-recreate"
+$SSH "cd $RAIZ && docker compose -p bossaos --env-file .env.prod -f infra/postgres.yml up -d"
+$SSH "cd $RAIZ && VERSAO=$VERSAO docker compose -p bossaos --env-file .env.prod -f infra/compose.prod.yml build"
+$SSH "cd $RAIZ && docker compose -p bossaos --env-file .env.prod -f infra/compose.prod.yml run --rm --entrypoint sh bossaos-web -c 'pnpm db:migrate:deploy'"
+$SSH "cd $RAIZ && VERSAO=$VERSAO docker compose -p bossaos --env-file .env.prod -f infra/compose.prod.yml up -d --force-recreate"
 sleep 8
 
 # ── PORTÃO 4: a versão no ar é a que acabei de construir ────────────────────
