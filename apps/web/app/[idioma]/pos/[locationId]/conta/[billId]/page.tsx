@@ -100,7 +100,9 @@ export default async function ContaNoTpv({
       )}
 
       <nav className="bo-lista">
+        <a data-seccao="cobrar" href={`${base}/cobrar`}>{t.aplicar}</a>
         <a data-seccao="dinheiro" href={`${base}/dinheiro`}>{t.dinheiro}</a>
+        <a data-seccao="devolver" href={`${base}/devolver`}>{t.devolver}</a>
         <a data-seccao="dividir" href={`${base}/dividir`}>{t.dividir}</a>
         <a data-seccao="desconto" href={`${base}/desconto`}>{t.desconto}</a>
         <a data-seccao="cortesia" href={`${base}/cortesia`}>{t.cortesia}</a>

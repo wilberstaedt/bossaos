@@ -1923,5 +1923,26 @@
     "troco": "Troco",
     "trocoAjuda": "O troco é o recebido menos o devido. Não é receita.",
     "voltar": "Voltar"
+  },
+  "pagamentoE23": {
+    "comprovativo": "Seu comprovante",
+    "desligado": "Desligado",
+    "dividir": "Como querem dividir?",
+    "divisaoAjuda": "As partes somam exatamente o total. O centavo que sobra vai para as primeiras.",
+    "emComprovacao": "O pagamento ainda está em verificação",
+    "emComprovacaoAjuda": "Não tente de novo: se foi cobrado, aparece aqui. Pagar outra vez é pagar duas vezes.",
+    "gorjeta": "Gorjeta",
+    "integracaoPendente": "Integração com o provedor: PENDENTE. Nada aqui falou com um banco.",
+    "ligado": "Ligado",
+    "naMesa": "Na mesa",
+    "pagar": "Pague da sua mesa",
+    "pago": "Pago",
+    "pingNaoProva": "Um terminal responder não prova que a cobrança chegou.",
+    "quantos": "Quantos são?",
+    "retornoNaoProva": "Voltar a esta tela não confirma um pagamento. Quem confirma é o banco.",
+    "segredoFora": "A chave do provedor não se guarda aqui: vive no servidor.",
+    "semAdquirente": "Ainda não há gateway de pagamento ligado: o pagamento é feito com uma pessoa.",
+    "semRecibo": "Não encontramos esse comprovante.",
+    "verConta": "Ver a conta"
   }
 }

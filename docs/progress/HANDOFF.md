@@ -1,7 +1,7 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E23 — pagamentos, webhooks e reembolsos (**12 telas**).
-**Estado:** **EM CURSO — fatia 1 (a fronteira).** As 12 telas não estão feitas.
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — as duas fatias.**
 **Régua:** `docs/reviews/ALVO-E23.md`, escrita **antes de existir código**.
 **Detalhe:** `docs/progress/E23.md`.
 
@@ -33,7 +33,36 @@ notasse se as duas fossem a mesma — pus o plante a correr a mesma ordem nas du
 voltas e a suite ficou verde.
 
 **Portões, códigos de saída lidos directamente:** `pnpm verificar` (**0**) ·
-`./scripts/provar-adquirente.sh` (**21 casos, 8 controlos negativos**, 0).
+`./scripts/provar-adquirente.sh` (**21 casos, 8 controlos negativos**, 0) ·
+`./scripts/provar-pagamentos-no-navegador.sh` (**24 casos, 7 controlos**, 0) ·
+`pnpm inspeccionar` (**589 casos, 0**).
+
+**As 12 telas.** As três públicas ficaram em `mesa/` e não em `menu/`: medi, e
+`menu/` é a carta ANÓNIMA enquanto `mesa/` é quem está sentado com sessão de
+visitante — um ecrã de pagamento na carta anónima seria pagamento sem sessão. O
+comprovativo lê por porta estreita com `search_path` fixo e leva um identificador
+**opaco**, não o `id` do pagamento. A STATE-011 **não tem botão de tentar outra
+vez**: diz o contrário. E onde não há adquirente **não há botão** — o cartão não
+aparece esbatido, não aparece.
+
+**O achado que mais vale: três telas estavam contadas na população e nunca eram
+visitadas.** A contagem dizia 12 e os ciclos de largura, toque, contraste e
+idioma corriam sobre 8. **Uma tela contada e não medida é pior do que uma tela em
+falta** — a contagem afirma que está coberta. E não o vi a ler código: vi-o
+porque um controlo negativo ficou **verde**, com a guarda de população a contar
+pagamentos em vez de medir o que eles mostram. Passou a exigir a **gorjeta
+visível**, porque uma gorjeta a zero é indistinguível de «a gorjeta nunca
+aparece».
+
+**A guarda das rotas apanhou-me duas vezes.** O leitor do comprovativo tocava na
+base sem resolver sessão — foi para `src/visitante/`, que é melhor sítio do que o
+que eu tinha escolhido. E depois disparou sobre o nome proibido escrito no meu
+**comentário**: ela não distingue código de comentário, ao contrário da
+`validar-dinheiro.sh`, que já resolveu isto com o `sem-comentarios.py`. Fica
+**declarado**; não mexi numa guarda assinada.
+
+**E o alvo de toque, três vezes na mesma etapa:** `<a>` cru fica com 24 px. Três
+vezes já não é distracção.
 
 **PENDÊNCIA DECLARADA:** não há credenciais de adquirente nenhum. Está
 implementada a **porta** e as provas determinísticas; a integração fica

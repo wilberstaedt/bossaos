@@ -3871,6 +3871,9 @@ model Payment {
   gorjetaMenor   Int    @default(0) @map("gorjeta_menor")
   provedor       String?
   provedorRef    String? @map("provedor_ref")
+  /// O identificador que vai no endereço do comprovativo. NÃO é o `id`: um
+  /// endereço com o identificador interno deixa adivinhar os vizinhos.
+  reciboPublico  String  @default(uuid()) @map("recibo_publico") @db.Uuid
   confirmadoEm   DateTime @default(now()) @map("confirmado_em") @db.Timestamptz(6)
 
   organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)

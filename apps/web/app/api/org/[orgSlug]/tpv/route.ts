@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import {
   abrirCaixa, abrirConta, ajustar, anular, comContaTrancada, confirmarPagamento, contar,
-  contasAbertas, devolver, entrarPagamentoEmDinheiro, fecharCaixa, fecharConta, listarUnidades,
-  corrigirMovimento, juntarLinhasDoPedido, movimentar, obterPrisma, reabrirCaixa,
+  contasAbertas, devolver, entrarPagamentoEmDinheiro, fecharCaixa, fecharConta,
+  listarUnidades, somasDaConta,
+  corrigirMovimento, guardarConectorDePagamento, juntarLinhasDoPedido, movimentar,
+  obterPrisma, reabrirCaixa,
   reconciliar, reverterAjuste, tentarPagar, transferirLinha,
 } from '@bossaos/db';
 import { corpoDaResposta, deTextoParaMenor, estadoHttp, exigirAccao } from '@bossaos/domain';
@@ -152,6 +154,34 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
         montanteMenor: valor, motivo, actor: actor.id,
       }));
       return voltarPara(`${paraCaixa(registerId)}/movimento`, { ok: 'corrigido' });
+    }
+
+    if (accao === 'guardar_conector_pagamento') {
+      // A titularidade, e nada mais. Não há aqui campo de chave secreta porque
+      // não há coluna: o segredo vive no ambiente do servidor.
+      await comEscopoDoPedido(sessao, (db) => guardarConectorDePagamento(db, {
+        organizationId, locationId: unidade.id,
+        ...(texto(dados, 'provedor') ? { provedor: texto(dados, 'provedor')! } : {}),
+        ...(texto(dados, 'merchantId') ? { merchantId: texto(dados, 'merchantId')! } : {}),
+        activo: texto(dados, 'activo') === 'on',
+      }));
+      return voltarPara(`${paraTpv()}/pagamentos`, { ok: 'conector' });
+    }
+
+    if (accao === 'cobrar_cartao') {
+      // Abre a TENTATIVA e mais nada. Quem confirma é o webhook, com assinatura
+      // verificada — «retorno do navegador não prova pagamento». Este caminho
+      // nunca cria um `Payment`.
+      const billId = texto(dados, 'billId') ?? '';
+      const prisma = obterPrisma(process.env.DATABASE_URL ?? '');
+      await comContaTrancada(prisma, { organizationId, userId: actor.id }, billId, async (db) => {
+        const { devidoMenor, pagoMenor } = await somasDaConta(db, billId);
+        return tentarPagar(db, {
+          billId, meio: 'CARTAO', montanteMenor: devidoMenor - pagoMenor,
+          chaveIdempotente: `tpv:cartao:${billId}:${Date.now()}`,
+        });
+      });
+      return voltarPara(`${paraConta(billId)}/cartao`, { ok: 'tentativa' });
     }
 
     if (accao === 'ajustar') {

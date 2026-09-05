@@ -33,6 +33,10 @@ export default async function HomeDoTpv({
         <a data-seccao="operador" href={`/${idioma}/pos/${locationId}/operador`}>{t.operador}</a>
         <a data-seccao="balcao" href={`/${idioma}/pos/${locationId}/balcao`}>{t.balcao}</a>
         <a data-seccao="caixa" href={`/${idioma}/pos/${locationId}/caixa`}>{t.historico}</a>
+        {/* As telas do E23 têm porta a partir daqui: sem isto seriam telas
+            provadas a que ninguém chega, que é o que o marco já reprovou. */}
+        <a data-seccao="pagamentos" href={`/${idioma}/pos/${locationId}/pagamentos`}>{t.caixa}</a>
+        <a data-seccao="terminais" href={`/${idioma}/pos/${locationId}/terminais`}>{t.operador}</a>
       </nav>
       <h2>{t.contasAbertas}</h2>
       <p data-teste="quantas">{contas.length}</p>

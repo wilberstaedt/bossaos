@@ -1923,5 +1923,26 @@
     "troco": "Change",
     "trocoAjuda": "Change is received minus owed. It is not revenue.",
     "voltar": "Back"
+  },
+  "pagamentoE23": {
+    "comprovativo": "Your receipt",
+    "desligado": "Not connected",
+    "dividir": "How do you want to split?",
+    "divisaoAjuda": "The parts add up to the total exactly. The leftover cent goes to the first ones.",
+    "emComprovacao": "The payment is still being checked",
+    "emComprovacaoAjuda": "Do not try again: if it went through, it shows here. Paying again is paying twice.",
+    "gorjeta": "Tip",
+    "integracaoPendente": "Provider integration: PENDING. Nothing here has talked to a bank.",
+    "ligado": "Connected",
+    "naMesa": "At table",
+    "pagar": "Pay from your table",
+    "pago": "Paid",
+    "pingNaoProva": "A terminal answering does not prove the charge arrived.",
+    "quantos": "How many of you?",
+    "retornoNaoProva": "Coming back to this screen does not confirm a payment. The bank confirms it.",
+    "segredoFora": "The provider key is not stored here: it lives on the server.",
+    "semAdquirente": "No payment provider connected yet: payment is taken by a person.",
+    "semRecibo": "We could not find that receipt.",
+    "verConta": "See the bill"
   }
 }

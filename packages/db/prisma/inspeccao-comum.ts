@@ -114,12 +114,15 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     -- ajustes e movimentos — e recusam bem: é essa a garantia da etapa. A saída
     -- NÃO é enfraquecer o gatilho; é dizer que isto é manutenção, e o dono da
     -- tabela pode desligá-los nas suas.
+    ALTER TABLE provider_events       DISABLE TRIGGER USER;
     ALTER TABLE cash_movements        DISABLE TRIGGER USER;
     ALTER TABLE cash_register_events  DISABLE TRIGGER USER;
     ALTER TABLE bill_lines            DISABLE TRIGGER USER;
     ALTER TABLE bill_adjustments      DISABLE TRIGGER USER;
     ALTER TABLE payments              DISABLE TRIGGER USER;
     ALTER TABLE refunds               DISABLE TRIGGER USER;
+    DELETE FROM provider_events      WHERE evento_id LIKE '${PREFIXO}%' OR bill_id IN (SELECT id FROM bills WHERE numero LIKE '${PREFIXO}%');
+    DELETE FROM payment_connectors   WHERE location_id IN (SELECT id FROM locations WHERE organization_id IN (SELECT id FROM organizations));
     DELETE FROM cash_movements       WHERE register_id IN (SELECT id FROM cash_registers WHERE nome LIKE '${PREFIXO}%');
     DELETE FROM cash_register_events WHERE register_id IN (SELECT id FROM cash_registers WHERE nome LIKE '${PREFIXO}%');
     DELETE FROM cash_registers       WHERE nome LIKE '${PREFIXO}%';
@@ -129,6 +132,7 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     DELETE FROM bill_adjustments     WHERE bill_id IN (SELECT id FROM bills WHERE numero LIKE '${PREFIXO}%');
     DELETE FROM bill_lines           WHERE bill_id IN (SELECT id FROM bills WHERE numero LIKE '${PREFIXO}%');
     DELETE FROM bills                WHERE numero LIKE '${PREFIXO}%';
+    ALTER TABLE provider_events       ENABLE TRIGGER USER;
     ALTER TABLE cash_movements        ENABLE TRIGGER USER;
     ALTER TABLE cash_register_events  ENABLE TRIGGER USER;
     ALTER TABLE bill_lines            ENABLE TRIGGER USER;

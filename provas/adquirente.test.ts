@@ -259,7 +259,7 @@ describe('3 · a ORDEM não é garantida, e não pode decidir', () => {
 
   it('o estorno que chega ANTES da captura não se perde', async () => {
     const agora = Date.now();
-    const { emOrdem, aoContrario } = await nasDuasOrdens([
+    const { aoContrario } = await nasDuasOrdens([
       { eventoId: `${PREFIXO}o1`, tipo: 'captura', estadoProvedor: 'CAPTURADO',
         ocorridoEm: new Date(agora).toISOString(), montanteMenor: 2000 },
       { eventoId: `${PREFIXO}o2`, tipo: 'estorno', estadoProvedor: 'DEVOLVIDO',

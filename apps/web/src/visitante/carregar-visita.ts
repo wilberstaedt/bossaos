@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import {
-  chamadasDaVisita, pedidosDoVisitante, producaoDoVisitante,
+  chamadasDaVisita, pedidosDoVisitante, producaoDoVisitante, reciboPublico,
   type PedidoDoVisitante,
 } from '@bossaos/db';
 import { cookies } from 'next/headers';
@@ -61,4 +61,23 @@ export async function chamadasDaVisitaActual() {
   const bolacha = await bolachaDaVisita();
   if (!bolacha) return [];
   return chamadasDaVisita(obterBase(), bolacha);
+}
+
+/**
+ * O comprovativo do pagamento, pela porta estreita.
+ *
+ * Vive aqui e não em `src/pagamento/` porque é canalização de uma tela de `/r/`:
+ * é neste módulo que vale a regra apertada — só portas, e nunca um cliente de
+ * base com inquilino. Posto ao lado, caía na regra geral e pedir-lhe-ia
+ * `resolverPedido`, que um visitante da mesa não tem e nunca vai ter.
+ *
+ * ── E o nome do que é proibido não se escreve aqui ───────────────────────
+ *
+ * A guarda das rotas lê o ficheiro em bruto e não distingue código de
+ * comentário: escrever o nome proibido para explicar porque não se usa fazia-a
+ * acender sobre a própria explicação. A `validar-dinheiro.sh` já tinha resolvido
+ * isto com o `sem-comentarios.py`; esta ainda não. Fica declarado no E23.md.
+ */
+export async function comprovativoDaVisita(recibo: string) {
+  return reciboPublico(obterBase(), recibo);
 }

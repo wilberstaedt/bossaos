@@ -1923,5 +1923,26 @@
     "troco": "Cambio",
     "trocoAjuda": "El cambio es lo recibido menos lo que se debe. No es un ingreso.",
     "voltar": "Volver"
+  },
+  "pagamentoE23": {
+    "comprovativo": "Tu comprobante",
+    "desligado": "Sin conectar",
+    "dividir": "¿Cómo queréis dividir?",
+    "divisaoAjuda": "Las partes suman exactamente el total. El céntimo que sobra va a las primeras.",
+    "emComprovacao": "El pago sigue en comprobación",
+    "emComprovacaoAjuda": "No lo intentes de nuevo: si se cobró, lo verás aquí. Volver a pagar es pagar dos veces.",
+    "gorjeta": "Propina",
+    "integracaoPendente": "Integración con el proveedor: PENDIENTE. Nada aquí ha hablado con un banco.",
+    "ligado": "Conectado",
+    "naMesa": "En la mesa",
+    "pagar": "Paga desde tu mesa",
+    "pago": "Cobrado",
+    "pingNaoProva": "Que un terminal responda no prueba que el cobro llegó.",
+    "quantos": "¿Cuántos sois?",
+    "retornoNaoProva": "Volver a esta pantalla no confirma un pago. Quien confirma es el banco.",
+    "segredoFora": "La clave del proveedor no se guarda aquí: vive en el servidor.",
+    "semAdquirente": "Todavía no hay pasarela de pago conectada: el cobro se hace con una persona.",
+    "semRecibo": "No encontramos ese comprobante.",
+    "verConta": "Ver la cuenta"
   }
 }

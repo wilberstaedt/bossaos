@@ -872,6 +872,46 @@ async function principal(): Promise<void> {
       ],
     });
 
+    // ── E23 · um pagamento capturado, com gorjeta, e um acontecimento ────
+    //
+    // «Verde sobre zero pagamentos» é reprovação à cabeça. Sem um pagamento
+    // confirmado não há comprovativo para medir, e a MENU-016 mediria o ecrã de
+    // «não encontramos» — que é o ecrã fácil.
+    //
+    // A gorjeta vai a zero de propósito num e diferente de zero noutro? Não:
+    // vai diferente de zero, porque é isso que distingue «a gorjeta aparece» de
+    // «a gorjeta é sempre zero e ninguém nota».
+    const tentativaDaProva = await prisma.paymentAttempt.create({
+      data: {
+        organizationId: IDS.orgA, billId: contaDaProva.id, meio: 'CARTAO',
+        montanteMenor: 4780, chaveIdempotente: `${PREFIXO}pago`, estado: 'CONFIRMADA',
+        resolvidaEm: new Date(),
+      },
+    });
+    const pagamentoDaProva = await prisma.payment.create({
+      data: {
+        organizationId: IDS.orgA, billId: contaDaProva.id,
+        attemptId: tentativaDaProva.id, meio: 'CARTAO', montanteMenor: 4780,
+        gorjetaMenor: 300, provedor: 'sandbox',
+        provedorRef: `sandbox:${tentativaDaProva.id}`,
+      },
+    });
+    await prisma.providerEvent.create({
+      data: {
+        organizationId: IDS.orgA, provedor: 'sandbox',
+        eventoId: `${PREFIXO}captura`, tipo: 'captura',
+        billId: contaDaProva.id, attemptId: tentativaDaProva.id,
+        estadoProvedor: 'CAPTURADO', montanteMenor: 4780, ocorridoEm: new Date(),
+      },
+    });
+    await prisma.paymentConnector.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        provedor: null, merchantId: null, activo: false,
+      },
+    });
+    console.log(`semeado: recibo público ${pagamentoDaProva.reciboPublico}`);
+
     // ── E18 · reservas: uma linha em cada lista, e nenhuma vazia ──────────
     //
     // As seis telas desta etapa são listas. Uma lista vazia mede o estado

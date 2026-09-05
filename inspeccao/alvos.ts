@@ -68,6 +68,8 @@ export interface Alvos {
   /** E22: a conta com desconto, e a caixa aberta com movimentos dos dois lados. */
   contaDoTpv: string;
   caixaDoTpv: string;
+  /** E23: o recibo público de um pagamento capturado, com gorjeta. */
+  reciboDoTpv: string;
 }
 
 const PREFIXO = 'insp-';
@@ -222,6 +224,11 @@ export async function resolverAlvos(): Promise<Alvos> {
       caixaDoTpv: await um(
         sql, `SELECT id FROM cash_registers WHERE nome = '${PREFIXO}Caja 1'`,
         'a caixa insp-Caja 1'),
+      reciboDoTpv: await um(
+        sql,
+        `SELECT recibo_publico::text AS id FROM payments
+          WHERE bill_id = (SELECT id FROM bills WHERE numero = '${PREFIXO}C1')`,
+        'o recibo público do pagamento semeado'),
     };
   } finally {
     await sql.end();

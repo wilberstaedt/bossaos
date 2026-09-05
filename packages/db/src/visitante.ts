@@ -514,3 +514,36 @@ export async function pedirDoVisitante(
   if (!r.ok) return { ok: false, motivo: r.motivo };
   return { ok: true, orderId: r.orderId, rejeitadas: r.rejeitadas.length };
 }
+
+/**
+ * O comprovativo, por porta estreita.
+ *
+ * ── Porque entra aqui e não numa excepção ─────────────────────────────────
+ *
+ * Quem está na mesa não tem inquilino: tem uma bolacha de visitante e um
+ * identificador de recibo. É a mesma forma do `abrirVisitante` — a função
+ * recebe a credencial e mais nada, e resolve tudo lá dentro. Uma excepção à
+ * guarda das rotas seria uma porta a mais, e este sítio já tem as que precisa.
+ *
+ * Devolve **só o que se mostra**: montante, gorjeta, moeda, e se ainda está por
+ * confirmar. Não devolve a conta, nem a tentativa, nem o nome de ninguém — o que
+ * não sai por aqui não pode ser lido por aqui.
+ */
+export async function reciboPublico(
+  prisma: PrismaClient, recibo: string,
+): Promise<{
+  montanteMenor: number; gorjetaMenor: number; moeda: string; emComprovacao: boolean;
+} | null> {
+  // O identificador é opaco e tem forma conhecida. Recusar aqui evita que uma
+  // cadeia arbitrária chegue à base — e evita-o antes de a base ser tocada.
+  if (!/^[0-9a-f-]{8,64}$/i.test(recibo)) return null;
+  const linhas = await prisma.$queryRaw<{
+    montante_menor: number; gorjeta_menor: number; moeda: string; em_comprovacao: boolean;
+  }[]>`SELECT * FROM publico_recibo(${recibo})`;
+  const r = linhas[0];
+  if (!r) return null;
+  return {
+    montanteMenor: r.montante_menor, gorjetaMenor: r.gorjeta_menor,
+    moeda: r.moeda, emComprovacao: r.em_comprovacao,
+  };
+}

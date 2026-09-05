@@ -103,3 +103,45 @@ CREATE POLICY tenant_isolation ON "provider_events"
 ALTER TABLE "payment_connectors" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON "payment_connectors"
   USING (organization_id = app_organizacao_actual()) WITH CHECK (organization_id = app_organizacao_actual());
+
+-- ── A porta estreita do comprovativo ──────────────────────────────────────
+--
+-- Quem está na mesa não tem sessão de inquilino: tem uma bolacha de visitante e
+-- um identificador de recibo. A leitura passa por `SECURITY DEFINER`, como todas
+-- as superfícies públicas desde o E10 — e não se inventa outra forma.
+--
+-- A porta devolve UM recibo e só o que se mostra: montante, gorjeta, moeda e se
+-- ainda está por confirmar. Não devolve o `bill_id`, nem o `attempt_id`, nem o
+-- nome de ninguém. O que não sai por aqui não pode ser lido por aqui.
+ALTER TABLE "payments" ADD COLUMN "recibo_publico" UUID NOT NULL DEFAULT gen_random_uuid();
+CREATE UNIQUE INDEX "um_recibo_publico_por_pagamento" ON "payments" ("recibo_publico");
+
+CREATE OR REPLACE FUNCTION publico_recibo(o_recibo TEXT)
+RETURNS TABLE (
+  montante_menor INTEGER,
+  gorjeta_menor INTEGER,
+  moeda CHAR(3),
+  em_comprovacao BOOLEAN
+)
+LANGUAGE sql
+SECURITY DEFINER
+-- `search_path` fixo: sem isto, quem conseguisse criar um esquema à frente do
+-- `public` fazia esta função ler outra tabela com o mesmo nome.
+SET search_path = public
+AS $$
+  SELECT p."montante_menor", p."gorjeta_menor", b."moeda",
+         -- Em comprovação = há tentativa por reconciliar nesta conta. É a mesma
+         -- pergunta que o TPV faz, e a resposta tem de ser a mesma nos dois.
+         EXISTS (
+           SELECT 1 FROM "payment_attempts" t
+            WHERE t."bill_id" = p."bill_id"
+              AND t."estado" IN ('CRIADA', 'PROCESSANDO', 'INDETERMINADA')
+         ) AS em_comprovacao
+    FROM "payments" p
+    JOIN "bills" b ON b."id" = p."bill_id"
+   WHERE p."recibo_publico"::text = o_recibo
+   LIMIT 1;
+$$;
+
+REVOKE ALL ON FUNCTION publico_recibo(TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION publico_recibo(TEXT) TO bossaos_app;

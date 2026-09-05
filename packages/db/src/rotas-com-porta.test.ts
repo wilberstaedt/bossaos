@@ -111,6 +111,12 @@ const PORTAS_DO_PUBLICO = [
   // — e é por isso que entram aqui em vez de uma excepção, que seria uma porta.
   'unidadePublica', 'horariosPublicos', 'reservarDaRua', 'esperarDaRua',
   'estadoDaEsperaPublica', 'reservaPorSegredo',
+  // ── E23 · o comprovativo do pagamento ───────────────────────────────────
+  //
+  // Recebe um identificador OPACO de recibo e mais nada, e resolve tudo dentro
+  // da porta estreita `publico_recibo`. Entra aqui pela mesma razão que o
+  // `abrirVisitante` — uma excepção seria uma porta a mais.
+  'reciboPublico',
 ];
 /**
  * ── E `src/visitante/` entra aqui, e isso APERTA em vez de aliviar ────────

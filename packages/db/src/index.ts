@@ -308,3 +308,4 @@ export {
   guardarConectorDePagamento, receberWebhook, reconciliarComProvedor, RecusaDeWebhook,
   type AcontecimentoDoProvedor, type RecusaDoAdquirente, type ResultadoDoWebhook,
 } from './adquirente.ts';
+export { reciboPublico } from './visitante.ts';
