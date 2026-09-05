@@ -25,7 +25,18 @@ echo
 # ── BLOQUEIO 1: nao havia porta para modulo nenhum ──────────────────────────
 echo "1. Ha porta para cada modulo entregue?"
 if [ -x scripts/provar-portas.sh ]; then
-  if bash scripts/provar-portas.sh >/tmp/marco-e21-portas.txt 2>&1; then
+  bash scripts/provar-portas.sh >/tmp/marco-e21-portas.txt 2>&1; cod=$?
+  # HA TRES RESPOSTAS. A primeira versao disto lia o codigo de saida e dizia
+  # FALHA — e a 05/09 apanhou um `Terminated: 15` (processo morto, provavelmente
+  # contencao de porta ou memoria com o JR a correr navegadores) e anunciou uma
+  # REGRESSAO DO MARCO que nao existia. A propria provar-portas dizia-o na
+  # saida: «o guiao nao chegou ao fim — nenhum controlo foi medido». Eu e' que
+  # nao a li. Um instrumento que confunde «nao medi» com «esta partido» faz
+  # exactamente o dano que existe para evitar.
+  if grep -qE "NAO CHEGOU AO FIM|Terminated|Killed" /tmp/marco-e21-portas.txt; then
+    amarelo "provar-portas nao chegou ao fim (processo morto) — NAO e regressao"
+    printf '           Repetir com a maquina livre. Ver /tmp/marco-e21-portas.txt\n'
+  elif [ "$cod" = "0" ]; then
     verde "provar-portas passa (inclui o controlo que volta a por '#')"
   else
     vermelho "provar-portas FALHOU — ver /tmp/marco-e21-portas.txt"
