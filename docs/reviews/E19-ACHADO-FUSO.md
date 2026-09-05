@@ -69,3 +69,60 @@ transformar em instante. E o par que impede o remendo de passar: uma prova com a
 unidade em `Europe/Madrid` e outra num fuso diferente, a mostrar que **o mesmo
 "20:00" produz instantes diferentes**. Se produzir o mesmo, o fuso continua a
 não entrar.
+
+---
+
+# Correcção ao que escrevi acima — medido a seguir, 05/09
+
+Escrevi que **«a porta pública ignora o fuso»**. É verdade, e é estreito de mais.
+Fui medir o resto do produto e a convenção é **de toda a casa**:
+
+```
+packages/db/src/host.ts:72                    r.inicio.getUTCHours()
+.../reservations/mover/page.tsx:52            r.inicio.toISOString().slice(11,16)
+.../reservations/walk-in/page.tsx:55          proxima.inicio.toISOString()…
+.../reserve/horarios/page.tsx:49              h.quando.toISOString().slice(11,16)
+```
+
+Hora de parede guardada como UTC e lida de volta pelas partes UTC. **Não é um
+descuido da fatia nova: é uma convenção implícita que atravessa o produto** — e
+que ninguém escreveu em lado nenhum, porque se tivesse sido escrita teria sido
+discutida.
+
+## A parte que é minha
+
+**Eu assinei etapas em cima desta convenção sem dar por ela.** O E13 e o E15
+tocaram nestas telas de host; o E18 passou por aqui. As minhas réguas exigiram
+população, controlo negativo, telas em navegador — e nenhuma perguntou *«que
+horas são estas?»*. O defeito não é dele; é uma coisa que eu deixei passar
+várias vezes seguidas e que só vi hoje porque a porta nova me pôs a linha
+`new Date(...Z)` à frente dos olhos.
+
+## Verificação ao vivo — não é leitura de código
+
+Contra o relógio verdadeiro da base de revisão:
+
+```
+agora (SELECT now()) ............ 2026-09-05T01:29:06.337Z
+desvio de Europe/Madrid ......... 120 min
+"20:00" como o produto o grava .. 2026-09-05T20:00:00.000Z
+"20:00" em Madrid, a sério ...... 2026-09-05T18:00:00.000Z
+antecedência QUE O PRODUTO CALCULA .... 1111 min
+antecedência REAL ..................... 991 min
+diferença ............................. 120 min
+```
+
+**Duas horas exactas**, que é o desvio do fuso. No Inverno serão sessenta
+minutos. A antecedência mínima de 60 min que protege a cozinha é atravessável
+durante toda a janela do desvio, o ano inteiro.
+
+## O que isto muda no pedido
+
+Já não é «corrige a porta». É uma **decisão de representação** que tem de ser
+escrita antes de mais nada assentar em cima: ou os instantes passam a nascer do
+`unidade.fuso` (e então as telas deixam de ler partes UTC), ou a convenção
+hora-de-parede fica **escrita e defendida por prova**, e nesse caso `agoraDaBase`
+não pode ser comparado directamente com `inicio` em sítio nenhum.
+
+As duas são defensáveis. **A que não é defensável é a de agora**, que tem metade
+do produto numa e a comparação com o relógio na outra.
