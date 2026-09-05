@@ -212,3 +212,44 @@ inferência de alergénios é decisão de produto e tem consequências legais.
 **Estado: 24 de 30 medidas, 18 classificadas, 6 por ler**
 (`precosPorCanal`, `unidadesAfectadasPelaBase`, `identificadorAdivinhavel`,
 `linhasParaGravar`, `leadsDaUnidade`, `serveConteudo`).
+
+---
+
+# Fecho do eixo do alcance: 30 de 30 lidas
+
+| Categoria | Quantas | O que se faz |
+| --- | --- | --- |
+| **Duplicado superado** | 15 | **apagar** — a capacidade existe por outro caminho |
+| **Instrumento de verificação** | 5 | nada; nota no E34 sobre peso no pacote publicado |
+| **Capacidade que não existe** | 3 | **defeito** |
+| **Higiene por ligar** | 1 | ligar o varredor |
+| **Restos sem uso nem provas** | 6 | apagar, depois de confirmar com quem os escreveu |
+
+## Os três defeitos, por ordem de gravidade
+
+**1. O domínio próprio não existe — e são TRÊS funções, não uma.**
+`sitePublicoPorDominio`, `serveConteudo` e `custom_domains` no schema. Nenhuma
+rota lê o Host. O `serveConteudo` até traz a regra difícil já resolvida —
+«INDETERMINADO serve», escrito uma vez para que ninguém decida por conta própria
+que *não sei* quer dizer *não*. **Não é uma órfã: é uma funcionalidade inteira
+construída e desligada.**
+
+**2. `receberPedidoExterno`** (E20) — não há porta por onde um pedido externo
+chegue, e a prova jura que entra.
+
+**3. `varrerRetencoesExpiradas`** (E18) — higiene. A capacidade liberta-se pelo
+relógio; a lista é que cresce para sempre.
+
+## O que este eixo ensinou, e vale mais do que a lista
+
+**Quinze das trinta eram duplicados superados** — código a apagar, não a ligar.
+Se eu tivesse entregue as 30 como «funções sem chamador, liguem-nas», metade do
+trabalho seria a criar segundos caminhos para coisas que já funcionam, cada um
+sem provas de tela. **A varredura diz onde olhar; só a leitura diz o que fazer**,
+e as duas conclusões possíveis são opostas.
+
+E há um padrão por baixo, que aparece três vezes: **a regra pensada com cuidado
+fica no módulo de domínio, e o produto reimplementa-a em linha.** Alergénios,
+preços por canal, domínios. Nos três casos a versão inline está certa hoje. Nos
+três, a versão pensada é a que não tem provas — e duas implementações da mesma
+regra divergem sempre pela que ninguém corre.
