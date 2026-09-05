@@ -218,3 +218,50 @@ recuperável. Três saídas nomeadas, nenhuma escolhida — é decisão de produ
 - **Uma decisão nova para o Matheus:** o `/ir/<modulo>` não reencaminha quando há
   uma unidade só. No La Societat é um clique a mais em cada navegação, todos os
   dias. Está em `docs/progress/DECISOES-DO-MATHEUS.md`, com as outras cinco.
+
+---
+
+## [2026-09-05 · fim de tarde] — 75%, AGUARDA=0, e o E00 julgado por quem não o escreveu
+
+### Mudança de status do projecto
+- **75% das etapas (27/36), 77% das telas (308/396), e `AGUARDA=0`** — nada à
+  espera de assinatura, pela primeira vez.
+- Assinados desde a última entrada: **E22** (TPV e caixa), **E23** (pagamentos e
+  webhooks), **E24** (fiscal, com pendência externa declarada), **E25** (stock),
+  **E26** (compras). E o **E00 foi julgado pelo JR** — validado, com a frase que
+  ele prometia **reprovada** e reescrita.
+
+### Learnings — os três que valem para os outros projectos
+
+- **Um contrato só impede um defeito se disser a consequência operacional E a
+  regra de decisão na fronteira onde ele entra.** Reformulação do JR, e é melhor
+  do que a minha tese. O defeito do fuso passou por baixo de um contrato que
+  **falava do assunto** e nomeava os três casos difíceis — faltava-lhe dizer o
+  que fazer no ponto de entrada. *(Eu tinha escrito que nenhum contrato falava
+  disso. Era falso, e foi ele a encontrá-lo ao verificar a prova que eu lhe dei
+  para julgar.)*
+- **Uma regra que depende de alguém a executar bem de cada vez não é uma regra.**
+  Falhei a verificação de alcance três vezes, de três maneiras. Só parou quando
+  deixou de ser memória: primeiro um script, depois — e melhor — **um controlo
+  negativo escrito por ele**, que desliga o motor do produto e verifica que a
+  prova acende.
+- **Não calar uma guarda vermelha com o mecanismo de excepção dela.** Podia
+  declarar 43 provas como excepção e deixar a CI verde em cinco minutos. O teste
+  que decide: *o que mudava no produto?* Nada — só a minha visão dele.
+
+### O que foi feito, do meu lado
+- Guardas novas: `validar-indice-de-contratos.sh` (27 contratos, 8 fora do
+  índice) e `validar-silenciadores.sh` (o `2>/dev/null` que engoliu erros aos
+  dois agentes hoje). Chamam-se `validar-*` e por isso entram na CI **sozinhas**.
+- `varrer-alcance-da-etapa.sh` e `provar-marco-e21.sh` — a reaprovação do marco
+  deixou de ser a minha leitura e passou a ser um comando.
+- Corri **todas as guardas pela primeira vez**: 3 vermelhas, todas apontando
+  para mim. A do móvel apanhou **89 telas que assinei sem afirmar o móvel** —
+  afirmei 43 com prova em mão e **declarei 46 em vez de as afirmar de memória**.
+
+### Próximo passo
+- **E27 (CRM e campanhas)** em curso — a etapa onde um defeito manda mensagem a
+  quem não a pediu.
+- **Sete decisões esperam pelo Matheus** (`DECISOES-DO-MATHEUS.md`), a mais
+  barata sendo a **CI trancada por facturação**, e a mais séria os **requisitos
+  fiscais por confirmar antes do primeiro talão real**.
