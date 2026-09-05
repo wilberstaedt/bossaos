@@ -55,7 +55,11 @@ erro() { echo "ERRO: $1" >&2; exit 1; }
 # O portão que só este projecto pode ter, e o mais importante dos quatro. O
 # motor inteiro existe para que nada passe sem segunda assinatura; publicar por
 # cima disso desfazia-o a partir de fora.
-AGUARDA="$(bash scripts/estado.sh 2>/dev/null | grep -oE 'AGUARDA=[0-9]+' | cut -d= -f2)"
+# `grep -oE 'AGUARDA=[0-9]+'` apanhava TAMBEM o TELAS_AGUARDA, e a variavel
+# ficava com dois valores - o portao recusou publicar dizendo "ha 0\n0 etapas
+# por validar". Falhou FECHADO, que e a direccao certa para um defeito num
+# portao, e por isso e que so o descobri a tentar publicar e nao em producao.
+AGUARDA="$(bash scripts/estado.sh 2>/dev/null | tr ' ' '\n' | grep -oE '^AGUARDA=[0-9]+' | cut -d= -f2)"
 [ "${AGUARDA:-1}" = "0" ] || erro "há ${AGUARDA:-?} etapa(s) por validar — assina antes de publicar"
 
 # ── PORTÃO 2: publica-se um COMMIT, não a árvore ────────────────────────────
