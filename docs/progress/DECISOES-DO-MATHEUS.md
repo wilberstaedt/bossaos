@@ -65,3 +65,34 @@ põe o pedido **já** na cozinha, com a pessoa a julgar tê-lo agendado.
 **Hoje não bloqueia** porque as telas são de staff. **Fica bloqueante na etapa
 que abrir o takeaway ao público** — aí o staff deixa de ser o filtro. Registo-o
 aqui para não ser esquecido quando essa etapa chegar.
+
+## 7. Os requisitos fiscais espanhóis — PENDÊNCIA EXTERNA, e é a mais séria
+
+**Nem eu nem o JR conseguimos confirmar o regime fiscal na fonte oficial.** Eu
+recusei escrevê-los de cabeça na régua do E24, e mantenho a recusa: um requisito
+fiscal escrito com confiança e errado é pior do que requisito nenhum, porque
+passa a ser citado como verdade e ninguém volta a verificar o que já está escrito.
+
+**O que a etapa entrega, e é verificável sem saber o regime:**
+
+- um PDF não é documento fiscal, e não aparece como válido se a integração falhou;
+- emitir duas vezes não emite dois documentos — uma correcção é documento novo;
+- uma rejeição é um estado com motivo, visível a quem a tem de corrigir;
+- um documento fiscal não se reescreve: corrige-se com outro, e os dois ficam,
+  com rasto por gatilho da base.
+
+**O que fica por confirmar:** os requisitos concretos do regime — que campos, que
+prazos, que formato, que fornecedor homologado. Está declarado no ADR
+`0002-fiscal-espanha.md` como **POR CONFIRMAR**, com a razão (sem acesso à fonte)
+em vez de ser preenchido a adivinhar.
+
+**A decisão é tua, e tem data-limite natural:** isto tem de ser confirmado por
+quem tenha acesso à fonte **antes de o BossaOS tocar num restaurante a sério** —
+o La Societat incluído. Não antes; não é preciso travar o desenvolvimento por
+isto. Mas antes do primeiro talão emitido a um cliente real.
+
+**E uma nota sobre como isto aconteceu**, porque a falha foi minha: eu mandei o
+JR à fonte oficial sem verificar se ele tem acesso à web. Dei-lhe uma ordem e uma
+proibição que se fechavam uma sobre a outra — *não inventes* e *vai confirmar
+onde não podes ir* — e ele parou, que era o correcto. Um agente que parasse menos
+teria inventado os requisitos para desbloquear.
