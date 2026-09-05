@@ -122,6 +122,15 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     ALTER TABLE bill_adjustments      DISABLE TRIGGER USER;
     ALTER TABLE payments              DISABLE TRIGGER USER;
     ALTER TABLE refunds               DISABLE TRIGGER USER;
+    DELETE FROM campaign_deliveries  WHERE customer_id IN (SELECT id FROM customers WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM campaigns            WHERE nome LIKE '${PREFIXO}%';
+    DELETE FROM campaign_templates   WHERE nome LIKE '${PREFIXO}%';
+    DELETE FROM segments             WHERE nome LIKE '${PREFIXO}%';
+    DELETE FROM consent_events       WHERE customer_id IN (SELECT id FROM customers WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM loyalty_movements    WHERE customer_id IN (SELECT id FROM customers WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM loyalty_rewards      WHERE nome LIKE '${PREFIXO}%';
+    DELETE FROM feedback_entries     WHERE customer_id IN (SELECT id FROM customers WHERE nome LIKE '${PREFIXO}%') OR origem = 'menu público';
+    DELETE FROM customers            WHERE nome LIKE '${PREFIXO}%' OR email LIKE '%@inspeccao.example';
     DELETE FROM stock_movements      WHERE receipt_line_id IN (SELECT rl.id FROM receipt_lines rl JOIN receipts r ON r.id = rl.receipt_id JOIN purchase_orders p ON p.id = r.purchase_order_id WHERE p.numero LIKE '${PREFIXO}%');
     DELETE FROM receipt_lines        WHERE receipt_id IN (SELECT id FROM receipts WHERE purchase_order_id IN (SELECT id FROM purchase_orders WHERE numero LIKE '${PREFIXO}%'));
     DELETE FROM receipts             WHERE purchase_order_id IN (SELECT id FROM purchase_orders WHERE numero LIKE '${PREFIXO}%');
@@ -265,6 +274,8 @@ export async function restos(prisma: PrismaClient): Promise<number> {
     + (SELECT count(*) FROM fiscal_documents    WHERE acontecimento LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM stock_items         WHERE nome LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM suppliers           WHERE nome LIKE '${PREFIXO}%')
+    + (SELECT count(*) FROM customers           WHERE nome LIKE '${PREFIXO}%')
+    + (SELECT count(*) FROM campaigns           WHERE nome LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM purchase_orders     WHERE numero LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM recipes             WHERE nome LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM external_catalog_mappings WHERE product_id IN (SELECT id FROM products WHERE nome LIKE '${PREFIXO}%'))

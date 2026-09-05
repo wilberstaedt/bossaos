@@ -90,6 +90,17 @@ export interface Alvos {
    */
   fornecedorDeCompras: string;
   encomendaDeCompras: string;
+  /**
+   * E27: as três pessoas que dão sentido à prova.
+   *
+   * Uma consentiu campanha, outra **só serviço**, e a terceira deu e retirou.
+   * Sem a do meio, uma campanha que enviasse a toda a gente passava — que é o
+   * defeito mais comum de todos os produtos de restauração. Sem a terceira, «o
+   * primeiro acontecimento manda» ficava por apanhar.
+   */
+  clienteQueConsentiu: string;
+  clienteSoServico: string;
+  campanhaDoCrm: string;
 }
 
 const PREFIXO = 'insp-';
@@ -261,6 +272,15 @@ export async function resolverAlvos(): Promise<Alvos> {
       encomendaDeCompras: await um(
         sql, `SELECT id FROM purchase_orders WHERE numero = '${PREFIXO}C-100'`,
         'a encomenda insp-C-100, a que tem uma linha a menos e outra certa'),
+      clienteQueConsentiu: await um(
+        sql, `SELECT id FROM customers WHERE nome = '${PREFIXO}María López'`,
+        'a cliente que consentiu campanha'),
+      clienteSoServico: await um(
+        sql, `SELECT id FROM customers WHERE nome = '${PREFIXO}Quien solo esperó'`,
+        'a pessoa que só consentiu SERVIÇO — a que dá sentido a toda a etapa'),
+      campanhaDoCrm: await um(
+        sql, `SELECT id FROM campaigns WHERE nome = '${PREFIXO}Otoño'`,
+        'a campanha insp-Otoño'),
     };
   } finally {
     await sql.end();

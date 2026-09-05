@@ -321,3 +321,13 @@ export {
   RecusaDaCompra, UMA_UNIDADE,
   type CustoDoInsumo, type LinhaConferida, type RecusaDeCompra,
 } from './compras.ts';
+export {
+  audiencia, campanhasDaUnidade, clientesDaUnidade, consentimentosDe, criarCampanha,
+  criarCliente, criarModeloDeCampanha, criarRecompensa, criarSegmento, enviarCampanha,
+  enviosDaCampanha, feedbackDaRua, juntarContactos, modelosDaUnidade, movimentarPontos,
+  movimentosDePontos, origensDaUnidade, recompensasDaUnidade, registarConsentimento,
+  resgatar, respostasDaUnidade, segmentosDaUnidade, temConsentimento,
+  RecusaDoCrm,
+  type CanalDeContacto, type Finalidade, type RecusaDeCrm, type RegraDeSegmento,
+  type ResultadoDaCampanha,
+} from './crm.ts';

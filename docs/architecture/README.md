@@ -71,4 +71,5 @@ uma destas, o documento é que está errado.
 - [`quantidades-e-unidades.md`](./quantidades-e-unidades.md) — Quantidades e unidades
 - [`stock-e-fichas.md`](./stock-e-fichas.md) — Stock e fichas técnicas
 - [`compras-e-fornecedores.md`](./compras-e-fornecedores.md) — Compras e fornecedores: encomendado, recebido e facturado são três números; só a recepção mexe no stock; a unidade de compra não é a de uso
+- [`consentimento-e-campanhas.md`](./consentimento-e-campanhas.md) — Consentimento por finalidade e por canal, derivado de acontecimentos; a retirada vale antes do próximo envio porque é um gatilho que a faz valer; audiência por regra, nunca por lista colada; pontos com saldo derivado
 - [`tarefas-de-producao-e-estacoes.md`](./tarefas-de-producao-e-estacoes.md) — Uma linha de pedido não é uma tarefa de estação

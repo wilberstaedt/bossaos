@@ -1,52 +1,59 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E26 — fornecedores e compras (**6 telas**).
+**Etapa atual:** E27 — CRM, fidelidade e campanhas (**14 telas**).
 **Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — as duas fatias.**
 
-**O núcleo:** encomendado, recebido e facturado são **três números** e não três
-estados de um. Vivem em três tabelas porque são três factos, ditos por gente
-diferente, em momentos diferentes — e as diferenças **derivam-se** da
-comparação, como o saldo de stock e o estado da conta. Não há coluna
-`divergencia`, e o estado da encomenda é só `ABERTA`/`FECHADA`: um `RECEBIDA`
-obrigava a escolher entre «recebida» e «recebida a menos», e a escolha apagava a
-informação por que a tela existe.
+**Porque é que esta etapa é diferente:** até aqui um defeito estragava um número.
+Aqui **manda uma mensagem a uma pessoa que não a pediu**, e isso não se desfaz.
+Por isso a garantia central foi para a FORMA: o gatilho
+`envio_exige_consentimento_vivo` recusa gravar um envio de campanha para quem não
+tenha, **naquele instante**, consentimento vivo de campanha naquele canal. E
+grava-se antes de despachar — recusada a gravação, não há nada despachado.
 
-**Só a recepção mexe no stock, e a garantia é pela AUSÊNCIA:** o movimento ganhou
-`receipt_line_id` e **não** ganhou `purchase_order_line_id` nem
-`supplier_invoice_line_id` — uma coluna que não existe não pode apontar para o
-sítio errado. Mais o gatilho `compra_so_entra_por_recepcao()` e o índice único
-parcial que faz do reenvio **uma** entrada.
+**Existir no CRM não é ter consentido.** Não há coluna nenhuma que diga «aceita
+campanhas», em modelo nenhum: uma coluna que não existe não pode ficar a `true`
+por omissão nem por uma caixa mal marcada. O consentimento é um **acontecimento**
+com origem e momento, e o estado deriva-se do último de cada
+`(pessoa, finalidade, canal)` — quatro respostas, nunca uma.
 
-**A unidade de compra não é a de uso:** `factor_mili` é `NOT NULL` com
-`CHECK > 0`, e a conta é inteira de ponta a ponta — 8 sacos × 25 kg dão 200 kg, e
-nunca 8. Sem factor, recusa-se: adivinhar é o defeito, a mesma regra da densidade.
+**A finalidade de serviço ACABA.** Nasce com `expira_em`, e quem verifica é a
+base contra o relógio dela. O telefone deixado à porta deixa de autorizar quando
+a finalidade acaba — ninguém decide guardá-lo, é o que acontece quando nada o
+apaga.
 
-**O custeio está ESCRITO — média ponderada móvel, derivada das entradas.**
-Ponderada e não PEPS porque a farinha do saco novo e a do velho estão no mesmo
-balde: um método que finge saber qual saiu produz um número exacto que está
-errado.
+**A retirada vale antes do próximo envio** porque a pergunta se faz **por pessoa**
+no instante de gravar cada envio, e não uma vez ao construir a audiência. Entre
+uma coisa e a outra passam minutos.
 
-**Achado que vale a etapa:** a PUR-003 rolava na horizontal a 360 px, e a causa
-não era o CSS — **o JSX remove o espaço entre elementos irmãos escritos em linhas
-separadas**, e os seis `<span>` da conferência ficavam um bloco contínuo sem
-sítio onde quebrar. A quebra passou a ser dada pela caixa e não por espaços no
-texto: um `{' '}` entre spans resolvia o sintoma e voltava a partir-se na
-primeira coluna nova.
+**Achado que vale a etapa:** `25P02` outra vez, e numa forma nova. Embrulhei a
+gravação num `try/catch` à espera da recusa do gatilho — a excepção **aborta a
+transacção** e apanhá-la em JavaScript não a desaborta. No E24 era colisão de
+índice e a saída foi `ON CONFLICT`; aqui é um `RAISE EXCEPTION`, que não tem
+`ON CONFLICT` nenhum. A pergunta passou a fazer-se antes, com a mesma função SQL
+que o gatilho usa.
 
-**E o guião de controlos apanhou um defeito dele próprio:** o `extrair-sql.py`
-leva dois argumentos e eu passei um; o `2>/dev/null` engoliu o `IndexError` e a
-base ficou sem gatilho. O silenciador era metade do defeito.
+**E dois achados sobre as minhas próprias asserções:** a da população exigia
+«pelo menos um vivo e pelo menos um não vivo», verdade para quase qualquer
+pessoa; e o contador das quatro respostas lia o array que a tela recebeu, não o
+ecrã — dizia «4» com uma linha desenhada. **Nenhuma foi encontrada a pensar:**
+foram os controlos a cair no caso errado que as destaparam. Um controlo que cai
+no sítio errado está a dizer que a asserção não mede o que eu julgava.
 
 **Provas (LOCAIS — a CI continua trancada pela facturação do GitHub):**
-`provas/compras.test.ts` **0** (**22 casos**, repetível) ·
-`provar-compras.sh` **0** (**9 controlos**) ·
-`provar-compras-no-navegador.sh` **0** (**26 casos, 8 controlos**) ·
-`validar-quantidades.sh` **0** · `validar-dinheiro.sh` **0** ·
-`pnpm verificar` **0** · `pnpm inspeccionar` **0** (**655 casos**) ·
+`provas/crm.test.ts` **0** (**27 casos**, repetível) ·
+`provar-crm.sh` **0** (**9 controlos**) ·
+`provar-crm-no-navegador.sh` **0** (**38 casos, 10 controlos**) ·
+`pnpm verificar` **0** · `pnpm inspeccionar` **0** (**690 casos**) ·
 `varrer-alcance-da-etapa.sh` → **a correr depois do commit**.
 
-**Contrato:** `docs/architecture/compras-e-fornecedores.md`, escrito antes do código.
-**Detalhe:** `docs/progress/E26.md`.
+## ⚠ PENDÊNCIA DECLARADA — não há provedor de envio
+
+Nem email nem SMS. Os envios ficam gravados como `POR_ENVIAR`, e a tela di-lo por
+palavras. **Isto não enfraquece o que interessa provar:** a recusa acontece na
+GRAVAÇÃO, que é o passo que existe, e não no despacho, que não existe.
+
+**Contrato:** `docs/architecture/consentimento-e-campanhas.md`, escrito antes do código.
+**Detalhe:** `docs/progress/E27.md`.
 
 ## O texto anterior, mantido por baixo — HISTÓRICO, não estado
 

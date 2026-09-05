@@ -123,6 +123,17 @@ const PORTAS_DO_PUBLICO = [
   // da porta estreita `publico_recibo`. Entra aqui pela mesma razão que o
   // `abrirVisitante` — uma excepção seria uma porta a mais.
   'reciboPublico',
+  // ── E27 · o feedback de quem esteve cá ──────────────────────────────────
+  //
+  // Resolve o inquilino dentro da porta estreita `registar_feedback_publico`,
+  // que é `SECURITY DEFINER` com `search_path` fixo e faz UMA coisa. Entra aqui
+  // pela mesma razão que o `reservarDaRua`: quem responde está na rua e não tem
+  // sessão de inquilino nenhuma para a RLS usar.
+  //
+  // E a parte que importa desta porta não é o escopo — é que o consentimento de
+  // campanha viaja num argumento SEPARADO, falso por omissão. Deixar o email
+  // para haver resposta não é aceitar publicidade.
+  'feedbackDaRua',
 ];
 /**
  * ── E `src/visitante/` entra aqui, e isso APERTA em vez de aliviar ────────

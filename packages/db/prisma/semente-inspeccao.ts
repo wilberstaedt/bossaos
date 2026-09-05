@@ -1109,6 +1109,104 @@ async function principal(): Promise<void> {
       },
     });
 
+    // ── E27 · CRM: e a pessoa que consentiu SERVIÇO e recusou CAMPANHA ────
+    //
+    // «Uma prova que só use quem consentiu tudo» é reprovação à cabeça. Sem esta
+    // segunda pessoa, uma campanha que enviasse a toda a gente passava — e é
+    // exactamente o defeito mais comum de todos os produtos de restauração.
+    //
+    // A terceira RETIROU depois de ter dado: sem ela, «o primeiro acontecimento
+    // manda» ficava por apanhar.
+    const consenteTudo = await prisma.customer.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}María López`, email: 'maria@inspeccao.example',
+        telefone: '+34600111222', origem: 'reserva',
+      },
+    });
+    const soServico = await prisma.customer.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Quien solo esperó`, email: 'espera@inspeccao.example',
+        telefone: '+34600333444', origem: 'espera',
+      },
+    });
+    const retirou = await prisma.customer.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Quien dijo que no`, email: 'nao@inspeccao.example',
+        origem: 'feedback',
+      },
+    });
+    await prisma.consentEvent.createMany({
+      data: [
+        { organizationId: IDS.orgA, customerId: consenteTudo.id, finalidade: 'CAMPANHA',
+          canal: 'EMAIL', accao: 'DADO', origem: 'formulário do site' },
+        { organizationId: IDS.orgA, customerId: consenteTudo.id, finalidade: 'SERVICO',
+          canal: 'SMS', accao: 'DADO', origem: 'reserva' },
+        // Esta deu o telefone à porta para ser avisada. E mais nada.
+        { organizationId: IDS.orgA, customerId: soServico.id, finalidade: 'SERVICO',
+          canal: 'SMS', accao: 'DADO', origem: 'lista de espera' },
+        { organizationId: IDS.orgA, customerId: retirou.id, finalidade: 'CAMPANHA',
+          canal: 'EMAIL', accao: 'DADO', origem: 'feedback público',
+          momento: new Date(Date.now() - 86_400_000) },
+        { organizationId: IDS.orgA, customerId: retirou.id, finalidade: 'CAMPANHA',
+          canal: 'EMAIL', accao: 'RETIRADO', origem: 'pedido da própria' },
+      ],
+    });
+    await prisma.loyaltyMovement.createMany({
+      data: [
+        { organizationId: IDS.orgA, customerId: consenteTudo.id, tipo: 'GANHO',
+          pontos: BigInt(450), motivo: 'visitas de Julho' },
+        { organizationId: IDS.orgA, customerId: consenteTudo.id, tipo: 'RESGATE',
+          pontos: BigInt(150), motivo: 'café de cortesia' },
+      ],
+    });
+    await prisma.loyaltyReward.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Café de cortesía`,
+        custoPontos: BigInt(150), valorMenor: BigInt(180),
+      },
+    });
+    const segmento = await prisma.segment.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Quien consintió promociones`,
+        regra: { exigeConsentimento: { finalidade: 'CAMPANHA', canal: 'EMAIL' } },
+      },
+    });
+    const modelo = await prisma.campaignTemplate.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Menú de otoño`, canal: 'EMAIL',
+        assunto: 'Nuevo menú', corpo: 'Ven a probarlo.',
+      },
+    });
+    const campanha = await prisma.campaign.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Otoño`, canal: 'EMAIL',
+        segmentId: segmento.id, templateId: modelo.id, estado: 'TERMINADA',
+        criadaPor: 'painel@inspeccao.example',
+      },
+    });
+    // Um envio, e só à que consentiu. O gatilho recusaria os outros dois.
+    await prisma.campaignDelivery.create({
+      data: {
+        organizationId: IDS.orgA, campaignId: campanha.id,
+        customerId: consenteTudo.id, canal: 'EMAIL',
+      },
+    });
+    await prisma.feedbackEntry.createMany({
+      data: [
+        { organizationId: IDS.orgA, locationId: IDS.unidadeA2, customerId: consenteTudo.id,
+          nota: 5, comentario: 'Todo perfecto', origem: 'menu público' },
+        { organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          nota: 2, comentario: 'Tardó mucho', origem: 'menu público' },
+      ],
+    });
+
     // ── E18 · reservas: uma linha em cada lista, e nenhuma vazia ──────────
     //
     // As seis telas desta etapa são listas. Uma lista vazia mede o estado

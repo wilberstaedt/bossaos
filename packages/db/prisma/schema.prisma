@@ -189,6 +189,15 @@ model Organization {
   linhasDeRecepcao  ReceiptLine[]
   facturasDeCompra  SupplierInvoice[]
   linhasDeFactura   SupplierInvoiceLine[]
+  clientes          Customer[]
+  consentimentos    ConsentEvent[]
+  movimentosDePontos LoyaltyMovement[]
+  recompensas       LoyaltyReward[]
+  segmentos         Segment[]
+  modelosDeCampanha CampaignTemplate[]
+  campanhas         Campaign[]
+  enviosDeCampanha  CampaignDelivery[]
+  respostas         FeedbackEntry[]
 }
 
 /// Marca: catálogo e identidade comercial. Pertence a uma organização.
@@ -331,6 +340,12 @@ model Location {
   @@map("locations")
   fornecedores Supplier[]
   encomendas   PurchaseOrder[]
+  clientes          Customer[]
+  recompensas       LoyaltyReward[]
+  segmentos         Segment[]
+  modelosDeCampanha CampaignTemplate[]
+  campanhas         Campaign[]
+  respostas         FeedbackEntry[]
 }
 
 /// Identidade GLOBAL. Excepção documentada (CT-04): não leva `organization_id`,
@@ -4452,4 +4467,239 @@ model SupplierInvoiceLine {
   artigo       SupplierItem    @relation(fields: [supplierItemId], references: [id], onDelete: Restrict)
 
   @@map("supplier_invoice_lines")
+}
+
+// ── E27 · CRM, fidelidade e campanhas ──────────────────────────────────────
+//
+// Contrato: `docs/architecture/consentimento-e-campanhas.md`.
+//
+// Repare-se no que NÃO existe aqui: nenhuma coluna «aceita campanhas», em
+// modelo nenhum. Uma coluna que não existe não pode ficar a `true` por omissão,
+// por importação, ou por alguém ter marcado a caixa errada num formulário de
+// reserva. O consentimento é um registo de ACONTECIMENTOS e o estado deriva-se.
+
+enum FinalidadeDeContacto {
+  SERVICO
+  CAMPANHA
+}
+
+enum CanalDeContacto {
+  EMAIL
+  SMS
+}
+
+enum AccaoDeConsentimento {
+  DADO
+  RETIRADO
+}
+
+enum TipoDeMovimentoDePontos {
+  GANHO
+  RESGATE
+  AJUSTE
+  EXPIRACAO
+}
+
+model Customer {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  nome           String
+  email          String?
+  telefone       String?
+  /// De onde veio esta pessoa. É informação de origem, não de permissão.
+  origem         String?
+  /// ── O saldo DERIVA-SE dos movimentos, como o stock do E25 ─────────────
+  ///
+  /// Um gatilho repõe quem o escrever à mão. Um programa de fidelidade cujo
+  /// saldo se escreve é um programa onde ninguém explica de onde veio um ponto.
+  saldoPontos    BigInt   @default(0) @map("saldo_pontos")
+  /// Quando dois contactos se juntam, o absorvido aponta para o que ficou. Não
+  /// se apaga: quem for ver a visita antiga tem de chegar à pessoa certa.
+  juntadoAId     String?  @map("juntado_a_id") @db.Uuid
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  juntadoA     Customer?    @relation("juncaoDeContactos", fields: [juntadoAId], references: [id], onDelete: SetNull)
+  absorvidos   Customer[]   @relation("juncaoDeContactos")
+  consentimentos ConsentEvent[]
+  pontos       LoyaltyMovement[]
+  envios       CampaignDelivery[]
+  respostas    FeedbackEntry[]
+
+  @@map("customers")
+}
+
+/// O consentimento é um ACONTECIMENTO. O estado actual é o último de cada
+/// `(pessoa, finalidade, canal)` — derivado, nunca guardado.
+model ConsentEvent {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  customerId     String @map("customer_id") @db.Uuid
+  finalidade     FinalidadeDeContacto
+  canal          CanalDeContacto
+  accao          AccaoDeConsentimento
+  /// De onde veio: o ecrã, o formulário, a pessoa que o registou. Sem origem, um
+  /// consentimento não se consegue defender a ninguém.
+  origem         String
+  /// ── A finalidade de SERVIÇO acaba ─────────────────────────────────────
+  ///
+  /// O telefone deixado à porta serve para avisar que a mesa está pronta. Meia
+  /// hora depois a finalidade acabou. `null` é «não caduca», e é o que a
+  /// campanha usa — porque essa só acaba quando a pessoa a retirar.
+  expiraEm       DateTime? @map("expira_em") @db.Timestamptz(6)
+  momento        DateTime  @default(now()) @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  cliente      Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId, finalidade, canal, momento])
+  @@map("consent_events")
+}
+
+model LoyaltyMovement {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  customerId     String @map("customer_id") @db.Uuid
+  tipo           TipoDeMovimentoDePontos
+  /// Sempre POSITIVA: o sinal vem do tipo. A mesma regra do stock.
+  pontos         BigInt
+  motivo         String
+  momento        DateTime @default(now()) @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  cliente      Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("loyalty_movements")
+}
+
+/// Uma recompensa custa pontos e vale dinheiro. O dinheiro é inteiro em unidade
+/// menor, com o sufixo que a guarda reconhece.
+model LoyaltyReward {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  nome           String
+  custoPontos    BigInt @map("custo_pontos")
+  valorMenor     BigInt @map("valor_menor")
+  moeda          String @default("EUR")
+  arquivadaEm    DateTime? @map("arquivada_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@map("loyalty_rewards")
+}
+
+/// O segmento guarda CRITÉRIOS, não pessoas.
+///
+/// Não há tabela de membros, de propósito: uma lista exportada e reimportada
+/// perde a origem do consentimento, e uma lista colada não tem origem nenhuma.
+model Segment {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  nome           String
+  /// Os critérios. Avaliados no momento do envio, nunca congelados.
+  regra          Json
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  campanhas    Campaign[]
+
+  @@unique([locationId, nome], name: "um_segmento_por_nome")
+  @@map("segments")
+}
+
+/// O modelo de uma mensagem de CAMPANHA.
+///
+/// ── Porque é que não reaproveita o `MessageTemplate` ──────────────────────
+///
+/// O que já existe é transaccional: identifica-se por `(unidade, tipo, idioma)`
+/// — «o email de confirmação de reserva, em espanhol». Este identifica-se por
+/// **nome**, escolhido por quem escreve — «a promoção de Natal». São
+/// identidades diferentes e ciclos de vida diferentes; forçá-los na mesma
+/// tabela obrigava o `tipo` a passar a ser texto livre, e a chave única que
+/// impede dois modelos de confirmação para o mesmo idioma deixava de valer.
+model CampaignTemplate {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  nome           String
+  canal          CanalDeContacto
+  assunto        String?
+  corpo          String
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  campanhas    Campaign[]
+
+  @@unique([locationId, nome], name: "um_modelo_de_campanha_por_nome")
+  @@map("campaign_templates")
+}
+
+model Campaign {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  nome           String
+  canal          CanalDeContacto
+  segmentId      String  @map("segment_id") @db.Uuid
+  templateId     String  @map("template_id") @db.Uuid
+  /// `RASCUNHO`, `A_ENVIAR` ou `TERMINADA`. Não há `ENVIADA`: o que foi enviado
+  /// deriva-se dos envios, e uma campanha a meio é o estado que interessa.
+  estado         String   @default("RASCUNHO")
+  criadaEm       DateTime @default(now()) @map("criada_em") @db.Timestamptz(6)
+  criadaPor      String?  @map("criada_por")
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location           @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  segmento     Segment            @relation(fields: [segmentId], references: [id], onDelete: Restrict)
+  modelo       CampaignTemplate   @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  envios       CampaignDelivery[]
+
+  @@unique([locationId, nome], name: "uma_campanha_por_nome")
+  @@map("campaigns")
+}
+
+/// O envio. **Grava-se ANTES de despachar** — a mesma ordem da assinatura antes
+/// do efeito no E23. Se a gravação for recusada pelo gatilho, não há nada
+/// despachado, e um defeito na aplicação não consegue enviar.
+model CampaignDelivery {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  campaignId     String @map("campaign_id") @db.Uuid
+  customerId     String @map("customer_id") @db.Uuid
+  canal          CanalDeContacto
+  /// `POR_ENVIAR` sempre, nesta etapa: não há provedor contratado. É pendência
+  /// declarada, e não muda o que interessa provar — a recusa é na gravação.
+  estado         String   @default("POR_ENVIAR")
+  gravadoEm      DateTime @default(now()) @map("gravado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campanha     Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  cliente      Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, customerId], name: "um_envio_por_pessoa_e_campanha")
+  @@map("campaign_deliveries")
+}
+
+model FeedbackEntry {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  customerId     String? @map("customer_id") @db.Uuid
+  nota           Int
+  comentario     String?
+  origem         String?
+  momento        DateTime @default(now()) @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  cliente      Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@map("feedback_entries")
 }
