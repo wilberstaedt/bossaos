@@ -160,3 +160,29 @@ minha régua e devia estar.
 as três conversões de dinheiro **e não acusa as três legítimas**». É a
 calibração que exigi depois de ela ter acusado o `total` de zona no E18, que
 conta pessoas.
+
+### Pergunta para a revisão: a hora de entrega não tem limites
+
+Medido: `RecusaDeAgendamento` tem três valores — `SEM_FUSO`, `HORA_INEXISTENTE`
+e `SEM_LINHAS`. **Não há recusa para hora no passado, para casa fechada, nem
+para uma data absurdamente longe.** Procurei no caminho todo, incluindo a rota:
+não está noutro sítio.
+
+O E18 tem `antecedenciaMinMin` e `antecedenciaMaxDias` para reservas. O E20 não
+tem equivalente para pedidos.
+
+**O que acontece hoje, e é pior do que parece:** uma hora no passado dá
+`producao_em` no passado, e a condição da fila é `producao_em <= agora`. O
+pedido **entra imediatamente na cozinha**, embora a pessoa julgue tê-lo
+agendado. Uma hora com a casa fechada é aceite e aparece às 03h40 a ninguém.
+
+**A nuance que baixa a urgência, e que não escondo:** a rota é
+`api/org/<orgSlug>/levar` — é **staff**, não é pública. Quem escolhe a hora é
+alguém do restaurante, e um erro de dedo é menos provável e mais corrigível do
+que um cliente na rua. O E20 tem 7 telas e, se alguma delas abrir isto ao
+público, a pergunta deixa de ser pergunta.
+
+**E a parte que é minha:** a régua do E20 também não exigia isto. É a segunda
+vez esta noite que o defeito mora onde nenhum contrato foi escrito — como o
+fuso. Ver `E00-PROVA-PARA-O-JR.md`: *um contrato errado discute-se; um contrato
+inexistente não tem quem o defenda.*
