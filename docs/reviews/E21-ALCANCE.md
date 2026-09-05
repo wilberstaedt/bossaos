@@ -136,3 +136,42 @@ antes de tempo, ou a tela mostra tudo e confia em quem a usa? Não medi. É
 pergunta de operação, e o E21 é exactamente onde ela se faz.
 
 **Estado: 12 de 30 classificadas. 18 por ler.**
+
+## Terceira passagem — e um segundo defeito da classe grave
+
+### `sitePublicoPorDominio` (E10) — capacidade que não existe. DEFEITO.
+
+Quase a classifiquei como duplicado superado, porque existe `sitePublico` e é
+chamado pela página pública. **Não é o mesmo:** o `sitePublico` resolve por
+**slug**; o `sitePublicoPorDominio` resolve por **domínio próprio**. Capacidades
+diferentes com nomes parecidos — a armadilha em que quase caí.
+
+Medido:
+
+```
+tabela custom_domains no schema ......... existe
+sitePublicoPorDominio em provas ......... 7 usos
+rotas que leem o Host do pedido ......... 0
+ecrãs que gerem domínios ................ 0
+```
+
+**Nada pode resolver por domínio porque nada olha para o domínio.** A tabela
+existe, a função existe, as provas juram que funciona, e não há por onde entrar.
+É o segundo caso da classe do `enfileirar`, ao lado do `receberPedidoExterno`.
+
+### `guardarLead` — duplicado superado. APAGAR.
+
+Este sim: a rota `api/publico/lead` chama `guardarLeadPublico`. A capacidade
+existe e está ligada; o `guardarLead` é a versão anterior. Sai.
+
+### Oito órfãs medidas, ainda por LER
+
+`avisoDeSeguranca`, `estadoDoAlergenio`, `precosPorCanal`,
+`unidadesAfectadasPelaBase`, `identificadorAdivinhavel`, `linhasParaGravar`,
+`leadsDaUnidade`, `serveConteudo`. **Zero usos em qualquer sítio** — nem produto
+nem provas. Não são instrumentos de verificação, isso já sei; se são restos ou
+capacidades por ligar, **não sei, porque ainda não as li**. Medi-as; não as
+classifiquei. A diferença importa: `avisoDeSeguranca` num módulo de alergénios
+pode ser exactamente o tipo de coisa que não pode faltar.
+
+**Estado: 24 de 30 medidas, 16 classificadas, 8 por ler.**
