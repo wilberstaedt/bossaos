@@ -18,6 +18,30 @@ cada uma.
 **Não urge por custo:** enviar commits não gasta minutos, porque nada corre.
 Urge por rede de segurança.
 
+### Medição afinada — 05/09, 19h
+
+Reverifiquei ao fim de um dia inteiro, porque assumir sem medir é o erro que
+passei a sessão a apanhar. **Continua trancada**, e agora com o sintoma exacto:
+
+```
+gh api …/actions/runs/<id>/jobs
+  Rápido — sem base nem navegador:      passos=0  inicio=16:48:23  fim=16:48:26
+  Base — acesso e catálogo:             passos=0  inicio=16:48:23  fim=16:48:26
+  Base — recuperação e segundo factor:  passos=0  inicio=16:48:23  fim=16:48:26
+```
+
+**Os cinco jobs SÃO criados, com nome, e morrem em três segundos com zero passos
+executados.** `gh run view --log-failed` devolve «log not found».
+
+Corrijo o que escrevi antes: eu disse que «o job nem chega a existir». **Existe**
+— o que não acontece é a execução. A distinção importa para quem for
+desbloquear: não é o workflow que está partido nem o repositório que não
+dispara. É a execução que é recusada, e isso resolve-se na facturação.
+
+**Nada mudou no diagnóstico:** enviar commits continua a não gastar minutos,
+porque nada corre. E as 43 provas sem decisão continuam sem correr — destrancar
+resolve metade, e a outra metade é a CI descobrir em vez de listar.
+
 ## 2. O domínio próprio: ligar ou apagar
 
 Existe a tabela `custom_domains`, o resolvedor `sitePublicoPorDominio`, a função
