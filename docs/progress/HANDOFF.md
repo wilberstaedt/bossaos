@@ -1,7 +1,7 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E29 — financeiro e conciliação (**11 telas**).
-**Estado:** **RETIDO por PRECISÃO e CONSERTADO — reentregue, aguardando validação.**
+**Etapa atual:** E30 — Analytics, relatórios e gestão multiunidade (**9 telas**).
+**Estado:** **EM CURSO.** E29 assinado a 06/09 em `d90310b` (`docs/reviews/E29.md`), retido à primeira e devolvido com duas portas fechadas. Contrato `relatorios-e-agregacao.md` e régua `ALVO-E30.md` escritos **antes** do código.
 
 **A retenção, e o sénior tinha razão:** a rota fazia
 `montanteMenor: Number(l.montante)` antes de chamar o motor, e o `BigInt()` do
