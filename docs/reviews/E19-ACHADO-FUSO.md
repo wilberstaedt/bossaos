@@ -184,3 +184,40 @@ de haver instante nenhum. O `estado` que ela devolve deixa de ser desperdiçado:
 E a prova que impede o remendo: **a mesma "20:00" em duas unidades com fusos
 diferentes tem de produzir instantes diferentes.** Se produzir o mesmo, o fuso
 continua a não entrar, por muito que a função apareça no meio do caminho.
+
+---
+
+# O achado tem agora um detector — e ele apanhou-me primeiro
+
+`scripts/demonstrar-defeito-do-fuso.sh`. Falha hoje, passa quando o conserto
+entrar. Fica **fora da suite** de propósito: um vermelho permanente lá dentro
+envenenava todas as medições seguintes.
+
+```
+    hora local escolhida ........... 2026-09-05 20:00:00
+    resolverHoraLocal Europe/Madrid  2026-09-05T18:00:00.000Z  (NORMAL)
+    resolverHoraLocal UTC .......... 2026-09-05T20:00:00.000Z  (NORMAL)
+    o que a porta publica grava .... 2026-09-05T20:00:00.000Z
+
+    [controlo] o resolvedor varia com o fuso? sim
+    FALHA  a porta publica ignora o fuso
+```
+
+O controlo por dentro é o que impede o detector de ser cego: se
+`resolverHoraLocal` devolvesse o mesmo para `Europe/Madrid` e para `UTC`, o
+teste não estaria a medir fuso nenhum e diria `CEGO` em vez de `FALHA`.
+
+## Da primeira vez, o meu detector acendeu pelo motivo errado
+
+Corri-o antes de migrar a base de revisão. A função `instante_local` não existia
+lá, o Node rebentou, saiu com código 1 — e o meu `case` leu esse 1 como se fosse
+o defeito. **Anunciou FALHA por uma razão que não tinha nada que ver com o
+produto.**
+
+É exactamente a armadilha que passei a noite a apontar aos outros, cometida por
+mim, no instrumento que escrevi para a apontar.
+
+O conserto foi obrigar a um **veredicto explícito** na saída (`PASSA`, `FALHA`
+ou `CEGO`) e tratar a ausência dele como **NÃO MEDI**, com o código 3 e uma
+mensagem que diz que não é prova de defeito nem de ausência dele. Há três
+respostas, não duas, e a terceira é a mais frequente.
