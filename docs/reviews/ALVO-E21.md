@@ -54,6 +54,24 @@ estados que agora derivam das tarefas.
   parecer do E21 tem de o dizer: um marco operacional validado só em máquina
   local é um marco com uma nota de rodapé, e a nota tem de estar lá.
 
+- **Duas máquinas do E18 continuam sem chamador** (`E18-CAMINHOS-MORTOS.md`):
+  `sentar` e `varrerRetencoesExpiradas`. O varredor é higiene — a capacidade
+  liberta-se pelo relógio, e o grupo 6 do `reservas.test.ts` prova-o — mas a
+  **lista** de retenções cresce para sempre se ninguém a varrer, e um marco
+  operacional é exactamente onde isso se nota. O `sentar` fica como pergunta:
+  ou o host o usa, ou é código que ninguém chama e sai.
+- **A pergunta que o E21 tem de fazer a TODAS as etapas anteriores, e que
+  nenhuma prova faz sozinha:** *o produto chega aqui?* Foi assim que o E19 foi
+  retido — com a suite inteiramente verde e 35 controlos negativos a acender, o
+  `enfileirar` tinha zero chamadas e o histórico de mensagens estava sempre
+  vazio. **Verde não é alcance.** Uma prova responde à pergunta que lhe fizeram;
+  o silêncio dela sobre o resto parece aprovação.
+
+  Concretamente, no E21: correr a varredura de funções exportadas sem chamador
+  (373 examinadas a 05/09, 55 sem chamador, a maioria legítima porque a etapa
+  ainda não fechou) e **triar as que pertencem a etapas já assinadas**. Essas
+  são dívida real; as outras são trabalho em curso.
+
 ## O padrão já existe, e nasceu do meu marco anterior
 
 `scripts/provar-jornada.sh` foi escrito como **correcção 4 do marco E11**, a
