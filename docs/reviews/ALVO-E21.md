@@ -121,3 +121,24 @@ etapas que ainda não existem.
 Isso reduz o E21 outra vez: de «rever E12-E20» para **esticar a jornada existente
 por dois caminhos** — o do cliente e o do empregado —, verificar as coberturas
 que já existem, e fazer o ensaio de contingência.
+
+- **Quatro alvos do arnês têm forma de lotaria** (`productId` com 5 linhas a
+  casar, `menuId` com 2, `categoryId`, `groupId`): `LIMIT 1` sem `ORDER BY`.
+  Declarado e medido pelo JR no E20, e **deliberadamente não tocado** — servem
+  provas de etapas já assinadas, e mexer neles sem as revalidar seria trocar um
+  risco conhecido por um desconhecido. O E21 é onde isto se resolve.
+
+  A frase dele vale a pena guardar: **«`LIMIT 1` sem `ORDER BY` não é um alvo, é
+  uma lotaria — e falha de forma intermitente, que é a maneira mais cara de
+  falhar.»** Passou seis etapas a acertar por sorte da ordem física das linhas.
+
+- **Uma guarda minha media a FORMA DA ESCRITA, não a propriedade.** A guarda das
+  28 telas do E19 exigia a palavra «implementado aguardando validação» e ficou
+  vermelha quando eu assinei a etapa e as pus a «validado» — **acendeu porque o
+  trabalho AVANÇOU.** Uma guarda que só sabe reconhecer um estado intermédio
+  proíbe o progresso sem o dizer. Corrigida no E20 (aceita as duas, e o controlo
+  põe uma tela em `planejado` para provar que ainda detecta regressão).
+
+  **O E21 tem de varrer as outras guardas à procura da mesma forma:** alguma
+  delas casa por texto de estado em vez de casar pela propriedade que quer
+  garantir? Foi a terceira aparição desta família em dois dias.
