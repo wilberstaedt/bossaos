@@ -118,6 +118,7 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     DELETE FROM production_stations  WHERE nome LIKE '${PREFIXO}%';
 
     -- ── E18 · reservas ──
+    DELETE FROM waitlist_areas      WHERE waitlist_id IN (SELECT id FROM waitlist_entries WHERE nome LIKE '${PREFIXO}%');
     DELETE FROM waitlist_entries    WHERE location_id IN (SELECT id FROM locations WHERE slug LIKE '${PREFIXO}%') OR nome LIKE '${PREFIXO}%';
     DELETE FROM reservation_messages WHERE reservation_id IN (SELECT id FROM reservations WHERE criada_por LIKE '%@inspeccao.example');
     DELETE FROM reservation_blocks  WHERE motivo LIKE '${PREFIXO}%';

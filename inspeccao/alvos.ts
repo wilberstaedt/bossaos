@@ -59,6 +59,8 @@ export interface Alvos {
   mesaComQr: string;
   /** E17: a sessão de visitante VIVA. Sem ela, as sete telas da visita mediam o desvio. */
   visitanteVivo: string;
+  /** E19: a espera VIVA. Sem ela, o RES-C-010 media «não temos mesa para o teu grupo». */
+  esperaViva: string;
 }
 
 const PREFIXO = 'insp-';
@@ -76,6 +78,8 @@ export const TOKEN_DE_CONVITE = 'insp-convite-para-medir';
  */
 export const SEGREDO_DO_QR = 'insp-segredo-da-mesa-para-medir';
 export const TOKEN_DO_VISITANTE = 'insp-token-do-visitante-para-medir';
+/** E19: o segredo do link de gestão. Fixo na semeadura, e só lá. */
+export const SEGREDO_DE_GESTAO = 'insp-segredo-de-gestao-para-medir';
 
 export const ORG_A = '11111111-1111-4111-8111-111111111111';
 export const EMAIL_DO_ARNES = 'painel@inspeccao.example';
@@ -177,6 +181,11 @@ export async function resolverAlvos(): Promise<Alvos> {
             AND g.table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%')
           LIMIT 1`,
         'uma sessão de visitante viva'),
+      esperaViva: await um(
+        sql,
+        `SELECT id FROM waitlist_entries
+          WHERE nome LIKE '${PREFIXO}%' AND estado = 'A_ESPERA' LIMIT 1`,
+        'uma espera viva'),
     };
   } finally {
     await sql.end();

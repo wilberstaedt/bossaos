@@ -264,3 +264,11 @@ export {
   sugestoesParaMesa, chamarDaEspera, sentarQuemEsperava, desistir,
   type EntradaNaEspera,
 } from './espera.ts';
+
+// ── E19 · a porta pública da reserva ──
+export {
+  JANELA_PUBLICA_SEGUNDOS, MAXIMO_PUBLICO_POR_JANELA,
+  unidadePublica, horariosPublicos, reservarDaRua, esperarDaRua, estadoDaEsperaPublica,
+  reservaPorSegredo,
+  type UnidadePublica, type HorarioOferecido, type ResultadoPublico, type RecusaPublica,
+} from './reserva-publica.ts';

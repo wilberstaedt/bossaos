@@ -83,6 +83,34 @@ E a prova tem de afirmar a regra nova com o par, senão mede outra coisa:
 Trocar a asserção sem escrever esta decisão seria calibrar a guarda ao que já
 existe, que é a forma mais silenciosa de uma guarda deixar de guardar.
 
+## E a reserva pública, que não tem credencial nenhuma
+
+A regra acima resolve a escrita de **quem está sentado**. A reserva pública é
+outra coisa: quem reserva está em casa, três dias antes, e não tem — nem pode
+ter — sessão de visitante. «Nada sem sessão de visitante» tornaria a reserva
+pública impossível.
+
+**A porta da reserva pública fica FORA de `/r/`**, em `/api/publico/reservar`. E
+fica lá exactamente pela razão que pôs a outra cá dentro, lida ao contrário: o
+que justifica o âmbito no endereço é **haver uma credencial que não pode viajar**.
+Um formulário anónimo não tem credencial nenhuma para proteger, e por isso não
+ganha nada em estar preso ao endereço do restaurante — ganha só uma excepção na
+regra da pasta, que passaria a ter duas leituras.
+
+A unidade vem no corpo do pedido e é resolvida pela porta estreita, como em toda
+a superfície pública.
+
+**O que esta porta precisa, e a outra não:** é uma escrita anónima na internet
+aberta. O que a protege não é uma credencial, é:
+
+- **um limite por unidade e por janela**, porque sem ele um guião enche a agenda
+  de um sábado em segundos e o restaurante descobre à porta;
+- **a chave idempotente** que o motor do E18 já exige, para que um duplo toque no
+  botão não faça duas reservas;
+- e **nenhuma leitura que confirme existência**: pedir uma hora ocupada e pedir
+  uma hora numa unidade que não existe respondem a mesma coisa, senão a porta
+  vira um catálogo de restaurantes e de horas cheias.
+
 ## O que NÃO decido, porque não é meu
 
 **Com que frequência se roda é do restaurante**, e o sistema não traz um valor
@@ -102,3 +130,6 @@ tempo o QR daquela mesa não é rodado** — informar não é decidir.
 5. **Escrita na pasta pública sem bolacha de visitante:** recusada, e a mesma
    escrita com bolacha passa. Sem a segunda metade, uma porta partida — que
    recusa toda a gente — passava o teste.
+6. **Reserva pública acima do limite da janela:** recusada, **e a primeira
+   passa**. Sem a segunda metade, uma porta que recusa toda a gente satisfaz o
+   teste e ninguém consegue reservar.

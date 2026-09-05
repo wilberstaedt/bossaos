@@ -104,6 +104,13 @@ const PORTAS_DO_PUBLICO = [
   // E17 · o visitante da mesa. Todas recebem a credencial, nunca um inquilino.
   'abrirVisitante', 'visitanteActivo', 'visitanteFalou', 'pedirDoVisitante',
   'chamarASala', 'chamadasDaVisita', 'pedidosDoVisitante', 'producaoDoVisitante',
+  // ── E19 · a reserva vinda da rua ────────────────────────────────────────
+  //
+  // Todas resolvem o inquilino pela porta estreita `unidade_publica` ANTES de
+  // abrirem escopo, e nenhuma o recebe de fora. É a mesma forma do `abrirVisitante`
+  // — e é por isso que entram aqui em vez de uma excepção, que seria uma porta.
+  'unidadePublica', 'horariosPublicos', 'reservarDaRua', 'esperarDaRua',
+  'estadoDaEsperaPublica', 'reservaPorSegredo',
 ];
 /**
  * ── E `src/visitante/` entra aqui, e isso APERTA em vez de aliviar ────────
@@ -117,7 +124,11 @@ const PORTAS_DO_PUBLICO = [
  * Aqui dentro passa a valer-lhe a regra apertada: só as portas, e nunca
  * `comEscopo`. É mais exigente do que a geral, e é a certa para o sítio.
  */
-const SO_PELO_PUBLICO = /^(app\/(r|api\/publico)|src\/visitante)\//;
+// `src/reserva/` entra pela mesma razão que `src/visitante/`: é a canalização das
+// telas públicas da reserva, e fora desta expressão caía na regra GERAL — que lhe
+// pediria `resolverPedido`, uma coisa que quem reserva da rua não tem e nunca vai
+// ter. Ficava vermelho para sempre pelo motivo errado.
+const SO_PELO_PUBLICO = /^(app\/(r|api\/publico)|src\/(visitante|reserva))\//;
 /** O que uma rota pública NÃO pode tocar: são os caminhos que exigem inquilino. */
 const PROIBIDO_NO_PUBLICO = ['comEscopo', 'comIdentidade', 'obterPrisma'];
 

@@ -1195,3 +1195,18 @@ label.bo-planos__item input[type="radio"] {
 }
 .bo-plano__codigo { font-weight: 700; }
 .bo-plano__capacidade { font-size: 12px; color: var(--bo-texto-secundario); }
+
+/* ── E19 · a lista de horas da reserva pública ──────────────────────────────
+   Quem reserva está na rua, num telemóvel, e escolhe uma hora entre muitas
+   parecidas. As horas ficam lado a lado e quebram para a linha seguinte em vez
+   de esticarem a página — uma coluna de vinte e quatro botões obriga a rolar
+   para ver o que já se sabia que existia. */
+.bo-lista-horas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bo-espaco-sm);
+  list-style: none;
+  margin: var(--bo-espaco-lg) 0;
+  padding: 0;
+}
+.bo-lista-horas a { min-height: var(--bo-toque-publico); }

@@ -823,6 +823,34 @@ async function principal(): Promise<void> {
           motivo: `${PREFIXO}Cena privada de empresa`,
         },
       });
+
+      // ── E19 · uma espera VIVA e uma reserva pública com link de gestão ──
+      //
+      // As telas RES-C-007 e RES-C-010 medem um estado que só existe com dados:
+      // sem eles mediriam «não encontramos esta reserva» e «não temos mesa para
+      // o teu grupo», que são ecrãs reais mas são os ecrãs FÁCEIS.
+      await prisma.waitlistEntry.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          nome: `${PREFIXO}Familia que espera`, contacto: 'espera@inspeccao.example',
+          pessoas: 2,
+        },
+      });
+      // O segredo é FIXO na semeadura para a prova o poder pôr no endereço. Em
+      // produção nasce de `randomBytes`; aqui tem de ser previsível, e é só aqui.
+      await prisma.reservation.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          pessoas: 2, origem: 'PUBLICO',
+          inicio: new Date('2027-06-12T20:00:00Z'), fim: new Date('2027-06-12T21:30:00Z'),
+          nome: `${PREFIXO}Reserva de la calle`, contacto: 'calle@inspeccao.example',
+          chaveIdempotente: `${PREFIXO}reserva-publica`,
+          criadaPor: 'painel@inspeccao.example',
+          gestaoTokenHash: createHash('sha256')
+            .update('insp-segredo-de-gestao-para-medir', 'utf8').digest('hex'),
+          gestaoExpiraEm: new Date('2027-06-13T20:00:00Z'),
+        },
+      });
     }
 
     // ── O SITE do restaurante (E10), publicado ────────────────────────────
