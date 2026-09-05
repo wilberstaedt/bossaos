@@ -112,7 +112,43 @@ outras=$(git ls-files '*.ts' '*.tsx' | grep -vE "\.test\.|^provas/|^inspeccao/" 
   | grep -vEi "centimos|centavos|cents|minor|emUnidadeMinima" || true)
 if [ -n "$outras" ]; then
   erro "conversao para virgula flutuante sobre nome de dinheiro:"
-  printf '%s\n' "$outras" | head -5 | sed 's/^/          /'
+  # O TIPO DECLARADO, ao lado de cada linha. Sem isto a guarda diz "suspeito" e
+  # quem a le tem de ir cavar - e a 05/09 fui eu, e cavei mal: li `montanteMenor
+  # Int` num modelo e conclui falso positivo, quando o modelo que a etapa
+  # escrevia era o BankLine, onde e BigInt. Disse ao JR que a guarda estava
+  # errada. Nao estava.
+  #
+  # O nome sozinho e ambiguo neste esquema, e legitimamente: ha `montanteMenor`
+  # Int e `montanteMenor` BigInt em modelos diferentes. Uma guarda que acusa por
+  # NOME tem de MOSTRAR essa ambiguidade em vez de a deixar para quem le.
+  printf '%s\n' "$outras" | head -5 | while IFS= read -r linha; do
+    printf '          %s\n' "$linha"
+    # Olham-se os DOIS lados. Em `montanteMenor: Number(l.montante)` quem tem o
+    # tipo e o ALVO da atribuicao, nao o argumento: `montante` nao e campo
+    # nenhum, `montanteMenor` e BigInt. A primeira versao desta anotacao lia so
+    # o argumento - e teria dito "nao e campo, olhar a mao" precisamente no caso
+    # que me enganou, que e o unico caso que ela existe para resolver.
+    alvo=$(printf '%s' "$linha" | sed -nE 's/.*[^A-Za-z_$]([A-Za-z_$]+)[[:space:]]*[:=][^=]*(Number|parseInt).*/\1/p' | head -1)
+    arg=$(printf '%s' "$linha" | sed -nE 's/.*(Number|parseInt)[[:space:]]*\(([^)]*)\).*/\2/p' \
+      | grep -oE '[A-Za-z_$][A-Za-z_$0-9]*' | tail -1)
+    tipos=""
+    for ident in $alvo $arg; do
+      t=$(grep -oE "^[[:space:]]+${ident}[[:space:]]+[A-Za-z]+" packages/db/prisma/schema.prisma 2>/dev/null \
+        | awk '{print $2}' | sort -u | tr '\n' '/' | sed 's|/$||')
+      [ -n "$t" ] && tipos="$ident $t" && break
+    done
+    ident="${alvo:-$arg}"
+    tipos=$(printf '%s' "$tipos" | cut -d' ' -f2-)
+    [ -z "$ident" ] && continue
+    if [ -z "$tipos" ]; then
+      printf '            ^ %s nao e campo do esquema — olhar a mao\n' "$ident"
+    else
+      case "$tipos" in
+        *BigInt*|*Decimal*) printf '            ^ %s declarado %s — PERDE PRECISAO\n' "$ident" "$tipos" ;;
+        *)                  printf '            ^ %s declarado %s\n' "$ident" "$tipos" ;;
+      esac
+    fi
+  done
 else
   ok "nenhuma conversao Number/parseInt sobre nome de dinheiro"
 fi
