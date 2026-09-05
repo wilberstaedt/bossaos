@@ -30,13 +30,30 @@ que fosse:
 
 | Classe | Quantas | O que significa |
 | --- | --- | --- |
-| usadas só por `provas/`, `inspeccao/` ou `scripts/` | **23** | código de verificação, a família da dívida 7 — peso no pacote publicado, não defeito |
-| **sem uso NENHUM em todo o repositório** | **42** | nem produto, nem prova, nem script |
+| usadas só por `provas/`, `inspeccao/` ou `scripts/` | **23** | código de verificação — peso no pacote publicado, não defeito |
+| usadas por testes **dentro dos pacotes** (`*.test.ts`) | **23** | testadas, mas sem caminho no produto |
+| **sem uso nenhum, em lado nenhum** | **19** | nem produto, nem prova, nem teste |
 
-As 42 são a parte que interessa, e por uma razão que a contagem sozinha não diz:
-**não estarem alcançáveis também significa não estarem testadas por nada.** Uma
-função assim ou é capacidade que o produto anuncia e não entrega, ou é código
-adiantado à sua etapa — que continua a ser código por testar.
+> ### ⚠ Correcção a 05/09, uma hora depois de eu escrever isto
+>
+> **Escrevi «42 sem uso nenhum em todo o repositório» e o número estava errado.**
+> A minha classificação procurou uso em `provas/`, `inspeccao/` e `scripts/` — e
+> **os testes também vivem ao lado do código**, em `packages/**/*.test.ts`. Vinte
+> e três dos 42 são exercidos aí. São **19**, não 42.
+>
+> Apanhei-o por acidente: fui verificar o `sessoesVivas` e um `grep` devolveu-me
+> cinco ficheiros onde eu tinha dito zero. Eram quatro artefactos de build e a
+> barrica de re-exportação — o `sessoesVivas` continua órfão —, mas a
+> contradição obrigou-me a refazer a conta, e a conta estava mal.
+>
+> **A lição é a minha de sempre, virada para mim:** defini «testado» por uma
+> lista de pastas escrita à mão em vez de descobrir onde os testes estão. Quarta
+> lista à mão a desalinhar hoje, e esta produziu um número que eu já tinha
+> publicado.
+>
+> E muda uma coisa no caso dos alergénios, para pior: o `avisoDeSeguranca` está
+> **bem testado**. A cobertura do domínio parece boa precisamente porque o teste
+> exercita a função que a tela não usa.
 
 ## As duas que já classifiquei
 
@@ -71,97 +88,26 @@ produto.** Precisa de irmã — uma varredura total com lista declarada, na form
 que a `validar-provas-na-ci` já usa: cada órfão ou tem chamador, ou tem motivo
 escrito. Aí o número deixa de crescer em silêncio.
 
-## As 42, medidas
+## As 19, medidas
 
 | Função | Ficheiro |
 | --- | --- |
 | `accoesDoPapel` | `packages/domain/src/permissoes.ts` |
-| `aoSair` | `packages/fila/src/fila.ts` |
 | `apagarExcepcao` | `packages/db/src/horarios.ts` |
-| `aplicarEvento` | `packages/fila/src/sincronizacao.ts` |
-| `aplicarSequencia` | `packages/domain/src/kds.ts` |
 | `autorizacaoPorConcessoes` | `packages/domain/src/portas/autorizacao.ts` |
-| `avisoDeSeguranca` | `packages/domain/src/alergenios.ts` |
-| `chaveDeTarefa` | `packages/domain/src/chaves.ts` |
-| `correioDeMemoria` | `packages/auth/src/correio.ts` |
-| `descodificar` | `packages/domain/src/qr.ts` |
 | `detectoresRegistados` | `packages/db/src/descidas.ts` |
-| `diasConfigurados` | `packages/domain/src/horarios.ts` |
 | `euProprio` | `packages/db/src/repositorios.ts` |
 | `filiacoesDaOrganizacao` | `packages/db/src/repositorios.ts` |
 | `filiacoesDoUtilizador` | `packages/db/src/repositorios.ts` |
 | `guardarLead` | `packages/db/src/leads.ts` |
-| `identificadorAdivinhavel` | `packages/domain/src/exportacao.ts` |
 | `leadsDaUnidade` | `packages/db/src/leads.ts` |
 | `limparConteudoLegivel` | `packages/fila/src/navegador.ts` |
-| `linhasParaGravar` | `packages/domain/src/importacao.ts` |
 | `listarAuditoria` | `packages/db/src/auditoria.ts` |
-| `modulosDeDadosDaVersao` | `packages/domain/src/qr.ts` |
-| `nomeDeEvento` | `packages/domain/src/chaves.ts` |
 | `oUsoCorrectoCompila` | `packages/db/src/escopo.tipos.ts` |
 | `obterUnidade` | `packages/db/src/repositorios.ts` |
 | `papeisDaFiliacao` | `packages/db/src/repositorios.ts` |
 | `passarClienteComEscopoOndeSePedeIdentidadeNaoCompila` | `packages/db/src/escopo.tipos.ts` |
 | `passarClienteDeIdentidadeOndeSePedeEscopoNaoCompila` | `packages/db/src/escopo.tipos.ts` |
 | `passarClienteSemEscopoNaoCompila` | `packages/db/src/escopo.tipos.ts` |
-| `penalidadePorMascara` | `packages/domain/src/qr.ts` |
-| `planosComAnualIncoerente` | `packages/domain/src/precificacao.ts` |
-| `podeSeguirParaCatalogo` | `packages/domain/src/arranque.ts` |
-| `precosPorCanal` | `packages/domain/src/precos.ts` |
-| `prefixoDeMedia` | `packages/domain/src/chaves.ts` |
-| `projeccaoVazia` | `packages/domain/src/kds.ts` |
 | `revogarConvite` | `packages/db/src/convites.ts` |
-| `serveConteudo` | `packages/domain/src/dominios.ts` |
 | `sessoesVivas` | `packages/auth/src/revogacao.ts` |
-| `sindromes` | `packages/domain/src/qr.ts` |
-| `textoDeProduto` | `packages/i18n/src/traduzir.ts` |
-| `tradutor` | `packages/i18n/src/traduzir.ts` |
-| `unidadesAfectadasPelaBase` | `packages/domain/src/precos.ts` |
-
----
-
-## O segundo caso verificado, e é o mais sério: `avisoDeSeguranca`
-
-Fui a este pelo nome — numa casa de comida, uma função chamada «aviso de
-segurança» sem chamador é o pior sítio possível para haver código morto. **Não
-há defeito de segurança vivo.** Mas o que está por baixo é pior do que código
-morto, e explica-se em três factos que só juntos fazem sentido.
-
-**1. A regra existe e tem nome.** `avisoDeSeguranca` devolve os quatro baldes —
-`contem`, `podeConter`, `naoContem`, `desconhecidos` — e o comentário por cima
-diz a razão de existir: *«`desconhecido` não desaparece e não vira "não
-contém"»*. É a regra mais séria do produto inteiro.
-
-**2. A tela pública não a chama.** Reimplementa-a numa cadeia de ternários:
-
-```
-a.estado === 'CONTEM' ? 'perigo' : a.estado === 'PODE_CONTER' ? 'aviso'
-  : a.estado === 'NAO_CONTEM' ? 'sucesso' : 'neutro'
-```
-
-Hoje está **correcta** — `DESCONHECIDO` cai em `neutro` com rótulo próprio.
-Verifiquei linha a linha antes de escrever isto.
-
-**3. A guarda vigia o módulo; a prova conta linhas; ninguém vigia o mapeamento.**
-A `validar-alergenios.sh` trabalha sobre `packages/domain/src/alergenios.ts`: que
-as assinaturas não aceitem nome nem foto, que os estados não colapsem no tipo.
-Correcta — e aponta para o caminho que **não é usado**. A prova pública afirma
-`toHaveCount(14)`, o que protege contra **omitir** uma linha; o próprio
-comentário di-lo: *«omitir um lê-se como "não contém"»*.
-
-**Nada afirma que um `DESCONHECIDO` aparece rotulado como desconhecido.** Trocar
-o último ternário para `'sucesso'` mantinha a contagem em catorze, passava a
-prova, passava a guarda — e um cliente com alergia lia **«não contém»** sobre um
-ingrediente que ninguém declarou.
-
-> **A regra está enunciada num sítio, implementada noutro, e as verificações
-> cobrem o sítio que não corre.** É a forma do dia inteiro, na sua versão mais
-> cara: aqui o preço de errar não é um número torto num relatório.
-
-**A correcção que proponho é uma só e resolve os dois problemas:** a tela passa a
-chamar `avisoDeSeguranca`. O órfão deixa de ser órfão, e o caminho vivo passa a
-ser o caminho guardado. Alternativa mais fraca, se houver razão para a tela
-manter o mapeamento: a prova pública afirma o **rótulo por estado**, e não só a
-contagem.
-
-Não a faço eu: é código de produto e sou eu que o vou verificar.
