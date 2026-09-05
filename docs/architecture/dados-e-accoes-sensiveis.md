@@ -61,6 +61,45 @@ Consentimento registado **por finalidade e por canal**, com origem e momento. Re
 **antes de qualquer envio futuro** — não a partir da próxima campanha, não depois da fila
 esvaziar: antes do próximo envio.
 
+## O contacto de quem esperou tem uma finalidade que ACABA
+
+O consentimento diz para que serve. Falta dizer **até quando**, e é onde estes
+produtos acumulam responsabilidade sem dar por isso.
+
+Alguém deixa o telefone à porta para ser avisado quando a mesa estiver pronta.
+Nesse momento a finalidade é clara e legítima. Meia hora depois, essa pessoa
+está sentada, ou foi jantar a outro lado. **A finalidade acabou** — e o número
+continua lá, numa tabela, para sempre, sem ninguém ter decidido que ficasse.
+
+Ninguém decide guardá-lo. É o que acontece por omissão quando nada o apaga.
+
+### Separar a visita do contacto
+
+São duas coisas, e só uma delas tem de sobreviver:
+
+- **O registo da visita** — houve uma espera, de um grupo de 4, que durou 25
+  minutos e acabou em mesa. Isto fica: é o que diz ao dono se a casa perde gente
+  à porta às sextas. Nenhum destes números identifica ninguém.
+- **O contacto** — o telefone, o nome, o que se escreveu para chamar a pessoa.
+  Isto **não** fica. Apaga-se quando a espera chega a estado final, com uma
+  janela curta para o que ainda pode acontecer nessa noite (o guarda-chuva
+  esquecido, a chamada que não foi atendida). Horas, não meses.
+
+A estatística não precisa do número. Quem justificar guardar contactos «para
+estatística» está a justificar outra coisa e a chamar-lhe estatística.
+
+### O que isto obriga no modelo
+
+O contacto vive num campo que se pode esvaziar **sem destruir a linha**. Se
+apagar o telefone obrigar a apagar a espera inteira, o produto passa a escolher
+entre perder a estatística e guardar o número — e escolhe sempre guardar o
+número. O modelo tem de tornar a escolha certa a mais fácil, senão ela não
+acontece às três da manhã de um sábado cheio.
+
+E o apagamento é **do relógio, não do ecrã**: acontece sem ninguém abrir nada,
+como a retenção das mesas no E18. Se depender de alguém carregar num botão de
+limpeza, não acontece.
+
 ## Não ensaiar em pessoas reais
 
 Email, campanha, cobrança e alteração de produção **não** se testam em pessoas reais por
