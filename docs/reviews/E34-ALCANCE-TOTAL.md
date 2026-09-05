@@ -117,3 +117,51 @@ escrito. Aí o número deixa de crescer em silêncio.
 | `textoDeProduto` | `packages/i18n/src/traduzir.ts` |
 | `tradutor` | `packages/i18n/src/traduzir.ts` |
 | `unidadesAfectadasPelaBase` | `packages/domain/src/precos.ts` |
+
+---
+
+## O segundo caso verificado, e é o mais sério: `avisoDeSeguranca`
+
+Fui a este pelo nome — numa casa de comida, uma função chamada «aviso de
+segurança» sem chamador é o pior sítio possível para haver código morto. **Não
+há defeito de segurança vivo.** Mas o que está por baixo é pior do que código
+morto, e explica-se em três factos que só juntos fazem sentido.
+
+**1. A regra existe e tem nome.** `avisoDeSeguranca` devolve os quatro baldes —
+`contem`, `podeConter`, `naoContem`, `desconhecidos` — e o comentário por cima
+diz a razão de existir: *«`desconhecido` não desaparece e não vira "não
+contém"»*. É a regra mais séria do produto inteiro.
+
+**2. A tela pública não a chama.** Reimplementa-a numa cadeia de ternários:
+
+```
+a.estado === 'CONTEM' ? 'perigo' : a.estado === 'PODE_CONTER' ? 'aviso'
+  : a.estado === 'NAO_CONTEM' ? 'sucesso' : 'neutro'
+```
+
+Hoje está **correcta** — `DESCONHECIDO` cai em `neutro` com rótulo próprio.
+Verifiquei linha a linha antes de escrever isto.
+
+**3. A guarda vigia o módulo; a prova conta linhas; ninguém vigia o mapeamento.**
+A `validar-alergenios.sh` trabalha sobre `packages/domain/src/alergenios.ts`: que
+as assinaturas não aceitem nome nem foto, que os estados não colapsem no tipo.
+Correcta — e aponta para o caminho que **não é usado**. A prova pública afirma
+`toHaveCount(14)`, o que protege contra **omitir** uma linha; o próprio
+comentário di-lo: *«omitir um lê-se como "não contém"»*.
+
+**Nada afirma que um `DESCONHECIDO` aparece rotulado como desconhecido.** Trocar
+o último ternário para `'sucesso'` mantinha a contagem em catorze, passava a
+prova, passava a guarda — e um cliente com alergia lia **«não contém»** sobre um
+ingrediente que ninguém declarou.
+
+> **A regra está enunciada num sítio, implementada noutro, e as verificações
+> cobrem o sítio que não corre.** É a forma do dia inteiro, na sua versão mais
+> cara: aqui o preço de errar não é um número torto num relatório.
+
+**A correcção que proponho é uma só e resolve os dois problemas:** a tela passa a
+chamar `avisoDeSeguranca`. O órfão deixa de ser órfão, e o caminho vivo passa a
+ser o caminho guardado. Alternativa mais fraca, se houver razão para a tela
+manter o mapeamento: a prova pública afirma o **rótulo por estado**, e não só a
+contagem.
+
+Não a faço eu: é código de produto e sou eu que o vou verificar.

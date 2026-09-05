@@ -12,6 +12,17 @@ pela `validar-dinheiro` depois de eu assinar. **É do JR** — quem assina não
 escreve o código que assinou. Detalhe em `docs/reviews/E27.md`.
 
 
+**⚠ Quarto item do JR — o de maior consequência dos quatro:**
+A tela pública do produto reimplementa a regra dos alergénios numa cadeia de
+ternários em vez de chamar `avisoDeSeguranca`. Está correcta hoje. Mas a
+`validar-alergenios.sh` guarda o módulo de domínio (que a tela não usa) e a prova
+pública só afirma `toHaveCount(14)` — protege contra **omitir** uma linha, não
+contra **rotular mal**. Trocar o último ternário para `sucesso` fazia `DESCONHECIDO`
+ler-se «não contém», com a contagem intacta e tudo verde. Liga a tela ao
+`avisoDeSeguranca`: o órfão deixa de o ser e o caminho vivo passa a ser o guardado.
+Detalhe em `docs/reviews/E34-ALCANCE-TOTAL.md`.
+
+
 **⚠ Terceiro item do JR, e é o mais sério dos três:**
 `revogarConvite` está implementada, correcta e **sem um único chamador**. A tela
 `ORG-007` já lista os convites pendentes, e `apps/web/app/api/org/[orgSlug]/
