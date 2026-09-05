@@ -48,6 +48,15 @@ url() { echo "postgresql://bossaos_$1:$2@${HOSPEDE}/${DB_REV}"; }
 U_APP="$(url app "$SENHA_APP")"
 U_MIG="$(url migrate "$SENHA_MIG")"
 U_AUTH="$(url auth "$SENHA_AUTH")"
+# Ligacao a base `postgres`, para poder APAGAR a de revisao (nao se apaga a
+# base a que se esta ligado).
+#
+# A ORDEM: apagar ANTES do dev-db.sh. Ao contrario — que foi o que fiz a
+# primeira vez — apaga-se a base que ele acabou de preparar, o Prisma recria-a
+# NUA, e fica sem papeis, sem concessoes por omissao e sem `reservation_settings`
+# acessivel. Deu 43 concessoes onde a dev tem 67, e as quatro provas morreram
+# em `permission denied`.
+U_MIG_POSTGRES="postgresql://bossaos_migrate:${SENHA_MIG}@${HOSPEDE}/postgres"
 
 if [ "${1:-}" = "--exportar" ]; then
   # Para: eval "$(bash scripts/base-de-revisao.sh --exportar)"
@@ -76,6 +85,35 @@ if [ "${1:-}" = "--exportar" ]; then
 fi
 
 echo "==> Base de revisao: $DB_REV"
+
+# ── PORQUE E' QUE ESTA BASE TEM DE NASCER VAZIA ─────────────────────────────
+#
+# O dev-db.sh faz `GRANT ... DELETE ON ALL TABLES` e 23 revogacoes das
+# migracoes tiram-no tabela a tabela por cima. Numa base VAZIA a ordem
+# resolve-se sozinha. Numa base JA MIGRADA nao: o GRANT em massa volta a
+# correr, os REVOKE nao (o Prisma nao reaplica migracoes ja aplicadas), e a
+# base fica MAIS permissiva a cada reconstrucao.
+#
+# Medido a 05/09: 96 DELETE concedidos ao runtime aqui contra 67 na dev, e a
+# provar-publico vermelha em "o runtime NAO pode apagar uma consulta". Quase
+# reportei isso como buraco de seguranca do produto.
+#
+# Tentei reaplicar as revogacoes a partir das migracoes. NAO FUNCIONOU, duas
+# vezes: a primeira colou `FROM bossaos_app` nas 8 que eram do `bossaos_auth`
+# e deixou `allergens` sem SELECT; a segunda, ja com o papel certo, apanhou um
+# `REVOKE ... ON language c` e a prova morreu em "permission denied for
+# language c". Reaplicar por texto e' remendo, e cada remendo trouxe um
+# defeito novo.
+#
+# A base nasce VAZIA. E' a unica forma em que a ordem esta certa por
+# construcao, e a provar-migracoes-do-zero ja demonstra que as 39 migracoes
+# aplicam limpas contra uma base vazia.
+if [ "${RECRIAR:-1}" = "1" ]; then
+  echo "==> A recriar $DB_REV do zero (RECRIAR=0 para reaproveitar)"
+  psql "$U_MIG_POSTGRES" -q -c "DROP DATABASE IF EXISTS $DB_REV WITH (FORCE)" 2>/dev/null \
+    || echo "   (nao consegui apagar; a base pode ficar mal-endurecida)" >&2
+fi
+
 
 # A receita das permissoes ja existe e esta certa. Chamo-a em vez de a copiar:
 # uma copia diverge no dia em que alguem corrige so um dos lados.
