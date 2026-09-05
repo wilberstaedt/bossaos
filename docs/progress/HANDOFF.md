@@ -12,6 +12,15 @@ pela `validar-dinheiro` depois de eu assinar. **É do JR** — quem assina não
 escreve o código que assinou. Detalhe em `docs/reviews/E27.md`.
 
 
+**⚠ Terceiro item do JR, e é o mais sério dos três:**
+`revogarConvite` está implementada, correcta e **sem um único chamador**. A tela
+`ORG-007` já lista os convites pendentes, e `apps/web/app/api/org/[orgSlug]/
+convites/route.ts` importa `criarConvite, listarConvites, registar` — **e não
+`revogarConvite`**. Um convite enviado para o email errado dá acesso e só sai por
+caducidade. A base tem o estado `REVOGADO` que nenhum caminho do produto produz.
+Ligar a acção na rota e na tela. Detalhe em `docs/reviews/E34-ALCANCE-TOTAL.md`.
+
+
 **⚠ Segundo item do JR, do E34 (sem pressa do E28):**
 `apps/web/app/[idioma]/platform/layout.tsx` linhas 52, 53 e 56 — três entradas
 `href: '#'` sem `porConstruir`. São do **E33** (`PLAT-007`, `PLAT-016`,
