@@ -58,6 +58,20 @@ apagam por estatística de uso).
 As funções do `qr.ts` e o `sobrepoe` existem para **verificar** o produto, não
 para o servir. Não é defeito; é peso num pacote que se publica.
 
+### 8. As assinaturas mudaram de sítio a meio, e isso engana quem procura
+
+**E09, E10, E12 e E13 estão validadas e não têm `docs/reviews/E##.md`.** Fui
+verificar se as assinei sem rever: **não.** A evidência está lá — réguas,
+controlos negativos, provas nomeadas — mas vive em `docs/progress/E##.md`.
+
+A convenção mudou a partir do E14 e as anteriores ficaram onde estavam. Não é
+defeito de substância; é defeito de **alcance**, outra vez: quem procurar as
+assinaturas em `docs/reviews/` conclui que quatro etapas passaram sem revisão.
+
+**O E34 decide uma das duas** — mover, ou deixar um apontador em cada — e
+escreve qual. O que não serve é ficar a depender de alguém saber que houve uma
+mudança de convenção a meio do projecto.
+
 ## O que exijo de mim próprio nesta revisão
 
 - **Enumerar os módulos antes de medir.** Aprovei o marco do Restaurant com
