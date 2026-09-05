@@ -65,7 +65,37 @@ menu, não uma chamada de código.
    etapa que o vai substituir. Um item de menu que parece clicável e não faz
    nada ensina o utilizador a desconfiar do menu inteiro.
 
-## O que ainda não medi
+## MEDIDO a seguir: a entrada directa está autorizada
+
+Declarei isto por medir e fui medi-lo. `apps/web/src/reservas/pagina.ts:12`:
+
+```ts
+const sessao = await resolverPedido(orgSlug);
+if (!sessao.ok) redirect(`/${idioma}/auth/organizations`);
+const unidade = await comEscopoDoPedido(sessao, async (db) => {
+  … unidades.find((u) => u.slug === locationSlug) ?? null;
+});
+if (!unidade) notFound();
+```
+
+Três coisas, e as três seguram:
+
+1. **A sessão é resolvida contra o `orgSlug` da URL.** Escrever a organização de
+   outra pessoa não passa daqui — redirecciona.
+2. **A lista de unidades vem sob escopo**, não da URL. Um `locationSlug` de
+   outra organização não está na lista.
+3. **`notFound()`**, não «lista vazia»: não confirma existência a quem pergunta.
+
+**Isto baixa a gravidade e afina o achado.** Não é buraco de segurança: é
+**alcance**. As telas estão protegidas e inalcançáveis — o que não deixa de ser
+um produto que não se pode usar, mas é uma coisa que se conserta com ligações e
+não com uma migração.
+
+E é a resposta certa à pergunta que fiz: quem souber o endereço **não** entra
+onde não deve. Entra onde já podia entrar, se souber escrevê-lo — e mais ninguém.
+
+## O que continua por medir
+
 
 Se as telas ficam **inacessíveis** ou apenas **não navegáveis** — quem souber o
 endereço entra. Não testei permissões nessa entrada directa. Se um `/app/x/y/
