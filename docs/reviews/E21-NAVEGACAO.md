@@ -102,3 +102,40 @@ endereço entra. Não testei permissões nessa entrada directa. Se um `/app/x/y/
 reservations` escrito à mão abrir sem passar por porta nenhuma, a pergunta deixa
 de ser de navegação e passa a ser de autorização. **Fica por medir, e não o
 conto como limpo.**
+
+## Verifiquei a minha própria afirmação — e quase caí na contagem
+
+Escrevi que «nenhuma prova começa na porta de entrada e clica». Depois contei
+**35 cliques** nas provas de navegador e fui verificar antes de deixar a frase
+ficar, porque 35 cliques podiam desmentir-me.
+
+Não desmentem. Medido:
+
+```
+inspeccao/*.spec.ts  →  getByRole('link'…)   0 ocorrências
+inspeccao/*.spec.ts  →  click(…)            35 ocorrências
+todos os goto(…)     →  endereços profundos, directos
+```
+
+Os 35 são **botões e submissões de formulário dentro de uma página** — «guardar»,
+«publicar», «confirmar». Nenhum é uma ligação de navegação. A minha contagem
+inicial juntava as duas coisas num só `grep`, e teria sido eu a produzir o
+desmentido da minha própria afirmação com um instrumento mal apontado.
+
+**O que isto confirma:** as 254 telas foram medidas por `goto(URL)`. Cada uma
+está certa; o caminho entre elas nunca foi medido, porque nunca foi percorrido.
+
+## As jornadas: as peças estão provadas, o percurso não
+
+A `provas/jornada.test.ts` prova **J01 e J02 ponta a ponta ao nível HTTP**, e
+bem — «o id vem do redireccionamento, não da base», «encontrá-la onde a pessoa a
+encontra». Isso é percurso a sério.
+
+Da J03 em diante, a régua já dizia o que agora se confirma: **as peças estão
+provadas, o percurso não.** E agora sabe-se porquê — o percurso não é
+percorrível: não há ligação da entrada para módulo nenhum.
+
+**As duas conclusões do E21 são a mesma:** o produto está construído por peças
+verificadas, e ninguém verificou que se anda de uma para a outra. No código
+chamou-se *função sem chamador*; no ecrã chama-se *tela sem porta*; na operação
+chama-se *jornada sem percurso*. É a mesma falha, medida em três escalas.
