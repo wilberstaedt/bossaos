@@ -59,6 +59,14 @@ RAIZ="/root/bossaos"
 # Ocupadas nesta caixa quando medi: 22 53 80 443 2019 3005 5433 5434 8087 8088
 # 8124 8130 8131 65529. O 8140 foi VERIFICADO livre, não deduzido.
 PORTA="8140"
+# ── A PORTA ESTA DEFINIDA EM DOIS SITIOS, e ganha o .env.prod ───────────────
+# O `ENV PORT=` do Dockerfile é sobreposto pelo `env_file:` do compose. Mudei a
+# porta no Dockerfile e no compose, e a aplicação arrancou na ANTIGA na mesma —
+# porque o `.env.prod` do servidor ainda dizia 8130 e é ele que manda.
+#
+# Editei o sítio que não decide. Sempre que um valor vive em dois sítios, o que
+# interessa é qual deles vence, e isso não se lê no ficheiro que eu por acaso
+# abri primeiro.
 DOMINIO="bossaos.mwdeveloper.tech"
 
 erro() { echo "ERRO: $1" >&2; exit 1; }
@@ -151,7 +159,7 @@ sleep 8
 # um build que não pegou serve o bundle antigo com ar de sucesso — e eu digo ao
 # Matheus que publiquei.
 VIVO="$($SSH "curl -sf http://localhost:$PORTA/api/health" || true)"
-[ -n "$VIVO" ] || erro "sem resposta em /api/health — journalctl -u bossaos"
+[ -n "$VIVO" ] || erro "sem resposta em /api/health — docker logs bossaos_web"
 NO_AR="$($SSH "curl -sf http://localhost:$PORTA/versao.txt" || true)"
 [ "$NO_AR" = "$VERSAO" ] \
   || erro "no ar está '${NO_AR:-nada}' e eu construí '$VERSAO' — o build não pegou"
