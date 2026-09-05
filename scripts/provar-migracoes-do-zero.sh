@@ -71,6 +71,9 @@ if [ "$codigo" -eq 0 ]; then
   # A contagem vem da BASE e nao do texto da saida. Contar linhas "Applying
   # migration" mede o que o Prisma imprimiu; contar `_prisma_migrations` mede o
   # que ele fez, e sao coisas diferentes no dia em que ele mudar o formato.
+  # silenciador-ok: a falha nao se perde — se a consulta rebentar, `aplicadas`
+  # fica vazio, o `${aplicadas:-0}` da 0 e o `-ne` abaixo levanta «aplicou 0 de
+  # N migracoes». O valor e' que denuncia, e nao o stderr.
   aplicadas=$(psql -U "$SUPER" -h "$PGHOST_" -d "$BASE" -X -A -t \
     -c "SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL" 2>/dev/null | tr -d " ")
   if [ "${aplicadas:-0}" -ne "$m" ]; then
