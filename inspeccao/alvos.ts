@@ -70,6 +70,16 @@ export interface Alvos {
   caixaDoTpv: string;
   /** E23: o recibo público de um pagamento capturado, com gorjeta. */
   reciboDoTpv: string;
+  /**
+   * E25: o insumo COM movimentos, e a ficha com SUB-RECEITA.
+   *
+   * A ficha não é a `Salsa de tomate`, de propósito: essa tem dois níveis
+   * nenhum, e numa ficha de um nível as linhas e as folhas são a mesma lista —
+   * a tela mediria as duas colunas iguais e a árvore, que é o que a etapa
+   * existe para provar, nunca apareceria.
+   */
+  insumoDoStock: string;
+  fichaDoStock: string;
 }
 
 const PREFIXO = 'insp-';
@@ -229,6 +239,12 @@ export async function resolverAlvos(): Promise<Alvos> {
         `SELECT recibo_publico::text AS id FROM payments
           WHERE bill_id = (SELECT id FROM bills WHERE numero = '${PREFIXO}C1')`,
         'o recibo público do pagamento semeado'),
+      insumoDoStock: await um(
+        sql, `SELECT id FROM stock_items WHERE nome = '${PREFIXO}Tomate'`,
+        'o insumo insp-Tomate, que tem entrada e consumo'),
+      fichaDoStock: await um(
+        sql, `SELECT id FROM recipes WHERE nome = '${PREFIXO}Pasta al pomodoro'`,
+        'a ficha insp-Pasta al pomodoro, a que tem sub-receita'),
     };
   } finally {
     await sql.end();

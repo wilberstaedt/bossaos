@@ -69,6 +69,10 @@ model Organization {
   conectoresDePagamento PaymentConnector[]
   documentosFiscais FiscalDocument[]
   conectoresFiscais FiscalConnector[]
+  insumos StockItem[]
+  movimentosDeStock StockMovement[]
+  fichas Recipe[]
+  linhasDeFicha RecipeLine[]
 
   // ── E06: perfil. TODOS opcionais, e isso é a decisão da etapa ─────────────
   //
@@ -261,6 +265,8 @@ model Location {
   conectorDePagamento PaymentConnector?
   documentosFiscais FiscalDocument[]
   conectorFiscal FiscalConnector?
+  insumos StockItem[]
+  fichas Recipe[]
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   /// COMPOSTA: a marca tem de ser da mesma organização. É a base que recusa.
@@ -338,6 +344,7 @@ model User {
   acontecimentosDeCaixa CashRegisterEvent[] @relation("actorDoAcontecimento")
   divergenciasAutorizadas CashRegisterEvent[] @relation("autorDaDivergencia")
   movimentosDeCaixa CashMovement[] @relation("actorDoMovimento")
+  movimentosDeStock StockMovement[]
 
   memberships   Membership[]
   sessions      Session[]
@@ -1124,6 +1131,7 @@ model Product {
   /// não autoriza fundir linhas — dois "Café" não são o mesmo produto.
   sku            String?
   estado         EstadoDeCatalogo @default(RASCUNHO)
+  ficha Recipe?
 
   /// ── E20 · quanto tempo demora a fazer ─────────────────────────────────
   ///
@@ -2575,6 +2583,7 @@ model OrderLine {
   /// e a linha servida continua a valer — é a razão de haver instantâneo.
   productId      String? @map("product_id") @db.Uuid
   linhasDeConta BillLine[]
+  movimentosDeStock StockMovement[]
 
   /// ── O INSTANTÂNEO, que é o aceite 3 escrito em colunas ─────────────────
   ///
@@ -4138,4 +4147,109 @@ model FiscalConnector {
   location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
 
   @@map("fiscal_connectors")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E25 — stock e fichas técnicas
+// ═══════════════════════════════════════════════════════════════════════════
+
+enum TipoDeMovimentoDeStock {
+  ENTRADA
+  CONSUMO
+  QUEBRA
+  AJUSTE
+  TRANSFERENCIA_SAIDA
+  TRANSFERENCIA_ENTRADA
+}
+
+/// Um insumo.
+///
+/// ── O saldo é DERIVADO, e ninguém lhe escreve ─────────────────────────────
+///
+/// Há coluna porque a leitura tem de ser barata, mas o gatilho recalcula-a a
+/// cada movimento **e** repõe qualquer `UPDATE` directo a partir da soma. É a
+/// forma do `producao_em` do E20: não é uma regra que se respeita, é uma coisa
+/// que não se consegue fazer.
+model StockItem {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  locationId     String @map("location_id") @db.Uuid
+  nome           String
+  /// `KG`, `L` ou `UN`.
+  unidade        String
+  /// Milésimos da unidade: 1 kg é 1_000_000, 1 g é 1000. Inteiro, sempre — o
+  /// mesmo argumento do dinheiro, e o sufixo diz a escala.
+  saldoMili      BigInt  @default(0) @map("saldo_mili")
+  minimoMili     BigInt? @map("minimo_mili")
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location        @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  movimentos   StockMovement[]
+  emFichas     RecipeLine[]
+
+  @@unique([locationId, nome], name: "um_insumo_por_nome_e_unidade")
+  @@map("stock_items")
+}
+
+/// Um movimento. Cada um com momento, autor e razão — e o saldo é a soma deles.
+model StockMovement {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  itemId         String @map("item_id") @db.Uuid
+  tipo           TipoDeMovimentoDeStock
+  /// Sempre POSITIVA: o sinal vem do tipo. Um consumo com quantidade negativa
+  /// seria uma entrada disfarçada, e ninguém daria por isso no relatório.
+  quantidadeMili BigInt  @map("quantidade_mili")
+  motivo         String
+  actor          String? @db.Uuid
+  orderLineId    String? @map("order_line_id") @db.Uuid
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  item         StockItem    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  quemFez      User?        @relation(fields: [actor], references: [id], onDelete: SetNull)
+  linhaDoPedido OrderLine?  @relation(fields: [orderLineId], references: [id], onDelete: SetNull)
+
+  @@map("stock_movements")
+}
+
+/// A ficha técnica — uma ÁRVORE.
+model Recipe {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  locationId     String  @map("location_id") @db.Uuid
+  nome           String
+  productId      String? @unique @map("product_id") @db.Uuid
+  rendeMili      BigInt  @default(1000) @map("rende_mili")
+  criadaEm       DateTime @default(now()) @map("criada_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  produto      Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
+  linhas       RecipeLine[] @relation("linhasDaFicha")
+  usadaEm      RecipeLine[] @relation("subReceita")
+
+  @@map("recipes")
+}
+
+/// Uma linha aponta OU para um insumo OU para outra ficha. Nunca as duas, nunca
+/// nenhuma — uma linha que não desconta nada é uma linha que ninguém vê falhar.
+///
+/// O **ciclo é recusado na escrita**, por gatilho com travessia recursiva. Em
+/// serviço, o que se veria não era um ciclo: era o sistema a parar.
+model RecipeLine {
+  id             String  @id @default(uuid()) @db.Uuid
+  organizationId String  @map("organization_id") @db.Uuid
+  recipeId       String  @map("recipe_id") @db.Uuid
+  itemId         String? @map("item_id") @db.Uuid
+  subRecipeId    String? @map("sub_recipe_id") @db.Uuid
+  quantidadeMili BigInt  @map("quantidade_mili")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  ficha        Recipe       @relation("linhasDaFicha", fields: [recipeId], references: [id], onDelete: Cascade)
+  insumo       StockItem?   @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  subFicha     Recipe?      @relation("subReceita", fields: [subRecipeId], references: [id], onDelete: Restrict)
+
+  @@map("recipe_lines")
 }

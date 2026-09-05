@@ -874,6 +874,20 @@ label.bo-planos__item input[type="radio"] {
 /* Lista simples, sem marcadores desalinhados com o resto da página. */
 .bo-lista { margin: 0; padding-left: var(--bo-espaco-xl); display: grid; gap: var(--bo-espaco-xs); }
 .bo-lista li { line-height: 24px; }
+/*
+ * O item de lista que é uma LIGAÇÃO tem de caber num dedo.
+ *
+ * Um `<a>` solto dentro de `.bo-lista` fica com 22 px de altura — a altura da
+ * linha —, e a 360 px isso é metade do alvo mínimo. Medido a 05/09 no INV-002,
+ * onde os três insumos deram 83×22, 105×22 e 92×22.
+ *
+ * A classe é própria, e não uma regra em `.bo-lista a`, de propósito: há listas
+ * já assinadas com ligações lá dentro, e mudar-lhes a altura por baixo era
+ * mexer no que outra régua já mediu.
+ */
+.bo-lista__ligacao {
+  display: inline-flex; align-items: center; min-height: var(--bo-toque-publico);
+}
 
 /* ── Carta pública (E09) ──────────────────────────────────────────────────────
    A primeira superfície que um estranho vê, e a única que se lê a uma mão, com

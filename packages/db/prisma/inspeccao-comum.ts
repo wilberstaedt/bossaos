@@ -122,6 +122,10 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     ALTER TABLE bill_adjustments      DISABLE TRIGGER USER;
     ALTER TABLE payments              DISABLE TRIGGER USER;
     ALTER TABLE refunds               DISABLE TRIGGER USER;
+    DELETE FROM stock_movements      WHERE item_id IN (SELECT id FROM stock_items WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM recipe_lines         WHERE recipe_id IN (SELECT id FROM recipes WHERE nome LIKE '${PREFIXO}%') OR item_id IN (SELECT id FROM stock_items WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM recipes              WHERE nome LIKE '${PREFIXO}%';
+    DELETE FROM stock_items          WHERE nome LIKE '${PREFIXO}%';
     DELETE FROM fiscal_documents     WHERE acontecimento LIKE '${PREFIXO}%';
     DELETE FROM fiscal_connectors    WHERE location_id IN (SELECT id FROM locations);
     DELETE FROM provider_events      WHERE evento_id LIKE '${PREFIXO}%' OR bill_id IN (SELECT id FROM bills WHERE numero LIKE '${PREFIXO}%');
@@ -250,6 +254,8 @@ export async function restos(prisma: PrismaClient): Promise<number> {
     + (SELECT count(*) FROM bills               WHERE numero LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM cash_registers      WHERE nome LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM fiscal_documents    WHERE acontecimento LIKE '${PREFIXO}%')
+    + (SELECT count(*) FROM stock_items         WHERE nome LIKE '${PREFIXO}%')
+    + (SELECT count(*) FROM recipes             WHERE nome LIKE '${PREFIXO}%')
     + (SELECT count(*) FROM external_catalog_mappings WHERE product_id IN (SELECT id FROM products WHERE nome LIKE '${PREFIXO}%'))
     + (SELECT count(*) FROM guest_sessions      WHERE table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%'))
   ) AS total`);

@@ -69,7 +69,7 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: [/autenticar\.setup\.ts/, /painel\.spec\.ts/, /isolamento\.spec\.ts/, /tema\.spec\.ts/, /sala\.spec\.ts/, /pedidos\.spec\.ts/, /staff\.spec\.ts/, /staff-telas\.spec\.ts/, /kds\.spec\.ts/, /visitante\.spec\.ts/, /reservas\.spec\.ts/, /host\.spec\.ts/, /mensagens\.spec\.ts/, /levar\.spec\.ts/, /tpv\.spec\.ts/, /portas\.spec\.ts/, /pagamentos\.spec\.ts/, /fiscal\.spec\.ts/],
+      testIgnore: [/autenticar\.setup\.ts/, /painel\.spec\.ts/, /isolamento\.spec\.ts/, /tema\.spec\.ts/, /sala\.spec\.ts/, /pedidos\.spec\.ts/, /staff\.spec\.ts/, /staff-telas\.spec\.ts/, /kds\.spec\.ts/, /visitante\.spec\.ts/, /reservas\.spec\.ts/, /host\.spec\.ts/, /mensagens\.spec\.ts/, /levar\.spec\.ts/, /tpv\.spec\.ts/, /portas\.spec\.ts/, /pagamentos\.spec\.ts/, /fiscal\.spec\.ts/, /stock\.spec\.ts/],
       dependencies: ['preparar'],
     },
     {
@@ -78,7 +78,7 @@ export default defineConfig({
       // pedir, e a de B para o par que dá sentido à recusa.
       // E o tema do E12 pela mesma razão: precisa da sessão de A para a recusa
       // e da de B para o par — e é em B, que é Pro, que existem cores próprias.
-      testMatch: [/painel\.spec\.ts/, /isolamento\.spec\.ts/, /tema\.spec\.ts/, /sala\.spec\.ts/, /pedidos\.spec\.ts/, /staff\.spec\.ts/, /staff-telas\.spec\.ts/, /kds\.spec\.ts/, /visitante\.spec\.ts/, /reservas\.spec\.ts/, /host\.spec\.ts/, /mensagens\.spec\.ts/, /levar\.spec\.ts/, /tpv\.spec\.ts/, /portas\.spec\.ts/, /pagamentos\.spec\.ts/, /fiscal\.spec\.ts/],
+      testMatch: [/painel\.spec\.ts/, /isolamento\.spec\.ts/, /tema\.spec\.ts/, /sala\.spec\.ts/, /pedidos\.spec\.ts/, /staff\.spec\.ts/, /staff-telas\.spec\.ts/, /kds\.spec\.ts/, /visitante\.spec\.ts/, /reservas\.spec\.ts/, /host\.spec\.ts/, /mensagens\.spec\.ts/, /levar\.spec\.ts/, /tpv\.spec\.ts/, /portas\.spec\.ts/, /pagamentos\.spec\.ts/, /fiscal\.spec\.ts/, /stock\.spec\.ts/],
       use: { ...devices['Desktop Chrome'], storageState: FICHEIRO_DE_SESSAO },
       dependencies: ['preparar'],
     },

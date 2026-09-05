@@ -1,5 +1,6 @@
 import { estadoDerivado } from '@bossaos/domain';
 import type { ClienteComEscopo } from './escopo.ts';
+import { consumirPelaLinha } from './stock.ts';
 
 /**
  * E16 · produção, estações e KDS.
@@ -325,7 +326,10 @@ export async function transitarTarefa(
 ): Promise<ResultadoDaTransicao> {
   const tarefa = await db.productionTask.findFirst({
     where: { id: dados.taskId },
-    select: { id: true, estado: true, versao: true, locationId: true, orderId: true, stationId: true },
+    select: {
+      id: true, estado: true, versao: true, locationId: true, orderId: true,
+      stationId: true, lineId: true,
+    },
   });
   if (!tarefa) return { ok: false, motivo: 'tarefa_desconhecida' };
 
@@ -367,6 +371,44 @@ export async function transitarTarefa(
       ...(dados.motivo ? { detalhe: { motivo: dados.motivo.trim() } as object } : {}),
     },
   });
+
+  // ── O consumo de stock acontece AQUI, e em mais lado nenhum ─────────────
+  //
+  // «O consumo é ao SERVIR», diz `docs/architecture/stock-e-fichas.md`, e este é
+  // o único sítio do produto onde uma linha passa a servida. Escrito e não
+  // ligado, o motor de stock era uma biblioteca que ninguém chamava — foi
+  // exactamente a dívida que o E23 deixou e o E24 pagou, e a varredura de
+  // alcance apanhou-a aqui **antes** de eu declarar a etapa.
+  //
+  // Um recall (`ENTREGUE` → `EM_PREPARO` → `ENTREGUE`) não desconta outra vez: o
+  // índice único `(order_line_id, item_id)` faz do segundo consumo o mesmo
+  // consumo. A identidade é a do acontecimento, e não a da chamada.
+  if (dados.para === 'ENTREGUE') {
+    const linha = await db.orderLine.findUnique({
+      where: { id: tarefa.lineId },
+      select: { productId: true, quantidade: true },
+    });
+    // Sem produto não há ficha, e sem ficha não há o que descontar. Não é erro:
+    // uma linha livre escrita à mão pelo empregado não tem árvore.
+    if (linha?.productId) {
+      // ── O `actor` fica VAZIO, e é a leitura certa ─────────────────────
+      //
+      // `stock_movements.actor` é chave estrangeira para `User.id`, e o KDS só
+      // conhece o email de quem carregou no botão. Escrever lá o email rebenta
+      // com `invalid input syntax for type uuid` — foi o que aconteceu à
+      // primeira, e é o género de erro que só aparece com a base ligada.
+      //
+      // Mas a correcção não é ir buscar um id qualquer: **o consumo não é uma
+      // acção de ninguém**, é a consequência de uma. Quem serviu está no
+      // `production_events.actorEmail`, ligado à mesma tarefa, e é por aí que se
+      // responde a «quem» — sem inventar um autor para um movimento automático.
+      await consumirPelaLinha(db, {
+        orderLineId: tarefa.lineId,
+        productId: linha.productId,
+        quantidade: linha.quantidade,
+      });
+    }
+  }
 
   return { ok: true, versao, estado: dados.para };
 }

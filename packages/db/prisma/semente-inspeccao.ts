@@ -940,6 +940,76 @@ async function principal(): Promise<void> {
       },
     });
 
+    // ── E25 · stock com movimentos, uma árvore de DOIS níveis e uma dívida ─
+    //
+    // «Verde sobre stock vazio» é reprovação à cabeça. E não chega um insumo:
+    // sem a sub-receita, a tela das folhas mediria uma ficha de um nível — onde
+    // linhas e folhas são a mesma coisa, e o erro que a etapa existe para
+    // impedir não aparece. E sem um saldo NEGATIVO, a lista de dívida media um
+    // ecrã vazio, que é a terceira saída disfarçada.
+    const tomate = await prisma.stockItem.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Tomate`, unidade: 'KG', minimoMili: BigInt(2_000_000),
+      },
+    });
+    const azeite = await prisma.stockItem.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Aceite`, unidade: 'L',
+      },
+    });
+    const emFalta = await prisma.stockItem.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Albahaca`, unidade: 'KG',
+      },
+    });
+    await prisma.stockMovement.createMany({
+      data: [
+        { organizationId: IDS.orgA, itemId: tomate.id, tipo: 'ENTRADA',
+          quantidadeMili: BigInt(10_000_000), motivo: 'compra semanal' },
+        { organizationId: IDS.orgA, itemId: tomate.id, tipo: 'CONSUMO',
+          quantidadeMili: BigInt(9_500_000), motivo: 'serviço' },
+        { organizationId: IDS.orgA, itemId: azeite.id, tipo: 'ENTRADA',
+          quantidadeMili: BigInt(5_000_000), motivo: 'compra' },
+        // Este fica NEGATIVO de propósito: é a dívida que a tela tem de mostrar.
+        { organizationId: IDS.orgA, itemId: emFalta.id, tipo: 'CONSUMO',
+          quantidadeMili: BigInt(300_000), motivo: 'serviço com contagem errada' },
+        // A contagem lança um AJUSTE, e nunca escreve o saldo. Sem um ajuste
+        // semeado, o INV-010 media a reconciliação sobre lista vazia — verde
+        // sobre população zero, que é reprovação à cabeça.
+        { organizationId: IDS.orgA, itemId: azeite.id, tipo: 'AJUSTE',
+          quantidadeMili: BigInt(120_000), motivo: 'contagem de segunda-feira' },
+      ],
+    });
+    const molho = await prisma.recipe.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Salsa de tomate`, rendeMili: BigInt(1_000_000),
+      },
+    });
+    await prisma.recipeLine.createMany({
+      data: [
+        { organizationId: IDS.orgA, recipeId: molho.id, itemId: tomate.id,
+          quantidadeMili: BigInt(800_000) },
+        { organizationId: IDS.orgA, recipeId: molho.id, itemId: azeite.id,
+          quantidadeMili: BigInt(200_000) },
+      ],
+    });
+    const prato = await prisma.recipe.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}Pasta al pomodoro`, rendeMili: BigInt(1000),
+      },
+    });
+    await prisma.recipeLine.create({
+      data: {
+        organizationId: IDS.orgA, recipeId: prato.id, subRecipeId: molho.id,
+        quantidadeMili: BigInt(500_000),
+      },
+    });
+
     // ── E18 · reservas: uma linha em cada lista, e nenhuma vazia ──────────
     //
     // As seis telas desta etapa são listas. Uma lista vazia mede o estado

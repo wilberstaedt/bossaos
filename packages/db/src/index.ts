@@ -314,3 +314,8 @@ export {
   guardarConectorFiscal, pedirDocumento, responderDocumento, RecusaDoFiscal,
   type RecusaFiscal,
 } from './fiscal.ts';
+export {
+  consumirPelaLinha, criarFicha, criarInsumo, dividaDeStock, fichasDaUnidade,
+  folhasDaFicha, insumosDaUnidade, juntarLinhaDaFicha, movimentarStock,
+  movimentosDoInsumo, RecusaDoStock, MILI, type RecusaDeStock,
+} from './stock.ts';

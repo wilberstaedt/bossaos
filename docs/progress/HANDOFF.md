@@ -1,21 +1,64 @@
 # HANDOFF — estado do motor BossaOS
 
-> ## ⚠ Sete decisões esperam pelo Matheus
-> **`docs/progress/DECISOES-DO-MATHEUS.md`** — nenhuma é técnica, todas têm custo,
-> risco legal ou dinheiro do lado de lá. A mais séria: **os requisitos do regime
-> fiscal por confirmar na fonte antes do primeiro talão emitido a um cliente
-> real.** A mais barata: **a CI está trancada por facturação** desde 04/09.
->
-> Este ponteiro está aqui porque o `HANDOFF` é o primeiro ficheiro que cada tick
-> manda ler, e era o único dos quatro documentos de entrada que **não** apontava
-> para a lista. Três apontavam; este, o que se lê primeiro, não.
+**Etapa atual:** E25 — stock e fichas técnicas (**12 telas**).
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — as duas fatias.**
 
-**Estado a 05/09, 16h20 (escrito pelo sénior):** o **E24 está ASSINADO** com a
-pendência fiscal declarada, e o **E25 (stock e fichas técnicas) está em curso** —
-o texto abaixo é anterior e ficou por actualizar. **66% das etapas (24/36), 73%
-das telas (290/396).**
+**O núcleo:** o stock **não é uma coluna**, é um saldo derivado de movimentos —
+e a garantia está na FORMA, não numa convenção: `stock_saldo_nao_se_escreve()`
+repõe o número de quem tentar escrevê-lo, como o `producao_em` do E20. A ficha
+técnica é uma **árvore**, o consumo desce por ela, e o ciclo recusa-se **na
+escrita** (`ficha_recusa_ciclo()`, CTE recursivo) — em serviço um ciclo não se
+veria como ciclo, via-se como o sistema a parar às 21h.
 
----
+**Das três saídas para o negativo, duas defendem-se e uma reprova-se.**
+Impossível trava o serviço com o cliente à frente e a equipa lança um ajuste
+inventado para desbloquear; visível deixa a equipa ver e corrigir. **Silencioso**
+é a que ninguém nota, e é a que o controlo negativo 2 planta para provar que a
+prova a apanha.
+
+**Quantidade é inteiro em milésimos**, com sufixo `Mili`, pela mesma razão que o
+dinheiro é inteiro em unidade menor — e com a sua própria guarda,
+`validar-quantidades.sh`, deliberadamente separada da do dinheiro.
+
+**Consumo ao SERVIR, e uma vez só:** um pedido cancelado antes de produzir não
+consome; produzido e devolvido **consome**, porque devolvê-la não a repõe no
+frigorífico — se foi para o lixo é uma **quebra**, com razão escrita. Servir duas
+vezes a mesma linha é **um** consumo: índice único parcial sobre
+`(order_line_id, item_id)`. A identidade é a do acontecimento, outra vez.
+
+**A porta, antes de eu declarar e não depois:** o menu `inventário` deixou de ser
+`#` e passa por `/app/<org>/ir/stock`, com `stock` na tabela `DESTINOS`. O
+controlo negativo 6 remove-o e as doze telas ficam só alcançáveis a escrever o
+endereço — foi o que reteve o E22 e o E24.
+
+**Achado que vale a etapa:** a asserção das folhas media um **nome**. Só exigia
+que «Salsa de tomate» não aparecesse — mas a tela mostra o identificador em cru
+quando não resolve o nome, por isso uma sub-receita a passar por insumo aparecia
+como **UUID** e a asserção ficava verde por cima do defeito. Descoberto com o
+defeito plantado. Passou a exigir que **toda** a folha resolva para um insumo.
+Mesma família do «Motivo del rechazo» que satisfazia um `length > 10` no E24.
+
+**O ALCANCE, medido ANTES de declarar:** `consumirPelaLinha` tinha **zero
+chamadores** — o motor de stock escrito, provado, e desligado do produto: servir
+um prato não mexia no frigorífico. É a dívida que o E23 deixou e o E24 pagou, e
+desta vez apareceu antes da assinatura. Ligado em `transitarTarefa` na passagem a
+`ENTREGUE`, o único sítio onde uma linha passa a servida. **Ligar partiu à
+primeira:** `stock_movements.actor` é chave estrangeira para `User.id` e o KDS só
+conhece o email — e a correcção não foi arranjar um id qualquer, foi reconhecer
+que **o consumo não é acção de ninguém, é consequência de uma**; quem serviu está
+no `production_events.actorEmail`, na mesma tarefa.
+
+**Provas (LOCAIS — a CI continua trancada pela facturação do GitHub):**
+`provas/stock.test.ts` **0** (**23 casos**, com o grupo 6 do alcance) ·
+`provar-stock.sh` **0** (**10 controlos**, dois deles a apagar a CHAMADA e não o
+comportamento) ·
+`validar-quantidades.sh` **0** (5 campos, 2 controlos) ·
+`provar-stock-no-navegador.sh` **0** (**26 casos, 8 controlos**) ·
+`pnpm verificar` **0** · `pnpm inspeccionar` **0** (**632 casos**) ·
+`varrer-alcance-da-etapa.sh 665b027 HEAD` → **a correr depois do commit**.
+
+**Contrato:** `docs/architecture/stock-e-fichas.md`, escrito antes do código.
+**Detalhe:** `docs/progress/E25.md`.
 
 ## O texto anterior, mantido por baixo
 
