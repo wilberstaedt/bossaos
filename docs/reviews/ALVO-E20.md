@@ -83,3 +83,26 @@ Contexto: `docs/reviews/E19-ACHADO-FUSO.md`.
 - **Uma suite que não consegue ficar vermelha.**
 - **O `entitlement` do delivery misturado com o do takeaway.** São separados por
   desenho; provar um não prova o outro.
+
+## Observado durante a construção — 05/09, fatia 1
+
+Não é veredicto: a etapa não foi declarada. Registo para não se perder.
+
+**A armadilha que pus no aceite 5 foi apanhada.** Eu tinha escrito que a prova
+do momento de produção não pode ser medida em minutos relativos, porque «entra
+25 minutos antes» é verdade em qualquer fuso. O grupo 1 do `mais-tarde.test.ts`
+chama-se **«O momento de produção, em hora ABSOLUTA»** e traz os casos certos,
+incluindo o par dos dois fusos e um que nomeia a origem: *«e NÃO é a hora de
+parede lida como UTC — o defeito do E19, aqui no fogão»*.
+
+**E foi além.** A derivação não está no código da aplicação: é um **gatilho da
+base**, `BEFORE INSERT OR UPDATE`, que reescreve `producao_em` a partir de
+`entregar_as - preparo_min`. Um valor escrito de fora é substituído — pela
+aplicação, por um script, ou por um `UPDATE` à mão. É a forma mais forte da
+garantia, a mesma família da bolacha com `path=/r/<slug>`: **não é uma regra que
+alguém tem de respeitar, é uma coisa que não se consegue fazer.**
+
+Fica por verificar na revisão, e não presumo: se o gatilho tem controlo negativo
+(uma escrita de fora que TEM de ser substituída, medida), e se o `preparo` do
+pedido é mesmo o **maior** das linhas e não a soma — as linhas preparam-se em
+paralelo, e somá-las inventaria espera que não existe.
