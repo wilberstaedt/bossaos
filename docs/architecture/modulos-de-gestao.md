@@ -123,3 +123,70 @@ funcionalidade.
 mostre como indisponível. Se aparecer com um número — qualquer número — o defeito está lá.
 E um teste que só usa produtos com custo completo nunca o encontra: é a versão desta área
 do verde sobre população zero.
+
+## Os cinco números das reservas, definidos — contrato do E19
+
+A regra 3 acima diz que uma taxa precisa de denominador e de intervalo. O E19
+entrega o relatório onde isso deixa de ser regra e passa a ser cinco decisões
+concretas. Escrevo-as antes de existir código, porque **um número mal definido
+não dá erro: dá um valor plausível**, e ninguém descobre até alguém tomar uma
+decisão com base nele.
+
+### Covers
+
+**Pessoas sentadas, não pessoas marcadas.** Um grupo de 4 que aparece com 3 são
+3 covers. Um walk-in é um cover — não veio de reserva, mas jantou.
+
+Quem contar reservas e chamar-lhe covers está a contar intenção e a chamar-lhe
+serviço. Numa casa com walk-ins, os dois números afastam-se muito.
+
+### Ocupação
+
+**Lugares ocupados a dividir por lugares disponíveis, ao longo de um intervalo.**
+Os dois lados precisam de decisão explícita:
+
+- o denominador conta só as **horas de serviço**. Uma casa fechada à segunda não
+  tem 0 % à segunda: **não tem dado nenhum**. Misturar as duas coisas puxa a
+  média para baixo e faz a casa parecer pior do que é, todas as semanas.
+- as mesas bloqueadas para obras saem do denominador enquanto estão bloqueadas.
+  Contá-las como disponíveis castiga a casa por uma decisão dela.
+
+### Cancelamento
+
+Duas linhas separadas, nunca somadas: **cancelado por quem reservou** e
+**cancelado pela casa**. São coisas opostas. Um cliente que desmarca com dois
+dias é comportamento normal; a casa a desmarcar é um problema de operação. Um
+número só, com os dois lá dentro, esconde exactamente aquilo que o dono precisa
+de ver.
+
+O intervalo de antecedência vai junto: desmarcar com dois dias e desmarcar às
+19h55 não são o mesmo facto.
+
+### No-show
+
+**Uma reserva que chegou ao fim da janela de tolerância sem ninguém aparecer.**
+Duas coisas que isto obriga a decidir, e que ninguém decide a tempo:
+
+- **A tolerância é da casa, não nossa.** Quinze minutos numa, quarenta noutra.
+  Sem ela configurada, o número é a nossa opinião disfarçada de medição.
+- **Um atrasado que é sentado NÃO é no-show**, mesmo que a mesa já tivesse sido
+  dada a outro. Se o produto marcar no-show quando liberta a mesa, passa a
+  contar como falta do cliente uma decisão da casa.
+
+### Origem
+
+De onde veio a reserva: página pública, telefone atendido pelo host, walk-in.
+**O walk-in tem origem** — é a origem mais comum em muitas casas, e omiti-lo faz
+a página pública parecer responsável por 100 % do movimento.
+
+### O que isto obriga
+
+Guardam-se os **acontecimentos** com o momento em que aconteceram — sentou,
+saiu, desmarcou, não apareceu — e os cinco números **derivam-se**. Nenhum deles
+é uma coluna que alguém incrementa: um contador incrementado não se consegue
+recontar depois de a definição mudar, e a definição vai mudar.
+
+E a definição fica **versionada com o relatório**. Um relatório de Março tem de
+poder dizer com que definição de no-show foi feito, senão a comparação com Abril
+é entre duas coisas diferentes com o mesmo nome — que é o pior dos casos, porque
+parece que corre bem.
