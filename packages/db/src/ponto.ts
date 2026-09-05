@@ -341,7 +341,7 @@ export async function jornadaDoDia(db: ClienteComEscopo, dados: {
     diaDeServico: dados.diaDeServico,
     realMinutos: real,
     previstoMinutos: previsto,
-    diferencaMinutos: real - (previsto ?? 0),
+    diferencaMinutos: previsto === null ? null : real - previsto,
     // Entrou e não saiu: uma jornada ABERTA, e não uma jornada de zero minutos.
     // Um produto que trate a ausência de saída como saída à meia-noite inventa
     // uma hora que ninguém picou.

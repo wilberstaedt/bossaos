@@ -352,18 +352,30 @@ describe('4 · previsto e real são DOIS números', () => {
   });
 
   it('a marcação CORRIGIDA não conta; a correcção dela é que conta', async () => {
+    // ── A direcção da correcção decide se este caso mede alguma coisa ─────
+    //
+    // A primeira versão corrigia a entrada para MAIS CEDO. O emparelhamento
+    // ordena as entradas e usa a mais antiga — que passava a ser a correcção —
+    // e por isso o total dava o mesmo com e sem o defeito. O controlo negativo
+    // ficou VERDE com a conta estragada, e foi assim que se soube.
+    //
+    // Agora a correcção empurra a entrada para MAIS TARDE: contar a original
+    // dá 360 minutos, contar a correcção dá 300. Os dois números separam-se.
     await turnoDas18As24();
-    const errada = await marcar('ENTRADA', '2026-09-04T17:00:00Z'); // 19h, uma hora a menos
-    await marcar('SAIDA', '2026-09-04T22:00:00Z');
+    const errada = await marcar('ENTRADA', '2026-09-04T16:00:00Z'); // 18h, cedo demais
+    await marcar('SAIDA', '2026-09-04T22:00:00Z');                  // 00h
     await comA((db) => corrigir(db, {
       organizationId: IDS.orgA, locationId: IDS.unidadeA, marcacaoId: errada.id,
-      autorMembershipId: encarregado, momento: new Date('2026-09-04T16:00:00Z'),
-      fuso: FUSO, motivo: `${PREFIXO}picou tarde, entrou às 18h`,
+      autorMembershipId: encarregado, momento: new Date('2026-09-04T17:00:00Z'),
+      fuso: FUSO, motivo: `${PREFIXO}picou à chegada, só entrou ao serviço às 19h`,
     }));
     const j = await comA((db) => jornadaDoDia(db, {
       membershipId: pessoa, locationId: IDS.unidadeA, diaDeServico: DIA, fuso: FUSO,
     }));
-    assert.equal(j.realMinutos, 360, 'a marcação corrigida continuou a contar');
+    assert.equal(j.realMinutos, 300, 'a marcação corrigida continuou a contar');
+    // E a contagem de entradas que VALEM tem de ser uma, não duas: sem isto,
+    // um emparelhamento que ignore a entrada a mais esconde o mesmo defeito.
+    assert.equal(j.entradas, 1, 'a original e a correcção contam as duas como entrada');
     assert.equal(j.correccoes, 1);
   });
 

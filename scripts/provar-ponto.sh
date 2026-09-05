@@ -46,6 +46,7 @@ restaurar() {
   local i=0
   for f in "${FICHEIROS[@]}"; do cp "${COPIAS[$i]}" "$f"; rm -f "${COPIAS[$i]}"; i=$((i+1)); done
   repor_sql
+  repor_check
   if [[ "$CHEGOU_AO_FIM" -eq 0 ]]; then
     printf '\033[31mO GUIÃO NÃO CHEGOU AO FIM\033[0m — nenhum controlo foi medido.\n' >&2
     exit 1
@@ -53,6 +54,32 @@ restaurar() {
   exit "$estado"
 }
 trap restaurar EXIT INT TERM
+
+# ── Repor a restrição: por FICHEIRO, e a limpar o que o controlo deixou ────
+#
+# Duas coisas correram mal aqui, e as duas em silêncio.
+#
+# A primeira: pus a restrição num `psql -c` com quatro níveis de aspas para
+# chegar ao `''` do SQL. Saiu malformada, não voltou, e o guião seguiu a medir
+# uma base sem ela — três controlos vermelhos pela mesma razão invisível.
+#
+# A segunda: com a restrição desligada, o caso que a testa consegue inserir a
+# linha que ela existe para recusar. Repor sem limpar falha com «is violated by
+# some row».
+repor_check() {
+  psql "$MIGRATION_DATABASE_URL" -q -v ON_ERROR_STOP=1 <<'FIMSQL' || {
+ALTER TABLE "time_entries" DROP CONSTRAINT IF EXISTS "correccao_exige_motivo";
+ALTER TABLE "time_entries" DISABLE TRIGGER USER;
+DELETE FROM "time_entries"
+ WHERE "corrige_id" IS NOT NULL AND length(btrim(COALESCE("motivo", ''))) = 0;
+ALTER TABLE "time_entries" ENABLE TRIGGER USER;
+ALTER TABLE "time_entries" ADD CONSTRAINT "correccao_exige_motivo" CHECK
+  ("corrige_id" IS NULL OR length(btrim(COALESCE("motivo", ''))) > 0);
+FIMSQL
+    vermelho "a restrição não voltou — o resto da corrida mede uma base sem ela"
+    return 1
+  }
+}
 
 correr() { node --experimental-strip-types --test provas/ponto.test.ts >"$1" 2>&1; }
 
@@ -114,10 +141,8 @@ psql "$MIGRATION_DATABASE_URL" -q -c \
   'ALTER TABLE "time_entries" DROP CONSTRAINT "correccao_exige_motivo";' >/dev/null 2>&1
 correr /tmp/bossaos-ponto-motivo.txt
 exigir_vermelho "caiu o motivo: corrige-se o salário de alguém sem dizer porquê" \
-  'correção SEM motivo é recusada' '' /tmp/bossaos-ponto-motivo.txt
-psql "$MIGRATION_DATABASE_URL" -q -c \
-  'ALTER TABLE "time_entries" ADD CONSTRAINT "correccao_exige_motivo" CHECK ("corrige_id" IS NULL OR length(btrim(COALESCE("motivo", '"''"''"''"'))) > 0);' \
-  >/dev/null 2>&1
+  'SEM motivo é recusada' '' /tmp/bossaos-ponto-motivo.txt
+repor_check
 
 echo
 echo "4. CONTROLO NEGATIVO — cai o gatilho que impede a correcção de trocar a pessoa"
