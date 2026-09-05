@@ -1,5 +1,25 @@
 # HANDOFF — estado do motor BossaOS
 
+> ## ⚠ Sete decisões esperam pelo Matheus
+> **`docs/progress/DECISOES-DO-MATHEUS.md`** — nenhuma é técnica, todas têm custo,
+> risco legal ou dinheiro do lado de lá. A mais séria: **os requisitos do regime
+> fiscal por confirmar na fonte antes do primeiro talão emitido a um cliente
+> real.** A mais barata: **a CI está trancada por facturação** desde 04/09.
+>
+> Este ponteiro está aqui porque o `HANDOFF` é o primeiro ficheiro que cada tick
+> manda ler, e era o único dos quatro documentos de entrada que **não** apontava
+> para a lista. Três apontavam; este, o que se lê primeiro, não.
+
+**Estado a 05/09, 16h20 (escrito pelo sénior):** o **E24 está ASSINADO** com a
+pendência fiscal declarada, e o **E25 (stock e fichas técnicas) está em curso** —
+o texto abaixo é anterior e ficou por actualizar. **66% das etapas (24/36), 73%
+das telas (290/396).**
+
+---
+
+## O texto anterior, mantido por baixo
+
+
 **Etapa atual:** E24 — documentos e integração fiscal (**5 telas**).
 **Estado:** **RETIDO por ALCANCE e CONSERTADO — reentregue, aguardando validação.**
 
