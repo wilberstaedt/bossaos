@@ -20,12 +20,12 @@ passou a semana a apanhar.
 | 4 | uma só imagem na home, nenhuma prova do produto | **CONFIRMADA, e pior** | `app/[idioma]/page.tsx` tem **zero** `<img>`, `<Image>`, `<picture>` ou `<svg>` em 87 linhas |
 | 5 | coral e verde-lima praticamente ausentes | **CONFIRMADA** | `#F5664D` **4** ocorrências e `#DDEA91` **3**, contra `#102E35` **20** |
 | 6 | home, produto, FAQ, planos e demo com a mesma estrutura | **por medir** | leitura comparada das cinco |
-| 7 | planos sem os preços aprovados | **por medir** | cruzar com `PRECIFICACAO.json`, que é a fonte |
+| 7 | planos sem os preços aprovados | **CONFIRMADA — e não é descuido** | zero preços na página e zero nas mensagens dos três idiomas. Ver a secção própria |
 | 8 | produto descreve três blocos e repete a home | **por medir** | |
 | 9 | demo isolada, sem contexto nem próximo passo | **por medir** | |
-| 10 | footer reduzido a «Feito com BossaOS» | **por medir** | a assinatura vem de `m.comum.asinatura` |
-| 11 | seletor de idioma não visível | **por medir** | não aparece na `MolduraMkt`; confirmar na `EstruturaPublica` |
-| 12 | `title`, description e social incompletos | **por medir** | |
+| 10 | footer reduzido a «Feito com BossaOS» | **CONFIRMADA** | o `<footer>` da `EstruturaPublica` tem `{assinatura}` e um `{rodape}` opcional que a `MolduraMkt` **não passa** |
+| 11 | seletor de idioma não visível | **CONFIRMADA no marketing** | não existe componente de troca de idioma em parte nenhuma; os únicos ficheiros que mencionam idioma na interface são do site do restaurante, não da moldura comercial |
+| 12 | `title`, description e social incompletos | **CONFIRMADA, com o mecanismo** | há metadata, mas **uma só para a aplicação inteira**: `title: 'BossaOS'` e `description: 'Sistema operativo do restaurante.'` no layout raiz. Nenhuma página de marketing define a sua; sem OG, canonical nem hreflang |
 | 13 | nenhuma prova visual de catálogo, mesas, KDS, reservas, TPV | **CONFIRMADA** | consequência directa da 4 |
 
 ## O achado 1, com o mecanismo
@@ -65,3 +65,54 @@ separação de credenciais. **Qualquer lote visual volta a passar por ali.**
 As capturas do §2.1 — quinze superfícies, seis viewports, três idiomas, com
 conteúdo determinístico e nomes longos. É a próxima peça, e é trabalho de
 navegador, não de leitura.
+
+## O caso 7 merece secção própria: uma decisão cuja premissa expirou
+
+**Não é um defeito de execução.** A `coverage.csv` guarda a decisão, no MKT-001:
+
+> «A tabela de planos **NÃO** publica preços: os escalões são reais, os preços
+> não existem em documento nenhum e inventá-los numa página comercial é uma
+> promessa a quem os leu.»
+
+Isso estava **certo**. E deixou de estar, no mesmo dia:
+
+| quando | o quê |
+| --- | --- |
+| 04/09 **02:38** | `ec15bca` — a decisão é registada: «os preços não existem em documento nenhum» |
+| 04/09 **04:01** | `37af235` — «Os preços entram no repositório» |
+
+**Oitenta e três minutos.** A decisão foi tomada com a premissa verdadeira e
+ninguém voltou lá quando ela caducou. Não há nada no projecto que o pudesse ter
+notado: uma decisão que se apoia em «X ainda não existe» não tem gatilho para o
+dia em que X passa a existir.
+
+E as fontes **concordam ao cêntimo** — medi:
+
+| plano | `PRECIFICACAO.json` | RV100 §6.5 |
+| --- | --- | --- |
+| Starter | 1900 / 19000 / implantação 9900 | €19 / €190 / €99 |
+| Restaurant | 7900 / 79000 / 29900 | €79 / €790 / €299 |
+| Pro | 14900 / 149000 / 49900 | €149 / €1.490 / €499 |
+
+Origem declarada no próprio ficheiro: `BossaOS_Precificacao_e_Modelo_Comercial_v1.pdf`,
+02/09/2026, V1. Por unidade física, IVA à parte, anual equivalente a dez
+mensalidades.
+
+**O que isto quer dizer para a RV100:** o §6.5 manda publicar, e manda ler a
+mesma fonte de configuração que o produto usa em vez de duplicar valores em
+conteúdo solto. A fonte existe e é a `PRECIFICACAO.json`. **A decisão antiga não
+se contorna em silêncio — cai porque a premissa dela caiu, e isso fica escrito
+aqui.**
+
+## O que já dá para dizer sem o navegador
+
+Nove das treze hipóteses estão medidas, e **as nove confirmam-se**. Duas
+agravam-se face ao que o §2.2 dizia (a home tem zero imagens, não uma; o footer
+não tem sequer rodapé opcional ligado) e duas mudam de natureza: a 7 é uma
+decisão caducada e não um esquecimento, e a 12 tem metadata — só que uma para
+todo o produto.
+
+Faltam quatro, todas de composição: **3** (hero com metade vazia), **6**
+(cinco páginas com a mesma estrutura), **8** (produto repete a home) e **9**
+(demo isolada). São de navegador e de leitura comparada, e ficam por medir em vez
+de presumidas.
