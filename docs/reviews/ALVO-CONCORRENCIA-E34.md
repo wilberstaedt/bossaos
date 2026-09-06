@@ -79,7 +79,7 @@ E: *«lançar um movimento — **a única porta que muda um saldo**»*.
 | | |
 | --- | --- |
 | **invariante 1** | dois movimentos concorrentes sobre o mesmo item deixam o saldo igual à **soma dos dois**. Nenhum se perde |
-| **invariante 2** | um `UPDATE` directo ao `saldo_mili` **é revertido pela base** — a promessa que o próprio módulo faz |
+| **invariante 2** | um `UPDATE` directo ao `saldo_mili` **é revertido pela base**, feito com a credencial de EXECUÇÃO e em concorrência com um movimento |
 | **disparo** | os dois movimentos em paralelo, sem um esperar pelo outro |
 | **controlo positivo** | o saldo **antes** é lido e os dois movimentos mudam-no de forma distinguível — dois valores diferentes, para que somar mal se veja |
 | **não conta como prova** | ler o saldo da resposta de qualquer um dos dois. Lê-se da base, depois de ambos acabarem |
