@@ -68,6 +68,23 @@ if [ "$n" -lt 10 ]; then
   exit 3
 fi
 
+# ── CONTROLO NEGATIVO ────────────────────────────────────────────────────────
+# Escrevi esta guarda a 06/09 de manha, DEPOIS de um `prisma generate` silenciado
+# me ter dado quatro vermelhos que li como defeito de produto. E nao lhe dei
+# controlo nenhum durante nove horas: uma guarda sobre erros calados, ela propria
+# sem prova de que sabe falar. Descoberto a medir as 27 guardas as 06h10.
+SONDA="$(mktemp -d)"; trap 'rm -rf "$SONDA"' EXIT
+printf 'prisma generate 2>/dev/null\n'        > "$SONDA/mau.sh"
+printf '# prisma generate 2>/dev/null\necho ok\n' > "$SONDA/bom.sh"
+apanha_mau=$(sed 's/#.*//' "$SONDA/mau.sh" | grep -cE "(restaurar|repor|checkout|migrate|generate|fixtures|semente|semear|prisma)[^|]*2>/dev/null" || true)
+apanha_bom=$(sed 's/#.*//' "$SONDA/bom.sh" | grep -cE "(restaurar|repor|checkout|migrate|generate|fixtures|semente|semear|prisma)[^|]*2>/dev/null" || true)
+if [ "$apanha_mau" = "1" ] && [ "$apanha_bom" = "0" ]; then
+  printf '\033[32m  ok\033[0m    controlo negativo: apanha o silenciador e NAO acusa o comentario\n'
+else
+  printf '\033[31m  FALHA\033[0m CONTROLO NEGATIVO: mau=%s (esperava 1) bom=%s (esperava 0)\n' "$apanha_mau" "$apanha_bom"
+  exit 1
+fi
+
 if [ -z "$achados" ]; then
   printf '\033[32m  ok\033[0m    nenhum silenciador em passo critico (%s scripts lidos)\n' "$n"
   exit 0

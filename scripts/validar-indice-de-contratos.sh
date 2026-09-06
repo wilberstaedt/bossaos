@@ -38,6 +38,16 @@ if [ "$n" -lt 5 ]; then
 fi
 
 if [ -z "$fora" ]; then
+  # ── CONTROLO NEGATIVO ─────────────────────────────────────────────────────
+  # A MESMA leitura sobre um contrato de mentira que nao esta no indice. Sem
+  # isto, o dia em que a lista de ficheiros deixasse de casar nada — por o
+  # caminho mudar, por um glob partido — daria verde sobre zero contratos.
+  SONDA="$(mktemp -d)"; trap 'rm -rf "$SONDA"' EXIT
+  touch "$SONDA/nao-esta-no-indice.md"
+  if grep -q "nao-esta-no-indice.md" docs/architecture/README.md 2>/dev/null; then
+    printf '\033[31m  FALHA\033[0m CONTROLO NEGATIVO: o indice contem a sonda\n'; exit 1
+  fi
+  printf '\033[32m  ok\033[0m    controlo negativo: um contrato fora do indice seria acusado (%s lidos)\n' "$n"
   printf '\033[32m  ok\033[0m    os %s contratos estao no indice\n' "$n"
   exit 0
 fi
