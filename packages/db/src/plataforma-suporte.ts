@@ -321,7 +321,8 @@ export async function enfileirarTrabalho(
   },
 ) {
   const tentativa = dados.tentativa ?? 1;
-  const identidade = identidadeDeTrabalho(dados.tipo, dados.alvo, tentativa);
+  const identidade = identidadeDeTrabalho(
+    dados.organizationId, dados.tipo, dados.alvo, tentativa);
   return db.platformJob.upsert({
     where: { identidade },
     create: {

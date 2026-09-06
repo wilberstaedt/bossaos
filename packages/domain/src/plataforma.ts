@@ -147,9 +147,27 @@ export function mostrarSegredo(s: {
  *
  * Escrita nos dois sítios pela razão do E31: a base é quem GARANTE, e esta cópia
  * é para quem precisa de saber a identidade antes de escrever.
+ *
+ * ── E a ORGANIZAÇÃO entra na chave, ao contrário do E31 ───────────────────
+ *
+ * A primeira versão era `tipo:alvo:tentativa`, copiada da impressão do E31. Lá
+ * a identidade é `tipo:documento_id:via` e funciona **porque o `documento_id` é
+ * um UUID**: único no mundo por construção, com a organização já lá dentro sem
+ * ninguém a ter de escrever.
+ *
+ * Aqui o `alvo` é texto livre — «relatorio-mensal», o nome de um ficheiro. A
+ * propriedade que fazia o padrão do E31 estar certo não transfere, e duas casas
+ * a pedir o mesmo trabalho colidiam: a segunda levava `duplicate key` e **nunca
+ * enfileirava**. Medido antes de corrigir.
+ *
+ * ── `plataforma` é o espaço de nomes dos trabalhos de ninguém ─────────────
+ *
+ * `organizationId` é anulável de propósito: uma migração global não é de casa
+ * nenhuma. Esses **devem** deduplicar entre si — é a razão de a fila existir — e
+ * o que não devem é deduplicar contra os de uma casa.
  */
 export function identidadeDeTrabalho(
-  tipo: string, alvo: string, tentativa: number,
+  organizationId: string | null, tipo: string, alvo: string, tentativa: number,
 ): string {
-  return `${tipo}:${alvo}:${tentativa}`;
+  return `${organizationId ?? 'plataforma'}:${tipo}:${alvo}:${tentativa}`;
 }

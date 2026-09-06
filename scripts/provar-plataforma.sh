@@ -60,6 +60,19 @@ DROP TRIGGER IF EXISTS "sessao_de_suporte_respeita_a_casa" ON "support_sessions"
 CREATE TRIGGER "sessao_de_suporte_respeita_a_casa"
   BEFORE INSERT OR UPDATE ON "support_sessions"
   FOR EACH ROW EXECUTE FUNCTION sessao_respeita_a_politica_da_casa();
+
+-- A identidade do trabalho, com a organizacao na chave. Um dos plantes repoe a
+-- forma antiga, e deixa-la para tras fazia duas casas voltarem a colidir - em
+-- silencio, ate alguem enfileirar.
+CREATE OR REPLACE FUNCTION identidade_de_trabalho_deriva()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW."identidade" :=
+    coalesce(NEW."organization_id"::text, 'plataforma')
+    || ':' || NEW."tipo" || ':' || NEW."alvo" || ':' || NEW."tentativa";
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 SQL
 }
 
@@ -252,6 +265,29 @@ exigir_vermelho "caiu a lista de permissão: o que vem a mais atravessa" \
 cp "${COPIAS[0]}" "$PURO"
 
 echo
+echo "8b. CONTROLO — a identidade do trabalho volta a atravessar inquilinos"
+# ── O defeito que o sénior apanhou na revisão, agora vigiado ─────────────
+#
+# A identidade era `tipo:alvo:tentativa` e o índice único é global: duas casas
+# a pedir o mesmo trabalho colidiam, e a segunda **nunca enfileirava**.
+#
+# O plante repõe a forma antiga no gatilho. É o defeito exacto, e não uma
+# aproximação — a base volta a escrever a identidade sem a organização.
+plantar_sql <<'SQL' || true
+CREATE OR REPLACE FUNCTION identidade_de_trabalho_deriva()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW."identidade" := NEW."tipo" || ':' || NEW."alvo" || ':' || NEW."tentativa";
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+SQL
+correr /tmp/bossaos-plat-c8b.txt || true
+exigir_vermelho "caiu a organização na chave: a segunda casa nunca enfileira" \
+  "DUAS CASAS com o mesmo pedido" /tmp/bossaos-plat-c8b.txt
+repor_base
+
+echo
 echo "9. Reposto"
 i=0; for f in "${FICHEIROS[@]}"; do cp "${COPIAS[$i]}" "$f"; i=$((i+1)); done
 repor_base
@@ -289,8 +325,10 @@ verificar "gatilho capacidade_protegida_nao_entra_no_plano" \
   "select count(*) from pg_trigger where tgname='capacidade_protegida_nao_entra_no_plano';" 1
 verificar "gatilho sessao_de_suporte_respeita_a_casa" \
   "select count(*) from pg_trigger where tgname='sessao_de_suporte_respeita_a_casa';" 1
+verificar "a identidade do trabalho leva a organizacao" \
+  "select count(*) from pg_proc where proname='identidade_de_trabalho_deriva' and pg_get_functiondef(oid) like '%organization_id%';" 1
 if [[ "$em_falta" -eq 0 ]]; then
-  verde "7 verificações: as quatro permissões e os três gatilhos"
+  verde "8 verificações: as quatro permissões, os três gatilhos e a forma da identidade"
 else
   vermelho "$em_falta por repor — a base está pior do que antes desta prova"
 fi

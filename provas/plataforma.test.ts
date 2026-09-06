@@ -6,6 +6,7 @@ import {
   enfileirarTrabalho, guardarPoliticaDeAcesso, obterPrisma, reprocessarTrabalho,
   segredosDaPlataforma, sessaoAutoriza, sessoesDaCasa, terminarSessaoDeSuporte,
 } from '../packages/db/src/index.ts';
+import { identidadeDeTrabalho } from '../packages/domain/src/plataforma.ts';
 import { IDS } from '../packages/db/prisma/fixtures.ts';
 
 /**
@@ -420,6 +421,59 @@ describe('7 · Nenhum segredo sai, e reprocessar não duplica', () => {
       'o estado não vem do ambiente: uma coluna fica a mentir no dia em que a variável sai');
     // E o valor não aparece em lado nenhum da projecção.
     assert.ok(!JSON.stringify(comAmbiente).includes('sk_live_zzz'));
+  });
+
+  it('DUAS CASAS com o mesmo pedido enfileiram as DUAS', async () => {
+    // ── O caso que o sénior apanhou na revisão do E33 ────────────────────
+    //
+    // A identidade era `tipo:alvo:tentativa` e o índice único é global: a casa
+    // B levava `duplicate key` e **nunca enfileirava**. Copiei a forma da
+    // impressão do E31, onde funciona porque o `documento_id` é um UUID — e
+    // aqui o `alvo` é texto livre.
+    //
+    // Mede-se contra a BASE, e não só no domínio: o que garante é o gatilho,
+    // e a cópia em TypeScript é só para quem precisa da identidade antes de
+    // escrever. Se as duas divergirem, a base ganha.
+    const daA = await comA((db) => enfileirarTrabalho(db, {
+      organizationId: IDS.orgA, tipo: `${PREFIXO}exportacao`, alvo: 'relatorio-mensal',
+    }));
+    const daB = await comEscopo(prisma, { organizationId: IDS.orgB, userId: IDS.utilizadorB },
+      (db) => enfileirarTrabalho(db, {
+        organizationId: IDS.orgB, tipo: `${PREFIXO}exportacao`, alvo: 'relatorio-mensal',
+      }));
+
+    assert.notEqual(daA.id, daB.id, 'as duas casas partilharam o trabalho');
+    assert.notEqual(daA.identidade, daB.identidade,
+      'a identidade atravessa inquilinos: a segunda casa nunca enfileira');
+
+    const n = await sql.query(
+      `SELECT count(*)::int AS n FROM platform_jobs WHERE tipo = $1`,
+      [`${PREFIXO}exportacao`]);
+    assert.equal(n.rows[0].n, 2, 'uma das casas ficou sem trabalho');
+  });
+
+  it('e a MESMA casa duas vezes continua a deduplicar', async () => {
+    // O par. Uma correcção que pusesse algo único por linha na identidade
+    // fazia as duas casas caberem **e** destruía a deduplicação, que é a razão
+    // de a fila existir.
+    const uma = await comA((db) => enfileirarTrabalho(db, {
+      organizationId: IDS.orgA, tipo: `${PREFIXO}dedup`, alvo: 'x',
+    }));
+    const outra = await comA((db) => enfileirarTrabalho(db, {
+      organizationId: IDS.orgA, tipo: `${PREFIXO}dedup`, alvo: 'x',
+    }));
+    assert.equal(uma.id, outra.id, 'a mesma casa duas vezes criou dois trabalhos');
+  });
+
+  it('e a identidade que a base escreve é a que o domínio calcula', async () => {
+    // As duas cópias da regra têm de dizer o mesmo. Se divergirem, a base ganha
+    // e a inserção falha — modo de falha certo, mas silencioso até acontecer.
+    const t = await comA((db) => enfileirarTrabalho(db, {
+      organizationId: IDS.orgA, tipo: `${PREFIXO}acordo`, alvo: 'y',
+    }));
+    assert.equal(t.identidade,
+      identidadeDeTrabalho(IDS.orgA, `${PREFIXO}acordo`, 'y', 1),
+      'o gatilho e o domínio calculam identidades diferentes');
   });
 
   it('reprocessar o mesmo trabalho duas vezes dá UM trabalho por tentativa', async () => {

@@ -144,12 +144,55 @@ describe('5. Nenhum segredo sai, e não há onde ele caiba', () => {
   });
 });
 
-describe('6. Reprocessar não duplica', () => {
-  it('a mesma tentativa dá a mesma identidade', () => {
-    assert.equal(identidadeDeTrabalho('envio', 'abc', 1), identidadeDeTrabalho('envio', 'abc', 1));
+describe('6. Reprocessar não duplica, e a chave não atravessa inquilinos', () => {
+  const A = '11111111-1111-4111-8111-111111111111';
+  const B = '22222222-2222-4222-8222-222222222222';
+
+  it('a mesma tentativa da MESMA casa dá a mesma identidade', () => {
+    assert.equal(
+      identidadeDeTrabalho(A, 'envio', 'abc', 1),
+      identidadeDeTrabalho(A, 'envio', 'abc', 1));
   });
 
   it('e a tentativa seguinte dá outra — senão reprocessar era impossível', () => {
-    assert.notEqual(identidadeDeTrabalho('envio', 'abc', 1), identidadeDeTrabalho('envio', 'abc', 2));
+    assert.notEqual(
+      identidadeDeTrabalho(A, 'envio', 'abc', 1),
+      identidadeDeTrabalho(A, 'envio', 'abc', 2));
+  });
+
+  it('O CASO QUE O SÉNIOR APANHOU: duas casas com o mesmo pedido NÃO colidem', () => {
+    // A primeira versão era `tipo:alvo:tentativa`, copiada do E31. Lá funciona
+    // porque o `documento_id` é um UUID — único no mundo, com a organização já
+    // lá dentro. Aqui o `alvo` é texto livre, e a propriedade não transfere: a
+    // segunda casa levava `duplicate key` e nunca enfileirava.
+    assert.notEqual(
+      identidadeDeTrabalho(A, 'exportacao', 'relatorio-mensal', 1),
+      identidadeDeTrabalho(B, 'exportacao', 'relatorio-mensal', 1),
+      'duas casas partilham a identidade: a segunda nunca enfileira');
+  });
+
+  it('e os trabalhos GLOBAIS deduplicam entre si — é a razão de a fila existir', () => {
+    // O par. Uma correcção que fizesse cada trabalho global ser único destruía
+    // a deduplicação no caso em que ela mais importa: uma migração pedida duas
+    // vezes.
+    assert.equal(
+      identidadeDeTrabalho(null, 'migracao', 'v2', 1),
+      identidadeDeTrabalho(null, 'migracao', 'v2', 1));
+    // E não se confundem com os de uma casa.
+    assert.notEqual(
+      identidadeDeTrabalho(null, 'migracao', 'v2', 1),
+      identidadeDeTrabalho(A, 'migracao', 'v2', 1));
+  });
+
+  it('CONTROLO NEGATIVO: sem a organização, as duas casas colidem', () => {
+    const semOrganizacao = (tipo: string, alvo: string, n: number) => `${tipo}:${alvo}:${n}`;
+    assert.equal(
+      semOrganizacao('exportacao', 'relatorio-mensal', 1),
+      semOrganizacao('exportacao', 'relatorio-mensal', 1),
+      'o plante não montou o caso');
+    assert.notEqual(
+      identidadeDeTrabalho(A, 'exportacao', 'relatorio-mensal', 1),
+      identidadeDeTrabalho(B, 'exportacao', 'relatorio-mensal', 1));
   });
 });
+

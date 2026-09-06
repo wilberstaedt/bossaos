@@ -59,6 +59,23 @@ WCAG) · `provar-plataforma-no-navegador.sh` **6 controlos** ·
 `id` UUID sem valor por omissão na base — invisível para quem escreve por Prisma,
 e a primeira pedra em que tropeça quem escreve SQL directo.
 
+## Retenção do sénior no E33 — a identidade do trabalho, corrigida
+
+**Era omissão.** A identidade de um trabalho era `tipo:alvo:tentativa` com índice
+único **global**, e duas casas que pedissem o mesmo colidiam: a segunda nunca
+enfileirava. Copiei a forma da impressão do E31, onde funciona **porque o
+`documento_id` é um UUID** — e aqui o `alvo` é texto livre.
+
+Uma metade da premissa não se confirmou: `organization_id` é **anulável**, não
+`NOT NULL`. É desenho (um trabalho global não é de casa nenhuma), e por isso a
+cura leva `coalesce(org, 'plataforma')`.
+
+Medido nas duas direcções: as duas casas passam a caber, e a mesma casa duas
+vezes **continua a deduplicar** — que é o par que impede uma correcção de
+destruir a razão de a fila existir. Controlo 8b novo, e a verificação final conta
+a forma da identidade.
+
+
 ## A tabela do E10 — decisão revertida pelo sénior a 06/09
 
 A `custom_domain_owners` **fica**, e sem RLS. O sénior verificou os três
