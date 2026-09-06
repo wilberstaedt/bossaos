@@ -96,7 +96,27 @@ O conserto existe — o `provar-tudo.sh` descobre — e a CI menciona-o num
 comentário sem o usar. `E21-CI.md`. **Terceira aparição do mesmo defeito neste
 projecto**; as outras duas foram os documentos de retoma.
 
-### 6. O código morto, com ficheiro e linha
+### 6. O código morto — a lista envelheceu, e a resolução é não ter lista
+
+**Medido a 06/09, às 03h40.** Cruzei os nomes do `E21-LIMPEZA.md` com a varredura
+ao produto inteiro e a lista **está desactualizada**: várias entradas que ela dá
+por mortas estão vivas — `agendaDoDia`, `atrasadas`, `carregarReservas` —, e as
+duas que ela marcava como «capacidade em falta» resolveram-se esta noite: o
+`revogarConvite` ficou ligado, e o `listarAuditoria` tem etapa (E33).
+
+**Foi escrita no E21, dez etapas atrás, e ninguém a voltou a medir.** É o padrão
+do dia inteiro — *lista à mão desalinha* — aplicado, desta vez, a uma lista de
+dívida. A ironia é que era uma lista feita para limpar código morto e tornou-se
+ela própria um documento morto.
+
+**Resolução: o `E21-LIMPEZA.md` deixa de carregar nomes e passa a apontar para a
+varredura.** `varrer-alcance-da-etapa.sh <primeiro-commit>..HEAD` responde à
+mesma pergunta com o estado de agora, e não com o de há dez etapas. Um documento
+que enumera não pode ser mais verdadeiro do que o dia em que foi escrito.
+
+*O que a dívida dizia quando foi aberta:*
+
+### 6-bis. O código morto, com ficheiro e linha
 
 `E21-LIMPEZA.md` tem a lista dividida: **7 para apagar** (duplicados com
 alternativa viva), **2 que NÃO se apagam** porque são capacidade em falta
