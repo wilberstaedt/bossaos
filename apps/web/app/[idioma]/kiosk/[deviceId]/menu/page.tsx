@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { formatarDinheiro, type Idioma } from '@bossaos/i18n';
 import { cartaPublica } from '@bossaos/db';
 import { IDIOMAS_DE_CONTEUDO, type IdiomaDeConteudo } from '@bossaos/domain';
+import { obterBase } from '../../../../../src/servidor.ts';
 import { carregarKiosk } from '../../../../../src/kiosk/carregar-kiosk.ts';
 import { CabecalhoDoKiosk, textosDoKiosk } from '../../../../../src/kiosk/PecasDoKiosk.tsx';
 
@@ -27,7 +28,7 @@ export default async function KioskMenu({
 }) {
   const { idioma, deviceId } = await params;
   const s = textosDoKiosk(idioma);
-  const { kiosk, disponibilidade, prisma } = await carregarKiosk(deviceId);
+  const { kiosk, disponibilidade } = await carregarKiosk(deviceId);
   if (!disponibilidade.disponivel) redirect(`/${idioma}/kiosk/${deviceId}/pausado`);
 
   const conteudo: IdiomaDeConteudo =
@@ -35,7 +36,15 @@ export default async function KioskMenu({
       ? (idioma as IdiomaDeConteudo)
       : IDIOMAS_DE_CONTEUDO[0];
 
-  const servida = await cartaPublica(prisma, kiosk.locationSlug, 'KIOSK', conteudo);
+  // ── Sem endereço público não há carta, e diz-se ─────────────────────
+  //
+  // `locationSlug` é anulável porque uma unidade pode não ter endereço público
+  // reservado. Um `?? ''` aqui pedia a carta de uma unidade chamada vazio e
+  // recebia ausência — indistinguível de «esta casa não publicou nada», que é a
+  // confusão que este projecto passa o tempo a fechar.
+  const servida = kiosk.locationSlug === null
+    ? null
+    : await cartaPublica(obterBase(), kiosk.locationSlug, 'KIOSK', conteudo);
 
   return (
     <div className="bo-pagina">

@@ -26,7 +26,35 @@ ok()   { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 # olhar para ela, não por um padrão largo que poupe o trabalho de olhar.
 EXCEPCOES="
 platform_staff:pessoal da plataforma, nao e dado de inquilino — o acesso e por papel
+custom_domain_owners:tabela CROSS-INQUILINO por desenho, e protegida por GRANT em vez de RLS — ver a nota abaixo
 "
+
+# ── A nota da custom_domain_owners, escrita a 06/09 ────────────────────────
+#
+# Esta tabela foi-me apontada como orfa para APAGAR: zero linhas, zero
+# chamadores, zero documentos. Fui verificar antes e a premissa nao se sustenta.
+#
+#   * A `vincular_dominio` (SECURITY DEFINER, linhas 463 e 478 da migracao do
+#     E10) LE e ESCREVE nela. O chamador nao aparece num grep de TypeScript
+#     porque vive dentro de uma funcao SQL.
+#   * Zero linhas porque a `provas/sites.test.ts` limpa atras de si. Essa prova
+#     passa hoje com 27 casos, e TRES deles medem exactamente esta tabela.
+#   * E a coluna `dominio` e a chave primaria: e ela que implementa a regra 3 do
+#     E10, «o nome nao volta ao mundo». Um dominio anda em cartoes, ementas e
+#     anuncios pagos; se a linha de dono desaparecer, outra organizacao reclama
+#     o nome e o trafego de quem o imprimiu passa a cair na casa errada.
+#
+# Porque e que nao tem RLS, e porque e que esta certo assim: ela e
+# CROSS-INQUILINO de proposito. A pergunta que responde e «este nome ja e de
+# alguem?», e essa pergunta so tem valor se a resposta atravessar inquilinos.
+# A proteccao esta noutro sitio, e e mais apertada do que RLS: o `bossaos_app`
+# tem SELECT e mais nada — sem INSERT, sem UPDATE, sem DELETE. Quem escreve e a
+# funcao SECURITY DEFINER, e so ela. A `provas/sites.test.ts:398` mede isso:
+# um DELETE pelo runtime da «permission denied».
+#
+# Ligar-lhe RLS por `organization_id` seria pior do que nao fazer nada: a
+# leitura passava a ver so as linhas do proprio inquilino, e a pergunta «este
+# nome ja e de alguem?» passava a responder «nao» a toda a gente.
 
 echo "1. Toda a tabela com organization_id tem RLS ligado"
 SEM_RLS="$(psql "$MIGRATION_DATABASE_URL" -tAc "
@@ -51,6 +79,42 @@ else
       erro "$t tem organization_id e NAO tem RLS"
     fi
   done <<< "$SEM_RLS"
+fi
+
+echo
+echo "1b. A excepcao que se justifica por GRANT tem de o PROVAR"
+# ── Uma excepcao sem verificacao e uma porta ──────────────────────────────
+#
+# A `custom_domain_owners` sai da regra do RLS porque diz que esta protegida por
+# GRANT: o runtime le e nao escreve. Se ficasse so escrito no comentario, bastava
+# alguem correr um `GRANT INSERT` e a excepcao continuava verde a proteger nada.
+#
+# Isto mede a afirmacao. E a mesma exigencia que o projecto faz a si proprio em
+# todo o lado: quem declara uma excepcao paga uma prova por ela.
+PODE_ESCREVER="$(psql "$MIGRATION_DATABASE_URL" -tAc "
+  SELECT privilege_type FROM information_schema.role_table_grants
+   WHERE table_name = 'custom_domain_owners'
+     AND grantee = 'bossaos_app'
+     AND privilege_type IN ('INSERT','UPDATE','DELETE','TRUNCATE')
+   ORDER BY 1" 2>/dev/null || true)"
+if [ -z "$PODE_ESCREVER" ]; then
+  ok "custom_domain_owners: o runtime tem leitura e mais nada"
+else
+  erro "custom_domain_owners: o runtime GANHOU escrita ($(printf '%s' "$PODE_ESCREVER" | tr '\n' ' '))"
+  echo "        A excepcao ao RLS assentava em ele nao poder escrever. Deixou de assentar."
+fi
+
+# E o outro lado: a leitura TEM de existir, senao a excepcao esta a proteger uma
+# tabela que ninguem consegue consultar — e a regra 3 do E10 deixava de valer
+# sem ninguem dar por isso.
+PODE_LER="$(psql "$MIGRATION_DATABASE_URL" -tAc "
+  SELECT 1 FROM information_schema.role_table_grants
+   WHERE table_name = 'custom_domain_owners'
+     AND grantee = 'bossaos_app' AND privilege_type = 'SELECT' LIMIT 1" 2>/dev/null || true)"
+if [ -n "$PODE_LER" ]; then
+  ok "e consegue ler — a pergunta «este nome ja e de alguem?» continua a ter resposta"
+else
+  erro "custom_domain_owners: o runtime perdeu a LEITURA — a regra 3 do E10 ficou muda"
 fi
 
 # ── controlo negativo ────────────────────────────────────────────────────────

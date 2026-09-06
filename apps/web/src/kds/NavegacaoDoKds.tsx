@@ -32,6 +32,10 @@ export const SECCOES_DO_KDS: readonly SeccaoDoKds[] = [
   { rota: '/passe', chave: 'passe', id: 'KDS-012', principal: true },
   { rota: '/saida', chave: 'confirmarSaida', id: 'KDS-013' },
   { rota: '/ajustes', chave: 'ajustarEstacao', id: 'KDS-014', principal: true },
+  // KDS-016: quando a impressora não responde, a cozinha lê o talão aqui. Fora
+  // desta tabela era uma tela construída e inalcançável — a porta morta ao
+  // contrário, e mais cara: existe e ninguém a encontra a meio de um serviço.
+  { rota: '/impressao', chave: 'fallbackImpressao', id: 'KDS-016', principal: true },
   { rota: '/ligacao', chave: 'semLigacao', id: 'STATE-012' },
 ] as const;
 

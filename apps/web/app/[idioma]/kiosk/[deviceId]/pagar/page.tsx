@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { Aviso } from '@bossaos/ui';
 import { type Idioma } from '@bossaos/i18n';
-import { podeCobrar } from '@bossaos/db';
+import { podeCobrar } from '@bossaos/domain';
 import { carregarKiosk } from '../../../../../src/kiosk/carregar-kiosk.ts';
 import { CabecalhoDoKiosk, textosDoKiosk } from '../../../../../src/kiosk/PecasDoKiosk.tsx';
 

@@ -44,6 +44,30 @@ export const SLUG_DE_INSPECCAO_B = 'insp-marina-barcelona';
  */
 export const PREFIXO = 'insp-';
 
+/**
+ * O kiosk do arnês — identificador FIXO, e é por isso que ele existe.
+ *
+ * O endereço do kiosk é `/kiosk/<deviceId>`, e um identificador gerado a cada
+ * semeadura obrigava a prova de navegador a descobri-lo primeiro. Uma prova que
+ * tem de perguntar à base qual é o endereço que vai visitar mede a base e o
+ * ecrã ao mesmo tempo; quando falha, não se sabe qual dos dois caiu.
+ */
+export const ID_DO_KIOSK_DE_INSPECCAO = 'aaaa1111-1111-4111-8111-9e31c0000001';
+export const ID_DA_IMPRESSORA_DE_INSPECCAO = 'aaaa1111-1111-4111-8111-9e31c0000002';
+
+/**
+ * O SEGUNDO kiosk, e é ele que torna o KIOSK-007 mensurável.
+ *
+ * Com um kiosk só, e a funcionar, a tela do terminal pausado renderiza o ramo
+ * «já está disponível» — que é honesto e não mede nada. O caso que a etapa
+ * existe para resolver é o outro: **uma cobrança indeterminada pausa o
+ * terminal**, e sem uma cobrança indeterminada semeada ele nunca aparece.
+ *
+ * É a mesma decisão da unidade das Canárias no E30: quando um caso não tem
+ * dados, corrige-se a semente e não se aceita a prova.
+ */
+export const ID_DO_KIOSK_PAUSADO = 'aaaa1111-1111-4111-8111-9e31c0000003';
+
 /** Abre a ligação com a credencial de MIGRAÇÃO, que é a que pode escrever isto. */
 export function abrirPrisma(): PrismaClient {
   const url = process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL;
@@ -122,6 +146,27 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     ALTER TABLE bill_adjustments      DISABLE TRIGGER USER;
     ALTER TABLE payments              DISABLE TRIGGER USER;
     ALTER TABLE refunds               DISABLE TRIGGER USER;
+    -- ── E31 · o kiosk e a impressão saem PRIMEIRO ─────────────────────────
+    --
+    -- Antes dos pedidos e das contas: a sessão de kiosk aponta para os dois, e
+    -- o envio de impressão aponta para a impressora com RESTRICT. Apagar por
+    -- outra ordem prende tudo por chave estrangeira, e quem estoira é a limpeza
+    -- da prova seguinte — longe de quem causou o problema.
+    --
+    -- E o gatilho da sessão fica DESLIGADO durante isto: ele recusa fechar uma
+    -- sessão com cobrança indeterminada, o que está certo em serviço e é uma
+    -- armadilha numa limpeza. A limpeza não fecha sessões, apaga-as.
+    DELETE FROM print_jobs           WHERE conteudo LIKE '%${PREFIXO}%' OR printer_id IN (SELECT id FROM printers WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM printers             WHERE nome LIKE '${PREFIXO}%';
+    -- Pela CONTA e nao pelo prefixo da chave: o prefixo insp- e partilhado com
+    -- outras sementes, e apagar por ele levava tentativas que ja tem pagamento
+    -- por cima — a chave estrangeira estoirava e a semeadura falhava inteira.
+    -- Medido a 06/09: o vermelho aparecia na semeadura e a causa era a limpeza.
+    DELETE FROM payment_attempts     WHERE bill_id IN (SELECT id FROM bills WHERE numero LIKE '${PREFIXO}K-%');
+    DELETE FROM kiosk_sessions       WHERE device_id IN (SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM bills                WHERE numero LIKE '${PREFIXO}K-%';
+    DELETE FROM order_contacts       WHERE customer_id IN (SELECT id FROM customers WHERE nome LIKE '${PREFIXO}%');
+    DELETE FROM devices              WHERE nome LIKE '${PREFIXO}%';
     ALTER TABLE time_entries DISABLE TRIGGER USER;
     DELETE FROM time_entries         WHERE corrige_id IS NOT NULL;
     DELETE FROM time_entries         WHERE origem = 'insp' OR location_id IN (SELECT id FROM locations WHERE slug IN ('puerto','playa'));

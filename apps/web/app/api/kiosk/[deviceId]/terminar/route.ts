@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server';
-import {
-  RecusaDoKiosk, comEscopo, kioskDoAparelho, sessaoViva, terminarSessao,
-  type MotivoDeSaida,
-} from '@bossaos/db';
+import { RecusaDoKiosk, terminarNoKiosk, type MotivoDeSaida } from '@bossaos/db';
 import { obterBase } from '../../../../../src/servidor.ts';
 
 /**
@@ -25,12 +22,6 @@ export async function POST(
   ctx: { params: Promise<{ deviceId: string }> },
 ) {
   const { deviceId } = await ctx.params;
-  const prisma = obterBase();
-
-  const kiosk = await kioskDoAparelho(prisma, deviceId);
-  // Ausência e nunca «proibido»: um aparelho desconhecido, um por parear e um
-  // revogado dão os três a mesma resposta.
-  if (!kiosk) return NextResponse.json({ erro: 'nao_encontrado' }, { status: 404 });
 
   const dados = await pedido.formData().catch(() => null);
   const motivoCru = dados?.get('motivo');
@@ -38,16 +29,11 @@ export async function POST(
   const motivo = MOTIVOS.find((m) => m === motivoCru);
   if (!motivo) return NextResponse.json({ erro: 'motivo_invalido' }, { status: 400 });
 
-  const escopo = { organizationId: kiosk.organizationId };
   try {
-    await comEscopo(prisma, escopo, async (db) => {
-      const viva = await sessaoViva(db, deviceId);
-      // Não haver sessão viva não é erro: é o estado normal de um kiosk parado.
-      // Devolver 404 aqui fazia o botão de recomeçar parecer avariado quando a
-      // inactividade já tinha fechado a sessão por baixo.
-      if (!viva) return;
-      await terminarSessao(db, viva.id, motivo, `saida:${motivo}`);
-    });
+    // Não haver sessão viva não é erro: é o estado normal de um kiosk parado, e
+    // é o que acontece quando a inactividade já fechou a sessão por baixo de
+    // quem carregou no botão. A porta devolve `false` e seguimos para o início.
+    await terminarNoKiosk(obterBase(), deviceId, motivo);
   } catch (erro) {
     // O gatilho da base recusa fechar com cobrança indeterminada. A pessoa vai
     // para o ecrã pausado e alguém da casa resolve — o que não pode acontecer é

@@ -1,7 +1,7 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E31 — Kiosk, terminais e impressão (**11 telas**).
-**Estado:** **EM CURSO.** E30 assinado a 06/09 em `1dc90bc` (`docs/reviews/E30.md`), medido em duas voltas por causa da máquina. Contrato `kiosk-e-impressao.md` e régua `ALVO-E31.md` escritos **antes** do código.
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** E30 assinado a 06/09 em `1dc90bc` (`docs/reviews/E30.md`), medido em duas voltas por causa da máquina. Contrato `kiosk-e-impressao.md` e régua `ALVO-E31.md` escritos **antes** do código.
 
 
 > ## ⚠ AO CHEGAR AOS 100%: PARAR E LER `docs/RV100.md`
@@ -14,37 +14,72 @@
 >
 > A ordem e o resto da fila estão em `docs/progress/DEPOIS-DOS-100.md`.
 
-**O que muda:** todas as anteriores produziam factos; **esta produz opiniões
-sobre factos**. E é a primeira em que o defeito muda o comportamento de uma
-**pessoa** e não do sistema — um relatório errado faz um gerente fechar um turno,
-com o código verde enquanto a decisão é tomada.
+**O que muda:** todas as anteriores acabavam DENTRO do sistema. **Esta acaba num
+pedaço de papel e num ecrã sozinho num corredor** — e nos dois sítios o produto
+perde a capacidade de verificar aquilo que afirma. É a etapa onde «verde não é
+alcance» deixa de ser sobre código: **o teste passa e não sai papel.**
 
-**Ausência não é zero**, e nada aqui devolve um número solto: todo o agregado é
-`Medido<T>`. `0 €` ao almoço diz que a casa abriu e não vendeu; sem dados diz que
-ninguém sabe. As duas escrevem-se diferente no ecrã, lado a lado.
+E isso aconteceu mesmo. A porta `kiosk_do_aparelho` devolvia o slug **interno** da
+unidade onde a carta pública espera o público; a carta do kiosk vinha vazia **em
+silêncio**, com o motor verde — 21 casos e 8 controlos, nenhum a abrir uma carta.
+Quem o apanhou foi a prova de NAVEGADOR, à primeira corrida.
 
-**O denominador viaja com o numerador** — e não existe `mediaDeMedias`, não por
-ser difícil mas porque existir era convidar alguém a chamá-la. **O período
-resolve-se por unidade** com a regra do E28. **Duas organizações não se somam.**
+**Dois clientes seguidos não partilham nada porque os dados NUNCA foram juntos.**
+A `kiosk_sessions` não tem uma única coluna com dados da pessoa — não é
+disciplina, é AUSÊNCIA. Quando há pessoa, ela vive em `customers` e o pedido
+REFERE-A pela `order_contacts`, com `ON DELETE CASCADE` do lado dela: apagar a
+pessoa leva a ligação e deixa o pedido de pé. E as **três saídas são uma função**.
 
-**A última entrada morta do menu de gestão está fechada.** O `início` leva à
-comparação entre unidades, e o ramo que propagava o `porConstruir` ficou código
-morto — apanhado pelo typecheck e removido. O controlo de portas passa a ter o
-produto inteiro do lado de dentro.
+**«Entregue à ponte» não é «imprimiu».** O enum não tem `IMPRESSO`: há resposta do
+aparelho ou não há, e o «não sei» DERIVA do tempo sem resposta. O CHECK
+`resposta_do_aparelho_ou_nada` torna impossível confirmar sem o que o aparelho
+disse — e o motor não tem `marcarComoImpresso`.
 
-**Achados:** escrevi por cima do `relatorios.ts` do E14 e apaguei seis
-exportações — **criar um ficheiro sem verificar se ele existe é uma escrita
-destrutiva disfarçada de escrita nova**. Uma guarda minha lia prosa em vez de
-código. A guarda das rotas voltou a mandar funções puras para o domínio, como no
-E28. E **duas vezes um plante tirou uma instância do caso e não o caso** — o
-controlo ficou verde nas duas.
+**A segunda via marca-se no papel, e a marca é um NÚMERO** — a garantia não
+depende da língua do talão. **O reiniciar não abandona cobrança indeterminada:**
+o gatilho recusa e o kiosk fica pausado. Parar a máquina é caro; a alternativa é o
+produto decidir sozinho sobre dinheiro que não consegue ver.
+
+**Sem hardware não se declara homologação.** A matriz está em
+`docs/progress/E31-HOMOLOGACAO.md` com todas as linhas POR TESTAR — nunca em
+branco —, e a base não tem booleano `homologada`: tem data e assinatura, e a
+ausência das duas é a terceira resposta.
 
 **Provas (LOCAIS — a CI continua trancada pela facturação do GitHub):**
-`provas/analitica.test.ts` **0** (**14 casos**, repetível) ·
-`provar-analitica.sh` **0** (**8 controlos**) ·
-`inspeccao/analitica.spec.ts` **0** (**28 casos**, 5 larguras, ES/PT/EN, 44 px) ·
-`provar-analitica-no-navegador.sh` **0** (**8 controlos**) ·
+`provas/kiosk.test.ts` **21** · `packages/domain/src/impressao.test.ts` **15** ·
+`scripts/provar-kiosk.sh` **8 controlos** (todos acendem, e o guião conta os 7
+objectos que desligou) · `inspeccao/kiosk.spec.ts` **20** (11 telas, 5 larguras,
+ES/PT/EN, 44 px, WCAG) · `scripts/provar-kiosk-no-navegador.sh` **5 controlos** ·
 `pnpm verificar` **0**.
+
+**Detalhe e achados:** `docs/progress/E31.md`.
+
+## ⚠ A tabela do E10 que me mandaram apagar NÃO é órfã — 06/09
+
+Foi-me pedido para apagar a `custom_domain_owners` do E10: zero linhas, zero
+chamadores, zero documentos. **Verifiquei antes, e a premissa não se sustenta.**
+
+- A `vincular_dominio` (`SECURITY DEFINER`, linhas 463 e 478 da migração do E10)
+  **lê e escreve** nela. O chamador não aparece num `grep` de TypeScript porque
+  vive dentro de uma função SQL.
+- Zero linhas porque a `provas/sites.test.ts` limpa atrás de si. Essa prova passa
+  hoje com **27 casos**, e três deles medem esta tabela.
+- É ela que implementa a regra 3 do E10 — **«o nome não volta ao mundo»**. Um
+  domínio anda em cartões, ementas e anúncios pagos; sem a linha de dono, outra
+  organização reclama o nome e o tráfego de quem o imprimiu cai na casa errada.
+
+**Porque é que não tem RLS, e porque é que está certo assim:** ela é
+CROSS-INQUILINO de propósito. A pergunta que responde é «este nome já é de
+alguém?», e essa pergunta só vale se a resposta atravessar inquilinos. A protecção
+está noutro sítio e é **mais apertada** do que RLS: o `bossaos_app` tem `SELECT` e
+mais nada. Ligar-lhe RLS por `organization_id` seria pior do que não fazer nada —
+a leitura passava a ver só o próprio inquilino, e a pergunta respondia «não» a
+toda a gente.
+
+**O que fiz em vez de apagar:** declarei a excepção na `validar-rls.sh` com o
+motivo escrito, **e fiz a excepção pagar prova** — secção 1b nova, que verifica
+que o runtime continua sem escrita e com leitura. Uma excepção sem verificação é
+uma porta. A guarda está verde.
 
 ## As quatro correcções do E34 estão fechadas — 06/09
 

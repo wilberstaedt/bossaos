@@ -208,15 +208,3 @@ export async function estadoDoKiosk(
 
   return { disponivel: true };
 }
-
-/**
- * Offline: aceita a escolha, **não promete nada**.
- *
- * O que impede a promessa não é esta função — é a ausência de caminho. Um kiosk
- * sem rede não chega ao servidor, logo não cria tentativa de pagamento nem
- * muda o pedido de rascunho. Isto existe para a tela poder DIZER isso em vez de
- * ficar a girar.
- */
-export function podeCobrar(ligacao: 'ONLINE' | 'OFFLINE'): boolean {
-  return ligacao === 'ONLINE';
-}

@@ -165,3 +165,25 @@ export function renderizarComanda(
     ...corpo,
   ].join('\n');
 }
+
+/**
+ * Offline: aceita a escolha, **não promete nada**.
+ *
+ * ── Porque é que isto vive no domínio e não no motor ──────────────────────
+ *
+ * É uma função pura, e viveu no `@bossaos/db` até a `rotas-com-porta.test.ts`
+ * a apanhar: a tela de pagamento do kiosk importava-a e ficava, aos olhos da
+ * guarda, a tocar na base. **Terceira vez que isto acontece** — o E28 e o E30
+ * pagaram a mesma renda —, e a cura é sempre a mesma: a função muda de casa,
+ * não se abre uma excepção. Uma excepção seria uma porta.
+ *
+ * ── E o que ela NÃO faz ───────────────────────────────────────────────────
+ *
+ * Não é isto que impede a promessa. O que a impede é a **ausência de caminho**:
+ * um kiosk sem rede não chega ao servidor, logo não cria tentativa de pagamento
+ * nem tira o pedido de rascunho. Isto existe para a tela poder DIZER que não
+ * está a cobrar, em vez de ficar a girar enquanto a pessoa acha que já pagou.
+ */
+export function podeCobrar(ligacao: 'ONLINE' | 'OFFLINE'): boolean {
+  return ligacao === 'ONLINE';
+}

@@ -5,6 +5,7 @@ import { cartaPublica } from '@bossaos/db';
 import {
   IDIOMAS_DE_CONTEUDO, avisosPorAlergenio, produtoDaCarta, type IdiomaDeConteudo,
 } from '@bossaos/domain';
+import { obterBase } from '../../../../../../src/servidor.ts';
 import { carregarKiosk } from '../../../../../../src/kiosk/carregar-kiosk.ts';
 import { CabecalhoDoKiosk, textosDoKiosk } from '../../../../../../src/kiosk/PecasDoKiosk.tsx';
 
@@ -34,7 +35,7 @@ export default async function KioskProduto({
   const s = textosDoKiosk(idioma);
   const m = mensagensDe(idioma);
   const c = m.publicoE09;
-  const { kiosk, disponibilidade, prisma } = await carregarKiosk(deviceId);
+  const { kiosk, disponibilidade } = await carregarKiosk(deviceId);
   if (!disponibilidade.disponivel) redirect(`/${idioma}/kiosk/${deviceId}/pausado`);
 
   const conteudo: IdiomaDeConteudo =
@@ -42,7 +43,15 @@ export default async function KioskProduto({
       ? (idioma as IdiomaDeConteudo)
       : IDIOMAS_DE_CONTEUDO[0];
 
-  const servida = await cartaPublica(prisma, kiosk.locationSlug, 'KIOSK', conteudo);
+  // ── Sem endereço público não há carta, e diz-se ─────────────────────
+  //
+  // `locationSlug` é anulável porque uma unidade pode não ter endereço público
+  // reservado. Um `?? ''` aqui pedia a carta de uma unidade chamada vazio e
+  // recebia ausência — indistinguível de «esta casa não publicou nada», que é a
+  // confusão que este projecto passa o tempo a fechar.
+  const servida = kiosk.locationSlug === null
+    ? null
+    : await cartaPublica(obterBase(), kiosk.locationSlug, 'KIOSK', conteudo);
   // Procura DENTRO da projecção, e não na base: se fosse à base, esta tela
   // repetia os filtros de publicação e de canal, e bastava esquecer um para o
   // detalhe mostrar o que a lista esconde.

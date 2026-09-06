@@ -134,6 +134,29 @@ const PORTAS_DO_PUBLICO = [
   // campanha viaja num argumento SEPARADO, falso por omissão. Deixar o email
   // para haver resposta não é aceitar publicidade.
   'feedbackDaRua',
+  // ── E31 · o kiosk do corredor ───────────────────────────────────────────
+  //
+  // O KDS exige uma pessoa com sessão iniciada: há alguém no tablet da cozinha.
+  // **No kiosk não há ninguém** — é um ecrã sozinho, e a primeira coisa que ele
+  // precisa de saber é a que organização pertence, que é a pergunta que a RLS
+  // não deixa fazer sem já se saber a resposta.
+  //
+  // A `kioskDoAparelho` resolve-a pela porta estreita `kiosk_do_aparelho`,
+  // `SECURITY DEFINER` com `search_path` fixo, que só responde por aparelhos
+  // ACTIVOS e devolve identificadores e o nome da unidade — nada do que está lá
+  // dentro. Entra aqui pela mesma razão que o `reservarDaRua`: uma excepção
+  // seria uma porta a mais.
+  //
+  // As outras quatro recebem o `deviceId` do endereço e vão à porta ANTES de
+  // abrirem escopo. Nenhuma aceita um `organizationId` de fora, que é a
+  // propriedade que esta lista mede.
+  //
+  // Todas recebem o `deviceId` do endereço e resolvem o inquilino lá dentro.
+  // **Nenhuma aceita um `organizationId` de fora**, que é a propriedade que
+  // esta lista mede — e o `comEscopo` vive dentro delas, no `kiosk-publico.ts`,
+  // fora do alcance da camada web.
+  'kioskDoAparelho', 'estadoParaOEcra', 'comecarNoKiosk', 'terminarNoKiosk',
+  'ligarPessoaNoKiosk', 'apagarPessoaNoKiosk',
 ];
 /**
  * ── E `src/visitante/` entra aqui, e isso APERTA em vez de aliviar ────────
@@ -151,11 +174,49 @@ const PORTAS_DO_PUBLICO = [
 // telas públicas da reserva, e fora desta expressão caía na regra GERAL — que lhe
 // pediria `resolverPedido`, uma coisa que quem reserva da rua não tem e nunca vai
 // ter. Ficava vermelho para sempre pelo motivo errado.
-const SO_PELO_PUBLICO = /^(app\/(r|api\/publico)|src\/(visitante|reserva))\//;
+// ── E31 · o kiosk entra AQUI, e isso aperta em vez de aliviar ─────────────
+//
+// O kiosk é uma superfície sem sessão de utilizador: um ecrã sozinho num
+// corredor. Fora desta expressão caía na regra GERAL, que lhe pediria
+// `resolverPedido` — uma coisa que ele não tem e nunca vai ter. Ficava vermelho
+// para sempre pelo motivo errado, ou passava por uma excepção sem verificação,
+// que é uma porta.
+//
+// Aqui dentro vale-lhe a regra apertada: só as portas estreitas, e **nunca**
+// `comEscopo`. A primeira versão do E31 abria escopo no `carregar-kiosk.ts` e
+// esta guarda reprovou-a — o escopo mudou-se para dentro das portas, no
+// `kiosk-publico.ts`, que é onde o `src/reserva/` já o tinha.
+const SO_PELO_PUBLICO =
+  /^(app\/(r|api\/publico|api\/kiosk|\[idioma\]\/kiosk)|src\/(visitante|reserva|kiosk))\//;
 /** O que uma rota pública NÃO pode tocar: são os caminhos que exigem inquilino. */
 const PROIBIDO_NO_PUBLICO = ['comEscopo', 'comIdentidade', 'obterPrisma'];
 
 const TOCA_NA_BASE = ['@bossaos/db', 'obterPrisma', 'obterBase', 'comEscopo'];
+
+/**
+ * O código sem os comentários — e isto apanhou-me a 06/09.
+ *
+ * ── Uma guarda que lê prosa castiga quem documenta ────────────────────────
+ *
+ * O `carregar-kiosk.ts` explicava, num comentário, que a primeira versão dele
+ * abria `comEscopo` e porque é que isso estava errado. Esta guarda leu a
+ * palavra, chamou-lhe uso, e reprovou o ficheiro **pela explicação de já não o
+ * fazer**.
+ *
+ * É a terceira guarda deste projecto a cair no mesmo: a `validar-alergenios.sh`
+ * corrigiu-o a 05/09, a `validar-portas-mortas.sh` a 06/09 de manhã, e esta à
+ * tarde. A família é sempre a mesma — casar TEXTO de código sem distinguir
+ * código de prosa —, e a cura também: cortar os comentários antes de procurar.
+ *
+ * Não é um analisador sintáctico e não precisa de ser: só tem de tirar `//` até
+ * ao fim da linha, os blocos `/* … *\/` e o conteúdo das cadeias de texto, que
+ * é onde as três formas de falso positivo vivem.
+ */
+function semComentarios(fonte: string): string {
+  return fonte
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+}
 const ATRAVESSA_A_PORTA = ['resolverPedido', 'actorDoPedido', 'comEscopoDoPedido'];
 
 function ficheirosDaWeb(): string[] {
@@ -178,7 +239,7 @@ function semPorta(): string[] {
   for (const ficheiro of ficheirosDaWeb()) {
     const relativo = relative(WEB, ficheiro).split('\\').join('/');
     if (EXCEPCOES.has(relativo)) continue;
-    const conteudo = readFileSync(ficheiro, 'utf8');
+    const conteudo = semComentarios(readFileSync(ficheiro, 'utf8'));
     const toca = TOCA_NA_BASE.some((m) => conteudo.includes(m));
     if (!toca) continue;
 
@@ -303,7 +364,10 @@ describe('as rotas públicas têm exigência própria, não uma dispensa', () =>
       .filter((f) => SO_PELO_PUBLICO.test(f));
     assert.ok(publicas.length > 0, 'não havia rotas públicas para medir');
     for (const f of publicas) {
-      const conteudo = readFileSync(join(WEB, f), 'utf8');
+      // Pelo mesmo corte da `semPorta`: esta metade lia o ficheiro em bruto e
+      // teria continuado a acusar comentários depois de a outra deixar de o
+      // fazer — a mesma regra escrita duas vezes, e só uma das cópias correcta.
+      const conteudo = semComentarios(readFileSync(join(WEB, f), 'utf8'));
       if (!TOCA_NA_BASE.some((m) => conteudo.includes(m))) continue;
       assert.ok(
         PORTAS_DO_PUBLICO.some((m) => conteudo.includes(m)),

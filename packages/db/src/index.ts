@@ -358,7 +358,7 @@ export {
 
 export {
   RecusaDoKiosk, abrirSessaoDeKiosk, apagarPessoa, estadoDoKiosk, ligarPessoaAoPedido,
-  podeCobrar, sessaoViva, terminarSessao,
+  sessaoViva, terminarSessao,
   type MotivoDeSaida, type RecusaDeKiosk,
 } from './kiosk.ts';
 
@@ -369,4 +369,7 @@ export {
   type RecusaDeImpressao,
 } from './impressao.ts';
 
-export { kioskDoAparelho, type KioskPublico } from './kiosk-publico.ts';
+export {
+  apagarPessoaNoKiosk, comecarNoKiosk, estadoParaOEcra, kioskDoAparelho,
+  ligarPessoaNoKiosk, terminarNoKiosk, type KioskPublico,
+} from './kiosk-publico.ts';

@@ -183,7 +183,7 @@ export {
 } from './agregacao.ts';
 
 export {
-  SEGUNDOS_ATE_NAO_SABER, estadoDeImpressao, identidadeDeImpressao,
+  SEGUNDOS_ATE_NAO_SABER, estadoDeImpressao, identidadeDeImpressao, podeCobrar,
   marcaDaVia, renderizarComanda,
   type EnvioDeImpressao, type LeituraDeImpressao, type LinhaDeTalao,
 } from './impressao.ts';

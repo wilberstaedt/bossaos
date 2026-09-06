@@ -27,7 +27,9 @@ import { createHash, randomUUID } from 'node:crypto';
 import { projectarSite } from '@bossaos/domain';
 import { IDS } from './fixtures.ts';
 import {
-  abrirPrisma, limpar, PREFIXO, SLUG_DE_INSPECCAO, SLUG_DE_INSPECCAO_B,
+  abrirPrisma, limpar, ID_DA_IMPRESSORA_DE_INSPECCAO, ID_DO_KIOSK_DE_INSPECCAO,
+  ID_DO_KIOSK_PAUSADO,
+  PREFIXO, SLUG_DE_INSPECCAO, SLUG_DE_INSPECCAO_B,
 } from './inspeccao-comum.ts';
 
 export { SLUG_DE_INSPECCAO, SLUG_DE_INSPECCAO_B };
@@ -78,6 +80,15 @@ async function principal(): Promise<void> {
       });
       await prisma.productChannel.create({
         data: { organizationId: IDS.orgA, productId: p.id, canal: 'CARTA', visivel: true },
+      });
+      // ── E31 · o KIOSK é um canal, e a visibilidade é POR canal ────────
+      //
+      // A carta do kiosk não é a carta pública com outro nome: o E09 decidiu
+      // que a publicação é por canal, e o kiosk lê `KIOSK`. Sem esta linha a
+      // carta do kiosk vem vazia — e foi assim que a prova de navegador caiu
+      // na primeira corrida, a dizer «não tem produto nenhum».
+      await prisma.productChannel.create({
+        data: { organizationId: IDS.orgA, productId: p.id, canal: 'KIOSK', visivel: true },
       });
       // Um alérgeno declarado e os restantes por declarar: é a ficha real, e é
       // ela que a inspecção tem de conseguir mostrar num ecrã de 360 px sem
@@ -143,6 +154,15 @@ async function principal(): Promise<void> {
     await prisma.menuPublication.create({
       data: {
         organizationId: IDS.orgA, menuId: menu.id, canal: 'CARTA',
+        revisionId: revisao.id, publicadaPor: 'inspeccao@exemplo.example',
+      },
+    });
+    // A MESMA revisão, publicada também no canal do kiosk. É de propósito que
+    // seja a mesma: a carta do corredor e a carta da mesa dizem o mesmo, e uma
+    // divergência entre elas é um defeito, não uma funcionalidade.
+    await prisma.menuPublication.create({
+      data: {
+        organizationId: IDS.orgA, menuId: menu.id, canal: 'KIOSK',
         revisionId: revisao.id, publicadaPor: 'inspeccao@exemplo.example',
       },
     });
@@ -1719,6 +1739,126 @@ async function principal(): Promise<void> {
       },
     });
 
+    // ═══════════════════════════════════════════════════════════════════
+    // E31 · o kiosk, a impressora e os TRÊS estados de um envio
+    // ═══════════════════════════════════════════════════════════════════
+    //
+    // ── A semente TEM de trazer o caso mau ────────────────────────────────
+    //
+    // O estado que interessa a esta etapa é o do meio: **entregue à ponte e sem
+    // resposta**. Não se consegue observar com uma impressora que funciona, e
+    // uma semeadura que só criasse envios confirmados fazia a prova do «não
+    // sei» passar por vácuo — verde sobre um caso que não está lá.
+    //
+    // Por isso são três envios, e o do meio tem `entregue_em` **antigo**: uma
+    // hora atrás, muito para lá do limite. Se fosse `now()`, a leitura ainda
+    // dizia «entregue» e o ecrã do «não sei» ficava por medir.
+    await prisma.device.create({
+      data: {
+        id: ID_DO_KIOSK_DE_INSPECCAO,
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}kiosk do corredor`, estacao: 'SALA', estado: 'ACTIVO',
+      },
+    });
+
+    // Nasce POR TESTAR — sem `homologadaEm`. A tela DEV-005 tem de o dizer por
+    // palavras, e uma semeadura que a criasse homologada tirava esse caso do
+    // ecrã sem ninguém dar por isso.
+    await prisma.printer.create({
+      data: {
+        id: ID_DA_IMPRESSORA_DE_INSPECCAO,
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}cozinha`, destino: 'COZINHA',
+        modelo: 'Simulador', ligacao: 'PONTE',
+      },
+    });
+
+    const UMA_HORA = 3600_000;
+    const documento = () => randomUUID();
+    const enviosDeInspeccao = [
+      // 1. na fila
+      { estado: 'POR_ENVIAR' as const, entregueEm: null, respondidoEm: null, resposta: null,
+        conteudo: `${PREFIXO}Pedido A101\nKIOSK\n\n1 x Café` },
+      // 2. O CASO MAU: saiu, ninguém respondeu, e já passou muito tempo.
+      { estado: 'ENTREGUE_A_PONTE' as const, entregueEm: new Date(Date.now() - UMA_HORA),
+        respondidoEm: null, resposta: null,
+        conteudo: `${PREFIXO}Pedido A102\nKIOSK\n\n1 x Tortilla` },
+      // 3. o aparelho respondeu — e só por isso é que se pode dizer «imprimiu»
+      { estado: 'CONFIRMADO_PELO_APARELHO' as const,
+        entregueEm: new Date(Date.now() - UMA_HORA),
+        respondidoEm: new Date(Date.now() - UMA_HORA + 2000), resposta: 'ok: 1 talao',
+        conteudo: `${PREFIXO}Pedido A103\nKIOSK\n\n2 x Agua` },
+    ];
+    for (const envio of enviosDeInspeccao) {
+      const docId = documento();
+      await prisma.printJob.create({
+        data: {
+          organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+          printerId: ID_DA_IMPRESSORA_DE_INSPECCAO,
+          tipo: 'COMANDA', documentoId: docId, via: 1,
+          identidade: `COMANDA:${docId}:1`, ...envio,
+        },
+      });
+    }
+
+    // E uma SEGUNDA VIA, que é a única forma de a tela do KDS-016 poder mostrar
+    // a marca. A base recusa o conteúdo sem `VIA 2` — se esta linha entrar, é
+    // porque a marca lá está.
+    const docComVia = documento();
+    await prisma.printJob.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        printerId: ID_DA_IMPRESSORA_DE_INSPECCAO,
+        tipo: 'COMANDA', documentoId: docComVia, via: 2,
+        identidade: `COMANDA:${docComVia}:2`,
+        estado: 'ENTREGUE_A_PONTE', entregueEm: new Date(Date.now() - UMA_HORA),
+        conteudo: `*** REIMPRESIÓN VIA 2 ***\n${PREFIXO}Pedido A102\nKIOSK\n\n1 x Tortilla`,
+      },
+    });
+
+    // ── O segundo kiosk: pausado por uma cobrança que ninguém consegue ver ─
+    //
+    // A pessoa foi-se embora, o dinheiro pode ter saído da conta dela, e não há
+    // ninguém no balcão para reclamar. O terminal PARA — e parar é caro, mas a
+    // alternativa é o produto decidir sozinho sobre dinheiro que não vê.
+    await prisma.device.create({
+      data: {
+        id: ID_DO_KIOSK_PAUSADO,
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        nome: `${PREFIXO}kiosk com cobranca por resolver`, estacao: 'SALA', estado: 'ACTIVO',
+      },
+    });
+    const contaPresa = await prisma.bill.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        numero: `${PREFIXO}K-001`, moeda: 'EUR',
+      },
+      select: { id: true },
+    });
+    await prisma.kioskSession.create({
+      data: {
+        organizationId: IDS.orgA, locationId: IDS.unidadeA2,
+        deviceId: ID_DO_KIOSK_PAUSADO, idioma: 'es-ES',
+        estado: 'ABERTA', billId: contaPresa.id,
+      },
+    });
+    await prisma.paymentAttempt.create({
+      data: {
+        organizationId: IDS.orgA, billId: contaPresa.id,
+        estado: 'INDETERMINADA', meio: 'CARTAO', montanteMenor: 1450,
+        chaveIdempotente: `${PREFIXO}k-001`,
+      },
+    });
+
+    // A porta estreita responde ANTES de o navegador tentar. Mesma razão da
+    // carta aqui em baixo: um erro de semeadura que aparece como «a inspecção
+    // falhou» manda procurar no sítio errado.
+    const porta = await prisma.$queryRawUnsafe<unknown[]>(
+      `SELECT * FROM kiosk_do_aparelho('${ID_DO_KIOSK_DE_INSPECCAO}'::uuid)`);
+    if (porta.length === 0) {
+      throw new Error('a porta do kiosk não responde depois de semeada');
+    }
+
     // Confirma que a carta responde ANTES de o navegador tentar. Sem isto, um
     // erro de semeadura aparecia como "a inspecção falhou", que manda procurar
     // no sítio errado.
@@ -1726,6 +1866,11 @@ async function principal(): Promise<void> {
       `SELECT * FROM publico_carta('${SLUG_DE_INSPECCAO}', 'CARTA'::"Canal")`);
     if (carta.length === 0) {
       throw new Error('a carta de inspecção não responde depois de semeada');
+    }
+    const doKiosk = await prisma.$queryRawUnsafe<unknown[]>(
+      `SELECT * FROM publico_carta('${SLUG_DE_INSPECCAO}', 'KIOSK'::"Canal")`);
+    if (doKiosk.length === 0) {
+      throw new Error('a carta do KIOSK não responde depois de semeada');
     }
     const doSite = await prisma.$queryRawUnsafe<unknown[]>(
       `SELECT * FROM publico_site('${SLUG_DE_INSPECCAO}')`);

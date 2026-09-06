@@ -46,6 +46,14 @@ export default async function DispositivosDaUnidade({
       {busca.pin === '1' ? <Aviso tom="sucesso" titulo={s.pin}>{m.comum.guardado}</Aviso> : null}
       {busca.erro === 'pin_fraco' ? <Aviso tom="perigo" titulo={s.pin}>{s.pinAjuda}</Aviso> : null}
 
+      {/* DEV-005 vive ao lado dos outros aparelhos: uma impressora é um
+          dispositivo do restaurante, e procurá-la noutro menu era a mesma
+          porta morta que o E30 fechou no painel de gestão. */}
+      <a className="bo-lista__ligacao" data-seccao="DEV-005"
+         href={`${base}/impressoras`}>
+        {m.kioskE31.impressoras}
+      </a>
+
       {dispositivos.length === 0 ? (
         <Aviso titulo={s.dispositivos}>{s.semDispositivos}</Aviso>
       ) : (

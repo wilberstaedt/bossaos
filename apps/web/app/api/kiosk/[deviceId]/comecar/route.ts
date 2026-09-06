@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { RecusaDoKiosk, abrirSessaoDeKiosk, comEscopo, kioskDoAparelho } from '@bossaos/db';
+import { RecusaDoKiosk, comecarNoKiosk } from '@bossaos/db';
 import { obterBase } from '../../../../../src/servidor.ts';
 
 /**
@@ -19,17 +19,15 @@ export async function POST(
   ctx: { params: Promise<{ deviceId: string }> },
 ) {
   const { deviceId } = await ctx.params;
-  const prisma = obterBase();
-
-  const kiosk = await kioskDoAparelho(prisma, deviceId);
-  if (!kiosk) return NextResponse.json({ erro: 'nao_encontrado' }, { status: 404 });
 
   const dados = await pedido.formData().catch(() => null);
   const idioma = typeof dados?.get('idioma') === 'string' ? String(dados.get('idioma')) : 'es-ES';
 
   try {
-    await comEscopo(prisma, { organizationId: kiosk.organizationId }, (db) =>
-      abrirSessaoDeKiosk(db, kiosk.organizationId, kiosk.locationId, deviceId, idioma));
+    // A porta resolve o inquilino e abre o escopo lá dentro. Esta rota não sabe
+    // — nem pode saber — a que organização o aparelho pertence.
+    const aberta = await comecarNoKiosk(obterBase(), deviceId, idioma);
+    if (!aberta) return NextResponse.json({ erro: 'nao_encontrado' }, { status: 404 });
   } catch (erro) {
     if (erro instanceof RecusaDoKiosk) {
       // Aparelho por parear ou revogado: o ecrã pausado diz o que se passa, e
