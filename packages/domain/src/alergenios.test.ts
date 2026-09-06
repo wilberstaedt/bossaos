@@ -1,8 +1,9 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  ALERGENIOS_UE, avisoDeSeguranca, estadoDoAlergenio, fichaDeAlergenios,
-  porDeclarar, PREFERENCIAS, revisaoDaFicha, type Declaracao,
+  ALERGENIOS_UE, avisoDeSeguranca, avisosPorAlergenio, estadoDoAlergenio,
+  fichaDeAlergenios, porDeclarar, PREFERENCIAS, revisaoDaFicha,
+  type Declaracao, type LinhaDeAlergenio,
 } from './alergenios.ts';
 
 /**
@@ -138,5 +139,82 @@ describe('4. Revisão: responsável e data, e a mais ANTIGA', () => {
     const r = revisaoDaFicha(todas);
     assert.equal(r.completa, true);
     assert.equal(porDeclarar(todas), 0);
+  });
+});
+
+/**
+ * 5. O TOM de cada linha — a metade que decide se alguém come o que não pode
+ *
+ * ── Porque é que este grupo existe, e o que ele diz sobre o anterior ───────
+ *
+ * O `avisoDeSeguranca` tinha treze casos. A `avisosPorAlergenio`, que é a que
+ * a tela pública chama e a que decide o TOM, **não tinha nenhum**. Tirar a
+ * cadeia de ternários da tela e pô-la ao lado da regra melhorou a estrutura e
+ * **não mediu nada** — a diferença era que passava a viver num módulo testado,
+ * o que faz a cobertura parecer melhor enquanto a propriedade continua por
+ * medir. É a forma do dia: o número sobe e a pergunta fica por responder.
+ *
+ * O que se pergunta aqui é uma coisa só, e é a que custa: **`DESCONHECIDO` tem
+ * de sair `neutro` e nunca `sucesso`.** As outras três estão cá porque um
+ * `tomDe` que devolvesse sempre `neutro` passava nessa sozinha.
+ */
+describe('5. O tom de cada linha, e o que nunca pode partilhar aparência', () => {
+  const LINHA = (a: string, e: LinhaDeAlergenio['estado']): LinhaDeAlergenio =>
+    ({ alergenio: a, estado: e });
+
+  const tomDe = (ficha: readonly LinhaDeAlergenio[], a: string) =>
+    avisosPorAlergenio(ficha).find((l) => l.alergenio === a)?.tom;
+
+  it('um caso por estado: os quatro tons saem certos', () => {
+    const ficha = [
+      LINHA('gluten', 'CONTEM'),
+      LINHA('soja', 'PODE_CONTER'),
+      LINHA('peixe', 'NAO_CONTEM'),
+      LINHA('mostarda', 'DESCONHECIDO'),
+    ];
+    assert.equal(tomDe(ficha, 'gluten'), 'perigo');
+    assert.equal(tomDe(ficha, 'soja'), 'aviso');
+    assert.equal(tomDe(ficha, 'peixe'), 'sucesso');
+    assert.equal(tomDe(ficha, 'mostarda'), 'neutro');
+  });
+
+  it('DESCONHECIDO nunca partilha o tom de NAO_CONTEM', () => {
+    // O caso que paga a etapa. Se estes dois se encontrarem, a tela diz
+    // «não contém» a um alérgeno que ninguém declarou — e a diferença entre
+    // as duas frases é alguém no hospital.
+    const ficha = [LINHA('mostarda', 'DESCONHECIDO'), LINHA('peixe', 'NAO_CONTEM')];
+    assert.notEqual(tomDe(ficha, 'mostarda'), tomDe(ficha, 'peixe'));
+    assert.equal(tomDe(ficha, 'mostarda'), 'neutro');
+  });
+
+  it('CONTROLO NEGATIVO: com DESCONHECIDO a dar sucesso, os dois casos acima caem', () => {
+    // O plante, feito na leitura e não no argumento: um `tomDe` que trata o
+    // não declarado como declarado-ausente. É exactamente o defeito que a
+    // cadeia de ternários da tela podia ter e ninguém veria.
+    const tomComDefeito = (ficha: readonly LinhaDeAlergenio[], a: string) => {
+      const aviso = avisoDeSeguranca(ficha);
+      return aviso.contem.includes(a) ? 'perigo'
+        : aviso.podeConter.includes(a) ? 'aviso'
+        : 'sucesso'; // ← o defeito: o resto cai todo em «não contém»
+    };
+    const ficha = [LINHA('mostarda', 'DESCONHECIDO'), LINHA('peixe', 'NAO_CONTEM')];
+
+    // O primeiro caso caía:
+    assert.equal(tomComDefeito(ficha, 'mostarda'), 'sucesso');
+    // E o segundo também, porque os dois passariam a ser indistinguíveis:
+    assert.equal(tomComDefeito(ficha, 'mostarda'), tomComDefeito(ficha, 'peixe'));
+
+    // E a função real continua a separá-los — senão isto não provava nada.
+    assert.notEqual(tomDe(ficha, 'mostarda'), tomDe(ficha, 'peixe'));
+  });
+
+  it('a ficha completa mantém a ordem e o tamanho — nada se perde pelo caminho', () => {
+    // Sem isto, um `avisosPorAlergenio` que devolvesse só os perigosos passava
+    // em tudo acima e escondia treze linhas da tela.
+    const ficha = ALERGENIOS_UE.map((a) => LINHA(a, 'DESCONHECIDO'));
+    const saida = avisosPorAlergenio(ficha);
+    assert.equal(saida.length, ALERGENIOS_UE.length);
+    assert.deepEqual(saida.map((l) => l.alergenio), [...ALERGENIOS_UE]);
+    assert.ok(saida.every((l) => l.tom === 'neutro'));
   });
 });

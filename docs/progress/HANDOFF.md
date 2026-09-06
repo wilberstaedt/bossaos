@@ -86,6 +86,20 @@ E a guarda passou a vigiar o lado que corre: secção 4 nova, que reprova cópia
 regra em `apps/web/app/r/` **e** exige que a tela chame `avisosPorAlergenio` —
 porque não copiar também se consegue não mostrando nada.
 
+**E faltava metade, apanhada pelo sénior a 06/09.** A `avisosPorAlergenio` não
+tinha **um único teste**. O `avisoDeSeguranca` tinha treze; a função nova, que é
+a que decide o TOM e a que a tela chama, não aparecia em prova nenhuma. Tirar o
+ternário da tela e pô-lo ao lado da regra melhorou a estrutura e **não mediu
+nada** — a única diferença era passar a viver num módulo testado, o que faz a
+cobertura parecer **melhor do que antes** enquanto a propriedade continua por
+medir. É a forma do dia, e desta vez fui eu a produzi-la.
+
+Grupo 5 no `alergenios.test.ts`: um caso por estado (quatro asserções),
+`DESCONHECIDO` nunca partilha o tom de `NAO_CONTEM`, a ficha completa não perde
+linhas, e um controlo negativo dentro do teste. **Medido com plante na função
+real:** trocar o último ramo por `'sucesso'` acende **4 falhas, todas no grupo
+5**, e nada mais; reposto, 326 a passar e 0 a falhar.
+
 ### Três guardas apanhadas de caminho, e uma delas era minha de há minutos
 
 **`validar-portas-mortas.sh` acusou PROSA.** Reprovou o meu próprio comentário a
