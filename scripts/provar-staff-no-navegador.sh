@@ -425,7 +425,20 @@ import io
 p = 'packages/db/prisma/inspeccao-comum.ts'
 s = io.open(p, encoding='utf-8').read()
 antigo = "numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example'"
-assert s.count(antigo) == 7, 'o cracha dos pedidos do arnes nao esta onde se esperava'
+# ── E a asserção é sobre a PROPRIEDADE, não sobre um número mágico ────────
+#
+# Isto dizia `== 7` e o ficheiro tem OITO ocorrências — sete nos `DELETE` e uma
+# na contagem do fecho, a da linha 422. Está a 8 há pelo menos oito commits, e o
+# plante nunca aplicou desde então: o `assert` disparava, ninguém lia o código de
+# saída, e o controlo corria contra um ficheiro intacto.
+#
+# Apareceu agora porque a correcção 7 pôs este guião a passar pelo `plantar()`,
+# que LÊ o código de saída. Foi a primeira coisa que ela apanhou.
+#
+# Um número exacto apodrece na primeira vez que alguém acrescenta um `DELETE`. A
+# propriedade é «o crachá está em uso e vai ser todo trocado» — e o quantos
+# diz-se em vez de se exigir.
+assert s.count(antigo) >= 7, f'o cracha dos pedidos do arnes aparece {s.count(antigo)} vezes, e esperavam-se 7 ou mais'
 # Volta ao cracha antigo: so o nome. Nada estoira, nada avisa — e o lixo fica.
 io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, "numero LIKE '${PREFIXO}%'"))
 PYCEGO

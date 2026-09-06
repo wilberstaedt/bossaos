@@ -179,9 +179,31 @@ export async function resolverAlvos(): Promise<Alvos> {
   await sql.connect();
   try {
     return {
-      menuId: await um(sql, `SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%' ORDER BY nome, id LIMIT 1`, 'um menu'),
-      categoryId: await um(sql, `SELECT id FROM categories WHERE nome LIKE '${PREFIXO}%' ORDER BY nome, id LIMIT 1`, 'uma categoria'),
-      productId: await um(sql, `SELECT id FROM products WHERE nome LIKE '${PREFIXO}%' ORDER BY nome, id LIMIT 1`, 'um produto'),
+      // ── O ÂMBITO: estes três existem em DUAS casas ────────────────────────
+      //
+      // A semente cria carta, categoria e pratos na organização A **e** na B —
+      // a B existe para provar o isolamento. Sem filtro de organização, o
+      // `ORDER BY nome` escolhe pelo alfabeto e pode cair na casa errada: o
+      // `insp-Arroz de sepia y alcachofas` é da **B**, e ordena antes dos
+      // quatro pratos da A.
+      //
+      // A prova pedia então um produto da B dentro de uma unidade da A, e
+      // recebia 404. **O 404 estava certo** — era o isolamento entre inquilinos
+      // a funcionar. O defeito era o alvo.
+      //
+      // Medido a 06/09: dos 32 alvos com organização verificável, **dois**
+      // caíam noutra casa (`categoryId` e `productId`); o `menuId` calhava
+      // certo, com a mesma lotaria. E das nove tabelas que os alvos consultam
+      // por `LIKE`, só estas três têm linhas em duas organizações — as outras
+      // seis vivem só na A, e por isso não levam filtro que não precisam.
+      //
+      // O `ORDER BY` que torna isto determinista foi posto hoje para tirar a
+      // lotaria: tirou-a, e transformou um defeito intermitente num permanente.
+      // O `brandId`, o `membershipId` e o `locationId` já filtravam por `ORG_A`
+      // — metade dos alvos sabia de que casa era e a outra metade não.
+      menuId: await um(sql, `SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%' AND organization_id = '${ORG_A}' ORDER BY nome, id LIMIT 1`, 'um menu'),
+      categoryId: await um(sql, `SELECT id FROM categories WHERE nome LIKE '${PREFIXO}%' AND organization_id = '${ORG_A}' ORDER BY nome, id LIMIT 1`, 'uma categoria'),
+      productId: await um(sql, `SELECT id FROM products WHERE nome LIKE '${PREFIXO}%' AND organization_id = '${ORG_A}' ORDER BY nome, id LIMIT 1`, 'um produto'),
       groupId: await um(sql, `SELECT id FROM modifier_groups WHERE nome LIKE '${PREFIXO}%' ORDER BY nome, id LIMIT 1`, 'um grupo de opções'),
       brandId: await um(sql, `SELECT id FROM brands WHERE organization_id = '${ORG_A}' ORDER BY nome, id LIMIT 1`, 'uma marca'),
       membershipId: await um(

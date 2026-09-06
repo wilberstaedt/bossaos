@@ -28,6 +28,64 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## Correcção 10 do E34 — o alvo era de outra casa
+
+**O diagnóstico de origem foi retirado pelo sénior** (a cadeia dos identificadores
+que derivam entre semeaduras: o `staff-telas.spec.ts` resolve os alvos num
+`beforeAll`, depois do `globalSetup`, e não no topo do módulo). Revi os
+identificadores fixos que tinha escrito por causa dele — e confirmei a
+retractação por medição: **com os 36 alvos pinados e ZERO a derivar, a `staff`
+continuava a falhar.**
+
+**A raiz é o ÂMBITO do alvo.** O `alvos.ts` resolvia `menuId`, `categoryId` e
+`productId` com `LIKE 'insp-%'` e `ORDER BY nome` **sem filtro de organização** —
+enquanto o `brandId`, o `membershipId` e o `locationId` já filtravam por `ORG_A`.
+Metade dos alvos sabia de que casa era e a outra metade não. O produto escolhido
+era o `insp-Arroz de sepia y alcachofas`, da organização **B**, e a unidade do
+Staff é da **A**: a prova pedia um produto de uma casa dentro de outra, e recebia
+404. **O 404 estava certo** — era o isolamento entre inquilinos a funcionar.
+
+**Medido antes de aplicar, e o número é mais apertado do que a lista:** dos 32
+alvos com organização verificável, **dois** caíam noutra casa (`categoryId` e
+`productId`); o `menuId` calhava certo, com a mesma lotaria. E das nove tabelas
+que os alvos consultam por `LIKE`, **só três têm linhas em duas organizações** —
+`menus`, `categories`, `products`. As outras seis vivem só na A e não levam
+filtro que não precisam.
+
+**Resultado:** a `staff` passa de morta a **31 casos de navegador verdes** (23
+telas × 5 larguras, mais toque, contraste, três idiomas e a fila), com dez
+controlos negativos a disparar.
+
+### E a correcção 7 apanhou a sua primeira presa sozinha
+
+O único vermelho que sobrou na corrida completa foi *«o plante NÃO APLICOU»*: o
+controlo 11 exigia `s.count(cracha) == 7` e o ficheiro tem **oito** — sete nos
+`DELETE` e uma na contagem do fecho. **Está a oito há pelo menos oito commits**, e
+o plante não aplicava desde então: o `assert` disparava, ninguém lia o código de
+saída, e o controlo corria contra um ficheiro intacto. Só apareceu porque a
+correcção 7 pôs este guião a passar pelo `plantar()`. Trocado por `>= 7` —
+um número exacto apodrece na primeira vez que alguém acrescenta um `DELETE` — e
+**verificado à parte: o plante aplica e troca os crachás**.
+
+**Fica dito um limite da `validar-plantes`:** ela mede que a **âncora existe**, e
+aqui existia; o que falhava era a **contagem**. Um plante pode estar vivo para a
+guarda e morto na corrida.
+
+### O que NÃO está medido
+
+A corrida completa da `staff` **depois** do `>= 7` — a que lancei foi
+interrompida a meio (`Terminated: 15`), e o vermelho que ela mostrou no controlo
+7 é o sinal, não um defeito: na corrida completa anterior esse controlo está
+`ok`. E a `visitante`, que usa o mesmo `productId` no `MENU-006`
+(`${publico}/menu/produto/${a.productId}/pedir`) e era uma das que falhavam no
+corredor: **provável**, não medido.
+
+**E a interrupção deixou rasto:** o `packages/db/src/dispositivos.ts` ficou com o
+plante do controlo 8 aplicado. O `trap restaurar` só corre se o processo puder
+correr, e um sinal duro não lhe dá essa hipótese. Reposto do git antes de
+qualquer commit.
+
+
 ## Correcção 7 do E34 — os plantes em letra morta, e a guarda que os media
 
 **Fechada, e o número mudou depois de eu medir.** A guarda dizia 19 plantes
