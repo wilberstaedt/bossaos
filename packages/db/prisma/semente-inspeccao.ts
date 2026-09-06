@@ -29,7 +29,8 @@ import { IDS } from './fixtures.ts';
 import {
   abrirPrisma, limpar, ID_DA_IMPRESSORA_DE_INSPECCAO, ID_DO_KIOSK_DE_INSPECCAO,
   ID_DO_KIOSK_PAUSADO,
-  CHAVE_DE_INSPECCAO, CLIENTE_SAAS_DE_INSPECCAO, PREFIXO, SLUG_DE_INSPECCAO, SLUG_DE_INSPECCAO_B,
+  CHAVE_DE_INSPECCAO, CLIENTE_SAAS_DE_INSPECCAO,
+  ID_DA_SESSAO_ESQUECIDA, ID_DA_SESSAO_VIVA, PREFIXO, SLUG_DE_INSPECCAO, SLUG_DE_INSPECCAO_B,
 } from './inspeccao-comum.ts';
 
 export { SLUG_DE_INSPECCAO, SLUG_DE_INSPECCAO_B };
@@ -2018,6 +2019,138 @@ async function principal(): Promise<void> {
     });
     if (resolvido?.organizationIdResolvido !== IDS.orgA) {
       throw new Error('o evento que alegou a B não ficou na A: a semente não monta o caso');
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // E33 · plataforma, suporte e governança
+    // ═══════════════════════════════════════════════════════════════════
+    //
+    // ── A semente traz o CASO MAU: a sessão que ninguém fechou ────────────
+    //
+    // Uma sessão viva e uma **expirada**, lado a lado. A segunda é a que decide
+    // a fronteira 1: ninguém a fechou, e ela deixou de valer na mesma. Com uma
+    // só, a tela mostrava um estado e o par não se via.
+
+    // Quem entra é pessoal da plataforma. Sem isto, a porta privilegiada recusa.
+    await prisma.platformStaff.upsert({
+      where: { userId: IDS.utilizadorA },
+      update: {},
+      create: { userId: IDS.utilizadorA, motivo: `${PREFIXO}arnes` },
+    });
+
+    // A política da casa, escrita por ela: sessões de no máximo 60 minutos.
+    await prisma.accessPolicy.upsert({
+      where: { organizationId: IDS.orgA },
+      update: { duracaoMaximaMin: 60, actualizadaPor: `${PREFIXO}dono` },
+      create: {
+        organizationId: IDS.orgA, exigeConsentimento: false,
+        duracaoMaximaMin: 60, actualizadaPor: `${PREFIXO}dono`,
+      },
+    });
+
+    const agora = Date.now();
+    await prisma.supportSession.create({
+      data: {
+        id: ID_DA_SESSAO_VIVA,
+        organizationId: IDS.orgA, staffUserId: IDS.utilizadorA,
+        staffEmail: `${PREFIXO}ana@bossa.example`,
+        motivo: 'o cliente reportou pedidos a desaparecer da fila da cozinha',
+        ambito: ['LEITURA'],
+        abertaEm: new Date(agora - 5 * 60_000),
+        expiraEm: new Date(agora + 55 * 60_000),
+      },
+    });
+
+    // ── E a esquecida ─────────────────────────────────────────────────────
+    //
+    // `terminadaEm` a NULO e `expiraEm` no passado. Ninguém a fechou; ela
+    // deixou de valer na mesma. É o estado que a PLAT-007 conta, e sem ele o
+    // contador ficava a zero por vácuo.
+    //
+    // Escreve-se pela credencial de MIGRAÇÃO, e não pela porta privilegiada: a
+    // porta calcula `expira_em` a partir de agora, e por isso não consegue
+    // criar uma que já expirou — o que está certo em serviço e é uma limitação
+    // aqui. O arnês é o único sítio onde se precisa disso.
+    await prisma.supportSession.create({
+      data: {
+        id: ID_DA_SESSAO_ESQUECIDA,
+        organizationId: IDS.orgA,
+        // ── OUTRA pessoa, e não por acaso ───────────────────────────────
+        //
+        // O índice impede uma segunda sessão POR FECHAR da mesma pessoa na
+        // mesma casa. A esquecida é do Bruno e a viva é da Ana — que é o caso
+        // real: uma sessão de ontem à noite que ficou aberta, e outra de hoje.
+        //
+        // Foi a semeadura que apanhou isto: escrevi as duas com a mesma pessoa
+        // e a base recusou. O índice tinha razão, e o nome dele é que mentia.
+        staffUserId: IDS.utilizadorB,
+        staffEmail: `${PREFIXO}bruno@bossa.example`,
+        motivo: 'a impressora da cozinha nao responde desde as vinte e uma',
+        ambito: ['LEITURA', 'DADOS_OPERACIONAIS'],
+        abertaEm: new Date(agora - 180 * 60_000),
+        expiraEm: new Date(agora - 120 * 60_000),
+      },
+    });
+
+    // Retenção por decidir: as três colunas a NULO. É o que a SET-013 mostra, e
+    // «vazio» tem de aparecer como vazio e não como zero.
+    await prisma.retentionPolicy.upsert({
+      where: { organizationId: IDS.orgA },
+      update: { actualizadaPor: `${PREFIXO}dono` },
+      create: { organizationId: IDS.orgA, actualizadaPor: `${PREFIXO}dono` },
+    });
+
+    await prisma.helpTicket.create({
+      data: {
+        organizationId: IDS.orgA, assunto: `${PREFIXO}A carta nao abre no kiosk`,
+        corpo: 'Desde ontem o kiosk do corredor mostra a carta vazia.',
+        abertoPor: `${PREFIXO}dono@casa.example`,
+        estado: 'RESPONDIDO', respondidoEm: new Date(),
+        respondidoPor: `${PREFIXO}ana@bossa.example`,
+      },
+    });
+
+    // Um incidente público e aberto: a HELP-004 tem de o mostrar.
+    await prisma.platformIncident.create({
+      data: {
+        titulo: `${PREFIXO}Lentidao nos relatorios`,
+        resumo: 'Os relatorios estao a demorar mais do que o habitual. Estamos a ver.',
+        estado: 'A_INVESTIGAR', publico: true,
+      },
+    });
+
+    await prisma.abuseReport.create({
+      data: {
+        organizationId: IDS.orgA, origem: `${PREFIXO}formulario publico`,
+        motivo: 'texto ofensivo no nome de um produto',
+      },
+    });
+
+    // Um trabalho falhado, para a PLAT-014 ter o que reprocessar.
+    await prisma.platformJob.create({
+      data: {
+        organizationId: IDS.orgA, tipo: `${PREFIXO}envio`, alvo: 'insp-1',
+        tentativa: 1, identidade: `${PREFIXO}envio:insp-1:1`,
+        estado: 'FALHOU', erro: 'o provedor devolveu 500',
+        terminadoEm: new Date(),
+      },
+    });
+
+    // Um segredo declarado e SEM valor — porque não há coluna para ele.
+    await prisma.platformSecret.create({
+      data: {
+        nome: 'INSP_SEGREDO_DE_PROVA',
+        descricao: 'Existe para a PLAT-017 ter o que mostrar. O valor vive no ambiente.',
+      },
+    });
+
+    // O caso da régua responde ANTES de o navegador tentar: tem de haver uma
+    // sessão expirada e uma viva, senão a semeadura está a montar outra coisa.
+    const esquecidas = await prisma.supportSession.count({
+      where: { terminadaEm: null, expiraEm: { lt: new Date() } },
+    });
+    if (esquecidas === 0) {
+      throw new Error('nenhuma sessão expirada: a semente não monta o caso da fronteira 1');
     }
 
     // A porta estreita responde ANTES de o navegador tentar. Mesma razão da

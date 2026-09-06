@@ -1,7 +1,7 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E33 — Administração da plataforma, suporte e governança (**19 telas**).
-**Estado:** **EM CURSO.** E32 assinado a 06/09 em `e13b318` (`docs/reviews/E32.md`). Contrato `plataforma-e-suporte.md` e régua `ALVO-E33.md` escritos **antes** do código.
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** E32 assinado a 06/09 em `e13b318`. Contrato `plataforma-e-suporte.md` e régua `ALVO-E33.md` escritos **antes** do código.
 
 > ## ⚠ AO CHEGAR AOS 100%: PARAR E LER `docs/RV100.md`
 >
@@ -12,43 +12,63 @@
 >
 > **E avisá-lo por push** — nos 100% e quando o RV100 arrancar. Pediu-o antes de
 > ir dormir. A ordem e o resto da fila estão em `docs/progress/DEPOIS-DOS-100.md`.
+>
+> _Reposto a 06/09: a minha reescrita do cabeçalho do E33 apagou este bloco, e a
+> `validar-gatilho-rv100.sh` apanhou-o. É a minha própria regra a apanhar-me —
+> o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
-**O que muda:** é a primeira etapa em que **um estranho fala com o sistema sem
-passar por tela nenhuma** — chega um pedido com uma chave, ou um webhook de fora,
-e o produto decide sozinho se acredita. E a primeira em que **o defeito rende
-dinheiro a quem o encontrar**: não é um erro que prejudica, é uma porta que se
-atravessa de propósito.
+**O que muda:** todas as outras deram poder a quem trabalha na casa. **Esta dá-o
+a quem vende o sistema** — a nós. Até aqui protegemos o restaurante de enganos e
+de estranhos; **aqui protegemo-lo de nós.** É a única etapa em que o atacante do
+modelo de ameaça somos nós próprios a agir de boa fé e com pressa.
 
-**O ACEITE QUE DECIDE, e a garantia é a FORMA da tabela.** A
-`saas_billing_events` **não tem** `organization_id` que o webhook possa
-preencher. Tem `organization_id_alegado` — o que o corpo *disse*, guardado para
-se poder denunciar — e `organization_id_resolvido`, que só a função privilegiada
-escreve, e sempre a partir da `saas_customers`. Um caminho que quisesse confiar
-no corpo teria de escrever numa coluna cujo nome diz que ela é uma alegação. E um
-gatilho recusa a resolução que a ligação não sustente: **a mentira não chega a
-ser escrita.**
+**As quatro condições da sessão de suporte, e nenhuma é decorativa.**
+**Temporária:** `expira_em` é `NOT NULL` e não há coluna `activa` — estar viva
+DERIVA de não ter fim e não ter expirado, porque um booleano é um estado que
+alguém escreve e esquece de reescrever. **Visível ao inquilino:** RLS por
+organização **para a casa a ver**, e é a única das quatro que não vive na base —
+as outras são restrições, esta é um ecrã. **Com âmbito** e **com motivo**, os
+dois com `CHECK`. E **a política é da casa**: não há rota da plataforma para a
+mudar, e a ausência é a garantia.
 
-E a rota **não tem por onde escolher**: as portas do `saas-publico.ts` não
-recebem escopo. A primeira versão recebia, e a rota teve de inventar uma
-organização para lha dar — usava a alegada quando parecia válida. Não mudava o
-resultado, e punha o valor não confiável no caminho onde os confiáveis viajam.
+**O rasto guarda a PESSOA, não o papel.** Um gatilho recusa `plataforma.%`
+assinado por «suporte», «sistema», «bot». É o segundo gatilho do E28 virado para
+dentro: a imutabilidade guarda a forma, isto guarda o sentido.
 
-**A fronteira do E05 sobrevive.** O `REVOKE` sobre `subscriptions` e
-`entitlement_grants` está repetido nesta migração de propósito, e há um controlo
-que concede essa escrita ao runtime e vê a prova acender.
+**O ACEITE QUE DECIDE — a fronteira do E05 sobrevive.** Esta é a etapa que traz a
+interface de escrita das concessões, e a que teria mais tentação de a abrir pelo
+lado de dentro. Não abre: o `REVOKE` está repetido pela terceira vez, e a escrita
+passa pela `conceder_capacidade` `SECURITY DEFINER`, que escreve a concessão **e
+a auditoria na mesma instrução**.
 
-**Provas (LOCAIS — a CI continua trancada):** `provas/integracoes.test.ts` **23**
-(duas organizações) · `integracoes.test.ts` **26** ·
-`scripts/provar-integracoes.sh` **7 controlos** (verifica no fim os objectos e as
-duas permissões do E05) · `inspeccao/integracoes.spec.ts` **25** (13 telas, 5
-larguras, ES/PT/EN, 44 px, WCAG, e a API por HTTP) ·
-`provar-integracoes-no-navegador.sh` **5 controlos** · `pnpm verificar` **0**.
+**Segurança, privacidade e exportação não ficam atrás do plano.** A única
+fronteira que não é técnica, e por isso está em SQL: um gatilho recusa oito
+capacidades protegidas. Numa constante do produto, muda-se num commit e ninguém
+repara; numa migração, muda-se com nome, data e revisor.
 
-**Detalhe e achados:** `docs/progress/E32.md`. O que mais vale a pena: **um
-`CHECK` que dá NULL passa** — `array_length('{}', 1)` é NULL, e a restrição do
-âmbito recusava zero elementos em todos os casos menos exactamente o único que
-interessa.
+**Provas (LOCAIS — a CI continua trancada):** `provas/plataforma.test.ts` **28** ·
+`plataforma.test.ts` **29** · `scripts/provar-plataforma.sh` **7 controlos**
+(verifica no fim as quatro permissões e os três gatilhos) ·
+`inspeccao/plataforma.spec.ts` **25** (19 telas, 5 larguras, ES/PT/EN, 44 px,
+WCAG) · `provar-plataforma-no-navegador.sh` **6 controlos** ·
+`provar-separacao-de-credenciais.sh` **0** · `pnpm verificar` **0**.
+
+**Detalhe e achados:** `docs/progress/E33.md`. O que mais vale a pena: o
+`@default(uuid())` do Prisma é do lado do **cliente**, e há **93 tabelas** com
+`id` UUID sem valor por omissão na base — invisível para quem escreve por Prisma,
+e a primeira pedra em que tropeça quem escreve SQL directo.
+
+## A tabela do E10 — decisão revertida pelo sénior a 06/09
+
+A `custom_domain_owners` **fica**, e sem RLS. O sénior verificou os três
+argumentos e reverteu a ordem de a apagar. O ponto cego ficou escrito no E34: a
+varredura de alcance lê TypeScript, e o chamador estava em **SQL** — dentro de
+uma `SECURITY DEFINER`, que é precisamente onde vive a lógica que o runtime não
+pode fazer sozinho.
+
+A excepção continua declarada na `validar-rls.sh` **com a verificação do GRANT**
+(secção 1b): o runtime tem `SELECT` e mais nada, e a guarda mede-o.
 
 ## As quatro correcções do E34 estão fechadas — 06/09
 

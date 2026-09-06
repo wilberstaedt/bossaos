@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { Aviso, Etiqueta } from '@bossaos/ui';
 import { formatarDataHora, mensagensDe, type Idioma } from '@bossaos/i18n';
-import { comIdentidade, obterPrisma } from '@bossaos/db';
+import { comIdentidade, obterPrisma, todasAsDenuncias } from '@bossaos/db';
 import { actorDoPedido } from '../../../../src/sessao.ts';
 import { obterEnv } from '../../../../src/servidor.ts';
 
@@ -32,8 +32,11 @@ export default async function Moderacao({
   if (!actor) redirect(`/${idioma}/auth/login`);
 
   const prisma = obterPrisma(obterEnv().DATABASE_URL);
+  // Pela função do motor, e não por uma consulta escrita outra vez aqui. A
+  // varredura de alcance apanhou-a sem chamador — e uma consulta repetida na
+  // tela é uma regra que a prova do motor não cobre.
   const denuncias = await comIdentidade(prisma, actor.id, (db) =>
-    db.abuseReport.findMany({ orderBy: { criadoEm: 'desc' }, take: 50 }));
+    todasAsDenuncias(db));
   const porResolver = denuncias.filter(
     (d: { resolvidoEm: Date | null }) => d.resolvidoEm === null);
 

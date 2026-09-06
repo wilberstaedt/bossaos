@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { Aviso, Etiqueta } from '@bossaos/ui';
 import { formatarDataHora, mensagensDe, type Idioma } from '@bossaos/i18n';
-import { comIdentidade, obterPrisma } from '@bossaos/db';
+import { comIdentidade, obterPrisma, trabalhosDaPlataforma } from '@bossaos/db';
 import { actorDoPedido } from '../../../../src/sessao.ts';
 import { obterEnv } from '../../../../src/servidor.ts';
 
@@ -29,8 +29,9 @@ export default async function TrabalhosDaPlataforma({
   if (!actor) redirect(`/${idioma}/auth/login`);
 
   const prisma = obterPrisma(obterEnv().DATABASE_URL);
-  const trabalhos = await comIdentidade(prisma, actor.id, (db) =>
-    db.platformJob.findMany({ orderBy: { criadoEm: 'desc' }, take: 100 }));
+  // Pela função do motor. A tela não repete a consulta.
+  const trabalhos = await comIdentidade(prisma, actor.id,
+    (db) => trabalhosDaPlataforma(db));
 
   const rotulo = (estado: string): string => {
     const v = (s as unknown as Record<string, unknown>)[`trabalho${estado}`];

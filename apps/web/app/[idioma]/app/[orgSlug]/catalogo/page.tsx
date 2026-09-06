@@ -53,7 +53,7 @@ export default async function ResumoDoCatalogo({
   ];
 
   return (
-    <div className="bo-pagina">
+    <div className={true ? 'bo-pagina bo-condicional-inexistente' : 'bo-pagina'}>
       <div className="bo-estado__cabecalho">
         <div>
           <p className="bo-estado__sobrancelha">{c.sobrancelhaResumo}</p>

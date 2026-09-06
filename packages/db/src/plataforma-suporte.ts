@@ -1,5 +1,6 @@
 import {
-  identidadeDeTrabalho, mostrarSegredo, sessaoViva, type AmbitoDeSuporte,
+  ambitoChega, identidadeDeTrabalho, mostrarSegredo, podeFicarAtrasDoPlano,
+  sessaoViva, type AmbitoDeSuporte,
 } from '@bossaos/domain';
 import type { ClienteComEscopo, ClienteComIdentidade } from './escopo.ts';
 
@@ -164,7 +165,10 @@ export async function sessaoAutoriza(
     throw new RecusaDePlataforma(
       sessao.terminadaEm !== null ? 'SESSAO_JA_TERMINADA' : 'SESSAO_EXPIRADA');
   }
-  if (!(sessao.ambito as AmbitoDeSuporte[]).includes(preciso)) {
+  // Chama a regra em vez de a repetir. Um `.includes` aqui era a mesma regra
+  // escrita duas vezes — e a segunda cópia fica fora do alcance da guarda, como
+  // aconteceu com os alergénios.
+  if (!ambitoChega(sessao.ambito as AmbitoDeSuporte[], preciso)) {
     throw new RecusaDePlataforma('FORA_DE_AMBITO', preciso);
   }
   return sessao;
@@ -220,6 +224,17 @@ export async function concederCapacidade(
     readonly motivo: string;
   },
 ): Promise<string> {
+  // ── Não se concede o que já é de toda a gente ───────────────────────────
+  //
+  // Segurança, privacidade e exportação não ficam atrás do plano — logo, também
+  // não se «concedem» como adicional. Uma concessão dessas passaria a ideia de
+  // que a casa não as tinha antes, e é essa ideia que abre a porta a alguém
+  // tirá-las um dia.
+  if (!podeFicarAtrasDoPlano(dados.capacidade)) {
+    throw new RecusaDePlataforma('CAPACIDADE_PROTEGIDA',
+      `${dados.capacidade} já é de todas as casas, em qualquer plano`);
+  }
+
   try {
     const linhas = await db.$queryRaw<{ conceder_capacidade: string }[]>`
       SELECT conceder_capacidade(
@@ -363,10 +378,22 @@ export function incidentesTodos(db: ClienteComEscopo | ClienteComIdentidade) {
   return db.platformIncident.findMany({ orderBy: { comecouEm: 'desc' }, take: 50 });
 }
 
-export function denuncias(db: ClienteComEscopo, organizationId: string) {
-  return db.abuseReport.findMany({
-    where: { organizationId }, orderBy: { criadoEm: 'desc' }, take: 50,
-  });
+/**
+ * As denúncias, para a moderação da plataforma (PLAT-018).
+ *
+ * ── Havia aqui uma versão por inquilino, e foi apagada ────────────────────
+ *
+ * A varredura de alcance apanhou-a sem chamador: a moderação é da plataforma e
+ * lê tudo, e não há tela de inquilino que veja denúncias sobre si próprio — nem
+ * deve haver, porque avisar o denunciado é a forma mais rápida de o problema
+ * mudar de sítio.
+ *
+ * Podia tê-la ligado a alguma coisa para calar a guarda. A resposta certa era
+ * apagá-la, como no E32: duas funções com o mesmo nome e âmbitos diferentes são
+ * o convite para alguém chamar a errada.
+ */
+export function todasAsDenuncias(db: ClienteComEscopo | ClienteComIdentidade) {
+  return db.abuseReport.findMany({ orderBy: { criadoEm: 'desc' }, take: 50 });
 }
 
 export function politicaDeRetencao(db: ClienteComEscopo, organizationId: string) {

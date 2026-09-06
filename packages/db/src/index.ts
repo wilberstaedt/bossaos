@@ -392,9 +392,9 @@ export {
 
 export {
   RecusaDePlataforma, abrirPedidoDeAjuda, abrirSessaoDeSuporte, auditoriaDaCasa,
-  concederCapacidade, denuncias, enfileirarTrabalho, guardarPoliticaDeAcesso,
+  concederCapacidade, enfileirarTrabalho, guardarPoliticaDeAcesso,
   guardarPoliticaDeRetencao, incidentesPublicos, incidentesTodos,
   pedidosDeAjuda, politicaDeAcesso, politicaDeRetencao, reprocessarTrabalho,
   segredosDaPlataforma, sessaoAutoriza, sessoesDaCasa, terminarSessaoDeSuporte,
-  trabalhosDaPlataforma, type RecusaDaPlataforma,
+  todasAsDenuncias, trabalhosDaPlataforma, type RecusaDaPlataforma,
 } from './plataforma-suporte.ts';

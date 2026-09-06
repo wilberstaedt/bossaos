@@ -1,0 +1,26 @@
+-- E33 · o índice chamava-se «viva» e o que ele impede é «por fechar»
+--
+-- ── Um nome que mente é um comentário que mente ────────────────────────────
+--
+-- `uma_sessao_viva_por_pessoa_e_casa` tem a condição `terminada_em IS NULL`. Mas
+-- **viva** neste projecto é uma coisa derivada: não terminada **e** não
+-- expirada. Uma sessão que expirou e que ninguém fechou não está viva — e o
+-- índice continuava a contá-la.
+--
+-- Consequência medida na semeadura do arnês: criar a sessão esquecida (expirada,
+-- por fechar) e depois uma viva para a mesma pessoa na mesma casa dava
+-- `duplicate key`. O índice estava a fazer uma coisa razoável com um nome que
+-- descrevia outra.
+--
+-- ── E porque é que a condição NÃO passa a incluir a expiração ─────────────
+--
+-- Porque não pode: `now()` não é imutável, e o Postgres recusa-o num predicado
+-- de índice. Não é uma limitação a contornar — é a base a dizer que um índice
+-- não pode depender do relógio.
+--
+-- Fica a condição que ela consegue garantir, com o nome certo. E o efeito é
+-- defensável por si: depois de uma sessão expirar sem ninguém a fechar, a mesma
+-- pessoa não abre outra naquela casa sem fechar a anterior. É um atrito, e é do
+-- lado certo — obriga a arrumar o que ficou aberto.
+ALTER INDEX "uma_sessao_viva_por_pessoa_e_casa"
+  RENAME TO "uma_sessao_por_fechar_por_pessoa_e_casa";

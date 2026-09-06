@@ -104,6 +104,16 @@ export const CLIENTE_SAAS_DE_INSPECCAO = 'insp-cus_A';
  */
 export const CHAVE_DE_INSPECCAO = 'bk_arnes-nao-usar-fora-da-inspeccao';
 
+/**
+ * A sessão de suporte do arnês — e as DUAS que a semente cria.
+ *
+ * Uma viva e uma **expirada**. A segunda é a que torna a etapa mensurável: uma
+ * sessão que ninguém fechou e que deixou de valer é o caso que decide a
+ * fronteira 1, e sem ela a tela mostra um estado só e o par não se vê.
+ */
+export const ID_DA_SESSAO_VIVA = 'aaaa1111-1111-4111-8111-9e33c0000001';
+export const ID_DA_SESSAO_ESQUECIDA = 'aaaa1111-1111-4111-8111-9e33c0000002';
+
 /** Abre a ligação com a credencial de MIGRAÇÃO, que é a que pode escrever isto. */
 export function abrirPrisma(): PrismaClient {
   const url = process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL;
@@ -182,6 +192,20 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     ALTER TABLE bill_adjustments      DISABLE TRIGGER USER;
     ALTER TABLE payments              DISABLE TRIGGER USER;
     ALTER TABLE refunds               DISABLE TRIGGER USER;
+    -- ── E33 · plataforma, suporte e governanca ───────────────────────────
+    --
+    -- A auditoria NAO entra nesta lista: e append-only, e a base recusa apagar.
+    -- Uma etapa sobre governanca seria o ultimo sitio onde isso devia ser
+    -- possivel, e por isso as linhas ficam. A prova mede as SUAS.
+    DELETE FROM support_sessions   WHERE staff_email LIKE '${PREFIXO}%';
+    DELETE FROM access_policies    WHERE actualizada_por LIKE '${PREFIXO}%';
+    DELETE FROM retention_policies WHERE actualizada_por LIKE '${PREFIXO}%';
+    DELETE FROM help_tickets       WHERE aberto_por LIKE '${PREFIXO}%';
+    DELETE FROM abuse_reports      WHERE origem LIKE '${PREFIXO}%';
+    DELETE FROM platform_incidents WHERE titulo LIKE '${PREFIXO}%';
+    DELETE FROM platform_jobs      WHERE tipo LIKE '${PREFIXO}%';
+    DELETE FROM platform_secrets   WHERE nome LIKE 'INSP_%';
+
     -- ── E32 · as integracoes e a cobranca do SaaS ────────────────────────
     --
     -- Os eventos primeiro: a coluna resolvida aponta para organizations com

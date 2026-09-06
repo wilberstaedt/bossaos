@@ -347,6 +347,22 @@ describe('5 · O ACEITE DO SÉNIOR: a fronteira do E05 sobrevive', () => {
       })),
       (e: Error) => e instanceof RecusaDePlataforma && e.motivo === 'SEM_MOTIVO');
   });
+
+
+  it('e NÃO se concede o que já é de todas as casas', async () => {
+    // ── Porque é que isto é uma recusa e não uma concessão inofensiva ────
+    //
+    // Conceder «dados.exportar» como adicional passaria a ideia de que a casa
+    // não a tinha antes — e é essa ideia que abre a porta a alguém lha tirar um
+    // dia. A capacidade não se concede porque nunca esteve por conceder.
+    await assert.rejects(
+      () => comA((db) => concederCapacidade(db, IDS.orgA, {
+        capacidade: 'dados.exportar', quota: null, validoAte: null,
+        staffUserId: IDS.utilizadorA, staffEmail: `${PREFIXO}ana@bossa.example`,
+        motivo: MOTIVO,
+      })),
+      (e: Error) => e instanceof RecusaDePlataforma && e.motivo === 'CAPACIDADE_PROTEGIDA');
+  });
 });
 
 describe('6 · Segurança, privacidade e exportação NÃO ficam atrás do plano', () => {
