@@ -30,6 +30,7 @@
 | **E22–E24** dinheiro | [dinheiro](./dinheiro.md) | quatro entidades; indeterminado **não** é falhado |
 | **E25–E30** gestão | [modulos-de-gestao](./modulos-de-gestao.md) | custo desconhecido dá margem **indisponível** |
 - [`implantacao-e-piloto.md`](./implantacao-e-piloto.md) — Implantação e piloto: um backup que nunca foi restaurado é uma esperança; preparar não é publicar; a versão que responde tem de ser a que foi construída; e um passo feito à mão esconde a dependência que o script tem.
+- [`E34-o-acesso-do-suporte-le.md`](./E34-o-acesso-do-suporte-le.md) — Como é que o suporte LÊ o que lhe foi concedido: política `FOR SELECT` com predicado próprio, e não porta estreita nem organização no contexto. A organização vem da LINHA e nunca do chamador; a rota mantém a verificação explícita, porque é ela que dá o 403 honesto — sem ela «sem concessão» vira «sem linhas» e lê-se como 404.
 | **E32–E33** plataforma | [operacao-e-recuperacao](./operacao-e-recuperacao.md) | cópia nunca restaurada não é cópia |
 | qualquer uma | [overview](./overview.md) · [versions](./versions.md) | o mapa e as versões verificadas |
 
