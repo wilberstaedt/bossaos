@@ -114,7 +114,18 @@ export function fichaDeAlergenios(
     const d = declaracoes.find((x) => x.alergenio === a);
     return {
       alergenio: a,
-      estado: d ? d.estado : 'DESCONHECIDO',
+      // ── Chama a regra em vez de a repetir ──────────────────────────────
+      //
+      // Esta linha era `d ? d.estado : 'DESCONHECIDO'` — a MESMA regra do
+      // `estadoDoAlergenio`, escrita outra vez. E a consequência era a que a
+      // varredura de alcance do E34 mostra: o `estadoDoAlergenio` ficava sem
+      // um único chamador no produto, e a `validar-alergenios.sh` — que
+      // verifica a assinatura dele para garantir que não se pode inferir —
+      // vigiava uma função que o caminho vivo não passava.
+      //
+      // É a mesma forma do defeito da tela pública, apanhado a 06/09: a regra
+      // num sítio e o uso noutro, com a guarda do lado que não corre.
+      estado: estadoDoAlergenio(declaracoes, a),
       ...(d?.revistoPor ? { revistoPor: d.revistoPor } : {}),
       ...(d?.revistoEm ? { revistoEm: d.revistoEm } : {}),
     };

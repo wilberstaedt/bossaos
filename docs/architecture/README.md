@@ -13,6 +13,7 @@
 | --- | --- | --- |
 | **E03** isolamento | [prova-de-isolamento](./prova-de-isolamento.md) | os 4 casos, e o 3.º é o que dá sentido ao 2.º |
 | **E04** autenticação | [autenticacao-e-convites](./autenticacao-e-convites.md) | ausência × falta de permissão; papel vem do convite |
+- [`plataforma-e-suporte.md`](./plataforma-e-suporte.md) — Plataforma e suporte: a etapa em que protegemos o restaurante de NÓS. O suporte não vira dono em silêncio, o rasto guarda a pessoa e não o papel, e segurança, privacidade e exportação nunca ficam atrás do plano.
 | **E05** planos | [planos-e-limites](./planos-e-limites.md) | quota por configurar = **negado**, não ilimitado |
 | **E06** onboarding | [domain-model](./domain-model.md) · [permissions](./permissions.md) | de quem é cada dado |
 | **E07–E08** catálogo | [catalogo-e-publicacao](./catalogo-e-publicacao.md) | alérgeno vazio é **desconhecido**; publicar é versão |
