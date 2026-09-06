@@ -60,7 +60,7 @@ export {
   ALERGENIOS_UE, PREFERENCIAS, estadoDoAlergenio, fichaDeAlergenios,
   porDeclarar, revisaoDaFicha, avisoDeSeguranca, avisosPorAlergenio,
   type EstadoDeclarado, type EstadoDeAlergenio, type Declaracao,
-  type LinhaDeAlergenio, type AlergenioUE, type Preferencia, type TomDeAviso,
+  type LinhaDeAlergenio, type AlergenioUE, type Preferencia, type TomDoAlergenio,
 } from './alergenios.ts';
 
 export {

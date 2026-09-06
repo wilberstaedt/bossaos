@@ -161,10 +161,18 @@ export function revisaoDaFicha(
 }
 
 /**
- * O peso visual de um aviso. `neutro` é o que ninguém declarou — e o que nunca
- * pode partilhar a aparência de `sucesso`.
+ * O peso visual do aviso de UM alérgeno. `neutro` é o que ninguém declarou — e
+ * o que nunca pode partilhar a aparência de `sucesso`.
+ *
+ * ── Porque é que não se chama `TomDeAviso` ────────────────────────────────
+ *
+ * Chamava-se, e o `@bossaos/ui` já exporta um `TomDeAviso` com valores
+ * DIFERENTES (`info | sucesso | aviso | perigo`, sem `neutro`). Dois tipos com
+ * o mesmo nome em dois barris é um erro à espera de quem importe do lado
+ * errado — e a troca não daria erro nenhum em metade dos casos, porque três
+ * dos valores coincidem. O nome diz agora de que é o tom.
  */
-export type TomDeAviso = 'perigo' | 'aviso' | 'sucesso' | 'neutro';
+export type TomDoAlergenio = 'perigo' | 'aviso' | 'sucesso' | 'neutro';
 
 /**
  * O que se mostra a quem lê a carta.
@@ -212,9 +220,9 @@ export function avisoDeSeguranca(ficha: readonly LinhaDeAlergenio[]): {
  */
 export function avisosPorAlergenio(
   ficha: readonly LinhaDeAlergenio[],
-): readonly { alergenio: string; estado: EstadoDeAlergenio; tom: TomDeAviso }[] {
+): readonly { alergenio: string; estado: EstadoDeAlergenio; tom: TomDoAlergenio }[] {
   const aviso = avisoDeSeguranca(ficha);
-  const tomDe = (alergenio: string): TomDeAviso =>
+  const tomDe = (alergenio: string): TomDoAlergenio =>
     aviso.contem.includes(alergenio) ? 'perigo'
       : aviso.podeConter.includes(alergenio) ? 'aviso'
       : aviso.naoContem.includes(alergenio) ? 'sucesso'

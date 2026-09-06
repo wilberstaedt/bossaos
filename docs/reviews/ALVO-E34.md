@@ -275,3 +275,35 @@ que é precisamente o que faz ninguém pensar duas vezes.
 **Fica para o E34 decidir:** ligar o RLS agora, ou apagar a tabela até a etapa
 dos domínios a precisar. O que não serve é ficar como está, porque o próximo a
 tocar-lhe não tem como saber.
+
+
+### A `custom_domain_owners`, resolvida — e nasceu numa etapa que EU assinei
+
+Medido: **duas tabelas nasceram na mesma migração**,
+`20260904140000_e10_sites_leads_dominios`.
+
+| Tabela | RLS | Usada por |
+| --- | --- | --- |
+| `custom_domains` | **ligado** | `packages/db/src/dominios.ts` — o caminho vivo |
+| `custom_domain_owners` | **desligado** | nada. Zero linhas, zero chamadores, zero documentos |
+
+A segunda é resto de um desenho que mudou dentro do mesmo commit: quem escreveu a
+migração criou as duas e ligou uma. **A tela `WEB-009 «Conecta tu dominio»` está
+validada e funciona** — usa a viva.
+
+**E o E10 fui eu que assinei.** A varredura de alcance que corri na altura era por
+etapa e ao nível de **funções**; nunca olhou para tabelas. Uma tabela órfã não
+tem chamador para faltar — ela só existe.
+
+> **A classe é a mesma e o nível é outro.** Passei o dia a caçar função sem
+> chamador, tela sem porta e jornada sem percurso. Esta é **esquema sem uso** — e
+> das quatro, é a única que a minha varredura não podia ver por construção.
+
+**A decisão do E34: apagar.** Não ligar o RLS. Uma tabela sem linhas, sem
+chamadores e substituída pela irmã no mesmo commit não é uma tabela por
+proteger — é uma tabela a mais. Ligar-lhe o RLS deixava-a lá a parecer
+intencional, e o próximo a encontrá-la usá-la-ia por julgar que existe por
+alguma razão.
+
+Migração é código de produto: **é do JR**, e eu verifico depois. A
+`validar-rls.sh` fica vermelha até lá, que é onde ela deve estar.

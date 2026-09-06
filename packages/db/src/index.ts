@@ -368,3 +368,5 @@ export {
   respostaDoAparelho,
   type RecusaDeImpressao,
 } from './impressao.ts';
+
+export { kioskDoAparelho, type KioskPublico } from './kiosk-publico.ts';

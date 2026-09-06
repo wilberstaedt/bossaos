@@ -175,6 +175,59 @@ fi
 cp "$COPIA2" "$ALVO2"
 
 echo
+echo "5. As VARIAVEIS do tema tambem tem de existir"
+# ── O buraco que isto fecha, e apanhou-me a 06/09 ──────────────────────────
+#
+# Esta guarda contava classes e nao contava `var(--bo-...)`. Escrevi
+# `var(--bo-superficie-2)` e `var(--bo-raio-sm)` — que NAO EXISTEM — e a guarda
+# disse 0 falhas. Uma classe por definir e um buraco visivel; uma variavel por
+# definir e pior: o CSS nao da erro nenhum, a propriedade cai para o valor
+# inicial, e o cartao aparece transparente sem ninguem saber porque.
+#
+# Mesma familia de tudo o resto neste ficheiro: o detector reconhecia UMA forma
+# de escrever o defeito e chamava-lhe cobertura.
+declarar_variaveis() {
+  python3 - <<'PY'
+import pathlib, re, sys
+
+definidas, usadas = set(), {}
+for f in pathlib.Path('packages/ui/src').rglob('*.css'):
+    texto = f.read_text(encoding='utf-8')
+    definidas |= set(re.findall(r'^\s*(--bo-[A-Za-z0-9_-]+)\s*:', texto, re.M))
+    for v in re.findall(r'var\(\s*(--bo-[A-Za-z0-9_-]+)', texto):
+        usadas.setdefault(v, set()).add(str(f))
+
+em_falta = sorted(v for v in usadas if v not in definidas)
+for v in em_falta:
+    print(f"FALTA {v} — usada em {sorted(usadas[v])[0]}")
+print(f"CONTAGEM {len(definidas)} definidas, {len(usadas)} usadas")
+PY
+}
+
+saida=$(declarar_variaveis)
+if grep -q '^FALTA ' <<<"$saida"; then
+  vermelho "variavel de tema usada sem estar definida:"
+  grep '^FALTA ' <<<"$saida" | head -4 | sed 's/^/          /'
+else
+  verde "$(grep '^CONTAGEM' <<<"$saida" | sed 's/^CONTAGEM //')"
+fi
+
+# Controlo negativo: a mesma leitura tem de acusar uma inventada e NAO acusar
+# uma real. Sem isto, esta seccao nascia sem nunca ter reprovado nada — que foi
+# como a queda em NAO_CONTEM viveu semanas no validar-alergenios.
+SONDA_CSS="packages/ui/src/sonda-variaveis.tmp.css"
+printf '.bo-sonda { color: var(--bo-nao-existe-mesmo); background: var(--bo-espaco-sm); }\n' \
+  > "$SONDA_CSS"
+sonda=$(declarar_variaveis)
+rm -f "$SONDA_CSS"
+if grep -q 'FALTA --bo-nao-existe-mesmo' <<<"$sonda" \
+   && ! grep -q 'FALTA --bo-espaco-sm' <<<"$sonda"; then
+  verde "controlo negativo: apanha a inventada e NAO acusa a que existe"
+else
+  vermelho "CONTROLO NEGATIVO FALHOU na leitura das variaveis"
+fi
+
+echo
 if (( falhas == 0 )); then printf '\033[32m%s\033[0m\n' "0 falhas"
 else printf '\033[31m%s\033[0m\n' "$falhas falhas"; fi
 exit $(( falhas > 0 ? 1 : 0 ))

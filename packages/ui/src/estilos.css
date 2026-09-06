@@ -891,6 +891,32 @@ label.bo-planos__item input[type="radio"] {
  * O rótulo é `<label>` a envolver o `<input>`: assim toda a linha é alvo de
  * toque, e não só o quadradinho de 13 px que o navegador desenha por omissão.
  */
+/*
+ * O número que a pessoa lê e diz em voz alta, num ecrã a dois metros.
+ *
+ * Grande de propósito: o KIOSK-006 é lido de pé, de relance, e muitas vezes por
+ * quem já se está a virar para o balcão. Um número do tamanho do texto corrido
+ * é um número que se lê mal e se diz errado.
+ */
+/*
+ * O talão, lido no ecrã em vez do papel (KDS-016).
+ *
+ * Monoespaçado e com as quebras de linha preservadas porque é EXACTAMENTE o
+ * texto que foi para a impressora: um talão reflowed é um talão diferente, e a
+ * pergunta que este ecrã responde é «o que é que saiu?».
+ */
+.bo-talao {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre-wrap; overflow-x: auto;
+  padding: var(--bo-espaco-sm); margin: var(--bo-espaco-sm) 0;
+  background: var(--bo-superficie-suave); border-radius: var(--bo-raio-controlo);
+}
+
+.bo-estado__numero {
+  font-size: 3rem; font-weight: 700; line-height: 1.1;
+  letter-spacing: 0.05em; margin: var(--bo-espaco-md) 0;
+}
+
 .bo-campo__linha {
   display: flex; align-items: center; gap: var(--bo-espaco-sm);
   min-height: var(--bo-toque-publico); cursor: pointer;
