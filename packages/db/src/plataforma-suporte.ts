@@ -1,7 +1,7 @@
 import {
   identidadeDeTrabalho, mostrarSegredo, sessaoViva, type AmbitoDeSuporte,
 } from '@bossaos/domain';
-import type { ClienteComEscopo } from './escopo.ts';
+import type { ClienteComEscopo, ClienteComIdentidade } from './escopo.ts';
 
 /**
  * Plataforma, suporte e governança — o motor do E33.
@@ -258,8 +258,18 @@ export async function concederCapacidade(
  * se guarda: uma coluna que diz «está configurado» é uma coluna que fica a
  * mentir no dia em que alguém tira a variável.
  */
+/**
+ * ── E aceita os DOIS clientes, de propósito ───────────────────────────────
+ *
+ * Nem a `platform_secrets` nem a `platform_incidents` têm `organization_id`:
+ * não são de inquilino nenhum. Exigir um `ClienteComEscopo` obrigava as telas da
+ * plataforma a inventar uma organização para lho dar — e inventar um inquilino
+ * para ler o que não é de nenhum é o princípio de um defeito.
+ *
+ * O marcador de tipo do `escopo.ts` apanhou-o à primeira compilação.
+ */
 export async function segredosDaPlataforma(
-  db: ClienteComEscopo,
+  db: ClienteComEscopo | ClienteComIdentidade,
   ambiente: Record<string, string | undefined> = process.env,
 ) {
   const segredos = await db.platformSecret.findMany({ orderBy: { nome: 'asc' } });
@@ -320,7 +330,7 @@ export async function reprocessarTrabalho(db: ClienteComEscopo, id: string) {
   });
 }
 
-export function trabalhosDaPlataforma(db: ClienteComEscopo) {
+export function trabalhosDaPlataforma(db: ClienteComEscopo | ClienteComIdentidade) {
   return db.platformJob.findMany({ orderBy: { criadoEm: 'desc' }, take: 100 });
 }
 
@@ -343,13 +353,13 @@ export function pedidosDeAjuda(db: ClienteComEscopo, organizationId: string) {
 }
 
 /** Os incidentes que o cliente vê. Um incidente só nosso é um telefone a tocar. */
-export function incidentesPublicos(db: ClienteComEscopo) {
+export function incidentesPublicos(db: ClienteComEscopo | ClienteComIdentidade) {
   return db.platformIncident.findMany({
     where: { publico: true }, orderBy: { comecouEm: 'desc' }, take: 20,
   });
 }
 
-export function incidentesTodos(db: ClienteComEscopo) {
+export function incidentesTodos(db: ClienteComEscopo | ClienteComIdentidade) {
   return db.platformIncident.findMany({ orderBy: { comecouEm: 'desc' }, take: 50 });
 }
 

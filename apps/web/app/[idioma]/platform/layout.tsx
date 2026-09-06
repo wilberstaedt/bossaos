@@ -67,11 +67,21 @@ export default async function LayoutDaPlataforma({
     // É a mesma decisão que o menu de gestão fechou no E30; aqui a diferença é
     // que o destino ainda não está construído, e por isso a honestidade é
     // declarar a ausência, não inventar uma porta.
-    { rotulo: m.plataforma.navSuporte, porConstruir: 'E33' },
-    { rotulo: m.plataforma.navIncidentes, porConstruir: 'E33' },
+    // ── As três que estavam por construir são AGORA o E33 ───────────────
+    //
+    // Foram marcadas `porConstruir: 'E33'` nas correcções do E34, e o E30
+    // fechou a última porta morta do menu de gestão. Esta etapa fecha as
+    // três da plataforma — e por isso deixam de ser marcas e passam a ser
+    // ligações.
+    { href: `${base}/suporte`, rotulo: m.plataforma.navSuporte },
+    { href: `${base}/incidentes`, rotulo: m.plataforma.navIncidentes },
+    { href: `${base}/trabalhos`, rotulo: m.plataformaE33.trabalhos },
+    { href: `${base}/moderacao`, rotulo: m.plataformaE33.moderacao },
+    { href: `${base}/modelos`, rotulo: m.plataformaE33.modelos },
+    { href: `${base}/migracao`, rotulo: m.plataformaE33.migracao },
     { href: `${base}/implantacoes`, rotulo: m.plataforma.navTrabalhos },
     { href: `${base}/flags`, rotulo: m.plataforma.navIntegracoes },
-    { rotulo: m.plataforma.navAuditoria, porConstruir: 'E33' },
+    { href: `${base}/auditoria`, rotulo: m.plataforma.navAuditoria },
   ];
 
   return (

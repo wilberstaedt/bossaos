@@ -36,7 +36,7 @@ export default async function Organizacoes({
       <div className="bo-estado__cabecalho">
         <div>
           <p className="bo-estado__sobrancelha">{m.plataforma.sobrancelhaTenants}</p>
-          <h1>{m.plataforma.tituloTenants}</h1>
+          <h1 data-tela="PLAT-001">{m.plataforma.tituloTenants}</h1>
         </div>
         {/* Saiu: a escrita de plataforma é pelo script auditado, e a nota desta
             página já o diz. O botão contradizia a nota ao lado dele. */}

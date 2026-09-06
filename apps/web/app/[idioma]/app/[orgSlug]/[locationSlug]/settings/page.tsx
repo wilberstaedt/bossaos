@@ -48,6 +48,27 @@ export default async function PreferenciasDaUnidade({
 
   return (
     <div className="bo-pagina">
+
+      {/* As quatro do E33: a política de acesso é a que faz «visível ao
+          inquilino» ser verdade, e por isso vem primeiro. */}
+      <nav className="bo-lista bo-lista--blocos" aria-label={mensagensDe(idioma).plataformaE33.acesso}>
+        <a className="bo-lista__ligacao" data-seccao="SET-010"
+           href={`/${idioma}/app/${orgSlug}/${locationSlug}/settings/acesso`}>
+          {mensagensDe(idioma).plataformaE33.acesso}
+        </a>
+        <a className="bo-lista__ligacao" data-seccao="SET-011"
+           href={`/${idioma}/app/${orgSlug}/${locationSlug}/settings/auditoria`}>
+          {mensagensDe(idioma).plataformaE33.auditoria}
+        </a>
+        <a className="bo-lista__ligacao" data-seccao="SET-013"
+           href={`/${idioma}/app/${orgSlug}/${locationSlug}/settings/retencao`}>
+          {mensagensDe(idioma).plataformaE33.retencao}
+        </a>
+        <a className="bo-lista__ligacao" data-seccao="SET-014"
+           href={`/${idioma}/app/${orgSlug}/${locationSlug}/settings/flags`}>
+          {mensagensDe(idioma).plataformaE33.flags}
+        </a>
+      </nav>
       <form method="post" action={`/api/org/${orgSlug}/unidades/${unidade.id}/preferencias`} className="bo-forma">
         <input type="hidden" name="idioma" value={idioma} />
         <input type="hidden" name="locationSlug" value={locationSlug} />

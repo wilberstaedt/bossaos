@@ -77,6 +77,7 @@ export default async function LayoutDaOrganizacao({
     { href: `/${idioma}/app/${orgSlug}/ir/equipa`, rotulo: m.navegacao.equipa, accao: 'equipa.ler' },
     { href: `/${idioma}/app/${orgSlug}/ir/financeiro`, rotulo: m.financeiroE29.financeiro, accao: 'financeiro.ler' },
     { href: `/${idioma}/app/${orgSlug}/ir/kiosks`, rotulo: m.kioskE31.kiosks, accao: 'organizacao.gerir' },
+    { href: `/${idioma}/app/${orgSlug}/ajuda`, rotulo: m.plataformaE33.ajuda, accao: null },
     { href: `/${idioma}/app/${orgSlug}/ir/relatorios`, rotulo: m.navegacao.relatorios, accao: 'relatorios.ler' },
   ]
     .filter((l) => l.accao === null || permitidas.has(l.accao as never))
