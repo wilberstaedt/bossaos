@@ -59,6 +59,22 @@ fi
 
 echo
 echo "3. Declarar e convidar a rever — e nao se revê arvore suja"
+# ── Numa arvore ligada esta pergunta e feita a arvore ERRADA ───────────────
+#
+# Uma arvore criada por `git worktree` a partir de um commit e limpa por
+# construcao: perguntar-lhe se a bancada tem trabalho por commitar nao mede a
+# bancada, mede a definicao de arvore nova. E foi pior do que inutil a 06/09 -
+# o `validar-no-commit.sh` liga os `node_modules` por symlink, o `.gitignore`
+# diz `node_modules/` COM BARRA (que so casa directorios) e os links apareceram
+# como doze ficheiros por commitar. A guarda acusou o instrumento que a chamava.
+#
+# Declara-se, como o `validar-ci-verde` faz dentro da CI. Ha tres respostas.
+if [ "$(git rev-parse --git-dir 2>/dev/null)" != "$(git rev-parse --git-common-dir 2>/dev/null)" ]; then
+  echo "  NAO MEDI  numa arvore ligada — limpa por construcao; esta pergunta e para a bancada"
+  echo
+  echo "  Nada medido aqui: 0 falhas, 1 declaracao."
+  exit 0
+fi
 # Nasceu de agora, 04/09: o handoff dizia "implementado, aguardando validacao" com
 # 47 ficheiros por commitar. Uma declaracao e um convite ao revisor, e rever uma
 # arvore a meio mede um estado que ninguem vai entregar - ja me custou duas

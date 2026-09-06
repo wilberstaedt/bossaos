@@ -832,3 +832,50 @@ corridas, alavanca está numa só. Provado nos três sentidos (prosa sozinha
 rejeitada, alavanca aceite, `DATABASE_URL` em todas as corridas rejeitada) e
 depois contra o produto partido: **a guarda antiga diz «0 falhas», a nova diz
 FALHA, sobre exactamente a mesma árvore.**
+
+## A sexta forma de verde vazio: verde na bancada, vermelho no que se publica
+
+**06/09, 07h20.** As 27 guardas leem a **árvore de trabalho**. O que se publica é
+o **commit**. Enquanto os dois coincidem ninguém dá por nada — e quando divergem,
+todas as guardas ficam verdes sobre uma coisa que não é a que sai daqui.
+
+Descobri-o a olhar para um ficheiro solto e foi **reincidência**:
+
+| commit | ficheiro do catálogo |
+| --- | --- |
+| `1f9675c` E07 | limpo |
+| `95201cd` E32 | **com o plante** — e eu assinei o E32 |
+| `e13b318` | limpo — o commit chamado «Resíduo de bancada» |
+| `de3eb52` E33 | **com o plante outra vez** |
+
+Um defeito plantado para um controlo negativo foi reposto na bancada e não
+commitado. `validar-classes` dava **2 falhas no HEAD e 0 na árvore**. E o commit
+que corrigiu a primeira vez removeu a **instância** sem impedir a **classe**, por
+isso voltou uma etapa depois.
+
+**Já tinha aprendido isto e não o trouxe para cá.** O `publicar.sh` publica um
+commit via `git archive` exactamente por esta razão — foi um dos nove tropeções
+do deploy. Aprendi-a no deploy e deixei as guardas a medir a bancada.
+
+**`scripts/validar-no-commit.sh`** corre o corredor inteiro contra o conteúdo de
+um commit, numa árvore ligada. O controlo negativo é a **própria história deste
+repositório**: exige vermelho no `de3eb52` e verde no `e13b318`. Não há sonda
+fabricada mais honesta do que um commit real que se sabe que carrega o defeito —
+uma sonda escrita à mão envelhece, um SHA não.
+
+**E o instrumento acusou em falso duas vezes antes de servir**, as duas por
+medir o seu próprio ambiente:
+
+- **Quatro pacotes «a reprovar»** que eram `ERR_MODULE_NOT_FOUND`: uma árvore
+  nova não tem `node_modules`. As dependências passam a vir da bancada, dito no
+  cabeçalho.
+- **Doze ficheiros «por commitar»** que eram os meus próprios symlinks: o
+  `.gitignore` diz `node_modules/` **com barra**, e barra só casa directórios —
+  um symlink escapa. A cura não foi esconder os links: a verificação «não se
+  revê árvore suja» é sobre a **bancada**, e numa árvore ligada está a ser feita
+  à árvore errada, que é limpa por construção. Agora declara, como o
+  `validar-ci-verde` faz dentro da CI.
+
+E na mesma passagem, a minha `validar-rls` escrevia **NÃO MEDI com o código de
+saída de FALHA** — a regra das três respostas quebrada pela guarda que a servia.
+Agora tenta o `.env` primeiro, e só declara quando não há mesmo maneira.

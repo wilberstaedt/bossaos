@@ -16,7 +16,22 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
-: "${MIGRATION_DATABASE_URL:?MIGRATION_DATABASE_URL em falta}"
+# ── "Nao medi" nao se escreve com o mesmo codigo de saida que "falhou" ────
+#
+# Ate 06/09 as 07h30 isto era `: "${MIGRATION_DATABASE_URL:?...}"`, que sai a 1 -
+# indistinguivel de uma falha real de RLS. E a regra desta casa - ha tres
+# respostas, e a terceira e NAO MEDI - quebrada pela guarda que a devia servir.
+#
+# Primeiro tenta MEDIR: o `.env` esta ao lado e e onde a variavel vive. So
+# declara quando nao houver mesmo maneira.
+if [ -z "${MIGRATION_DATABASE_URL:-}" ] && [ -f .env ]; then
+  set -a; . ./.env; set +a
+fi
+if [ -z "${MIGRATION_DATABASE_URL:-}" ]; then
+  printf '  NAO MEDI sem MIGRATION_DATABASE_URL e sem .env — esta guarda precisa da base.\n'
+  printf '           Isto NAO e verde: quem assinar tem de a correr onde a base responda.\n'
+  exit 2
+fi
 
 falhas=0
 erro() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas+1)); }
