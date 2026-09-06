@@ -879,3 +879,43 @@ medir o seu próprio ambiente:
 E na mesma passagem, a minha `validar-rls` escrevia **NÃO MEDI com o código de
 saída de FALHA** — a regra das três respostas quebrada pela guarda que a servia.
 Agora tenta o `.env` primeiro, e só declara quando não há mesmo maneira.
+
+## Li a definição e chamei-lhe a chamada — duas vezes no mesmo dia, 06/09
+
+Hoje errei a mesma coisa duas vezes, com seis horas de intervalo, e da segunda
+vez já tinha escrito a primeira aqui ao lado.
+
+**De manhã.** Publiquei uma raiz de causa em quatro passos que dizia que o
+`resolverAlvos()` corria no topo do módulo em `staff-telas.spec.ts`. Corre no
+`beforeAll`. O que eu tinha lido era a linha do **`import`**, que naqueles
+ficheiros vive na linha 6 — e chamei-lhe o sítio de chamada.
+
+**À tarde.** Escrevi que o `provar-alvos-e-matriz.sh` corre o projecto `painel`
+inteiro, porque a linha do Playwright diz `--project=painel "$@"` e o corredor
+invoca os guiões sem argumentos. Só que aquele `"$@"` está **dentro de uma
+função** que faz `shift` do ficheiro de saída, e os dois sítios que a chamam
+passam-lhe ficheiros explícitos. Corrigi uma frase verdadeira para uma falsa,
+publiquei-a e mandei-a ao Matheus.
+
+**A forma:** *um símbolo aparece no ficheiro; eu leio o sítio onde ele é
+**declarado** e trato-o como o sítio onde ele é **usado**.* `import X` não é
+chamar `X`. `f() { … "$@" … }` não diz o que chega a `f`. Uma assinatura, um
+`import`, uma declaração de tipo, um `export` — nenhum deles é evidência de uso.
+
+**A regra, e é uma pergunta:** *quantos sítios usam isto, e vi-os?* Se a resposta
+for «vi um», falta perguntar se esse um era a declaração. Grep pelo símbolo
+devolve a declaração **e** as chamadas na mesma lista, sem os distinguir, e o
+olho pega no primeiro.
+
+**O controlo que a apanha:** procurar o símbolo e **contar as ocorrências**. Uma
+só ocorrência num ficheiro que claramente o usa é o sinal — é quase sempre a
+declaração sozinha, e o uso está noutro sítio com outro nome. Foi assim que
+apanhei a segunda: o `correr` tinha de ser chamado nalgum lado, e eu não tinha
+olhado para lado nenhum.
+
+**E o custo real não é o erro, é a construção por cima dele.** Da primeira vez
+parei o implementador a meio de uma correcção com fundamento errado. Da segunda
+inventei uma contradição que não existia — «a suite falha à mão mas o guião que a
+corre passou» — e ainda lhe dei uma hipótese razoável. Uma explicação plausível
+para um facto que eu próprio fabriquei é a coisa mais difícil de desfazer,
+porque ela **soa** a trabalho bem feito.
