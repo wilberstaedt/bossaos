@@ -453,3 +453,69 @@ desde então.
 chegou primeiro ao CPU, e o sintoma são falhas de ~12s que mudam de sítio a cada
 corrida. `scripts/maquina-livre.sh` avisa. O sénior corre na árvore e base dele;
 se vires um vermelho estranho, confirma primeiro que não há outra suite viva.
+
+## O que aterrou no E34 a 06/09, e uma sessão nova não pode redescobrir
+
+Foi um dia inteiro de revisão, e o que ele produziu **não é código novo: são
+garantias**. Uma sessão nova que não saiba disto vai reabrir coisas fechadas.
+
+### As oito jornadas existem e correram juntas
+
+J01, J02, J08, J09, J11, J12, J14, J15 — **58 passos, numa só execução**. A régua
+de cada uma está em `docs/reviews/ALVO-J08-J12-J15.md`, escrita **antes** do
+código. Duas coisas dessa régua estavam erradas e foste tu que as corrigiste, com
+razão: não existe objecto «divisão» neste produto, e as duas recusas da J15 não
+têm de ser pela mesma razão — o que não pode haver é um 404.
+
+### As treze correcções, e o estado delas
+
+Todas fechadas. As que deixam regra atrás de si:
+
+- **7** — um plante tem de verificar que aplicou. Apanhou, na primeira corrida,
+  um plante que não aplicava **há oito commits** (`== 7` num ficheiro com oito
+  ocorrências).
+- **10 e 12** — os alvos de teste dizem de que casa são. A raiz da `staff` morta
+  era esta: o alvo vinha da organização B e o **404 estava certo**.
+- **13** — o rasto do suporte não se separa da leitura. `0 >= 0` fazia a
+  auditoria opcional.
+- **4** — a CI **descobre** as provas por glob. As `provas/*.test.ts` que ela
+  alcança passaram de **12 para 39 de 40**.
+- **5** — o `varrerRetencoesExpiradas` ganhou quem o chame; o `sentar` morto foi
+  apagado.
+
+### As guardas novas — se uma delas ficar vermelha, é achado, não ruído
+
+| guarda | o que impede |
+| --- | --- |
+| `validar-suites-com-guiao.sh` | uma suite ou prova sem guião **desaparece** do corredor |
+| `validar-dados-ficticios.sh` | domínio de fantasia ou texto de encher no que embarca |
+| `validar-leitura-cedo-demais.sh` | valor lido no corpo do `describe` congela vazio |
+| `validar-tres-linguas.sh` | chave em falta cai para espanhol **em silêncio** |
+| `validar-alvos-com-casa.sh` | alvo de teste sem organização, nas tabelas que vivem em duas |
+| `validar-plantes.sh` (estendida) | distingue **VIVO / APLICADO / MORTO** — «aplicado» é defeito por restaurar |
+
+Todas com sonda por dentro. A das três respostas constrói um repositório git de
+brincar em cada corrida.
+
+### O que o E34 ainda NÃO tem, e é do sénior fechar
+
+**Não fecha a etapa quem implementa.** Se te mandarem fechar o E34, é engano:
+faltam medições que são da revisão.
+
+- **Aceite 3** — das seis famílias de invariante concorrente, três estão provadas
+  (saldo, reservas, deduplicação) e **três não**: **reembolso, stock e acesso**.
+  Reembolso é dinheiro a sair; stock é venda a descoberto.
+- **Aceite 5** — a tabela final de pendências, verificada item a item.
+- **Dívida 2** — o `/staff/` não tem uma única ligação. É decisão do Matheus.
+
+### A armadilha que apareceu em cinco formas no mesmo dia
+
+*Todo o eixo em que se estreita é um eixo onde a resposta se esconde.* No mesmo
+dia: a inflexão da palavra (`simultan` não casa com `SIMULTÂNEAS`), o limite do
+identificador (`publico` dentro de `crm-publico`), a fronteira de linha (o
+`git grep` casa linha a linha), a profundidade do aninhamento (o filtro dentro da
+relação), e **a definição confundida com a chamada** (`import X` não é chamar
+`X`).
+
+E a que vale por todas: **um `git grep -E '\b…'` devolve zero em silêncio** — o
+`git grep` não suporta `\b`. Usa `-w`.
