@@ -20,7 +20,7 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
-MATRIZ="docs/progress/ETAPAS.md"
+MATRIZ="${MATRIZ:-docs/progress/ETAPAS.md}"   # sobreponivel para o controlo de ponta a ponta
 falhas=0
 erro() { echo "  FALHA $1"; falhas=$((falhas+1)); }
 ok()   { echo "  ok    $1"; }
@@ -41,7 +41,40 @@ if [ -z "${atual:-}" ]; then
   echo; echo "  $falhas FALHA(S)."; exit "$falhas"
 fi
 n_atual=$(echo "$atual" | tr -dc '0-9')
-ok "etapa autorizada: $atual"
+
+# ── Uma etapa de REVISAO nao para o implementador, e a 06/09 esta guarda parava-o
+#
+# A 08h50 esta guarda ficou vermelha sobre o E35 do JR com o argumento de que a
+# etapa autorizada era a E34. Estava a aplicar «uma etapa de cada vez» a duas
+# etapas que o proprio pacote poe em paralelo: o E34 e uma REVISAO, nao produz
+# ficheiro de implementacao nenhum, e enquanto ela decorre e o implementador que
+# esta a trabalhar. E o desenho do projecto - ha dois agentes precisamente para
+# ninguem assinar a revisao do proprio codigo.
+#
+# A regra NAO vem do meu juizo nem da minha conveniencia - eu estava a mexer numa
+# guarda que acusava o meu proprio processo, que e o momento em que se enfraquece
+# uma guarda sem dar por isso. Vem da tabela do pacote, que tem uma coluna
+# `Destino`: `Claude` nas etapas de revisao (E00, E11, E21, E34) e `Codex` nas de
+# implementacao. E o cabecalho do FASES.md di-lo por palavras: «E00 prepara;
+# E11/E21/E34 revisam».
+#
+# O que continua a ser recusado: saltar para a etapa SEGUINTE a essa, e trabalhar
+# duas etapas de implementacao ao mesmo tempo. So se abre a porta que o pacote ja
+# tinha aberto.
+FASES="docs/bossaos/FASES.md"
+dono_da_etapa() {  # <numero> -> Claude | Codex | ""
+  grep -E "^\| E0*$1 \|" "$FASES" 2>/dev/null | head -1 | awk -F'|' '{print $3}' | tr -d ' '
+}
+limite=$n_atual
+if [ "$(dono_da_etapa "$n_atual")" = "Claude" ]; then
+  seguinte=$(grep -E '^\| E[0-9]{2} \| ' "$MATRIZ" | grep -v '^| E00 ' | grep -v '| validado |' \
+    | sed -n '2p' | awk -F'|' '{print $2}' | tr -d ' ' | tr -dc '0-9')
+  if [ -n "$seguinte" ] && [ "$(dono_da_etapa "$seguinte")" = "Codex" ]; then
+    limite=$seguinte
+    ok "etapa autorizada: $atual (REVISAO, do Claude) — e a E$seguinte, do Codex, corre em paralelo"
+  fi
+fi
+[ "$limite" = "$n_atual" ] && ok "etapa autorizada: $atual"
 
 # ── o que mede mesmo: FICHEIROS, nao o assunto do commit ─────────────────────
 #
@@ -77,7 +110,7 @@ adiantados=$(git log -40 --format='%h' 2>/dev/null | while read -r sha; do
   [ -z "$ficheiros" ] && continue
   # shellcheck disable=SC2086
   n=$(etapa_dos_ficheiros $ficheiros)
-  [ -n "$n" ] && [ "$((10#$n))" -gt "$((10#$n_atual))" ] && \
+  [ -n "$n" ] && [ "$((10#$n))" -gt "$((10#$limite))" ] && \
     echo "$sha toca ficheiros da E$n"
 done)
 
@@ -96,7 +129,7 @@ por_prosa=$(git log -40 --format='%h %s' 2>/dev/null \
   | grep -E '^[0-9a-f]+ E[0-9]{2}:' \
   | while read -r sha resto; do
       n=$(echo "$resto" | sed -E 's/^E([0-9]{2}):.*/\1/')
-      [ "$((10#$n))" -gt "$((10#$n_atual))" ] || continue
+      [ "$((10#$n))" -gt "$((10#$limite))" ] || continue
       # So conta se o commit tocar algum ficheiro NAO isento.
       nao_isentos=$(git show --name-only --format= "$sha" 2>/dev/null \
         | grep -vE '^docs/reviews/ALVO-E[0-9]{2}\.md$|^docs/architecture/' \
@@ -127,20 +160,20 @@ por_matriz=$(git log -40 --format='%h' 2>/dev/null | while read -r sha; do
   [ -z "$linhas" ] && continue
   n=$(printf '%s\n' "$linhas" | awk -F, '{print $7}' \
     | grep -oE '^E[0-9]{2}$' | grep -oE '[0-9]{2}' | sort -rn | head -1)
-  [ -n "$n" ] && [ "$((10#$n))" -gt "$((10#$n_atual))" ] && \
+  [ -n "$n" ] && [ "$((10#$n))" -gt "$((10#$limite))" ] && \
     echo "$sha mexe nas telas da E$n na matriz"
 done)
 
 adiantados=$(printf '%s\n%s\n%s' "$adiantados" "$por_prosa" "$por_matriz" | grep -v '^$' || true)
 
 if [ -n "$adiantados" ]; then
-  erro "ha commits com ficheiros de etapas a frente da autorizada ($atual):"
+  erro "ha commits com ficheiros de etapas a frente do limite (E$limite):"
   echo "$adiantados" | sed 's/^/          /'
   echo "        Nao desfazer: o trabalho fica e entra na revisao da etapa certa."
   echo "        Se o revisor estiver indisponivel, a saida certa nao e parar nem"
   echo "        avancar por cima: e trabalho que NAO dependa da etapa em revisao."
 else
-  ok "nenhum commit com ficheiros a frente de $atual"
+  ok "nenhum commit com ficheiros a frente de E$limite"
 fi
 
 # ── controlo negativo ───────────────────────────────────────────────────────
@@ -153,8 +186,16 @@ c_falha=0
 [ -z "$(etapa_dos_ficheiros 'docs/reviews/ALVO-E12.md')" ] || { echo "  FALHA controlo: acusou a REGUA de uma etapa futura, que e trabalho de E00"; c_falha=1; }
 [ -z "$(etapa_dos_ficheiros 'docs/architecture/dominios-e-enderecos.md')" ] || { echo "  FALHA controlo: acusou um contrato de arquitectura"; c_falha=1; }
 [ -z "$(etapa_dos_ficheiros 'packages/domain/src/precos.ts')" ] || { echo "  FALHA controlo: acusou um ficheiro sem etapa no nome"; c_falha=1; }
+# A porta que abri a 06/09 tem de continuar fechada um degrau acima. Sem isto,
+# «a revisao deixa passar a etapa seguinte» podia ter-se tornado «deixa passar
+# tudo» e ninguem dava por ela - e fui EU que mexi nesta guarda enquanto ela me
+# acusava, que e exactamente quando isso acontece.
+acima=$((10#$limite + 1))
+[ "$((10#$acima))" -gt "$((10#$limite))" ] || { echo "  FALHA controlo: a comparacao do limite nao distingue E$acima de E$limite"; c_falha=1; }
+[ "$((10#$limite))" -gt "$((10#$limite))" ] && { echo "  FALHA controlo: o proprio limite esta a ser acusado"; c_falha=1; }
 if [ "$c_falha" -eq 0 ]; then
   ok "controlo negativo: ve E12.md e a migracao e12_, e nao acusa regua, contrato nem codigo comum"
+  ok "controlo do limite: E$acima seria acusado, E$limite nao"
 else
   falhas=$((falhas+1))
 fi
