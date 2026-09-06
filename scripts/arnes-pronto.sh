@@ -35,16 +35,31 @@ cd "$(dirname "$0")/.."
 # A verificação é a MESMA do fim: se as três coisas já lá estão, salta. Assim
 # pode ser chamado de qualquer sítio sem se pensar no custo — que é a condição
 # para ele deixar de ser um guião que ninguém chama.
+# ── «Pronto» passa a ser perguntado a quem precisa, e nao a uma lista ──────
+#
+# Ate 06/09 as 16h isto contava organizacoes, menus e o utilizador do arnes. Nao
+# contava PRODUTOS — e as provas do Staff pedem `/catalogo/<produto>`.
+#
+# PROVADO, e nao lido: tirei o prefixo `insp-` aos cinco produtos semeados e
+# perguntei outra vez. A resposta foi «arnes ja pronto — nada a fazer», e no
+# mesmo estado o `resolverAlvos()` rebentou com «nao encontrei um produto».
+# Declarava pronto um arnes cujos alvos nao resolvem.
+#
+# Acrescentar `products` a lista corrigia ESTE caso e deixava o seguinte — e a
+# lista a mao e o defeito que este projecto passa o dia a apanhar. Por isso a
+# pergunta passa a ser feita ao unico sitio que sabe a resposta: o proprio
+# `resolverAlvos()`, que e quem as provas usam. Se ele resolve, esta pronto; se
+# rebenta, nao esta. Um alvo novo fica coberto no dia em que nasce, sem ninguem
+# se lembrar de nada.
 ja_pronto() {
-  local o m u
-  o=$(psql "$MIGRATION_DATABASE_URL" -tAc "SELECT count(*) FROM organizations" 2>/dev/null || echo 0)
-  m=$(psql "$MIGRATION_DATABASE_URL" -tAc "SELECT count(*) FROM menus" 2>/dev/null || echo 0)
-  u=$(psql "$MIGRATION_DATABASE_URL" -tAc "SELECT count(*) FROM users WHERE email='painel@inspeccao.example'" 2>/dev/null || echo 0)
-  [ "${o:-0}" -gt 0 ] && [ "${m:-0}" -gt 0 ] && [ "${u:-0}" -gt 0 ]
+  node --experimental-strip-types -e '
+    import { resolverAlvos } from "./inspeccao/alvos.ts";
+    resolverAlvos().then(() => process.exit(0)).catch(() => process.exit(1));
+  ' >/dev/null 2>&1
 }
 
 if ja_pronto; then
-  echo "==> arnês já pronto (organizações, menus e utilizador presentes) — nada a fazer"
+  echo "==> arnês já pronto (os alvos das provas resolvem) — nada a fazer"
   exit 0
 fi
 
