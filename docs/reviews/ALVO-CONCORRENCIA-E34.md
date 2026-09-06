@@ -54,24 +54,49 @@ o que ficaria a proteger sozinho no dia em que alguém mudar a ordem das linhas.
 
 ---
 
-## Stock — dois decrementos concorrentes da última unidade
+## Stock — CORRIGIDO a 06/09: a corrida que escrevi não existe neste produto
 
-**Porque importa:** é venda a descoberto. Vende-se o que não há e alguém fica sem
-jantar.
+**A régua original mandava provar «dois pedidos da última unidade; o nível não
+fica negativo». Isso assume um contador no caminho do pedido, e este produto não
+o tem.** Fui ler antes de o JR implementar, e o que encontrei foi outra coisa —
+melhor.
 
-**O produto promete isto:** o `pedidos.ts:136` diz que *«o esgotado é rejeitado
-com o carrinho preservado»*. Logo existe invariante para medir — não estou a
-inventar uma promessa que o produto nunca fez.
+**O que decide se um prato entra num pedido** é o `estaDisponivel`, e ele lê a
+`productAvailability`: uma **bandeira de bloqueio**, com validade opcional. Não há
+quantidade. Dois pedidos ao mesmo tempo do mesmo prato são ambos aceites, e **está
+certo**: não há nada para esgotar.
+
+**O stock existe noutro sítio e com outra forma.** O `stock.ts` diz de si próprio:
+
+> *«Não tem nenhuma função que escreva o saldo. Não há `actualizarSaldo`, não há
+> `definirStock`. O saldo é a soma dos movimentos, derivada por gatilho. Um
+> `UPDATE stock_items SET saldo_mili` é reposto pela base.»*
+
+E: *«lançar um movimento — **a única porta que muda um saldo**»*.
+
+### O cenário certo, então
 
 | | |
 | --- | --- |
-| **invariante** | nunca se aceita mais do que existe; o nível na base **não fica negativo** |
-| **disparo** | dois pedidos da **última** unidade, em paralelo |
-| **controlo positivo** | o nível é **1 antes de disparar**, verificado na base. Com stock ilimitado o caso mede zero contra zero |
-| **negativo** | exactamente um aceite e um rejeitado |
-| **não conta como prova** | ler o nível da **resposta**. Lê-se da base, depois de os dois acabarem |
+| **invariante 1** | dois movimentos concorrentes sobre o mesmo item deixam o saldo igual à **soma dos dois**. Nenhum se perde |
+| **invariante 2** | um `UPDATE` directo ao `saldo_mili` **é revertido pela base** — a promessa que o próprio módulo faz |
+| **disparo** | os dois movimentos em paralelo, sem um esperar pelo outro |
+| **controlo positivo** | o saldo **antes** é lido e os dois movimentos mudam-no de forma distinguível — dois valores diferentes, para que somar mal se veja |
+| **não conta como prova** | ler o saldo da resposta de qualquer um dos dois. Lê-se da base, depois de ambos acabarem |
 
----
+**O invariante 2 é o que vale a pena**, e não estava na régua original: é uma
+promessa escrita no produto que ninguém pôs à prova. Uma escrita directa que a
+base repõe é a diferença entre um saldo derivado e um saldo que apenas *parece*
+derivado.
+
+### E porque é que esta correcção está aqui em vez de apagada
+
+A régua original está errada e podia simplesmente ser reescrita. Fica **a
+correcção à vista** porque o erro tem forma conhecida: **escrevi um critério a
+partir do nome da família — «stock» — e não do que o produto faz com ela.** É o
+mesmo que fiz na J08 ao exigir uma «divisão» que não existe, e que o JR me
+corrigiu. Duas vezes o mesmo erro na mesma revisão; desta vez apanhei-o antes de
+custar trabalho a alguém.
 
 ## Acesso — uma leitura de suporte contra a revogação da concessão
 
