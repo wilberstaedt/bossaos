@@ -771,3 +771,24 @@ escolher a medição pelo resultado, e isso não é medir.
 **E o elogio que a guarda merece:** ela podia ter contado `0 testes` no `auth` e
 seguido. Um zero silencioso ali teria sido um verde vazio dentro de uma guarda
 escrita contra verdes vazios.
+
+## Nenhuma pergunta sobre uso se responde só em TypeScript
+
+**06/09, 06h30.** Declarei uma tabela como esquema sem uso a partir de um `grep`
+de TypeScript. O chamador estava numa função `SECURITY DEFINER`, dentro de uma
+migração. **A decisão que tirei disso teria apagado a defesa contra um
+restaurante ficar com o domínio de outro.**
+
+**A regra:** antes de dizer que algo não é usado neste produto, procura-se em
+`*.ts`, `*.tsx` **e `*.sql`** — e nas migrações, que é onde vivem os gatilhos, as
+políticas e as funções `SECURITY DEFINER`.
+
+E há uma razão para isto ser pior do que parece: **as `SECURITY DEFINER` são
+exactamente onde está a lógica que o runtime não pode fazer sozinho.** Ou seja, o
+ponto cego cobria precisamente a parte mais sensível do produto — aquilo que
+existe porque não se confia no processo da aplicação para o fazer.
+
+**A varredura passou a ler `.sql` também.** O número não mudou — nenhuma função
+TypeScript é chamada de SQL, e não podia ser. Fica escrito porque **a alteração
+não é a correcção**: a correcção é esta regra, e o instrumento que falhou foi o
+meu `grep` de circunstância, não o guião.

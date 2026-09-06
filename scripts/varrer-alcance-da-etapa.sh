@@ -39,8 +39,19 @@ for f in fich:
     if not p.exists(): continue
     for m in re.finditer(r'^export (?:async )?function (\w+)', p.read_text(), re.M):
         exp[m.group(1)]=f
-alvos=[q for q in pathlib.Path('.').rglob('*.ts*')
-       if 'node_modules' not in str(q) and '.test.' not in q.name
+# ── O SQL TAMBEM CONTA, e custou-me uma decisao errada descobri-lo ──────────
+# Ate 06/09 as 06h25 isto lia so `*.ts*`. A 03h declarei a `custom_domain_owners`
+# como esquema sem uso e mandei apaga-la: zero chamadores num grep de TypeScript.
+# O chamador existia — a funcao `vincular_dominio`, SECURITY DEFINER, faz SELECT
+# e INSERT nela, dentro da migracao do E10. O JR foi verificar a premissa em vez
+# de executar, e se tivesse obedecido tinhamos apagado a defesa contra um
+# restaurante ficar com o dominio de outro.
+#
+# As funcoes SECURITY DEFINER sao onde vive a logica que o runtime NAO pode fazer
+# sozinho — o pior sitio possivel para um instrumento ter um ponto cego.
+alvos=[q for q in pathlib.Path('.').rglob('*')
+       if q.suffix in ('.ts','.tsx','.mts','.sql')
+       and 'node_modules' not in str(q) and '.test.' not in q.name
        and not str(q).startswith(('provas/','inspeccao/','docs/'))]
 txt=[q.read_text() for q in alvos]
 mortas=[]
