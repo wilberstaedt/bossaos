@@ -20,6 +20,7 @@ Por **quando bloqueia**, não por ordem de descoberta:
 | 4º | **8.** Convenção de salário | antes do primeiro recibo real |
 | 5º | **2.** Domínio próprio | quando o piloto for público |
 | 6º | **3.** Alergénios em dois sítios | é regra de negócio, não de código |
+| **5º** | **9.** Os leads sem quem os leia | antes de o site do piloto ter tráfego real |
 | — | **4.** e **5.** | adiadas, com gatilho escrito |
 
 **As duas primeiras não dependem uma da outra** e podem ir em paralelo. A fiscal
@@ -167,3 +168,32 @@ menos poder para contestar o recibo.
 **Precisa de fonte:** convénio aplicável em Espanha para hostelaria, com
 nocturnidade, horas extraordinárias e feriados. **Bloqueia antes do primeiro
 recibo real**, não antes do piloto.
+
+## 9. Os leads: o produto capta e ninguém os consegue ler
+
+**Não é dívida técnica — é âmbito, e por isso é tua.**
+
+O site público capta contactos (`guardarLeadPublico`, três chamadores, a
+funcionar). A função que os **lista** para o restaurante, `leadsDaUnidade`, tem
+zero chamadores — e **não existe tela nenhuma no atlas das 396 que os mostre**,
+em etapa nenhuma, nem nas que faltam. Procurei por `lead`, `contacto` e
+`solicitud`: só aparecem a tela de quem envia e a confirmação.
+
+**E há uma promessa por cumprir:** a `MKT-011` chama-se «Tu solicitud está
+enviada» e está validada. O produto diz ao visitante que o pedido chegou. Chegou
+a uma tabela que ninguém abre.
+
+**As três saídas, e a escolha é tua:**
+
+1. **Uma tela nova** na lista de clientes do CRM — os leads entram como contactos
+   por converter. É a mais natural e a que menos mexe no atlas.
+2. **Notificar por email** quando entra um lead, e não guardar mais nada. Depende
+   da decisão 7 (provedor de envio).
+3. **Tirar o formulário do site público** até haver onde os ler. Honesto, e
+   custa-te contactos.
+
+**O que não serve é ficar como está**, porque o custo não é nosso: é de um
+cliente do restaurante que escreveu, leu «enviada», e nunca teve resposta. Esse
+não reclama — muda de sítio.
+
+**Quando bloqueia:** antes do piloto no La Societat receber tráfego real no site.
