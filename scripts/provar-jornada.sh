@@ -51,7 +51,7 @@ export BETTER_AUTH_URL="$BASE_URL"
 export WEBHOOK_SEGREDO_JORNADA="jornada-$(date +%s)-descartavel"
 
 GRUPOS_ESPERADOS=8
-CASOS_ESPERADOS=58
+CASOS_ESPERADOS=59
 falhas=0
 PID=""
 

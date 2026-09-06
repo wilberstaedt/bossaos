@@ -1308,6 +1308,15 @@ describe('J15 — suporte: ticket, diagnóstico autorizado, acesso temporário e
     });
   }
 
+  /** Quantos acessos ao pedido ficaram escritos. Leitura de verificação. */
+  async function rastosDoPedido(): Promise<number> {
+    const { rows } = await sql.query(
+      `SELECT count(*)::int AS n FROM audit_events
+        WHERE accao = 'plataforma.suporte.pedido.lido' AND alvo_id = $1`,
+      [feito.orderJ15]);
+    return (rows[0] as { n: number }).n;
+  }
+
   /** Ler o pedido do cliente por baixo de uma sessão de suporte. */
   async function lerPedido(sessionId: string) {
     const r = await fetch(
@@ -1434,6 +1443,30 @@ describe('J15 — suporte: ticket, diagnóstico autorizado, acesso temporário e
     const r = await lerPedido(feito.sessaoDeSuporte!);
     assert.equal(r.estado, 200, `o suporte não conseguiu ler com a concessão: ${JSON.stringify(r.corpo)}`);
     assert.ok(r.corpo.pedido, 'respondeu 200 e não trouxe o pedido');
+  });
+
+  it('CONTROLO 1c — sem sessão válida não há dados NEM rasto', async () => {
+    // ── A metade que esta jornada existe para provar ─────────────────────
+    //
+    // A primeira composição da `suporte_le_pedido` prendia as duas metades com
+    // `WHERE (SELECT count(*) FROM rasto) >= 0` — e **zero é maior ou igual a
+    // zero**. Com uma sessão que não casa com nenhuma, o `INSERT` inseria zero
+    // linhas e a leitura devolvia os dados na mesma: um acesso sem rasto.
+    //
+    // Não havia fuga (o predicado continuava a guardar a leitura), mas havia um
+    // registo que só apanhava alguns acessos — e isso dá a sensação de
+    // vigilância sem a ter.
+    //
+    // Mede-se pelas duas pontas: não vêm dados, e a contagem de rastos não mexe.
+    const antes = await rastosDoPedido();
+    const inventada = '99999999-9999-4999-8999-999999999999';
+    const r = await fetch(
+      paraPlataforma(`/suporte/${inventada}/pedido/${feito.orderJ15}`),
+      { headers: { cookie: cookieOperador } });
+    assert.notEqual(r.status, 200,
+      'uma sessão que não existe devolveu dados');
+    assert.equal(await rastosDoPedido(), antes,
+      'a leitura falhou e mesmo assim escreveu rasto — ou escreveu sem ler');
   });
 
   it('CONTROLO 2 — depois de TERMINADA, recusado outra vez', async () => {

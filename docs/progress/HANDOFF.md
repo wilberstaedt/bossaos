@@ -28,6 +28,44 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## Correcção 13 — o rasto do suporte podia não acontecer
+
+**Achado do sénior, na revisão do que eu tinha acabado de escrever.** A primeira
+composição do `suporte_le_pedido` juntava a sessão **só** na CTE que escreve o
+rasto, e prendia as duas metades com `WHERE (SELECT count(*) FROM rasto) >= 0`.
+**Zero é maior ou igual a zero.**
+
+Com um `p_sessao` que não casa com sessão nenhuma, o `INSERT` insere zero linhas,
+a condição continua verdadeira, e **a leitura devolve os dados sem deixar rasto**.
+Reproduzi-o antes de corrigir, numa réplica com a mesma composição e transacção
+revertida: com sessão que existe, dados e 1 rasto; **com sessão inventada, os
+mesmos dados e o rasto na mesma 1**.
+
+Não havia fuga — o predicado continuava a guardar a leitura. Havia um acesso que
+podia acontecer sem ficar escrito, e um segundo efeito da mesma causa: com uma
+sessão válida **de outro agente**, o registo nomeava esse outro, porque o
+`staff_user_id` saía da sessão que o chamador escolheu.
+
+**E aquele `WHERE` era pior do que parecia:** uma CTE que escreve corre **sempre
+e por inteiro**, seja ou não lida pela consulta principal. A condição nunca teve
+função — nem para forçar o `INSERT`, que já corria, nem para acoplar as metades.
+Decoração com ar de mecanismo.
+
+**A cura junta as duas metades numa só:** a sessão entra no `lido`, com três
+condições — é a sessão indicada, é da organização daquele pedido, e é do agente
+que está a chamar. Sem isso não há dados **nem** rasto, porque os dois saem da
+mesma linha.
+
+**Medido na réplica, com a contagem em instrução separada** — dentro da mesma
+instrução o `count` não vê o próprio `INSERT`, e li-o quase mal: inventada →
+nada, 0 rastos; de outro agente → nada, 0 rastos; do próprio → dados, 1 rasto.
+
+**Controlo 1c** novo na J15, medido pelas duas pontas: uma sessão que não existe
+não devolve dados **e** a contagem de rastos não mexe.
+
+`provar-jornada.sh` **0 falhas** — 8 jornadas, **59 passos**, 4 elos partidos.
+
+
 ## As três jornadas que faltavam — J08, J12 e J15 — e as OITO numa só corrida
 
 **8 jornadas, 58 passos, 0 falhas**, com os quatro elos partidos a acender, a
