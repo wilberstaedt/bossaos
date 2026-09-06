@@ -5,6 +5,7 @@ import {
   abrirCaixa, abrirConta, comEscopo, confirmarPagamento, contar, corrigirMovimento,
   entrarPagamentoEmDinheiro, esperadoNaGaveta, estadoDaCaixa, fecharCaixa,
   historicoDeCaixas, movimentar, obterPrisma, rastoDaCaixa, reabrirCaixa,
+  RecusaDaCaixa,
   resumoDaCaixa, tentarPagar,
 } from '../packages/db/src/index.ts';
 import { IDS } from '../packages/db/prisma/fixtures.ts';
@@ -377,5 +378,135 @@ describe('6 · o histórico mostra o que aconteceu', () => {
     assert.equal(daProva.find((c) => c.id === b)?.estado, 'ABERTA');
     assert.equal(daProva.find((c) => c.id === b)?.contadoMenor, null,
       'uma caixa por contar não pode mostrar um contado');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+describe('7 · dois fechos ao MESMO TEMPO — e a base não os impede', () => {
+  /**
+   * ── Porque é que isto é dinheiro e não arrumação ────────────────────────
+   *
+   * Dois fechos são **duas contagens** e, pior, **duas decisões de autorização
+   * de divergência tomadas em separado**. Ao fim de um serviço com dois
+   * operadores — ou um duplo toque no mesmo botão — a caixa fecha duas vezes e
+   * cada fecho carrega o seu `autorizadoPor`. Quem depois lê o rasto não
+   * consegue dizer qual das duas contagens foi a boa.
+   *
+   * ── E prova-se com Promise.all, nunca com dois `await` seguidos ─────────
+   *
+   * Dois `await` medem SEQUÊNCIA: o segundo pedido vê o primeiro já gravado, e
+   * passa numa implementação que só faz `SELECT` antes do `INSERT` — que é
+   * exactamente a que temos. Uma corrida com a janela estreita passa a maior
+   * parte das vezes, e um defeito que falha em 1 de 50 é mais caro do que um
+   * que falha sempre.
+   */
+  async function caixaProntaAFechar() {
+    const caixa = await caixaCom(1000);
+    await comA((db) => contar(db, {
+      registerId: caixa, contadoMenor: 1000, actor: IDS.utilizadorA,
+    }));
+    return caixa;
+  }
+
+  const fechosNaBase = async (caixa: string) => (await sql.query(
+    `SELECT count(*)::int AS n FROM cash_register_events
+      WHERE register_id = $1 AND tipo = 'FECHO'`, [caixa])).rows[0].n as number;
+
+  /**
+   * ── E o `Promise.all` sozinho NÃO chega ─────────────────────────────────
+   *
+   * A primeira versão desta prova era `Promise.allSettled([fechar(), fechar()])`
+   * e **passou** — com o defeito lá. Medi porquê com uma sonda à parte: as duas
+   * transacções abriram em `pid`s diferentes e sobrepostas, e gravaram **dois**
+   * FECHOS. No teste, a primeira acabava antes de a segunda abrir a transacção,
+   * porque abrir uma transacção interactiva é ela própria uma ida à base.
+   *
+   * Ou seja: `Promise.all` mede intenção de concorrência, e o que sai é
+   * sequência quando calha. Um verde por temporização é pior do que nenhum
+   * teste — diz que está protegido.
+   *
+   * O encontro torna a corrida DETERMINISTA: as duas transacções estão abertas
+   * antes de qualquer uma ler o estado, que é o que «ao mesmo tempo» quer dizer
+   * quando dois operadores carregam no botão.
+   */
+  function encontro(quantos: number) {
+    let chegaram = 0;
+    let abrir!: () => void;
+    const porta = new Promise<void>((r) => { abrir = r; });
+    return async () => {
+      chegaram += 1;
+      if (chegaram === quantos) abrir();
+      await porta;
+    };
+  }
+
+  it('dois fechos concorrentes da mesma caixa dão UM evento de FECHO', async () => {
+    const caixa = await caixaProntaAFechar();
+    const juntos = encontro(2);
+    const fechar = () => comEscopo(prisma, ESCOPO, async (db) => {
+      // Força a transacção a existir de facto antes do encontro: sem isto, a
+      // espera acontecia antes de haver ligação e as duas continuavam a
+      // serializar-se na aquisição.
+      await db.$queryRaw`SELECT 1`;
+      await juntos();
+      return fecharCaixa(db, { registerId: caixa, actor: IDS.utilizadorA });
+    });
+
+    const saidas = await Promise.allSettled([fechar(), fechar()]);
+    const boas = saidas.filter((s) => s.status === 'fulfilled');
+    const mas = saidas.filter((s) => s.status === 'rejected');
+
+    // ── A asserção que manda é a da BASE, e não a contagem de rejeições ───
+    //
+    // O que estraga o dinheiro são dois eventos de FECHO gravados. Contar
+    // promessas mede o que o motor devolveu; contar linhas mede o que ficou.
+    assert.equal(await fechosNaBase(caixa), 1,
+      'a caixa fechou duas vezes: duas contagens e duas autorizações no rasto');
+    assert.equal(boas.length, 1, 'as duas passaram');
+    assert.equal(mas.length, 1, 'nenhuma recusou');
+
+    // ── E contar rejeições não chega: é preciso saber PORQUÊ ──────────────
+    //
+    // A lição do E24: com `Serializable` a segunda também cai, mas com um
+    // `40001` — um erro sobre a base e não sobre o negócio. O caso ficava verde
+    // sem nunca tocar na regra da caixa.
+    //
+    // Aqui é a mesma família e MEDIDA: sem a tranca no `fecharCaixa`, o gatilho
+    // sozinho segura o dinheiro na mesma (um único FECHO), mas quem perde a
+    // corrida recebe `PrismaClientKnownRequestError` com `23514` e a mensagem
+    // embrulhada. A caixa fica certa e **o ecrã fica errado**: o operador que
+    // carregou ao mesmo tempo vê um erro de sistema em vez de «a caixa já está
+    // fechada». Por isso a asserção é sobre a CLASSE e não sobre o texto.
+    const razao = (mas[0] as PromiseRejectedResult).reason;
+    assert.ok(razao instanceof RecusaDaCaixa,
+      `a recusa não foi de negócio, foi ${(razao as Error)?.constructor?.name}: `
+      + `«${String((razao as Error)?.message).replace(/\s+/g, ' ').slice(0, 90)}»`);
+    assert.equal((razao as RecusaDaCaixa).motivo, 'CAIXA_FECHADA');
+  });
+
+  it('E A SONDA QUE TEM DE PASSAR: um fecho sozinho continua a fechar', async () => {
+    // Sem este par, uma cura que recusasse SEMPRE passava o caso de cima.
+    const caixa = await caixaProntaAFechar();
+    const r = await comA((db) => fecharCaixa(db, {
+      registerId: caixa, actor: IDS.utilizadorA,
+    }));
+    assert.equal(r.diferencaMenor, 0);
+    assert.equal(await fechosNaBase(caixa), 1);
+    assert.equal(await comA((db) => estadoDaCaixa(db, caixa)), 'FECHADA');
+  });
+
+  it('e a divergência autorizada continua a passar, uma única vez', async () => {
+    // O caminho que carrega a decisão humana é o que não pode partir-se com a
+    // cura: é aqui que vive o `autorizadoPor`.
+    const caixa = await caixaCom(1000);
+    await comA((db) => contar(db, {
+      registerId: caixa, contadoMenor: 900, actor: IDS.utilizadorA,
+    }));
+    const r = await comA((db) => fecharCaixa(db, {
+      registerId: caixa, actor: IDS.utilizadorA,
+      autorizadoPor: IDS.utilizadorA, motivo: 'falta de troco',
+    }));
+    assert.equal(r.diferencaMenor, -100);
+    assert.equal(await fechosNaBase(caixa), 1);
   });
 });

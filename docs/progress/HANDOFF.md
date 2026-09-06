@@ -25,6 +25,48 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## Correcção 1 do E34, encaminhada a mim — o fecho de caixa duplo
+
+**Fechado.** O `fecharCaixa` lia o estado, fazia cinco validações e só depois
+criava o evento — sem tranca. O estado **deriva do último acontecimento**, e
+derivar é uma leitura, não uma trava.
+
+**Primeiro escrevi a prova que falha, como mandado.** E ela passou à primeira
+tentativa — com o defeito lá. `Promise.allSettled([fechar(), fechar()])` mede
+**intenção** de concorrência: abrir uma transacção interactiva é ela própria uma
+ida à base, e a primeira acabava antes de a segunda abrir. Um verde por
+temporização é pior do que nenhum teste, porque diz que está protegido.
+
+Medi-o com uma sonda à parte: `pid` 54579 e 54580, a segunda transacção aberta
+**antes** de a primeira gravar, e **dois eventos FECHO** na mesma caixa, as duas
+chamadas bem sucedidas. Com um **encontro** entre as duas transacções (ambas
+abertas antes de qualquer uma ler) a corrida passou a ser determinista e a prova
+ficou vermelha: `esperado 1, obtido 2`.
+
+**A cura são duas coisas, e medi que não são a mesma dita duas vezes:**
+
+| desligo | o que acontece |
+|---------|----------------|
+| só a tranca | o dinheiro fica certo (um FECHO) e **o ecrã fica errado**: `PrismaClientKnownRequestError` `23514` em vez de `RecusaDaCaixa` |
+| só o gatilho | a prova em TypeScript fica verde — mas a **base** aceita dois FECHOS por SQL directo |
+| os dois | dois FECHOS, as duas chamadas bem sucedidas |
+
+Por isso a asserção da prova é sobre a **classe** da recusa e não sobre o texto,
+e o controlo do gatilho entra por **SQL**, que é a porta que a tranca não guarda.
+
+**E é um gatilho com tranca, não um índice único:** a caixa reabre com motivo e
+um segundo ciclo TEM de poder fechar. O que é único é o fecho **por ciclo**, e o
+ciclo não existe como coluna — escrevê-lo seria inventar um número que se deriva.
+
+**Observação que fica, e não lhe toquei:** a rota do TPV traduz recusas com
+`/^[A-Z_]+:/`, e uma `RecusaDaCaixa` sem detalhe tem a mensagem `CAIXA_FECHADA`
+**sem dois pontos** — não casa, e o operador lê «erro» em vez do motivo. Vale
+para todas as recusas de caixa sem detalhe, não só para esta.
+
+`provar-caixa.sh` **0 falhas** (12 secções, os controlos 10 e 11 novos) ·
+`validar-concorrencia.sh` **0** · `validar-rls.sh` **0** · `pnpm verificar` **0**.
+
+
 ## E35 — pacote de implantação e piloto (MEU, aguarda validação)
 
 **Contrato** `docs/architecture/implantacao-e-piloto.md` e **régua**

@@ -202,7 +202,89 @@ exigir_vermelho "caiu o rasto: o fecho de uma caixa passou a apagar-se" \
 repor_base
 
 echo
-echo "10. Reposto — tem de voltar ao verde"
+echo "10. CONTROLO NEGATIVO — a tranca sai e o fecho deixa de ser recusa de NEGÓCIO"
+# ── As duas garantias não são a mesma coisa dita duas vezes ────────────────
+#
+# Medido: com o gatilho sozinho, o dinheiro fica certo (um único FECHO) e o
+# **ecrã fica errado** — quem perde a corrida recebe um
+# `PrismaClientKnownRequestError` com `23514` em vez de `RecusaDaCaixa`, e o
+# operador vê um erro de sistema onde devia ler «a caixa já está fechada».
+python3 - <<'PYTRANCA'
+import io
+p = 'packages/db/src/caixa.ts'
+s = io.open(p, encoding='utf-8').read()
+antigo = '  await db.$queryRaw`SELECT 1 FROM "cash_registers" WHERE "id" = ${dados.registerId}::uuid FOR UPDATE`;'
+assert antigo in s, 'a tranca nao esta onde se esperava'
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, '', 1))
+PYTRANCA
+correr /tmp/bossaos-caixa-tranca.txt
+exigir_vermelho "caiu a tranca: a recusa virou erro de base em vez de recusa de negócio" \
+  'dois fechos concorrentes' 'a recusa não foi de negócio' \
+  /tmp/bossaos-caixa-tranca.txt
+cp "$ORIG_CAIXA" "$CAIXA"
+
+echo
+echo "11. CONTROLO NEGATIVO — o gatilho sai e a BASE aceita dois fechos"
+# ── E este mede-se em SQL, não pelo motor ─────────────────────────────────
+#
+# Com a tranca no `fecharCaixa` a prova em TypeScript fica verde à mesma: ela só
+# passa por essa função. O que o gatilho protege é **qualquer outro chamador** —
+# SQL directo, outra rota, um trabalho de manutenção. Por isso o controlo entra
+# pela porta que a tranca não guarda.
+#
+# Dentro de uma transacção DESFEITA: nada disto fica na base.
+sonda_sql() {
+  psql "$MIGRATION_DATABASE_URL" -t -A -v ON_ERROR_STOP=0 <<'PSQL' 2>&1
+BEGIN;
+  SELECT set_config('app.organization_id', (SELECT organization_id::text FROM cash_registers LIMIT 1), true);
+  -- ── A caixa da sonda nasce AQUI, aberta ────────────────────────────────
+  -- A primeira versão apanhava `cash_registers LIMIT 1` e calhou uma caixa já
+  -- FECHADA das provas anteriores: o gatilho recusava logo o primeiro fecho, e
+  -- o controlo teria medido «já estava fechada» em vez de «dois fechos». Uma
+  -- caixa nova não depende do que ficou de outra corrida.
+  CREATE TEMP TABLE alvo ON COMMIT DROP AS
+    SELECT gen_random_uuid() AS id, organization_id, location_id FROM cash_registers LIMIT 1;
+  INSERT INTO cash_registers (id, organization_id, location_id, nome, moeda, fundo_menor)
+    SELECT id, organization_id, location_id, 'sonda-do-controlo-11', 'EUR', 0 FROM alvo;
+  INSERT INTO cash_register_events (id, organization_id, register_id, tipo, actor)
+    SELECT gen_random_uuid(), organization_id, id, 'ABERTURA',
+           (SELECT id FROM users LIMIT 1) FROM alvo;
+  INSERT INTO cash_register_events (id, organization_id, register_id, tipo, actor)
+    SELECT gen_random_uuid(), organization_id, id, 'FECHO',
+           (SELECT id FROM users LIMIT 1) FROM alvo;
+  INSERT INTO cash_register_events (id, organization_id, register_id, tipo, actor)
+    SELECT gen_random_uuid(), organization_id, id, 'FECHO',
+           (SELECT id FROM users LIMIT 1) FROM alvo;
+  SELECT 'DOIS_FECHOS_ACEITES';
+ROLLBACK;
+PSQL
+}
+psql "$MIGRATION_DATABASE_URL" -q -c 'DROP TRIGGER IF EXISTS "um_fecho_de_caixa_de_cada_vez" ON "cash_register_events"' >/dev/null 2>&1
+SEM_GATILHO="$(sonda_sql)"
+# Repor ANTES de julgar: um julgamento que rebente não pode deixar a base sem a
+# garantia. A lição do E31, onde um guião morto a meio deixou a base sem a
+# restrição única que ele próprio tinha removido.
+python3 scripts/extrair-sql.py \
+  packages/db/prisma/migrations/20260917970000_e34_um_fecho_de_caixa_de_cada_vez/migration.sql \
+  'CREATE OR REPLACE FUNCTION|CREATE TRIGGER' \
+  | psql "$MIGRATION_DATABASE_URL" -q -v ON_ERROR_STOP=1
+COM_GATILHO_SQL="$(sonda_sql)"
+
+if grep -q 'DOIS_FECHOS_ACEITES' <<<"$SEM_GATILHO"; then
+  if grep -q 'CAIXA_FECHADA' <<<"$COM_GATILHO_SQL"; then
+    verde "caiu o gatilho: a base aceitou dois FECHOS por SQL, e com ele recusa"
+  else
+    vermelho "com o gatilho reposto, a base CONTINUA a aceitar dois fechos por SQL"
+  fi
+else
+  # Sem o gatilho a base tem de aceitar — se não aceitou, o que está a recusar é
+  # outra coisa, e este controlo nunca mediu o gatilho.
+  vermelho "sem o gatilho a base já recusava: o controlo mede outra coisa"
+  printf '%s\n' "$SEM_GATILHO" | head -3 | sed 's/^/           /'
+fi
+
+echo
+echo "12. Reposto — tem de voltar ao verde"
 if correr /tmp/bossaos-caixa-reposto.txt; then
   passou=$(sed -e 's/\x1b\[[0-9;]*m//g' /tmp/bossaos-caixa-reposto.txt \
     | grep -oE '^# pass [0-9]+' | grep -oE '[0-9]+')

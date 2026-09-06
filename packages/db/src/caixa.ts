@@ -227,6 +227,31 @@ export async function fecharCaixa(
   db: ClienteComEscopo,
   dados: { registerId: string; actor: string; autorizadoPor?: string; motivo?: string },
 ): Promise<{ contadoMenor: number; esperadoMenor: number; diferencaMenor: number }> {
+  // ── A TRANCA VEM ANTES DE LER O ESTADO, e é essa a correcção ─────────────
+  //
+  // O estado da caixa **deriva do último acontecimento**, e derivar é uma
+  // leitura, não uma trava. Sem isto, duas chamadas ao mesmo tempo leem ambas
+  // ABERTA, fazem ambas as cinco validações, e gravam ambas o fecho.
+  //
+  // Medido a 06/09 com as duas transacções demonstravelmente sobrepostas
+  // (`pid` 54579 e 54580): **dois eventos FECHO na mesma caixa**, as duas
+  // chamadas bem sucedidas. Dois fechos são duas contagens e duas decisões de
+  // autorização de divergência tomadas em separado.
+  //
+  // `FOR UPDATE` na linha da caixa faz a segunda ESPERAR pela primeira e só
+  // depois ler — e por isso ela recebe `CAIXA_FECHADA`, que é uma resposta de
+  // negócio. Com `Serializable` em vez da tranca, receberia `40001`, que é uma
+  // resposta sobre a base e obriga quem chama a repetir para a traduzir.
+  //
+  // ── E porque é que isto está AQUI se há um gatilho na base ───────────────
+  //
+  // O gatilho `um_fecho_de_caixa_de_cada_vez` é a garantia — vale para qualquer
+  // chamador, inclusive SQL directo. Mas uma excepção de gatilho **aborta a
+  // transacção**, e apanhá-la em JS não a desaborta (a lição do E27). Por isso
+  // pergunta-se ANTES, com a mesma tranca que o gatilho usa: o caminho normal
+  // devolve uma recusa limpa, e o gatilho fica como a rede por baixo.
+  await db.$queryRaw`SELECT 1 FROM "cash_registers" WHERE "id" = ${dados.registerId}::uuid FOR UPDATE`;
+
   const caixa = await db.cashRegister.findUniqueOrThrow({
     where: { id: dados.registerId }, select: { organizationId: true, locationId: true },
   });
