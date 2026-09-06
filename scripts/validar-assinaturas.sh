@@ -78,32 +78,73 @@ linhas = list(csv.DictReader(open('docs/progress/coverage.csv', encoding='utf-8-
 campos = list(linhas[0].keys())
 # Uma tela de uma etapa POR VALIDAR, marcada validado: tem de ser apanhada.
 #
-# A etapa escolhe-se DA MATRIZ, em vez de vir fixa no codigo. A primeira versao
-# fixava E12, e no minuto em que validei o E12 o controlo passou a plantar uma
-# sonda LEGITIMA - a guarda nao a acusava, e com razao, mas o controlo dizia que
-# ela tinha falhado. Um controlo que depende de um facto que se move mede o
-# calendario e nao a propriedade.
+# ── A sonda passou a ser SINTETICA, e foi por ter ficado sem materia-prima ──
+#
+# A primeira versao fixava a etapa E12 no codigo, e no minuto em que o E12 foi
+# validado o controlo passou a plantar uma sonda LEGITIMA. A segunda escolhia a
+# primeira etapa por validar DA MATRIZ — melhor, e ainda dependente do
+# repositorio conter uma.
+#
+# A 06/09 ficou sem nenhuma: com 36 etapas e o atlas fechado, a primeira por
+# validar era a E34, que **nao tem telas**. O `sem tela da E34 para a sonda`
+# saiu, o CSV nunca chegou a ser escrito, e o controlo reportou que o produto
+# tinha falhado — quando quem tinha falhado era ele.
+#
+# Um controlo que precisa que o defeito JA EXISTA no repositorio para de
+# funcionar exactamente quando tudo fica pronto. Agora inventa as duas coisas:
+# uma etapa que nao existe e uma tela dela. Nao depende de nada que se mova.
 import re
+
+# A leitura da matriz — precisa dela para escolher a etapa VALIDADA da sonda boa.
 etapas = {}
 for linha in open('docs/progress/ETAPAS.md', encoding='utf-8'):
     m = re.match(r'\|\s*(E\d{2})\s*\|([^|]*)\|', linha)
     if m:
         etapas[m.group(1)] = re.sub(r'[*_`]', '', m.group(2)).strip().lower()
-por_validar = next((e for e, s in sorted(etapas.items()) if e != 'E00' and s != 'validado'), None)
-if por_validar is None:
-    print('CONTAGENS 0 0')  # tudo validado: nao ha etapa para a sonda, e isso diz-se
-    raise SystemExit(0)
-alvo = next((l for l in linhas if (l['etapa_principal'] or '').strip() == por_validar), None)
-if alvo is None:
-    raise SystemExit(f'sem tela da {por_validar} para a sonda')
-alvo = dict(alvo); alvo[campos[0]] = 'ZZZ-996'; alvo['status'] = 'validado'
+
+campos_etapa = 'E99'
+
+# A etapa sintetica entra na COPIA da matriz, por validar.
+copia = d / 'etapas.md'
+texto = copia.read_text(encoding='utf-8')
+copia.write_text(texto.rstrip() + f"\n| {campos_etapa} | planejado |  |\n", encoding='utf-8')
+
+modelo = dict(linhas[0])
+
+# ── A SONDA MA: tem de ser apanhada ──────────────────────────────────────
+ma = dict(modelo)
+ma[campos[0]] = 'ZZZ-996'
+ma['etapa_principal'] = campos_etapa
+ma['status'] = 'validado'
+
+# ── E A SONDA BOA, que TEM de passar ─────────────────────────────────────
+#
+# Sem ela, uma leitura que acusasse TUDO passava o controlo — e o guarda-costas
+# do guarda-costas seria o proximo a nao existir. E a regra que o senior fixou a
+# 06/09: escreve-se sempre a sonda que tem de passar ao lado das que devem
+# falhar.
+#
+# Aponta a uma etapa VALIDADA da matriz, e por isso e legitima.
+validada = next((e for e, st in sorted(etapas.items()) if st == 'validado'), None)
+if validada is None:
+    raise SystemExit('nao ha etapa validada nenhuma: o controlo nao consegue montar a sonda boa')
+boa = dict(modelo)
+boa[campos[0]] = 'ZZZ-997'
+boa['etapa_principal'] = validada
+boa['status'] = 'validado'
+
 with open(d / 'cobertura.csv', 'w', encoding='utf-8-sig', newline='') as f:
-    w = csv.DictWriter(f, fieldnames=campos); w.writeheader(); w.writerows(linhas + [alvo])
+    w = csv.DictWriter(f, fieldnames=campos); w.writeheader(); w.writerows(linhas + [ma, boa])
 PY
-if grep -q '^MAU ZZZ-996' <<<"$(analisar "$TMP/etapas.md" "$TMP/cobertura.csv")"; then
-  ok "controlo negativo: apanha uma tela assinada antes da etapa"
-else
+SAIDA_DA_SONDA="$(analisar "$TMP/etapas.md" "$TMP/cobertura.csv")"
+if ! grep -q '^MAU ZZZ-996' <<<"$SAIDA_DA_SONDA"; then
   erro "CONTROLO NEGATIVO FALHOU: aceitou uma tela validada com a etapa por validar"
+elif grep -q '^MAU ZZZ-997' <<<"$SAIDA_DA_SONDA"; then
+  # A metade que faltava. Uma leitura que acuse tudo apanha a sonda ma por
+  # acidente, e o controlo dava-se por satisfeito.
+  erro "CONTROLO NEGATIVO FALHOU: acusou a sonda LEGITIMA — a leitura reprova tudo"
+else
+  ok "controlo negativo: apanha a assinada antes da etapa e NAO acusa a legitima"
 fi
 
 echo
