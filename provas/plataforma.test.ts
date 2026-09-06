@@ -1,5 +1,6 @@
 import { after, before, beforeEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { Client } from 'pg';
 import {
   RecusaDePlataforma, abrirSessaoDeSuporte, comEscopo, comIdentidade, concederCapacidade,
@@ -684,55 +685,33 @@ describe('8 · leitura do suporte e revogação da concessão, concorrentes (E34
     });
 
   /**
-   * ── ACHADO, medido a 07/09 ao escrever esta prova ─────────────────────────
+   * ── CORRECÇÃO 14 · a sessão NOMEADA também tem de estar viva ──────────────
    *
-   * **Não é um caso por escrever. É um caso escrito que a base ainda não passa**,
-   * e está marcado `todo` para não fingir verde nem parar o corredor.
+   * Achado ao escrever a prova concorrente de cima, a 07/09, e corrigido na
+   * migração `20260918010000_e34_a_sessao_nomeada_tem_de_estar_viva`.
    *
-   * A `suporte_le_pedido` liga a sessão que o chamador nomeia por três
-   * condições — `s.id = p_sessao`, mesma organização, mesmo agente — e **não
-   * verifica que ESSA sessão está viva ou em âmbito.** Quem verifica é o
-   * `suporte_com_concessao_viva(org)`, e a pergunta dele é outra: «este agente
-   * tem ALGUMA concessão viva nesta casa?».
+   * A correcção 13 tinha ligado a sessão nomeada por três condições — `s.id`, a
+   * organização e o agente — e não pela liveness dela. Quem verificava liveness
+   * era o `suporte_com_concessao_viva(org)`, e a pergunta dele é outra: **«este
+   * agente tem ALGUMA concessão viva nesta casa?»**, e não «é ESTA».
    *
    * O que medi, nesta ordem:
    *
-   *   1. sessão A (DADOS_OPERACIONAIS) viva  → lê. Correcto.
-   *   2. A revogada, nenhuma outra viva      → não lê. Correcto.
-   *   3. A revogada, **B viva**, a ler com o id de A → **LÊ**, e o rasto nomeia A.
+   *   1. sessão A (DADOS_OPERACIONAIS) viva          → lê. Correcto.
+   *   2. A revogada, nenhuma outra viva              → não lê. Correcto.
+   *   3. A revogada, **B viva**, a ler com o id de A → **lia**, e o rasto nomeava A.
    *
-   * E a variante que dói mais, também medida: uma sessão C de âmbito `LEITURA`
-   * — que, **enquanto viva, recusou** ler o pedido — passa a ler depois de
-   * terminada, desde que o mesmo agente tenha uma sessão de dados operacionais
-   * aberta. O rasto fica com o email e o motivo de C.
+   * Não era fuga de dados — só lê quem tem, naquele instante, uma concessão viva
+   * e em âmbito para aquela casa. O que se estragava era o **rasto**, que é a
+   * razão de ser desta etapa: o agente escolhia qual das suas sessões passadas
+   * ficava escrita, e a casa lia um acesso atribuído a uma sessão já fechada,
+   * com um motivo que não era o do acesso.
    *
-   * ── Porque é que isto importa, e o que NÃO é ─────────────────────────────
-   *
-   * Não é fuga de dados: só lê quem tem, naquele instante, uma concessão viva e
-   * em âmbito para aquela casa. O que se estraga é o **rasto**, que é a razão de
-   * ser desta etapa: o agente escolhe qual das suas sessões passadas fica
-   * escrita, e a casa lê um acesso atribuído a uma sessão já fechada, com um
-   * motivo que não é o do acesso — e, no caso de C, com um âmbito que nunca o
-   * permitiria.
-   *
-   * É a mesma família do defeito que a migração
-   * `e34_o_rasto_do_suporte_nao_se_separa_da_leitura` fechou: lá, o rasto podia
-   * nomear **outro agente**; aqui nomeia **outra sessão do próprio**.
-   *
-   * ── E não está aberto pela rota ──────────────────────────────────────────
-   *
-   * A rota do suporte chama `sessaoAutoriza(...)` antes, e essa recusa uma
-   * sessão terminada ou fora de âmbito. Hoje não há por onde entrar. Mas o
-   * argumento escrito na própria migração é que a garantia não pode depender
-   * disso — *«a alternativa era a base confiar que alguém verificou»* — e é essa
-   * promessa que este caso mede.
-   *
-   * A cura são três condições no `JOIN`, ao lado das que já lá estão:
-   * `s.terminada_em IS NULL`, `s.expira_em > now()` e
-   * `'DADOS_OPERACIONAIS' = ANY (s.ambito)`.
+   * Os dois casos seguintes exigem o invariante a sério. O terceiro é o controlo
+   * negativo que lhes dá sentido: sem ele, não se sabe se estes dois medem a
+   * correcção ou se sempre teriam passado.
    */
-  it('ACHADO: uma concessão REVOGADA volta a ler quando o mesmo agente abre outra',
-    { todo: 'defeito medido a 07/09: a sessão nomeada não é verificada, só a existência de outra viva' },
+  it('uma concessão REVOGADA não volta a ler quando o mesmo agente abre outra',
     async () => {
       const pedido = await pedidoDaCasa();
       const revogada = await concessao();
@@ -744,27 +723,108 @@ describe('8 · leitura do suporte e revogação da concessão, concorrentes (E34
 
       // Uma concessão NOVA, legítima, para outro diagnóstico. Nada nela diz
       // respeito à sessão que a casa mandou fechar.
-      await concessao();
+      const viva = await concessao();
+      assert.ok(await lerComoSuporte(pedido, viva.id),
+        'controlo: a concessão nova lê — senão este caso passava por a casa estar fechada');
 
       assert.equal(await lerComoSuporte(pedido, revogada.id), null,
         'a concessão revogada voltou a ler porque o agente abriu outra — e o rasto nomeia a revogada');
+      // E não ficou rasto da tentativa recusada: são 2 leituras boas, 2 rastos.
+      assert.equal(await rastos(pedido), 2,
+        'ficou rasto de um acesso que a concessão revogada não chegou a fazer');
     });
 
-  it('ACHADO (a variante mais dura): a sessão de LEITURA revogada lê o que nunca pôde ler',
-    { todo: 'defeito medido a 07/09: o âmbito da sessão NOMEADA não é verificado pela função' },
+  it('e a sessão de LEITURA revogada continua sem ler o que nunca pôde ler', async () => {
+    const pedido = await pedidoDaCasa();
+    const soLeitura = await concessao('LEITURA');
+    // Enquanto viva, esta sessão recusa — o âmbito é a terceira das quatro
+    // condições, e funciona. É o controlo positivo do caso: se ela já lesse
+    // aqui, o que se mede a seguir não era sobre a revogação.
+    assert.equal(await lerComoSuporte(pedido, soLeitura.id), null,
+      'controlo: uma sessão de LEITURA viva não lê dados operacionais');
+    await comA((db) => terminarSessaoDeSuporte(
+      db, soLeitura.id, `${PREFIXO_E34}fim da consulta de configuração`, EMAIL));
+    const operacional = await concessao('DADOS_OPERACIONAIS');
+    assert.ok(await lerComoSuporte(pedido, operacional.id), 'controlo: a sessão em âmbito lê');
+
+    assert.equal(await lerComoSuporte(pedido, soLeitura.id), null,
+      'a sessão de LEITURA, já terminada, leu os dados operacionais — e o rasto ficou com o motivo dela');
+    assert.equal(await rastos(pedido), 1, 'ficou rasto de um acesso que não aconteceu');
+  });
+
+  /**
+   * ── O CONTROLO NEGATIVO, e sem ele os dois casos de cima não valem nada ───
+   *
+   * A pergunta que ele responde é «estes casos medem a correcção 14, ou teriam
+   * passado na mesma?». A resposta tem de sair de correr **a função anterior** —
+   * e não da minha palavra de que ela era diferente.
+   *
+   * A versão anterior não está transcrita aqui: é **lida do ficheiro da
+   * migração** que a criou. Uma transcrição minha podia divergir do que estava
+   * mesmo em produção, e aí o controlo media a minha cópia.
+   *
+   * Corre tudo numa transacção **revertida** e na MESMA ligação — o `CREATE OR
+   * REPLACE` é transaccional no PostgreSQL, e uma ligação diferente não veria a
+   * substituição antes do commit. As duas medições saem da mesma ligação, do
+   * mesmo papel, sobre os mesmos dados: a **única** variável é o corpo da
+   * função. E o `ROLLBACK` repõe a corrigida — incluindo o rasto que a versão
+   * com defeito escrever pelo caminho.
+   */
+  it('CONTROLO NEGATIVO: com a função ANTERIOR à correcção 14, as duas leituras passam',
     async () => {
       const pedido = await pedidoDaCasa();
+      const revogada = await concessao();
+      await comA((db) => terminarSessaoDeSuporte(
+        db, revogada.id, `${PREFIXO_E34}o cliente retirou o acesso`, EMAIL));
       const soLeitura = await concessao('LEITURA');
-      // Enquanto viva, esta sessão recusa — o âmbito é a terceira condição, e
-      // funciona. É o controlo positivo do caso.
-      assert.equal(await lerComoSuporte(pedido, soLeitura.id), null,
-        'controlo: uma sessão de LEITURA viva não lê dados operacionais');
       await comA((db) => terminarSessaoDeSuporte(
         db, soLeitura.id, `${PREFIXO_E34}fim da consulta de configuração`, EMAIL));
       await concessao('DADOS_OPERACIONAIS');
 
-      assert.equal(await lerComoSuporte(pedido, soLeitura.id), null,
-        'a sessão de LEITURA, já terminada, leu os dados operacionais — e o rasto ficou com o motivo dela');
+      const anterior = await readFile(new URL(
+        '../packages/db/prisma/migrations/'
+        + '20260917990000_e34_o_rasto_do_suporte_nao_se_separa_da_leitura/migration.sql',
+        import.meta.url), 'utf8');
+      assert.ok(anterior.includes('CREATE OR REPLACE FUNCTION suporte_le_pedido'),
+        'o ficheiro da migração anterior não define a função: o controlo não mede nada');
+
+      const lerPorAqui = async (sessaoId: string) => (await sql.query(
+        `SELECT suporte_le_pedido($1::uuid, $2::uuid) AS d`, [pedido, sessaoId])).rows[0].d;
+
+      /**
+       * As duas medições saem daqui dentro, e a transacção fecha-se sempre.
+       * Se o `CREATE OR REPLACE` rebentar, o erro sobe e o caso falha — um
+       * controlo que não chegou a correr não pode sair a verde.
+       */
+      const medir = async () => {
+        await sql.query('BEGIN');
+        try {
+          await sql.query(`SELECT set_config('app.user_id', $1, true)`, [IDS.utilizadorA]);
+          // A corrigida, medida por ESTA ligação — para a comparação ser entre
+          // corpos de função, e não entre caminhos.
+          const corrigida = [await lerPorAqui(revogada.id), await lerPorAqui(soLeitura.id)];
+          await sql.query(anterior);
+          const antiga = [await lerPorAqui(revogada.id), await lerPorAqui(soLeitura.id)];
+          return { corrigida, antiga };
+        } finally {
+          await sql.query('ROLLBACK');
+        }
+      };
+      const { corrigida, antiga } = await medir();
+
+      assert.deepEqual(corrigida, [null, null],
+        'a função corrigida ainda lê por uma sessão revogada: a correcção 14 não pegou');
+      assert.ok(antiga[0],
+        'a função ANTERIOR já recusava a sessão revogada: o caso não mede a correcção 14');
+      assert.ok(antiga[1],
+        'a função ANTERIOR já recusava a sessão de LEITURA revogada: o caso não mede a correcção 14');
+
+      // E o `ROLLBACK` desfez tudo: a função viva é outra vez a corrigida, e o
+      // rasto que a versão com defeito escreveu não ficou.
+      assert.equal(await lerComoSuporte(pedido, revogada.id), null,
+        'a substituição temporária sobreviveu à transacção');
+      assert.equal(await rastos(pedido), 0,
+        'ficou na auditoria um rasto escrito pela versão com defeito');
     });
 
   it('e a concessão de LEITURA não chega para ver o pedido — nem deixa rasto', async () => {
