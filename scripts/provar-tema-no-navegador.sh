@@ -16,6 +16,18 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
+# O arnês antes de tudo. Salta sozinho em zero segundos se já estiver pronto;
+# numa base fresca faz os três passos pela ordem certa — fixtures, o utilizador
+# do `preparar`, e só depois a semente, que o `preparar` limparia.
+#
+# Sem isto, uma base sem o utilizador do arnês faz o `alvos.ts` rebentar na
+# RECOLHA e o Playwright diz «No tests found» — que não aponta para nada, e me
+# custou seis hipóteses a 06/09.
+bash "$(dirname "$0")/arnes-pronto.sh" >/dev/null || {
+  echo "ERRO: não consegui preparar o arnês — vê scripts/arnes-pronto.sh" >&2
+  exit 1
+}
+
 if [[ -f .env ]]; then set -a; . ./.env; set +a; fi
 : "${DATABASE_URL:?DATABASE_URL em falta}"
 : "${MIGRATION_DATABASE_URL:?MIGRATION_DATABASE_URL em falta}"

@@ -28,6 +28,26 @@ cd "$(dirname "$0")/.."
 
 : "${MIGRATION_DATABASE_URL:?MIGRATION_DATABASE_URL em falta — carrega o ambiente da base certa}"
 
+# ── Se já está pronto, não se refaz ─────────────────────────────────────────
+# O passo do `preparar` leva ~19s e a semente reescreve o cenário. Correr isto à
+# cabeça de cada prova custaria isso vinte vezes por nada.
+#
+# A verificação é a MESMA do fim: se as três coisas já lá estão, salta. Assim
+# pode ser chamado de qualquer sítio sem se pensar no custo — que é a condição
+# para ele deixar de ser um guião que ninguém chama.
+ja_pronto() {
+  local o m u
+  o=$(psql "$MIGRATION_DATABASE_URL" -tAc "SELECT count(*) FROM organizations" 2>/dev/null || echo 0)
+  m=$(psql "$MIGRATION_DATABASE_URL" -tAc "SELECT count(*) FROM menus" 2>/dev/null || echo 0)
+  u=$(psql "$MIGRATION_DATABASE_URL" -tAc "SELECT count(*) FROM users WHERE email='painel@inspeccao.example'" 2>/dev/null || echo 0)
+  [ "${o:-0}" -gt 0 ] && [ "${m:-0}" -gt 0 ] && [ "${u:-0}" -gt 0 ]
+}
+
+if ja_pronto; then
+  echo "==> arnês já pronto (organizações, menus e utilizador presentes) — nada a fazer"
+  exit 0
+fi
+
 echo "==> 1/3 fixtures"
 node --experimental-strip-types packages/db/prisma/fixtures.ts >/dev/null
 

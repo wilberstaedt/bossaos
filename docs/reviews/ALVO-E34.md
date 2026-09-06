@@ -25,7 +25,7 @@ precisa de ser **executável**, não uma pilha.
 | 9 | `larguras.spec.ts` parece global e não é | **resolvida** — o defeito era a alegação, não a cobertura: o ficheiro passa a dizer que cobre as seis cascas | eu |
 | 10 | O meu `git add`, **três** vezes | **regra corrigida a 06/09**: `git commit -- <caminhos>`. Caminhos explícitos no `add` não chegam — o índice já pode ter coisas | eu |
 | 11 | RLS: `custom_domain_owners` | **decidida, por executar** — apagar, não proteger | JR |
-| 12 | Provas de navegador não auto-contidas | **meia** — mensagem corrigida e `arnes-pronto.sh` escrito; falta ligá-lo aos 20 guiões | eu |
+| 12 | Provas de navegador não auto-contidas | **paga** — mensagem corrigida, `arnes-pronto.sh` escrito e ligado aos 21 guiões, com salto em 0s quando já está pronto | eu |
 
 **Cinco pagas, uma fechada sem achado, uma resolvida, três abertas minhas, uma
 decidida à espera do JR, uma do Matheus.**
