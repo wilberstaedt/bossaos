@@ -143,7 +143,19 @@ echo "CONTROLO NEGATIVO — um marcador PERDE a etapa que o vai construir"
 # «dizem QUAL etapa» corre hoje sobre ZERO marcadores, o que é verde sobre
 # população zero. O dia em que voltar a haver um item por construir, esta
 # contagem passa de 0 e o controlo volta a ter o que medir.
-MARCADORES=$(grep -rlE "porConstruir: '" apps/web/app --include='*.tsx' 2>/dev/null | grep -c . || true)
+# ── E conta-se CÓDIGO, não prosa ──────────────────────────────────────────
+#
+# A primeira versão desta contagem fazia `grep -r` directo e apanhava **um
+# comentário** — a linha do `platform/layout.tsx` que EXPLICA que as três foram
+# marcadas `porConstruir: 'E33'` e depois fechadas. Um marcador a mais, e este
+# controlo passava a acusar sem haver nada.
+#
+# É o defeito que a `validar-portas-mortas.sh` já tinha apanhado uma vez — nela
+# própria, sobre o meu comentário — e escrevi-o outra vez aqui. Passa pelo
+# `sem-comentarios.py`, como ela.
+MARCADORES=$(git ls-files 'apps/web/app/**/*.tsx' 2>/dev/null \
+  | xargs python3 scripts/sem-comentarios.py 2>/dev/null \
+  | grep -cE "porConstruir: '" || true)
 if [ "${MARCADORES:-0}" -eq 0 ]; then
   printf '  \033[33mNÃO MEDI\033[0m não há um único `porConstruir` no produto — o E30 e o E33\n'
   echo "           fecharam-nos todos. Sem marcador não há o que plantar, e a"
