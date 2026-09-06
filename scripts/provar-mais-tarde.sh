@@ -39,6 +39,22 @@ BASE_MEXIDA=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 # ── Repor SEMPRE o gatilho que deriva o momento ───────────────────────────
 #
 # Um guião morto a meio deixaria `producao_em` como mais uma coluna que alguém
@@ -126,7 +142,7 @@ echo
 echo "2. CONTROLO NEGATIVO — a cozinha volta a ver TUDO (o modelo ingénuo)"
 # «Um pedido é um pedido, entra na fila quando chega.» Enche o ecrã da cozinha ao
 # almoço com trabalho para o jantar — e ensina a cozinha a ignorar o ecrã.
-python3 - <<'PYINGENUO'
+plantar <<'PYINGENUO' || true
 import io
 p = 'packages/db/src/producao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -148,7 +164,7 @@ echo "3. CONTROLO NEGATIVO — a cozinha ESCONDE tudo o que tem hora"
 # «Só aparece quando for a hora» escrito como «nunca aparece»: um pedido que
 # nunca entra é comida que nunca se faz. Sem este par, o controlo 2 passa com
 # «esconde tudo» lá dentro.
-python3 - <<'PYESCONDE'
+plantar <<'PYESCONDE' || true
 import io
 p = 'packages/db/src/producao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -173,7 +189,7 @@ echo "4. CONTROLO NEGATIVO — o relógio deixa de ser o da BASE"
 # O plante põe quatro horas de deriva, acima da margem do cenário, porque é isso
 # que faz a diferença ser observável. Uma deriva pequena existe e é invisível —
 # e é precisamente por ser invisível que se pergunta à base em vez de adivinhar.
-python3 - <<'PYRELOGIO'
+plantar <<'PYRELOGIO' || true
 import io
 p = 'packages/db/src/producao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -197,7 +213,7 @@ echo "5. CONTROLO NEGATIVO OBRIGATÓRIO — a hora de entrega volta a ser hora d
 # O que TEM de cair é a asserção da hora ABSOLUTA. Se caísse só uma medida em
 # minutos relativos, o controlo não provava nada: 25 minutos antes é verdade em
 # qualquer fuso.
-python3 - <<'PYPAREDE'
+plantar <<'PYPAREDE' || true
 import io
 p = 'packages/db/src/mais-tarde.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -224,7 +240,7 @@ echo
 echo "7. CONTROLO NEGATIVO — a taxa passa a ter um valor por OMISSÃO"
 # «Ausência não é política, e um valor por omissão que ninguém decidiu é uma
 # decisão do dono tomada por nós.» É o ramo que qualquer pessoa escreve primeiro.
-python3 - <<'PYTAXA'
+plantar <<'PYTAXA' || true
 import io
 p = 'packages/db/src/mais-tarde.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -242,7 +258,7 @@ echo
 echo "8. CONTROLO NEGATIVO — o esgotado só se descobre à HORA"
 # «O defeito é descobri-lo às 19h58, e o defeito pior é descobri-lo às 18h e não
 # dizer nada.» Aqui a lista só olha para o que já entrou em produção.
-python3 - <<'PYESGOTADO'
+plantar <<'PYESGOTADO' || true
 import io
 p = 'packages/db/src/mais-tarde.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -267,7 +283,7 @@ cp "$ORIG_TARDE" "$TARDE"
 
 echo
 echo "9. CONTROLO NEGATIVO — o conector externo aceita com o provedor desligado"
-python3 - <<'PYCONECTOR'
+plantar <<'PYCONECTOR' || true
 import io
 p = 'packages/db/src/mais-tarde.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -282,7 +298,7 @@ cp "$ORIG_TARDE" "$TARDE"
 
 echo
 echo "10. CONTROLO NEGATIVO — o mesmo evento externo cria DOIS pedidos"
-python3 - <<'PYIDEMP'
+plantar <<'PYIDEMP' || true
 import io
 p = 'packages/db/src/mais-tarde.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -299,7 +315,7 @@ echo
 echo "11. CONTROLO NEGATIVO — o preparo passa a ser a SOMA das linhas"
 # As estações trabalham em paralelo: a batata e o bife saem juntos. Somar dá um
 # momento de produção cedo demais, e trabalho que espera no passe.
-python3 - <<'PYSOMA'
+plantar <<'PYSOMA' || true
 import io
 p = 'packages/db/src/mais-tarde.ts'
 s = io.open(p, encoding='utf-8').read()

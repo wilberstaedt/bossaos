@@ -40,6 +40,22 @@ PRIVILEGIO_ABERTO=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 # Repor SEMPRE. Um script morto a meio deixaria o runtime com privilégio de
 # APAGAR revisões de tema — e isso sobrevive a um commit distraído.
 restaurar() {
@@ -122,7 +138,7 @@ echo "2. CONTROLO NEGATIVO — o portão do plano desaparece do rascunho"
 # escondido, é o servidor a recusar». Sem o portão, o Starter passa a gravar — e
 # se as recusas NÃO ficarem verdes com ele desligado, o que estava a bloquear era
 # outra coisa e o teste do plano nunca existiu.
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/db/src/tema.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -146,7 +162,7 @@ echo "3. CONTROLO NEGATIVO — o contraste deixa de bloquear"
 # «Publicar cor ilegível falha NO SERVIDOR. No cliente é conveniência; no
 # servidor é a regra.» Com a validação desligada, o par ilegível tem de passar —
 # e a asserção que cai tem de ser a do contraste, não a do plano.
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/db/src/tema.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -164,7 +180,7 @@ echo
 echo "4. CONTROLO NEGATIVO — os tokens não temáveis passam a ser aceites"
 # «O que NÃO é personalizável continua a não ser, mesmo no plano de cima.» Um
 # cliente que repinte um estado de erro quebra a leitura de um ecrã de operação.
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/db/src/tema.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -183,7 +199,7 @@ echo "5. CONTROLO NEGATIVO — a cor volta a ser escrita tal e qual no CSS"
 # `red;--bo-foco:transparent` desligava o anel de foco do site inteiro sem
 # ninguém escrever uma linha de CSS. É a regra «não injecte CSS recebido do
 # cliente», e a última porta é `variaveisDoTema`.
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/ui/src/tema.ts'
 s = io.open(p, encoding='utf-8').read()

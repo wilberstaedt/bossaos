@@ -37,6 +37,22 @@ BASE_MEXIDA=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 # ── Repor SEMPRE o CHECK dos carimbos ─────────────────────────────────────
 #
 # Um script morto a meio deixaria a base a aceitar um `SENTADO` sem hora — e o
@@ -129,7 +145,7 @@ echo "2. CONTROLO NEGATIVO OBRIGATÓRIO — a derivação IGNORA o tamanho do gr
 # senta. O caso do de 2 a mudar **não** pode cair: numa fila ele também muda, e
 # se caísse este controlo estaria a medir «alguma coisa parou» em vez da
 # diferença entre uma fila e uma lista de espera.
-python3 - <<'PYFILA'
+plantar <<'PYFILA' || true
 import io
 p = 'packages/domain/src/espera.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -155,7 +171,7 @@ echo
 echo "3. CONTROLO NEGATIVO — a posição volta a ser um contador de chegada"
 # A outra forma da mesma fila: agrupar toda a gente numa lista só, mantendo o
 # filtro. É o que sai de escrever «ordena por chegada e conta».
-python3 - <<'PYCONTADOR'
+plantar <<'PYCONTADOR' || true
 import io
 p = 'packages/domain/src/espera.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -172,7 +188,7 @@ echo
 echo "4. CONTROLO NEGATIVO — a preferência de ZONA deixa de contar"
 # Quem só aceita o terraço passa a ser sugerido para a sala. Nada dá erro: o host
 # chama a pessoa, ela recusa, e a mesa fica vazia mais dez minutos.
-python3 - <<'PYZONA'
+plantar <<'PYZONA' || true
 import io
 p = 'packages/domain/src/espera.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -188,7 +204,7 @@ echo
 echo "5. CONTROLO NEGATIVO — a estimativa perde a marca de estimativa"
 # «Uma estimativa apresentada como promessa é um defeito.» Aqui o número passa a
 # viajar sozinho, e nenhum ecrã consegue saber o que ele é.
-python3 - <<'PYESTIMATIVA'
+plantar <<'PYESTIMATIVA' || true
 import io
 p = 'packages/domain/src/espera.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -206,7 +222,7 @@ echo "6. CONTROLO NEGATIVO — quem não cabe passa a ser o ÚLTIMO"
 # A tentação óbvia: em vez de `null`, dar-lhe o fim da lista. É a promessa mais
 # falsa de todas — um grupo de 20 numa sala cuja maior mesa tem 6 nunca vai ser
 # sentado, e «é o 7.º» diz-lhe que vai.
-python3 - <<'PYSEMMESA'
+plantar <<'PYSEMMESA' || true
 import io
 p = 'packages/domain/src/espera.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -223,7 +239,7 @@ echo
 echo "7. CONTROLO NEGATIVO — desistir deixa a vaga pendurada"
 # A mesa fica presa a quem foi embora, até a retenção expirar. Ninguém vê erro
 # nenhum: vê-se uma mesa vazia que o sistema diz estar ocupada.
-python3 - <<'PYDESISTE'
+plantar <<'PYDESISTE' || true
 import io
 p = 'packages/db/src/espera.ts'
 s = io.open(p, encoding='utf-8').read()

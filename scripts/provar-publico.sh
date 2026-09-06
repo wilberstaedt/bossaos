@@ -78,6 +78,22 @@ repor_funcoes() { psql "$MIGRATION_DATABASE_URL" -q -v ON_ERROR_STOP=1 -f "$FUNC
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 restaurar() {
   for f in "$PROJ" "$CHAVES" "$PUBDB" "$PUBLICO" "$PAGINA"; do repor "$f"; done
   # As funções primeiro: se a prova morrer a meio de um controlo negativo, o que
@@ -302,7 +318,7 @@ echo "6bb. CONTROLO NEGATIVO — a porta do visitante deixa de EXIGIR a credenci
 # desta forma nova e o que uma varredura ingénua não distingue.
 PORTA_DO_VISITANTE='apps/web/app/r/[publicLocationSlug]/api/mesa/route.ts'
 cp "$PORTA_DO_VISITANTE" /tmp/bossaos-porta-visitante-orig.ts
-python3 - <<'PYPORTA'
+plantar <<'PYPORTA' || true
 import io
 p = 'apps/web/app/r/[publicLocationSlug]/api/mesa/route.ts'
 s = io.open(p, encoding='utf-8').read()

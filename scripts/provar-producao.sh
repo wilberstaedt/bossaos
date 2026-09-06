@@ -56,6 +56,22 @@ BASE_MEXIDA=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 # ── Repor SEMPRE ──────────────────────────────────────────────────────────
 #
 # Um script morto a meio deixaria a base sem o gatilho que impede o estado de
@@ -156,7 +172,7 @@ echo "2. CONTROLO NEGATIVO OBRIGATÓRIO — o modelo INGÉNUO: uma linha, uma es
 # É o que o contrato exige pelo nome. Com uma estação por linha, a fritadeira
 # nunca vê a batata — e o defeito não dá erro: dá comida em falta, descoberta
 # pelo cliente.
-python3 - <<'PYINGENUO'
+plantar <<'PYINGENUO' || true
 import io
 p = 'packages/db/src/producao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -175,7 +191,7 @@ echo "3. CONTROLO NEGATIVO — ausência de regra passa a ser «cozinha por omis
 # «Ausência de regra não é cozinha por omissão.» Este defeito manda o item sem
 # roteamento para a primeira estação que houver — em silêncio, que é o que o
 # torna perigoso: alguém decidiu, e essa pessoa não foi o dono.
-python3 - <<'PYOMISSAO'
+plantar <<'PYOMISSAO' || true
 import io
 p = 'packages/db/src/producao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -201,7 +217,7 @@ echo "4. CONTROLO NEGATIVO — «pronto parcial» passa a ser pronto"
 # «Uma mesa com três pratos em que dois estão prontos é uma mesa que ainda não
 # sai — e mostrar pronto ali faz sair comida fria.» O defeito é trocar o TODAS
 # por um ALGUMA, que é a versão que sai de graça de quem escreve depressa.
-python3 - <<'PYPARCIAL'
+plantar <<'PYPARCIAL' || true
 import io
 p = 'packages/domain/src/pedido-puro.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -218,7 +234,7 @@ echo
 echo "5. CONTROLO NEGATIVO — cancelar a linha deixa tarefas ÓRFÃS nas estações"
 # «Uma tarefa órfã numa estação é comida a ser feita para um pedido que já não
 # existe» — e a cozinha não tem como saber, porque do lado dela nada mudou.
-python3 - <<'PYORFA'
+plantar <<'PYORFA' || true
 import io
 p = 'packages/db/src/producao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -237,7 +253,7 @@ echo "6. CONTROLO NEGATIVO — o limite VISÍVEL entra na fila"
 # O erro concreto do `kds-e-tempo-real.md`: o KDS mostra doze, chegam vinte, e os
 # oito de baixo desaparecem em vez de ficarem alcançáveis. Parece limpo, e é
 # comida que nunca é feita.
-python3 - <<'PYLIMITE'
+plantar <<'PYLIMITE' || true
 import io
 p = 'packages/db/src/producao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -281,7 +297,7 @@ echo "9. CONTROLO NEGATIVO — o ecrã volta a poder REGREDIR"
 #
 # O defeito é «aplicar o último que chega», que sai de graça de qualquer
 # implementação que não pense em ordem.
-python3 - <<'PYREGRIDE'
+plantar <<'PYREGRIDE' || true
 import io
 p = 'packages/domain/src/kds.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -297,7 +313,7 @@ echo
 echo "10. CONTROLO NEGATIVO — o buraco no cursor é ignorado"
 # «Ao detectar um intervalo desconhecido, vai ao estado autoritativo em vez de
 # adivinhar.» Aplicar por cima do buraco é a definição de adivinhar.
-python3 - <<'PYBURACO'
+plantar <<'PYBURACO' || true
 import io
 p = 'packages/domain/src/kds.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -314,7 +330,7 @@ echo "11. CONTROLO NEGATIVO — o temporizador volta a ler o relógio do TABLET"
 # «Os temporizadores contam a partir do carimbo do servidor, nunca do relógio do
 # tablet.» Um `Date.now()` escondido aqui passava despercebido para sempre, e o
 # sintoma aparecia num restaurante e não numa prova.
-python3 - <<'PYRELOGIO'
+plantar <<'PYRELOGIO' || true
 import io
 p = 'packages/domain/src/kds.ts'
 s = io.open(p, encoding='utf-8').read()

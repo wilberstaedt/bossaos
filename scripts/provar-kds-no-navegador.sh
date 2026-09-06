@@ -82,6 +82,22 @@ falhas=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 restaurar() {
   cp "$ORIG_PRODUCAO" "$PRODUCAO"; cp "$ORIG_CSS" "$CSS"; cp "$ORIG_PECAS" "$PECAS"
   cp "$ORIG_PURO" "$PURO"
@@ -142,7 +158,7 @@ echo "2. CONTROLO NEGATIVO — o limite VISÍVEL passa a esconder bilhetes"
 # O erro concreto do contrato: o KDS mostra doze, chegam vinte, e os oito de
 # baixo desaparecem em vez de ficarem alcançáveis. Parece limpo, e é comida que
 # nunca é feita.
-python3 - <<'PYLIMITE'
+plantar <<'PYLIMITE' || true
 import io
 p = 'packages/db/src/producao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -156,7 +172,7 @@ cp "$ORIG_PRODUCAO" "$PRODUCAO"
 
 echo
 echo "3. CONTROLO NEGATIVO — «pronto parcial» volta a ser pronto NO ECRÃ"
-python3 - <<'PYPARCIAL'
+plantar <<'PYPARCIAL' || true
 import io
 p = 'packages/domain/src/pedido-puro.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -184,7 +200,7 @@ echo "4. CONTROLO NEGATIVO — o trabalho SEM ESTAÇÃO deixa de aparecer no ecr
 # trabalho sem estação é VISÍVEL a quem configura. São duas coisas, e as duas
 # têm de estar guardadas: sem a segunda, uma tarefa órfã podia existir na base e
 # não aparecer em ecrã nenhum, que é o mesmo que desaparecer.
-python3 - <<'PYORFA'
+plantar <<'PYORFA' || true
 import io
 p = 'apps/web/app/[idioma]/kds/[locationId]/[stationId]/tudo/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -205,7 +221,7 @@ echo "5. CONTROLO NEGATIVO — o marcador da tela deixa de existir"
 # identifica-se a si própria», e as ligações levam `data-seccao`. Se alguém
 # voltar a escrever `data-tela` numa ligação, este controlo não muda — mas se o
 # CABEÇALHO perder o marcador, tem de acender.
-python3 - <<'PYMARCA'
+plantar <<'PYMARCA' || true
 import io
 p = 'apps/web/src/kds/PecasDoKds.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -222,7 +238,7 @@ echo "6. CONTROLO NEGATIVO — o texto do KDS volta a ser INVISÍVEL"
 # 1.00:1 é texto da cor do fundo. O navegador não se queixa, o build passa, os
 # tipos passam — e o ecrã que se lê a um metro e meio não tem lá nada escrito.
 # Foi a medição de contraste que o apanhou, e nada mais o podia apanhar.
-python3 - <<'PYCONTRASTE'
+plantar <<'PYCONTRASTE' || true
 import io
 p = 'packages/ui/src/estilos.css'
 s = io.open(p, encoding='utf-8').read()
@@ -240,7 +256,7 @@ cp "$ORIG_CSS" "$CSS"
 
 echo
 echo "7. CONTROLO NEGATIVO — uma tela DESAPARECE da lista medida"
-python3 - <<'PYPOP'
+plantar <<'PYPOP' || true
 import io
 p = 'inspeccao/kds.spec.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -256,7 +272,7 @@ echo
 echo "8. CONTROLO NEGATIVO — a tela deixa de dizer os DOIS números"
 # «Os dois números ditos em voz alta — não "o backlog tem itens".» Com um só, o
 # ecrã volta a poder mostrar doze de vinte sem que nada o revele.
-python3 - <<'PYDOIS'
+plantar <<'PYDOIS' || true
 import io
 p = 'apps/web/app/[idioma]/kds/[locationId]/[stationId]/page.tsx'
 s = io.open(p, encoding='utf-8').read()

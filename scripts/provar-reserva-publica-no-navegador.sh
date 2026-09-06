@@ -63,6 +63,22 @@ cp "$SEMENTE" "$ORIG_SEMENTE"
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 restaurar() {
   cp "$ORIG_I18N" "$I18N"; cp "$ORIG_ESTADO" "$ESTADO"; cp "$ORIG_HOR" "$HORARIOS"
   cp "$ORIG_SEM" "$SEMMESA"; cp "$ORIG_PREFS" "$PREFS"; cp "$ORIG_SPEC" "$SPEC"
@@ -119,7 +135,7 @@ echo "2. CONTROLO NEGATIVO — a estimativa deixa de se dizer estimativa"
 # «Quem espera à porta com 20 minutos no ecrã volta aos 21 a reclamar.» O texto
 # passa a prometer, e o número continua exactamente igual — que é o defeito: a
 # promessa não muda nada no código, só na frase.
-python3 - <<'PYPROMESSA'
+plantar <<'PYPROMESSA' || true
 import json, io, collections
 p = 'packages/i18n/src/mensagens/es-ES.json'
 d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
@@ -135,7 +151,7 @@ cp "$ORIG_I18N" "$I18N"
 echo
 echo "3. CONTROLO NEGATIVO — o FACTO passa a dizer-se como a estimativa"
 # A outra metade do par. «Se as duas se disserem igual, a distinção não existe.»
-python3 - <<'PYFACTO'
+plantar <<'PYFACTO' || true
 import json, io, collections
 p = 'packages/i18n/src/mensagens/es-ES.json'
 d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
@@ -153,7 +169,7 @@ echo "4. CONTROLO NEGATIVO — a posição perde o DENOMINADOR"
 # «É o 3.º» é a fila outra vez. Sem o denominador, a frase deixa de ser
 # verificável por quem a lê — e volta a não sobreviver ao grupo de 2 passar à
 # frente.
-python3 - <<'PYDENOM'
+plantar <<'PYDENOM' || true
 import json, io, collections
 p = 'packages/i18n/src/mensagens/es-ES.json'
 d = json.load(open(p), object_pairs_hook=collections.OrderedDict)
@@ -170,7 +186,7 @@ echo
 echo "5. CONTROLO NEGATIVO — a lista de horas deixa de se dizer ORIENTATIVA"
 # «Disponibilidade da tela nunca substitui verificação de servidor.» Sem o aviso,
 # a lista parece uma garantia — e a recusa no fim parece uma avaria.
-python3 - <<'PYAVISO'
+plantar <<'PYAVISO' || true
 import io
 p = 'apps/web/app/r/[publicLocationSlug]/[locale]/reserve/horarios/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -186,7 +202,7 @@ cp "$ORIG_HOR" "$HORARIOS"
 echo
 echo "6. CONTROLO NEGATIVO — a recusa deixa de dar ALTERNATIVAS"
 # «Recusado» sozinho manda a pessoa recomeçar, e recomeçar é onde ela desiste.
-python3 - <<'PYALT'
+plantar <<'PYALT' || true
 import io
 p = 'apps/web/app/r/[publicLocationSlug]/[locale]/reserve/sem-mesa/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -202,7 +218,7 @@ echo
 echo "7. CONTROLO NEGATIVO — o marketing nasce MARCADO"
 # «Marketing é opcional e separado do contacto necessário à reserva.» Marcado por
 # omissão, aceitar a reserva passa a ser aceitar o marketing por distracção.
-python3 - <<'PYMKT'
+plantar <<'PYMKT' || true
 import io
 p = 'apps/web/app/r/[publicLocationSlug]/[locale]/reserve/preferencias/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -228,7 +244,7 @@ echo "8. CONTROLO NEGATIVO — a semeadura deixa de pôr a espera e a reserva"
 # A reserva não tem alvo — o segredo é uma constante —, e por isso é ela que a
 # guarda de população protege sozinha. Sem este plante, o RES-C-007 podia passar
 # a medir «não encontramos esta reserva» em cinco larguras, em silêncio.
-python3 - <<'PYVAZIO'
+plantar <<'PYVAZIO' || true
 import io
 p = 'packages/db/prisma/semente-inspeccao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -243,7 +259,7 @@ cp "$ORIG_SEMENTE" "$SEMENTE"
 
 echo
 echo "9. CONTROLO NEGATIVO — uma tela DESAPARECE da lista medida"
-python3 - <<'PYPOP'
+plantar <<'PYPOP' || true
 import io
 p = 'inspeccao/reserva-publica.spec.ts'
 s = io.open(p, encoding='utf-8').read()

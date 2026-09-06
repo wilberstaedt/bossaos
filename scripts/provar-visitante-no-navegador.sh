@@ -68,6 +68,22 @@ falhas=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 restaurar() {
   cp "$ORIG_VISITANTE" "$VISITANTE"; cp "$ORIG_PECAS" "$PECAS"
   cp "$ORIG_RENOVAR" "$RENOVAR"; cp "$ORIG_SPEC" "$SPEC"; cp "$ORIG_AJUDA" "$AJUDA"
@@ -125,7 +141,7 @@ echo
 echo "2. CONTROLO NEGATIVO OBRIGATÓRIO — RODAR passa a REVOGAR, no produto"
 # O colapso, medido onde a pessoa o veria: a visita que estava aberta deixa de
 # abrir depois de o QR ser trocado.
-python3 - <<'PYCOLAPSO'
+plantar <<'PYCOLAPSO' || true
 import io
 p = 'packages/db/src/visitante.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -144,7 +160,7 @@ cp "$ORIG_VISITANTE" "$VISITANTE"
 
 echo
 echo "3. CONTROLO NEGATIVO — o ecrã deixa de dizer o NÚMERO antes de confirmar"
-python3 - <<'PYNUMERO'
+plantar <<'PYNUMERO' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/channels/qr/mesa/[tableId]/renovar/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -164,7 +180,7 @@ echo
 echo "4. CONTROLO NEGATIVO — os dois actos colapsam num só no ECRÃ"
 # A regra da base continua certa; o produto é que passa a oferecer um botão só.
 # Sem este controlo, o colapso podia voltar pela interface sem nada acender.
-python3 - <<'PYUMBOTAO'
+plantar <<'PYUMBOTAO' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/channels/qr/mesa/[tableId]/renovar/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -181,7 +197,7 @@ cp "$ORIG_RENOVAR" "$RENOVAR"
 
 echo
 echo "5. CONTROLO NEGATIVO — o marcador da tela deixa de existir"
-python3 - <<'PYMARCA'
+plantar <<'PYMARCA' || true
 import io
 p = 'apps/web/src/visitante/PecasDoVisitante.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -195,7 +211,7 @@ cp "$ORIG_PECAS" "$PECAS"
 
 echo
 echo "6. CONTROLO NEGATIVO — uma tela DESAPARECE da lista medida"
-python3 - <<'PYPOP'
+plantar <<'PYPOP' || true
 import io
 p = 'inspeccao/visitante.spec.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -214,7 +230,7 @@ echo "7. CONTROLO NEGATIVO — a prova deixa de pôr a bolacha do visitante"
 # Sem a bolacha, as sete telas da visita redireccionam para o STATE-009. A
 # asserção do CAMINHO FINAL é a única coisa que separa «medi a tela» de «medi o
 # desvio» — e sem ela seriam cinco larguras verdes sobre o ecrã errado.
-python3 - <<'PYBOLACHA'
+plantar <<'PYBOLACHA' || true
 import io
 p = 'inspeccao/visitante.spec.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -238,7 +254,7 @@ echo "8. CONTROLO NEGATIVO — a porta do visitante sai do endereco do restauran
 # Nada dava erro: a rota respondia 303, a pagina carregava, e o pedido
 # desaparecia. Nenhuma prova de base o podia ver, porque do lado do servidor a
 # bolacha estava sempre la. So carregar num botao o mostrava.
-python3 - <<'PYPORTA'
+plantar <<'PYPORTA' || true
 import io, pathlib
 # A porta muda de sitio; o formulario passa a apontar para fora do `path` da
 # bolacha, que e' exactamente o defeito.
@@ -259,7 +275,7 @@ PYPORTA
 # que ele próprio criou, e mais nada.
 mkdir -p "apps/web/app/api/publico/mesa"
 cp "apps/web/app/r/[publicLocationSlug]/api/mesa/route.ts" /tmp/bossaos-porta-visitante.ts
-python3 - <<'PYCOPIA'
+plantar <<'PYCOPIA' || true
 import io
 s = io.open('/tmp/bossaos-porta-visitante.ts', encoding='utf-8').read()
 # A copia na raiz precisa de um nivel a menos nos caminhos.
@@ -301,7 +317,7 @@ echo "9. CONTROLO NEGATIVO — a porta deixa de RECUSAR quem não tem bolacha"
 # Por isso este controlo planta as duas. Continua a ser UM defeito — «a porta
 # deixa de exigir a credencial» — e a alternativa era ter uma asserção viva sem
 # controlo nenhum, que é a guarda que ninguém pode verificar.
-python3 - <<'PYRECUSA'
+plantar <<'PYRECUSA' || true
 import io
 p = 'apps/web/src/visitante/sessao-do-visitante.ts'
 s = io.open(p, encoding='utf-8').read()

@@ -51,6 +51,22 @@ falhas=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 restaurar() {
   cp "$ORIG_CARTA" "$CARTA"; cp "$ORIG_MOLDURA" "$MOLDURA"; cp "$ORIG_UI" "$TEMA_UI"
   cp "$ORIG_SEMENTE" "$SEMENTE"
@@ -106,7 +122,7 @@ echo "2. CONTROLO NEGATIVO — a CARTA deixa de aplicar o tema"
 # É literalmente o defeito que o E09 escondeu do revisor: a marcação certa, a
 # página a responder 200, e o estilo a não chegar. Se a prova continuar verde, o
 # que ela mede é o CSS declarado e não a cor calculada.
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'apps/web/app/r/[publicLocationSlug]/[locale]/menu/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -127,7 +143,7 @@ echo "3. CONTROLO NEGATIVO — o SITE deixa de aplicar o tema"
 # A cor primária não aparece na carta: aparece no botão da home. Sem este
 # segundo controlo, uma implementação que aplicasse o fundo e esquecesse a
 # primária passava — medir uma parte e dar a outra por medida.
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'apps/web/src/componentes/SitePublico.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -149,7 +165,7 @@ echo "4. CONTROLO NEGATIVO — uma cor de ESTADO passa a ser temável"
 # um ecrã de operação: quem está ao balcão deixa de distinguir um aviso de um
 # erro. A fronteira está em `variaveisDoTema`, que é a única função que
 # transforma um tema em CSS — e é ali que este defeito tem de doer.
-python3 - <<'PYEST'
+plantar <<'PYEST' || true
 import io
 p = 'packages/ui/src/tema.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -171,7 +187,7 @@ echo "5. CONTROLO NEGATIVO — a semeadura deixa de estabelecer o PLANO"
 # Com o plano fora da semeadura, quem tem de falhar é a GUARDA DO PLANO, e com a
 # frase que nomeia a causa. Se em vez dela caísse a asserção do contraste, a prova
 # continuava a mandar quem a lê procurar no sítio errado.
-python3 - <<'PYPLANO'
+plantar <<'PYPLANO' || true
 import io
 p = 'packages/db/prisma/semente-inspeccao.ts'
 s = io.open(p, encoding='utf-8').read()

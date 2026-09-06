@@ -44,6 +44,22 @@ cp "$CONFIG" "$ORIGINAL"
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 parar() {
   [[ -n "$PID" ]] && { kill "$PID" 2>/dev/null; wait "$PID" 2>/dev/null; }
   PID=""
@@ -147,7 +163,7 @@ echo "2. CONTROLO NEGATIVO — a revogação de sessões no reset DESLIGADA"
 # de recuperação devolve 200 — e não que recuperar o acesso expulsa quem já lá
 # estava, que é o que o aceite 3 exige.
 parar
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/auth/src/autenticacao.ts'
 s = io.open(p, encoding='utf-8').read()

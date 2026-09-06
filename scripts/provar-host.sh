@@ -36,6 +36,22 @@ BASE_MEXIDA=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 # ── Repor SEMPRE o CHECK dos carimbos ─────────────────────────────────────
 #
 # Um script morto a meio deixaria a base a aceitar uma reserva SENTADA sem hora
@@ -116,7 +132,7 @@ echo
 echo "2. CONTROLO NEGATIVO OBRIGATÓRIO — o check-in passa a SENTAR"
 # Os dois actos colapsam num só. É o que qualquer pessoa escreve primeiro, e é o
 # que faz o mapa da sala mentir a quem serve.
-python3 - <<'PYCOLAPSO'
+plantar <<'PYCOLAPSO' || true
 import io
 p = 'packages/db/src/host.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -143,7 +159,7 @@ echo
 echo "3. CONTROLO NEGATIVO — sentar deixa de exigir a chegada"
 # O check-in fica a existir e deixa de servir para nada: senta-se quem nunca
 # apareceu, e o carimbo da chegada some.
-python3 - <<'PYSEMCHEGADA'
+plantar <<'PYSEMCHEGADA' || true
 import io
 p = 'packages/db/src/host.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -170,7 +186,7 @@ echo
 echo "5. CONTROLO NEGATIVO — a sala anuncia reservas de QUALQUER hora"
 # «A reserva de amanhã aparece na sala de hoje.» O mapa enche-se de avisos que
 # não são deste turno, e quem serve deixa de os ler.
-python3 - <<'PYJANELA'
+plantar <<'PYJANELA' || true
 import io
 p = 'packages/db/src/host.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -188,7 +204,7 @@ echo "6. CONTROLO NEGATIVO — as atrasadas passam a ser LIBERTADAS"
 # «Libertar uma reserva atrasada é política e acção do host, nunca uma limpeza
 # automática silenciosa.» Um varredor dá a mesa de quem está a estacionar o carro
 # a outra pessoa, sem ninguém decidir nada.
-python3 - <<'PYVARREDOR'
+plantar <<'PYVARREDOR' || true
 import io
 p = 'packages/db/src/host.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -209,7 +225,7 @@ echo
 echo "7. CONTROLO NEGATIVO — as chegadas por hora contam as HORAS TODAS"
 # Uma reserva das 20h que dura 90 minutos passa a contar nas 20h e nas 21h, e a
 # ocupação soma mais gente do que existe na sala.
-python3 - <<'PYHORAS'
+plantar <<'PYHORAS' || true
 import io
 p = 'packages/db/src/host.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -228,7 +244,7 @@ cp "$ORIG_HOST" "$HOST"
 
 echo
 echo "8. CONTROLO NEGATIVO — o walk-in senta-se numa mesa ocupada"
-python3 - <<'PYWALKIN'
+plantar <<'PYWALKIN' || true
 import io
 p = 'packages/db/src/host.ts'
 s = io.open(p, encoding='utf-8').read()

@@ -28,6 +28,75 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## Correcção 7 do E34 — os plantes em letra morta, e a guarda que os media
+
+**Fechada, e o número mudou depois de eu medir.** A guarda dizia 19 plantes
+mortos; são **três**. Os outros 16 — e mais 25 que ela nem via — eram defeito
+dela.
+
+### A guarda cometia o defeito que existe para apanhar, duas vezes
+
+**Primeiro: só lia metade da população.** O padrão era `python3 - <<'TAG'`, e
+há **162 blocos** invocados como `plantar <<'TAG'`. Media 172 de 334 e reportava
+como se fossem todos — nem os contava, nem os declarava. Agora lê as duas
+formas, e o autoteste tem **quatro sondas**: vivo e morto em cada forma. Sem as
+duas novas, a versão cega passava o autoteste na mesma.
+
+**Segundo: comparava o texto-fonte da âncora, não o valor.** Um
+`antigo = "linha um\nlinha dois"` ficava com uma barra e um `n` **literais**,
+que nunca casam com uma quebra de linha do ficheiro: **todo o plante multilinha
+era dado por morto**. Medido: dos 44 «mortos», **36 estavam vivos**.
+
+**E terceiro, mais pequeno: media o NOME da variável.** Exigia `antigo`, e
+metade dos guiões chama-lhe `alvo` ou `agulha`. Passou a ler a âncora do
+`assert ... in s`, com a convenção antiga como recurso — e a ordem importa: pô-la
+a substituir em vez de somar fez os legíveis caírem de 310 para 245, e reparei
+porque medi outra vez.
+
+**De 172 lidos / 19 mortos / 11 por ler → 320 vivos, ZERO mortos, 12 por ler.**
+Os 12 são genuinamente dinâmicos (variáveis de ambiente, JSON carregado, cópias
+em `/tmp`) e continuam declarados, não concluídos.
+
+### Os três mortos a sério
+
+**`provar-catalogo.sh` — e era o pior.** Plantava em `fichaDeAlergenios`, onde a
+regra estava escrita **duas vezes**; o E34 tirou a cópia e a ficha passou a
+chamar `estadoDoAlergenio`. O plante ficou em letra morta e o guião passou a
+**acusar o produto** do defeito mais perigoso deste projecto — um alérgeno não
+declarado a ler-se como «não contém» — sem nunca o ter plantado. Re-ancorado ao
+**único** sítio onde a regra vive. Medido depois: `provar-catalogo.sh` **0
+falhas**, e o controlo acende — *«caiu a asserção dos catorze desconhecidos»*.
+
+**`provar-pedidos.sh`** — o filtro dos componentes de combo mudou de ficheiro
+(`relatorios.ts`, na própria consulta). Tirei o plante em vez de o re-ancorar: o
+caso que o controlo nomeia é o **CHECK da base**, que ele já derruba.
+
+**`provar-portas.sh`** — ficou **sem matéria-prima**: não existe um único
+`porConstruir` no produto (o E30 fechou o do menu de gestão, o E33 os três da
+plataforma). Declara em vez de acusar, como a `validar-assinaturas.sh` quando o
+atlas fechou. **E fica dito o que isso significa:** a asserção «dizem QUAL
+etapa» corre hoje sobre **zero marcadores** — verde sobre população zero, na
+prova.
+
+### E o que impede o regresso: 32 guiões passaram a verificar o plante
+
+Os 172 blocos `python3 - <<` não liam o código de saída. Agora todos passam pelo
+`plantar()` — se a âncora mudou, a falha é do **guião** e diz-se assim, em vez
+de ser atribuída ao produto. Sobraram dois `python3 - <<` no
+`provar-marco-e11.sh`, e não são plantes: calculam valores.
+
+### A atribuição das cinco falhas, corrigida com medição
+
+Das cinco que ele ligou aos plantes mortos, **só o catálogo era**. Corri as
+outras quatro: **`mensagens` passa** (0 falhas). **`staff`, `tema` e
+`visitante` falham no passo 1 — «com tudo ligado», antes de qualquer plante** —
+portanto não são acusações falsas: são vermelhos a sério e ficam para ele, que é
+quem está a investigar o corredor.
+
+`validar-plantes.sh` **0 falhas** · `provar-catalogo.sh` **0** ·
+`provar-mensagens-no-navegador.sh` **0** · `pnpm verificar` **0**.
+
+
 ## Correcção 4 do E34 — a J14 existe, e destapou o webhook a responder 500 ao reenvio
 
 **Fechada.** `provas/jornada.test.ts` passa de 4 jornadas e 27 passos a **5 e

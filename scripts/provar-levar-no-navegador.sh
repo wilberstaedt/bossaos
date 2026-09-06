@@ -60,6 +60,22 @@ cp "$SEMENTE" "$ORIG_SEMENTE"
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 restaurar() {
   cp "$ORIG_FILA" "$FILA"; cp "$ORIG_DEL" "$DEL"; cp "$ORIG_FILADEL" "$FILADEL"
   cp "$ORIG_STAFF" "$STAFF"; cp "$ORIG_TARDE" "$TARDE"; cp "$ORIG_SPEC" "$SPEC"
@@ -108,7 +124,7 @@ echo "2. CONTROLO NEGATIVO — as filas ficam VAZIAS"
 # O falso verde que a régua reprova à cabeça. Sem pedidos, as sete telas
 # respondem 200, cabem em todas as larguras e passam o contraste — sobre o ecrã
 # de «não há pedidos».
-python3 - <<'PYVAZIO'
+plantar <<'PYVAZIO' || true
 import io
 p = 'packages/db/prisma/semente-inspeccao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -136,7 +152,7 @@ echo "3. CONTROLO NEGATIVO — o filtro por canal desaparece"
 #
 # Sem o filtro, a tela do takeaway mostra as entregas. É o que aconteceria com
 # duas tabelas mal ligadas — ou com uma consulta que se esquece do canal.
-python3 - <<'PYCANAL'
+plantar <<'PYCANAL' || true
 import io
 p = 'packages/db/src/mais-tarde.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -170,7 +186,7 @@ echo
 echo "4. CONTROLO NEGATIVO — a fila deixa de separar o que ainda não entrou"
 # «Um pedido que ainda não entrou não é um pedido atrasado.» Misturados, quem
 # está ao balcão lê os dois como a mesma coisa.
-python3 - <<'PYSEPARA'
+plantar <<'PYSEPARA' || true
 import io
 p = 'packages/db/src/mais-tarde.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -187,7 +203,7 @@ cp "$ORIG_TARDE" "$TARDE"
 
 echo
 echo "5. CONTROLO NEGATIVO — a tela deixa de dizer que os pedidos entram sozinhos"
-python3 - <<'PYFRASE'
+plantar <<'PYFRASE' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/takeaway/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -202,7 +218,7 @@ cp "$ORIG_FILA" "$FILA"
 
 echo
 echo "6. CONTROLO NEGATIVO — o conector desligado deixa de dizer a CONSEQUÊNCIA"
-python3 - <<'PYCONECTOR'
+plantar <<'PYCONECTOR' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/delivery/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -218,7 +234,7 @@ cp "$ORIG_DEL" "$DEL"
 echo
 echo "7. CONTROLO NEGATIVO — a fila de entrega passa a mostrar a MORADA"
 # «Não exponha endereços ou telefones nas telas públicas de fila.»
-python3 - <<'PYMORADA'
+plantar <<'PYMORADA' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/delivery/fila/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -238,7 +254,7 @@ cp "$ORIG_FILADEL" "$FILADEL"
 
 echo
 echo "8. CONTROLO NEGATIVO — uma tela DESAPARECE da lista medida"
-python3 - <<'PYPOP'
+plantar <<'PYPOP' || true
 import io
 p = 'inspeccao/levar.spec.ts'
 s = io.open(p, encoding='utf-8').read()

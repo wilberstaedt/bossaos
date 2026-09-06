@@ -125,20 +125,33 @@ fechar_porta "caixa"      caixa       'chega-se a caixa'              /tmp/bossa
 
 echo
 echo "CONTROLO NEGATIVO — um marcador PERDE a etapa que o vai construir"
-# «Um marcador sem etapa não é marcador, é um resto.» Sem este controlo, a regra
-# do `#` legítimo era uma frase no contrato e não uma condição verificada.
-plantar <<'PYETAPA' || true
-import io
-p = 'apps/web/app/[idioma]/app/[orgSlug]/layout.tsx'
-s = io.open(p, encoding='utf-8').read()
-antigo = "porConstruir: 'E25' }"
-assert antigo in s, 'o marcador do inventario nao esta onde se esperava'
-io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, "porConstruir: 'depois' }", 1))
-PYETAPA
-correr /tmp/bossaos-portas-etapa.txt
-exigir_vermelho "caiu o marcador: um item inerte sem etapa é um resto" \
-  'dizem QUAL etapa' 'não é marcador, é um resto' /tmp/bossaos-portas-etapa.txt
-cp "$ORIG" "$LAYOUT"
+# «Um marcador sem etapa não é marcador, é um resto.»
+#
+# ── E este controlo ficou SEM MATÉRIA-PRIMA ──────────────────────────────
+#
+# Plantava em `porConstruir: 'E25' }` no layout da organização. Esse marcador já
+# não existe: o E30 fechou a última porta morta do menu de gestão e o E33 fechou
+# as três da plataforma. **Não há um único `porConstruir` no produto.**
+#
+# O plante ficou em letra morta e o guião passou a ACUSAR: o `assert` disparava,
+# ninguém lia o código de saída, o `exigir_vermelho` corria contra um produto
+# intacto, e o produto era declarado defeituoso por uma asserção que nunca foi
+# exercida.
+#
+# A saída é a mesma da `validar-assinaturas.sh` quando o atlas fechou: **declarar
+# em vez de acusar**. E fica dito o que isto significa para a prova — a asserção
+# «dizem QUAL etapa» corre hoje sobre ZERO marcadores, o que é verde sobre
+# população zero. O dia em que voltar a haver um item por construir, esta
+# contagem passa de 0 e o controlo volta a ter o que medir.
+MARCADORES=$(grep -rlE "porConstruir: '" apps/web/app --include='*.tsx' 2>/dev/null | grep -c . || true)
+if [ "${MARCADORES:-0}" -eq 0 ]; then
+  printf '  \033[33mNÃO MEDI\033[0m não há um único `porConstruir` no produto — o E30 e o E33\n'
+  echo "           fecharam-nos todos. Sem marcador não há o que plantar, e a"
+  echo "           asserção «dizem QUAL etapa» corre sobre ZERO linhas."
+else
+  vermelho "há $MARCADORES ficheiro(s) com marcador e este controlo ficou por reescrever"
+  echo "        Re-ancora o plante ao marcador que existe hoje."
+fi
 
 echo
 echo "Reposto — tem de voltar ao verde"

@@ -62,6 +62,22 @@ cp "$TPL" "$ORIG_TPL"
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 restaurar() {
   cp "$ORIG_INT" "$INT"; cp "$ORIG_HIST" "$HIST"; cp "$ORIG_REL" "$REL"; cp "$ORIG_REP" "$REP"
   cp "$ORIG_HOST" "$HOST"; cp "$ORIG_SPEC" "$SPEC"; cp "$ORIG_SEMENTE" "$SEMENTE"
@@ -108,7 +124,7 @@ echo
 echo "2. CONTROLO NEGATIVO — o conector deixa de dizer a CONSEQUÊNCIA"
 # «Desligado» sozinho lê-se como um pormenor de configuração. A frase que
 # importa é a outra: nada é enviado, e nenhuma mensagem aparecerá como enviada.
-python3 - <<'PYAJUDA'
+plantar <<'PYAJUDA' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/integrations/mensageria/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -124,7 +140,7 @@ cp "$ORIG_INT" "$INT"
 echo
 echo "3. CONTROLO NEGATIVO — quem escreve os textos deixa de ver o aviso"
 # Quem escreve é quem vai perguntar porque é que os clientes não recebem.
-python3 - <<'PYTEMPLATES'
+plantar <<'PYTEMPLATES' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/reservations/mensagens/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -156,7 +172,7 @@ echo "4. CONTROLO NEGATIVO — o número perde a DEFINIÇÃO"
 # Plantei primeiro em `packages/db/src/host.ts` e ficou VERDE. Nao investiguei
 # porque: o que esta asercao mede e' o ECRA, e a tela e' quem decide o que
 # escreve na coluna. Plantar no motor era medir a canalizacao.
-python3 - <<'PYDEF'
+plantar <<'PYDEF' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/reservations/relatorio/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -182,7 +198,7 @@ echo "5. CONTROLO NEGATIVO — as duas telas do relatório DISCORDAM"
 # numeros. Um plante que nao muda o resultado nao e' um plante.
 #
 # O que muda sempre e' a lista: o REP-008 deixa de mostrar um dos cinco numeros.
-python3 - <<'PYDISCORDA'
+plantar <<'PYDISCORDA' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/reports/reservas/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -197,7 +213,7 @@ cp "$ORIG_REP" "$REP"
 
 echo
 echo "6. CONTROLO NEGATIVO — o histórico fica sem MENSAGENS"
-python3 - <<'PYVAZIO'
+plantar <<'PYVAZIO' || true
 import io
 p = 'packages/db/prisma/semente-inspeccao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -214,7 +230,7 @@ cp "$ORIG_SEMENTE" "$SEMENTE"
 
 echo
 echo "7. CONTROLO NEGATIVO — uma tela DESAPARECE da lista medida"
-python3 - <<'PYPOP'
+plantar <<'PYPOP' || true
 import io
 p = 'inspeccao/mensagens.spec.ts'
 s = io.open(p, encoding='utf-8').read()

@@ -49,6 +49,22 @@ ORIG_ROTA=$(mktemp); cp "$ROTA" "$ORIG_ROTA"
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 parar_app() {
   if [[ -n "$PID_APP" ]]; then kill "$PID_APP" 2>/dev/null || true; wait "$PID_APP" 2>/dev/null || true; PID_APP=""; fi
   local restantes; restantes=$(lsof -ti ":$PORTA" 2>/dev/null || true)
@@ -162,13 +178,24 @@ echo
 echo "2. CONTROLO NEGATIVO — a ausência de alérgeno passa a ler-se como 'não contém'"
 # O defeito exacto que o contrato proíbe, e o que qualquer pessoa escreveria sem
 # pensar. Tem de fazer cair o par — e SÓ o par.
-python3 - <<'PY'
+# ── A âncora mudou de sítio porque a REGRA mudou de sítio ─────────────────
+#
+# Plantava em `fichaDeAlergenios`, onde a linha era `d ? d.estado :
+# 'DESCONHECIDO'` — a mesma regra escrita duas vezes. O E34 tirou a cópia e a
+# ficha passou a chamar o `estadoDoAlergenio`, e o plante ficou em letra morta:
+# o `assert` disparava, o guião não lia o código de saída, e o `exigir_vermelho`
+# corria contra um produto INTACTO. O produto passava, e o guião concluía que a
+# asserção era vazia — uma acusação falsa ao caso mais perigoso deste produto.
+#
+# Agora aponta ao ÚNICO sítio onde a regra vive, que é o que o refactor
+# conseguiu: um alérgeno sem linha passa a ler-se como «não contém».
+plantar <<'PY'
 import io
 p = 'packages/domain/src/alergenios.ts'
 s = io.open(p, encoding='utf-8').read()
-antigo = "      estado: d ? d.estado : 'DESCONHECIDO',"
-assert antigo in s, 'a ficha não está onde se esperava'
-io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, "      estado: d ? d.estado : 'NAO_CONTEM',"))
+antigo = "  return d ? d.estado : 'DESCONHECIDO';"
+assert antigo in s, 'a regra do alergénio nao esta onde se esperava'
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, "  return d ? d.estado : 'NAO_CONTEM';", 1))
 PY
 exigir_vermelho "caiu a asserção dos catorze desconhecidos" \
   'TODOS os catorze são DESCONHECIDO' /tmp/bossaos-cat-sem-desconhecido.txt
@@ -181,7 +208,7 @@ cp "$ORIG_ALERG" "$ALERG"
 
 echo
 echo "3. CONTROLO NEGATIVO — o empate de preços resolvido pelo primeiro"
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/domain/src/precos.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -202,7 +229,7 @@ echo
 echo "4. CONTROLO NEGATIVO — a validação de modificadores deixa de olhar para a base"
 # Uma rota que "valide" com os limites que o cliente enviou não valida nada. Isto
 # simula o caso extremo: a validação devolve sempre vazio.
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/db/src/catalogo.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -216,7 +243,7 @@ cp "$ORIG_CAT" "$CAT"
 
 echo
 echo "5. CONTROLO NEGATIVO — o conflito de versão deixa de ser verificado"
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/db/src/catalogo.ts'
 s = io.open(p, encoding='utf-8').read()

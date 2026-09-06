@@ -40,6 +40,22 @@ BASE_MEXIDA=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 # Repor SEMPRE. Um script morto a meio deixaria a base sem o índice único do
 # `command_id` — e o reenvio depois do commit passaria a cobrar duas vezes, em
 # silêncio, até alguém reparar. Foi assim que uma corrida morta do E13 deixou uma
@@ -137,7 +153,7 @@ echo
 echo "3. CONTROLO NEGATIVO — o resumo do corpo deixa de contar"
 # A mesma chave com corpo diferente passaria por repetição, e um pedido legítimo
 # desaparecia com um "já tratado".
-python3 - <<'PYHASH'
+plantar <<'PYHASH' || true
 import io
 p = 'packages/db/src/pedidos.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -152,7 +168,7 @@ cp "$ORIG" "$PEDIDOS"
 echo
 echo "4. CONTROLO NEGATIVO — acrescentar passa a reescrever o pedido inteiro"
 # O padrão que perde trabalho em silêncio, e o mais natural de escrever.
-python3 - <<'PYADD'
+plantar <<'PYADD' || true
 import io
 p = 'packages/db/src/pedidos.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -175,7 +191,7 @@ echo
 echo "5. CONTROLO NEGATIVO — a versão sai da condição e passa a ser lida antes"
 # Ler a versão, comparar em JavaScript e depois gravar é a mesma corrida com a
 # janela mais estreita — e o conflito recuperável deixa de acontecer.
-python3 - <<'PYVER'
+plantar <<'PYVER' || true
 import io
 p = 'packages/db/src/pedidos.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -206,7 +222,7 @@ echo
 echo "7. CONTROLO NEGATIVO — o carrinho é limpo ao rejeitar"
 # «Rejeitar limpando o carrinho é o defeito que faz a pessoa desistir — e passa
 # qualquer teste que só verifique a rejeição.»
-python3 - <<'PYCAR'
+plantar <<'PYCAR' || true
 import io
 p = 'packages/db/src/pedidos.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -227,7 +243,7 @@ echo
 echo "8. CONTROLO NEGATIVO — o preço divergente passa a ser aplicado em silêncio"
 # É a decisão de dinheiro desta etapa. Aplicar em silêncio cobra 11 a quem pediu
 # ao ver 9 — cumpre a letra do «preço do servidor» e falha a pessoa.
-python3 - <<'PYPRECO'
+plantar <<'PYPRECO' || true
 import io
 p = 'packages/db/src/pedidos.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -246,18 +262,19 @@ echo
 echo "9. CONTROLO NEGATIVO — o total volta a somar os componentes do combo"
 # A regra que cobra a dobrar. Cada linha isolada esta certa; a conta vem ao dobro,
 # e ninguem repara porque nada da erro.
-python3 - <<'PYCOMBO'
-import io
-p = 'packages/db/src/pedidos.ts'
-s = io.open(p, encoding='utf-8').read()
-antigo = "  const aceites = linhas.filter(\n    (l) => l.estado === 'ACEITE' && l.precoMenor !== null && !l.linhaPaiId);"
-assert antigo in s, 'o filtro dos componentes nao esta onde se esperava'
-novo = "  const aceites = linhas.filter((l) => l.estado === 'ACEITE' && l.precoMenor !== null);"
-io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, novo))
-PYCOMBO
-# O componente semeado pela prova nao tem preco (a base recusa), por isso tirar o
-# filtro sozinho nao muda a soma. O que muda e a segunda porta: sem a restricao da
-# BASE, um componente COM preco passa a caber - e e esse o caso que se planta.
+# ── O plante em JS saiu daqui, e o que este controlo mede e o CHECK ────────
+#
+# Havia um segundo plante que tirava `!l.linhaPaiId` de um filtro em
+# `packages/db/src/pedidos.ts`. Esse filtro **mudou de ficheiro**: os relatorios
+# passaram a excluir os componentes na propria consulta
+# (`relatorios.ts`, `linhaPaiId: null`), e o plante ficou em letra morta — o
+# `assert` disparava, ninguem lia o codigo de saida, e o `exigir_vermelho` corria
+# contra um produto intacto.
+#
+# Tirei-o em vez de o re-ancorar, porque o caso que este controlo nomeia —
+# «recusa dar preco a um componente» — e o CHECK da BASE e nao o filtro em JS. O
+# componente semeado pela prova nao tem preco (a base recusa), por isso o filtro
+# sozinho nunca mudava a soma: a porta que se planta e a restricao.
 psql "$MIGRATION_DATABASE_URL" -q -c 'ALTER TABLE "order_lines" DROP CONSTRAINT IF EXISTS "componente_de_combo_nao_tem_preco";' >/dev/null 2>&1
 BASE_MEXIDA=1
 exigir_vermelho "caiu a recusa de preco no componente de combo" \

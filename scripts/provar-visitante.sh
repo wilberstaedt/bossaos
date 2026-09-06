@@ -41,6 +41,22 @@ BASE_MEXIDA=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 # ── Repor SEMPRE ──────────────────────────────────────────────────────────
 #
 # Um script morto a meio deixaria a base com a porta do visitante alargada — e um
@@ -199,7 +215,7 @@ echo "2. CONTROLO NEGATIVO OBRIGATÓRIO — RODAR passa a REVOGAR (o colapso)"
 # O defeito que o contrato existe para impedir, plantado. A rotação passa a
 # fechar as sessões vivas — e é a versão que sai de graça de quem escreve
 # «invalidar o QR» sem pensar em quem está a comer.
-python3 - <<'PYCOLAPSO'
+plantar <<'PYCOLAPSO' || true
 import io
 p = 'packages/db/src/visitante.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -220,7 +236,7 @@ echo
 echo "3. CONTROLO NEGATIVO — REVOGAR passa a não fechar nada (o colapso ao contrário)"
 # O outro lado: um sistema onde revogar não revoga. Passa o caso 1 com folga, e
 # deixa quem se queixou de pedidos que não fez a continuar a recebê-los.
-python3 - <<'PYREVOGA'
+plantar <<'PYREVOGA' || true
 import io
 p = 'packages/db/src/visitante.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -301,7 +317,7 @@ echo "6. CONTROLO NEGATIVO — o segredo deixa de ser trocado ao rodar"
 # Um defeito que derruba tudo não prova que a asserção certa funciona; prova que
 # alguma coisa parou. Agora a rotação escreve sempre — mas escreve **o mesmo
 # segredo**, e é isso que uma rotação que não roda realmente é.
-python3 - <<'PYNAORODA'
+plantar <<'PYNAORODA' || true
 import io
 p = 'packages/db/src/visitante.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -444,7 +460,7 @@ echo "11. CONTROLO NEGATIVO — a confirmacao de atendimento deixa de chegar ao 
 # «Sem ela, quem chamou nao sabe se alguem vem, e volta a carregar.» A chamada
 # fica atendida do lado da sala e o visitante nunca sabe — que e' o pior dos dois
 # mundos: o aviso sai da fila e a pessoa continua a carregar.
-python3 - <<'PYCONFIRMA'
+plantar <<'PYCONFIRMA' || true
 import io
 p = 'packages/db/src/visitante.ts'
 s = io.open(p, encoding='utf-8').read()

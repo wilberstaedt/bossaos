@@ -37,6 +37,22 @@ ALTERADO=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; verificacoes=$((verificacoes + 1)); }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); verificacoes=$((verificacoes + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 # Repor SEMPRE. Um script morto a meio com a verificação de plano desligada
 # deixa um furo comercial a viver no repositório — e é o tipo de coisa que
 # sobrevive a um commit distraído.
@@ -99,7 +115,7 @@ echo
 echo "2. CONTROLO NEGATIVO — verificação de plano DESLIGADA"
 cp "$ALVO" /tmp/bossaos-planos.bom
 ALTERADO=1
-python3 - <<'PY'
+plantar <<'PY' || true
 p = 'packages/db/src/planos.ts'
 s = open(p, encoding='utf-8').read()
 # O defeito exacto: o portão passa a deixar passar tudo. É o que alguém escreve

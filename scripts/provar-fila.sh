@@ -34,6 +34,22 @@ cp "$FILA" "$ORIG_FILA"; cp "$SINC" "$ORIG_SINC"; cp "$NAVEG" "$ORIG_NAVEG"
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 restaurar() {
   cp "$ORIG_FILA" "$FILA"; cp "$ORIG_SINC" "$SINC"; cp "$ORIG_NAVEG" "$NAVEG"
   rm -f "$ORIG_FILA" "$ORIG_SINC" "$ORIG_NAVEG"
@@ -90,7 +106,7 @@ echo "2. CONTROLO NEGATIVO OBRIGATÓRIO — a partição por UTILIZADOR desligad
 # É o que o contrato exige pelo nome. Com a partição a comparar só organização e
 # unidade, os rascunhos de A seguem com a sessão de B — atribuição errada, e dado
 # de uma pessoa a viajar com o nome de outra.
-python3 - <<'PYPART'
+plantar <<'PYPART' || true
 import io
 p = 'packages/fila/src/fila.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -113,7 +129,7 @@ cp "$ORIG_FILA" "$FILA"
 
 echo
 echo "3. CONTROLO NEGATIVO — o logout deixa de limpar o que é legível"
-python3 - <<'PYSAIR'
+plantar <<'PYSAIR' || true
 import io
 p = 'packages/fila/src/fila.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -129,7 +145,7 @@ echo
 echo "4. CONTROLO NEGATIVO — o pendente repete sem consultar"
 # «Consultar antes de repetir. Sempre, e nunca ao contrário.» Repetir primeiro já
 # criou o segundo efeito quando se descobre que não era preciso.
-python3 - <<'PYCONS'
+plantar <<'PYCONS' || true
 import io
 p = 'packages/fila/src/sincronizacao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -143,7 +159,7 @@ cp "$ORIG_SINC" "$SINC"
 
 echo
 echo "5. CONTROLO NEGATIVO — o último evento ganha"
-python3 - <<'PYEV'
+plantar <<'PYEV' || true
 import io
 p = 'packages/fila/src/sincronizacao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -157,7 +173,7 @@ cp "$ORIG_SINC" "$SINC"
 
 echo
 echo "6. CONTROLO NEGATIVO — offline passa a poder pagar"
-python3 - <<'PYPAG'
+plantar <<'PYPAG' || true
 import io
 p = 'packages/fila/src/sincronizacao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -173,7 +189,7 @@ echo
 echo "7. CONTROLO NEGATIVO — a sessao morta passa a disparar a fila"
 # «Sessao expirada exige reautenticacao ANTES de sincronizar.» Sincronizar
 # primeiro e autenticar depois e uma porta aberta por quem ja nao devia la estar.
-python3 - <<'PYSESSAO'
+plantar <<'PYSESSAO' || true
 import io
 p = 'packages/fila/src/sincronizacao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -190,7 +206,7 @@ echo "8. CONTROLO NEGATIVO — a fila junta por semelhanca"
 # O par do aceite 2. Uma implementacao que junte tudo por semelhanca passa o teste
 # da duplicacao e PERDE COMIDA REAL: duas pessoas a mesma mesa pediram o mesmo
 # prato de proposito.
-python3 - <<'PYSEM'
+plantar <<'PYSEM' || true
 import io
 p = 'packages/fila/src/fila.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -223,7 +239,7 @@ echo "9. CONTROLO NEGATIVO — «nao saiu» volta a confundir-se com «nao sei»
 # Apanhado pela prova de NAVEGADOR: com a rede cortada antes do envio, a entrada
 # ficava "saiu, e nao sei". Nao tinha saido - e essa duvida a mais e o que faz
 # alguem nao repetir um pedido que nunca chegou.
-python3 - <<'PYSAIU'
+plantar <<'PYSAIU' || true
 import io
 p = 'packages/fila/src/sincronizacao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -240,7 +256,7 @@ echo "10. CONTROLO NEGATIVO — a gravacao volta a acontecer so no fim"
 # O comentario prometia "marca-se pendente ANTES de enviar" e isso era verdade no
 # array e mentira no disco: um envio pendurado deixava o armazem a dizer que nada
 # tinha saido, sobre um comando que podia ter chegado.
-python3 - <<'PYGRAV'
+plantar <<'PYGRAV' || true
 import io
 p = 'packages/fila/src/sincronizacao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -274,7 +290,7 @@ echo "11. CONTROLO NEGATIVO — a contagem das suspensas volta a ignorar os outr
 # misturado, que é o cenário certo para medir a REGRA e o errado para medir o
 # ARMAZÉM. É por isso que este controlo existe, e é por isso que ele planta o
 # defeito na FUNÇÃO DO ARMAZÉM e não na regra.
-python3 - <<'PYOUTROS'
+plantar <<'PYOUTROS' || true
 import io
 p = 'packages/fila/src/navegador.ts'
 s = io.open(p, encoding='utf-8').read()

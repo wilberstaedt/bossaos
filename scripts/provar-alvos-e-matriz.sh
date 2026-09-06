@@ -34,6 +34,22 @@ cp "$ALVOS" "$ORIG_ALVOS"; cp "$MATRIZ" "$ORIG_MATRIZ"
 falhas=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
+
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
 restaurar() {
   cp "$ORIG_ALVOS" "$ALVOS"; cp "$ORIG_MATRIZ" "$MATRIZ"
   rm -f "$ORIG_ALVOS" "$ORIG_MATRIZ"
@@ -83,7 +99,7 @@ fi
 
 echo
 echo "2. CONTROLO NEGATIVO — o alvo aponta a um pedido REAL mas ERRADO"
-python3 - <<'PYALVO'
+plantar <<'PYALVO' || true
 import io
 p = 'inspeccao/alvos.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -100,7 +116,7 @@ cp "$ORIG_ALVOS" "$ALVOS"
 
 echo
 echo "3. CONTROLO NEGATIVO — uma tela do E19 volta a PLANEJADO"
-python3 - <<'PYMATRIZ'
+plantar <<'PYMATRIZ' || true
 import io
 p = 'docs/progress/coverage.csv'
 s = io.open(p, encoding='utf-8', newline='').read()

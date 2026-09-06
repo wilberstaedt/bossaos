@@ -38,6 +38,22 @@ cp "$PORTA" "$ORIG_PORTA"; cp "$ESPERA" "$ORIG_ESPERA"; cp "$MSG" "$ORIG_MSG"
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 restaurar() {
   cp "$ORIG_PORTA" "$PORTA"; cp "$ORIG_ESPERA" "$ESPERA"; cp "$ORIG_MSG" "$MSG"
   rm -f "$ORIG_PORTA" "$ORIG_ESPERA" "$ORIG_MSG"
@@ -99,7 +115,7 @@ echo "2. A CHAMADA a resolverHoraLocal desaparece da porta"
 #
 # A função continua lá, provada e correcta. O que desaparece é quem a chama — que
 # era exactamente o estado em que a etapa foi retida.
-python3 - <<'PYFUSO'
+plantar <<'PYFUSO' || true
 import io
 p = 'packages/db/src/reserva-publica.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -122,7 +138,7 @@ cp "$ORIG_PORTA" "$PORTA"
 echo
 echo "3. A CHAMADA a enfileirar desaparece da porta"
 # A retenção 2. A fila continua provada; ninguém a chama.
-python3 - <<'PYFILA'
+plantar <<'PYFILA' || true
 import io
 p = 'packages/db/src/reserva-publica.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -137,7 +153,7 @@ cp "$ORIG_PORTA" "$PORTA"
 
 echo
 echo "4. A CHAMADA a enfileirar desaparece da chamada da espera"
-python3 - <<'PYPRONTA'
+plantar <<'PYPRONTA' || true
 import io
 p = 'packages/db/src/espera.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -155,7 +171,7 @@ echo "5. A chave volta a ser (reserva, tipo) — e engole a segunda chamada"
 #
 # «A sua mesa está pronta» pode ter de sair duas vezes na mesma noite. Com esta
 # chave a segunda desaparece em silêncio, e a mesa fica vazia com gente à porta.
-python3 - <<'PYCHAVE'
+plantar <<'PYCHAVE' || true
 import io
 p = 'packages/db/src/mensagens.ts'
 s = io.open(p, encoding='utf-8').read()

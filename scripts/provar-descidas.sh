@@ -40,6 +40,22 @@ FUNCAO_ABERTA=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 # Repor SEMPRE. Um script morto a meio deixaria a verificação de inquilino
 # DESLIGADA dentro da função da base — e isso sobrevive a um commit distraído.
 restaurar() {
@@ -120,7 +136,7 @@ echo "2. CONTROLO NEGATIVO — a flag volta a ser opcional"
 # consultada se quem chamasse se lembrasse de a passar, e nenhum sítio se
 # lembrava. Plantá-lo de volta tem de fazer cair a asserção da flag, e SÓ ela —
 # se caísse o par da quota também, o que se estava a medir era o plano.
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/db/src/planos.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -142,7 +158,7 @@ echo
 echo "3. CONTROLO NEGATIVO — a descida deixa de consultar pendências"
 # Sem isto, "adia por causa da caixa aberta" e "efectiva porque não há nada
 # aberto" leem-se iguais: as duas acabariam a efectivar.
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/db/src/descidas.ts'
 s = io.open(p, encoding='utf-8').read()

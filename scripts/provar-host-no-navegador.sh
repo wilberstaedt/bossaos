@@ -61,6 +61,22 @@ cp "$SEMENTE" "$ORIG_SEMENTE"
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 restaurar() {
   cp "$ORIG_HOST" "$HOST"; cp "$ORIG_FLOOR" "$FLOOR"; cp "$ORIG_CHEGADA" "$CHEGADA"
   cp "$ORIG_TIMELINE" "$TIMELINE"; cp "$ORIG_ESPERA" "$ESPERA"; cp "$ORIG_SPEC" "$SPEC"
@@ -106,7 +122,7 @@ fi
 
 echo
 echo "2. CONTROLO NEGATIVO — a agenda do dia fica VAZIA"
-python3 - <<'PYVAZIO'
+plantar <<'PYVAZIO' || true
 import io
 p = 'packages/db/prisma/semente-inspeccao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -127,7 +143,7 @@ echo "3. CONTROLO NEGATIVO — a reserva que aí vem SOME da sala"
 #
 # A mesa continua livre, o ecrã continua certo sobre o presente, e o host senta
 # um walk-in na mesa das 20h. Só se descobre com as pessoas à porta.
-python3 - <<'PYSALA'
+plantar <<'PYSALA' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/floor/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -142,7 +158,7 @@ cp "$ORIG_FLOOR" "$FLOOR"
 
 echo
 echo "4. CONTROLO NEGATIVO — o check-in deixa de dizer que NÃO senta"
-python3 - <<'PYCHEGADA'
+plantar <<'PYCHEGADA' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/reservations/[reservaId]/chegada/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -158,7 +174,7 @@ echo
 echo "5. CONTROLO NEGATIVO — o número perde a DEFINIÇÃO ao lado"
 # «Um número sem definição não é comparável.» O «12» fica sozinho, e o dono usa-o
 # para decidir sem ninguém conseguir reproduzi-lo.
-python3 - <<'PYDEF'
+plantar <<'PYDEF' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/reservations/timeline/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -172,7 +188,7 @@ cp "$ORIG_TIMELINE" "$TIMELINE"
 
 echo
 echo "6. CONTROLO NEGATIVO — a espera do host passa a ler-se como uma FILA"
-python3 - <<'PYFILA'
+plantar <<'PYFILA' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/reservations/espera/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -187,7 +203,7 @@ cp "$ORIG_ESPERA" "$ESPERA"
 
 echo
 echo "7. CONTROLO NEGATIVO — uma tela DESAPARECE da lista medida"
-python3 - <<'PYPOP'
+plantar <<'PYPOP' || true
 import io
 p = 'inspeccao/host.spec.ts'
 s = io.open(p, encoding='utf-8').read()

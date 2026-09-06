@@ -26,6 +26,22 @@ falhas=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 repor_base() {
   psql "$MIGRATION_DATABASE_URL" -q <<'PSQL' >/dev/null 2>&1
 DROP TRIGGER IF EXISTS "movimentos_sao_imutaveis" ON "cash_movements";
@@ -80,7 +96,7 @@ fi
 
 echo
 echo "2. CONTROLO NEGATIVO — a correcção passa a somar-se por cima do erro"
-python3 - <<'PYCORR'
+plantar <<'PYCORR' || true
 import io
 p = 'packages/db/src/caixa.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -97,7 +113,7 @@ cp "$ORIG_CAIXA" "$CAIXA"
 
 echo
 echo "3. CONTROLO NEGATIVO — o cartão passa a entrar na gaveta como notas"
-python3 - <<'PYCARTAO'
+plantar <<'PYCARTAO' || true
 import io
 p = 'packages/db/src/caixa.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -117,7 +133,7 @@ cp "$ORIG_CAIXA" "$CAIXA"
 
 echo
 echo "4. CONTROLO NEGATIVO — a contagem deixa de ter de ser a última palavra"
-python3 - <<'PYCONT'
+plantar <<'PYCONT' || true
 import io
 p = 'packages/db/src/caixa.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -137,7 +153,7 @@ cp "$ORIG_CAIXA" "$CAIXA"
 
 echo
 echo "5. CONTROLO NEGATIVO — a divergência deixa de exigir autorização"
-python3 - <<'PYDIV'
+plantar <<'PYDIV' || true
 import io
 p = 'packages/db/src/caixa.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -157,7 +173,7 @@ cp "$ORIG_CAIXA" "$CAIXA"
 
 echo
 echo "6. CONTROLO NEGATIVO — fecha com operações por reconciliar"
-python3 - <<'PYPEND'
+plantar <<'PYPEND' || true
 import io
 p = 'packages/db/src/caixa.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -209,7 +225,7 @@ echo "10. CONTROLO NEGATIVO — a tranca sai e o fecho deixa de ser recusa de NE
 # **ecrã fica errado** — quem perde a corrida recebe um
 # `PrismaClientKnownRequestError` com `23514` em vez de `RecusaDaCaixa`, e o
 # operador vê um erro de sistema onde devia ler «a caixa já está fechada».
-python3 - <<'PYTRANCA'
+plantar <<'PYTRANCA' || true
 import io
 p = 'packages/db/src/caixa.ts'
 s = io.open(p, encoding='utf-8').read()

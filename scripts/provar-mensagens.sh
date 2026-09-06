@@ -35,6 +35,22 @@ BASE_MEXIDA=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 # ── Repor SEMPRE as duas garantias da base ────────────────────────────────
 #
 # Sem elas, uma mensagem pode ficar «entregue» sem saber quando, e o conector
@@ -126,7 +142,7 @@ echo
 echo "2. CONTROLO NEGATIVO — o reenvio ENTREGA outra vez"
 # O defeito que a régua nomeia. O cliente recebe duas confirmações da mesma
 # reserva, e ninguém vê erro nenhum: os dois envios correram bem.
-python3 - <<'PYDUPLO'
+plantar <<'PYDUPLO' || true
 import io
 p = 'packages/db/src/mensagens.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -145,7 +161,7 @@ echo "3. CONTROLO NEGATIVO — a chave volta a ser (reserva, tipo)"
 #
 # «A sua mesa está pronta» pode ter de sair DUAS VEZES na mesma noite. Com esta
 # chave a segunda desaparece em silêncio, e a mesa fica vazia com gente à porta.
-python3 - <<'PYENGOLE'
+plantar <<'PYENGOLE' || true
 import io
 p = 'packages/db/src/mensagens.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -165,7 +181,7 @@ cp "$ORIG_MSG" "$MSG"
 echo
 echo "4. CONTROLO NEGATIVO — sem provedor, finge que ENVIOU"
 # «Não a fingir que enviou.» É o que a régua reprova à cabeça.
-python3 - <<'PYFINGE'
+plantar <<'PYFINGE' || true
 import io
 p = 'packages/db/src/mensagens.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -201,7 +217,7 @@ echo
 echo "7. CONTROLO NEGATIVO — a falha do provedor deixa de ser registada"
 # «O resultado do provedor é guardado.» Sem a tentativa, ninguém sabe porque é
 # que o cliente não recebeu — e a resposta a essa pergunta é a razão do histórico.
-python3 - <<'PYSEMERRO'
+plantar <<'PYSEMERRO' || true
 import io
 p = 'packages/db/src/mensagens.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -217,7 +233,7 @@ echo
 echo "8. CONTROLO NEGATIVO — o reenvio de uma FALHADA passa a ser recusado"
 # A deduplicação é sobre a ENTREGA, e não sobre a tentativa. Quem falhou ainda
 # não recebeu, e recusar-lhe o reenvio deixava o cliente sem mensagem nenhuma.
-python3 - <<'PYFALHADA'
+plantar <<'PYFALHADA' || true
 import io
 p = 'packages/db/src/mensagens.ts'
 s = io.open(p, encoding='utf-8').read()

@@ -38,6 +38,22 @@ INDICE_MEXIDO=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 # O índice é a garantia inteira do aceite 1. Um script morto a meio que o deixasse
 # de fora abria a porta a duas sessões na mesma mesa, em silêncio.
 repor_indice() {
@@ -161,7 +177,7 @@ echo "4. CONTROLO NEGATIVO — a transferência escreve o histórico fora da tra
 # verde: nesse sítio ele nunca chega a correr quando o destino está ocupado,
 # porque o `update` falha antes. O controlo estava a plantar um defeito que o
 # caminho medido não atravessa — e isso lê-se como código correcto.
-python3 - <<'PYTRANS'
+plantar <<'PYTRANS' || true
 import io
 p = 'packages/db/src/sala.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -191,7 +207,7 @@ echo
 echo "5. CONTROLO NEGATIVO — arquivar fecha a sessão em vez de recusar"
 # «Arquivamento respeita sessões abertas.» Fechar por quem está à mesa decide a
 # conta de alguém a meio do jantar.
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/db/src/sala.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -208,7 +224,7 @@ echo "6. CONTROLO NEGATIVO — o PIN é verificado e o DISPOSITIVO não"
 # É o defeito que o «inclusive» do aceite 2 nomeia. O ataque 1 e o 3 caem; o
 # ataque 2 aguenta, porque mede outra defesa — e é essa distinção que faz destes
 # controlos dois e não um.
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/db/src/dispositivos.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -234,7 +250,7 @@ cp "$ORIG_DISP" "$DISP"
 
 echo
 echo "7. CONTROLO NEGATIVO — a porta dos comandos deixa de ver a revogação"
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/db/src/dispositivos.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -248,7 +264,7 @@ cp "$ORIG_DISP" "$DISP"
 
 echo
 echo "8. CONTROLO NEGATIVO — o PIN passa a ser guardado em claro"
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/db/src/dispositivos.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -265,7 +281,7 @@ echo "9. CONTROLO NEGATIVO — a limpeza passa a libertar a mesa"
 # Uma mesa vazia por limpar NAO e uma mesa livre. Se `EM_LIMPEZA` sair do indice
 # — ou se o fecho acontecer sem passar por ela — outra pessoa senta-se numa mesa
 # por limpar, e o ecra da sala diz que estava tudo bem.
-python3 - <<'PYLIMP'
+plantar <<'PYLIMP' || true
 import io
 p = 'packages/db/src/sala.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -284,7 +300,7 @@ echo "10. CONTROLO NEGATIVO — o responsável deixa de ser verificado"
 # A pertenca de outro inquilino nao aparece dentro do escopo; sem a verificacao,
 # o `update` aceitaria um identificador vindo do formulario e a mesa passava a
 # responder a alguem que nao e da casa.
-python3 - <<'PYRESP'
+plantar <<'PYRESP' || true
 import io
 p = 'packages/db/src/sala.ts'
 s = io.open(p, encoding='utf-8').read()

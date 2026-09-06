@@ -27,6 +27,22 @@ falhas=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 restaurar() {
   cp "$ORIG_DINHEIRO" "$DINHEIRO"; cp "$ORIG_CONTAS" "$CONTAS"; cp "$ORIG_PROVA" "$PROVA"
   rm -f "$ORIG_DINHEIRO" "$ORIG_CONTAS" "$ORIG_PROVA"
@@ -109,7 +125,7 @@ fi
 
 echo
 echo "2. CONTROLO NEGATIVO — o resíduo da divisão deixa de ser distribuído"
-python3 - <<'PYDIV'
+plantar <<'PYDIV' || true
 import io
 p = 'packages/domain/src/dinheiro.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -131,7 +147,7 @@ echo
 echo "3. CONTROLO NEGATIVO — a varredura passa a ter só divisões exactas"
 # A guarda de leitor cego. Sem ela, uma varredura sem restos passava e não media
 # nada — que é a forma de verde vazio que a régua nomeia.
-python3 - <<'PYVARR'
+plantar <<'PYVARR' || true
 import io
 p = 'provas/contas.test.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -165,7 +181,7 @@ repor_base
 
 echo
 echo "5. CONTROLO NEGATIVO — a última parcela deixa de ter limite"
-python3 - <<'PYLIM'
+plantar <<'PYLIM' || true
 import io
 p = 'packages/db/src/contas.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -186,7 +202,7 @@ cp "$ORIG_CONTAS" "$CONTAS"
 
 echo
 echo "6. CONTROLO NEGATIVO — deixa de se reconciliar antes de cobrar outra vez"
-python3 - <<'PYREC'
+plantar <<'PYREC' || true
 import io
 p = 'packages/db/src/contas.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -216,7 +232,7 @@ repor_base
 
 echo
 echo "8. CONTROLO NEGATIVO — a devolução deixa de ter limite no capturado"
-python3 - <<'PYDEV'
+plantar <<'PYDEV' || true
 import io
 p = 'packages/db/src/contas.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -236,7 +252,7 @@ cp "$ORIG_CONTAS" "$CONTAS"
 
 echo
 echo "9. CONTROLO NEGATIVO — o troco passa a entrar na receita"
-python3 - <<'PYTROCO'
+plantar <<'PYTROCO' || true
 import io
 p = 'packages/db/src/contas.ts'
 s = io.open(p, encoding='utf-8').read()

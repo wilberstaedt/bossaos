@@ -50,6 +50,22 @@ RLS_DESLIGADO=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 # Repor SEMPRE. Um script morto a meio deixaria a política de linha DESLIGADA
 # numa tabela de inquilino, ou a porta da criação a duplicar organizações — e
 # isso sobrevive a um commit distraído.
@@ -173,7 +189,7 @@ echo "3. CONTROLO NEGATIVO — por configurar passa a ler-se como fechado"
 # É o defeito exacto que o contrato proíbe, e o que qualquer pessoa escreveria
 # sem pensar. Tem de fazer cair as asserções do desconhecido e SÓ essas.
 semear
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/domain/src/horarios.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -193,7 +209,7 @@ cp "$ORIG_MOTOR" "$MOTOR"
 echo
 echo "4. CONTROLO NEGATIVO — o dia anterior deixa de ser consultado"
 semear
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/domain/src/horarios.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -225,7 +241,7 @@ echo "6. CONTROLO NEGATIVO — o motor passa a usar o relógio do PROCESSO"
 # dois iguais ficaria verde, e um verde aqui diria que a conversão está certa
 # quando o que estava a acontecer era não haver conversão nenhuma.
 semear
-python3 - <<'PY'
+plantar <<'PY' || true
 import io
 p = 'packages/domain/src/horarios.ts'
 s = io.open(p, encoding='utf-8').read()

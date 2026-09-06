@@ -65,6 +65,22 @@ cp "$TURNOS" "$ORIG_TUR"; cp "$SPEC" "$ORIG_SPEC"; cp "$SEMENTE" "$ORIG_SEM"
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 restaurar() {
   cp "$ORIG_NAV" "$NAV"; cp "$ORIG_POL" "$POLITICAS"; cp "$ORIG_PREF" "$PREFERENCIAS"
   cp "$ORIG_TUR" "$TURNOS"; cp "$ORIG_SPEC" "$SPEC"; cp "$ORIG_SEM" "$SEMENTE"
@@ -128,7 +144,7 @@ echo "2. CONTROLO NEGATIVO — as listas ficam VAZIAS"
 # reconstrói.
 #
 # Um defeito plantado num sítio que o alvo repõe não é um defeito plantado.
-python3 - <<'PYVAZIO'
+plantar <<'PYVAZIO' || true
 import io
 p = 'packages/db/prisma/semente-inspeccao.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -144,7 +160,7 @@ echo
 echo "3. CONTROLO NEGATIVO — o marcador da tela deixa de existir"
 # A correcção que o E15 pagou caro: `data-tela` quer dizer «esta página
 # identifica-se a si própria», e vive no cabeçalho.
-python3 - <<'PYMARCA'
+plantar <<'PYMARCA' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/reservations/politicas/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -163,7 +179,7 @@ echo "4. CONTROLO NEGATIVO — a navegação volta a levar data-tela"
 # A navegação aparece em todas as páginas. Com `data-tela` nas ligações, cada
 # página anuncia-se como todas as outras e o marcador por tela deixa de poder
 # falhar — o detector morre sem dizer nada.
-python3 - <<'PYNAV'
+plantar <<'PYNAV' || true
 import io
 p = 'apps/web/src/reservas/NavegacaoDeReservas.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -180,7 +196,7 @@ echo "5. CONTROLO NEGATIVO — o depósito deixa de dizer PORQUÊ"
 # «Não é uma funcionalidade em falta: é uma decisão.» Sem o motivo no ecrã,
 # «desligado» lê-se como avaria — e a decisão deixa de existir num sítio que uma
 # pessoa veja.
-python3 - <<'PYDEPOSITO'
+plantar <<'PYDEPOSITO' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/reservations/politicas/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -196,7 +212,7 @@ echo
 echo "6. CONTROLO NEGATIVO — o SET-007 deixa de dizer o ESTADO"
 # `activo` desligado é «não aceitamos reservas»; sem turnos é «não sabemos
 # quando». Sem o estado no ecrã, quem configura não distingue os dois.
-python3 - <<'PYESTADO'
+plantar <<'PYESTADO' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/settings/reservas/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -212,7 +228,7 @@ echo
 echo "7. CONTROLO NEGATIVO — uma tela DESAPARECE da lista medida"
 # Mede o leitor da matriz. Sem isto, encolher a lista era uma forma silenciosa de
 # passar: menos telas, menos hipóteses de falhar.
-python3 - <<'PYPOP'
+plantar <<'PYPOP' || true
 import io
 p = 'inspeccao/reservas.spec.ts'
 s = io.open(p, encoding='utf-8').read()

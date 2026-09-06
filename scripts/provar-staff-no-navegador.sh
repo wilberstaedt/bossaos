@@ -99,6 +99,22 @@ falhas=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 restaurar() {
   cp "$ORIG_PAINEL" "$PAINEL"; cp "$ORIG_NAVEG" "$NAVEG"
   cp "$ORIG_CSS" "$CSS"; cp "$ORIG_PROCURAR" "$PROCURAR"
@@ -169,7 +185,7 @@ echo "2. CONTROLO NEGATIVO — a recusa de pagamento volta a ignorar a rede"
 # mostrar a recusa sem cruzar com o estado da ligação faz o ecrã dizer «não se
 # pode fazer sem conexão» COM conexão. O caso que tem de acender é o de rede
 # ligada — o outro passava na mesma, e é isso que torna o defeito invisível.
-python3 - <<'PYPAGA'
+plantar <<'PYPAGA' || true
 import io
 p = 'apps/web/src/staff/PainelDaFila.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -198,7 +214,7 @@ echo "3. CONTROLO NEGATIVO — as suspensas voltam a nao contar os outros baldes
 # asserção não prova que o detector funciona. Por isso o defeito é agora a
 # INVERSÃO da condição, que compila e reproduz fielmente o que o produto fazia —
 # olhar só para o próprio balde.
-python3 - <<'PYSUSP'
+plantar <<'PYSUSP' || true
 import io
 p = 'packages/fila/src/navegador.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -215,7 +231,7 @@ echo "4. CONTROLO NEGATIVO — os alvos de toque do indice voltam a 22 px"
 # Foi a prova de navegador que o apanhou, e nada mais o podia apanhar: uma
 # ligação pequena não é um erro em lado nenhum. É uma ligação que funciona e que
 # ninguém acerta de pé — e é o ÚNICO caminho para dez das telas.
-python3 - <<'PYTOQUE'
+plantar <<'PYTOQUE' || true
 import io
 p = 'packages/ui/src/estilos.css'
 s = io.open(p, encoding='utf-8').read()
@@ -236,7 +252,7 @@ echo "5. CONTROLO NEGATIVO — uma tela perde o caminho de navegacao"
 # Uma tela sem ligação está tão morta como uma que não existe, com a diferença de
 # que RESPONDE ao endereço — e por isso as cinco larguras dela ficam verdes.
 # Sem este controlo, o índice podia perder metade das entradas em silêncio.
-python3 - <<'PYNAV'
+plantar <<'PYNAV' || true
 import io
 p = 'apps/web/app/[idioma]/staff/[locationId]/procurar/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -259,7 +275,7 @@ echo "6. CONTROLO NEGATIVO — uma tela DESAPARECE da lista medida"
 # barulho nenhum a passar.
 TELAS_SPEC=inspeccao/staff-telas.spec.ts
 ORIG_TELAS=$(mktemp); cp "$TELAS_SPEC" "$ORIG_TELAS"
-python3 - <<'PYPOP'
+plantar <<'PYPOP' || true
 import io
 p = 'inspeccao/staff-telas.spec.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -283,7 +299,7 @@ echo "7. CONTROLO NEGATIVO — o portao de sessao volta a estar desligado"
 # em ciclo com uma sessao que ja' nao existe.
 FILA_NAV=apps/web/src/staff/fila-do-navegador.ts
 ORIG_FILA_NAV=$(mktemp); cp "$FILA_NAV" "$ORIG_FILA_NAV"
-python3 - <<'PYSESSAO'
+plantar <<'PYSESSAO' || true
 import io
 p = 'apps/web/src/staff/fila-do-navegador.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -310,7 +326,7 @@ echo "8. CONTROLO NEGATIVO — o aparelho volta a nao declarar o numero"
 # porque quem decide ja' nao sabe o que descarta.
 DISPOS=packages/db/src/dispositivos.ts
 ORIG_DISPOS=$(mktemp); cp "$DISPOS" "$ORIG_DISPOS"
-python3 - <<'PYDECL'
+plantar <<'PYDECL' || true
 import io
 p = 'packages/db/src/dispositivos.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -338,7 +354,7 @@ echo "9. CONTROLO NEGATIVO — o marcador da tela deixa de existir"
 # sem barulho: tira o `data-tela` do cabecalho e exige que a prova acenda.
 PECAS=apps/web/src/staff/PecasDoStaff.tsx
 ORIG_PECAS=$(mktemp); cp "$PECAS" "$ORIG_PECAS"
-python3 - <<'PYMARCA'
+plantar <<'PYMARCA' || true
 import io
 p = 'apps/web/src/staff/PecasDoStaff.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -364,7 +380,7 @@ echo "10. CONTROLO NEGATIVO — a origem do pedido some do ecra"
 # codigo sem prova, e prova sem codigo.
 ANDAMENTO="apps/web/app/[idioma]/staff/[locationId]/andamento/page.tsx"
 ORIG_ANDAMENTO=$(mktemp); cp "$ANDAMENTO" "$ORIG_ANDAMENTO"
-python3 - <<'PYORIGEM'
+plantar <<'PYORIGEM' || true
 import io, re
 p = 'apps/web/app/[idioma]/staff/[locationId]/andamento/page.tsx'
 s = io.open(p, encoding='utf-8').read()
@@ -404,7 +420,7 @@ echo "11. CONTROLO NEGATIVO — o fecho do arnes volta a ser CEGO aos pedidos"
 COMUM="packages/db/prisma/inspeccao-comum.ts"
 ORIG_COMUM="/tmp/bossaos-inspeccao-comum.ts"
 cp "$COMUM" "$ORIG_COMUM"
-python3 - <<'PYCEGO'
+plantar <<'PYCEGO' || true
 import io
 p = 'packages/db/prisma/inspeccao-comum.ts'
 s = io.open(p, encoding='utf-8').read()

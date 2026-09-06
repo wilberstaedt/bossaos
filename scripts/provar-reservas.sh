@@ -51,6 +51,22 @@ BASE_MEXIDA=0
 verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); }
 
+# ── Um plante tem de VERIFICAR-SE ────────────────────────────────────────────
+#
+# Se a âncora já não existe, o `assert` do python dispara, o guião segue, e o
+# `exigir_vermelho` corre contra um produto INTACTO: o produto passa, e o guião
+# conclui que a asserção é vazia. É uma acusação falsa — e cinco das dez falhas
+# do corredor de 06/09 eram exactamente isso.
+#
+# Aqui o código de saída do plante é lido. Se ele não pegou, a falha é do GUIÃO
+# e diz-se assim, em vez de se atribuir ao produto.
+plantar() {
+  if ! python3 -; then
+    vermelho "o plante NÃO APLICOU — a âncora mudou; isto não mediu nada"
+    return 1
+  fi
+}
+
 # ── Repor a exclusão SEMPRE ───────────────────────────────────────────────
 #
 # Um script morto a meio deixaria a base sem `uma_mesa_um_intervalo` — e a mesma
@@ -142,7 +158,7 @@ echo "2. CONTROLO NEGATIVO OBRIGATÓRIO — a SERIALIZAÇÃO desaparece"
 # O que TEM de cair é a contagem da zona. O caso da mesma mesa **não** pode cair:
 # quem o segura é a exclusão, e se caísse este controlo estaria a medir «alguma
 # coisa parou» em vez do desvio de escrita.
-python3 - <<'PYSERIAL'
+plantar <<'PYSERIAL' || true
 import io
 p = 'packages/db/src/escopo.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -176,7 +192,7 @@ echo
 echo "4. CONTROLO NEGATIVO — o limite semiaberto passa a FECHADO"
 # `<` para `<=`: um caractere. É a origem clássica da mesa vendida duas vezes na
 # direcção contrária — o turno das 21h recusado a noite inteira.
-python3 - <<'PYLIMITE'
+plantar <<'PYLIMITE' || true
 import io
 p = 'packages/domain/src/reservas.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -193,7 +209,7 @@ echo
 echo "5. CONTROLO NEGATIVO — o buffer é aplicado DEPOIS da conta"
 # «Aplicá-lo depois da verificação é o mesmo que não o ter.» Aqui deixa de entrar
 # no intervalo efectivo — e o intervalo guardado na alocação fica sem ele.
-python3 - <<'PYBUFFER'
+plantar <<'PYBUFFER' || true
 import io
 p = 'packages/domain/src/reservas.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -211,7 +227,7 @@ echo "6. CONTROLO NEGATIVO — a combinação passa a ter recurso PRÓPRIO"
 # O erro cuja soma bate certo: a combinação 3+4 deixa de ocupar as componentes e
 # passa a ser um recurso à parte. Nada dá erro, o relatório fecha, e às 21h estão
 # duas famílias à porta.
-python3 - <<'PYCOMBI'
+plantar <<'PYCOMBI' || true
 import io
 p = 'packages/domain/src/reservas.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -228,7 +244,7 @@ echo "7. CONTROLO NEGATIVO — a retenção passa a expirar por EVENTO"
 # «Se a capacidade só é libertada quando alguém abre o ecrã, uma retenção
 # esquecida bloqueia uma mesa a noite inteira.» A ocupação deixa de olhar para o
 # relógio e passa a acreditar no estado — que é exactamente o desenho proibido.
-python3 - <<'PYRETENCAO'
+plantar <<'PYRETENCAO' || true
 import io
 p = 'packages/db/src/reservas.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -246,7 +262,7 @@ echo "8. CONTROLO NEGATIVO — reagendar LARGA primeiro e tenta depois"
 # capacidade, a função devolve em vez de rebentar — e o COMMIT leva o
 # `deleteMany` consigo. A reserva sobrevive sem mesa nenhuma, que é a versão
 # silenciosa do defeito.
-python3 - <<'PYREAGENDA'
+plantar <<'PYREAGENDA' || true
 import io
 p = 'packages/db/src/reservas.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -262,7 +278,7 @@ cp "$ORIG_RESERVAS" "$RESERVAS"
 echo
 echo "9. CONTROLO NEGATIVO — a chave idempotente deixa de ser lida"
 # «Sem chave, o retry é a segunda reserva.» O cliente fica com duas mesas.
-python3 - <<'PYCHAVE'
+plantar <<'PYCHAVE' || true
 import io
 p = 'packages/db/src/reservas.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -278,7 +294,7 @@ echo
 echo "10. CONTROLO NEGATIVO — o walk-in deixa de ocupar a mesa"
 # «Walk-ins usam as mesmas alocações.» Sem esta fonte, a sala cheia aparece vazia
 # a quem atende o telefone — e a mesa é prometida a alguém que já lá tem gente.
-python3 - <<'PYSALA'
+plantar <<'PYSALA' || true
 import io
 p = 'packages/db/src/reservas.ts'
 s = io.open(p, encoding='utf-8').read()
@@ -295,7 +311,7 @@ echo "11. CONTROLO NEGATIVO — a soma da zona conta por ALOCAÇÃO"
 # O grupo de oito numa combinação passa a contar dezasseis, e a zona parece cheia
 # com metade da gente. O erro que fecha as reservas de uma noite inteira sem
 # nunca dar erro.
-python3 - <<'PYSOMA'
+plantar <<'PYSOMA' || true
 import io
 p = 'packages/db/src/reservas.ts'
 s = io.open(p, encoding='utf-8').read()
