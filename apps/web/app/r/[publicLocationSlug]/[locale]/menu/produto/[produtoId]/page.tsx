@@ -2,7 +2,9 @@ import { notFound } from 'next/navigation';
 import { Etiqueta, variaveisDoTema } from '@bossaos/ui';
 import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { cartaPublica, temaPublico } from '@bossaos/db';
-import { IDIOMAS_DE_CONTEUDO, produtoDaCarta, type IdiomaDeConteudo } from '@bossaos/domain';
+import {
+  IDIOMAS_DE_CONTEUDO, avisosPorAlergenio, produtoDaCarta, type IdiomaDeConteudo,
+} from '@bossaos/domain';
 import { obterBase } from '../../../../../../../src/servidor.ts';
 
 export const dynamic = 'force-dynamic';
@@ -84,18 +86,23 @@ export default async function ProdutoPublico({
       <section aria-labelledby="alergenos">
         <h2 id="alergenos">{c.alergenos}</h2>
         <ul className="bo-publico__alergenos">
-          {produto.alergenos.map((a) => (
-            <li key={a.codigo}>
-              <span>{(m.alergenios as unknown as Record<string, string>)[a.codigo] ?? a.codigo}</span>
+          {/* ── O tom vem do domínio, e não daqui ────────────────────────
+              Isto era um encadeado de ternários a repetir a regra dos
+              alérgenos. Uma cópia da regra é uma regra que a guarda não
+              vigia: `validar-alergenios.sh` lê o módulo do domínio, e com o
+              ternário aqui plantar-lhe um defeito não mudava NADA do que
+              esta pessoa lê — o controlo acendia num sítio onde o ecrã não
+              passa. Agora há um caminho só, e ele passa pela regra. */}
+          {avisosPorAlergenio(
+            produto.alergenos.map((a) => ({ alergenio: a.codigo, estado: a.estado })),
+          ).map((a) => (
+            <li key={a.alergenio}>
+              <span>
+                {(m.alergenios as unknown as Record<string, string>)[a.alergenio] ?? a.alergenio}
+              </span>
               {/* Texto e não só cor: quem não distingue vermelho de verde tem de
                   conseguir ler a diferença entre "contém" e "não contém". */}
-              <Etiqueta tom={
-                a.estado === 'CONTEM' ? 'perigo'
-                  : a.estado === 'PODE_CONTER' ? 'aviso'
-                  : a.estado === 'NAO_CONTEM' ? 'sucesso' : 'neutro'
-              }>
-                {rotulo(`estado${a.estado}`)}
-              </Etiqueta>
+              <Etiqueta tom={a.tom}>{rotulo(`estado${a.estado}`)}</Etiqueta>
             </li>
           ))}
         </ul>

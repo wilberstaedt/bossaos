@@ -161,6 +161,12 @@ export function revisaoDaFicha(
 }
 
 /**
+ * O peso visual de um aviso. `neutro` é o que ninguém declarou — e o que nunca
+ * pode partilhar a aparência de `sucesso`.
+ */
+export type TomDeAviso = 'perigo' | 'aviso' | 'sucesso' | 'neutro';
+
+/**
  * O que se mostra a quem lê a carta.
  *
  * `desconhecido` **não desaparece** e **não vira "não contém"**. O texto é da
@@ -179,4 +185,39 @@ export function avisoDeSeguranca(ficha: readonly LinhaDeAlergenio[]): {
     naoContem: de('NAO_CONTEM'),
     desconhecidos: de('DESCONHECIDO'),
   };
+}
+
+/**
+ * O aviso de cada alérgeno, **linha a linha**, para quem desenha a carta.
+ *
+ * ── Porque é que isto existe, e é derivado ────────────────────────────────
+ *
+ * O `avisoDeSeguranca` devolve quatro listas, e um ecrã que mostra os catorze
+ * pela ordem fixa não consegue usá-las sem as reagrupar. Foi por isso que a
+ * tela pública do produto acabou a repetir a regra num encadeado de ternários
+ * — e, com a cópia, a guarda desta regra passou a vigiar o lado que **não
+ * corre**: plantar o defeito aqui não mexia uma vírgula no que a pessoa lê.
+ *
+ * Esta função não é uma segunda regra: é a PRIMEIRA, vista de outro ângulo.
+ * É calculada **a partir** do `avisoDeSeguranca`, e por isso um defeito lá
+ * chega cá — e daqui ao ecrã. Uma regra, um sítio, um caminho.
+ *
+ * ── O tom faz parte da regra, não da decoração ────────────────────────────
+ *
+ * `DESCONHECIDO` tem de sair `neutro` e nunca `sucesso`. Se o tom vivesse no
+ * ecrã, esta linha — a que separa "ninguém declarou" de "não contém" — ficava
+ * fora do alcance da guarda outra vez, que é exactamente o defeito que isto
+ * corrige. O que o ecrã escolhe é a cor do `neutro`; o que **não** escolhe é
+ * qual dos catorze é neutro.
+ */
+export function avisosPorAlergenio(
+  ficha: readonly LinhaDeAlergenio[],
+): readonly { alergenio: string; estado: EstadoDeAlergenio; tom: TomDeAviso }[] {
+  const aviso = avisoDeSeguranca(ficha);
+  const tomDe = (alergenio: string): TomDeAviso =>
+    aviso.contem.includes(alergenio) ? 'perigo'
+      : aviso.podeConter.includes(alergenio) ? 'aviso'
+      : aviso.naoContem.includes(alergenio) ? 'sucesso'
+      : 'neutro';
+  return ficha.map((l) => ({ alergenio: l.alergenio, estado: l.estado, tom: tomDe(l.alergenio) }));
 }

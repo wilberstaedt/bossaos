@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { criarConvite, listarConvites, registar } from '@bossaos/db';
+import { criarConvite, listarConvites, registar, revogarConvite } from '@bossaos/db';
 import { corpoDaResposta, estadoHttp, exigirAccao, type Papel } from '@bossaos/domain';
 import { comEscopoDoPedido, resolverPedido } from '../../../../../src/sessao.ts';
 import { obterEnv } from '../../../../../src/servidor.ts';
@@ -86,3 +86,56 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
   // nem se pode voltar a pedir: a base só tem o resumo dele.
   return NextResponse.json({ conviteId: r.conviteId, token: r.token, expiraEm: r.expiraEm }, { status: 201 });
 }
+
+/**
+ * Revogar um convite.
+ *
+ * ── Porque é que isto faltava, e o que custava ────────────────────────────
+ *
+ * A ORG-007 lista os convites pendentes e a rota só sabia criá-los. Um convite
+ * enviado para o email errado **não se cancelava**: ficava válido até expirar, e
+ * quem o recebesse entrava na organização.
+ *
+ * Foi a `validar-desfazer.sh` que o apanhou, e a regra dela é a certa: **se
+ * quem cria tem chamador e quem desfaz não tem, o produto deixa fazer e não
+ * deixa voltar atrás.**
+ *
+ * A revogação exige a mesma concessão que convidar — quem pode chamar alguém
+ * tem de poder desconvidá-lo — e deixa rasto, como a criação.
+ */
+export async function DELETE(pedido: Request, ctx: { params: Promise<{ orgSlug: string }> }) {
+  const { orgSlug } = await ctx.params;
+  const sessao = await resolverPedido(orgSlug);
+  if (!sessao.ok) {
+    return NextResponse.json(corpoDaResposta(sessao.resultado), { status: estadoHttp(sessao.resultado) });
+  }
+  const recusa = exigirAccao(sessao.concessoes, 'equipa.gerir');
+  if (recusa) return NextResponse.json(corpoDaResposta(recusa), { status: estadoHttp(recusa) });
+
+  const corpo = (await pedido.json().catch(() => null)) as { conviteId?: string } | null;
+  if (!corpo?.conviteId) {
+    return NextResponse.json({ erro: 'pedido_invalido' }, { status: 400 });
+  }
+
+  const revogado = await comEscopoDoPedido(sessao, async (db) => {
+    const feito = await revogarConvite(db, corpo.conviteId as string);
+    if (feito) {
+      await registar(db, sessao.contexto.organizationId, {
+        accao: 'convite.revogado',
+        actorId: sessao.actor.id,
+        actorEmail: sessao.actor.email,
+        alvoTipo: 'invitation',
+        alvoId: corpo.conviteId as string,
+        detalhe: {},
+      });
+    }
+    return feito;
+  });
+
+  // Um convite que já não estava pendente dá AUSÊNCIA, e não erro: pode ter
+  // sido aceite, ter expirado, ou já ter sido revogado por outra pessoa — e
+  // nenhuma dessas é uma falha de quem carregou no botão.
+  if (!revogado) return NextResponse.json({ erro: 'nao_encontrado' }, { status: 404 });
+  return NextResponse.json({ revogado: true }, { status: 200 });
+}
+

@@ -55,6 +55,30 @@ que fosse:
 > **bem testado**. A cobertura do domínio parece boa precisamente porque o teste
 > exercita a função que a tela não usa.
 
+## FECHADAS a 06/09 pelo JR — quatro das cinco
+
+`revogarConvite`, `apagarExcepcao`, as três portas mortas do menu da plataforma e
+o caso dos alergénios estão pagas. `validar-desfazer.sh` foi de **2 pares sem
+desfazer a ZERO**. O detalhe fica no `HANDOFF.md`, secção «As quatro correcções
+do E34 estão fechadas».
+
+Duas notas que valem mais do que o fecho:
+
+**O `href: '#'` não era descuido — era obrigatório.** `LigacaoDeNavegacao` pedia
+`href: string` enquanto o comentário ao lado dizia «não tem href». Quem escrevia
+o menu não tinha outra forma de dizer «isto ainda não existe». O tipo passou a
+união discriminada e o estado errado deixou de ter nome.
+
+**O caso dos alergénios confirmou a tua frase, e piorou-a.** Escreveste que a
+cobertura do domínio parecia boa *precisamente porque o teste exercita a função
+que a tela não usa*. Medi-o: plantar `contem: []` no `avisoDeSeguranca` faz um
+prato **com glúten** mostrar-se como «ninguém declarou» — e antes da correcção
+esse plante **não mudava uma vírgula do que a pessoa alérgica lia**. O controlo
+acendia num sítio por onde o ecrã não passa.
+
+**Continua aberta a quinta:** `leadsDaUnidade`, escrever sem ler. É a forma para
+que apagaste a `validar-escrita-sem-leitura.sh`, e não lhe toquei.
+
 ## As duas que já classifiquei
 
 **`listarAuditoria` — legítima.** O E33 consome-a (`SET-011` «Registro de

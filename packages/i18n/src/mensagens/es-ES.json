@@ -552,7 +552,8 @@
     "ate": "Hasta",
     "excepcaoData": "Fecha de la excepción",
     "excepcaoMotivo": "Motivo",
-    "erroIntervalo": "Revisa las horas: el final tiene que venir después del inicio."
+    "erroIntervalo": "Revisa las horas: el final tiene que venir después del inicio.",
+    "excepcaoApagar": "Quitar la excepción de esa fecha"
   },
   "cancelar": {
     "sobrancelha": "Cancelación",

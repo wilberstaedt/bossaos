@@ -3,26 +3,48 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 
-export interface LigacaoDeNavegacao {
-  href: string;
-  rotulo: string;
-  activa?: boolean;
-  /**
-   * A etapa que vai construir este módulo — e a marca de que ele **ainda não
-   * existe**.
-   *
-   * ── Porque é que isto é um campo e não um `href: '#'` ────────────────────
-   *
-   * «Um item que parece uma ligação e não faz nada ensina a pessoa a desconfiar
-   * do menu inteiro, e a partir daí ela deixa de tentar os que funcionam.»
-   *
-   * Com este campo, o item deixa de ser uma ligação: não tem `href`, não
-   * responde a `getByRole('link')`, e diz ao lado quem o vai construir. Um `#`
-   * num módulo entregue continua a ser o que sempre foi — uma porta que ninguém
-   * abriu — e é isso que a prova de navegação apanha.
-   */
-  porConstruir?: string;
-}
+/**
+ * Um item do menu: **ou** é uma ligação **ou** é um marcador do que falta —
+ * nunca as duas coisas, e nunca nenhuma.
+ *
+ * ── Porque é uma união e não um objecto com campos opcionais ──────────────
+ *
+ * Enquanto o tipo dizia `href: string` obrigatório, o comentário abaixo dizia
+ * «não tem href» e o tipo dizia o contrário: um item por construir era
+ * obrigado a inventar um destino, e o `'#'` era a mentira que o tipo EXIGIA.
+ * O `href: '#'` não era descuido de quem escrevia o menu — era a única forma
+ * de o compilador aceitar o que se queria dizer.
+ *
+ * Com a união, o estado errado deixa de ter nome: um item com `porConstruir`
+ * **não pode** ter `href`, e um item com `href` não pode ter `porConstruir`.
+ * O compilador recusa a porta morta antes de a prova de navegação a apanhar,
+ * que é a mesma escolha do resto do projecto — garantir na FORMA em vez de
+ * confiar em quem escreve.
+ */
+export type LigacaoDeNavegacao =
+  | {
+      href: string;
+      rotulo: string;
+      activa?: boolean;
+      porConstruir?: never;
+    }
+  | {
+      href?: never;
+      rotulo: string;
+      activa?: boolean;
+      /**
+       * A etapa que vai construir este módulo — e a marca de que ele **ainda
+       * não existe**.
+       *
+       * «Um item que parece uma ligação e não faz nada ensina a pessoa a
+       * desconfiar do menu inteiro, e a partir daí ela deixa de tentar os que
+       * funcionam.»
+       *
+       * O item deixa de ser uma ligação: não tem `href`, não responde a
+       * `getByRole('link')`, e diz ao lado quem o vai construir.
+       */
+      porConstruir: string;
+    };
 
 /**
  * A marca da navegação: quatro quadrados numa grelha de 2×2, como o atlas

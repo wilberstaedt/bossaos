@@ -16,6 +16,14 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
+# O schema e' a fonte dos tipos deste leitor. Se faltar, isto nao mede nada —
+# e um zero de "esta tudo bem" escreve-se igual a um zero de "nao medi".
+SCHEMA="packages/db/prisma/schema.prisma"
+if [ ! -f "$SCHEMA" ]; then
+  echo "  FALHA nao encontrei $SCHEMA — o leitor de tipos esta cego" >&2
+  exit 1
+fi
+
 SCHEMA="packages/db/prisma/schema.prisma"
 NOME_DINHEIRO="preco|Preco|valor|Valor|total|Total|montante|Montante|amount|Amount|price|Price|custo|Custo|troco|Troco|taxa|Taxa"
 falhas=0
@@ -133,7 +141,10 @@ if [ -n "$outras" ]; then
       | grep -oE '[A-Za-z_$][A-Za-z_$0-9]*' | tail -1)
     tipos=""
     for ident in $alvo $arg; do
-      t=$(grep -oE "^[[:space:]]+${ident}[[:space:]]+[A-Za-z]+" packages/db/prisma/schema.prisma 2>/dev/null \
+      # Sem `2>/dev/null`: se o schema desaparecer, o leitor de tipos fica cego
+      # e esta guarda passa a dizer "nao ha tipo" para tudo — verde sobre nada.
+      # O ficheiro e' verificado uma vez la em cima, e a falha aqui aparece.
+      t=$(grep -oE "^[[:space:]]+${ident}[[:space:]]+[A-Za-z]+" "$SCHEMA" \
         | awk '{print $2}' | sort -u | tr '\n' '/' | sed 's|/$||')
       [ -n "$t" ] && tipos="$ident $t" && break
     done

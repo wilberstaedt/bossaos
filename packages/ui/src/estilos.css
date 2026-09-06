@@ -885,6 +885,17 @@ label.bo-planos__item input[type="radio"] {
  * já assinadas com ligações lá dentro, e mudar-lhes a altura por baixo era
  * mexer no que outra régua já mediu.
  */
+/*
+ * Uma caixa de marcar com a sua etiqueta ao lado, e com altura de dedo.
+ *
+ * O rótulo é `<label>` a envolver o `<input>`: assim toda a linha é alvo de
+ * toque, e não só o quadradinho de 13 px que o navegador desenha por omissão.
+ */
+.bo-campo__linha {
+  display: flex; align-items: center; gap: var(--bo-espaco-sm);
+  min-height: var(--bo-toque-publico); cursor: pointer;
+}
+
 .bo-lista__ligacao {
   display: inline-flex; align-items: center; justify-content: flex-start;
   min-height: var(--bo-toque-publico);

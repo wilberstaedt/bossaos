@@ -143,6 +143,16 @@ export default async function HorariosDaUnidade({
             <Campo rotulo={h.excepcaoData} name="excepcaoData" type="date" />
             <Campo rotulo={h.excepcaoMotivo} name="excepcaoMotivo" />
           </div>
+          {/* ── E por onde se DESMARCA ────────────────────────────────────
+              A rota já sabia apagar e a tela não tinha por onde pedir: uma
+              casa que marcasse fechado a 25 de Dezembro por engano ficava com o
+              dia fechado para sempre. Ligar o motor sem a porta era deixar o
+              caminho a existir sem ninguém lhe chegar. */}
+          <label className="bo-campo__linha">
+            <input type="checkbox" name="excepcaoApagar" value="1"
+                   data-teste="excepcao-apagar" />
+            <span>{h.excepcaoApagar}</span>
+          </label>
         </Cartao>
 
         {/* A frase que esta tela existe para dizer. */}

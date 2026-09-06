@@ -15,6 +15,14 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
+# O leitor de comentarios e' a fonte desta guarda. Se nao correr, ela le zero
+# linhas e diz "0 falhas" — cega e verde ao mesmo tempo. Prova-se uma vez, e
+# alto, em vez de se engolir o erro em cada ficheiro.
+if ! python3 scripts/sem-comentarios.py "$0" > /dev/null 2>&1; then
+  echo "  FALHA o sem-comentarios.py nao corre — esta guarda ficaria cega" >&2
+  exit 1
+fi
+
 F="packages/domain/src/alergenios.ts"
 falhas=0
 erro() { echo "  FALHA $1"; falhas=$((falhas+1)); }
@@ -68,7 +76,7 @@ echo "3. Ausencia nunca vira 'nao contem'"
 # que o `git ls-files` visse a sonda - e uma guarda nao deve escrever no indice.
 procurar_queda() {
   printf '%s\n' "$@" \
-    | xargs python3 scripts/sem-comentarios.py 2>/dev/null \
+    | xargs python3 scripts/sem-comentarios.py \
     | grep -E "(\?\?|\|\|)[[:space:]]*[\"'\`]NAO_CONTEM[\"'\`]|:[[:space:]]*[\"'\`]NAO_CONTEM[\"'\`][[:space:]]*[,;)]" || true
 }
 
@@ -79,6 +87,43 @@ if [ -n "$queda" ]; then
   printf '%s\n' "$queda" | head -4 | sed 's/^/          /'
 else
   ok "nenhum valor por omissao a transformar ausencia em 'nao contem'"
+fi
+
+echo
+echo "4. A regra nao pode ter copia na superficie PUBLICA"
+# O defeito que isto fecha: a tela publica do produto reimplementava os estados
+# num encadeado de ternarios. A guarda lia o modulo do dominio e dizia 0 falhas,
+# mas plantar um defeito no dominio nao mudava NADA do que a pessoa alergica le -
+# a guarda vigiava o lado que nao corre, e o controlo acendia noutro sitio a
+# PARECER que funcionava.
+#
+# Regra: quem le a carta nao decide o estado; pede-o ao dominio. Comparar os
+# estados a mao em apps/web/app/r/ e ter a regra em dois sitios outra vez.
+copiar_regra() {
+  printf '%s\n' "$@" \
+    | xargs python3 scripts/sem-comentarios.py \
+    | grep -E "estado[[:space:]]*===[[:space:]]*[\"'\`](CONTEM|PODE_CONTER|NAO_CONTEM|DESCONHECIDO)[\"'\`]" || true
+}
+
+# shellcheck disable=SC2046
+copia=$(copiar_regra $(git ls-files 'apps/web/app/r/*'))
+if [ -n "$copia" ]; then
+  erro "superficie publica a decidir o estado por si:"
+  printf '%s\n' "$copia" | head -4 | sed 's/^/          /'
+else
+  ok "nenhuma superficie publica compara os estados a mao"
+fi
+
+# E o outro lado da mesma moeda: nao basta nao copiar, tem de CHAMAR.
+# Sem isto, apagar o bloco dos alergenos da tela passava a guarda a verde -
+# a ausencia de copia tambem se consegue nao mostrando nada.
+TELA="apps/web/app/r/[publicLocationSlug]/[locale]/menu/produto/[produtoId]/page.tsx"
+if [ ! -f "$TELA" ]; then
+  erro "nao encontrei a tela publica do produto"
+elif python3 scripts/sem-comentarios.py "$TELA" | grep -q "avisosPorAlergenio"; then
+  ok "a tela publica do produto pede o aviso ao dominio"
+else
+  erro "$TELA nao chama avisosPorAlergenio - a regra voltou a ter duas casas"
 fi
 
 # ── controlo negativo ────────────────────────────────────────────────────────
@@ -101,7 +146,20 @@ if [ -n "$(procurar_queda "$SONDA/s.ts")" ]; then
   echo "  CONTROLO NEGATIVO FALHOU: acusou um valor inofensivo." >&2
   falhas=$((falhas + 1))
 fi
-[ "$falhas" -eq 0 ] && ok "controlo negativo: apanha as tres aspas e nao acusa o inofensivo"
+# A seccao 4 prova-se pelo mesmo criterio: uma copia da regra tem de acusar, e o
+# codigo que pede ao dominio tem de passar. Sem isto ficava uma guarda nova sem
+# nunca ter reprovado nada - que foi como a queda em NAO_CONTEM viveu semanas.
+printf "export const a = (x: any) => x.estado === 'CONTEM' ? 1 : 0;\n" > "$SONDA/s.tsx"
+if [ -z "$(copiar_regra "$SONDA/s.tsx")" ]; then
+  echo "  CONTROLO NEGATIVO FALHOU: a regra copiada passou despercebida." >&2
+  falhas=$((falhas + 1))
+fi
+printf "export const a = (f: any) => avisosPorAlergenio(f);\n" > "$SONDA/s.tsx"
+if [ -n "$(copiar_regra "$SONDA/s.tsx")" ]; then
+  echo "  CONTROLO NEGATIVO FALHOU: acusou quem pede ao dominio." >&2
+  falhas=$((falhas + 1))
+fi
+[ "$falhas" -eq 0 ] && ok "controlo negativo: apanha as tres aspas e a regra copiada, e nao acusa o inofensivo"
 
 echo
 [ "$falhas" -eq 0 ] && echo "  A distincao esta trancada: 0 falhas." || echo "  $falhas FALHA(S)."

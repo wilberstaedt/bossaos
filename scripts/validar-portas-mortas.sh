@@ -20,6 +20,14 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
+# O leitor de comentarios e' a fonte desta guarda. Se nao correr, ela le zero
+# linhas e diz "0 falhas" — cega e verde ao mesmo tempo. Prova-se uma vez, e
+# alto, em vez de se engolir o erro em cada ficheiro.
+if ! python3 scripts/sem-comentarios.py "$0" > /dev/null 2>&1; then
+  echo "  FALHA o sem-comentarios.py nao corre — esta guarda ficaria cega" >&2
+  exit 1
+fi
+
 falhas=0
 erro() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas+1)); }
 ok()   { printf '  \033[32mok\033[0m    %s\n' "$1"; }
@@ -42,13 +50,25 @@ echo "   ($N_LAYOUTS layouts descobertos)"
 # morrem la dentro. A primeira versao desta guarda imprimia as tres FALHAS e
 # saia a ZERO - imprimir o defeito e devolver verde e a forma mais pura do verde
 # vazio, e cometi-a numa guarda escrita para cacar exactamente isso.
+#
+# E le CODIGO, nao prosa. A 06/09 esta guarda acusou um COMENTARIO que explicava
+# porque e que o `href: '#'` era mau — castigou exactamente quem tinha acabado de
+# fechar as portas. A leitura passa pelo `sem-comentarios.py`, que ja devolve
+# `ficheiro:linha:texto` e mantem os numeros de linha certos. E a mesma calibragem
+# do `validar-alergenios.sh`, e pela mesma razao: uma guarda que nao distingue
+# codigo de comentario ensina a nao documentar.
+portas_mortas() {
+  python3 scripts/sem-comentarios.py "$@" \
+    | grep -E "href: *'#'" || true
+}
+
 while IFS= read -r f; do
   [ -n "$f" ] || continue
   while IFS= read -r linha; do
-    n="${linha%%:*}"; texto="${linha#*:}"
+    resto="${linha#*:}"; n="${resto%%:*}"; texto="${resto#*:}"
     case "$texto" in *porConstruir*) continue ;; esac
     erro "$f:$n entrada morta sem porConstruir — ${texto#*rotulo: }"
-  done < <(grep -nE "href: *'#'" "$f" || true)
+  done < <(portas_mortas "$f")
 done <<EOF
 $LAYOUTS
 EOF
@@ -58,10 +78,14 @@ EOF
 echo
 echo "2. Controlo negativo"
 SONDA="$(mktemp -d)"; trap 'rm -rf "$SONDA"' EXIT
-printf "  { href: '#', rotulo: m.x },\n  { href: '#', rotulo: m.y, porConstruir: 'E30' },\n" > "$SONDA/l.tsx"
-apanhadas=$(grep -nE "href: *'#'" "$SONDA/l.tsx" | grep -vc porConstruir || true)
+# Tres casos numa sonda so: a anonima TEM de acusar, a declarada NAO, e o
+# comentario que fala de `href: '#'` tambem NAO — este ultimo entrou a 06/09,
+# no dia em que a guarda acusou prosa e nao codigo. Um controlo que nao cobre o
+# caso que ja falhou uma vez e um controlo que so prova o que ja se sabia.
+printf "  { href: '#', rotulo: m.x },\n  { href: '#', rotulo: m.y, porConstruir: 'E30' },\n  // um href: '#' parece clicavel e nao leva a lado nenhum\n" > "$SONDA/l.tsx"
+apanhadas=$(portas_mortas "$SONDA/l.tsx" | grep -vc porConstruir || true)
 if [ "$apanhadas" = "1" ]; then
-  ok "a mesma leitura apanha a anonima e NAO acusa a declarada"
+  ok "apanha a anonima, e NAO acusa a declarada nem o comentario"
 else
   erro "CONTROLO NEGATIVO FALHOU: apanhou $apanhadas de 1"
 fi

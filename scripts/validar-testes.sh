@@ -97,11 +97,41 @@ if [ "${#alvos[@]}" -lt 5 ]; then
 fi
 ok "${#alvos[@]} pacotes com script de teste"
 
+# ── controlo negativo da leitura do sumario ─────────────────────────────────
+# Prova, em cada corrida, que a leitura ve as DUAS grafias e que a ausencia
+# continua a ser NAO MEDI. Sem isto, acrescentar a segunda forma era uma
+# afirmacao minha — e a guarda so estaria certa ate ao proximo formato.
+falhas_controlo=0
+for forma in '#' 'ℹ'; do
+  saida="$(printf '%s pass 7\n%s fail 0\n' "$forma" "$forma")"
+  sumario() { echo "$saida" | grep -oE "^(#|ℹ) $1 [0-9]+" | grep -oE '[0-9]+' | head -1; }
+  [ "$(sumario pass)" = "7" ] || { echo "  CONTROLO NEGATIVO FALHOU: nao leu a forma [$forma]" >&2; falhas_controlo=$((falhas_controlo+1)); }
+done
+saida="$(printf 'ℹ duration_ms 104\n')"
+sumario() { echo "$saida" | grep -oE "^(#|ℹ) $1 [0-9]+" | grep -oE '[0-9]+' | head -1; }
+[ -z "$(sumario pass)" ] || { echo "  CONTROLO NEGATIVO FALHOU: inventou um sumario onde nao ha" >&2; falhas_controlo=$((falhas_controlo+1)); }
+falhas=$((falhas + falhas_controlo))
+[ "$falhas_controlo" -eq 0 ] && ok "controlo: le as duas grafias do sumario, e ausencia continua a ser NAO MEDI"
+unset saida
+
 echo
 for nome in "${alvos[@]}"; do
   saida=$(pnpm --filter "@bossaos/$nome" test --test-reporter=tap 2>&1 || true)
-  passou=$(echo "$saida" | grep -oE '^# pass [0-9]+' | grep -oE '[0-9]+' | head -1)
-  falhou=$(echo "$saida" | grep -oE '^# fail [0-9]+' | grep -oE '[0-9]+' | head -1)
+  # ── AS DUAS FORMAS DO MESMO SUMARIO ──────────────────────────────────────
+  #
+  # A 06/09 esta guarda deu NAO MEDI em `auth`, `config` e `db` numa arvore sem
+  # defeito nenhum. Motivo: o node 23 do ambiente escreve `ℹ pass 14` onde o
+  # node 22 do projecto escreve `# pass 14`. Mesmo facto, duas grafias — e a
+  # guarda so conhecia uma, portanto passava a dizer "nao medi" a quem corresse
+  # com outro node. E' a mesma familia das tres aspas do `validar-alergenios.sh`
+  # e a cura e' a mesma: cobrir TODAS as formas validas de escrever o facto,
+  # senao a guarda vigia um formato em vez de uma propriedade.
+  #
+  # Nota do que NAO se fez: nao se fixou o node aqui dentro. Uma guarda que
+  # escolhe o seu proprio interprete mede um mundo que nao e o de quem a corre.
+  sumario() { echo "$saida" | grep -oE "^(#|ℹ) $1 [0-9]+" | grep -oE '[0-9]+' | head -1; }
+  passou=$(sumario pass)
+  falhou=$(sumario fail)
   total=$(( ${passou:-0} + ${falhou:-0} ))
 
   # ── NAO MEDI e outra resposta, diferente de ZERO ──────────────────────────

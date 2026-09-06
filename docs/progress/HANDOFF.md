@@ -35,6 +35,89 @@ controlo ficou verde nas duas.
 `provar-analitica-no-navegador.sh` **0** (**8 controlos**) ·
 `pnpm verificar` **0**.
 
+## As quatro correcções do E34 estão fechadas — 06/09
+
+Não é etapa nova: são as quatro dívidas que a varredura de alcance do E34 deixou
+escritas. **As duas guardas vermelhas que esperavam por elas estão verdes**, e
+`validar-desfazer.sh` passa de **2 pares sem desfazer a ZERO**, em 447 substantivos.
+
+**1. `revogarConvite` sem chamador.** A `ORG-007` listava os convites e a rota
+não importava a revogação: um convite enviado para o email errado dava acesso ao
+sistema de um restaurante e **só se esperava que caducasse**, com a janela a ser
+o que alguém tivesse configurado. A rota passa a ter `DELETE`, com `equipa.gerir`,
+auditoria `convite.revogado`, e um convite que já não está pendente devolve
+**ausência (404)** e não erro — porque não haver o que revogar não é falha.
+
+**2. `apagarExcepcao` sem chamador.** O mesmo defeito nos horários: uma casa
+marcava fechado a 25 de Dezembro e não desmarcava. A rota ramifica em
+`excepcaoApagar`, e a auditoria regista qual dos dois caminhos correu. **Também
+abri a porta no ecrã** — ligar o motor sem a porta era deixar o caminho a existir
+sem ninguém lhe chegar. Chave nova `excepcaoApagar` nas três línguas.
+
+**3. As três portas mortas do menu da PLATAFORMA.** Suporte, Incidentes e
+Auditoria estavam a `href: '#'`. Passam a `porConstruir: 'E33'`.
+
+**E o `href: '#'` deixou de ser possível nesse item.** O tipo dizia
+`href: string` **obrigatório** enquanto o comentário ao lado dizia «não tem
+href»: o `'#'` não era descuido de quem escrevia o menu, era **a única forma de
+o compilador aceitar o que se queria dizer**. `LigacaoDeNavegacao` é agora uma
+união — ou ligação, ou marcador, nunca as duas nem nenhuma — e o compilador
+recusa o estado errado antes de a prova de navegação lá chegar. Medido: o item
+com as duas coisas dá `TS2322`; só-marcador e só-ligação passam.
+
+**4. A tela pública dos alergénios reimplementava a regra.** Este era o pior dos
+quatro, e não pelo tamanho. `validar-alergenios.sh` lê `packages/domain/src/
+alergenios.ts`; a tela decidia o estado num encadeado de ternários próprio. **A
+guarda vigiava o lado que não corre** — e a cobertura do domínio parecia boa
+precisamente porque o teste exercitava a função que a tela não usava.
+
+A cura não foi copiar menos: foi **tirar o segundo caminho**. `avisosPorAlergenio`
+vive no domínio, é calculada **a partir** do `avisoDeSeguranca`, e a tela pede-lha.
+Uma regra, um sítio, um caminho.
+
+**Medido, e é o controlo que importa:** com `contem: de('CONTEM')` trocado por
+`contem: []` no `avisoDeSeguranca`, a leitura passa de `gluten:perigo` a
+`gluten:neutro` — um prato **com glúten** a mostrar-se como «ninguém declarou».
+Antes desta correcção **esse defeito não conseguia chegar ao ecrã**: o plante
+acendia no domínio e a pessoa alérgica continuava a ler o mesmo. Reposto, volta a
+`gluten:perigo`.
+
+E a guarda passou a vigiar o lado que corre: secção 4 nova, que reprova cópia da
+regra em `apps/web/app/r/` **e** exige que a tela chame `avisosPorAlergenio` —
+porque não copiar também se consegue não mostrando nada.
+
+### Três guardas apanhadas de caminho, e uma delas era minha de há minutos
+
+**`validar-portas-mortas.sh` acusou PROSA.** Reprovou o meu próprio comentário a
+explicar porque é que o `href: '#'` era mau — castigou exactamente quem tinha
+acabado de fechar as portas. Passa pelo `sem-comentarios.py`, e **o controlo
+negativo cobre agora o caso que falhou**: a anónima acusa, a declarada não, o
+comentário não.
+
+**`validar-testes.sh` dava NÃO MEDI em `auth`, `config` e `db`** — numa árvore
+sem defeito nenhum. O node 23 do ambiente escreve `ℹ pass 14` onde o node 22 do
+projecto escreve `# pass 14`: mesmo facto, duas grafias, e a guarda só conhecia
+uma. Mesma família das três aspas do `validar-alergenios.sh`. Lê as duas, com
+controlo negativo que prova as duas **e** que a ausência continua a ser NÃO MEDI.
+Os três pacotes passam a estar medidos: 12, 14 e 7 testes.
+
+**`validar-dinheiro.sh` engolia o erro ao ler o schema** (`2>/dev/null` na linha
+136), e `validar-silenciadores.sh` tinha-o vermelho. Se o schema desaparecesse, o
+leitor de tipos dizia «não há tipo» para tudo — verde sobre nada. O ficheiro é
+verificado uma vez, alto, e a falha aparece.
+
+**E não deixei um silenciador novo:** o meu código chamava o `sem-comentarios.py`
+com `2>/dev/null`. Se ele não corresse, a guarda lia zero linhas e dizia «0
+falhas» — cega e verde ao mesmo tempo. Pré-voo em ambas as guardas, provado a
+mexer: sem o leitor, saída **1**; reposto, **0**.
+
+**Estado das guardas:** 24 de 25 verdes; a 25ª é a `validar-handoff.sh`, vermelha
+só enquanto isto estiver por commitar. `pnpm verificar` **0** (medido pelo código
+de saída, não pela ausência de texto no ecrã).
+
+**Fica por fazer da lista do E34:** o `leadsDaUnidade` — escrever sem ler. Não
+estava nas quatro, e não lhe toquei.
+
 ## ⚠ PENDÊNCIA DE MÁQUINA — `pnpm inspeccionar` não correu sobre esta árvore
 
 `mac-health.sh` dá **PERIGO**: 3,1 GB disponíveis, 61 MB livres, uma aplicação de
@@ -49,15 +132,6 @@ mais. **Um guião morto a meio deixa o artefacto com o defeito plantado.**
 
 **Contrato:** `docs/architecture/relatorios-e-agregacao.md` (do sénior, por fronteira).
 **Detalhe:** `docs/progress/E30.md`.
-
-## ⚠ PENDÊNCIA DECLARADA — sem contabilidade legal e sem leitor de formatos
-
-Taxas, impostos e percentagens são **configuração**, não regra inventada pelo
-produto. E a importação recebe linhas em texto cru: inventar um leitor de OFX ou
-CAMT agora era prometer que se lê o que não se leu.
-
-**Contrato:** `docs/architecture/conciliacao-e-fecho.md` (do sénior, por fronteira).
-**Detalhe:** `docs/progress/E29.md`.
 
 ## ⚠ PENDÊNCIA DECLARADA — sem contabilidade legal e sem leitor de formatos
 

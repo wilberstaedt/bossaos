@@ -38,7 +38,7 @@ Os PDFs, contratos e prompts estão preparados. Nenhuma etapa de implementação
 | E31 | planejado |  |
 | E32 | planejado |  |
 | E33 | planejado |  |
-| E34 | planejado |  |
+| E34 | planejado | **as 4 dívidas da varredura de alcance estão pagas — 06/09**, e não são etapa: `revogarConvite` ligado (`DELETE` na rota dos convites, `equipa.gerir`, auditoria, e não-pendente dá **404** e não erro) · `apagarExcepcao` ligado no motor **e no ecrã**, com a auditoria a registar qual caminho correu · as 3 portas mortas do menu da **plataforma** marcadas `porConstruir: 'E33'` — e `LigacaoDeNavegacao` passou a **união discriminada**, porque o tipo exigia `href` obrigatório enquanto o comentário dizia «não tem href»: o `'#'` era a mentira que o compilador OBRIGAVA a escrever (medido: `TS2322`) · a tela pública dos alergénios deixa de reimplementar a regra e chama `avisosPorAlergenio`, derivada do `avisoDeSeguranca` — **medido com plante**: `contem: []` faz um prato COM glúten mostrar-se como «ninguém declarou», e antes disto esse defeito não chegava ao ecrã · `validar-desfazer.sh` de **2 pares sem desfazer a 0** em 447 substantivos · **3 guardas consertadas de caminho**: `validar-portas-mortas.sh` acusava prosa (o meu próprio comentário), `validar-testes.sh` dava NÃO MEDI em `auth`/`config`/`db` por só conhecer `# pass N` e não `ℹ pass N`, e `validar-dinheiro.sh` engolia o erro ao ler o schema · **24/25 guardas verdes**, `pnpm verificar` **0** · **fica aberto:** `leadsDaUnidade` (escrever sem ler) |
 | E35 | planejado |  |
 
 Use estados: planejado; em execução; implementado aguardando validação; validado; bloqueado por dependência. Não transforme cobertura de design em implementação pronta.

@@ -552,7 +552,8 @@
     "ate": "To",
     "excepcaoData": "Exception date",
     "excepcaoMotivo": "Reason",
-    "erroIntervalo": "Check the times: the end has to come after the start."
+    "erroIntervalo": "Check the times: the end has to come after the start.",
+    "excepcaoApagar": "Remove the exception on that date"
   },
   "cancelar": {
     "sobrancelha": "Cancellation",

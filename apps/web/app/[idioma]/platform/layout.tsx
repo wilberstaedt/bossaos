@@ -49,11 +49,21 @@ export default async function LayoutDaPlataforma({
     { href: base, rotulo: m.plataforma.navResumo },
     { href: base, rotulo: m.plataforma.navOrganizacoes, activa: true },
     { href: `${base}/planos`, rotulo: m.plataforma.navPlanos },
-    { href: '#', rotulo: m.plataforma.navSuporte },
-    { href: '#', rotulo: m.plataforma.navIncidentes },
+    // ── As três que faltam levam a MARCA, e não um `#` ──────────────────
+    //
+    // Um `href: '#'` parece clicável e não leva a lado nenhum: quem carrega
+    // pensa que a página falhou. O `porConstruir` é a marca de que o módulo
+    // **ainda não existe**, e a estrutura desenha-o inerte com a etapa ao lado.
+    //
+    // As três são do E33, e ficam a dizê-lo — em vez de mentirem em silêncio.
+    // É a mesma decisão que o menu de gestão fechou no E30; aqui a diferença é
+    // que o destino ainda não está construído, e por isso a honestidade é
+    // declarar a ausência, não inventar uma porta.
+    { rotulo: m.plataforma.navSuporte, porConstruir: 'E33' },
+    { rotulo: m.plataforma.navIncidentes, porConstruir: 'E33' },
     { href: `${base}/implantacoes`, rotulo: m.plataforma.navTrabalhos },
     { href: `${base}/flags`, rotulo: m.plataforma.navIntegracoes },
-    { href: '#', rotulo: m.plataforma.navAuditoria },
+    { rotulo: m.plataforma.navAuditoria, porConstruir: 'E33' },
   ];
 
   return (

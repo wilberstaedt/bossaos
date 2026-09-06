@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { guardarExcepcao, guardarSemana, registar } from '@bossaos/db';
+import { apagarExcepcao, guardarExcepcao, guardarSemana, registar } from '@bossaos/db';
 import {
   corpoDaResposta, deRelogio, estadoHttp, exigirAccao,
   type DiaDaSemana, type EstadoDoDia, type Intervalo,
@@ -69,16 +69,34 @@ export async function POST(
     if (!gravado.ok) return gravado;
 
     if (excepcaoData) {
-      await guardarExcepcao(db, sessao.contexto.organizationId, locationId, {
-        data: excepcaoData,
-        motivo: texto(dados, 'excepcaoMotivo') ?? '—',
-        estado: { tipo: 'fechado' },
-      });
+      // ── Marcar e DESMARCAR, e não só marcar ──────────────────────────
+      //
+      // A rota só sabia gravar. Uma casa que marcasse fechado a 25 de Dezembro
+      // por engano ficava com o dia fechado **para sempre** — não havia caminho
+      // nenhum no produto que o desfizesse.
+      //
+      // Foi a `validar-desfazer.sh` que o apanhou, e a regra dela é a certa: se
+      // quem cria tem chamador e quem desfaz não tem, o produto deixa fazer e
+      // não deixa voltar atrás.
+      if (texto(dados, 'excepcaoApagar') === '1') {
+        await apagarExcepcao(db, locationId, excepcaoData);
+      } else {
+        await guardarExcepcao(db, sessao.contexto.organizationId, locationId, {
+          data: excepcaoData,
+          motivo: texto(dados, 'excepcaoMotivo') ?? '—',
+          estado: { tipo: 'fechado' },
+        });
+      }
     }
     await registar(db, sessao.contexto.organizationId, {
       accao: 'unidade.horarios.guardados', actorId: sessao.actor.id, actorEmail: sessao.actor.email,
       alvoTipo: 'location', alvoId: locationId,
-      detalhe: { dias: Object.keys(semana), excepcao: excepcaoData ?? null },
+      detalhe: {
+        dias: Object.keys(semana), excepcao: excepcaoData ?? null,
+        // O rasto diz se a excepção foi posta ou tirada: «alguém mexeu no dia
+        // 25» sem dizer em que sentido não explica nada a quem o for ler.
+        apagada: texto(dados, 'excepcaoApagar') === '1',
+      },
     });
     return gravado;
   });
