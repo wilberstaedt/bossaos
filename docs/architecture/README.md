@@ -29,6 +29,7 @@
 | **E18–E19** reservas | [capacidade-e-reservas](./capacidade-e-reservas.md) | intervalo semiaberto; os **dois** lados do limite |
 | **E22–E24** dinheiro | [dinheiro](./dinheiro.md) | quatro entidades; indeterminado **não** é falhado |
 | **E25–E30** gestão | [modulos-de-gestao](./modulos-de-gestao.md) | custo desconhecido dá margem **indisponível** |
+- [`implantacao-e-piloto.md`](./implantacao-e-piloto.md) — Implantação e piloto: um backup que nunca foi restaurado é uma esperança; preparar não é publicar; a versão que responde tem de ser a que foi construída; e um passo feito à mão esconde a dependência que o script tem.
 | **E32–E33** plataforma | [operacao-e-recuperacao](./operacao-e-recuperacao.md) | cópia nunca restaurada não é cópia |
 | qualquer uma | [overview](./overview.md) · [versions](./versions.md) | o mapa e as versões verificadas |
 

@@ -3,6 +3,17 @@
 **Etapa atual:** E31 — Kiosk, terminais e impressão (**11 telas**).
 **Estado:** **EM CURSO.** E30 assinado a 06/09 em `1dc90bc` (`docs/reviews/E30.md`), medido em duas voltas por causa da máquina. Contrato `kiosk-e-impressao.md` e régua `ALVO-E31.md` escritos **antes** do código.
 
+
+> ## ⚠ AO CHEGAR AOS 100%: PARAR E LER `docs/RV100.md`
+>
+> O Matheus deixou-o a 06/09 às 03h20, com o motor a 86%. São 841 linhas —
+> reconstrução visual, comercial e de usabilidade — e o pedido dele foi
+> explícito: **ler o documento inteiro antes de tocar em código**. Tem uma
+> secção de diagnóstico obrigatório e um **portão de aprovação humana** nas
+> telas-mestre, portanto há um ponto em que se para e se espera por ele.
+>
+> A ordem e o resto da fila estão em `docs/progress/DEPOIS-DOS-100.md`.
+
 **O que muda:** todas as anteriores produziam factos; **esta produz opiniões
 sobre factos**. E é a primeira em que o defeito muda o comportamento de uma
 **pessoa** e não do sistema — um relatório errado faz um gerente fechar um turno,
