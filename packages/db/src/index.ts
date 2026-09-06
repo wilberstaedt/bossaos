@@ -355,3 +355,16 @@ export {
   type Diferenca, type IndicadorDaUnidade, type JanelaDaUnidade,
   type LinhaDeIndicador,
 } from './analitica.ts';
+
+export {
+  RecusaDoKiosk, abrirSessaoDeKiosk, apagarPessoa, estadoDoKiosk, ligarPessoaAoPedido,
+  podeCobrar, sessaoViva, terminarSessao,
+  type MotivoDeSaida, type RecusaDeKiosk,
+} from './kiosk.ts';
+
+export {
+  RecusaDaImpressao, desactivarImpressora, enfileirarComanda, enfileirarImpressao,
+  entregueAPonte, filaDaUnidade, impressorasDaUnidade, registarImpressora,
+  respostaDoAparelho,
+  type RecusaDeImpressao,
+} from './impressao.ts';

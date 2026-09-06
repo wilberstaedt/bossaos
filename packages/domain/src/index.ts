@@ -181,3 +181,9 @@ export {
   mediaPonderada, medido, porLinhaMenor, SEM_DADOS,
   type Agregado, type Medido,
 } from './agregacao.ts';
+
+export {
+  SEGUNDOS_ATE_NAO_SABER, estadoDeImpressao, identidadeDeImpressao,
+  marcaDaVia, renderizarComanda,
+  type EnvioDeImpressao, type LeituraDeImpressao, type LinhaDeTalao,
+} from './impressao.ts';

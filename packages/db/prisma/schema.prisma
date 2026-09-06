@@ -173,6 +173,10 @@ model Organization {
   entregas             OrderDelivery[]
   conectoresDeEntrega  DeliveryConnector[]
   mapasExternos        ExternalCatalogMapping[]
+  impressoras   Printer[]
+  sessoesDeKiosk KioskSession[]
+  contactosDePedido OrderContact[]
+  enviosDeImpressao PrintJob[]
   @@map("organizations")
   revisoes        MenuRevision[]
   publicacoes     MenuPublication[]
@@ -344,6 +348,9 @@ model Location {
   areasDeEntrega      DeliveryArea[]
   conectorDeEntrega   DeliveryConnector?
   mapasExternos       ExternalCatalogMapping[]
+  impressoras    Printer[]
+  sessoesDeKiosk KioskSession[]
+  enviosDeImpressao PrintJob[]
   @@unique([organizationId, id], name: "location_por_organizacao")
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -2402,6 +2409,7 @@ model Device {
   location     Location        @relation(fields: [locationId], references: [id], onDelete: Restrict)
   pareamentos  DevicePairing[]
 
+  sessoesDeKiosk KioskSession[]
   @@unique([organizationId, id], name: "dispositivo_por_organizacao")
   @@index([organizationId, locationId, estado])
   @@map("devices")
@@ -2609,6 +2617,8 @@ model Order {
   eventos      OrderEvent[]
 
   tarefas ProductionTask[]
+  sessaoDeKiosk KioskSession?
+  contacto      OrderContact?
   @@unique([organizationId, id], name: "pedido_por_organizacao")
   @@unique([locationId, numero], name: "numero_por_unidade")
   @@index([locationId, producaoEm])
@@ -3831,6 +3841,7 @@ model Bill {
   tentativas   PaymentAttempt[]
   pagamentos   Payment[]
 
+  sessaoDeKiosk KioskSession?
   @@unique([locationId, numero], name: "um_numero_de_conta_por_unidade")
   @@map("bills")
 }
@@ -4548,6 +4559,7 @@ model Customer {
   envios       CampaignDelivery[]
   respostas    FeedbackEntry[]
 
+  pedidos OrderContact[]
   @@map("customers")
 }
 
@@ -5043,4 +5055,171 @@ model ExchangeRate {
 
   @@unique([organizationId, de, para, emVigorDe], name: "uma_taxa_por_dia")
   @@map("exchange_rates")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E31 · Kiosk, terminais e impressão
+// ═══════════════════════════════════════════════════════════════════════════
+
+enum EstadoDaSessaoDeKiosk {
+  ABERTA
+  /// Os TRÊS caminhos de saída. **As três limpam o mesmo** — o motivo
+  /// distingue-as, o efeito não pode. Um caminho que limpa menos do que os
+  /// outros é o que deixa o carrinho do cliente anterior no ecrã do seguinte.
+  CONCLUIDA
+  ABANDONADA
+  REINICIADA
+}
+
+enum LigacaoDeImpressora {
+  REDE
+  USB
+  PONTE
+}
+
+enum TipoDeDocumentoImpresso {
+  COMANDA
+  CONTA
+  RECIBO
+  DOCUMENTO_FISCAL
+}
+
+/// **«Entregue à ponte» não é «imprimiu».**
+///
+/// Repare-se no que não está aqui: não há `IMPRESSO`. Há resposta do aparelho
+/// ou não há — e «não sei» **deriva** do tempo sem resposta, nunca se escreve.
+/// Se estivesse nesta lista, alguém acabava por o escrever à mão e ele passava
+/// a querer dizer «alguém achou» em vez de «ninguém respondeu».
+enum EstadoDeEnvioDeImpressao {
+  POR_ENVIAR
+  ENTREGUE_A_PONTE
+  CONFIRMADO_PELO_APARELHO
+  RECUSADO_PELO_APARELHO
+}
+
+/// A impressora de serviço (DEV-005).
+model Printer {
+  id             String              @id @default(uuid()) @db.Uuid
+  organizationId String              @map("organization_id") @db.Uuid
+  locationId     String              @map("location_id") @db.Uuid
+  nome           String
+  destino        Estacao
+  modelo         String
+  ligacao        LigacaoDeImpressora
+  endereco       String?
+  activa         Boolean             @default(true)
+
+  /// ── Nulo quer dizer POR TESTAR, e nunca aprovado ────────────────────────
+  ///
+  /// Não há booleano `homologada` de propósito: um booleano tem duas respostas
+  /// e aqui há três — sim, não, e **não medi**. A ausência de data é a
+  /// terceira, e é a única que se pode afirmar sem aparelho a sério.
+  homologadaEm     DateTime? @map("homologada_em") @db.Timestamptz(6)
+  homologadaPor    String?   @map("homologada_por")
+  homologacaoNotas String?   @map("homologacao_notas")
+
+  criadaEm DateTime @default(now()) @map("criada_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  envios       PrintJob[]
+
+  @@unique([locationId, nome], name: "uma_impressora_por_nome")
+  @@index([organizationId, locationId, destino])
+  @@map("printers")
+}
+
+/// A sessão de um cliente no kiosk (KIOSK-001..007).
+///
+/// **Repare-se no que esta tabela não tem:** nome, email, telefone, nada da
+/// pessoa. Não é disciplina de quem escreve o código — é AUSÊNCIA. Uma coluna
+/// que não existe não fica com os dados do cliente anterior, e nenhum botão de
+/// limpar precisa de se lembrar dela.
+model KioskSession {
+  id             String                @id @default(uuid()) @db.Uuid
+  organizationId String                @map("organization_id") @db.Uuid
+  locationId     String                @map("location_id") @db.Uuid
+  deviceId       String                @map("device_id") @db.Uuid
+  idioma         String
+  estado         EstadoDaSessaoDeKiosk @default(ABERTA)
+
+  /// `@unique` e não um índice comum: **duas sessões não podem partilhar o
+  /// mesmo carrinho nem a mesma conta**. É a segunda metade do «dois clientes
+  /// seguidos não partilham nada» — a primeira é a sessão aberta única por
+  /// aparelho, esta impede que a sessão nova aponte para o pedido da anterior.
+  orderId String? @unique @map("order_id") @db.Uuid
+  billId  String? @unique @map("bill_id") @db.Uuid
+
+  abertaEm        DateTime  @default(now()) @map("aberta_em") @db.Timestamptz(6)
+  terminadaEm     DateTime? @map("terminada_em") @db.Timestamptz(6)
+  terminadaMotivo String?   @map("terminada_motivo")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  dispositivo  Device       @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  pedido       Order?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  conta        Bill?        @relation(fields: [billId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, locationId, estado])
+  @@map("kiosk_sessions")
+}
+
+/// A ligação entre um pedido e a pessoa — a **referência**, e não a cópia.
+///
+/// O `orders` continua sem saber quem é a pessoa. Apagar a pessoa leva esta
+/// linha e deixa o pedido de pé, porque nunca foram a mesma coisa. Se isto
+/// fosse uma coluna em `orders`, apagar a pessoa ou apagava o pedido ou era
+/// recusado — e as duas são a falha que o aceite descreve.
+model OrderContact {
+  id             String               @id @default(uuid()) @db.Uuid
+  organizationId String               @map("organization_id") @db.Uuid
+  orderId        String               @unique @map("order_id") @db.Uuid
+  customerId     String               @map("customer_id") @db.Uuid
+  finalidade     FinalidadeDeContacto
+  expiraEm       DateTime             @map("expira_em") @db.Timestamptz(6)
+  criadoEm       DateTime             @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  pedido       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  pessoa       Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, customerId])
+  @@map("order_contacts")
+}
+
+/// Um envio para a impressora (KDS-016, DEV-006). Fila idempotente.
+model PrintJob {
+  id             String                  @id @default(uuid()) @db.Uuid
+  organizationId String                  @map("organization_id") @db.Uuid
+  locationId     String                  @map("location_id") @db.Uuid
+  printerId      String                  @map("printer_id") @db.Uuid
+  tipo           TipoDeDocumentoImpresso
+  documentoId    String                  @map("documento_id") @db.Uuid
+
+  /// 1 é o original. 2 em diante é reimpressão, e o número vai **no papel**.
+  via Int @default(1)
+
+  /// Derivada por gatilho. Está guardada porque é sobre ela que a restrição
+  /// única trabalha, mas ninguém a escolhe.
+  identidade String
+
+  estado EstadoDeEnvioDeImpressao @default(POR_ENVIAR)
+
+  /// O que foi enviado, tal como foi enviado. Sem isto, a pergunta «o que é que
+  /// a cozinha viu?» não tem resposta depois do facto.
+  conteudo String
+
+  criadoEm     DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+  entregueEm   DateTime? @map("entregue_em") @db.Timestamptz(6)
+  respondidoEm DateTime? @map("respondido_em") @db.Timestamptz(6)
+  /// O que o **aparelho** disse. Não o que o software achou.
+  resposta     String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  impressora   Printer      @relation(fields: [printerId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, identidade], name: "um_envio_por_identidade")
+  @@index([organizationId, locationId, estado])
+  @@map("print_jobs")
 }
