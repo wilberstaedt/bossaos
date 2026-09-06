@@ -43,6 +43,57 @@ nome e data, e não num commit que ninguém revê.
 "id"` — o achado 2 do JR (o `@default(uuid())` do Prisma é do lado do cliente)
 a aparecer sozinho, num sítio onde ninguém o foi procurar.
 
+## Ponto 1 da régua — as quatro condições: **PASSA na base**
+
+Medido ao vivo, com o positivo primeiro:
+
+| sonda | resultado |
+| --- | --- |
+| sessão válida | **entra** |
+| motivo com 5 caracteres | `sessao_tem_motivo` |
+| âmbito vazio | `sessao_tem_ambito` |
+| prazo no passado | `prazo_e_futuro` |
+| sem prazo nenhum | `NOT NULL` em `expira_em` |
+
+E **zero** colunas `activa`: estar viva deriva, não se escreve. O runtime tem
+`SELECT` e mais nada sobre `support_sessions` — a casa vê e não apaga.
+
+**Nota de percurso, e é a lição:** a primeira corrida destas cinco sondas deu
+cinco recusas — todas pelo **meu** erro de tipo (`text[]` contra
+`"AmbitoDeSuporte"[]`). Se eu tivesse escrito só as quatro que deviam falhar,
+tinha concluído que as restrições funcionam sem ter medido nenhuma. **Foi o
+controlo positivo que apanhou isto**, e é a terceira vez esta noite.
+
+## Ponto 6 da régua — reprocessar não duplica: **PASSA, com uma RETENÇÃO**
+
+`CREATE UNIQUE INDEX um_trabalho_por_identidade ON platform_jobs (identidade)`,
+com a identidade derivada por gatilho — não escrita pelo produto. Medido: a
+segunda inserção da mesma identidade é recusada pela restrição.
+
+### RETENÇÃO 1 — a identidade do trabalho não tem a organização
+
+```
+identidade := tipo || ':' || alvo || ':' || tentativa
+```
+
+**Sem `organization_id`**, e o índice único é **global**. A tabela tem
+`organization_id NOT NULL` com chave estrangeira: é por inquilino por desenho.
+Duas casas que enfileirem o mesmo tipo sobre o mesmo alvo na mesma tentativa
+colidem — a segunda leva `duplicate key` e o trabalho dela **nunca entra**.
+
+Não é hipótese: apanhei-o porque a minha própria sonda escreveu `identidade =
+'sonda2'` e a base guardou `EXPORTACAO:alvo:1`. O gatilho ignora o que o produto
+escreve, que está certo — mas o que ele deriva não distingue casas.
+
+**Hoje não colide, e é por isso que a correcção é barata:** `enfileirarTrabalho`
+não tem chamador nenhum no produto — só o `reprocessarTrabalho` a chama. O
+caminho de escrita ainda não tem porta. Depois de ter, mudar a chave é uma
+migração com dados lá dentro.
+
+**Pergunta para o JR, não ordem:** é omissão, ou é deduplicação global
+deliberada? Se for deliberada, falta o comentário a dizê-lo — e falta explicar
+por que razão uma tabela por inquilino tem chave que atravessa inquilinos.
+
 ## Por medir
 
 | ponto | o quê |
