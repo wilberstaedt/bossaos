@@ -354,3 +354,36 @@ alguma razão.
 
 Migração é código de produto: **é do JR**, e eu verifico depois. A
 `validar-rls.sh` fica vermelha até lá, que é onde ela deve estar.
+
+## Dívida 12 — as provas de navegador não são auto-contidas numa base fresca
+
+**06/09, 04h20.** A prova de navegador do E31 falhou na minha base isolada com
+«não encontrei a pertença do utilizador do arnês», e **não é defeito do E31**.
+
+`alvos.ts` precisa do utilizador `painel@inspeccao.example` **ao carregar o
+ficheiro** — antes de qualquer teste correr. Quem cria esse utilizador é o
+projecto `preparar` do Playwright (`autenticar.setup.ts`), que só corre **depois**
+da recolha. A `semente-inspeccao.ts` usa esse email apenas como valor de texto
+(`abertoPor`); nunca cria o utilizador.
+
+**Numa base fresca, nenhuma prova de navegador pode carregar sem uma corrida
+anterior do `preparar`.** Nas validações do E29 e do E30 isto passou despercebido
+porque a base já tinha o utilizador de corridas anteriores — que é exactamente o
+tipo de dependência que a base isolada existe para revelar.
+
+**Resolução:** o passo do `preparar` entra nos guiões, ou no
+`base-de-revisao.sh`. Uma prova que depende de estado que outra deixou passa
+sempre na máquina de quem a escreveu.
+
+### O que isto me custou, e porquê vale a pena escrevê-lo
+
+**Seis hipóteses, cinco mortas por medição.** A quarta é a que interessa: contei
+`organizations` e deu **zero**, e concluí que a base estava vazia. **Estava
+cheia** — eu é que lia como `bossaos_app`, sujeito a RLS e sem contexto de
+inquilino. Como `bossaos_migrate` estavam lá duas organizações, quatro pertenças
+e três unidades.
+
+> **O zero que eu via não era ausência: era o limite do que eu estava autorizado
+> a ver.** É a lição do dia inteiro virada contra o revisor — e a única razão de
+> não ter «consertado» a semeadura, o ambiente e as fixtures, todos sãos, foi ter
+> testado cada hipótese em vez de agir sobre ela.
