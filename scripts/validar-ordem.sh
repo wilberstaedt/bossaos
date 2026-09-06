@@ -74,6 +74,28 @@ if [ "$(dono_da_etapa "$n_atual")" = "Claude" ]; then
     ok "etapa autorizada: $atual (REVISAO, do Claude) — e a E$seguinte, do Codex, corre em paralelo"
   fi
 fi
+# ── E UMA ETAPA JA VALIDADA NUNCA PODE SER «TRABALHO A FRENTE» ──────────────
+#
+# A 06/09, depois de eu assinar o E35, esta guarda ficou vermelha sobre TRES
+# commits do E35 - incluindo o meu proprio commit de validacao. A excepcao do
+# paralelo acima olha para a SEGUNDA etapa por validar; com o E35 ja validado,
+# essa segunda deixou de existir, o limite caiu para E34, e trabalho ja revisto
+# passou a contar como avanco.
+#
+# A regra vem da matriz e nao do meu juizo: `validado` quer dizer REVISTO, e
+# rever e exactamente o que esta guarda protege. Uma etapa revista nao pode estar
+# a frente de nada.
+#
+# O que continua fechado: uma etapa POR validar acima do limite continua a ser
+# acusada - e o controlo la em baixo mede as duas direccoes, porque eu estava a
+# mexer numa guarda que acusava o meu proprio trabalho.
+maior_validado=$(grep -E '^\| E[0-9]{2} \| ' "$MATRIZ" | grep -v '^| E00 ' \
+  | grep -F '| validado |' | sed -E 's/^\| E([0-9]{2}) \|.*/\1/' | sort -rn | head -1)
+if [ -n "${maior_validado:-}" ] && [ "$((10#$maior_validado))" -gt "$((10#$limite))" ]; then
+  limite=$maior_validado
+  ok "limite sobe a E$maior_validado: e a etapa mais alta ja VALIDADA, e validado e revisto"
+fi
+
 [ "$limite" = "$n_atual" ] && ok "etapa autorizada: $atual"
 
 # ── o que mede mesmo: FICHEIROS, nao o assunto do commit ─────────────────────
@@ -193,6 +215,16 @@ c_falha=0
 acima=$((10#$limite + 1))
 [ "$((10#$acima))" -gt "$((10#$limite))" ] || { echo "  FALHA controlo: a comparacao do limite nao distingue E$acima de E$limite"; c_falha=1; }
 [ "$((10#$limite))" -gt "$((10#$limite))" ] && { echo "  FALHA controlo: o proprio limite esta a ser acusado"; c_falha=1; }
+# ── A porta que abri a 06/09 (validado nao e avanco), medida nos DOIS sentidos
+#
+# Sem a primeira, «li uma etapa validada» podia ser vazio e o limite subia por
+# acidente. Sem a segunda, a excepcao podia ter-se tornado «deixa passar tudo».
+[ -n "${maior_validado:-}" ] \
+  || { echo "  FALHA controlo: nao li etapa validada nenhuma na matriz - populacao zero"; c_falha=1; }
+grep -qE "^\| E${maior_validado:-XX} \| validado \|" "$MATRIZ" \
+  || { echo "  FALHA controlo: a E${maior_validado:-??} que li NAO esta validada na matriz"; c_falha=1; }
+grep -qE "^\| E$(printf '%02d' "$acima") \| validado \|" "$MATRIZ" \
+  && { echo "  FALHA controlo: E$acima esta validada, e o controlo de cima nao mede nada"; c_falha=1; }
 if [ "$c_falha" -eq 0 ]; then
   ok "controlo negativo: ve E12.md e a migracao e12_, e nao acusa regua, contrato nem codigo comum"
   ok "controlo do limite: E$acima seria acusado, E$limite nao"
