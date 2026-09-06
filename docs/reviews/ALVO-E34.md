@@ -17,7 +17,7 @@ precisa de ser **executável**, não uma pilha.
 | 1 | Menu da plataforma sem `porConstruir` | **paga** | JR |
 | 2 | `/staff/` sem uma única ligação | **aberta** — é pergunta de produto: como chega um tablet novo ao endereço? | Matheus |
 | 3 | Alvos do arnês com forma de lotaria | **paga** — 13 consultas ordenadas, verificadas | eu |
-| 4 | Guardas que observam a forma da escrita | **fechada sem achado** — varri as 25, as três que leem prosa têm invariante textual | eu |
+| 4 | Guardas que observam a forma da escrita | **REABERTA e paga a 06/09** — tinha-a fechado com o critério errado. Ler prosa vale num documento, não num ficheiro de código a fingir de mecanismo. O `validar-jornada` era isso: `grep` por comentário. Agora mede a alavanca, com controlo negativo em três sentidos | eu |
 | 5 | Provas que não correm na CI | **paga** — descoberta em vez de lista | eu |
 | 6 | Código morto com ficheiro e linha | **resolvida** — a lista envelheceu; aponta para a varredura | eu |
 | 7 | Código de verificação no pacote | **medida**: as 8 chegam ao pacote. Decisão de as tirar fica aberta | JR |

@@ -792,3 +792,43 @@ existe porque não se confia no processo da aplicação para o fazer.
 TypeScript é chamada de SQL, e não podia ser. Fica escrito porque **a alteração
 não é a correcção**: a correcção é esta regra, e o instrumento que falhou foi o
 meu `grep` de circunstância, não o guião.
+
+## Ler prosa é legítimo quando a prosa É o artefacto — e é um defeito quando ela substitui um mecanismo
+
+**06/09, 06h50.** Duas coisas na mesma meia hora, e a segunda só apareceu porque
+a primeira me deixou a olhar.
+
+**Primeiro, à mão.** Fui verificar quais das 27 guardas têm controlo negativo com
+um `grep` pela frase «controlo negativo». Acusou **sete**. Fui lê-las: todas as
+sete o tinham — escrito por outras palavras (`autoteste`, `sonda`, «o detector
+prova-se a si próprio», «degradei o índice e a guarda continuou a dizer»). **A
+minha afirmação original — só o `validar-ci-verde` está sem — estava certa, e o
+instrumento com que a fui reconferir era pior do que ela.**
+
+**Depois, em produção.** O `validar-jornada.sh` decidia «há controlo negativo
+declarado» com `grep -liE 'elo partido|CONTROLO NEGATIVO|deve parar'` sobre o
+ficheiro da prova. Um **comentário** com a frase passava. E estava verde por
+sorte: a linha que a fazia passar era `// A jornada tem de PARAR aí` — um
+comentário, três linhas acima do mecanismo verdadeiro. **Veredicto certo, razão
+nenhuma.** Apagar o mecanismo e deixar o comentário mantinha-a verde; medi-o.
+
+**A distinção que me faltava:**
+
+| A guarda lê prosa em | Veredicto |
+| --- | --- |
+| Um **documento** — HANDOFF, ETAPAS, uma assinatura | **legítimo.** A prosa é o artefacto; o invariante é mesmo textual |
+| Um **ficheiro de código**, como prova de que existe um mecanismo | **defeito.** A prosa é uma alegação sobre o mecanismo, e alegações não se verificam a si próprias |
+
+Foi por não ter esta linha que fechei a dívida 4 do E34 «sem achado». O critério
+que usei — «as que leem prosa têm invariante textual» — é verdadeiro para o
+`validar-handoff` e o `validar-registo-coerente`, e falso exactamente para a
+terceira. **Fechei-a com o critério errado, e o critério certo reabre uma.**
+
+**O que substituiu a prosa:** uma alavanca é a variável que o corredor **põe numa
+corrida e não põe noutra, sobre a mesma prova**. É a definição de controlo
+negativo — o mesmo instrumento em dois mundos — e não precisa de lista de nomes,
+que era a outra maneira de isto envelhecer: configuração está em todas as
+corridas, alavanca está numa só. Provado nos três sentidos (prosa sozinha
+rejeitada, alavanca aceite, `DATABASE_URL` em todas as corridas rejeitada) e
+depois contra o produto partido: **a guarda antiga diz «0 falhas», a nova diz
+FALHA, sobre exactamente a mesma árvore.**
