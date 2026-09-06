@@ -464,3 +464,184 @@ describe('6 · servir pelo KDS desconta o stock', () => {
     assert.equal(r.ok, true, 'uma linha sem produto impediu a entrega');
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+/**
+ * E34 · aceite 3, família STOCK — dois movimentos ao mesmo tempo.
+ *
+ * ── A corrida que a régua pedia primeiro NÃO existe neste produto ─────────
+ *
+ * «Dois pedidos da última unidade; o nível não fica negativo» assume um contador
+ * no caminho do pedido. O que decide se um prato entra num pedido é o
+ * `estaDisponivel`, e ele lê uma **bandeira de bloqueio** — não há quantidade
+ * para esgotar, e dois pedidos do mesmo prato são ambos aceites de propósito.
+ *
+ * O stock existe noutro sítio: aqui. E o que este módulo promete de si próprio é
+ * o que ninguém tinha posto à prova **com duas escritas ao mesmo tempo**:
+ *
+ *   «O saldo é a soma dos movimentos, derivada por gatilho. Um
+ *    `UPDATE stock_items SET saldo_mili` é reposto pela base.»
+ *
+ * O grupo 1 já mede as duas metades **em sequência**. O que falta é o que
+ * acontece quando as duas escritas partem juntas — e é aí que um saldo derivado
+ * se distingue de um saldo que apenas *parece* derivado.
+ */
+describe('7 · dois movimentos concorrentes, e o saldo não perde nenhum (E34)', () => {
+  /** O encontro do E22: as duas transacções abertas antes de qualquer uma escrever. */
+  function encontro(quantos: number) {
+    let chegaram = 0;
+    let abrir!: () => void;
+    const porta = new Promise<void>((r) => { abrir = r; });
+    return async () => {
+      chegaram += 1;
+      if (chegaram === quantos) abrir();
+      await porta;
+    };
+  }
+
+  /**
+   * A testemunha da sobreposição, e não a intenção dela.
+   *
+   * Conta as OUTRAS ligações desta base que estão dentro de uma transacção. Com
+   * o encontro passado, a outra metade da corrida tem de aparecer aqui — e se
+   * não aparecer, o que se mediu foi sequência, e o caso tem de o dizer.
+   */
+  const OUTRAS_ABERTAS = `SELECT count(*)::int AS outros FROM pg_stat_activity
+     WHERE datname = current_database() AND xact_start IS NOT NULL
+       AND pid <> pg_backend_pid() AND backend_type = 'client backend'`;
+  async function outrasTransaccoesAbertas(db: { $queryRaw: typeof prisma.$queryRaw }) {
+    const r = await db.$queryRaw<{ outros: number }[]>`
+      SELECT count(*)::int AS outros FROM pg_stat_activity
+       WHERE datname = current_database() AND xact_start IS NOT NULL
+         AND pid <> pg_backend_pid() AND backend_type = 'client backend'`;
+    return r[0]!.outros;
+  }
+
+  const saldoNaBase = async (id: string) => Number((await sql.query(
+    `SELECT saldo_mili FROM stock_items WHERE id = $1`, [id])).rows[0].saldo_mili);
+  const movimentosNaBase = async (id: string) => (await sql.query(
+    `SELECT count(*)::int AS n FROM stock_movements WHERE item_id = $1`, [id])).rows[0].n as number;
+
+  const ANTES = 4_000_000;
+  const ENTRA = 1_500_000;
+  const SAI = 700_000;
+
+  async function itemCom(saldo: number) {
+    const { id } = await insumo();
+    await comA((db) => movimentarStock(db, {
+      itemId: id, tipo: 'ENTRADA', quantidadeMili: saldo, motivo: 'compra',
+    }));
+    return id;
+  }
+
+  it('o saldo final é a SOMA dos dois, e nenhum se perde', async () => {
+    const id = await itemCom(ANTES);
+
+    // ── Controlo positivo: o saldo ANTES lê-se, e não se presume ──────────
+    //
+    // Sem ele, «a soma bate» passava sobre um item vazio com dois movimentos
+    // que se anulam. E os dois movimentos são de valores DIFERENTES e de sinais
+    // diferentes de propósito: com dois iguais, somar mal — trocar um pelo
+    // outro, aplicar um só duas vezes — dava o mesmo número.
+    assert.equal(await saldoNaBase(id), ANTES, 'o item não tinha o saldo de partida');
+    assert.notEqual(ENTRA, SAI, 'dois valores iguais escondem uma soma errada');
+
+    const juntos = encontro(2);
+    const sobrepostas: number[] = [];
+    const mover = (tipo: 'ENTRADA' | 'CONSUMO', quantidadeMili: number) =>
+      comEscopo(prisma, ESCOPO, async (db) => {
+        // A transacção tem de existir de facto antes do encontro: sem isto, a
+        // espera acontece antes de haver ligação e as duas serializam-se na
+        // aquisição — o defeito medido no E22.
+        await db.$queryRaw`SELECT 1`;
+        await juntos();
+        sobrepostas.push(await outrasTransaccoesAbertas(db));
+        return movimentarStock(db, { itemId: id, tipo, quantidadeMili, motivo: 'e34 concorrente' });
+      });
+
+    const saidas = await Promise.allSettled([mover('ENTRADA', ENTRA), mover('CONSUMO', SAI)]);
+
+    assert.ok(sobrepostas.every((n) => n >= 1),
+      `um dos movimentos não viu o outro em transacção (${sobrepostas.join(',')}): isto é sequência`);
+    assert.equal(saidas.filter((s) => s.status === 'rejected').length, 0,
+      `um movimento legítimo foi recusado: ${saidas.map((s) => s.status === 'rejected'
+        ? String(s.reason).slice(0, 120) : 'ok').join(' | ')}`);
+
+    // ── E lê-se da BASE, nunca da resposta de um deles ────────────────────
+    //
+    // O `movimentarStock` devolve o saldo que ELE viu dentro da sua transacção;
+    // nessa altura o outro ainda não commitou, e por isso a resposta de qualquer
+    // um dos dois é sempre um número menor do que a verdade. Contar por ali era
+    // dar por provado o defeito que se procura.
+    assert.equal(await saldoNaBase(id), ANTES + ENTRA - SAI,
+      'um dos dois movimentos perdeu-se: o saldo não é a soma');
+    assert.equal(await movimentosNaBase(id), 3, 'um movimento não ficou escrito');
+  });
+
+  it('um UPDATE directo ao saldo, ao mesmo tempo que um movimento, é REPOSTO', async () => {
+    const id = await itemCom(ANTES);
+    const ENVENENADO = 999_999_999;
+    assert.notEqual(ENVENENADO, ANTES - SAI, 'o valor plantado tem de ser distinguível');
+
+    // ── O intruso é o RUNTIME, e não o dono das tabelas ───────────────────
+    //
+    // O grupo 1 faz o `UPDATE` com a credencial de migração. Aqui é a de
+    // execução — a que a aplicação tem na mão todos os dias, e a única cuja
+    // escrita directa é um acidente plausível. Precisa do contexto de inquilino:
+    // sem ele a RLS não vê linha nenhuma e o `UPDATE` mexe em zero linhas, que é
+    // um caso a passar por vácuo.
+    const intruso = new Client({ connectionString: RUNTIME });
+    await intruso.connect();
+    try {
+      const juntos = encontro(2);
+      const sobrepostas: number[] = [];
+
+      const escritaDirecta = (async () => {
+        await intruso.query('BEGIN');
+        await intruso.query(`SELECT set_config('app.organization_id', $1, true)`, [IDS.orgA]);
+        await juntos();
+        sobrepostas.push(Number((await intruso.query(OUTRAS_ABERTAS)).rows[0].outros));
+        const r = await intruso.query(
+          `UPDATE stock_items SET saldo_mili = $1 WHERE id = $2`, [ENVENENADO, id]);
+        await intruso.query('COMMIT');
+        return r.rowCount ?? 0;
+      })();
+
+      const movimento = comEscopo(prisma, ESCOPO, async (db) => {
+        await db.$queryRaw`SELECT 1`;
+        await juntos();
+        sobrepostas.push(await outrasTransaccoesAbertas(db));
+        return movimentarStock(db, {
+          itemId: id, tipo: 'CONSUMO', quantidadeMili: SAI, motivo: 'e34 contra a escrita directa',
+        });
+      });
+
+      const [escrita, mov] = await Promise.allSettled([escritaDirecta, movimento]);
+
+      assert.ok(sobrepostas.every((n) => n >= 1),
+        `a escrita e o movimento não se sobrepuseram (${sobrepostas.join(',')})`);
+      assert.equal(mov.status, 'fulfilled',
+        `o movimento legítimo caiu: ${mov.status === 'rejected' ? String(mov.reason).slice(0, 140) : ''}`);
+
+      // ── Controlo positivo do intruso ──────────────────────────────────
+      //
+      // A escrita tem de ter ACERTADO na linha. Um `UPDATE` que não encontra
+      // nada — por RLS, por id errado — deixaria este caso a certificar uma
+      // guarda que nunca foi chamada.
+      assert.equal(escrita.status, 'fulfilled',
+        `a escrita directa nem chegou a correr: ${escrita.status === 'rejected'
+          ? String(escrita.reason).slice(0, 140) : ''}`);
+      assert.equal((escrita as PromiseFulfilledResult<number>).value, 1,
+        'o UPDATE directo não tocou em linha nenhuma: o caso passaria por vácuo');
+
+      // E o invariante, que vale para as duas ordens: a base repõe a soma dos
+      // movimentos, chegue a escrita antes ou depois.
+      const final = await saldoNaBase(id);
+      assert.notEqual(final, ENVENENADO, 'o saldo escrito à mão FICOU: a contagem passa a mentir');
+      assert.equal(final, ANTES - SAI,
+        'o saldo não é a soma dos movimentos depois da escrita directa');
+    } finally {
+      await intruso.end();
+    }
+  });
+});

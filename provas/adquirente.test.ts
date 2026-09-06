@@ -452,3 +452,217 @@ describe('6 · a titularidade, e o que não se declara pronto', () => {
     assert.equal(trilho.length, 1);
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+/**
+ * E34 · aceite 3, família REEMBOLSO — duas entregas do mesmo estorno, ao mesmo
+ * tempo.
+ *
+ * ── Porque é que esta prova existe, tendo a J14 ───────────────────────────
+ *
+ * A J14 já mostra «reprocessar sem duplicar», **em sequência**: a segunda
+ * entrega chega com a primeira já gravada, e o `findFirst` do
+ * `reconciliarComProvedor` encontra-a. Isso passa numa implementação em que a
+ * única protecção é essa consulta — e essa é a pior de todas, porque falha uma
+ * vez em cinquenta.
+ *
+ * A base já tem `@@unique([organizationId, chaveIdempotente])`. Portanto esta
+ * prova **não** existe para descobrir se há protecção. Existe para demonstrar
+ * que **é a restrição que trava o segundo, e não a consulta que está antes** —
+ * que é o que ficaria a proteger sozinho no dia em que alguém trocasse a ordem
+ * das linhas.
+ */
+describe('7 · duas entregas concorrentes do mesmo estorno (E34)', () => {
+  /**
+   * O encontro, copiado do E22 e pela mesma razão medida lá: `Promise.all`
+   * sozinho mede **intenção** de concorrência. Abrir uma transacção interactiva
+   * é ela própria uma ida à base, e a primeira acabava antes de a segunda abrir.
+   *
+   * Aqui as duas transacções estão abertas antes de qualquer uma ler o estado —
+   * que é o que «ao mesmo tempo» quer dizer quando o adquirente entrega duas
+   * vezes o mesmo evento.
+   */
+  function encontro(quantos: number) {
+    let chegaram = 0;
+    let abrir!: () => void;
+    const porta = new Promise<void>((r) => { abrir = r; });
+    return async () => {
+      chegaram += 1;
+      if (chegaram === quantos) abrir();
+      await porta;
+    };
+  }
+
+  /**
+   * A testemunha da sobreposição, e não a intenção dela.
+   *
+   * Conta as OUTRAS ligações desta base que estão dentro de uma transacção. Com
+   * o encontro passado, a outra metade da corrida tem de aparecer aqui — e se
+   * não aparecer, o que se mediu foi sequência e o caso tem de o dizer.
+   */
+  async function outrasTransaccoesAbertas(db: { $queryRaw: typeof prisma.$queryRaw }) {
+    const r = await db.$queryRaw<{ outros: number }[]>`
+      SELECT count(*)::int AS outros FROM pg_stat_activity
+       WHERE datname = current_database() AND xact_start IS NOT NULL
+         AND pid <> pg_backend_pid() AND backend_type = 'client backend'`;
+    return r[0]!.outros;
+  }
+
+  const devolucoes = async (billId: string) => (await sql.query(
+    `SELECT count(*)::int AS n, coalesce(sum(montante_menor), 0)::int AS soma
+       FROM refunds
+      WHERE payment_id IN (SELECT id FROM payments WHERE bill_id = $1)`, [billId])).rows[0] as
+      { n: number; soma: number };
+
+  /** Um pagamento capturado, já reconciliado, com o estorno por aplicar. */
+  async function capturadoComEstornoPorAplicar(montanteMenor = 2000) {
+    const { attemptId, billId } = await contaComTentativa(montanteMenor);
+    const agora = Date.now();
+    await webhook({
+      eventoId: proximo(), tipo: 'captura', estadoProvedor: 'CAPTURADO',
+      ocorridoEm: new Date(agora).toISOString(), attemptId, billId, montanteMenor,
+    });
+    // Reconcilia a captura ANTES da corrida: assim a corrida tem uma coisa só
+    // para disputar — a devolução. Sem isto, as duas entregas disputavam também
+    // o `paymentAttempt.updateMany`, e a tranca de linha desse `UPDATE`
+    // serializava-as: o que se mediria era a espera, e não a restrição.
+    const r = await comA((db) => reconciliarComProvedor(db, {
+      attemptId, autorizadoPor: IDS.utilizadorA, provedor: PROVEDOR }));
+    assert.equal(r.criouPagamento, true, 'a captura não criou pagamento: não há o que devolver');
+    await webhook({
+      eventoId: proximo(), tipo: 'estorno', estadoProvedor: 'DEVOLVIDO',
+      ocorridoEm: new Date(agora + 60_000).toISOString(), attemptId, billId, montanteMenor,
+    });
+    return { attemptId, billId, montanteMenor };
+  }
+
+  it('duas entregas concorrentes do mesmo estorno dão UMA linha em refunds', async () => {
+    const { attemptId, billId, montanteMenor } = await capturadoComEstornoPorAplicar(2000);
+
+    // ── Controlo positivo, antes de qualquer asserção sobre a corrida ─────
+    //
+    // Sem ele, «uma linha e a soma não excede» passava sobre zero linhas e soma
+    // zero — o verde sobre população zero que esta casa reprova em toda a parte.
+    const estado = await comA((db) => estadoAutorizado(db, attemptId));
+    assert.equal(estado.capturadoMenor, montanteMenor, 'não há captura: não há o que devolver');
+    assert.equal(estado.devolvidoMenor, montanteMenor, 'o estorno não chegou ao conjunto');
+    assert.equal((await devolucoes(billId)).n, 0, 'já havia devolução antes da corrida');
+
+    const juntos = encontro(2);
+    const sobrepostas: number[] = [];
+    const entrega = () => comEscopo(prisma, ESCOPO, async (db) => {
+      // Força a transacção a existir de facto antes do encontro.
+      await db.$queryRaw`SELECT 1`;
+      await juntos();
+      sobrepostas.push(await outrasTransaccoesAbertas(db));
+      return reconciliarComProvedor(db, {
+        attemptId, autorizadoPor: IDS.utilizadorA, provedor: PROVEDOR });
+    });
+
+    const saidas = await Promise.allSettled([entrega(), entrega()]);
+
+    // As duas estavam mesmo abertas ao mesmo tempo. Medido, não presumido.
+    assert.ok(sobrepostas.every((n) => n >= 1),
+      `uma das entregas não viu a outra em transacção (${sobrepostas.join(',')}): isto é sequência`);
+
+    // ── A asserção manda-se da BASE, e vale para AS DUAS ORDENS ───────────
+    //
+    // Medido a 07/09 em 20 corridas: 19 vezes a segunda entrega chega ao
+    // `create` e é a restrição que a trava; 1 vez a primeira já commitou e o
+    // `findFirst` encontra a linha. **Exigir «uma delas recusou» seria uma
+    // moeda ao ar** — e é por isso que a asserção é a contagem e a soma.
+    const { n, soma } = await devolucoes(billId);
+    assert.equal(n, 1, 'o dinheiro foi devolvido duas vezes ao mesmo cliente');
+    assert.ok(soma <= estado.capturadoMenor,
+      `devolveu ${soma} de ${estado.capturadoMenor} capturados`);
+
+    // E a linha foi criada por UMA das entregas — não estava lá antes, e não a
+    // pôs ninguém a não ser a corrida. Vale nas duas ordens: quem perde ou
+    // recusa, ou devolve `criouDevolucao: false`.
+    const criaram = saidas.filter(
+      (s) => s.status === 'fulfilled' && s.value.criouDevolucao).length;
+    assert.equal(criaram, 1, 'nenhuma das duas entregas criou a devolução, ou criaram-na as duas');
+
+    // ── E o que a prova existe para demonstrar ────────────────────────────
+    //
+    // Quando há recusa, ela tem de vir da RESTRIÇÃO. Se viesse do `findFirst`,
+    // não havia recusa nenhuma — a entrega devolvia `criouDevolucao: false` e
+    // seguia. Uma recusa com outro nome (um `40001`, um erro de rede) diria que
+    // o que travou o segundo foi outra coisa qualquer.
+    for (const s of saidas) {
+      if (s.status !== 'rejected') continue;
+      const erro = s.reason as { code?: string; meta?: unknown };
+      const texto = `${String(s.reason)} ${JSON.stringify(erro.meta ?? {})}`;
+      assert.ok(texto.includes('uma_devolucao_por_chave'),
+        `a recusa não foi a da restrição: «${texto.replace(/\s+/g, ' ').slice(0, 160)}»`);
+    }
+  });
+
+  it('E O CONTROLO QUE NÃO DEPENDE DA SORTE: sem consulta prévia, é a BASE que recusa',
+    async () => {
+      // O caso de cima só encontra a restrição quando as duas entregas passam
+      // pelo `findFirst` sem se verem — 19 vezes em 20, medido. Aqui não há
+      // consulta nenhuma pelo meio: as duas escritas partem com a MESMA chave, e
+      // o que sobra é a base. Se este passar a verde com duas linhas, a
+      // restrição deixou de existir e o caso de cima passa a proteger nada.
+      const { billId } = await capturadoComEstornoPorAplicar(2000);
+      const { rows } = await sql.query(`SELECT id FROM payments WHERE bill_id = $1`, [billId]);
+      const paymentId = rows[0].id as string;
+      const chave = `${PREFIXO}mesma-chave-${Date.now()}`;
+
+      const juntos = encontro(2);
+      const escrever = (montanteMenor: number) => comEscopo(prisma, ESCOPO, async (db) => {
+        await db.$queryRaw`SELECT 1`;
+        await juntos();
+        return db.refund.create({
+          data: {
+            organizationId: IDS.orgA, paymentId, montanteMenor,
+            motivo: 'controlo: a mesma chave duas vezes',
+            autorizadoPor: IDS.utilizadorA, chaveIdempotente: chave,
+          },
+          select: { id: true },
+        });
+      });
+
+      const saidas = await Promise.allSettled([escrever(100), escrever(200)]);
+      const mas = saidas.filter((s) => s.status === 'rejected') as PromiseRejectedResult[];
+      assert.equal((await devolucoes(billId)).n, 1, 'a mesma chave entrou duas vezes');
+      assert.equal(mas.length, 1, 'as duas escritas passaram, ou nenhuma');
+      const texto = `${String(mas[0]!.reason)} `
+        + `${JSON.stringify((mas[0]!.reason as { meta?: unknown }).meta ?? {})}`;
+      assert.ok(texto.includes('uma_devolucao_por_chave'),
+        `recusou, mas não foi a restrição: «${texto.replace(/\s+/g, ' ').slice(0, 160)}»`);
+    });
+
+  it('e o PAR: duas chaves DIFERENTES ao mesmo tempo entram as duas', async () => {
+    // Sem este par, o controlo de cima passava numa base que recusasse toda a
+    // segunda escrita — e aí a «restrição» não era a chave, era o azar.
+    const { billId } = await capturadoComEstornoPorAplicar(2000);
+    const { rows } = await sql.query(`SELECT id FROM payments WHERE bill_id = $1`, [billId]);
+    const paymentId = rows[0].id as string;
+    const marca = Date.now();
+
+    const juntos = encontro(2);
+    const escrever = (sufixo: string, montanteMenor: number) =>
+      comEscopo(prisma, ESCOPO, async (db) => {
+        await db.$queryRaw`SELECT 1`;
+        await juntos();
+        return db.refund.create({
+          data: {
+            organizationId: IDS.orgA, paymentId, montanteMenor,
+            motivo: 'controlo: duas chaves diferentes',
+            autorizadoPor: IDS.utilizadorA,
+            chaveIdempotente: `${PREFIXO}dif-${marca}-${sufixo}`,
+          },
+          select: { id: true },
+        });
+      });
+
+    const saidas = await Promise.allSettled([escrever('a', 100), escrever('b', 200)]);
+    assert.equal(saidas.filter((s) => s.status === 'rejected').length, 0,
+      'duas devoluções legítimas e distintas foram recusadas');
+    const { n, soma } = await devolucoes(billId);
+    assert.equal(n, 2);
+    assert.equal(soma, 300);
+  });
+});

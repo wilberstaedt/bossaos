@@ -2,7 +2,7 @@ import { after, before, beforeEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from 'pg';
 import {
-  RecusaDePlataforma, abrirSessaoDeSuporte, comEscopo, concederCapacidade,
+  RecusaDePlataforma, abrirSessaoDeSuporte, comEscopo, comIdentidade, concederCapacidade,
   enfileirarTrabalho, guardarPoliticaDeAcesso, obterPrisma, reprocessarTrabalho,
   segredosDaPlataforma, sessaoAutoriza, sessoesDaCasa, terminarSessaoDeSuporte,
 } from '../packages/db/src/index.ts';
@@ -32,12 +32,24 @@ let sql: Client;
 let prisma: ReturnType<typeof obterPrisma>;
 
 const PREFIXO = 'e33-';
+/** O grupo 8 é do E34, e marca o que cria com o seu próprio prefixo. */
+const PREFIXO_E34 = 'e34-acesso-';
 const MOTIVO = 'o cliente reportou pedidos a desaparecer da fila da cozinha';
 const comA = <T>(fn: Parameters<typeof comEscopo<T>>[2]) =>
   comEscopo(prisma, { organizationId: IDS.orgA, userId: IDS.utilizadorA }, fn);
 
 async function limpar() {
-  await sql.query(`DELETE FROM support_sessions WHERE motivo LIKE '%${PREFIXO}%' OR motivo = $1`, [MOTIVO]);
+  await sql.query(
+    `DELETE FROM support_sessions WHERE motivo LIKE '%${PREFIXO}%' OR motivo LIKE '${PREFIXO_E34}%' OR motivo = $1`,
+    [MOTIVO]);
+  // ── Os pedidos do grupo 8 são lixo desta prova ────────────────────────
+  //
+  // O rasto do acesso NÃO se limpa — a `audit_events` é append-only, e é a
+  // garantia a funcionar. Por isso cada caso conta as SUAS linhas pelo
+  // identificador do pedido que criou, e nunca por contagens absolutas.
+  const pedidosE34 = `(SELECT id FROM orders WHERE aberto_por LIKE '${PREFIXO_E34}%')`;
+  await sql.query(`DELETE FROM order_lines WHERE order_id IN ${pedidosE34}`);
+  await sql.query(`DELETE FROM orders WHERE aberto_por LIKE '${PREFIXO_E34}%'`);
   await sql.query(`DELETE FROM platform_jobs WHERE tipo LIKE '${PREFIXO}%'`);
   await sql.query(`DELETE FROM platform_secrets WHERE nome LIKE '${PREFIXO.toUpperCase()}%'`);
   // ── A auditoria NÃO se limpa, e isso é a garantia a funcionar ─────────
@@ -492,5 +504,277 @@ describe('7 · Nenhum segredo sai, e reprocessar não duplica', () => {
     const n = await sql.query(
       `SELECT count(*)::int AS n FROM platform_jobs WHERE tipo = $1`, [`${PREFIXO}envio`]);
     assert.equal(n.rows[0].n, 2, 'ficaram mais trabalhos do que tentativas');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+/**
+ * E34 · aceite 3, família ACESSO — uma leitura do suporte contra a revogação.
+ *
+ * ── O único dos três em que a resposta certa NÃO é determinista ───────────
+ *
+ * O `suporte_com_concessao_viva` é `STABLE`. Dentro do instantâneo de uma
+ * instrução, uma leitura que começou antes de a revogação **confirmar** continua
+ * a ver a concessão viva. **Isso é o isolamento do PostgreSQL a funcionar, e não
+ * um defeito.** Uma prova que exigisse «a leitura tem de falhar» estava a exigir
+ * o impossível, e seria intermitente.
+ *
+ * Por isso aqui não se afirma qual dos dois ganhou. Afirmam-se as duas coisas
+ * que são verdade nas duas ordens:
+ *
+ *   1. **rastos = leituras bem sucedidas.** Nenhuma leitura passa sem registo,
+ *      e nenhuma leitura recusada deixa registo de um acesso que não houve.
+ *   2. Depois de a revogação estar **confirmada**, toda a leitura seguinte é
+ *      recusada.
+ *
+ * E um detalhe de medição, que já apanhou quem escreveu a régua: **não se conta
+ * o rasto na mesma instrução que o provoca.** A CTE que escreve não é visível ao
+ * resto da instrução que a desencadeou — a contagem faz-se depois, noutra
+ * instrução, ou lê-se zero e conclui-se um defeito que não existe.
+ */
+describe('8 · leitura do suporte e revogação da concessão, concorrentes (E34)', () => {
+  function encontro(quantos: number) {
+    let chegaram = 0;
+    let abrir!: () => void;
+    const porta = new Promise<void>((r) => { abrir = r; });
+    return async () => {
+      chegaram += 1;
+      if (chegaram === quantos) abrir();
+      await porta;
+    };
+  }
+
+  /** A testemunha da sobreposição: quantas OUTRAS ligações estão em transacção. */
+  async function outrasTransaccoesAbertas(db: { $queryRaw: typeof prisma.$queryRaw }) {
+    const r = await db.$queryRaw<{ outros: number }[]>`
+      SELECT count(*)::int AS outros FROM pg_stat_activity
+       WHERE datname = current_database() AND xact_start IS NOT NULL
+         AND pid <> pg_backend_pid() AND backend_type = 'client backend'`;
+    return r[0]!.outros;
+  }
+
+  const EMAIL = `${PREFIXO_E34}ana@bossa.example`;
+  const MOTIVO_E34 = `${PREFIXO_E34}o cliente diz que um pedido sumiu da fila da cozinha`;
+
+  /** Um pedido real da casa A, com linhas — sem linhas, o pedido chega vazio. */
+  async function pedidoDaCasa() {
+    const { rows } = await sql.query(
+      `INSERT INTO orders (id, organization_id, location_id, canal, numero, estado,
+                           aberto_por, updated_at)
+       VALUES (gen_random_uuid(), $1, $2, 'SALA', $3, 'ACEITE', $4, now())
+       RETURNING id`,
+      [IDS.orgA, IDS.unidadeA, `${PREFIXO_E34}${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+       `${PREFIXO_E34}quem`]);
+    const id = rows[0].id as string;
+    await sql.query(
+      `INSERT INTO order_lines (id, organization_id, order_id, nome, quantidade, estado, updated_at)
+       VALUES (gen_random_uuid(), $1, $2, 'bacalhau à Brás', 2, 'ACEITE', now())`,
+      [IDS.orgA, id]);
+    return id;
+  }
+
+  const concessao = (ambito: 'LEITURA' | 'DADOS_OPERACIONAIS' = 'DADOS_OPERACIONAIS') =>
+    comA((db) => abrirSessaoDeSuporte(db, IDS.orgA, {
+      staffUserId: IDS.utilizadorA, staffEmail: EMAIL, motivo: MOTIVO_E34,
+      ambito: [ambito], duracaoMinutos: 30,
+    }));
+
+  /**
+   * A leitura pelo caminho REAL do suporte: `comIdentidade`, sem organização no
+   * contexto — que é a decisão inteira do E34 e a razão de a `suporte_le_pedido`
+   * existir. Devolve o pedido, ou `null` quando a concessão não autoriza.
+   */
+  const lerComoSuporte = (pedidoId: string, sessaoId: string) =>
+    comIdentidade(prisma, IDS.utilizadorA, async (db) => {
+      const linhas = await db.$queryRaw<{ suporte_le_pedido: unknown }[]>`
+        SELECT suporte_le_pedido(${pedidoId}::uuid, ${sessaoId}::uuid)`;
+      return linhas[0]?.suporte_le_pedido ?? null;
+    });
+
+  /** Contado NOUTRA instrução, e depois. Nunca na que o provoca. */
+  const rastos = async (pedidoId: string) => (await sql.query(
+    `SELECT count(*)::int AS n FROM audit_events
+      WHERE accao = 'plataforma.suporte.pedido.lido' AND alvo_id = $1`, [pedidoId])).rows[0].n as number;
+
+  it('a leitura e a revogação ao mesmo tempo: rastos = leituras bem sucedidas', async () => {
+    const pedido = await pedidoDaCasa();
+    const s = await concessao();
+
+    // ── Controlo positivo, e é ele que impede a prova de medir uma porta já
+    //    fechada ────────────────────────────────────────────────────────────
+    //
+    // Sem isto, «zero leituras e zero rastos» satisfaz o invariante 1 e o caso
+    // sai a verde sobre população zero — com o caminho partido, aliás, que foi
+    // exactamente o que aconteceu na J15 antes do E34.
+    const controlo = await lerComoSuporte(pedido, s.id);
+    assert.ok(controlo, 'a leitura autorizada não devolveu nada: o caminho está fechado antes de começar');
+    assert.equal(await rastos(pedido), 1, 'a leitura passou e NÃO deixou rasto');
+    let boas = 1;
+
+    // As duas partem juntas: a leitura e a revogação são concorrentes, e
+    // nenhuma espera pela resposta da outra.
+    const juntos = encontro(2);
+    const sobrepostas: number[] = [];
+
+    const leitura = comIdentidade(prisma, IDS.utilizadorA, async (db) => {
+      await db.$queryRaw`SELECT 1`;
+      await juntos();
+      sobrepostas.push(await outrasTransaccoesAbertas(db));
+      const linhas = await db.$queryRaw<{ suporte_le_pedido: unknown }[]>`
+        SELECT suporte_le_pedido(${pedido}::uuid, ${s.id}::uuid)`;
+      return linhas[0]?.suporte_le_pedido ?? null;
+    });
+    const revogacao = comEscopo(prisma, { organizationId: IDS.orgA, userId: IDS.utilizadorA },
+      async (db) => {
+        await db.$queryRaw`SELECT 1`;
+        await juntos();
+        sobrepostas.push(await outrasTransaccoesAbertas(db));
+        return terminarSessaoDeSuporte(db, s.id, `${PREFIXO_E34}o cliente retirou o acesso`, EMAIL);
+      });
+
+    const [saiuLeitura, saiuRevogacao] = await Promise.allSettled([leitura, revogacao]);
+
+    assert.ok(sobrepostas.every((n) => n >= 1),
+      `a leitura e a revogação não se sobrepuseram (${sobrepostas.join(',')}): isto é sequência`);
+    assert.equal(saiuLeitura.status, 'fulfilled',
+      `a leitura estoirou em vez de recusar: ${saiuLeitura.status === 'rejected'
+        ? String(saiuLeitura.reason).slice(0, 160) : ''}`);
+    assert.equal(saiuRevogacao.status, 'fulfilled',
+      `a revogação falhou: ${saiuRevogacao.status === 'rejected'
+        ? String(saiuRevogacao.reason).slice(0, 160) : ''}`);
+
+    // ── E aqui NÃO se afirma quem ganhou ─────────────────────────────────
+    //
+    // Medido a 07/09 em 20 corridas: 20 vezes a leitura chegou primeiro e leu.
+    // Isso é um facto desta máquina e deste dia, não um invariante — e uma
+    // asserção construída sobre ele seria uma moeda ao ar com sorte boa.
+    const leu = (saiuLeitura as PromiseFulfilledResult<unknown>).value !== null;
+    if (leu) boas += 1;
+    assert.equal(await rastos(pedido), boas,
+      leu ? 'a leitura da corrida passou sem deixar rasto'
+          : 'ficou um rasto de um acesso que não devolveu nada');
+
+    // ── Invariante 2: com a revogação confirmada, acabou ─────────────────
+    const { rows } = await sql.query(
+      `SELECT terminada_em FROM support_sessions WHERE id = $1`, [s.id]);
+    assert.ok(rows[0].terminada_em, 'a revogação disse que sim e a sessão continua por fechar');
+    assert.equal(await lerComoSuporte(pedido, s.id), null,
+      'a concessão foi revogada e a leitura seguinte continuou a passar');
+    assert.equal(await rastos(pedido), boas,
+      'uma leitura recusada deixou rasto de um acesso que não aconteceu');
+  });
+
+  it('e o PAR: revogada aquela, uma concessão NOVA volta a ler — e a deixar rasto',
+    async () => {
+      // Sem este par, «depois da revogação recusa sempre» passava num sistema
+      // que recusasse tudo, incluindo o caminho legítimo. A recusa tem de ser
+      // sobre a concessão morta, e não sobre o pedido.
+      const pedido = await pedidoDaCasa();
+      const primeira = await concessao();
+      assert.ok(await lerComoSuporte(pedido, primeira.id), 'a primeira concessão não leu');
+      await comA((db) => terminarSessaoDeSuporte(
+        db, primeira.id, `${PREFIXO_E34}fim do diagnóstico`, EMAIL));
+      assert.equal(await lerComoSuporte(pedido, primeira.id), null, 'a sessão fechada continuou a ler');
+      assert.equal(await rastos(pedido), 1);
+
+      const segunda = await concessao();
+      assert.ok(await lerComoSuporte(pedido, segunda.id),
+        'uma concessão nova e viva não leu: a recusa não era da concessão');
+      assert.equal(await rastos(pedido), 2, 'a leitura nova não deixou rasto');
+    });
+
+  /**
+   * ── ACHADO, medido a 07/09 ao escrever esta prova ─────────────────────────
+   *
+   * **Não é um caso por escrever. É um caso escrito que a base ainda não passa**,
+   * e está marcado `todo` para não fingir verde nem parar o corredor.
+   *
+   * A `suporte_le_pedido` liga a sessão que o chamador nomeia por três
+   * condições — `s.id = p_sessao`, mesma organização, mesmo agente — e **não
+   * verifica que ESSA sessão está viva ou em âmbito.** Quem verifica é o
+   * `suporte_com_concessao_viva(org)`, e a pergunta dele é outra: «este agente
+   * tem ALGUMA concessão viva nesta casa?».
+   *
+   * O que medi, nesta ordem:
+   *
+   *   1. sessão A (DADOS_OPERACIONAIS) viva  → lê. Correcto.
+   *   2. A revogada, nenhuma outra viva      → não lê. Correcto.
+   *   3. A revogada, **B viva**, a ler com o id de A → **LÊ**, e o rasto nomeia A.
+   *
+   * E a variante que dói mais, também medida: uma sessão C de âmbito `LEITURA`
+   * — que, **enquanto viva, recusou** ler o pedido — passa a ler depois de
+   * terminada, desde que o mesmo agente tenha uma sessão de dados operacionais
+   * aberta. O rasto fica com o email e o motivo de C.
+   *
+   * ── Porque é que isto importa, e o que NÃO é ─────────────────────────────
+   *
+   * Não é fuga de dados: só lê quem tem, naquele instante, uma concessão viva e
+   * em âmbito para aquela casa. O que se estraga é o **rasto**, que é a razão de
+   * ser desta etapa: o agente escolhe qual das suas sessões passadas fica
+   * escrita, e a casa lê um acesso atribuído a uma sessão já fechada, com um
+   * motivo que não é o do acesso — e, no caso de C, com um âmbito que nunca o
+   * permitiria.
+   *
+   * É a mesma família do defeito que a migração
+   * `e34_o_rasto_do_suporte_nao_se_separa_da_leitura` fechou: lá, o rasto podia
+   * nomear **outro agente**; aqui nomeia **outra sessão do próprio**.
+   *
+   * ── E não está aberto pela rota ──────────────────────────────────────────
+   *
+   * A rota do suporte chama `sessaoAutoriza(...)` antes, e essa recusa uma
+   * sessão terminada ou fora de âmbito. Hoje não há por onde entrar. Mas o
+   * argumento escrito na própria migração é que a garantia não pode depender
+   * disso — *«a alternativa era a base confiar que alguém verificou»* — e é essa
+   * promessa que este caso mede.
+   *
+   * A cura são três condições no `JOIN`, ao lado das que já lá estão:
+   * `s.terminada_em IS NULL`, `s.expira_em > now()` e
+   * `'DADOS_OPERACIONAIS' = ANY (s.ambito)`.
+   */
+  it('ACHADO: uma concessão REVOGADA volta a ler quando o mesmo agente abre outra',
+    { todo: 'defeito medido a 07/09: a sessão nomeada não é verificada, só a existência de outra viva' },
+    async () => {
+      const pedido = await pedidoDaCasa();
+      const revogada = await concessao();
+      assert.ok(await lerComoSuporte(pedido, revogada.id), 'a concessão não leu enquanto viva');
+      await comA((db) => terminarSessaoDeSuporte(
+        db, revogada.id, `${PREFIXO_E34}o cliente retirou o acesso`, EMAIL));
+      assert.equal(await lerComoSuporte(pedido, revogada.id), null,
+        'controlo: sem nenhuma concessão viva, a revogada já não lê');
+
+      // Uma concessão NOVA, legítima, para outro diagnóstico. Nada nela diz
+      // respeito à sessão que a casa mandou fechar.
+      await concessao();
+
+      assert.equal(await lerComoSuporte(pedido, revogada.id), null,
+        'a concessão revogada voltou a ler porque o agente abriu outra — e o rasto nomeia a revogada');
+    });
+
+  it('ACHADO (a variante mais dura): a sessão de LEITURA revogada lê o que nunca pôde ler',
+    { todo: 'defeito medido a 07/09: o âmbito da sessão NOMEADA não é verificado pela função' },
+    async () => {
+      const pedido = await pedidoDaCasa();
+      const soLeitura = await concessao('LEITURA');
+      // Enquanto viva, esta sessão recusa — o âmbito é a terceira condição, e
+      // funciona. É o controlo positivo do caso.
+      assert.equal(await lerComoSuporte(pedido, soLeitura.id), null,
+        'controlo: uma sessão de LEITURA viva não lê dados operacionais');
+      await comA((db) => terminarSessaoDeSuporte(
+        db, soLeitura.id, `${PREFIXO_E34}fim da consulta de configuração`, EMAIL));
+      await concessao('DADOS_OPERACIONAIS');
+
+      assert.equal(await lerComoSuporte(pedido, soLeitura.id), null,
+        'a sessão de LEITURA, já terminada, leu os dados operacionais — e o rasto ficou com o motivo dela');
+    });
+
+  it('e a concessão de LEITURA não chega para ver o pedido — nem deixa rasto', async () => {
+    // O âmbito é a terceira das quatro condições, e é a que distingue «ver que a
+    // casa existe» de «ver o que ela vendeu». Sem este caso, o par de cima
+    // provava que uma sessão qualquer serve.
+    const pedido = await pedidoDaCasa();
+    const s = await concessao('LEITURA');
+    assert.equal(await lerComoSuporte(pedido, s.id), null,
+      'uma sessão de LEITURA leu os dados operacionais da casa');
+    assert.equal(await rastos(pedido), 0, 'ficou rasto de um acesso que não aconteceu');
   });
 });
