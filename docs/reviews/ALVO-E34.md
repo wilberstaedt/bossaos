@@ -415,3 +415,40 @@ alguém tem de saber correr. A hipótese natural — metê-lo no
 `base-de-revisao.sh` — obriga o servidor a estar de pé para uma reconstrução de
 base, e é caro para quem só quer o motor. **Não decido isto às 04h30**; fica
 registado para o E34 com as duas opções em cima da mesa.
+
+
+## Dívidas 3 e 12, pagas e verificadas com a mesma corrida
+
+**06/09, 04h45.** `provar-kiosk-no-navegador` com os treze alvos ordenados e o
+arnês preparado pelo guião novo: **20 casos verdes, zero falhas, reposto.**
+
+### `scripts/arnes-pronto.sh` — os três passos, e a ordem que não é a óbvia
+
+```
+1. fixtures.ts           organizações, unidades, pertenças
+2. --project=preparar    o UTILIZADOR do arnês
+3. semente-inspeccao.ts  o cenário insp- — carta, mesas, pedidos
+```
+
+**Escrevi-o com a ordem errada e o próprio guião acusou-me.** Pus a semente em
+segundo e o `preparar` em terceiro; o bloco de verificação respondeu **«zero
+menus»**. O `preparar` corre uma limpeza no fim — *«nada ficou para trás»* — que
+leva o cenário da semente e **deixa o utilizador**. Semear depois dele.
+
+> **É o ponto do bloco de verificação inteiro:** um guião de preparação que diz
+> «pronto» sem confirmar é a mesma promessa vazia que ando a caçar no produto.
+> Sem ele, eu teria um script que anuncia sucesso e deixa a base inutilizável —
+> e a prova seguinte falharia com um erro que não aponta para ele.
+
+**Seis hipóteses e quarenta minutos viraram um comando**, com a razão de cada
+passo escrita ao lado.
+
+### O que fica por fazer, e não escondo
+
+O `arnes-pronto.sh` **existe e não é chamado por ninguém** — os vinte guiões de
+navegador continuam a assumir o estado. Chamá-lo de dentro deles é a conversão
+certa, e é trabalho de os editar um a um ou de lhes dar um preâmbulo comum.
+
+**Sim, isto é uma função sem chamador** — escrita por quem passou o dia a caçá-las.
+Fica declarada como tal em vez de eu fingir que a dívida está fechada: o que está
+feito é o conhecimento deixar de estar só na minha cabeça.
