@@ -231,15 +231,33 @@ apenas para desligar o RLS no controlo negativo — o desenho está certo.
 liga como dono*. No dia em que alguma rota usasse a credencial de migração, 137
 tabelas perderiam o RLS **em silêncio**, e nada acenderia.
 
-### Achado 1 — a prova de isolamento cobre 6 de 137
+### ~~Achado 1 — a prova de isolamento cobre 6 de 137~~ — ERRADO, e corrijo
 
-```
-TABELAS=(organizations brands locations memberships role_assignments users)
-```
+Escrevi isto às 02h40 e **está errado**. Vi `TABELAS=(organizations brands
+locations memberships role_assignments users)` e concluí que a prova cobria seis
+tabelas. **Essas seis são a alavanca do controlo negativo** — é nelas que o RLS
+se desliga para exigir que os casos 2 e 3 fiquem vermelhos —, não a cobertura.
 
-Seis. **É uma amostra, e amostra é o erro que eu próprio cometi no E20** — cinco
-funções de oito e chamei-lhe verificação. A prova está certa no método e curta no
-alcance.
+A cobertura está no `provas/isolamento.test.ts`, com **28 asserções**, e mede o
+**mecanismo**: contexto de inquilino, `WITH CHECK` na escrita **e no mover uma
+linha de A para B**, contexto vazio a negar sem rebentar, o contexto a deixar de
+valer no `COMMIT` e no `ROLLBACK`, a mesma ligação a não ver o inquilino
+anterior, o email a devolver `NULL` sem dizer se existe alguém, e o `comEscopo` a
+recusar um identificador que não é UUID antes de tocar na base.
+
+**Testar 137 tabelas seria testar o mesmo mecanismo 137 vezes.** A prova está
+certa no método e no alcance, e eu li seis linhas de um ficheiro e julguei o
+resto — a segunda vez esta noite que acusei um instrumento nosso e o instrumento
+tinha razão. A primeira foi a `validar-dinheiro`.
+
+### Achado 1, na forma certa — nada verifica que uma tabela de inquilino TEM RLS
+
+O que o `isolamento.test.ts` mede é que **o mecanismo funciona onde está ligado**.
+O que ninguém mede é se está ligado **em todo o lado que precisa**.
+
+E há prova de que isso importa: a `custom_domain_owners` tem `organization_id` e
+não tem RLS. O teste do mecanismo nunca a tocaria, porque não é sobre tabelas — e
+é precisamente por isso que ela passou despercebida.
 
 ### Achado 2 — uma tabela com dado de inquilino, sem RLS e sem ninguém
 
