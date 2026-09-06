@@ -1,0 +1,138 @@
+[
+  {
+    "pagina": "home",
+    "rota": "/es-ES",
+    "vw": 1440,
+    "alturaPagina": 1173,
+    "alturaRolavel": 1173,
+    "rola": true,
+    "seccoes": 3,
+    "media": 1,
+    "marca": {
+      "largura": 81,
+      "altura": 28
+    },
+    "heroAltura": 344,
+    "heroConteudoAteX": 1256,
+    "impressao": "t0p2l0b0i0·t4p5l0b0i0·t1p2l0b0i0"
+  },
+  {
+    "pagina": "produto",
+    "rota": "/es-ES/product",
+    "vw": 1440,
+    "alturaPagina": 900,
+    "alturaRolavel": 900,
+    "rola": false,
+    "seccoes": 2,
+    "media": 1,
+    "marca": {
+      "largura": 81,
+      "altura": 28
+    },
+    "heroAltura": 226,
+    "heroConteudoAteX": 728,
+    "impressao": "t0p1l0b0i0·t4p4l0b0i0"
+  },
+  {
+    "pagina": "planos",
+    "rota": "/es-ES/plans",
+    "vw": 1440,
+    "alturaPagina": 900,
+    "alturaRolavel": 900,
+    "rola": false,
+    "seccoes": 2,
+    "media": 1,
+    "marca": {
+      "largura": 81,
+      "altura": 28
+    },
+    "heroAltura": 202,
+    "heroConteudoAteX": 728,
+    "impressao": "t0p1l0b0i0·t1p1l0b1i0"
+  },
+  {
+    "pagina": "implantacao",
+    "rota": "/es-ES/getting-started",
+    "vw": 1440,
+    "alturaPagina": 900,
+    "alturaRolavel": 900,
+    "rola": false,
+    "seccoes": 2,
+    "media": 1,
+    "marca": {
+      "largura": 81,
+      "altura": 28
+    },
+    "heroAltura": 202,
+    "heroConteudoAteX": 728,
+    "impressao": "t0p1l0b0i0·t5p5l4b0i0"
+  },
+  {
+    "pagina": "piloto",
+    "rota": "/es-ES/pilot",
+    "vw": 1440,
+    "alturaPagina": 900,
+    "alturaRolavel": 900,
+    "rola": false,
+    "seccoes": 2,
+    "media": 1,
+    "marca": {
+      "largura": 81,
+      "altura": 28
+    },
+    "heroAltura": 226,
+    "heroConteudoAteX": 728,
+    "impressao": "t0p1l0b0i0·t3p3l2b0i0"
+  },
+  {
+    "pagina": "confianca",
+    "rota": "/es-ES/trust",
+    "vw": 1440,
+    "alturaPagina": 900,
+    "alturaRolavel": 900,
+    "rola": false,
+    "seccoes": 2,
+    "media": 1,
+    "marca": {
+      "largura": 81,
+      "altura": 28
+    },
+    "heroAltura": 284,
+    "heroConteudoAteX": 728,
+    "impressao": "t0p1l0b0i0·t4p3l0b0i0"
+  },
+  {
+    "pagina": "faq",
+    "rota": "/es-ES/faq",
+    "vw": 1440,
+    "alturaPagina": 966,
+    "alturaRolavel": 966,
+    "rola": true,
+    "seccoes": 2,
+    "media": 1,
+    "marca": {
+      "largura": 81,
+      "altura": 28
+    },
+    "heroAltura": 162,
+    "heroConteudoAteX": 652,
+    "impressao": "t0p0l0b0i0·t5p5l0b0i0"
+  },
+  {
+    "pagina": "demo",
+    "rota": "/es-ES/demo",
+    "vw": 1440,
+    "alturaPagina": 1194,
+    "alturaRolavel": 1194,
+    "rola": true,
+    "seccoes": 2,
+    "media": 1,
+    "marca": {
+      "largura": 81,
+      "altura": 28
+    },
+    "heroAltura": 202,
+    "heroConteudoAteX": 728,
+    "impressao": "t0p1l0b0i0·t1p1l0b0i0"
+  }
+]

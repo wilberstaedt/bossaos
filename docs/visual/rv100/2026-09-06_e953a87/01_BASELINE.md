@@ -112,7 +112,66 @@ não tem sequer rodapé opcional ligado) e duas mudam de natureza: a 7 é uma
 decisão caducada e não um esquecimento, e a 12 tem metadata — só que uma para
 todo o produto.
 
-Faltam quatro, todas de composição: **3** (hero com metade vazia), **6**
-(cinco páginas com a mesma estrutura), **8** (produto repete a home) e **9**
-(demo isolada). São de navegador e de leitura comparada, e ficam por medir em vez
-de presumidas.
+As quatro que faltavam estão medidas abaixo, no navegador.
+
+## As quatro de composição — medidas no DOM, 1440 × 900, es-ES
+
+Instrumento: `inspeccao/rv100-baseline.spec.ts`. Não julga; recolhe números e
+escreve-os em `evidence/baseline/medidas-1440.json`, com uma captura de página
+inteira por superfície. O controlo positivo é exigir que cada página tenha pelo
+menos uma secção — sem isso, uma página que não carregou passaria por medição.
+
+| página | rola? | secções | mídia | hero acaba em x |
+| --- | --- | ---: | ---: | ---: |
+| home | sim (1173) | 3 | 1 | 1256 |
+| produto | **não** | 2 | 1 | 728 |
+| planos | **não** | 2 | 1 | 728 |
+| implantação | **não** | 2 | 1 | 728 |
+| piloto | **não** | 2 | 1 | 728 |
+| confiança | **não** | 2 | 1 | 728 |
+| faq | sim (966) | 2 | 1 | 652 |
+| demo | sim (1194) | 2 | 1 | 728 |
+
+**Hipótese 3 — CONFIRMADA, com o número corrigido.** O conteúdo do hero acaba em
+**x = 728** de 1440 em sete das oito páginas: os **49% da direita não têm nada**.
+A observação de 05/09 dizia 468 px; o valor real é 728. O problema é o mesmo, a
+medida não era — e é exactamente por isto que o §2.2 manda revalidar em vez de
+herdar.
+
+**Hipótese 6 — CONFIRMADA, e a minha primeira medida era fina de mais.** Comparei
+as páginas por uma impressão digital de contagens de elementos e **nenhuma se
+repetia** — o que me teria feito escrever «não se confirma». Está errado: a
+estrutura é a mesma e a impressão é que era fina de mais para a ver. Sete das
+oito páginas têm **exactamente duas secções**, a primeira sempre sem título e com
+um parágrafo, a segunda com tudo o resto.
+
+**E o que a medida certa mostrou:** **cinco das oito páginas comerciais não rolam
+de todo.** Produto, planos, implantação, piloto e confiança cabem inteiras em 900
+px. O §6.3 pede uma sequência mínima de **catorze** blocos para a LP.
+
+> Nota de instrumento: a primeira leitura foi `body.getBoundingClientRect()`, que
+> num layout de altura 100% devolve o viewport mesmo numa página longa. **Não
+> escrevi «cabe num ecrã» com esse número** — voltei a medir com
+> `documentElement.scrollHeight`, que é o que responde à pergunta. Os dois davam
+> 900; um por acaso, o outro por razão.
+
+**Hipótese 8 — CONFIRMADA.** A página de produto são duas secções, quatro
+títulos, quatro parágrafos e **zero mídia**. Descreve; não mostra.
+
+**Hipótese 9 — CONFIRMADA.** A demo tem, além do formulário, **um título e um
+parágrafo**. Sem contexto, sem duração, sem o que vem a seguir.
+
+**E uma que atravessa todas:** `mídia = 1` em **todas as oito** superfícies — e
+essa uma é a marca. **Não há uma única imagem do produto em nenhuma página
+comercial.** A hipótese 4 falava da home; é o site comercial inteiro.
+
+**E a marca mede 81 × 28 px no navegador**, exactamente o que a aritmética do
+componente previa. Fonte e ecrã concordam.
+
+## Estado do diagnóstico
+
+**Treze de treze medidas. Treze confirmadas** — duas com o número corrigido, uma
+que mudou de natureza (a 7 é uma decisão caducada) e uma que quase escapou por o
+meu instrumento ser fino de mais. Falta o §2.1: as capturas nos seis viewports e
+nos três idiomas, com conteúdo longo. As de 1440 em es-ES estão em
+`evidence/baseline/`.
