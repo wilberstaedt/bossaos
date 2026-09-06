@@ -20,7 +20,7 @@ precisa de ser **executável**, não uma pilha.
 | 4 | Guardas que observam a forma da escrita | **fechada sem achado** — varri as 25, as três que leem prosa têm invariante textual | eu |
 | 5 | Provas que não correm na CI | **paga** — descoberta em vez de lista | eu |
 | 6 | Código morto com ficheiro e linha | **resolvida** — a lista envelheceu; aponta para a varredura | eu |
-| 7 | Código de verificação no pacote | **aberta, e o método descartado escrito** — nomes num pacote minificado não medem | eu |
+| 7 | Código de verificação no pacote | **medida**: as 8 chegam ao pacote. Decisão de as tirar fica aberta | JR |
 | 8 | Assinaturas na pasta antiga | **paga** — e era pior: três diziam-se à espera | eu |
 | 9 | `larguras.spec.ts` parece global e não é | **aberta** — baixa prioridade: cada etapa mede as suas | eu |
 | 10 | O meu `git add -A`, duas vezes | **regra escrita**: caminhos explícitos, sempre | eu |
@@ -485,3 +485,48 @@ certa, e é trabalho de os editar um a um ou de lhes dar um preâmbulo comum.
 **Sim, isto é uma função sem chamador** — escrita por quem passou o dia a caçá-las.
 Fica declarada como tal em vez de eu fingir que a dívida está fechada: o que está
 feito é o conhecimento deixar de estar só na minha cabeça.
+
+
+## Dívida 7, respondida — e a suspeita original estava certa
+
+**06/09, 05h00.** Voltei-lhe com o método que faltava: **os mapas de origem
+preservam os nomes**, e eu tinha-os excluído na primeira medição. Foi esse o erro.
+
+**Controlo positivo primeiro**, porque um instrumento que não vê o que existe não
+serve para dizer que algo não existe: `avisoDeSeguranca` aparece em 5 mapas,
+`guardarLeadPublico` em 4. As duas têm de estar lá, e estão.
+
+**As oito estão todas no pacote servido:**
+
+| Função | Mapas |
+| --- | --- |
+| `sobrepoe` | 5 |
+| `sindromes` | 3 |
+| `penalidadePorMascara` | 3 |
+| `descodificar` | 6 |
+| `identificadorAdivinhavel` | 3 |
+| `sessoesVivas` | 9 |
+| `leadsDaUnidade` | 3 |
+| `listarAuditoria` | **49** |
+
+**A suspeita da dívida estava certa e a minha primeira medição deu cinco zeros
+falsos** — grepar nomes num pacote minificado não mede nada, e eu ia fechá-la
+com uma conclusão confortável.
+
+### O que isto prova, e o que não prova
+
+Prova que **os módulos que contêm estas funções chegam ao pacote**. Não prova, por
+si só, que o empacotador manteve o corpo de cada função — pode ter eliminado
+alguma dentro de um módulo que entrou. Para funções exportadas e alcançáveis por
+barrica, a eliminação é improvável, mas **não a medi** e não a afirmo.
+
+### E uma verificação que não estava pedida
+
+Se há mapas no pacote, a pergunta seguinte é se algum é **servido ao navegador** —
+um mapa público expõe o código-fonte original. **Não são:** zero mapas em
+`static/`, e um pedido real de fora a um `.map` devolve **404**. Os 1480 são do
+lado do servidor.
+
+**Fica aberta a decisão, não a medição:** o peso é real e a superfície do
+`sessoesVivas` e do `leadsDaUnidade` também. Tirar as barricas de re-exportação
+resolve, e é mudança de produto — do JR, com verificação minha.
