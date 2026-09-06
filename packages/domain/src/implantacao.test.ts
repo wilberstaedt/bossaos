@@ -1,8 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  arvoreLimpa, conferirImportacao, degrauPodeSubir, etapasPorValidar,
-  podeDeclararRpo, podeSubir, versaoQueResponde,
+  arvoreLimpa, conferirImportacao, degrauPodeSubir, etapasPorValidar, lerDegraus, podeDeclararRpo, podeSubir, versaoQueResponde,
 } from './implantacao.ts';
 
 /**
@@ -174,5 +173,98 @@ describe('6. A entrada progressiva tem plano de saída', () => {
   it('e sem critérios também não — subir «quando parecer» não é um degrau', () => {
     const r = degrauPodeSubir({ nome: 'Pro', criterios: [], saida: 'voltar ao Starter' });
     assert.equal(r.ok, false);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+describe('lerDegraus — a ponte que faltava entre a regra e os dados', () => {
+  // ── A retenção do sénior, e o caso EXACTO que ele plantou ───────────────
+  //
+  // O controlo contava `## Degrau ` contra `**Plano de saída` e dizia
+  // `degraus=3 saidas=3` com o plano do último VAZIO. Contar títulos mede que
+  // alguém escreveu o título.
+  const DOCUMENTO = [
+    '# Entrada progressiva',
+    '',
+    '## Degrau 1 — STARTER: a carta no QR',
+    '',
+    '**Critérios para subir ao degrau 2**',
+    '1. Uma semana de serviço com a carta no ar.',
+    '2. Alergénios revistos pela casa.',
+    '',
+    '**Plano de saída:** volta-se à carta de papel.',
+    '',
+    '---',
+    '',
+    '## Degrau 2 — RESTAURANT: a operação',
+    '',
+    '**Critérios para subir ao degrau 3**',
+    '1. Duas semanas de serviço.',
+    '',
+    '**Plano de saída, por partes** — papel e caixa registadora.',
+    '',
+  ].join('\n');
+
+  it('lê os degraus com nome, critérios e saída', () => {
+    const d = lerDegraus(DOCUMENTO);
+    assert.equal(d.length, 2);
+    assert.match(d[0]!.nome, /Degrau 1/);
+    assert.equal(d[0]!.criterios.length, 2);
+    assert.match(d[0]!.saida ?? '', /carta de papel/);
+  });
+
+  it('o rótulo escrito de duas maneiras lê-se das duas', () => {
+    // `**Plano de saída:**` e `**Plano de saída, por partes**` são a mesma
+    // coisa dita de duas formas. Cobrir as formas de escrever é o defeito das
+    // três aspas; o que se mede é onde o rótulo ACABA.
+    const d = lerDegraus(DOCUMENTO);
+    assert.match(d[1]!.saida ?? '', /papel e caixa registadora/);
+    assert.doesNotMatch(d[1]!.saida ?? '', /Plano de saída/);
+  });
+
+  it('CONTROLO: cabeçalho intacto e plano vazio dá saída NULA, e a regra recusa', () => {
+    // É o ficheiro adulterado do sénior, em miniatura: o título do plano fica,
+    // o plano desaparece.
+    const adulterado = DOCUMENTO.replace(
+      '**Plano de saída, por partes** — papel e caixa registadora.',
+      '**Plano de saída, por partes**',
+    );
+    const d = lerDegraus(adulterado);
+    assert.equal(d.length, 2, 'continua a haver dois degraus — o cabeçalho está lá');
+    assert.equal(d[1]!.saida, null, 'e a saída é NULA, não a presença do título');
+    const veredicto = degrauPodeSubir(d[1]!);
+    assert.equal(veredicto.ok, false);
+    assert.equal(veredicto.ok === false ? veredicto.razao : '', 'sem plano de saída');
+  });
+
+  it('CONTROLO: um degrau SEM sequer o rótulo também não sobe', () => {
+    const semRotulo = DOCUMENTO.replace(
+      '**Plano de saída, por partes** — papel e caixa registadora.',
+      'e pronto.',
+    );
+    const d = lerDegraus(semRotulo);
+    assert.equal(d[1]!.saida, null);
+    assert.equal(degrauPodeSubir(d[1]!).ok, false);
+  });
+
+  it('CONTROLO: pontuação sozinha não é um plano', () => {
+    // `**Plano de saída:** —` tem texto depois do rótulo e continua a não
+    // dizer nada. Sem isto, um travessão comprava o degrau.
+    const so_traco = DOCUMENTO.replace(
+      '**Plano de saída:** volta-se à carta de papel.',
+      '**Plano de saída:** —',
+    );
+    const d = lerDegraus(so_traco);
+    assert.equal(d[0]!.saida, null);
+    assert.equal(degrauPodeSubir(d[0]!).ok, false);
+  });
+
+  it('E A SONDA QUE TEM DE PASSAR: os dois degraus inteiros sobem', () => {
+    // Sem este par, um leitor que devolvesse `saida: null` para tudo passava
+    // os quatro controlos acima.
+    const d = lerDegraus(DOCUMENTO);
+    for (const degrau of d) {
+      assert.equal(degrauPodeSubir(degrau).ok, true, degrau.nome);
+    }
   });
 });

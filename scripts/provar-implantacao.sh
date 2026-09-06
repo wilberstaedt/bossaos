@@ -29,6 +29,12 @@ verde()    { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas+1)); }
 naomedi()  { printf '  \033[33mNÃO MEDI\033[0m %s\n' "$1"; }
 
+# As decisões puras leem-se do domínio, como no `publicar.sh`: o que se prova
+# aqui é a regra a correr sobre os dados verdadeiros, e não uma segunda cópia
+# da regra escrita em `bash` — que era o defeito da versão anterior deste
+# controlo, com as duas metades a nunca se tocarem.
+decidir() { node --experimental-strip-types -e "$1" "${@:2}"; }
+
 CAIXA="$(mktemp -d)"
 trap 'rm -rf "$CAIXA"' EXIT INT TERM
 
@@ -323,27 +329,85 @@ printf '| a | b |\n|---|---|\n| cheio | |\n' > "$CAIXA/tabela-com-buraco.md"
 echo
 
 # ═══════════════════════════════════════════════════════════════════════════
-echo "CONTROLO 8 · cada degrau da entrada progressiva tem plano de saída"
+echo "CONTROLO 8 · os TRÊS degraus verdadeiros passam pela regra"
 # ═══════════════════════════════════════════════════════════════════════════
+#
+# ── A retenção do sénior, e porque é que a versão anterior não media nada ──
+#
+# Este controlo tinha duas metades que nunca se tocavam: contava `## Degrau `
+# contra `**Plano de saída` no documento, e aplicava o `degrauPodeSubir` a
+# objectos INVENTADOS (`{nome:"x", saida:null}`). A regra estava certa e nunca
+# via um degrau verdadeiro.
+#
+# Ele mediu o buraco em vez de o supor: esvaziou o plano de saída do último
+# degrau **deixando o cabeçalho intacto**, e a contagem respondeu
+# `degraus=3 saidas=3`, verde, com o plano vazio. Contar títulos mede que
+# alguém escreveu o título.
+#
+# Agora o documento passa pelo `lerDegraus` e cada degrau pelo `degrauPodeSubir`.
 DOC=docs/releases/entrada-progressiva.md
-DEGRAUS="$(grep -c '^## Degrau ' "$DOC")"
-SAIDAS="$(grep -c '^\*\*Plano de saída' "$DOC")"
-if [ "$DEGRAUS" -gt 0 ] && [ "$DEGRAUS" -eq "$SAIDAS" ]; then
-  verde "$DEGRAUS degraus, $SAIDAS planos de saída"
+
+# Devolve, por degrau: `ok<TAB>nome` ou `MAU<TAB>nome<TAB>razão`, e `N<TAB>quantos`.
+julgar_degraus() {
+  decidir '
+import { lerDegraus, degrauPodeSubir } from "./packages/domain/src/implantacao.ts";
+import { readFileSync } from "node:fs";
+const degraus = lerDegraus(readFileSync(process.argv[1], "utf8"));
+console.log("N\t" + degraus.length);
+for (const d of degraus) {
+  const v = degrauPodeSubir(d);
+  console.log(v.ok ? "ok\t" + d.nome : "MAU\t" + d.nome + "\t" + v.razao);
+}
+' "$1"
+}
+
+JULGAMENTO="$(julgar_degraus "$DOC")"
+QUANTOS="$(printf '%s\n' "$JULGAMENTO" | awk -F'\t' '$1=="N"{print $2}')"
+
+# ── A população primeiro ─────────────────────────────────────────────────
+# Um leitor partido devolve zero degraus, e «nenhum degrau falhou» sobre zero
+# degraus é verde sobre população zero.
+if [ "${QUANTOS:-0}" -eq 3 ]; then
+  verde "li 3 degraus do documento"
 else
-  vermelho "$DEGRAUS degraus e $SAIDAS planos de saída — falta a saída de algum"
+  vermelho "li ${QUANTOS:-0} degraus e o documento tem 3 — o leitor está cego"
 fi
-# E o código recusa, que é o que aguenta quando o documento se desactualiza.
-node --experimental-strip-types -e '
-import { degrauPodeSubir } from "./packages/domain/src/implantacao.ts";
-const sem = degrauPodeSubir({ nome: "x", criterios: ["a"], saida: null });
-const com = degrauPodeSubir({ nome: "x", criterios: ["a"], saida: "volta ao papel" });
-if (sem.ok) { console.log("MAU: subiu sem saída"); process.exit(1); }
-if (!com.ok) { console.log("MAU: não subiu com saída"); process.exit(1); }
-console.log("BOM");
-' >/dev/null 2>&1 \
-  && verde "e degrauPodeSubir recusa sem saída e aceita com saída" \
-  || vermelho "degrauPodeSubir não separa os dois casos"
+
+MAUS="$(printf '%s\n' "$JULGAMENTO" | awk -F'\t' '$1=="MAU"{print $2" ("$3")"}')"
+if [ -z "$MAUS" ] && [ "${QUANTOS:-0}" -eq 3 ]; then
+  verde "e os três passam pelo degrauPodeSubir: critérios E plano de saída"
+elif [ -n "$MAUS" ]; then
+  vermelho "degrau(s) sem poder subir:"; printf '%s\n' "$MAUS" | sed 's/^/           /'
+fi
+
+# ── E O CONTROLO NEGATIVO É O FICHEIRO ADULTERADO DELE ───────────────────
+# Cabeçalho do plano intacto, plano vazio. A contagem antiga dava verde aqui.
+ADULTERADO="$CAIXA/entrada-sem-saida.md"
+python3 -c '
+import re, sys
+texto = open(sys.argv[1], encoding="utf-8").read()
+i = texto.rindex("**Plano de saída")
+rotulo = texto[i:texto.index("\n", i)]
+corte = re.sub(r"\s*—.*$", "", rotulo).rstrip(":")
+open(sys.argv[2], "w", encoding="utf-8").write(texto[:i] + corte + "\n")
+' "$DOC" "$ADULTERADO"
+
+CONTROLO="$(julgar_degraus "$ADULTERADO")"
+CQ="$(printf '%s\n' "$CONTROLO" | awk -F'\t' '$1=="N"{print $2}')"
+CMAUS="$(printf '%s\n' "$CONTROLO" | awk -F'\t' '$1=="MAU"{print $2}')"
+if [ "${CQ:-0}" -ne 3 ]; then
+  vermelho "  controlo inválido: li ${CQ:-0} degraus no ficheiro adulterado, e têm de ser 3"
+elif printf '%s' "$CMAUS" | grep -q 'Degrau 3'; then
+  verde "  controlo: plano do Degrau 3 esvaziado com o cabeçalho intacto, e RECUSA"
+  verde "  (a contagem antiga respondia degraus=3 saidas=3 e dava verde aqui)"
+else
+  vermelho "  CONTROLO NEGATIVO FALHOU: o plano vazio passou"
+fi
+# E o outro lado: não pode acusar os degraus que estão bem.
+OUTROS="$(printf '%s\n' "$CMAUS" | grep -c 'Degrau [12]' || true)"
+[ "${OUTROS:-0}" -eq 0 ] \
+  && verde "  e não acusa os degraus 1 e 2, que continuam com plano" \
+  || vermelho "  acusou degraus intactos — a leitura reprova tudo"
 echo
 
 # ═══════════════════════════════════════════════════════════════════════════

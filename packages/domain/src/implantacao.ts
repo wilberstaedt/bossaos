@@ -262,3 +262,56 @@ export function degrauPodeSubir(d: Degrau): { ok: true } | { ok: false; razao: s
   }
   return { ok: true };
 }
+
+/**
+ * Lê os degraus do documento da entrada progressiva.
+ *
+ * ── Porque é que isto teve de existir ─────────────────────────────────────
+ *
+ * O `degrauPodeSubir` estava certo e **nunca via um degrau verdadeiro**. O
+ * controlo tinha duas metades que não se tocavam: uma contava cabeçalhos no
+ * documento (`## Degrau ` contra `**Plano de saída`), a outra aplicava a regra a
+ * objectos inventados (`{ nome: "x", saida: null }`).
+ *
+ * O sénior mediu o buraco em vez de o supor: esvaziou o plano de saída do último
+ * degrau **deixando o cabeçalho intacto**, e o controlo respondeu `degraus=3
+ * saidas=3`, verde, com o plano vazio. Contar títulos mede que alguém escreveu o
+ * título.
+ *
+ * Esta função é a ponte que faltava: transforma o documento em `Degrau`s, e a
+ * regra passa a correr sobre os dados a sério.
+ *
+ * ── E por isso a `saida` sai do TEXTO e não da presença do rótulo ─────────
+ *
+ * O que se devolve é o que está **depois** de `**Plano de saída…**`, sem o
+ * rótulo. Um cabeçalho sozinho dá cadeia vazia, e cadeia vazia é o que o
+ * `degrauPodeSubir` recusa. Se isto lesse «tem rótulo, logo tem plano»,
+ * reproduzia exactamente o defeito que veio corrigir.
+ */
+export function lerDegraus(documento: string): readonly Degrau[] {
+  const degraus: Degrau[] = [];
+  const blocos = documento.split(/^## Degrau /m).slice(1);
+  for (const bloco of blocos) {
+    const linhas = bloco.split('\n');
+    const nome = `Degrau ${(linhas[0] ?? '').trim()}`;
+    const criterios = linhas
+      .filter((l) => /^\d+\.\s+\S/.test(l.trim()))
+      .map((l) => l.trim());
+    // O rótulo pode ser `**Plano de saída:**` ou `**Plano de saída, por
+    // partes**` — o que interessa é onde ele ACABA, e não a forma como está
+    // escrito. Medir a forma era o defeito anterior.
+    const m = /\*\*Plano de saída[^*]*\*\*:?/.exec(bloco);
+    const saida = m === null
+      ? null
+      : bloco
+          .slice(m.index + m[0].length)
+          // O bloco seguinte não é deste degrau.
+          .split(/^---$/m)[0]!
+          // Um travessão ou dois pontos logo a seguir ao rótulo são pontuação,
+          // e pontuação sozinha não é um plano.
+          .replace(/^[\s:—-]+/, '')
+          .trim();
+    degraus.push({ nome, criterios, saida: saida === '' ? null : saida });
+  }
+  return degraus;
+}

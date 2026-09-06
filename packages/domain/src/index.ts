@@ -201,7 +201,7 @@ export {
 
 export {
   ESTADOS_DO_PACOTE, NUNCA_SOBE, arvoreLimpa, conferirImportacao,
-  degrauPodeSubir, etapasPorValidar, podeDeclararRpo, podeSubir,
+  degrauPodeSubir, etapasPorValidar, lerDegraus, podeDeclararRpo, podeSubir,
   versaoQueResponde,
   type AvisoDeImportacao, type Degrau, type EstadoDaEtapa, type EstadoDoPacote,
   type LeituraDaVersao, type LinhaDeImportacao,

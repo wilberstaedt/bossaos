@@ -76,7 +76,20 @@ indistinguível de um portão a recusar. Apanhou-o a casa de mentira do controlo
 que tem as 36 validadas. Não mexi no medidor: a falha dele passa a **NÃO MEDI** e
 o portão fica pela leitura directa da matriz.
 
-**Provas (LOCAIS):** `packages/domain` **421 casos, 0 falhas** ·
+**RETENÇÃO DO SÉNIOR PAGA — a regra e os dados nunca se encontravam.** O ponto
+8 tinha duas metades que não se tocavam: o controlo contava `## Degrau ` contra
+`**Plano de saída` no documento, e o `degrauPodeSubir` corria sobre objectos
+inventados (`{nome:"x", saida:null}`). A regra estava certa e nunca via um degrau
+verdadeiro. Ele mediu-o: esvaziou o plano do último degrau **deixando o cabeçalho
+intacto** e o controlo deu `degraus=3 saidas=3`, verde. **Contar títulos mede que
+alguém escreveu o título.** Cura: `lerDegraus` lê o documento e cada degrau passa
+pela regra — e a `saida` sai do **texto**, não da presença do rótulo, senão
+reproduzia o defeito que veio corrigir. População medida primeiro (3 degraus), a
+sonda que tem de passar, o ficheiro adulterado dele a recusar, e o outro lado a
+não acusar os degraus intactos. **Plante:** trocar a leitura por «tem rótulo,
+logo tem plano» acende 4 falhas e reprova o `provar-implantacao.sh`.
+
+**Provas (LOCAIS):** `packages/domain` **427 casos, 0 falhas** ·
 `scripts/provar-implantacao.sh` **0 falhas** (cenário 0 que TEM de passar + os
 quatro portões violados **à vez** + 4 controlos) · `ensaiar-restauracao.sh` **0
 falhas** · detalhe e achados em `docs/progress/E35.md`.
