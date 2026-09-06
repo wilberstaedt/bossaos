@@ -1,7 +1,7 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E30 — analytics, relatórios e gestão multiunidade (**9 telas**).
-**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO — com pendência de MÁQUINA.**
+**Etapa atual:** E31 — Kiosk, terminais e impressão (**11 telas**).
+**Estado:** **EM CURSO.** E30 assinado a 06/09 em `1dc90bc` (`docs/reviews/E30.md`), medido em duas voltas por causa da máquina. Contrato `kiosk-e-impressao.md` e régua `ALVO-E31.md` escritos **antes** do código.
 
 **O que muda:** todas as anteriores produziam factos; **esta produz opiniões
 sobre factos**. E é a primeira em que o defeito muda o comportamento de uma
