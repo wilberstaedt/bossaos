@@ -179,20 +179,20 @@ export async function resolverAlvos(): Promise<Alvos> {
   await sql.connect();
   try {
     return {
-      menuId: await um(sql, `SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%' LIMIT 1`, 'um menu'),
-      categoryId: await um(sql, `SELECT id FROM categories WHERE nome LIKE '${PREFIXO}%' LIMIT 1`, 'uma categoria'),
-      productId: await um(sql, `SELECT id FROM products WHERE nome LIKE '${PREFIXO}%' LIMIT 1`, 'um produto'),
-      groupId: await um(sql, `SELECT id FROM modifier_groups WHERE nome LIKE '${PREFIXO}%' LIMIT 1`, 'um grupo de opções'),
-      brandId: await um(sql, `SELECT id FROM brands WHERE organization_id = '${ORG_A}' LIMIT 1`, 'uma marca'),
+      menuId: await um(sql, `SELECT id FROM menus WHERE nome LIKE '${PREFIXO}%' ORDER BY nome, id LIMIT 1`, 'um menu'),
+      categoryId: await um(sql, `SELECT id FROM categories WHERE nome LIKE '${PREFIXO}%' ORDER BY nome, id LIMIT 1`, 'uma categoria'),
+      productId: await um(sql, `SELECT id FROM products WHERE nome LIKE '${PREFIXO}%' ORDER BY nome, id LIMIT 1`, 'um produto'),
+      groupId: await um(sql, `SELECT id FROM modifier_groups WHERE nome LIKE '${PREFIXO}%' ORDER BY nome, id LIMIT 1`, 'um grupo de opções'),
+      brandId: await um(sql, `SELECT id FROM brands WHERE organization_id = '${ORG_A}' ORDER BY nome, id LIMIT 1`, 'uma marca'),
       membershipId: await um(
         sql,
         `SELECT m.id FROM memberships m JOIN users u ON u.id = m.user_id
-          WHERE m.organization_id = '${ORG_A}' AND u.email = '${EMAIL_DO_ARNES}' LIMIT 1`,
+          WHERE m.organization_id = '${ORG_A}' AND u.email = '${EMAIL_DO_ARNES}' ORDER BY m.id LIMIT 1`,
         'a pertença do utilizador do arnês',
       ),
       unidadeArquivadaId: await um(
         sql,
-        `SELECT id FROM locations WHERE slug LIKE '${PREFIXO}%' AND archived_at IS NOT NULL LIMIT 1`,
+        `SELECT id FROM locations WHERE slug LIKE '${PREFIXO}%' AND archived_at IS NOT NULL ORDER BY slug, id LIMIT 1`,
         'uma unidade arquivada',
       ),
       unidadeVivaId: await um(
@@ -206,13 +206,13 @@ export async function resolverAlvos(): Promise<Alvos> {
       sessionId: await um(
         sql,
         `SELECT id FROM table_sessions WHERE estado <> 'FECHADA'
-           AND table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%') LIMIT 1`,
+           AND table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%') ORDER BY id LIMIT 1`,
         'uma sessão de mesa aberta'),
       // Dois dispositivos, e não um: a ficha mede-se num ACTIVO e a revogação
       // precisa de um que ainda não esteja revogado. Com um só, a segunda visita
       // media o ecrã de um aparelho que a primeira já tinha retirado.
-      deviceId: await um(sql, `SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%' AND estado = 'ACTIVO' LIMIT 1`, 'um dispositivo activo'),
-      deviceRevogavelId: await um(sql, `SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%' AND estado = 'PENDENTE' LIMIT 1`, 'um dispositivo por aprovar'),
+      deviceId: await um(sql, `SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%' AND estado = 'ACTIVO' ORDER BY nome, id LIMIT 1`, 'um dispositivo activo'),
+      deviceRevogavelId: await um(sql, `SELECT id FROM devices WHERE nome LIKE '${PREFIXO}%' AND estado = 'PENDENTE' ORDER BY nome, id LIMIT 1`, 'um dispositivo por aprovar'),
       // ── `LIMIT 1` sem ordem não é um alvo, é uma lotaria ─────────────────
       //
       // Isto era `numero LIKE '${PREFIXO}%' LIMIT 1`, e havia **nove** pedidos a
@@ -246,7 +246,7 @@ export async function resolverAlvos(): Promise<Alvos> {
       estacaoDeExpo: await um(
         sql,
         `SELECT id FROM production_stations
-          WHERE nome LIKE '${PREFIXO}%' AND tipo = 'EXPO' AND archived_at IS NULL LIMIT 1`,
+          WHERE nome LIKE '${PREFIXO}%' AND tipo = 'EXPO' AND archived_at IS NULL ORDER BY nome, id LIMIT 1`,
         'a estação de expo'),
       tarefaDeProducao: await um(
         sql,
@@ -257,7 +257,7 @@ export async function resolverAlvos(): Promise<Alvos> {
       mesaComQr: await um(
         sql,
         `SELECT id FROM service_tables
-          WHERE codigo LIKE '${PREFIXO}%' AND qr_segredo_hash IS NOT NULL LIMIT 1`,
+          WHERE codigo LIKE '${PREFIXO}%' AND qr_segredo_hash IS NOT NULL ORDER BY codigo, id LIMIT 1`,
         'uma mesa com QR emitido'),
       visitanteVivo: await um(
         sql,
@@ -270,7 +270,7 @@ export async function resolverAlvos(): Promise<Alvos> {
       esperaViva: await um(
         sql,
         `SELECT id FROM waitlist_entries
-          WHERE nome LIKE '${PREFIXO}%' AND estado = 'A_ESPERA' LIMIT 1`,
+          WHERE nome LIKE '${PREFIXO}%' AND estado = 'A_ESPERA' ORDER BY nome, id LIMIT 1`,
         'uma espera viva'),
       reservaDeHoje: await um(
         sql,
