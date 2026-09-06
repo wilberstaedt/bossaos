@@ -387,3 +387,31 @@ e três unidades.
 > a ver.** É a lição do dia inteiro virada contra o revisor — e a única razão de
 > não ter «consertado» a semeadura, o ambiente e as fixtures, todos sãos, foi ter
 > testado cada hipótese em vez de agir sobre ela.
+
+
+### Dívida 12, primeira metade paga: a mensagem passou a nomear as duas causas
+
+**06/09, 04h25.** A correcção que fiz **não foi a que eu esperava fazer**.
+
+O que me custou seis hipóteses não foi a dependência em si — foi a **mensagem de
+erro apontar para a causa errada**. Ela dizia apenas *«a semeadura da inspecção
+correu?»*, e a semeadura **tinha corrido**. O que faltava era o utilizador do
+arnês, que a semente não cria (usa o email só como valor de texto) e que nasce no
+projecto `preparar` do Playwright.
+
+Agora nomeia as duas, por ordem de probabilidade, com o comando de cada uma — e
+diz que **numa base fresca é quase sempre a primeira**.
+
+> **Uma mensagem de erro que nomeia a causa errada é pior do que uma mensagem
+> vaga:** manda quem depura para o sítio onde não há nada, e manda-o com
+> confiança. Uma vaga faz procurar; uma errada faz encontrar a coisa errada.
+
+**E provoquei-a para a ver renderizada** antes de a dar por feita. Escrever uma
+mensagem que nunca vi aparecer seria repetir, na correcção, o defeito que a
+correcção existe para resolver.
+
+**Fica por pagar a outra metade:** o `preparar` continua a ser um passo que
+alguém tem de saber correr. A hipótese natural — metê-lo no
+`base-de-revisao.sh` — obriga o servidor a estar de pé para uma reconstrução de
+base, e é caro para quem só quer o motor. **Não decido isto às 04h30**; fica
+registado para o E34 com as duas opções em cima da mesa.

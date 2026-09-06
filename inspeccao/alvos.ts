@@ -142,9 +142,31 @@ async function um(sql: Client, consulta: string, oQue: string): Promise<string> 
   if (!id) {
     // Falha ALTA. Sem isto, a medição seguia com `undefined` no endereço e
     // media a página de "não encontrado" em cinco larguras, a dizer verde.
+    //
+    // ── A MENSAGEM NOMEIA AS DUAS CAUSAS, e não só a primeira ────────────
+    //
+    // A 06/09 esta mensagem dizia apenas «a semeadura da inspecção correu?», e
+    // custou ao sénior SEIS hipóteses e quarenta minutos numa base fresca. A
+    // semeadura tinha corrido; o que faltava era o utilizador do arnês, que a
+    // semente NÃO cria — usa o email só como valor de texto — e que nasce no
+    // projecto `preparar` do Playwright.
+    //
+    // E este ficheiro é lido na RECOLHA, antes de qualquer projecto correr:
+    // numa base onde o `preparar` nunca passou, isto rebenta sempre, e o
+    // Playwright reporta «No tests found», que não aponta para nada.
+    //
+    // Uma mensagem de erro que nomeia a causa errada é pior do que uma
+    // mensagem vaga: manda quem depura para o sítio onde não há nada, com
+    // confiança.
     throw new Error(
-      `alvos: não encontrei ${oQue}. A semeadura da inspecção correu? ` +
-      'Sem este identificador as telas dessa família mediriam um 404.',
+      `alvos: não encontrei ${oQue}. Sem este identificador as telas dessa ` +
+      'família mediriam um 404.\n' +
+      'DUAS causas possíveis, por esta ordem:\n' +
+      '  1. o utilizador do arnês não existe — corre primeiro ' +
+      '`npx playwright test --project=preparar`. A semente NÃO o cria.\n' +
+      '  2. a semeadura da inspecção não correu — ' +
+      '`node --experimental-strip-types packages/db/prisma/semente-inspeccao.ts`\n' +
+      'Numa base fresca é quase sempre a primeira.',
     );
   }
   return id;
