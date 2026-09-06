@@ -25,7 +25,7 @@ if [[ "$NODE_ACTUAL" != "$NODE_ESPERADO" ]]; then
 fi
 
 GRUPOS_ESPERADOS=5
-CASOS_ESPERADOS=17
+CASOS_ESPERADOS=19
 falhas=0
 
 HOST=packages/db/src/host.ts

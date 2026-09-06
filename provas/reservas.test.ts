@@ -435,6 +435,46 @@ describe('6. A retenção expira por RELÓGIO, não por evento', () => {
     const { rows } = await sql.query(`SELECT estado FROM waitlist_entries WHERE id = $1`, [esperaId]);
     assert.equal(rows[0].estado, 'A_ESPERA');
   });
+
+  it('e o WORKER encontra a unidade onde há ofertas mortas', async () => {
+    // ── A função existia e ninguém a chamava ─────────────────────────────
+    //
+    // O `varrerRetencoesExpiradas` estava escrito, exportado e com este teste ao
+    // lado — e com ZERO chamadas no produto. Faltava a linha, não faltava o
+    // worker: o ciclo já corria o `varrerDescidas`.
+    //
+    // O que o worker precisa de saber é ONDE há trabalho, sem estar dentro de
+    // casa nenhuma. É o que esta função responde, e é o par positivo do
+    // controlo a seguir.
+    const esperaId = await comA((db) => entrarNaEspera(db, IDS.orgA, IDS.unidadeA, {
+      nome: `${PREFIXO}espera-do-worker`, contacto: 'w@inspeccao.example', pessoas: 2 }));
+    await comA((db) => chamarDaEspera(db, IDS.unidadeA, esperaId, mesa2Id, as(19), as(20, 30)));
+    await sql.query(`UPDATE waitlist_entries SET oferta_expira_em = now() - interval '1 minute'
+                      WHERE id = $1`, [esperaId]);
+
+    const { rows } = await sql.query(
+      'SELECT organization_id, location_id FROM unidades_com_retencoes_expiradas()');
+    assert.ok(rows.some((r: { location_id: string }) => r.location_id === IDS.unidadeA),
+      'o worker não encontraria a unidade com ofertas por expirar');
+
+    await comA((db) => varrerRetencoesExpiradas(db, IDS.unidadeA));
+    const depois = await sql.query(
+      'SELECT organization_id, location_id FROM unidades_com_retencoes_expiradas()');
+    assert.ok(!depois.rows.some((r: { location_id: string }) => r.location_id === IDS.unidadeA),
+      'depois de varrer, a unidade continua na lista — o ciclo seguinte varria a mesma coisa');
+  });
+
+  it('CONTROLO: o varrimento RECUSA-SE a responder de dentro de um inquilino', async () => {
+    // ── Sem isto, o enumerador era uma porta para o lado ─────────────────
+    //
+    // É a mesma regra do `descidas_devidas()`: um restaurante não pergunta quem
+    // MAIS tem ofertas por expirar. A recusa é da base, não da rota — e por isso
+    // vale para as consultas que ninguém escreveu ainda.
+    await assert.rejects(
+      () => comA((db) => db.$queryRaw`SELECT * FROM unidades_com_retencoes_expiradas()`),
+      (e: Error) => /não se faz de dentro de um inquilino/.test(String(e)),
+      'de dentro de um inquilino, o enumerador respondeu');
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

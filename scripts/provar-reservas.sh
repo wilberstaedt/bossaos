@@ -38,7 +38,7 @@ if [[ "$NODE_ACTUAL" != "$NODE_ESPERADO" ]]; then
 fi
 
 GRUPOS_ESPERADOS=12
-CASOS_ESPERADOS=35
+CASOS_ESPERADOS=37
 falhas=0
 
 RESERVAS=packages/db/src/reservas.ts

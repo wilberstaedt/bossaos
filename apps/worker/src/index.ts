@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { criarLogger, loadEnv, EnvError } from '@bossaos/config';
 import { obterPrisma, verificarBase } from '@bossaos/db';
 import { varrerDescidas } from './descidas.ts';
+import { varrerRetencoes } from './retencoes.ts';
 
 /**
  * Processo de fundo do BossaOS.
@@ -59,6 +60,19 @@ async function principal(): Promise<void> {
       // no escuro.
       const resumo = await varrerDescidas(prisma, ciclo);
       if (resumo.encontradas > 0) ciclo.info('worker: descidas', resumo as unknown as Record<string, unknown>);
+
+      // ── O segundo trabalho: as ofertas de espera que já passaram da hora ──
+      //
+      // A função existia desde o E18, exportada e com teste, e **ninguém a
+      // chamava no produto**. Faltava a linha, não faltava o worker.
+      //
+      // É higiene e não correcção — a capacidade já fica livre sem ela —, e é
+      // por isso que corre depois das descidas e não antes: se uma volta falhar,
+      // o que se perde são ofertas mortas num ecrã, não mesas bloqueadas.
+      const retencoes = await varrerRetencoes(prisma, ciclo);
+      if (retencoes.unidades > 0) {
+        ciclo.info('worker: retenções', retencoes as unknown as Record<string, unknown>);
+      }
     }
 
     await new Promise((r) => setTimeout(r, CICLO_MS));

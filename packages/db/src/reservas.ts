@@ -698,12 +698,24 @@ export async function registarNaoCompareceu(
   await db.reservationAllocation.deleteMany({ where: { reservationId: reservaId } });
 }
 
-export async function sentar(db: ClienteComEscopo, reservaId: string): Promise<void> {
-  await db.reservation.update({
-    where: { id: reservaId },
-    data: { estado: 'SENTADA', sentadaEm: new Date() },
-  });
-}
+// ── O `sentar` foi APAGADO, e o motivo é o que está escrito no que ficou ──
+//
+// Havia aqui um `sentar(db, reservaId)` que punha a reserva em `SENTADA` e mais
+// nada. Exportado, sem um único chamador no produto — e a rota que TEM um ramo
+// `accao === 'sentar'` chama o `sentarReserva` do `host.ts`, que é outra função
+// e não um alias.
+//
+// Não foi fundido com ele porque é a sua **metade perigosa**: mudava o estado
+// sem exigir que a pessoa tivesse chegado, sem ver se a mesa estava ocupada e
+// **sem abrir a sessão de mesa** — exactamente o que o comentário do
+// `sentarReserva` diz que não pode acontecer, «uma reserva sentada sem mesa
+// aberta, e o mapa da sala a mostrar livre uma mesa com gente lá».
+//
+// Fundi-lo preservava a armadilha com outro nome: quem fosse corrigir «a função
+// de sentar» encontrava duas, e a errada era a mais simples de chamar.
+//
+// O que ficou no lugar não é este comentário: é o caso em `provas/host.test.ts`
+// que exige que nenhuma reserva chegue a `SENTADA` sem sessão de mesa aberta.
 
 // ──────────────────────────────────────────────────────────────────────────
 // Lista de espera e retenção

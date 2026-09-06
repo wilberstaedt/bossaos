@@ -243,7 +243,7 @@ export {
   TENTATIVAS_DE_SERIALIZACAO,
   lerDefinicoes, guardarDefinicoes,
   ocupacaoNoIntervalo, mesasBloqueadas, disponibilidade, comensaisPorZona,
-  confirmarReserva, reagendar, cancelar, registarNaoCompareceu, sentar,
+  confirmarReserva, reagendar, cancelar, registarNaoCompareceu,
   varrerRetencoesExpiradas,
   listarTurnos, listarCapacidades, listarBloqueios, listarReservas,
   resolverHoraLocal, agoraDaBase, segredoDeGestao,

@@ -147,6 +147,61 @@ describe('2. Chegar NÃO é estar sentado', () => {
     assert.ok(depois?.sentadaEm);
   });
 
+  it('NENHUMA reserva fica SENTADA sem sessão de mesa aberta', async () => {
+    // ── O que ficou no lugar do `sentar` apagado ─────────────────────────
+    //
+    // Havia em `reservas.ts` um `sentar(db, reservaId)` que punha a reserva em
+    // `SENTADA` e mais nada: sem exigir chegada, sem ver a mesa ocupada, e
+    // **sem abrir a sessão**. Exportado, com zero chamadores — e a rota que tem
+    // um ramo `accao === 'sentar'` chama o `sentarReserva`, que é outra função.
+    //
+    // Apagá-lo não se prova por o `pnpm verificar` passar: isso prova que
+    // ninguém o chamava. O que se prova aqui é a PROPRIEDADE que ele violava —
+    // e é ela que impede que alguém volte a escrever a metade perigosa.
+    const r = await reservar(2, as(20));
+    await comA((db) => marcarChegada(db, r.reservaId));
+    const s = await comA((db) => sentarReserva(
+      db, IDS.orgA, IDS.unidadeA, r.reservaId, mesa2Id, ACTOR));
+    assert.ok(s.ok, 'não sentou');
+
+    const { rows } = await sql.query(
+      `SELECT r.id
+         FROM reservations r
+        WHERE r.location_id = $1 AND r.estado = 'SENTADA'
+          AND NOT EXISTS (
+            SELECT 1 FROM table_sessions t
+             WHERE t.location_id = r.location_id AND t.estado <> 'FECHADA')`,
+      [IDS.unidadeA]);
+    assert.equal(rows.length, 0,
+      'há reservas SENTADAS sem uma única sessão de mesa aberta — o mapa da sala '
+      + 'mostra livre uma mesa com gente lá');
+  });
+
+  it('CONTROLO: a metade perigosa do `sentar` faz a propriedade cair', async () => {
+    // O `sentar` apagado fazia exactamente este `update`. Replicá-lo aqui, numa
+    // reserva sem sessão de mesa, tem de fazer a asserção de cima cair — senão
+    // ela não estava a medir nada.
+    const r = await reservar(2, as(20));
+    await comA((db) => marcarChegada(db, r.reservaId));
+    await sql.query(
+      `UPDATE reservations SET estado = 'SENTADA', sentada_em = now() WHERE id = $1`,
+      [r.reservaId]);
+    await sql.query(
+      `UPDATE table_sessions SET estado = 'FECHADA', fechada_em = now()
+        WHERE location_id = $1 AND estado <> 'FECHADA'`, [IDS.unidadeA]);
+
+    const { rows } = await sql.query(
+      `SELECT r.id
+         FROM reservations r
+        WHERE r.location_id = $1 AND r.estado = 'SENTADA'
+          AND NOT EXISTS (
+            SELECT 1 FROM table_sessions t
+             WHERE t.location_id = r.location_id AND t.estado <> 'FECHADA')`,
+      [IDS.unidadeA]);
+    assert.ok(rows.length > 0,
+      'a metade perigosa não fez a propriedade cair — a asserção de cima é vazia');
+  });
+
   it('sentar quem NÃO chegou é recusado', async () => {
     const r = await reservar(2, as(20));
     const s = await comA((db) => sentarReserva(

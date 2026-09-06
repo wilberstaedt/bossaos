@@ -28,6 +28,56 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## Correcção 5 — o varredor ganhou quem o chame, e o `sentar` morto foi apagado
+
+**A pergunta era do sénior e a resposta veio com instrumento que funciona:** o
+`git grep -E` com `\b` dava zero para os dois, e **o `git grep` não suporta
+`\b`** — o zero era do instrumento. Com `-w`, nove ficheiros e três.
+
+### O varredor: faltava a linha, não faltava o worker
+
+`varrerRetencoesExpiradas` estava escrito, exportado e com teste — e com **zero
+chamadas no produto**. O `apps/worker/src/index.ts` já é um ciclo que varre e já
+corria o `varrerDescidas`.
+
+**O risco é baixo e sei-o por ler a função, não por supor:** a documentação dela
+distingue **higiene de correcção** — a capacidade já fica livre sem ela, porque a
+`ocupacaoNoIntervalo` compara `oferta_expira_em` com `now()`. O que ela evita é a
+lista de espera encher-se de ofertas mortas no ecrã de quem trabalha a sala. Quem
+a escreveu previu a pergunta e deixou lá a razão de a correcção não depender
+dela; ponto a favor, e é o que torna esta ligação segura.
+
+**Enumerar sem entrar em casa nenhuma**, na forma do `descidas_devidas()`: a
+`unidades_com_retencoes_expiradas()` é `SECURITY DEFINER` e **recusa-se a
+responder de dentro de um inquilino** — é isso que impede um restaurante de
+perguntar quem mais tem ofertas por expirar. E devolve só as unidades que **têm**
+trabalho: num ciclo vazio não se abre transacção nenhuma.
+
+**Provado:** o enumerador encontra a unidade, deixa de a listar depois de varrer
+(senão o ciclo seguinte varria a mesma coisa), e **o controlo mostra a recusa de
+dentro do inquilino**. `provar-reservas.sh` **0 falhas**, 37 casos.
+
+### O `sentar`: apagado, e não fundido
+
+`reservas.ts:701` estava exportado com **zero chamadores**. A rota tem um ramo
+`accao === 'sentar'` que **parece** o chamador e não é: chama `sentarReserva`, do
+`host.ts`, que é outra função e não um alias.
+
+**Apagado, não fundido, e o motivo está escrito no que ficou:** era a **metade
+perigosa** do `sentarReserva` — mudava o estado sem exigir que a pessoa tivesse
+chegado, sem ver se a mesa estava ocupada e **sem abrir a sessão de mesa**.
+Exactamente o que o comentário do `sentarReserva` diz que não pode acontecer:
+«uma reserva sentada sem mesa aberta, e o mapa da sala a mostrar livre uma mesa
+com gente lá». Fundi-lo preservava a armadilha com outro nome — quem fosse
+corrigir «a função de sentar» encontrava duas, e a errada era a mais simples.
+
+**O que prova que nada partiu não é o `pnpm verificar` passar** — isso prova que
+ninguém o chamava. O que ficou é um caso que exige a **propriedade que ele
+violava**: nenhuma reserva chega a `SENTADA` sem sessão de mesa aberta. E o
+controlo replica a metade perigosa e exige que a propriedade **caia** — senão a
+asserção era vazia. `provar-host.sh` **0 falhas**, 19 casos.
+
+
 ## Correcção 4 — a CI descobre as provas, e a lista de excepções caduca
 
 **O número da revisão estava errado e o sénior corrigiu-o antes de mo mandar**:
