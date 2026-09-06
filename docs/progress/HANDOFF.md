@@ -1,7 +1,7 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E32 — Integrações, API e cobrança do SaaS (**13 telas**).
-**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** E31 assinado a 06/09 em `90d4fe0`. Contrato `integracoes-e-cobranca-do-saas.md` e régua `ALVO-E32.md` escritos **antes** do código.
+**Etapa atual:** E33 — Administração da plataforma, suporte e governança (**19 telas**).
+**Estado:** **EM CURSO.** E32 assinado a 06/09 em `e13b318` (`docs/reviews/E32.md`). Contrato `plataforma-e-suporte.md` e régua `ALVO-E33.md` escritos **antes** do código.
 
 **O que muda:** é a primeira etapa em que **um estranho fala com o sistema sem
 passar por tela nenhuma** — chega um pedido com uma chave, ou um webhook de fora,
