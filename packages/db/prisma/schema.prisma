@@ -177,6 +177,14 @@ model Organization {
   sessoesDeKiosk KioskSession[]
   contactosDePedido OrderContact[]
   enviosDeImpressao PrintJob[]
+  chaves            ApiKey[]
+  webhooks          WebhookEndpoint[]
+  entregasDeWebhook WebhookDelivery[]
+  clienteSaas       SaasCustomer[]
+  eventosDeCobranca SaasBillingEvent[]
+  facturasSaas      SaasInvoice[]
+  integracoes       Integration[]
+  registosDeIntegracao IntegrationLog[]
   @@map("organizations")
   revisoes        MenuRevision[]
   publicacoes     MenuPublication[]
@@ -5222,4 +5230,230 @@ model PrintJob {
   @@unique([organizationId, identidade], name: "um_envio_por_identidade")
   @@index([organizationId, locationId, estado])
   @@map("print_jobs")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E32 · Integrações, API e cobrança do SaaS
+// ═══════════════════════════════════════════════════════════════════════════
+
+enum EscopoDeApi {
+  CATALOGO_LER
+  CATALOGO_ESCREVER
+  PEDIDOS_LER
+  PEDIDOS_ESCREVER
+  RELATORIOS_LER
+}
+
+enum EstadoDaEntrega {
+  POR_ENVIAR
+  ENTREGUE
+  FALHOU
+  DESISTIU
+}
+
+/// O estado de um evento de cobrança do SaaS.
+///
+/// `SEM_VINCULO` é o que decide a etapa: chegou, a assinatura confere, e **não
+/// há ligação nossa** para este cliente do provedor. Não é erro de ninguém — é
+/// a resposta certa a um evento que ninguém pediu. Fica parado e não muda nada.
+enum EstadoDoEventoDeCobranca {
+  RECEBIDO
+  SEM_VINCULO
+  APLICADO
+  RECUSADO
+}
+
+enum EstadoDaIntegracao {
+  DESLIGADA
+  CONFIGURADA
+  ACTIVA
+  ERRO
+}
+
+/// Uma chave de API (INT-008).
+///
+/// **Repare-se no que este modelo não tem: a chave.** Guarda-se o resumo, e o
+/// resumo não abre nada. Um ecrã que consiga mostrar outra vez uma chave antiga
+/// prova que ela está guardada em claro — e aqui não há onde a guardar.
+model ApiKey {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String        @map("organization_id") @db.Uuid
+  nome           String
+  /// Os primeiros caracteres, para a pessoa reconhecer a chave sem a ver.
+  prefixo        String
+  resumo         String        @unique
+  escopos        EscopoDeApi[]
+  /// **Obrigatório.** Uma chave sem prazo é uma chave para sempre, incluindo
+  /// depois de a pessoa que a criou sair da empresa.
+  expiraEm       DateTime      @map("expira_em") @db.Timestamptz(6)
+  revogadaEm     DateTime?     @map("revogada_em") @db.Timestamptz(6)
+  revogadaPor    String?       @map("revogada_por")
+  criadaPor      String        @map("criada_por")
+  criadaEm       DateTime      @default(now()) @map("criada_em") @db.Timestamptz(6)
+  ultimoUsoEm    DateTime?     @map("ultimo_uso_em") @db.Timestamptz(6)
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  registos     IntegrationLog[]
+
+  @@index([organizationId, revogadaEm])
+  @@map("api_keys")
+}
+
+model WebhookEndpoint {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  url            String
+  segredoResumo  String   @map("segredo_resumo")
+  eventos        String[]
+  activo         Boolean  @default(true)
+  criadoPor      String   @map("criado_por")
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  entregas     WebhookDelivery[]
+
+  @@index([organizationId, activo])
+  @@map("webhook_endpoints")
+}
+
+model WebhookDelivery {
+  id             String          @id @default(uuid()) @db.Uuid
+  organizationId String          @map("organization_id") @db.Uuid
+  endpointId     String          @map("endpoint_id") @db.Uuid
+  evento         String
+  /// A versão viaja com a entrega: um consumidor que receba um corpo novo sem
+  /// saber que o formato mudou parte em silêncio.
+  versao         Int             @default(1)
+  /// O identificador que o consumidor usa para descartar repetições.
+  entregaId      String          @default(uuid()) @map("entrega_id") @db.Uuid
+  corpo          String
+  assinatura     String
+  estado         EstadoDaEntrega @default(POR_ENVIAR)
+  tentativas     Int             @default(0)
+  criadoEm       DateTime        @default(now()) @map("criado_em") @db.Timestamptz(6)
+  entregueEm     DateTime?       @map("entregue_em") @db.Timestamptz(6)
+  respostaEstado Int?            @map("resposta_estado")
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  endpoint     WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, entregaId], name: "uma_entrega_por_identificador")
+  @@index([organizationId, estado])
+  @@map("webhook_deliveries")
+}
+
+/// A LIGAÇÃO entre um cliente do provedor e uma organização.
+///
+/// **É esta tabela que autoriza.** O corpo do webhook não autoriza nada: no
+/// máximo sugere, e a sugestão confirma-se contra o que já sabemos. Foi criada
+/// por alguém autenticado, do nosso lado.
+model SaasCustomer {
+  id                String   @id @default(uuid()) @db.Uuid
+  organizationId    String   @map("organization_id") @db.Uuid
+  provedor          String
+  provedorClienteId String   @map("provedor_cliente_id")
+  criadoPor         String   @map("criado_por")
+  criadoEm          DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([provedor, provedorClienteId], name: "um_cliente_por_provedor")
+  @@unique([organizationId, provedor], name: "uma_ligacao_por_organizacao")
+  @@map("saas_customers")
+}
+
+/// O evento de cobrança, como chegou.
+///
+/// ── Repare-se no que este modelo NÃO tem ──────────────────────────────────
+///
+/// Não tem `organizationId` que o webhook possa preencher. Tem
+/// `organizationIdAlegado` — o que o corpo *disse*, guardado para se poder
+/// comparar e denunciar — e `organizationIdResolvido`, que **só a função
+/// privilegiada escreve**, e sempre a partir da `saas_customers`.
+model SaasBillingEvent {
+  id                      String                   @id @default(uuid()) @db.Uuid
+  provedor                String
+  provedorEventoId        String                   @map("provedor_evento_id")
+  tipo                    String
+  /// O cliente VERIFICADO no provedor. É por aqui, e só por aqui, que se resolve.
+  provedorClienteId       String                   @map("provedor_cliente_id")
+  /// O plano vem do corpo, e isso está certo: a assinatura autentica a ORIGEM.
+  /// O que ela não faz é autorizar o ALVO.
+  planoCodigo             String?                  @map("plano_codigo")
+  organizationIdAlegado   String?                  @map("organization_id_alegado") @db.Uuid
+  organizationIdResolvido String?                  @map("organization_id_resolvido") @db.Uuid
+  corpoCru                String                   @map("corpo_cru")
+  assinaturaConfere       Boolean                  @map("assinatura_confere")
+  estado                  EstadoDoEventoDeCobranca @default(RECEBIDO)
+  motivo                  String?
+  recebidoEm              DateTime                 @default(now()) @map("recebido_em") @db.Timestamptz(6)
+  resolvidoEm             DateTime?                @map("resolvido_em") @db.Timestamptz(6)
+
+  organizacaoResolvida Organization? @relation(fields: [organizationIdResolvido], references: [id], onDelete: SetNull)
+
+  @@unique([provedor, provedorEventoId], name: "um_evento_por_identidade_do_provedor")
+  @@index([estado, recebidoEm])
+  @@map("saas_billing_events")
+}
+
+/// A assinatura que o RESTAURANTE nos paga (ORG-011).
+///
+/// Não há chave estrangeira nenhuma entre esta família e a do E22 — o jantar do
+/// cliente —, e é de propósito. **São duas contabilidades e não se tocam.**
+model SaasInvoice {
+  id                String    @id @default(uuid()) @db.Uuid
+  organizationId    String    @map("organization_id") @db.Uuid
+  provedor          String
+  provedorFacturaId String    @map("provedor_factura_id")
+  numero            String
+  montanteMenor     Int       @map("montante_menor")
+  moeda             String    @db.Char(3)
+  estado            String
+  emitidaEm         DateTime  @map("emitida_em") @db.Timestamptz(6)
+  pagaEm            DateTime? @map("paga_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([provedor, provedorFacturaId], name: "uma_factura_por_provedor")
+  @@index([organizationId, emitidaEm])
+  @@map("saas_invoices")
+}
+
+model Integration {
+  id             String             @id @default(uuid()) @db.Uuid
+  organizationId String             @map("organization_id") @db.Uuid
+  familia        String
+  provedor       String
+  estado         EstadoDaIntegracao @default(DESLIGADA)
+  /// O que falta para ela funcionar, em palavras. `DESLIGADA` sem requisitos é
+  /// um beco: quem lê não sabe o que fazer a seguir.
+  requisitos     String?
+  ultimoErro     String?            @map("ultimo_erro")
+  actualizadaEm  DateTime           @default(now()) @map("actualizada_em") @db.Timestamptz(6)
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  registos     IntegrationLog[]
+
+  @@unique([organizationId, familia, provedor], name: "uma_integracao_por_provedor")
+  @@map("integrations")
+}
+
+/// O que aconteceu numa integração (INT-010). **Sem segredos.**
+model IntegrationLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  integrationId  String?  @map("integration_id") @db.Uuid
+  /// QUEM chamou. A chave identifica-se pelo id, **nunca pelo valor**.
+  apiKeyId       String?  @map("api_key_id") @db.Uuid
+  accao          String
+  resultado      String
+  detalhe        Json     @default("{}")
+  ocorridoEm     DateTime @default(now()) @map("ocorrido_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  integracao   Integration? @relation(fields: [integrationId], references: [id], onDelete: SetNull)
+  chave        ApiKey?      @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, ocorridoEm(sort: Desc)])
+  @@map("integration_logs")
 }

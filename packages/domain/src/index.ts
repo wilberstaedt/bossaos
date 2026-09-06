@@ -187,3 +187,8 @@ export {
   marcaDaVia, renderizarComanda,
   type EnvioDeImpressao, type LeituraDeImpressao, type LinhaDeTalao,
 } from './impressao.ts';
+
+export {
+  ESCOPOS, destinoPermitido, doisDinheiros, estadoDaChave, redigir, temEscopo,
+  type DoisDinheiros, type Escopo, type EstadoDaChave,
+} from './integracoes.ts';

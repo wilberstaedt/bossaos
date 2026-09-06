@@ -373,3 +373,11 @@ export {
   apagarPessoaNoKiosk, comecarNoKiosk, estadoParaOEcra, kioskDoAparelho,
   ligarPessoaNoKiosk, terminarNoKiosk, type KioskPublico,
 } from './kiosk-publico.ts';
+
+export {
+  RecusaDaIntegracao, aplicarEventoDeCobranca, assinarCorpo, criarChave,
+  criarEndpoint, declararIntegracao, enfileirarEntrega, facturasDoSaas,
+  ligarClienteSaas, listarChaves, listarIntegracoes, receberEventoDeCobranca,
+  registosDaIntegracao, resumirChave, revogarChave, seguroParaSeguir,
+  verificarChave, type RecusaDeIntegracao,
+} from './integracoes.ts';
