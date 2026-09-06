@@ -28,6 +28,43 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## Correcção 2 do E34 — o pt-BR misturava duas ortografias
+
+**Fechada.** Não era preferência de ninguém: o ficheiro divergia **do próprio
+padrão**. Medi antes de mexer e as contagens do sénior confirmam-se —
+`activ` 7 contra `ativ` 34, `contacto` 3 contra `contato` 7, `excepç` 1 contra
+`exceç` 5.
+
+**Onze chaves, e a minha varredura mais larga não encontrou mais nenhuma.**
+Procurei também `óptim`, `acto`, `adopt`, `objecto`, `direc(c|ç)`,
+`proje(c|ç)t` — o conjunto fechou exactamente nas onze que ele nomeou.
+
+| depois | |
+|---|---|
+| `activ` **0** | → `ativ` 41 |
+| `contacto` **0** | → `contato` 10 |
+| `excepç` **0** | → `exceç` 6 |
+
+**Só valores, nunca nomes de chave.** `staffE15.dispositivosActivos` **é** o nome
+da chave e fica como está: as três línguas partilham o conjunto, e um `sed` de
+`activ` pelo ficheiro fora teria partido o pt-BR contra os outros dois. Por isso
+a troca foi sobre a cadeia inteira de cada valor.
+
+**Confirmado depois:** as **2344 chaves** continuam idênticas nas três línguas, e
+o `git diff` toca **um só ficheiro** — `es-ES` e `en` não foram abertos.
+
+**E a sonda da ortografia prova-se a si própria:** zero achados lê-se de duas
+maneiras — «está limpo» e «o detector está cego» —, e escrevem-se igual. Com
+«Dispositivos activos» replantado, a sonda apanha **1**, e nomeia a chave.
+
+`packages/i18n` **19 casos, 0 falhas** (inclui «os três idiomas têm exactamente
+as mesmas chaves») · `pnpm verificar` **0**.
+
+**Fica dito, e não fiz:** nada impede a regressão. A paridade de **chaves** é
+guarda; a **ortografia** de cada língua não é medida por ninguém. É uma dúzia de
+linhas no `i18n.test.ts` se quiseres — não avancei por ser lista delimitada.
+
+
 ## Correcção 1 do E34, encaminhada a mim — o fecho de caixa duplo
 
 **Fechado.** O `fecharCaixa` lia o estado, fazia cinco validações e só depois
