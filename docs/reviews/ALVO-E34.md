@@ -23,7 +23,7 @@ precisa de ser **executável**, não uma pilha.
 | 7 | Código de verificação no pacote | **medida**: as 8 chegam ao pacote. Decisão de as tirar fica aberta | JR |
 | 8 | Assinaturas na pasta antiga | **paga** — e era pior: três diziam-se à espera | eu |
 | 9 | `larguras.spec.ts` parece global e não é | **resolvida** — o defeito era a alegação, não a cobertura: o ficheiro passa a dizer que cobre as seis cascas | eu |
-| 10 | O meu `git add -A`, duas vezes | **regra escrita**: caminhos explícitos, sempre | eu |
+| 10 | O meu `git add`, **três** vezes | **regra corrigida a 06/09**: `git commit -- <caminhos>`. Caminhos explícitos no `add` não chegam — o índice já pode ter coisas | eu |
 | 11 | RLS: `custom_domain_owners` | **decidida, por executar** — apagar, não proteger | JR |
 | 12 | Provas de navegador não auto-contidas | **meia** — mensagem corrigida e `arnes-pronto.sh` escrito; falta ligá-lo aos 20 guiões | eu |
 
@@ -530,3 +530,29 @@ lado do servidor.
 **Fica aberta a decisão, não a medição:** o peso é real e a superfície do
 `sessoesVivas` e do `leadsDaUnidade` também. Tirar as barricas de re-exportação
 resolve, e é mudança de produto — do JR, com verificação minha.
+
+
+## Dívida 10, terceira ocorrência — e a regra que eu tinha era insuficiente
+
+**06/09, 05h30.** A `validar-ordem.sh` acusou o commit `5b0f0cf`, o do contrato
+do E33. Ele levou trabalho do JR: rotas do kiosk, rotas de impressoras e o
+`alergenios.ts`.
+
+**E eu usei caminhos explícitos no `git add`.** Foi essa a regra que escrevi
+depois das duas primeiras vezes, e ela **não chega**:
+
+> `git add <caminhos>` acrescenta esses caminhos — mas **o que já estava no
+> índice fica lá e vai no commit à mesma**. Caminhos explícitos protegem contra
+> acrescentar a coisa errada; não protegem contra o que já está preparado.
+
+E o índice é estado partilhado entre dois agentes na mesma árvore. Qualquer coisa
+que ele tenha feito `git add` fica à espera do primeiro `git commit` — que pode
+ser o meu.
+
+**A regra que fica, e esta é verificável:** `git commit -F msg -- <caminhos>`. Com
+os caminhos **no commit**, e não só no add, o que está no índice é ignorado.
+
+> **Terceira vez, e as duas primeiras produziram uma regra que parecia resolver e
+> não resolvia.** É a forma do dia aplicada às minhas próprias regras: uma
+> correcção que não foi verificada contra o mecanismo real é uma correcção que
+> tranquiliza sem proteger.
