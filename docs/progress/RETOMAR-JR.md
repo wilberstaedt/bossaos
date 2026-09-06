@@ -223,6 +223,58 @@ feita há uma hora.
   `PRECIFICACAO.json`, em cêntimos inteiros. **Quem tocar na LP lê de lá**, e a
   `validar-precos.sh` reprova um preço escrito à mão numa tela.
 
+## O que aterrou entre o E18 e o E33, e uma sessão nova não pode redescobrir
+
+Escrito a 06/09 às 08h00, com o atlas fechado — **396/396 telas validadas**, 34
+de 36 etapas. Isto é o que custou a noite a aprender e o que uma sessão nova
+repetiria do zero.
+
+### As quatro regras que saíram desta noite
+
+**1. Nenhuma pergunta sobre uso se responde só em TypeScript.** A 03h mandei
+apagar a `custom_domain_owners` como «esquema sem uso»: zero chamadores num
+`grep` de TypeScript. O chamador existia — `vincular_dominio`, `SECURITY
+DEFINER`, dentro de uma migração. **Tu foste verificar a premissa em vez de
+executar, e foi isso que salvou a defesa contra um restaurante ficar com o
+domínio de outro.** Continua a fazê-lo. O `varrer-alcance-da-etapa.sh` já lê
+`.sql`; o `grep` de circunstância é que não lê, e é sempre o `grep` que mente.
+
+**2. As guardas liam a bancada; o que se publica é o commit.** Um defeito
+plantado para controlo negativo foi reposto na bancada e não commitado — duas
+vezes, E32 e E33, com um commit pelo meio a corrigir a primeira. As 27 guardas
+verdes sobre a árvore, o HEAD vermelho. **Corre `scripts/validar-no-commit.sh`
+antes de declarar uma etapa.** O controlo negativo dele é a própria história
+deste repositório: exige vermelho no `de3eb52` e verde no `e13b318`.
+
+**3. Ler prosa vale quando a prosa É o artefacto; é defeito quando substitui um
+mecanismo.** O `validar-jornada` dizia «há controlo negativo» por causa de um
+**comentário**. Estava verde por sorte. Agora mede a alavanca — a variável que o
+corredor põe numa corrida e não põe noutra.
+
+**4. Copiar a forma de um padrão que funcionou exige voltar a verificar a
+razão.** É a tua própria frase, do fecho do E33: a identidade do trabalho
+copiou a forma da `print_jobs` do E31, onde funciona **porque o alvo é um
+UUID**. Aqui era texto livre, e a propriedade não transferiu. Duas casas
+colidiam.
+
+### E uma que é do sénior, e serve-te na mesma
+
+**Sem uma sonda que TEM de entrar, quatro recusas seguidas passam por prova.**
+Três vezes nesta noite as minhas sondas mediram o meu próprio erro — um `cast`
+errado, um nome de coluna errado, um filtro de limpeza errado — e todas as vezes
+foi o **controlo positivo** que apanhou. Escreve sempre o caso que deve passar,
+ao lado dos que devem falhar.
+
+### O estado, em três linhas
+
+- **E33 validado** a 06/09 pelo sénior (`docs/reviews/E33.md`). O atlas fechou.
+- **Falta o E34** (é do sénior, não teu) e o **E35 — implantação e piloto**, que
+  é o teu. Contrato `docs/architecture/implantacao-e-piloto.md` e régua
+  `docs/reviews/ALVO-E35.md`, os dois escritos **antes** do código.
+- **Há um documento novo, o `docs/RV100.md`**, deixado pelo Matheus: reconstrução
+  visual e comercial. **Não é teu** e não lhe toques — tem um portão de aprovação
+  humana e o sénior está a tratar do diagnóstico. Se o vires referido, é isso.
+
 ## Notas para o sénior (não colar)
 
 - O terminal do JR é `F17A8F91-337F-428E-A6C6-438922559E0C`; o boot normal dele é
