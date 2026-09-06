@@ -126,6 +126,34 @@ E há um detalhe de medição que já me apanhou hoje e que fica escrito aqui:
 é visível ao resto da instrução que a desencadeou — a contagem faz-se **depois**,
 noutra instrução, ou lê-se zero e conclui-se um defeito que não existe.
 
+### O que a leitura da corrida já mostrou, antes de a prova existir
+
+Segui a rota do suporte e encontrei a janela. A rota tem **duas** recusas com
+significados diferentes:
+
+```
+:72   catch → 403   quando a verificação explícita da concessão recusa
+:66   if (!dados) → 404 'nao_encontrado'   quando a função devolve vazio
+```
+
+E a função devolve vazio em **três** casos: a sessão não é do agente actual, o
+pedido é de outra casa, **ou a concessão morreu entre a verificação e a chamada.**
+
+Os dois primeiros são 404 legítimo — não se revela a existência de coisas de
+outra casa. **O terceiro não é.** Na janela da corrida, uma recusa de *permissão*
+sai vestida de *inexistência*, e é exactamente o que a régua da J15 proíbe
+confundir.
+
+**Não leva a fuga de dados** — não sai nada. O que sai errado é o **motivo**, e o
+motivo é o que quem lê o registo precisa para distinguir «o teu acesso acabou» de
+«enganaste-te no identificador».
+
+**Portanto o cenário do acesso tem um terceiro invariante:** quando a verificação
+explícita passou e a função devolveu vazio, a resposta **não pode ser a mesma** que
+se dá a um identificador inventado. Duas causas diferentes, duas respostas
+diferentes — a mesma regra que o JR me ensinou na J15 quando recusou dar a mesma
+razão às duas recusas dele.
+
 ## O que me faz reprovar sem discussão
 
 - Um disparo em que o segundo espera pela resposta do primeiro.
