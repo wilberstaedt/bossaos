@@ -389,3 +389,12 @@ export {
 export {
   autorizarChave, comOEscopoDaChave, registarChamadaPublica, type Autorizado,
 } from './api-publica.ts';
+
+export {
+  RecusaDePlataforma, abrirPedidoDeAjuda, abrirSessaoDeSuporte, auditoriaDaCasa,
+  concederCapacidade, denuncias, enfileirarTrabalho, guardarPoliticaDeAcesso,
+  guardarPoliticaDeRetencao, incidentesPublicos, incidentesTodos,
+  pedidosDeAjuda, politicaDeAcesso, politicaDeRetencao, reprocessarTrabalho,
+  segredosDaPlataforma, sessaoAutoriza, sessoesDaCasa, terminarSessaoDeSuporte,
+  trabalhosDaPlataforma, type RecusaDaPlataforma,
+} from './plataforma-suporte.ts';

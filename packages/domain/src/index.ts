@@ -192,3 +192,9 @@ export {
   ESCOPOS, destinoPermitido, doisDinheiros, estadoDaChave, redigir, temEscopo,
   type DoisDinheiros, type Escopo, type EstadoDaChave,
 } from './integracoes.ts';
+
+export {
+  AMBITOS, NUNCA_ATRAS_DO_PLANO, ambitoChega, eUmaPessoa, estadoDaSessao,
+  identidadeDeTrabalho, mostrarSegredo, podeFicarAtrasDoPlano, sessaoViva,
+  type AmbitoDeSuporte, type EstadoDaSessao, type SegredoVisivel,
+} from './plataforma.ts';

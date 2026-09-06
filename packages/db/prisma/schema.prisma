@@ -185,6 +185,12 @@ model Organization {
   facturasSaas      SaasInvoice[]
   integracoes       Integration[]
   registosDeIntegracao IntegrationLog[]
+  sessoesDeSuporte  SupportSession[]
+  politicaDeAcesso  AccessPolicy?
+  trabalhos         PlatformJob[]
+  pedidosDeAjuda    HelpTicket[]
+  denuncias         AbuseReport[]
+  politicaDeRetencao RetentionPolicy?
   @@map("organizations")
   revisoes        MenuRevision[]
   publicacoes     MenuPublication[]
@@ -410,6 +416,7 @@ model User {
   convitesFeitos Invitation[] @relation("convidadoPor")
   plataforma     PlatformStaff?
 
+  sessoesDeSuporte SupportSession[]
   @@map("users")
 }
 
@@ -5456,4 +5463,175 @@ model IntegrationLog {
 
   @@index([organizationId, ocorridoEm(sort: Desc)])
   @@map("integration_logs")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// E33 · Plataforma, suporte e governança
+// ═══════════════════════════════════════════════════════════════════════════
+
+enum AmbitoDeSuporte {
+  LEITURA
+  CONFIGURACAO
+  DADOS_OPERACIONAIS
+}
+
+enum EstadoDoTrabalho {
+  PENDENTE
+  A_CORRER
+  CONCLUIDO
+  FALHOU
+}
+
+enum EstadoDoIncidente {
+  ABERTO
+  A_INVESTIGAR
+  MITIGADO
+  FECHADO
+}
+
+enum EstadoDoPedidoDeAjuda {
+  ABERTO
+  EM_CURSO
+  RESPONDIDO
+  FECHADO
+}
+
+/// Uma sessão de suporte: **temporária, visível ao inquilino, com âmbito e com
+/// motivo**. As quatro, e nenhuma é decorativa.
+///
+/// Repare-se no que este modelo **não tem**: uma coluna `activa`. Estar activa
+/// deriva de não ter fim e não ter expirado. Um booleano seria um estado que
+/// alguém escreve — e o que alguém escreve, alguém esquece de reescrever.
+model SupportSession {
+  id             String            @id @default(uuid()) @db.Uuid
+  organizationId String            @map("organization_id") @db.Uuid
+  /// A PESSOA, e não o papel. «Suporte» não responde a *quem fez isto*.
+  staffUserId    String            @map("staff_user_id") @db.Uuid
+  staffEmail     String            @map("staff_email")
+  motivo         String
+  ambito         AmbitoDeSuporte[]
+  abertaEm       DateTime          @default(now()) @map("aberta_em") @db.Timestamptz(6)
+  /// **Obrigatório.** Uma sessão que termina «quando alguém se lembra» é
+  /// permanente na prática.
+  expiraEm       DateTime          @map("expira_em") @db.Timestamptz(6)
+  terminadaEm    DateTime?         @map("terminada_em") @db.Timestamptz(6)
+  terminadaMotivo String?          @map("terminada_motivo")
+  consentidaPor  String?           @map("consentida_por")
+  consentidaEm   DateTime?         @map("consentida_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  staff        User         @relation(fields: [staffUserId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, abertaEm(sort: Desc)])
+  @@map("support_sessions")
+}
+
+/// A política de acesso — **do inquilino**. Há casas que aceitam entrada sem
+/// pedir; há casas que exigem consentimento a cada vez. A política é delas.
+model AccessPolicy {
+  organizationId     String   @id @map("organization_id") @db.Uuid
+  exigeConsentimento Boolean  @default(false) @map("exige_consentimento")
+  /// O tecto que a casa aceita. O suporte pode pedir menos; nunca mais.
+  duracaoMaximaMin   Int      @default(60) @map("duracao_maxima_min")
+  actualizadaEm      DateTime @default(now()) @map("actualizada_em") @db.Timestamptz(6)
+  actualizadaPor     String?  @map("actualizada_por")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("access_policies")
+}
+
+/// Um segredo da plataforma — **e não há coluna para o valor**.
+///
+/// Não é uma coluna mascarada: o valor vive no ambiente autorizado. Uma coluna
+/// com `••••••` no ecrã é uma coluna com o segredo lá dentro.
+model PlatformSecret {
+  id            String    @id @default(uuid()) @db.Uuid
+  nome          String    @unique
+  descricao     String
+  /// Se a variável de ambiente está presente. Um booleano, e não o valor.
+  configurado   Boolean   @default(false)
+  rodadoEm      DateTime? @map("rodado_em") @db.Timestamptz(6)
+  rodadoPor     String?   @map("rodado_por")
+  actualizadoEm DateTime  @default(now()) @map("actualizado_em") @db.Timestamptz(6)
+
+  @@map("platform_secrets")
+}
+
+model PlatformJob {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String?          @map("organization_id") @db.Uuid
+  tipo           String
+  alvo           String
+  /// Derivada por gatilho. Reprocessar é normal; reprocessar duas vezes o mesmo
+  /// efeito é que não.
+  identidade     String           @unique
+  tentativa      Int              @default(1)
+  estado         EstadoDoTrabalho @default(PENDENTE)
+  erro           String?
+  criadoEm       DateTime         @default(now()) @map("criado_em") @db.Timestamptz(6)
+  terminadoEm    DateTime?        @map("terminado_em") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("platform_jobs")
+}
+
+model HelpTicket {
+  id             String                @id @default(uuid()) @db.Uuid
+  organizationId String                @map("organization_id") @db.Uuid
+  assunto        String
+  corpo          String
+  abertoPor      String                @map("aberto_por")
+  estado         EstadoDoPedidoDeAjuda @default(ABERTO)
+  criadoEm       DateTime              @default(now()) @map("criado_em") @db.Timestamptz(6)
+  respondidoEm   DateTime?             @map("respondido_em") @db.Timestamptz(6)
+  respondidoPor  String?               @map("respondido_por")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, criadoEm(sort: Desc)])
+  @@map("help_tickets")
+}
+
+/// Um incidente da plataforma. **Público por omissão**: um incidente que só nós
+/// vemos é um incidente que o cliente descobre pelo telefone dele a tocar.
+model PlatformIncident {
+  id        String            @id @default(uuid()) @db.Uuid
+  titulo    String
+  resumo    String
+  estado    EstadoDoIncidente @default(ABERTO)
+  publico   Boolean           @default(true)
+  comecouEm DateTime          @default(now()) @map("comecou_em") @db.Timestamptz(6)
+  fechadoEm DateTime?         @map("fechado_em") @db.Timestamptz(6)
+
+  @@map("platform_incidents")
+}
+
+model AbuseReport {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  origem         String
+  motivo         String
+  resolvidoEm    DateTime? @map("resolvido_em") @db.Timestamptz(6)
+  resolvidoPor   String?   @map("resolvido_por")
+  criadoEm       DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("abuse_reports")
+}
+
+/// A retenção, por inquilino. **Nulo é «não decidido», e não «para sempre».**
+model RetentionPolicy {
+  organizationId String   @id @map("organization_id") @db.Uuid
+  diasPedidos    Int?     @map("dias_pedidos")
+  diasClientes   Int?     @map("dias_clientes")
+  diasAuditoria  Int?     @map("dias_auditoria")
+  actualizadaEm  DateTime @default(now()) @map("actualizada_em") @db.Timestamptz(6)
+  actualizadaPor String?  @map("actualizada_por")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("retention_policies")
 }

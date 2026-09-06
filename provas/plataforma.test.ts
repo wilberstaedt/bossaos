@@ -1,30 +1,26 @@
-import { after, before, describe, it } from 'node:test';
+import { after, before, beforeEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from 'pg';
 import {
-  comEscopo, comIdentidade, concessoesDaPlataforma, ePlataforma, flagsDaPlataforma,
-  obterPrisma, organizacaoDaPlataforma, organizacoesDaPlataforma,
+  RecusaDePlataforma, abrirSessaoDeSuporte, comEscopo, concederCapacidade,
+  enfileirarTrabalho, guardarPoliticaDeAcesso, obterPrisma, reprocessarTrabalho,
+  segredosDaPlataforma, sessaoAutoriza, sessoesDaCasa, terminarSessaoDeSuporte,
 } from '../packages/db/src/index.ts';
 import { IDS } from '../packages/db/prisma/fixtures.ts';
 
 /**
- * A superfície interna de plataforma (PLAT-002, 003, 004, 006, 010, 011).
+ * E33 — plataforma, suporte e governança.
  *
- * ── O que a decide ──────────────────────────────────────────────────────────
+ * ── A etapa em que o atacante somos NÓS ───────────────────────────────────
  *
- * **O par**, como em todas as etapas anteriores. A leitura que atravessa
- * inquilinos é exactamente a que o E03 existe para recusar, e por isso não
- * chega provar que ela funciona para quem é da plataforma nem que rebenta para
- * quem não é:
+ * Todas as outras deram poder a quem trabalha na casa. Esta dá-o a quem vende o
+ * sistema. **Até aqui protegemos o restaurante de enganos e de estranhos; aqui
+ * protegemo-lo de nós.**
  *
- *   1. com o Diogo (staff) → devolve as duas organizações;
- *   2. com a Ana (cliente) → **rebenta**, e a mensagem não diz o que existe.
- *
- * Só (2) passaria num sistema que rebentasse para toda a gente e não mostrasse
- * nada a ninguém, que é uma superfície de plataforma que não serve para nada.
- *
- * E a Ana **é dona de uma organização** — não é uma estranha. É essa a diferença
- * que interessa: ser dona da sua não a torna dona da plataforma.
+ * O grupo 1 decide: uma sessão que só termina quando alguém se lembra é
+ * permanente na prática. O grupo 3 é o aceite do sénior: a fronteira do E05 tem
+ * de sobreviver a esta etapa — a que traz a interface de escrita das concessões
+ * e teria mais tentação de a abrir pelo lado de dentro.
  */
 
 const RUNTIME = process.env.DATABASE_URL;
@@ -34,133 +30,397 @@ if (!RUNTIME || !MIG) throw new Error('DATABASE_URL e MIGRATION_DATABASE_URL em 
 let sql: Client;
 let prisma: ReturnType<typeof obterPrisma>;
 
-const comoStaff = <T>(fn: Parameters<typeof comIdentidade<T>>[2]) =>
-  comIdentidade(prisma, IDS.utilizadorPlataforma, fn);
-const comoCliente = <T>(fn: Parameters<typeof comIdentidade<T>>[2]) =>
-  comIdentidade(prisma, IDS.utilizadorA, fn);
+const PREFIXO = 'e33-';
+const MOTIVO = 'o cliente reportou pedidos a desaparecer da fila da cozinha';
+const comA = <T>(fn: Parameters<typeof comEscopo<T>>[2]) =>
+  comEscopo(prisma, { organizationId: IDS.orgA, userId: IDS.utilizadorA }, fn);
+
+async function limpar() {
+  await sql.query(`DELETE FROM support_sessions WHERE motivo LIKE '%${PREFIXO}%' OR motivo = $1`, [MOTIVO]);
+  await sql.query(`DELETE FROM platform_jobs WHERE tipo LIKE '${PREFIXO}%'`);
+  await sql.query(`DELETE FROM platform_secrets WHERE nome LIKE '${PREFIXO.toUpperCase()}%'`);
+  // ── A auditoria NÃO se limpa, e isso é a garantia a funcionar ─────────
+  //
+  // Tentei apagá-la aqui, e a base recusou: «audit_events e append-only, DELETE
+  // nao e permitido». Um registo de auditoria que se pode apagar não é um
+  // registo de auditoria — e a prova de uma etapa sobre governança seria o
+  // último sítio onde isso devia ser possível.
+  //
+  // As linhas ficam. Cada caso mede as SUAS pelo identificador do que criou, e
+  // não por contagens absolutas — a lição do E29, onde uma prova contava linhas
+  // partilhadas e partia quando outra semente crescia.
+  await sql.query(`DELETE FROM entitlement_grants WHERE motivo = $1`, [MOTIVO]);
+  await sql.query(`DELETE FROM plan_capabilities WHERE capacidade LIKE '${PREFIXO}%'`);
+  await sql.query(`DELETE FROM access_policies WHERE organization_id = $1`, [IDS.orgA]);
+  await sql.query(`DELETE FROM platform_staff WHERE motivo LIKE '${PREFIXO}%'`);
+}
 
 before(async () => {
   sql = new Client({ connectionString: MIG });
   await sql.connect();
   prisma = obterPrisma(RUNTIME);
+  await limpar();
 });
-
+beforeEach(async () => { await limpar(); await tornarPessoalDaPlataforma(); });
 after(async () => {
-  await sql.end();
-  await prisma.$disconnect();
+  try { await limpar(); } catch (e) { console.error('limpeza:', e); }
+  finally { await sql.end(); await prisma.$disconnect(); }
 });
 
-describe('1. O par: quem é da plataforma vê, quem é cliente não', () => {
-  it('o staff vê as organizações TODAS, e são mais do que uma', async () => {
-    const orgs = await comoStaff((db) => organizacoesDaPlataforma(db));
-    // Mais do que uma: é isso que prova que a leitura atravessa inquilinos. Com
-    // uma só, o resultado seria indistinguível de uma leitura com escopo.
-    assert.ok(orgs.length >= 2, `só ${orgs.length} organização(ões) — a leitura não atravessa inquilinos`);
-    const ids = orgs.map((o) => o.id);
-    assert.ok(ids.includes(IDS.orgA) && ids.includes(IDS.orgB));
+const PESSOA = { staffUserId: IDS.utilizadorA, staffEmail: `${PREFIXO}ana@bossa.example` };
+
+/** Sem estar na plataforma, ninguém abre sessão. E e isso que se quer. */
+async function tornarPessoalDaPlataforma() {
+  await sql.query(
+    `INSERT INTO platform_staff (user_id, motivo) VALUES ($1, $2)
+     ON CONFLICT (user_id) DO NOTHING`, [IDS.utilizadorA, `${PREFIXO}staff`]);
+}
+
+const abrir = (extra: Partial<Parameters<typeof abrirSessaoDeSuporte>[2]> = {}) =>
+  comA((db) => abrirSessaoDeSuporte(db, IDS.orgA, {
+    ...PESSOA, motivo: MOTIVO, ambito: ['LEITURA'], duracaoMinutos: 30, ...extra,
+  }));
+
+// ═════════════════════════════════════════════════════════════════════════════
+
+describe('1 · A sessão de suporte EXPIRA SOZINHA', () => {
+  it('uma sessão dentro do prazo autoriza a leitura', async () => {
+    const s = await abrir();
+    const ok = await comA((db) => sessaoAutoriza(db, s.id, 'LEITURA'));
+    assert.equal(ok.id, s.id);
   });
 
-  it('a dona de uma organização NÃO vê a superfície', async () => {
+  it('O CASO QUE DECIDE: ninguém a fechou, e passado o prazo já não autoriza',
+    async () => {
+      // «Uma sessão que só termina quando alguém se lembra é permanente na
+      // prática.» Aqui ninguém a fecha — e ela deixa de valer na mesma.
+      const s = await abrir();
+      const daquiAUmaHora = new Date(Date.now() + 3600_000);
+      await assert.rejects(
+        () => comA((db) => sessaoAutoriza(db, s.id, 'LEITURA', daquiAUmaHora)),
+        (e: Error) => e instanceof RecusaDePlataforma && e.motivo === 'SESSAO_EXPIRADA',
+        'a sessão esquecida continuou a autorizar: o suporte virou dono');
+    });
+
+  it('e a base RECUSA um prazo que já passou quando se abre', async () => {
     await assert.rejects(
-      () => comoCliente((db) => organizacoesDaPlataforma(db)),
-      /sem acesso à plataforma/,
-      'uma cliente conseguiu listar todos os inquilinos',
-    );
+      () => sql.query(
+        `INSERT INTO support_sessions (organization_id, staff_user_id, staff_email,
+           motivo, ambito, aberta_em, expira_em)
+         VALUES ($1, $2, $3, $4, '{LEITURA}', now(), now() - interval '1 minute')`,
+        [IDS.orgA, IDS.utilizadorA, PESSOA.staffEmail, MOTIVO]),
+      /prazo_e_futuro/);
   });
 
-  it('`ePlataforma` distingue os dois, e é o que o ecrã usa', async () => {
-    assert.equal(await comoStaff((db) => ePlataforma(db)), true);
-    assert.equal(await comoCliente((db) => ePlataforma(db)), false);
-  });
-
-  it('sem identidade nenhuma, também não', async () => {
-    // Sem `app.user_id` definido, `app_utilizador_actual()` devolve NULL e NULL
-    // não está em tabela nenhuma. É o caso 3 do isolamento aplicado aqui: sem
-    // contexto, a mesma consulta positiva tem de recusar.
+  it('e o âmbito verifica-se por operação: ler não dá mexer', async () => {
+    const s = await abrir({ ambito: ['LEITURA'] });
     await assert.rejects(
-      () => prisma.$queryRaw`SELECT * FROM plataforma_organizacoes()`,
-      /sem acesso à plataforma/,
-    );
+      () => comA((db) => sessaoAutoriza(db, s.id, 'DADOS_OPERACIONAIS')),
+      (e: Error) => e instanceof RecusaDePlataforma && e.motivo === 'FORA_DE_AMBITO');
+  });
+
+  it('a base RECUSA uma sessão sem motivo que explique', async () => {
+    await assert.rejects(
+      () => abrir({ motivo: 'x' }),
+      (e: Error) => e instanceof RecusaDePlataforma && e.motivo === 'SEM_MOTIVO');
+  });
+
+  it('e RECUSA uma sessão sem âmbito nenhum', async () => {
+    await assert.rejects(
+      () => sql.query(
+        `INSERT INTO support_sessions (organization_id, staff_user_id, staff_email,
+           motivo, ambito, expira_em)
+         VALUES ($1, $2, $3, $4, '{}', now() + interval '10 minutes')`,
+        [IDS.orgA, IDS.utilizadorA, PESSOA.staffEmail, MOTIVO]),
+      /sessao_tem_ambito/,
+      'passou uma sessão sem âmbito: o suporte vê a casa inteira');
+  });
+
+
+  it('fechar à mão TERMINA-A, e deixa rasto da saída', async () => {
+    // ── Fechar à mão continua a existir, e não é a garantia ─────────────
+    //
+    // A garantia é a expiração; isto é a conveniência. Mas a saída também
+    // deixa rasto: quem entrou numa casa e saiu tem as duas pontas escritas, e
+    // uma entrada sem saída registada é uma pergunta sem resposta seis meses
+    // depois.
+    const s = await abrir();
+    const fechada = await comA((db) =>
+      terminarSessaoDeSuporte(db, s.id, `${PREFIXO}resolvido`, PESSOA.staffEmail));
+    assert.ok(fechada.terminadaEm instanceof Date);
+
+    const { rows } = await sql.query(
+      `SELECT actor_email FROM audit_events
+        WHERE accao = 'plataforma.suporte.saiu' AND alvo_id = $1`, [s.id]);
+    assert.equal(rows.length, 1, 'saiu e não ficou escrito');
+    assert.equal(rows[0].actor_email, PESSOA.staffEmail);
+  });
+
+  it('e fechar duas vezes não esconde a primeira razão', async () => {
+    const s = await abrir();
+    await comA((db) => terminarSessaoDeSuporte(db, s.id, `${PREFIXO}primeira`, PESSOA.staffEmail));
+    await assert.rejects(
+      () => comA((db) => terminarSessaoDeSuporte(db, s.id, `${PREFIXO}segunda`, PESSOA.staffEmail)),
+      (e: Error) => e instanceof RecusaDePlataforma && e.motivo === 'SESSAO_JA_TERMINADA');
+
+    const { rows } = await sql.query(
+      `SELECT terminada_motivo FROM support_sessions WHERE id = $1`, [s.id]);
+    assert.match(String(rows[0].terminada_motivo), /primeira/,
+      'a segunda razão escreveu por cima da primeira');
   });
 });
 
-describe('2. Os números vêm da base, não do ecrã', () => {
-  it('o detalhe conta unidades e pessoas, e bate com a contagem directa', async () => {
-    const detalhe = await comoStaff((db) => organizacaoDaPlataforma(db, IDS.orgA));
-    assert.ok(detalhe, 'a organização A não apareceu no detalhe');
-
-    const { rows: u } = await sql.query(
-      'SELECT count(*)::int AS n FROM locations WHERE organization_id = $1 AND archived_at IS NULL', [IDS.orgA]);
-    const { rows: p } = await sql.query(
-      "SELECT count(*)::int AS n FROM memberships WHERE organization_id = $1 AND estado = 'ACTIVO'", [IDS.orgA]);
-    assert.equal(detalhe.unidades, u[0].n);
-    assert.equal(detalhe.utilizadores, p[0].n);
-    assert.ok(detalhe.unidades > 0, 'zero unidades: o detalhe passaria por vácuo');
+describe('2 · O INQUILINO vê a entrada', () => {
+  it('a casa lê as sessões de suporte dela, com quem, quando e porquê', async () => {
+    // Não é cortesia: é a segunda das quatro condições. Um acesso que só aparece
+    // do nosso lado é um acesso que o cliente não pode contestar.
+    const s = await abrir();
+    const vistas = await comA((db) => sessoesDaCasa(db, IDS.orgA));
+    const minha = vistas.find((x: { id: string }) => x.id === s.id);
+    assert.ok(minha, 'a casa não vê a entrada do suporte');
+    assert.equal(minha.staffEmail, PESSOA.staffEmail, 'a casa não vê QUEM entrou');
+    assert.equal(minha.motivo, MOTIVO, 'a casa não vê PORQUÊ');
+    assert.ok(minha.abertaEm instanceof Date, 'a casa não vê QUANDO');
   });
 
-  it('as concessões da organização A são as dela, e não as da B', async () => {
+  it('e a casa NÃO pode apagar o registo dessa entrada', async () => {
+    // Ver, sim: é o direito dela. Apagar, não — uma casa que pudesse apagar a
+    // entrada que lhe interessasse esconder tem o mesmo poder que nós, e é
+    // desse poder que esta etapa protege.
+    const s = await abrir();
+    await assert.rejects(
+      () => comA((db) => db.$executeRaw`DELETE FROM support_sessions WHERE id = ${s.id}::uuid`),
+      /permission denied|permissão negada/i);
+  });
+
+  it('e o runtime também não a pode CRIAR — quem abre é a plataforma', async () => {
+    await assert.rejects(
+      () => comA((db) => db.$executeRaw`
+        INSERT INTO support_sessions (organization_id, staff_user_id, staff_email,
+          motivo, ambito, expira_em)
+        VALUES (${IDS.orgA}::uuid, ${IDS.utilizadorA}::uuid, 'x@y.example',
+          ${MOTIVO}, '{LEITURA}', now() + interval '10 minutes')`),
+      /permission denied|permissão negada/i);
+  });
+});
+
+describe('3 · A política é DA CASA', () => {
+  it('a casa aperta o tecto, e o suporte não pode pedir mais', async () => {
+    await comA((db) => guardarPoliticaDeAcesso(db, IDS.orgA, {
+      exigeConsentimento: false, duracaoMaximaMin: 15,
+      actualizadaPor: 'dono@casa.example',
+    }));
+    await assert.rejects(
+      () => abrir({ duracaoMinutos: 60 }),
+      (e: Error) => e instanceof RecusaDePlataforma && e.motivo === 'EXCEDE_O_TECTO',
+      'o suporte pediu mais tempo do que a casa aceita, e passou');
+  });
+
+  it('e o PAR: dentro do tecto, abre', async () => {
+    // Sem isto, «recusa sempre» passava o caso de cima e o suporte nunca entrava.
+    await comA((db) => guardarPoliticaDeAcesso(db, IDS.orgA, {
+      exigeConsentimento: false, duracaoMaximaMin: 15,
+      actualizadaPor: 'dono@casa.example',
+    }));
+    const s = await abrir({ duracaoMinutos: 10 });
+    assert.ok(s.id);
+  });
+
+  it('a casa que exige consentimento não deixa entrar sem ele', async () => {
+    await comA((db) => guardarPoliticaDeAcesso(db, IDS.orgA, {
+      exigeConsentimento: true, duracaoMaximaMin: 60,
+      actualizadaPor: 'dono@casa.example',
+    }));
+    await assert.rejects(
+      () => abrir(),
+      (e: Error) => e instanceof RecusaDePlataforma && e.motivo === 'EXIGE_CONSENTIMENTO');
+
+    // E com consentimento, entra — e fica escrito quem consentiu.
+    const s = await abrir({ consentidaPor: 'dono@casa.example' });
+    assert.equal(s.consentidaPor, 'dono@casa.example');
+  });
+});
+
+describe('4 · O rasto guarda a PESSOA, não o papel', () => {
+  it('a base RECUSA uma acção da plataforma assinada por «suporte»', async () => {
+    await assert.rejects(
+      () => sql.query(
+        `INSERT INTO audit_events (id, organization_id, actor_id, actor_email, accao)
+         VALUES (gen_random_uuid(), $1, $2, 'suporte@bossa.example', 'plataforma.teste')`,
+        [IDS.orgA, IDS.utilizadorA]),
+      /rasto_assinado_por_um_papel/,
+      '«suporte» passou como resposta a QUEM FEZ ISTO');
+  });
+
+  it('e RECUSA uma acção da plataforma sem pessoa nenhuma', async () => {
+    await assert.rejects(
+      () => sql.query(
+        `INSERT INTO audit_events (id, organization_id, accao)
+         VALUES (gen_random_uuid(), $1, 'plataforma.teste')`,
+        [IDS.orgA]),
+      /rasto_sem_pessoa/);
+  });
+
+  it('e ACEITA uma pessoa — senão isto recusava toda a gente', async () => {
+    const r = await sql.query(
+      `INSERT INTO audit_events (id, organization_id, actor_id, actor_email, accao)
+       VALUES (gen_random_uuid(), $1, $2, $3, 'plataforma.teste') RETURNING id`,
+      [IDS.orgA, IDS.utilizadorA, `${PREFIXO}ana@bossa.example`]);
+    assert.equal(r.rowCount, 1);
+  });
+
+  it('e as acções do PRODUTO não são afectadas — o gatilho é só da plataforma',
+    async () => {
+      // Sem este par, o gatilho podia estar a recusar tudo e ninguém dava por
+      // isso até uma tela do restaurante deixar de gravar auditoria.
+      const r = await sql.query(
+        `INSERT INTO audit_events (id, organization_id, accao)
+         VALUES (gen_random_uuid(), $1, 'produto.teste') RETURNING id`, [IDS.orgA]);
+      assert.equal(r.rowCount, 1);
+    });
+});
+
+describe('5 · O ACEITE DO SÉNIOR: a fronteira do E05 sobrevive', () => {
+  it('o runtime NÃO escreve em entitlement_grants, nem nesta etapa', async () => {
+    // Esta é a etapa que traz a interface de escrita das concessões — a que
+    // teria mais tentação de abrir a porta pelo lado de dentro. Não abre.
+    await assert.rejects(
+      () => comA((db) => db.$executeRaw`
+        INSERT INTO entitlement_grants (organization_id, capacidade, origem)
+        VALUES (${IDS.orgA}::uuid, 'e33-inventada', 'PLANO')`),
+      /permission denied|permissão negada/i,
+      'o runtime ganhou escrita em entitlement_grants: a fronteira do E05 caiu');
+  });
+
+  it('e a concessão passa pelo CAMINHO PRÓPRIO, com pessoa e motivo', async () => {
     await sql.query(
-      `INSERT INTO entitlement_grants (id, organization_id, capacidade, quota, origem, motivo, updated_at)
-       VALUES (gen_random_uuid(), $1, 'kds', NULL, 'ADICIONAL', 'prova da plataforma', now())
-       ON CONFLICT (organization_id, capacidade, location_id) DO UPDATE SET motivo = 'prova da plataforma'`,
-      [IDS.orgB]);
-    try {
-      const deA = await comoStaff((db) => concessoesDaPlataforma(db, IDS.orgA));
-      const deB = await comoStaff((db) => concessoesDaPlataforma(db, IDS.orgB));
-      assert.ok(deB.some((c) => c.capacidade === 'kds'), 'a concessão que acabei de dar a B não aparece');
-      assert.ok(!deA.some((c) => c.capacidade === 'kds'), 'a concessão de B apareceu em A');
-    } finally {
-      await sql.query("DELETE FROM entitlement_grants WHERE organization_id = $1 AND capacidade = 'kds'", [IDS.orgB]);
+      `INSERT INTO platform_staff (user_id, motivo) VALUES ($1, $2)
+       ON CONFLICT (user_id) DO NOTHING`, [IDS.utilizadorA, `${PREFIXO}staff`]);
+
+    const id = await comA((db) => concederCapacidade(db, IDS.orgA, {
+      capacidade: 'relatorios.avancados', quota: null, validoAte: null,
+      staffUserId: IDS.utilizadorA, staffEmail: `${PREFIXO}ana@bossa.example`,
+      motivo: MOTIVO,
+    }));
+    assert.ok(id);
+
+    // E a auditoria saiu na MESMA transacção. Conceder e registar não são duas
+    // coisas — se fossem, a segunda seria a que falha num dia com pressa.
+    const { rows } = await sql.query(
+      `SELECT actor_email, motivo FROM audit_events
+        WHERE accao = 'plataforma.capacidade.concedida' AND alvo_id = $1`, [id]);
+    assert.equal(rows.length, 1, 'concedeu e não registou');
+    assert.equal(rows[0].actor_email, `${PREFIXO}ana@bossa.example`);
+    assert.equal(rows[0].motivo, MOTIVO);
+  });
+
+  it('e quem NÃO é da plataforma não concede', async () => {
+    await sql.query(`DELETE FROM platform_staff WHERE user_id = $1`, [IDS.utilizadorA]);
+    await assert.rejects(
+      () => comA((db) => concederCapacidade(db, IDS.orgA, {
+        capacidade: 'relatorios.avancados', quota: null, validoAte: null,
+        staffUserId: IDS.utilizadorA, staffEmail: `${PREFIXO}ana@bossa.example`,
+        motivo: MOTIVO,
+      })),
+      (e: Error) => e instanceof RecusaDePlataforma && e.motivo === 'NAO_E_DA_PLATAFORMA');
+  });
+
+  it('e conceder sem motivo que explique é recusado', async () => {
+    await sql.query(
+      `INSERT INTO platform_staff (user_id, motivo) VALUES ($1, $2)
+       ON CONFLICT (user_id) DO NOTHING`, [IDS.utilizadorA, `${PREFIXO}staff`]);
+    await assert.rejects(
+      () => comA((db) => concederCapacidade(db, IDS.orgA, {
+        capacidade: 'relatorios.avancados', quota: null, validoAte: null,
+        staffUserId: IDS.utilizadorA, staffEmail: `${PREFIXO}ana@bossa.example`,
+        // ── O caso estava EXACTAMENTE no limiar, e passou ────────────
+        //
+        // A primeira versão usava «porque sim»: dez caracteres, e o limiar é
+        // «menos de dez». Passou — e passou com razão, segundo a regra escrita.
+        //
+        // Fica dito o que a regra é e o que ela não é: **mede comprimento, não
+        // sentido**. «porque sim» explica tanto como «ok», e nenhuma verificação
+        // automática distingue um motivo longo e vazio de um curto e certo. O
+        // que o comprimento apanha é o campo despachado à pressa, que é a forma
+        // mais comum — e é para isso que serve.
+        motivo: 'urgente',
+      })),
+      (e: Error) => e instanceof RecusaDePlataforma && e.motivo === 'SEM_MOTIVO');
+  });
+});
+
+describe('6 · Segurança, privacidade e exportação NÃO ficam atrás do plano', () => {
+  it('a base RECUSA pôr a exportação atrás de um plano', async () => {
+    // «Começa por "a exportação em massa é uma funcionalidade Pro" e acaba com
+    // um cliente sem forma de sair.» A regra não é técnica, e por isso está em
+    // SQL: uma constante muda-se num commit e ninguém repara.
+    const { rows } = await sql.query(`SELECT id FROM plan_definitions LIMIT 1`);
+    await assert.rejects(
+      () => sql.query(
+        `INSERT INTO plan_capabilities (id, plan_id, capacidade)
+         VALUES (gen_random_uuid(), $1, 'dados.exportar')`,
+        [rows[0].id]),
+      /capacidade_protegida_atras_do_plano/,
+      'a exportação ficou atrás do plano');
+  });
+
+  it('e a CONVENIÊNCIA pode ficar — senão não haveria planos nenhuns', async () => {
+    const { rows } = await sql.query(`SELECT id FROM plan_definitions LIMIT 1`);
+    const r = await sql.query(
+      `INSERT INTO plan_capabilities (id, plan_id, capacidade)
+       VALUES (gen_random_uuid(), $1, $2) ON CONFLICT DO NOTHING RETURNING id`,
+      [rows[0].id, `${PREFIXO}relatorios.avancados`]);
+    assert.equal(r.rowCount, 1, 'nem a conveniência entra: o gatilho recusa tudo');
+  });
+});
+
+describe('7 · Nenhum segredo sai, e reprocessar não duplica', () => {
+  it('a tabela de segredos não tem coluna nenhuma para o valor', async () => {
+    // Varre TODAS as colunas, e não as que eu me lembraria de verificar.
+    const { rows } = await sql.query(
+      `SELECT column_name FROM information_schema.columns
+        WHERE table_name = 'platform_secrets'`);
+    const nomes = rows.map((r: { column_name: string }) => r.column_name);
+    for (const proibida of ['valor', 'value', 'segredo', 'secret', 'chave', 'token']) {
+      assert.ok(!nomes.includes(proibida),
+        `a tabela de segredos tem uma coluna "${proibida}"`);
     }
   });
 
-  it('as flags saem com o alcance certo: global e por organização', async () => {
+  it('e o que se mostra é o ESTADO, lido do ambiente e não guardado', async () => {
     await sql.query(
-      `INSERT INTO feature_flags (id, nome, organization_id, ligada, updated_at)
-       VALUES (gen_random_uuid(), 'prova.plataforma', NULL, false, now()),
-              (gen_random_uuid(), 'prova.plataforma', $1, true, now())
-       ON CONFLICT (nome, organization_id) DO UPDATE SET ligada = EXCLUDED.ligada`, [IDS.orgA]);
-    try {
-      const flags = await comoStaff((db) => flagsDaPlataforma(db));
-      const minhas = flags.filter((f) => f.nome === 'prova.plataforma');
-      assert.equal(minhas.length, 2, 'as duas linhas da mesma flag têm de aparecer separadas');
-      const global = minhas.find((f) => f.organizationId === null);
-      const daOrg = minhas.find((f) => f.organizationId === IDS.orgA);
-      assert.equal(global?.ligada, false);
-      assert.equal(daOrg?.ligada, true);
-      // O nome da organização vem no resultado: um ecrã que só tivesse o id
-      // obrigaria quem opera a decorar UUIDs.
-      assert.ok(daOrg?.organizacao, 'a flag da organização veio sem nome');
-    } finally {
-      await sql.query("DELETE FROM feature_flags WHERE nome = 'prova.plataforma'");
-    }
-  });
-});
+      `INSERT INTO platform_secrets (nome, descricao) VALUES ($1, $2)`,
+      [`${PREFIXO.toUpperCase()}SEGREDO_X`, 'um segredo de prova']);
 
-describe('3. A tabela de staff não é alcançável pelo runtime', () => {
-  it('o runtime não lê `platform_staff` directamente', async () => {
-    // Se lesse, a próxima pessoa a escrever uma consulta "só para saber" abria
-    // caminho para a escrita. A porta é a função, e mais nada.
-    await assert.rejects(
-      () => comoStaff((db) => db.$queryRaw`SELECT count(*) FROM platform_staff`),
-      /permission denied/i,
-    );
+    const semAmbiente = await comA((db) => segredosDaPlataforma(db, {}));
+    const comAmbiente = await comA((db) => segredosDaPlataforma(db, {
+      [`${PREFIXO.toUpperCase()}SEGREDO_X`]: 'sk_live_zzz',
+    }));
+
+    const antes = semAmbiente.find((s) => s.nome === `${PREFIXO.toUpperCase()}SEGREDO_X`);
+    const depois = comAmbiente.find((s) => s.nome === `${PREFIXO.toUpperCase()}SEGREDO_X`);
+    assert.equal(antes?.configurado, false);
+    assert.equal(depois?.configurado, true,
+      'o estado não vem do ambiente: uma coluna fica a mentir no dia em que a variável sai');
+    // E o valor não aparece em lado nenhum da projecção.
+    assert.ok(!JSON.stringify(comAmbiente).includes('sk_live_zzz'));
   });
 
-  it('nem de dentro de um inquilino', async () => {
-    await assert.rejects(
-      () => comEscopo(prisma, { organizationId: IDS.orgA }, (db) =>
-        db.$queryRaw`SELECT count(*) FROM platform_staff`),
-      /permission denied/i,
-    );
-  });
+  it('reprocessar o mesmo trabalho duas vezes dá UM trabalho por tentativa', async () => {
+    const t = await comA((db) => enfileirarTrabalho(db, {
+      organizationId: IDS.orgA, tipo: `${PREFIXO}envio`, alvo: 'abc',
+    }));
+    const igual = await comA((db) => enfileirarTrabalho(db, {
+      organizationId: IDS.orgA, tipo: `${PREFIXO}envio`, alvo: 'abc',
+    }));
+    assert.equal(t.id, igual.id, 'pedir a mesma tentativa criou um trabalho novo');
 
-  it('e o runtime não se pode acrescentar a ela', async () => {
-    await assert.rejects(
-      () => comoCliente((db) => db.$executeRaw`
-        INSERT INTO platform_staff (user_id, motivo) VALUES (${IDS.utilizadorA}::uuid, 'eu próprio')`),
-      /permission denied/i,
-      'um cliente conseguiu dar-se acesso de plataforma',
-    );
+    const seguinte = await comA((db) => reprocessarTrabalho(db, t.id));
+    assert.notEqual(seguinte.id, t.id, 'reprocessar devolveu o mesmo trabalho');
+    assert.equal(seguinte.tentativa, 2);
+
+    const n = await sql.query(
+      `SELECT count(*)::int AS n FROM platform_jobs WHERE tipo = $1`, [`${PREFIXO}envio`]);
+    assert.equal(n.rows[0].n, 2, 'ficaram mais trabalhos do que tentativas');
   });
 });
