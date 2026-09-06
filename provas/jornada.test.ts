@@ -43,6 +43,8 @@ if (!MIG) throw new Error('MIGRATION_DATABASE_URL em falta');
 const marca = Date.now();
 const SENHA = 'jornada-Muito-Longa-2026';
 const EMAIL = `jornada-${marca}@jornada.example`;
+/** Quem opera a plataforma. Uma pessoa, com nome — «ana@…» e não «suporte@…». */
+const OPERADOR = `ana-${marca}@jornada.example`;
 const ORG_SLUG = `jornada-${marca}`;
 const SLUG_PUBLICO = `jornada-${marca}`;
 
@@ -93,25 +95,42 @@ async function verComoEstranho(caminho: string) {
   return { estado: r.status, texto: await r.text() };
 }
 
-before(async () => {
-  sql = new Client({ connectionString: MIG });
-  await sql.connect();
-
-  // A conta é criada pela porta do produto. O limitador de abuso é respeitado —
-  // desligá-lo para a prova passar seria apagar um requisito para chegar ao verde.
+/**
+ * Uma conta criada pela porta do produto. O limitador de abuso é respeitado —
+ * desligá-lo para a prova passar seria apagar um requisito para chegar ao verde.
+ */
+async function inscrever(email: string, nome: string) {
   let inscricao: Response | undefined;
   for (let tentativa = 0; tentativa < 6; tentativa++) {
     inscricao = await fetch(`${BASE}/api/auth/sign-up/email`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', origin: BASE },
-      body: JSON.stringify({ email: EMAIL, password: SENHA, name: 'Jornada' }),
+      body: JSON.stringify({ email, password: SENHA, name: nome }),
     });
     if (inscricao.status !== 429) break;
     await dormir(11_000);
   }
-  assert.ok(inscricao?.ok, `inscrição falhou: ${inscricao?.status}`);
-  cookie = (inscricao.headers.getSetCookie?.() ?? []).map((c) => c.split(';')[0]).join('; ');
+  assert.ok(inscricao?.ok, `inscrição de ${nome} falhou: ${inscricao?.status}`);
+  return (inscricao.headers.getSetCookie?.() ?? []).map((c) => c.split(';')[0]).join('; ');
+}
+
+before(async () => {
+  sql = new Client({ connectionString: MIG });
+  await sql.connect();
+
+  cookie = await inscrever(EMAIL, 'Jornada');
   assert.ok(cookie, 'a inscrição não devolveu sessão');
+
+  // ── E uma PESSOA da BossaOS, porque o rasto guarda a pessoa ────────────
+  //
+  // Dar um plano é uma acção da plataforma, e o E33 exige que ela diga quem a
+  // fez: `actor_id` e `actor_email` de uma pessoa, nunca o nome de um papel.
+  // Quem opera o piloto é gente, e a jornada tem de a ter como tem tudo o
+  // resto — criada pela porta do produto, e não escrita à mão na base.
+  //
+  // Não é a mesma conta do restaurante de propósito: uma organização a assinar
+  // a própria concessão é um restaurante a dar-se um plano.
+  await inscrever(OPERADOR, 'Ana da BossaOS');
 });
 
 after(async () => {
@@ -168,6 +187,7 @@ describe('J01 — de uma organização que NÃO EXISTE até uma unidade utilizá
     // até alguém da BossaOS lhe dar um plano.
     const saida = execFileSync('node', [
       'scripts/plataforma.mjs', 'plano', ORG_SLUG, 'STARTER',
+      '--por', OPERADOR,
       '--motivo', 'jornada do marco E11: o passo que hoje não é auto-serviço',
     ], { encoding: 'utf8' });
     assert.match(saida, /plano STARTER/, `o controlo de plataforma não confirmou: ${saida}`);
@@ -192,7 +212,7 @@ describe('J01 — de uma organização que NÃO EXISTE até uma unidade utilizá
     for (const capacidade of ['marcas', 'unidades', 'produtos']) {
       const saida = execFileSync('node', [
         'scripts/plataforma.mjs', 'conceder', ORG_SLUG, capacidade,
-        '--quota', '1',
+        '--por', OPERADOR, '--quota', '1',
         '--motivo', 'jornada do marco E11: um estabelecimento contratado',
       ], { encoding: 'utf8' });
       assert.match(saida, new RegExp(capacidade), `não concedeu ${capacidade}: ${saida}`);
@@ -407,5 +427,187 @@ describe('J11 — o site do restaurante, publicado', () => {
     const site = await verComoEstranho(`/r/${SLUG_PUBLICO}/es-ES`);
     assert.ok(!site.texto.includes('RASCUNHO QUE NAO PODE SAIR'),
       'o rascunho saiu para o público dentro da jornada');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+describe('J09 — a caixa de um serviço: abrir, movimentar, contar, reconciliar, ENCERRAR', () => {
+  /**
+   * ── Porque é que esta jornada faltava, e porque é que é ela a primeira ───
+   *
+   * Há **182 casos** a provar segmentos destas jornadas — contas 39, plataforma
+   * 31, mais-tarde 26, integrações 23, caixa 22, catálogo 21, fiscal 20 — e
+   * **zero a percorrê-las**. E os dois defeitos que apareceram na noite de 06/09
+   * vivem nas juntas: o fecho de caixa duplo é o **último passo desta jornada**.
+   *
+   * Uma prova de segmento não pode ver uma junta, por construção: a fixture
+   * entrega ao passo N+1 o estado que o passo N devia ter produzido, e é
+   * exactamente aí que o produto se parte.
+   *
+   * ── E esta corre em cima do que J01 e J02 deixaram ──────────────────────
+   *
+   * A unidade, a marca e o produto vêm dos passos anteriores desta mesma
+   * corrida. Abrir aqui uma unidade nova seria preparar estado a meio — a
+   * prática que descaracteriza uma jornada e que a `validar-jornada.sh` mede.
+   */
+
+  /**
+   * O montante como o ecrã o mostra, devolvido como o formulário o aceita.
+   *
+   * ── E lê-se o PARÁGRAFO inteiro, não até ao primeiro `<` ────────────────
+   *
+   * A primeira versão parava no primeiro `<` e vinha vazia: o React separa duas
+   * expressões de texto com um comentário — `>Esperado<!-- --> 108,50 €<` — e o
+   * número está do outro lado dele. Media o rótulo e não o valor.
+   *
+   * Lê-se o que está no ecrã e devolve-se na forma que o campo aceita. Calcular
+   * aqui o valor esperado seria reimplementar a regra do lado da prova — a lição
+   * do E30, onde a prova passava a concordar consigo própria.
+   */
+  function montanteDoEcra(html: string, marcador: string) {
+    const bloco = html.match(new RegExp(`data-teste="${marcador}"[^>]*>([\\s\\S]*?)</p>`))?.[1] ?? '';
+    const limpo = bloco.replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]*>/g, '');
+    const numero = limpo.match(/\d+(?:[.,]\d{2})?/)?.[0] ?? '';
+    return numero.replace('.', ',');
+  }
+
+  it('abrir a caixa do serviço', async () => {
+    const r = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'abrir_caixa',
+      nome: `Caja ${marca}`, fundo: '100,00',
+    });
+    assert.ok(!r.procura.get('erro'), `recusou: ${r.procura.get('erro')}`);
+    const id = r.destino.match(/caixa\/([0-9a-f-]{36})/)?.[1];
+    assert.ok(id, `o produto não devolveu a caixa aberta: ${r.destino}`);
+    feito.registerId = id;
+  });
+
+  it('uma venda ao balcão paga em dinheiro — e o dinheiro ENTRA na gaveta', async () => {
+    const conta = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'abrir_conta',
+      nome: 'Croquetas de la casa', valor: '8,50',
+    });
+    assert.ok(!conta.procura.get('erro'), `recusou a conta: ${conta.procura.get('erro')}`);
+    const billId = conta.destino.match(/conta\/([0-9a-f-]{36})/)?.[1];
+    assert.ok(billId, `sem conta no destino: ${conta.destino}`);
+    feito.billDinheiro = billId;
+
+    const pago = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'pagar_dinheiro',
+      billId, cobrar: '8,50', recebido: '10,00',
+    });
+    assert.ok(!pago.procura.get('erro'), `recusou o pagamento: ${pago.procura.get('erro')}`);
+
+    // ── E a junta mede-se AQUI ──────────────────────────────────────────
+    //
+    // Pagar em dinheiro e o dinheiro entrar na gaveta são dois factos, e é o
+    // segundo que a caixa vê. Uma prova de segmento do pagamento fica verde sem
+    // este passo nunca ter acontecido.
+    const fecho = await ver(`/es-ES/pos/${feito.locationId}/caixa/${feito.registerId}/fecho`);
+    assert.equal(fecho.estado, 200, 'o ecrã de fecho não abriu');
+    assert.equal(montanteDoEcra(fecho.texto, 'esperado'), '108,50',
+      'o pagamento em dinheiro não chegou à gaveta — a venda existe e a caixa não a viu. '
+      + `Ecrã: ${fecho.texto.match(/data-teste="esperado"[\s\S]{0,80}/)?.[0] ?? 'sem marcador'}`);
+  });
+
+  it('uma saída de caixa, com motivo', async () => {
+    const r = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'movimentar',
+      registerId: feito.registerId!, tipo: 'SAIDA', valor: '5,00',
+      motivo: 'troco para o turno da noite',
+    });
+    assert.ok(!r.procura.get('erro'), `recusou: ${r.procura.get('erro')}`);
+  });
+
+  it('um cartão que fica POR RECONCILIAR — e o id vem do ecrã', async () => {
+    const conta = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'abrir_conta',
+      nome: 'Menú del día', valor: '14,00',
+    });
+    const billId = conta.destino.match(/conta\/([0-9a-f-]{36})/)?.[1];
+    assert.ok(billId, `sem conta no destino: ${conta.destino}`);
+    feito.billCartao = billId;
+
+    const tentativa = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'cobrar_cartao', billId,
+    });
+    assert.ok(!tentativa.procura.get('erro'), `recusou: ${tentativa.procura.get('erro')}`);
+
+    const ecra = await ver(`/es-ES/pos/${feito.locationId}/conta/${billId}`);
+    assert.equal(ecra.estado, 200, 'o ecrã da conta não abriu');
+    assert.ok(ecra.texto.includes('data-teste="por-reconciliar"'),
+      'a conta não avisa que há uma tentativa por reconciliar');
+    const attemptId = ecra.texto.match(/name="attemptId" value="([0-9a-f-]{36})"/)?.[1];
+    assert.ok(attemptId, 'o ecrã não oferece a porta de reconciliação — não há por onde sair');
+    feito.attemptId = attemptId;
+  });
+
+  it('contar a gaveta — e o valor esperado vem do ECRÃ, não de uma conta minha', async () => {
+    // ── SEM_CONTAGEM=1 percorre a jornada SEM este passo ────────────────
+    //
+    // É o elo partido desta jornada, e parte-se onde dói: fechar sem contar. O
+    // fecho tem de PARAR aí e o motivo tem de NOMEAR a contagem — uma paragem
+    // que não diz o que falta é um beco, e quem está ao balcão às duas da manhã
+    // não tem como adivinhar.
+    if (process.env.SEM_CONTAGEM === '1') return;
+
+    const antes = await ver(`/es-ES/pos/${feito.locationId}/caixa/${feito.registerId}/fecho`);
+    const esperado = montanteDoEcra(antes.texto, 'esperado');
+    assert.equal(esperado, '103,50', 'a saída de caixa não desceu o esperado');
+
+    const r = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'contar',
+      registerId: feito.registerId!, contado: esperado,
+    });
+    assert.ok(!r.procura.get('erro'), `recusou a contagem: ${r.procura.get('erro')}`);
+  });
+
+  it('o fecho RECUSA enquanto houver operação por reconciliar', async () => {
+    // A junta entre a conta e a caixa: um cartão em aberto NOUTRA conta impede
+    // encerrar o turno. Nenhuma prova de segmento da caixa via isto, porque a
+    // fixture da caixa não tem contas com tentativas.
+    const r = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'fechar_caixa',
+      registerId: feito.registerId!,
+    });
+    assert.equal(r.procura.get('erro'), 'OPERACOES_PENDENTES',
+      `o fecho não recusou pelo motivo certo — veio «${r.procura.get('erro')}»`);
+  });
+
+  it('reconciliar a tentativa — o acto que a tira do indeterminado', async () => {
+    const r = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'reconciliar',
+      billId: feito.billCartao!, attemptId: feito.attemptId!, resultado: 'CANCELADA',
+    });
+    assert.ok(!r.procura.get('erro'), `recusou: ${r.procura.get('erro')}`);
+  });
+
+  it('E A CAIXA ENCERRA — o turno fecha', async () => {
+    const r = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'fechar_caixa',
+      registerId: feito.registerId!,
+    });
+    assert.ok(!r.procura.get('erro'), `o fecho recusou: ${r.procura.get('erro')}`);
+
+    const fecho = await ver(`/es-ES/pos/${feito.locationId}/caixa/${feito.registerId}/fecho`);
+    assert.ok(/data-teste="estado-caixa"[^>]*>FECHADA/.test(fecho.texto),
+      'o ecrã não mostra a caixa fechada depois de a fechar');
+  });
+
+  it('e fechar OUTRA VEZ é recusado — a junta que ontem deixava passar', async () => {
+    // O defeito de 06/09, agora dentro da corrente: ontem entravam DOIS eventos
+    // de FECHO, que são duas contagens e duas decisões de autorização de
+    // divergência tomadas em separado.
+    const r = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'fechar_caixa',
+      registerId: feito.registerId!,
+    });
+    assert.ok(r.procura.get('erro'), 'o segundo fecho foi aceite');
+
+    const { rows } = await sql.query(
+      `SELECT count(*)::int AS n FROM cash_register_events
+        WHERE register_id = $1 AND tipo = 'FECHO'`, [feito.registerId]);
+    assert.equal((rows[0] as { n: number }).n, 1,
+      'a caixa fechou duas vezes dentro da jornada');
   });
 });

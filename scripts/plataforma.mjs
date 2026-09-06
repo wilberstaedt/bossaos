@@ -23,6 +23,9 @@
  * meses — e concessões que ninguém revê é como um piloto vira produto grátis.
  *
  * Uso:
+ * **Quem opera diz-se sempre:** `--por <email>` ou `BOSSAOS_OPERADOR=<email>`,
+ * e tem de ser uma conta que existe. É o E33: o rasto guarda a pessoa.
+ *
  *   ./scripts/plataforma.mjs listar [orgSlug]
  *   ./scripts/plataforma.mjs staff <email> "<motivo>"
  *   ./scripts/plataforma.mjs plano <orgSlug> <STARTER|RESTAURANT|PRO>
@@ -63,12 +66,46 @@ const opcao = (nome) => {
 const sql = new pg.Client({ connectionString: URL_MIG });
 await sql.connect();
 
+// ── QUEM está a operar, e porque é que isto passou a ser obrigatório ────────
+//
+// O E33 pôs um gatilho na `audit_events`: uma acção `plataforma.%` tem de dizer
+// **quem** a fez — `actor_id` e `actor_email` de uma PESSOA, e não o nome de um
+// papel. A regra está certa: «suporte@…» é um papel, «ana@…» é uma pessoa.
+//
+// Este guião assinava `plataforma:$USER` e não punha `actor_id` nenhum, e por
+// isso deixou de escrever no dia em que o gatilho entrou: `rasto_sem_pessoa`.
+// Ninguém deu por isso porque a única coisa que o exercia era a jornada J01, e a
+// jornada não estava a ser corrida.
+//
+// A cura não é abrandar o gatilho — é o guião passar a dizer quem opera. O nome
+// vem de `--por <email>` ou de `BOSSAOS_OPERADOR`, resolve-se contra `users`, e
+// **não há valor por omissão**: inventar um aqui era exactamente a assinatura
+// sem pessoa que o E33 proibiu.
+let operador = null;
+async function quemOpera() {
+  if (operador) return operador;
+  const email = opcao('por') ?? process.env.BOSSAOS_OPERADOR;
+  if (!email) {
+    console.error('falta dizer QUEM opera: --por <email> ou BOSSAOS_OPERADOR=<email>.');
+    console.error('Uma acção da plataforma sem pessoa não se escreve (E33).');
+    process.exit(2);
+  }
+  const { rows } = await sql.query('SELECT id, email FROM users WHERE lower(email) = lower($1)', [email]);
+  if (rows.length === 0) {
+    console.error(`"${email}" não é uma conta deste sistema — o rasto guarda a pessoa, não um nome escrito à mão.`);
+    process.exit(2);
+  }
+  operador = rows[0];
+  return operador;
+}
+
 /** Toda a escrita passa por aqui. Sem organização não há linha de auditoria. */
 async function auditar(organizationId, accao, detalhe, motivo) {
+  const quem = await quemOpera();
   await sql.query(
-    `INSERT INTO audit_events (id, organization_id, actor_email, accao, alvo_tipo, motivo, detalhe)
-     VALUES (gen_random_uuid(), $1, $2, $3, 'plataforma', $4, $5::jsonb)`,
-    [organizationId, `plataforma:${process.env.USER ?? 'desconhecido'}`, accao, motivo ?? null, JSON.stringify(detalhe)],
+    `INSERT INTO audit_events (id, organization_id, actor_id, actor_email, accao, alvo_tipo, motivo, detalhe)
+     VALUES (gen_random_uuid(), $1, $2, $3, $4, 'plataforma', $5, $6::jsonb)`,
+    [organizationId, quem.id, quem.email, accao, motivo ?? null, JSON.stringify(detalhe)],
   );
 }
 

@@ -381,7 +381,19 @@ export async function POST(pedido: Request, ctx: { params: Promise<{ orgSlug: st
   } catch (e) {
     // A recusa de negócio volta para o ecrã com o nome dela. Um 500 aqui dizia
     // «alguma coisa correu mal» a quem precisa de saber O QUÊ.
-    const motivo = e instanceof Error && /^[A-Z_]+:/.test(e.message)
+    //
+    // ── E o `:` não é obrigatório, que era o buraco ───────────────────────
+    //
+    // O padrão exigia dois pontos, e uma recusa SEM detalhe não os tem: a
+    // `RecusaDaCaixa` escreve `MOTIVO` quando há detalhe e `MOTIVO: detalhe`
+    // quando há. Ou seja, `SEM_CONTAGEM`, `CAIXA_FECHADA` e `PAGAMENTO_NAO_E_DINHEIRO`
+    // caíam todas no genérico `erro`, e quem está ao balcão às duas da manhã
+    // lia «erro» onde devia ler o que falta.
+    //
+    // Medido pela jornada J09: com a contagem por fazer, o fecho parava — e o
+    // ecrã não dizia que era a contagem. As recusas COM detalhe passavam, e por
+    // isso ninguém via metade do defeito.
+    const motivo = e instanceof Error && /^[A-Z_]{3,}(:|$)/.test(e.message)
       ? e.message.split(':')[0] : 'erro';
     return voltarPara(paraTpv(), { erro: motivo ?? 'erro' });
   }

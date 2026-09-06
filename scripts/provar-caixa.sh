@@ -246,15 +246,25 @@ BEGIN;
     SELECT gen_random_uuid() AS id, organization_id, location_id FROM cash_registers LIMIT 1;
   INSERT INTO cash_registers (id, organization_id, location_id, nome, moeda, fundo_menor)
     SELECT id, organization_id, location_id, 'sonda-do-controlo-11', 'EUR', 0 FROM alvo;
-  INSERT INTO cash_register_events (id, organization_id, register_id, tipo, actor)
+  -- ── E o TEMPO escreve-se, senão a sonda é uma moeda ao ar ──────────────
+  --
+  -- `criado_em` tem `now()` por omissão, e `now()` é o instante da TRANSACÇÃO:
+  -- três inserções aqui dentro ficam com o mesmo carimbo. O gatilho lê o último
+  -- acontecimento por `criado_em DESC, id DESC`, e com o tempo empatado o
+  -- desempate cai no uuid — a sonda passava ou falhava conforme o sorteio.
+  --
+  -- Apanhei-o com este controlo a alternar entre verde e vermelho sem ninguém
+  -- mexer em nada. No produto o empate não acontece (cada acontecimento é uma
+  -- transacção), mas aqui tem de se escrever a ordem para se medir a ordem.
+  INSERT INTO cash_register_events (id, organization_id, register_id, tipo, actor, criado_em)
     SELECT gen_random_uuid(), organization_id, id, 'ABERTURA',
-           (SELECT id FROM users LIMIT 1) FROM alvo;
-  INSERT INTO cash_register_events (id, organization_id, register_id, tipo, actor)
+           (SELECT id FROM users LIMIT 1), now() - interval '2 minutes' FROM alvo;
+  INSERT INTO cash_register_events (id, organization_id, register_id, tipo, actor, criado_em)
     SELECT gen_random_uuid(), organization_id, id, 'FECHO',
-           (SELECT id FROM users LIMIT 1) FROM alvo;
-  INSERT INTO cash_register_events (id, organization_id, register_id, tipo, actor)
+           (SELECT id FROM users LIMIT 1), now() - interval '1 minute' FROM alvo;
+  INSERT INTO cash_register_events (id, organization_id, register_id, tipo, actor, criado_em)
     SELECT gen_random_uuid(), organization_id, id, 'FECHO',
-           (SELECT id FROM users LIMIT 1) FROM alvo;
+           (SELECT id FROM users LIMIT 1), now() FROM alvo;
   SELECT 'DOIS_FECHOS_ACEITES';
 ROLLBACK;
 PSQL

@@ -28,6 +28,63 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## Correcção 3 do E34 — a J09 existe e percorre-se
+
+**Fechada.** `provas/jornada.test.ts` passa de 3 jornadas e 18 passos a **4 e
+27**, e a nova é a da caixa: **abrir → vender e o dinheiro entrar na gaveta →
+saída com motivo → cartão por reconciliar → contar → o fecho recusar →
+reconciliar → ENCERRAR → e fechar outra vez ser recusado**.
+
+Tudo pelas portas que uma pessoa usa, e o estado vem sempre do que o produto
+devolveu: o `registerId` do redireccionamento, o `attemptId` do ecrã da conta, e
+**o valor a contar lido do ecrã de fecho** — calculá-lo aqui era reimplementar a
+regra do lado da prova.
+
+**A alavanca é `SEM_CONTAGEM=1`**, no modelo do `SEM_MOEDA`: tira-se a contagem,
+o fecho tem de parar e o motivo tem de **nomear a contagem**.
+
+### Três coisas que a jornada destapou, e que segmento nenhum via
+
+**1. A J01 estava vermelha desde o E33, e ninguém deu por isso.** O gatilho
+`rasto_guarda_a_pessoa` exige que uma acção `plataforma.%` diga quem a fez —
+`actor_id` e `actor_email` de uma pessoa. O `scripts/plataforma.mjs` assinava
+`plataforma:$USER` **sem `actor_id`**, e por isso deixou de escrever:
+`rasto_sem_pessoa`. Como é a única porta para dar plano e concessões, **nenhuma
+organização nova conseguia ser habilitada** desde então. A cura não é abrandar o
+gatilho — é o guião dizer quem opera: `--por <email>` ou `BOSSAOS_OPERADOR`,
+resolvido contra `users`, **sem valor por omissão**. E a jornada cria essa pessoa
+pela porta do produto, numa conta diferente da do restaurante: uma organização a
+assinar a própria concessão é um restaurante a dar-se um plano.
+
+**2. A recusa sem detalhe chegava ao ecrã como «erro».** É a observação que
+deixei escrita na correcção 1 e não tinha tocado — agora está paga, porque a
+alavanca da J09 a mediu. A rota do TPV traduzia com `/^[A-Z_]+:/`, e uma
+`RecusaDaCaixa` sem detalhe escreve `CAIXA_FECHADA` **sem dois pontos**. Caíam
+todas no genérico: `SEM_CONTAGEM`, `CAIXA_FECHADA`, `PAGAMENTO_NAO_E_DINHEIRO`.
+As recusas **com** detalhe passavam, e por isso ninguém via metade do defeito.
+
+**3. A limpeza da jornada bate na imutabilidade do rasto.** A J09 deixa
+acontecimentos de caixa, movimentos, pagamentos e linhas de conta paga — **cinco
+gatilhos que recusam `DELETE`, incluindo à credencial de migração**. Desligam-se
+e voltam a ligar, e o passo 7 verifica os **seis**, com a contagem primeiro:
+zero desligados sobre zero lidos era verde sobre população zero.
+
+### E um achado contra mim
+
+**O meu controlo 11 da caixa era uma moeda ao ar.** As três inserções da sonda
+partilham o `criado_em` — `now()` é o instante da **transacção** —, e o gatilho
+desempata por `id`, que é um uuid. O controlo alternava entre verde e vermelho
+sem ninguém mexer em nada. Passou a escrever a ordem: três corridas seguidas, 0
+falhas. **No produto o empate não acontece** (cada acontecimento é uma
+transacção), mas fica dito porque é uma propriedade real da leitura do estado.
+
+`provar-jornada.sh` **0 falhas** — 4 jornadas, 27 passos, 3 elos partidos ·
+`validar-jornada.sh` **0** (vê as duas alavancas) · `provar-caixa.sh` **0** ·
+`pnpm verificar` **0**.
+
+**Por fazer, e é a lista dele:** J08, J12, J14 e J15. Uma de cada vez.
+
+
 ## Correcção 2 do E34 — o pt-BR misturava duas ortografias
 
 **Fechada.** Não era preferência de ninguém: o ficheiro divergia **do próprio
