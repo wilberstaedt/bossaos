@@ -211,3 +211,49 @@ abro excepção: a etiqueta errada é minha e o registo tem de a mostrar.
 **Consequência para a revisão do E29:** o esquema financeiro está em `c5f09e0` e
 não no commit que o JR vier a declarar. A varredura do E29 tem de cobrir o
 intervalo que inclui os dois, ou mede uma etapa a que falta a base.
+
+## Dívida 11 — o RLS, medido a pedido do JR e com dois achados por baixo
+
+06/09, 02h40. O JR perguntou se devia usar `FORCE ROW LEVEL SECURITY` em vez de
+`ENABLE`, notou que 30 migrações usam só `ENABLE`, **seguiu a convenção do
+projecto e deixou-me a observação**. Foi a decisão certa nas duas metades: não
+divergir sozinho, e não calar a dúvida.
+
+**Medido na base do staging:** 145 tabelas, **todas** com dono `bossaos_migrate`;
+137 com RLS ligado e nenhuma com ele forçado; 8 sem RLS.
+
+**A resposta: `ENABLE` chega, e a convenção fica.** O `FORCE` só importa para o
+**dono** da tabela, e o runtime liga-se como `bossaos_app`, que não é o dono. O
+`provar-isolamento.sh` corre com o papel real de runtime e usa o de migração
+apenas para desligar o RLS no controlo negativo — o desenho está certo.
+
+**Mas a protecção assenta num invariante que ninguém mede:** *o runtime nunca se
+liga como dono*. No dia em que alguma rota usasse a credencial de migração, 137
+tabelas perderiam o RLS **em silêncio**, e nada acenderia.
+
+### Achado 1 — a prova de isolamento cobre 6 de 137
+
+```
+TABELAS=(organizations brands locations memberships role_assignments users)
+```
+
+Seis. **É uma amostra, e amostra é o erro que eu próprio cometi no E20** — cinco
+funções de oito e chamei-lhe verificação. A prova está certa no método e curta no
+alcance.
+
+### Achado 2 — uma tabela com dado de inquilino, sem RLS e sem ninguém
+
+`custom_domain_owners` tem `organization_id`, **não tem RLS**, e o
+`CustomDomainOwner` aparece **só no `schema.prisma`** — nenhum código de produto,
+nenhum teste, nenhum documento. As outras sete sem RLS são globais por natureza:
+o catálogo de alergénios da UE, as definições de plano, o pessoal da plataforma,
+a contabilidade das migrações.
+
+**É a classe de alcance um nível abaixo: modelo sem chamador em vez de função sem
+chamador.** Hoje não vaza nada porque ninguém lê a tabela. No dia em que alguém a
+usar, herda uma tabela de inquilino sem cerca — e vai encontrá-la já criada, o
+que é precisamente o que faz ninguém pensar duas vezes.
+
+**Fica para o E34 decidir:** ligar o RLS agora, ou apagar a tabela até a etapa
+dos domínios a precisar. O que não serve é ficar como está, porque o próximo a
+tocar-lhe não tem como saber.
