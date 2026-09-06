@@ -1,6 +1,7 @@
 import { after, before, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { createHmac } from 'node:crypto';
 import { Client } from 'pg';
 
 /**
@@ -87,6 +88,26 @@ async function submeter(caminho: string, campos: Record<string, string | string[
 async function ver(caminho: string) {
   const r = await fetch(`${BASE}${caminho}`, { headers: cookie ? { cookie } : {} });
   return { estado: r.status, texto: await r.text() };
+}
+
+/**
+ * O montante como o ecrã o mostra, devolvido como o formulário o aceita.
+ *
+ * ── E lê-se o PARÁGRAFO inteiro, não até ao primeiro `<` ────────────────
+ *
+ * A primeira versão parava no primeiro `<` e vinha vazia: o React separa duas
+ * expressões de texto com um comentário — `>Esperado<!-- --> 108,50 €<` — e o
+ * número está do outro lado dele. Media o rótulo e não o valor.
+ *
+ * Lê-se o que está no ecrã e devolve-se na forma que o campo aceita. Calcular
+ * aqui o valor esperado seria reimplementar a regra do lado da prova — a lição
+ * do E30, onde a prova passava a concordar consigo própria.
+ */
+function montanteDoEcra(html: string, marcador: string) {
+  const bloco = html.match(new RegExp(`data-teste="${marcador}"[^>]*>([\\s\\S]*?)</p>`))?.[1] ?? '';
+  const limpo = bloco.replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]*>/g, '');
+  const numero = limpo.match(/\d+(?:[.,]\d{2})?/)?.[0] ?? '';
+  return numero.replace('.', ',');
 }
 
 /** Uma leitura SEM sessão nenhuma — o que um estranho vê. */
@@ -451,25 +472,6 @@ describe('J09 — a caixa de um serviço: abrir, movimentar, contar, reconciliar
    * prática que descaracteriza uma jornada e que a `validar-jornada.sh` mede.
    */
 
-  /**
-   * O montante como o ecrã o mostra, devolvido como o formulário o aceita.
-   *
-   * ── E lê-se o PARÁGRAFO inteiro, não até ao primeiro `<` ────────────────
-   *
-   * A primeira versão parava no primeiro `<` e vinha vazia: o React separa duas
-   * expressões de texto com um comentário — `>Esperado<!-- --> 108,50 €<` — e o
-   * número está do outro lado dele. Media o rótulo e não o valor.
-   *
-   * Lê-se o que está no ecrã e devolve-se na forma que o campo aceita. Calcular
-   * aqui o valor esperado seria reimplementar a regra do lado da prova — a lição
-   * do E30, onde a prova passava a concordar consigo própria.
-   */
-  function montanteDoEcra(html: string, marcador: string) {
-    const bloco = html.match(new RegExp(`data-teste="${marcador}"[^>]*>([\\s\\S]*?)</p>`))?.[1] ?? '';
-    const limpo = bloco.replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]*>/g, '');
-    const numero = limpo.match(/\d+(?:[.,]\d{2})?/)?.[0] ?? '';
-    return numero.replace('.', ',');
-  }
 
   it('abrir a caixa do serviço', async () => {
     const r = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
@@ -610,4 +612,240 @@ describe('J09 — a caixa de um serviço: abrir, movimentar, contar, reconciliar
     assert.equal((rows[0] as { n: number }).n, 1,
       'a caixa fechou duas vezes dentro da jornada');
   });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+describe('J14 — a integração falha: preservar o facto, sinalizar, reprocessar SEM duplicar e reconciliar', () => {
+  /**
+   * ── A frase do critério, e onde ela se joga ─────────────────────────────
+   *
+   * «J14 · Integração falha · Preservar facto, sinalizar, reprocessar sem
+   * duplicar e reconciliar.» O sítio é a porta do adquirente: a única do sistema
+   * onde alguém de fora afirma que **dinheiro entrou**, e a única sem sessão —
+   * o que autoriza é a assinatura.
+   *
+   * ── E era uma porta que ninguém tinha aberto de ponta a ponta ───────────
+   *
+   * `WEBHOOK_SEGREDO_*` não estava definido em lado nenhum do repositório: a
+   * prova do E23 chama `receberWebhook` por dentro, e a rota HTTP — assinatura,
+   * cabeçalho da organização, corpo cru, reconciliação na mesma transacção —
+   * não era percorrida por ninguém. É outra vez a peça contra o caminho.
+   */
+  const SEGREDO = process.env.WEBHOOK_SEGREDO_JORNADA ?? '';
+  const PROVEDOR = 'jornada';
+  const CAPTURA = `captura-${marca}`;
+  const DEVOLUCAO = `devolucao-${marca}`;
+
+  /**
+   * ── A ALAVANCA: o adquirente reenvia com identidade NOVA ────────────────
+   *
+   * `REENVIO_COM_IDENTIDADE_NOVA=1` faz o reenvio trazer outro `eventoId` para
+   * o MESMO facto — um provedor que não preserva a identidade do acontecimento.
+   * É o elo desta jornada, e parte-se onde dói: a identidade é a única coisa que
+   * impede o reprocessamento de duplicar.
+   *
+   * E dói mais na DEVOLUÇÃO do que na captura, por uma assimetria que está no
+   * `estadoAutorizado`: o capturado é uma **atribuição** (`= montante`, o último
+   * carimbo manda) e o devolvido é uma **soma** (`+=`, porque devoluções
+   * parciais acumulam). A soma está certa — e faz da identidade a única defesa
+   * do lado do dinheiro que sai.
+   */
+  const identidade = (original: string) =>
+    process.env.REENVIO_COM_IDENTIDADE_NOVA === '1' ? `${original}-reenvio` : original;
+
+  // ── E a alavanca aponta à DEVOLUÇÃO, não à captura ──────────────────────
+  //
+  // Na captura, um reenvio com identidade nova mete um facto a mais no ecrã e o
+  // dinheiro não muda: o `capturadoMenor` é uma ATRIBUIÇÃO, o último carimbo
+  // manda. Parava a jornada, e parava antes de chegar ao sítio onde dói.
+  //
+  // Na devolução o `devolvidoMenor` é uma SOMA — e a chave idempotente do
+  // reembolso inclui o montante. Identidade nova leva o devolvido de 40,00 a
+  // 80,00, a chave muda, e nasce um SEGUNDO reembolso. É dinheiro a sair duas
+  // vezes por causa de um reenvio, e é isso que o elo tem de mostrar.
+  const identidadeDaCaptura = (original: string) => original;
+
+  /**
+   * O adquirente bate à porta como bate a sério: corpo **cru** e HMAC por cima
+   * desse mesmo texto. Assinar um objecto reconvertido para JSON daria outra
+   * ordem de chaves e outro espaçamento — e a assinatura nunca bateria, ou pior,
+   * bateria sobre outra coisa. É a razão pela qual a rota lê `.text()`.
+   */
+  async function adquirenteDiz(facto: Record<string, unknown>) {
+    const cru = JSON.stringify(facto);
+    const r = await fetch(`${BASE}/api/webhooks/pagamentos/${PROVEDOR}`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-bossaos-organizacao': feito.organizationId!,
+        'x-bossaos-assinatura': createHmac('sha256', SEGREDO).update(cru, 'utf8').digest('hex'),
+      },
+      body: cru,
+    });
+    // ── Lê-se TEXTO e só depois se tenta o JSON ──────────────────────────
+    //
+    // Com `r.json()` directo, uma resposta vazia rebenta com «Unexpected end of
+    // JSON input» e a prova morre a dizer que o JSON estava mal formado — não
+    // que a porta devolveu **500 com o corpo vazio**. O diagnóstico ficava
+    // escondido atrás do leitor.
+    const texto = await r.text();
+    let corpo: { recebido?: boolean; repetido?: boolean; erro?: string } = {};
+    try { corpo = JSON.parse(texto) as typeof corpo; } catch { /* fica vazio */ }
+    return { estado: r.status, texto, corpo };
+  }
+
+  /** Quantos acontecimentos do adquirente a CONTA mostra a quem a abre. */
+  const acontecimentosNoEcra = (html: string) =>
+    (html.match(/data-teste="estado-provedor"/g) ?? []).length;
+
+  it('a organização tem de ser descoberta na BASE — e isso é um buraco declarado', async () => {
+    // ── O único valor desta jornada que o produto não sabe dizer ──────────
+    //
+    // O webhook exige o cabeçalho `x-bossaos-organizacao`, e **nenhum ecrã
+    // mostra o identificador da organização**: procurei por `name="organizationId"`
+    // e por marcador de teste, e não existe em lado nenhum. Quem configura o
+    // adquirente não tem onde ir buscar o valor que ele tem de enviar.
+    //
+    // Somado ao `WEBHOOK_SEGREDO_*` que ninguém define, isto quer dizer que a
+    // integração de pagamentos **não é configurável hoje** — numa jornada que se
+    // chama «a integração falha». Fica como pendência declarada, e este caso
+    // existe para que ela não passe despercebida: o dia em que o produto expuser
+    // o identificador, este passo é o que se apaga.
+    const { rows } = await sql.query(
+      'SELECT id FROM organizations WHERE slug = $1', [ORG_SLUG]);
+    const id = (rows[0] as { id: string } | undefined)?.id;
+    assert.ok(id, 'a organização da jornada desapareceu');
+    feito.organizationId = id;
+
+    const ecra = await ver(`/es-ES/pos/${feito.locationId}/pagamentos`);
+    assert.equal(ecra.estado, 200, 'o ecrã do adquirente não abriu');
+    assert.ok(!ecra.texto.includes(id),
+      'o ecrã já mostra o identificador da organização — este passo deixou de fazer sentido');
+  });
+
+  it('a porta exige assinatura — e não diz porque recusou', async () => {
+    // A fechadura primeiro. Sem isto, tudo o que vem a seguir podia estar a ser
+    // feito por qualquer pessoa que saiba o endereço.
+    const r = await fetch(`${BASE}/api/webhooks/pagamentos/${PROVEDOR}`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-bossaos-organizacao': feito.organizationId!,
+        'x-bossaos-assinatura': 'ff'.repeat(32),
+      },
+      body: JSON.stringify({ eventoId: 'nao-entra', tipo: 'captura' }),
+    });
+    assert.equal(r.status, 401, 'a porta aceitou uma assinatura forjada');
+    assert.equal((await r.json() as { erro?: string }).erro, 'nao_autorizado',
+      'a recusa explica o que faltou — e isso é um manual de como a forjar');
+  });
+
+  it('uma conta por cartão, e a tentativa fica SINALIZADA', async () => {
+    const conta = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'abrir_conta',
+      nome: 'Cena para dos', valor: '40,00',
+    });
+    const billId = conta.destino.match(/conta\/([0-9a-f-]{36})/)?.[1];
+    assert.ok(billId, `sem conta no destino: ${conta.destino}`);
+    feito.billJ14 = billId;
+
+    await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'cobrar_cartao', billId,
+    });
+    const ecra = await ver(`/es-ES/pos/${feito.locationId}/conta/${billId}`);
+    assert.ok(ecra.texto.includes('data-teste="por-reconciliar"'),
+      'a conta não sinaliza a tentativa em aberto — quem está ao balcão não sabe que não pode cobrar outra vez');
+    const attemptId = ecra.texto.match(/name="attemptId" value="([0-9a-f-]{36})"/)?.[1];
+    assert.ok(attemptId, 'não há por onde reconciliar');
+    feito.attemptJ14 = attemptId;
+    assert.equal(acontecimentosNoEcra(ecra.texto), 0,
+      'a conta mostra acontecimentos do adquirente antes de ele ter dito seja o que for');
+  });
+
+  it('o adquirente diz que CAPTUROU — o facto fica preservado e reconciliado', async () => {
+    const r = await adquirenteDiz({
+      eventoId: CAPTURA, tipo: 'pagamento.capturado', estadoProvedor: 'CAPTURADO',
+      montanteMenor: 4000, attemptId: feito.attemptJ14, billId: feito.billJ14,
+      ocorridoEm: new Date().toISOString(),
+    });
+    assert.equal(r.estado, 200, `a porta recusou o facto: ${JSON.stringify(r.corpo)}`);
+    assert.equal(r.corpo.repetido, false, 'o primeiro envio veio marcado como repetido');
+
+    const ecra = await ver(`/es-ES/pos/${feito.locationId}/conta/${feito.billJ14}`);
+    assert.equal(acontecimentosNoEcra(ecra.texto), 1,
+      'o que o adquirente disse não chegou ao ecrã de quem tem de reconciliar');
+    assert.equal(montanteDoEcra(ecra.texto, 'pago'), '40,00',
+      'a captura não virou pagamento — o facto ficou e ninguém o aplicou');
+    assert.ok(!ecra.texto.includes('data-teste="por-reconciliar"'),
+      'a conta continua a pedir reconciliação depois de o adquirente ter falado');
+  });
+
+  it('o adquirente REENVIA a captura — e nada duplica', async () => {
+    // Um adquirente que recebe erro reenvia, e reenviar tem de ser inofensivo.
+    // A garantia é o índice único sobre a identidade do acontecimento, e não um
+    // «se já existe»: entre a procura e a inserção cabe o segundo processo.
+    const r = await adquirenteDiz({
+      eventoId: identidadeDaCaptura(CAPTURA), tipo: 'pagamento.capturado', estadoProvedor: 'CAPTURADO',
+      montanteMenor: 4000, attemptId: feito.attemptJ14, billId: feito.billJ14,
+      ocorridoEm: new Date().toISOString(),
+    });
+    assert.equal(r.estado, 200,
+      `a porta respondeu ${r.estado} ao REENVIO: «${r.texto.slice(0, 120)}». `
+      + 'Um adquirente que recebe erro reenvia — e um erro no reenvio é um martelo.');
+    assert.equal(r.corpo.repetido, true,
+      'o reenvio do MESMO facto não foi reconhecido como repetido — entrou como facto novo');
+
+    const ecra = await ver(`/es-ES/pos/${feito.locationId}/conta/${feito.billJ14}`);
+    assert.equal(acontecimentosNoEcra(ecra.texto), 1, 'o mesmo facto está duas vezes na conta');
+    assert.equal(montanteDoEcra(ecra.texto, 'pago'), '40,00', 'reprocessar duplicou o dinheiro');
+  });
+
+  it('o adquirente DEVOLVE — e a devolução entra uma vez', async () => {
+    const r = await adquirenteDiz({
+      eventoId: DEVOLUCAO, tipo: 'pagamento.devolvido', estadoProvedor: 'DEVOLVIDO',
+      montanteMenor: 4000, attemptId: feito.attemptJ14, billId: feito.billJ14,
+      ocorridoEm: new Date().toISOString(),
+    });
+    assert.equal(r.estado, 200, `a porta recusou a devolução: ${JSON.stringify(r.corpo)}`);
+    assert.equal(r.corpo.repetido, false, 'a devolução veio marcada como repetida');
+    assert.deepEqual(await devolvido(), { quantas: 1, total: 4000 },
+      'a devolução do adquirente não foi aplicada uma vez');
+  });
+
+  it('e o adquirente REENVIA a devolução — o dinheiro que SAI não se duplica', async () => {
+    // ── O passo onde a alavanca dói a sério ──────────────────────────────
+    //
+    // Aqui não é só um facto a mais no ecrã: o devolvido SOMA-se, e a chave
+    // idempotente do reembolso inclui o montante. Um reenvio com identidade nova
+    // leva `devolvidoMenor` de 40,00 a 80,00, a chave muda, e nasce um SEGUNDO
+    // reembolso. É dinheiro a sair duas vezes por causa de um reenvio.
+    const r = await adquirenteDiz({
+      eventoId: identidade(DEVOLUCAO), tipo: 'pagamento.devolvido', estadoProvedor: 'DEVOLVIDO',
+      montanteMenor: 4000, attemptId: feito.attemptJ14, billId: feito.billJ14,
+      ocorridoEm: new Date().toISOString(),
+    });
+    assert.equal(r.estado, 200,
+      `a porta respondeu ${r.estado} ao reenvio da devolução: «${r.texto.slice(0, 120)}»`);
+
+    // ── O DINHEIRO primeiro, e o mecanismo a seguir ───────────────────────
+    //
+    // A primeira versão afirmava `repetido === true` antes de contar os
+    // reembolsos, e por isso a jornada parava a dizer «entrou como facto novo» —
+    // verdade, e o mecanismo. O que importa a quem lê é o que aconteceu ao
+    // dinheiro, e isso é a contagem: com a alavanca posta são DOIS reembolsos,
+    // 120,00 sobre um pagamento de 40,00. A ordem das asserções decide qual das
+    // duas frases a paragem mostra.
+    assert.deepEqual(await devolvido(), { quantas: 1, total: 4000 },
+      'reprocessar duplicou o dinheiro que SAI');
+    assert.equal(r.corpo.repetido, true, 'o reenvio da devolução entrou como facto novo');
+  });
+
+  /** O que a base tem de reembolsos desta tentativa. Leitura de verificação. */
+  async function devolvido() {
+    const { rows } = await sql.query(
+      `SELECT count(*)::int AS quantas, coalesce(sum(r.montante_menor), 0)::int AS total
+         FROM refunds r JOIN payments p ON p.id = r.payment_id
+        WHERE p.attempt_id = $1`, [feito.attemptJ14]);
+    return rows[0] as { quantas: number; total: number };
+  }
 });

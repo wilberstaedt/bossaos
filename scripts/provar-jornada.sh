@@ -42,9 +42,16 @@ export BASE_URL="http://127.0.0.1:$PORTA"
 # Tem de bater certo com a porta, senão a inscrição devolve 403 e o erro não diz
 # uma palavra sobre portas. Custou-me isso uma vez no arnês do navegador.
 export BETTER_AUTH_URL="$BASE_URL"
+# ── O segredo do adquirente, e porque é que ele nasce AQUI ─────────────────
+#
+# `WEBHOOK_SEGREDO_*` não estava definido em lado nenhum do repositório — só
+# lido na rota. A prova do E23 chama `receberWebhook` por dentro, e a porta HTTP
+# nunca tinha sido aberta. Este é descartável e vive só nesta corrida: um
+# segredo de piloto no repositório era um segredo publicado.
+export WEBHOOK_SEGREDO_JORNADA="jornada-$(date +%s)-descartavel"
 
-GRUPOS_ESPERADOS=4
-CASOS_ESPERADOS=27
+GRUPOS_ESPERADOS=5
+CASOS_ESPERADOS=34
 falhas=0
 PID=""
 
@@ -83,23 +90,44 @@ religar_auditoria() {
 }
 
 limpar_jornada() {
+  # ── A limpeza corre DENTRO de uma transacção, e é isso que a torna segura ──
+  #
+  # Metade destas tabelas recusa `DELETE` por gatilho — o rasto da caixa, os
+  # pagamentos, os reembolsos, os acontecimentos do adquirente e a auditoria são
+  # imutáveis **para toda a gente, incluindo a credencial de migração**. Para
+  # limpar é preciso desligá-los.
+  #
+  # A primeira versão desligava uma LISTA escrita à mão e voltava a ligá-la no
+  # fim. Duas corridas seguidas mostraram o defeito: a J14 trouxe duas tabelas
+  # novas (`provider_events`, `refunds`), a limpeza abortou ao bater na primeira
+  # que faltava na lista, e o `ENABLE` do fim **nunca chegou a correr** — a base
+  # ficou com cinco gatilhos desligados, e só o passo 8 deu por isso.
+  #
+  # Duas mudanças, e a segunda é a que fecha a classe:
+  #
+  #   1. os gatilhos descobrem-se na BASE (`pg_trigger` sobre as tabelas que esta
+  #      limpeza toca), em vez de se escreverem à mão. Uma tabela nova entra
+  #      sozinha;
+  #   2. tudo dentro de `BEGIN`/`COMMIT`. `ALTER TABLE ... DISABLE TRIGGER` é
+  #      transaccional: se qualquer `DELETE` falhar, o `ROLLBACK` repõe os
+  #      gatilhos. **Deixar a base sem protecção deixa de ser possível**, em vez
+  #      de depender de o guião chegar ao fim.
+  #
+  # (`session_replication_role = replica` seria mais curto e o `bossaos_migrate`
+  # não tem permissão para o usar — medido.)
   psql "$MIGRATION_DATABASE_URL" -q -v ON_ERROR_STOP=1 >/tmp/bossaos-jornada-limpeza.log 2>&1 <<'SQL'
-ALTER TABLE audit_events DISABLE TRIGGER audit_events_sem_delete;
--- ── E a caixa também se defende de quem a quer apagar ──────────────────────
---
--- A J09 deixa rasto imutável POR GATILHO: os acontecimentos da caixa, os
--- movimentos, os pagamentos e as linhas de conta paga recusam `DELETE`, para
--- toda a gente e incluindo a credencial de migração. É a garantia a funcionar
--- contra a limpeza, como no E33.
---
--- Desligam-se aqui e voltam a ligar no fim, e o passo 7 VERIFICA que voltaram —
--- um guião morto a meio deixaria a caixa sem a protecção do rasto, e ninguém
--- daria por isso até precisar dele.
-ALTER TABLE cash_register_events DISABLE TRIGGER acontecimentos_de_caixa_sao_imutaveis;
-ALTER TABLE cash_movements       DISABLE TRIGGER movimentos_sao_imutaveis;
-ALTER TABLE payments             DISABLE TRIGGER payments_sao_imutaveis;
-ALTER TABLE bill_lines           DISABLE TRIGGER linhas_de_conta_paga_nao_se_mexem;
-ALTER TABLE bill_lines           DISABLE TRIGGER bill_lines_derivam_devido;
+BEGIN;
+DO $$
+DECLARE t record;
+BEGIN
+  FOR t IN
+    SELECT tgrelid::regclass AS tabela, tgname FROM pg_trigger
+     WHERE NOT tgisinternal AND tgrelid::regclass::text IN ('public_slug_owners', 'site_publications', 'site_revisions', 'site_pages', 'sites', 'menu_publications', 'menu_revisions', 'menu_categories', 'menus', 'product_channels', 'price_rules', 'products', 'categories', 'audit_events', 'role_assignments', 'memberships', 'cash_movements', 'cash_register_events', 'cash_registers', 'provider_events', 'refunds', 'payments', 'payment_attempts', 'bill_adjustments', 'bill_lines', 'bills', 'locations', 'brands', 'entitlement_grants', 'subscriptions', 'organizations', 'users')
+  LOOP
+    EXECUTE format('ALTER TABLE %s DISABLE TRIGGER %I', t.tabela, t.tgname);
+  END LOOP;
+END $$;
+
 DELETE FROM public_slug_owners WHERE slug LIKE 'jornada-%';
 DELETE FROM site_publications WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM site_revisions    WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
@@ -116,10 +144,10 @@ DELETE FROM categories        WHERE organization_id IN (SELECT id FROM organizat
 DELETE FROM audit_events      WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM role_assignments  WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM memberships       WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
--- A caixa e as contas da J09, antes das unidades que as seguram.
 DELETE FROM cash_movements        WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM cash_register_events  WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM cash_registers        WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
+DELETE FROM provider_events       WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM refunds               WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM payments              WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM payment_attempts      WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
@@ -133,12 +161,18 @@ DELETE FROM audit_events      WHERE organization_id IN (SELECT id FROM organizat
 DELETE FROM subscriptions     WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM organizations     WHERE slug LIKE 'jornada-%';
 DELETE FROM users WHERE email LIKE '%@jornada.example';
-ALTER TABLE audit_events ENABLE TRIGGER audit_events_sem_delete;
-ALTER TABLE cash_register_events ENABLE TRIGGER acontecimentos_de_caixa_sao_imutaveis;
-ALTER TABLE cash_movements       ENABLE TRIGGER movimentos_sao_imutaveis;
-ALTER TABLE payments             ENABLE TRIGGER payments_sao_imutaveis;
-ALTER TABLE bill_lines           ENABLE TRIGGER linhas_de_conta_paga_nao_se_mexem;
-ALTER TABLE bill_lines           ENABLE TRIGGER bill_lines_derivam_devido;
+
+DO $$
+DECLARE t record;
+BEGIN
+  FOR t IN
+    SELECT tgrelid::regclass AS tabela, tgname FROM pg_trigger
+     WHERE NOT tgisinternal AND tgrelid::regclass::text IN ('public_slug_owners', 'site_publications', 'site_revisions', 'site_pages', 'sites', 'menu_publications', 'menu_revisions', 'menu_categories', 'menus', 'product_channels', 'price_rules', 'products', 'categories', 'audit_events', 'role_assignments', 'memberships', 'cash_movements', 'cash_register_events', 'cash_registers', 'provider_events', 'refunds', 'payments', 'payment_attempts', 'bill_adjustments', 'bill_lines', 'bills', 'locations', 'brands', 'entitlement_grants', 'subscriptions', 'organizations', 'users')
+  LOOP
+    EXECUTE format('ALTER TABLE %s ENABLE TRIGGER %I', t.tabela, t.tgname);
+  END LOOP;
+END $$;
+COMMIT;
 SQL
   religar_auditoria
 }
@@ -307,7 +341,47 @@ else
   vermelho "não consegui subir a aplicação"
 fi
 
-echo "5. A árvore ficou limpa?"
+echo "5. QUARTO ELO PARTIDO — o adquirente reenvia com identidade NOVA"
+# ── O elo da J14, e é o dinheiro que SAI ─────────────────────────────────
+#
+# «Preservar facto, sinalizar, reprocessar SEM duplicar e reconciliar.» A
+# identidade do acontecimento é a única coisa que impede o reprocessamento de
+# duplicar — e dói mais na devolução do que na captura, por uma assimetria que
+# está no `estadoAutorizado`: o capturado é uma ATRIBUIÇÃO (o último carimbo
+# manda) e o devolvido é uma SOMA (devoluções parciais acumulam).
+#
+# Com a alavanca, o mesmo facto volta com outro `eventoId`: o devolvido passa de
+# 40,00 a 80,00, a chave idempotente do reembolso muda, e nasce um SEGUNDO
+# reembolso. A jornada tem de parar aí.
+#
+# E o par que mantém isto honesto é o passo 1: sem a alavanca, a mesma jornada
+# chega ao fim com uma devolução só.
+limpar_jornada
+parar
+if construir_e_subir; then
+  REENVIO_COM_IDENTIDADE_NOVA=1 node --test --test-timeout=180000 --test-reporter=tap \
+    --experimental-strip-types provas/jornada.test.ts >/tmp/bossaos-jornada-identidade.txt 2>&1
+  if grep -qE '^ *ok .*REENVIA a devolução' /tmp/bossaos-jornada-identidade.txt; then
+    vermelho "o reenvio com identidade nova não duplicou nada — a jornada não mediu este elo"
+  elif grep -qE '^ *not ok .*REENVIA a devolução' /tmp/bossaos-jornada-identidade.txt; then
+    verde "a jornada parou na devolução reprocessada — onde a identidade é a ÚNICA defesa"
+    # E tem de DIZER o que aconteceu: duplicou, e em quê.
+    # E tem de dizer o que duplicou, com o número: dois reembolsos onde havia um.
+    if grep -qF 'reprocessar duplicou o dinheiro que SAI' /tmp/bossaos-jornada-identidade.txt; then
+      verde "e diz o que aconteceu ao DINHEIRO, e não só ao mecanismo"
+    else
+      vermelho "parou, e não disse que tinha duplicado"
+      grep -m1 -E '^ +[a-z].*' /tmp/bossaos-jornada-identidade.txt | sed 's/^/          /'
+    fi
+  else
+    vermelho "parou noutro sítio, não no reprocessamento"
+    grep -E '^ *not ok' /tmp/bossaos-jornada-identidade.txt | head -4
+  fi
+else
+  vermelho "não consegui subir a aplicação"
+fi
+
+echo "6. A árvore ficou limpa?"
 limpar_jornada
 RESTOS=$(psql "$MIGRATION_DATABASE_URL" -tAc "SELECT
   (SELECT count(*) FROM organizations WHERE slug LIKE 'jornada-%')
@@ -321,7 +395,7 @@ else
 fi
 
 echo
-echo "6. A rota de menus ficou como estava?"
+echo "7. A rota de menus ficou como estava?"
 if diff -q "$COPIAS/menus.ts" "$FONTE" >/dev/null 2>&1; then
   verde "o elo partido foi reposto"
 else
@@ -329,7 +403,7 @@ else
 fi
 
 echo
-echo "7. O gatilho da auditoria voltou a ligar?"
+echo "8. O gatilho da auditoria voltou a ligar?"
 # A limpeza desliga-o de propósito. Deixá-lo desligado seria tirar a protecção do
 # registo de quem fez o quê — e ninguém daria por isso até precisar dele.
 # Os CINCO, e não só a auditoria: a J09 obriga a desligar também os do rasto da
@@ -338,17 +412,19 @@ DESLIGADOS=$(psql "$MIGRATION_DATABASE_URL" -tAc "SELECT string_agg(tgname, ' ')
   FROM pg_trigger WHERE tgenabled <> 'O' AND tgname IN (
     'audit_events_sem_delete', 'acontecimentos_de_caixa_sao_imutaveis',
     'movimentos_sao_imutaveis', 'payments_sao_imutaveis',
-    'linhas_de_conta_paga_nao_se_mexem', 'bill_lines_derivam_devido')")
+    'linhas_de_conta_paga_nao_se_mexem', 'bill_lines_derivam_devido',
+    'eventos_do_provedor_sao_imutaveis')")
 LIDOS=$(psql "$MIGRATION_DATABASE_URL" -tAc "SELECT count(*) FROM pg_trigger WHERE tgname IN (
     'audit_events_sem_delete', 'acontecimentos_de_caixa_sao_imutaveis',
     'movimentos_sao_imutaveis', 'payments_sao_imutaveis',
-    'linhas_de_conta_paga_nao_se_mexem', 'bill_lines_derivam_devido')")
-if [[ "$LIDOS" != "6" ]]; then
+    'linhas_de_conta_paga_nao_se_mexem', 'bill_lines_derivam_devido',
+    'eventos_do_provedor_sao_imutaveis')")
+if [[ "$LIDOS" != "7" ]]; then
   # Zero desligados sobre zero lidos é verde sobre população zero: se um gatilho
   # mudar de nome, esta verificação passava a não medir nada.
-  vermelho "só encontrei $LIDOS dos 6 gatilhos — a verificação não mede o que diz"
+  vermelho "só encontrei $LIDOS dos 7 gatilhos — a verificação não mede o que diz"
 elif [[ -z "$DESLIGADOS" ]]; then
-  verde "os 6 gatilhos do rasto voltaram a recusar DELETE"
+  verde "os 7 gatilhos do rasto voltaram a recusar DELETE"
 else
   vermelho "GATILHOS DESLIGADOS: $DESLIGADOS"
 fi

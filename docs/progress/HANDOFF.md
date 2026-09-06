@@ -28,6 +28,85 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## Correcção 4 do E34 — a J14 existe, e destapou o webhook a responder 500 ao reenvio
+
+**Fechada.** `provas/jornada.test.ts` passa de 4 jornadas e 27 passos a **5 e
+34**. A J14 vive na porta do adquirente — a única do sistema onde alguém de fora
+afirma que **dinheiro entrou**, e a única sem sessão: o que autoriza é a
+assinatura.
+
+A corrente: descobrir a organização → a porta recusa assinatura forjada **sem
+dizer porquê** → conta por cartão **sinalizada** → o adquirente diz `CAPTURADO`,
+o facto fica **preservado** e reconciliado na mesma transacção → **reenvia e nada
+duplica** → devolve → **reenvia a devolução e o dinheiro que sai não se duplica**.
+
+### O defeito que ela encontrou: o reenvio devolvia 500
+
+**E o reenvio é o caso normal de qualquer adquirente.** O `receberWebhook`
+tentava inserir e apanhava o `P2002` em JS — e o comentário que lá estava
+avisava: *«fica anotado por ser frágil: no dia em que alguém acrescentar uma
+linha aqui, parte sem aviso»*. Alguém acrescentou, **na rota**: depois de
+receber, ela lê `membership.findFirst` para reconciliar. O erro do índice
+**aborta a transacção**, o `catch` corre mas já não pode ler nada, e a leitura
+seguinte rebenta com `25P02`. Resultado medido: **500 com o corpo vazio**.
+
+E um 500 põe o adquirente a martelar a porta — que é, por escrito, o que a rota
+diz que quer evitar. Cura: a forma do E24 que o comentário já nomeava,
+`ON CONFLICT DO NOTHING` (`createMany` com `skipDuplicates`), que não levanta
+excepção e não aborta nada.
+
+**E medi porque é que ninguém tinha visto:** com o defeito reposto,
+`provar-adquirente.sh` dá **0 falhas e 21 casos verdes — incluindo o caso do
+reenvio**. A prova de segmento chama a função e não corre a linha que vem
+depois; a `portas-do-dinheiro` verifica que a rota **menciona** `receberWebhook`,
+lendo o ficheiro como texto. A peça estava provada duas vezes e o caminho estava
+partido.
+
+### A alavanca aponta à devolução, e isso mudou depois de medir
+
+`REENVIO_COM_IDENTIDADE_NOVA=1` faz o reenvio trazer outro `eventoId` para o
+mesmo facto. Na **captura** isso mete um facto a mais no ecrã e não mexe no
+dinheiro — o `capturadoMenor` é uma **atribuição**, o último carimbo manda. Na
+**devolução** o `devolvidoMenor` é uma **soma** (devoluções parciais acumulam) e
+a chave idempotente do reembolso inclui o montante: o devolvido vai de 40,00 a
+80,00, a chave muda, e nasce um **segundo reembolso**. É lá que a identidade é a
+única defesa, e é lá que a alavanca tem de doer.
+
+A ordem das asserções decide o que a paragem diz: o **dinheiro primeiro**, o
+mecanismo a seguir. Com `repetido` antes, a jornada parava a dizer «entrou como
+facto novo» — verdade, e o mecanismo; quem lê precisa de saber o que aconteceu ao
+dinheiro.
+
+### E a limpeza deixou de poder deixar a base sem protecção
+
+A minha primeira versão desligava uma **lista escrita à mão** de gatilhos e
+voltava a ligá-los no fim. A J14 trouxe duas tabelas novas, a limpeza abortou ao
+bater na primeira que faltava, e o `ENABLE` **nunca correu**: a base ficou com
+cinco gatilhos desligados, e só o passo 8 deu por isso. Duas mudanças: os
+gatilhos **descobrem-se na base** (`pg_trigger` sobre as tabelas que a limpeza
+toca), e tudo corre dentro de `BEGIN`/`COMMIT` — `DISABLE TRIGGER` é
+transaccional, portanto **deixar a base sem protecção deixa de ser possível** em
+vez de depender de o guião chegar ao fim. Provou-se sozinho: quando parei a
+corrida a meio com um `kill`, a base ficou com **0 gatilhos desligados**.
+(`session_replication_role = replica` era mais curto, e o `bossaos_migrate` não
+tem permissão — medido.)
+
+### Pendências declaradas: a integração de pagamentos não é configurável hoje
+
+`WEBHOOK_SEGREDO_*` **não está definido em lado nenhum do repositório** — só é
+lido na rota. E **nenhum ecrã mostra o `organizationId`** que o webhook tem de
+trazer no cabeçalho `x-bossaos-organizacao`: procurei por `name="organizationId"`
+e por marcador de teste, e não existe. Quem configura o adquirente não tem onde
+ir buscar o valor. O primeiro passo da J14 existe para isto não passar
+despercebido, e **apaga-se no dia em que o produto expuser o identificador**.
+
+`provar-jornada.sh` **0 falhas** (5 jornadas, 34 passos, 4 elos partidos, corrido
+**sozinho na base**) · `provar-adquirente.sh` **0** · `validar-jornada.sh` **0**
+(vê as três alavancas) · `pnpm verificar` **0**.
+
+**Por fazer, da lista dele:** J08, J12 e J15.
+
+
 ## Correcção 3 do E34 — a J09 existe e percorre-se
 
 **Fechada.** `provas/jornada.test.ts` passa de 3 jornadas e 18 passos a **4 e

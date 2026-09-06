@@ -136,40 +136,43 @@ export async function receberWebhook(
   // ── 3. A identidade do acontecimento, garantida por ÍNDICE ───────────────
   //
   // Não há aqui «procura e se não existir insere»: entre a procura e a inserção
-  // cabe o segundo processo. Tenta-se inserir e trata-se a colisão como o que
-  // ela é — o reenvio normal do adquirente.
-  try {
-    await db.providerEvent.create({
-      data: {
-        organizationId: dados.organizationId,
-        provedor: dados.provedor,
-        eventoId: evento.eventoId,
-        tipo: evento.tipo,
-        estadoProvedor: evento.estadoProvedor,
-        ocorridoEm: evento.ocorridoEm,
-        attemptId: evento.attemptId ?? null,
-        billId: evento.billId ?? null,
-        montanteMenor: evento.montanteMenor ?? null,
-        // O corpo fica para auditoria. A ASSINATURA nunca: um segredo em
-        // registo é um segredo publicado.
-        corpo: JSON.parse(dados.corpoCru) as object,
-      },
-    });
-  } catch (e) {
-    // ── E porque é que aqui o `catch` ainda serve ─────────────────────────
-    //
-    // Porque não há mais nada depois dele: devolve-se e acabou. Se houvesse uma
-    // consulta a seguir, ela falharia com `25P02` — a transacção fica abortada
-    // pelo erro, e o `catch` corre mas já não pode ler nada. Foi medido no E24,
-    // onde a mesma forma partiu por ter uma leitura a seguir.
-    //
-    // Fica anotado por ser frágil: no dia em que alguém acrescentar uma linha
-    // aqui, parte sem aviso. O E24 usa `ON CONFLICT DO NOTHING`, que é a forma
-    // que não tem esse pé de barro.
-    const codigo = (e as { code?: string }).code;
-    if (codigo === 'P2002') return { eventoId: evento.eventoId, repetido: true };
-    throw e;
-  }
+  // cabe o segundo processo. A garantia é o índice único sobre a identidade.
+  //
+  // ── E o `catch` do `P2002` estava partido, exactamente como dizia ────────
+  //
+  // A versão anterior tentava inserir e apanhava a colisão em JS. O comentário
+  // que lá estava avisava: *«fica anotado por ser frágil: no dia em que alguém
+  // acrescentar uma linha aqui, parte sem aviso»* — e alguém acrescentou, na
+  // ROTA: depois de `receberWebhook` ela chama `membership.findFirst` para
+  // reconciliar. O erro do índice **aborta a transacção**, o `catch` corre mas
+  // já não pode ler nada, e a leitura seguinte rebenta com `25P02`.
+  //
+  // Medido pela J14 a 06/09: o **reenvio** — que é o caso normal de qualquer
+  // adquirente — respondia **500 com o corpo vazio**. E um adquirente que recebe
+  // erro reenvia: a própria rota diz que responde 200 depois de gravar para não
+  // o pôr a martelar a porta durante horas, e era isso que acontecia.
+  //
+  // A cura é a forma do E24, que o comentário antigo já nomeava:
+  // `ON CONFLICT DO NOTHING`. Não levanta excepção, não aborta nada, e a
+  // contagem devolvida diz se entrou ou se já lá estava.
+  const inserido = await db.providerEvent.createMany({
+    data: [{
+      organizationId: dados.organizationId,
+      provedor: dados.provedor,
+      eventoId: evento.eventoId,
+      tipo: evento.tipo,
+      estadoProvedor: evento.estadoProvedor,
+      ocorridoEm: evento.ocorridoEm,
+      attemptId: evento.attemptId ?? null,
+      billId: evento.billId ?? null,
+      montanteMenor: evento.montanteMenor ?? null,
+      // O corpo fica para auditoria. A ASSINATURA nunca: um segredo em registo
+      // é um segredo publicado.
+      corpo: JSON.parse(dados.corpoCru) as object,
+    }],
+    skipDuplicates: true,
+  });
+  if (inserido.count === 0) return { eventoId: evento.eventoId, repetido: true };
   return { eventoId: evento.eventoId, repetido: false };
 }
 
