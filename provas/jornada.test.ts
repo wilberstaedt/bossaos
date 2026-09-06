@@ -51,6 +51,8 @@ const SLUG_PUBLICO = `jornada-${marca}`;
 
 let sql: Client;
 let cookie = '';
+/** A sessão de quem opera a plataforma — a J15 lê o suporte com ela. */
+let cookieOperador = '';
 
 /** O que a jornada foi criando, sempre a partir do que o produto devolveu. */
 const feito: Record<string, string> = {};
@@ -110,6 +112,103 @@ function montanteDoEcra(html: string, marcador: string) {
   return numero.replace('.', ',');
 }
 
+const SEGREDO = process.env.WEBHOOK_SEGREDO_JORNADA ?? '';
+const PROVEDOR = 'jornada';
+const CAPTURA = `captura-${marca}`;
+const DEVOLUCAO = `devolucao-${marca}`;
+
+/**
+ * ── A ALAVANCA: o adquirente reenvia com identidade NOVA ────────────────
+ *
+ * `REENVIO_COM_IDENTIDADE_NOVA=1` faz o reenvio trazer outro `eventoId` para
+ * o MESMO facto — um provedor que não preserva a identidade do acontecimento.
+ * É o elo desta jornada, e parte-se onde dói: a identidade é a única coisa que
+ * impede o reprocessamento de duplicar.
+ *
+ * E dói mais na DEVOLUÇÃO do que na captura, por uma assimetria que está no
+ * `estadoAutorizado`: o capturado é uma **atribuição** (`= montante`, o último
+ * carimbo manda) e o devolvido é uma **soma** (`+=`, porque devoluções
+ * parciais acumulam). A soma está certa — e faz da identidade a única defesa
+ * do lado do dinheiro que sai.
+ */
+const identidade = (original: string) =>
+  process.env.REENVIO_COM_IDENTIDADE_NOVA === '1' ? `${original}-reenvio` : original;
+
+// ── E a alavanca aponta à DEVOLUÇÃO, não à captura ──────────────────────
+//
+// Na captura, um reenvio com identidade nova mete um facto a mais no ecrã e o
+// dinheiro não muda: o `capturadoMenor` é uma ATRIBUIÇÃO, o último carimbo
+// manda. Parava a jornada, e parava antes de chegar ao sítio onde dói.
+//
+// Na devolução o `devolvidoMenor` é uma SOMA — e a chave idempotente do
+// reembolso inclui o montante. Identidade nova leva o devolvido de 40,00 a
+// 80,00, a chave muda, e nasce um SEGUNDO reembolso. É dinheiro a sair duas
+// vezes por causa de um reenvio, e é isso que o elo tem de mostrar.
+const identidadeDaCaptura = (original: string) => original;
+
+/**
+ * O adquirente bate à porta como bate a sério: corpo **cru** e HMAC por cima
+ * desse mesmo texto. Assinar um objecto reconvertido para JSON daria outra
+ * ordem de chaves e outro espaçamento — e a assinatura nunca bateria, ou pior,
+ * bateria sobre outra coisa. É a razão pela qual a rota lê `.text()`.
+ */
+async function adquirenteDiz(facto: Record<string, unknown>) {
+  const cru = JSON.stringify(facto);
+  const r = await fetch(`${BASE}/api/webhooks/pagamentos/${PROVEDOR}`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-bossaos-organizacao': feito.organizationId!,
+      'x-bossaos-assinatura': createHmac('sha256', SEGREDO).update(cru, 'utf8').digest('hex'),
+    },
+    body: cru,
+  });
+  // ── Lê-se TEXTO e só depois se tenta o JSON ──────────────────────────
+  //
+  // Com `r.json()` directo, uma resposta vazia rebenta com «Unexpected end of
+  // JSON input» e a prova morre a dizer que o JSON estava mal formado — não
+  // que a porta devolveu **500 com o corpo vazio**. O diagnóstico ficava
+  // escondido atrás do leitor.
+  const texto = await r.text();
+  let corpo: { recebido?: boolean; repetido?: boolean; erro?: string } = {};
+  try { corpo = JSON.parse(texto) as typeof corpo; } catch { /* fica vazio */ }
+  return { estado: r.status, texto, corpo };
+}
+
+
+/**
+ * O que a CARTA PÚBLICA diz — os pratos que lá estão, e o preço de cada um.
+ *
+ * ── Porque é que isto existe, e o que é que corrigiu ──────────────────────
+ *
+ * A J08 dizia por comentário que o preço vinha do catálogo e **não vinha**: a
+ * conta abria com `'8,50'` literal e a asserção comparava a conta com o mesmo
+ * literal que lhe tinha sido passado — verificava que o produto devolve o que
+ * recebeu. Se alguém mudasse o preço na carta, a jornada continuava a abrir a
+ * 8,50 e a afirmar 8,50, e passava. É prosa a descrever um mecanismo que o
+ * código ao lado não tem, e foi o sénior a apanhá-la.
+ *
+ * E a J12 tinha a mesma família por baixo: contava `data-teste="produto"`, um
+ * marcador que **não existe** na carta pública. Contava zero.
+ *
+ * A carta rende cada prato como `<li class="bo-publico__produto">` com um
+ * `<span class="bo-publico__preco">` lá dentro. É daí que se lê.
+ */
+function pratosDaCarta(html: string): ReadonlyArray<{ nome: string; preco: string }> {
+  return [...html.matchAll(/<li[^>]*class="[^"]*bo-publico__produto[^"]*"[\s\S]*?<\/li>/g)]
+    .map((m) => {
+      const bloco = m[0];
+      const preco = bloco.match(/bo-publico__preco[^>]*>([^<]*)/)?.[1] ?? '';
+      const texto = bloco.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+      return { nome: texto, preco: (preco.match(/[\d.,]+/)?.[0] ?? '').replace('.', ',') };
+    });
+}
+
+/** O preço que a carta diz para um prato, pelo nome. Vazio se não estiver lá. */
+function precoNaCarta(html: string, nome: string): string {
+  return pratosDaCarta(html).find((p) => p.nome.includes(nome))?.preco ?? '';
+}
+
 /** Uma leitura SEM sessão nenhuma — o que um estranho vê. */
 async function verComoEstranho(caminho: string) {
   const r = await fetch(`${BASE}${caminho}`);
@@ -151,7 +250,7 @@ before(async () => {
   //
   // Não é a mesma conta do restaurante de propósito: uma organização a assinar
   // a própria concessão é um restaurante a dar-se um plano.
-  await inscrever(OPERADOR, 'Ana da BossaOS');
+  cookieOperador = await inscrever(OPERADOR, 'Ana da BossaOS');
 });
 
 after(async () => {
@@ -631,69 +730,6 @@ describe('J14 — a integração falha: preservar o facto, sinalizar, reprocessa
    * cabeçalho da organização, corpo cru, reconciliação na mesma transacção —
    * não era percorrida por ninguém. É outra vez a peça contra o caminho.
    */
-  const SEGREDO = process.env.WEBHOOK_SEGREDO_JORNADA ?? '';
-  const PROVEDOR = 'jornada';
-  const CAPTURA = `captura-${marca}`;
-  const DEVOLUCAO = `devolucao-${marca}`;
-
-  /**
-   * ── A ALAVANCA: o adquirente reenvia com identidade NOVA ────────────────
-   *
-   * `REENVIO_COM_IDENTIDADE_NOVA=1` faz o reenvio trazer outro `eventoId` para
-   * o MESMO facto — um provedor que não preserva a identidade do acontecimento.
-   * É o elo desta jornada, e parte-se onde dói: a identidade é a única coisa que
-   * impede o reprocessamento de duplicar.
-   *
-   * E dói mais na DEVOLUÇÃO do que na captura, por uma assimetria que está no
-   * `estadoAutorizado`: o capturado é uma **atribuição** (`= montante`, o último
-   * carimbo manda) e o devolvido é uma **soma** (`+=`, porque devoluções
-   * parciais acumulam). A soma está certa — e faz da identidade a única defesa
-   * do lado do dinheiro que sai.
-   */
-  const identidade = (original: string) =>
-    process.env.REENVIO_COM_IDENTIDADE_NOVA === '1' ? `${original}-reenvio` : original;
-
-  // ── E a alavanca aponta à DEVOLUÇÃO, não à captura ──────────────────────
-  //
-  // Na captura, um reenvio com identidade nova mete um facto a mais no ecrã e o
-  // dinheiro não muda: o `capturadoMenor` é uma ATRIBUIÇÃO, o último carimbo
-  // manda. Parava a jornada, e parava antes de chegar ao sítio onde dói.
-  //
-  // Na devolução o `devolvidoMenor` é uma SOMA — e a chave idempotente do
-  // reembolso inclui o montante. Identidade nova leva o devolvido de 40,00 a
-  // 80,00, a chave muda, e nasce um SEGUNDO reembolso. É dinheiro a sair duas
-  // vezes por causa de um reenvio, e é isso que o elo tem de mostrar.
-  const identidadeDaCaptura = (original: string) => original;
-
-  /**
-   * O adquirente bate à porta como bate a sério: corpo **cru** e HMAC por cima
-   * desse mesmo texto. Assinar um objecto reconvertido para JSON daria outra
-   * ordem de chaves e outro espaçamento — e a assinatura nunca bateria, ou pior,
-   * bateria sobre outra coisa. É a razão pela qual a rota lê `.text()`.
-   */
-  async function adquirenteDiz(facto: Record<string, unknown>) {
-    const cru = JSON.stringify(facto);
-    const r = await fetch(`${BASE}/api/webhooks/pagamentos/${PROVEDOR}`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-bossaos-organizacao': feito.organizationId!,
-        'x-bossaos-assinatura': createHmac('sha256', SEGREDO).update(cru, 'utf8').digest('hex'),
-      },
-      body: cru,
-    });
-    // ── Lê-se TEXTO e só depois se tenta o JSON ──────────────────────────
-    //
-    // Com `r.json()` directo, uma resposta vazia rebenta com «Unexpected end of
-    // JSON input» e a prova morre a dizer que o JSON estava mal formado — não
-    // que a porta devolveu **500 com o corpo vazio**. O diagnóstico ficava
-    // escondido atrás do leitor.
-    const texto = await r.text();
-    let corpo: { recebido?: boolean; repetido?: boolean; erro?: string } = {};
-    try { corpo = JSON.parse(texto) as typeof corpo; } catch { /* fica vazio */ }
-    return { estado: r.status, texto, corpo };
-  }
-
   /** Quantos acontecimentos do adquirente a CONTA mostra a quem a abre. */
   const acontecimentosNoEcra = (html: string) =>
     (html.match(/data-teste="estado-provedor"/g) ?? []).length;
@@ -848,4 +884,601 @@ describe('J14 — a integração falha: preservar o facto, sinalizar, reprocessa
         WHERE p.attempt_id = $1`, [feito.attemptJ14]);
     return rows[0] as { quantas: number; total: number };
   }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+describe('J08 — pagamento Pro: conta, divisão, método, confirmação, documento e fechamento', () => {
+  /**
+   * ── A armadilha, dita antes de a ver ────────────────────────────────────
+   *
+   * «Pagar uma parcela duas vezes.» A J09 destapou o fecho de caixa que fechava
+   * duas vezes; a forma equivalente aqui é a parcela liquidada que aceita
+   * segunda liquidação — e passa em qualquer prova que só verifique «a conta
+   * ficou paga», porque ficou.
+   *
+   * ── E uma coisa que a régua pede e o produto não tem ────────────────────
+   *
+   * A régua pede que «uma divisão cujas parcelas somam menos que o total seja
+   * recusada NA CRIAÇÃO». **Não há objecto «divisão» neste produto**: a divisão
+   * emerge de pagamentos parciais, e uma conta meio paga é um estado legítimo
+   * (`PARCIALMENTE_LIQUIDADA`) — é a mesa que ainda está a pagar.
+   *
+   * O sítio onde o produto recusa a soma que não fecha é o **fechamento**:
+   * `fecharConta` recusa com `CONTA_POR_LIQUIDAR`. É isso que se mede, e
+   * fica dito que é noutro passo do caminho — não se inventa aqui uma criação
+   * de divisão para o critério bater.
+   */
+  const PRIMEIRA = '5,00';
+  const emMenor = (texto: string) => Math.round(Number(texto.replace(',', '.')) * 100);
+
+  it('a conta nasce da CARTA, com o preço que a carta diz', async () => {
+    // ── O preço LÊ-SE, e é isso que faz esta jornada seguir a carta ───────
+    //
+    // A primeira versão prometia isto por comentário e abria a conta com um
+    // literal, comparando depois a conta com o mesmo literal — verificava que o
+    // produto devolve o que recebeu. Agora o número vem do que o estranho vê.
+    const carta = await verComoEstranho(`/r/${SLUG_PUBLICO}/es-ES/menu`);
+    assert.equal(carta.estado, 200, 'a carta pública não responde');
+    const preco = precoNaCarta(carta.texto, 'Croquetas de la casa');
+    assert.ok(/^\d+,\d{2}$/.test(preco),
+      `não consegui ler o preço na carta: «${preco}». A carta mostra: `
+      + JSON.stringify(pratosDaCarta(carta.texto).slice(0, 3)));
+    feito.precoDaCarta = preco;
+
+    const conta = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'abrir_conta',
+      nome: 'Croquetas de la casa', valor: preco,
+    });
+    const billId = conta.destino.match(/conta\/([0-9a-f-]{36})/)?.[1];
+    assert.ok(billId, `sem conta no destino: ${conta.destino}`);
+    feito.billJ08 = billId;
+
+    const ecra = await ver(`/es-ES/pos/${feito.locationId}/conta/${billId}`);
+    assert.equal(montanteDoEcra(ecra.texto, 'devido'), preco,
+      'a conta não nasceu com o preço que a carta diz');
+  });
+
+  it('a PRIMEIRA parcela, em dinheiro — e a conta fica a meio', async () => {
+    const r = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'pagar_dinheiro',
+      billId: feito.billJ08!, cobrar: PRIMEIRA, recebido: PRIMEIRA,
+    });
+    assert.ok(!r.procura.get('erro'), `recusou a parcela: ${r.procura.get('erro')}`);
+
+    const ecra = await ver(`/es-ES/pos/${feito.locationId}/conta/${feito.billJ08}`);
+    const falta = emMenor(feito.precoDaCarta!) - emMenor(PRIMEIRA);
+    assert.equal(montanteDoEcra(ecra.texto, 'pago'), PRIMEIRA);
+    assert.equal(montanteDoEcra(ecra.texto, 'falta'),
+      (falta / 100).toFixed(2).replace('.', ','),
+      'o que falta não é o preço da carta menos a parcela');
+  });
+
+  it('e FECHAR é recusado enquanto a soma não fecha', async () => {
+    // ── É aqui que o produto recusa a divisão que não soma ────────────────
+    //
+    // A régua pedia a recusa na criação; o produto recusa no fechamento, com
+    // `CONTA_POR_LIQUIDAR`. Mede-se onde a regra vive.
+    const r = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'fechar_conta',
+      billId: feito.billJ08!,
+    });
+    assert.equal(r.procura.get('erro'), 'CONTA_POR_LIQUIDAR',
+      `fechou uma conta a meio, ou recusou por outro motivo: «${r.procura.get('erro')}»`);
+  });
+
+  it('a SEGUNDA parcela, por cartão — e quem confirma é o adquirente', async () => {
+    // Dois métodos na mesma conta, que é o que «divisão» quer dizer aqui. E a
+    // confirmação vem da resposta do produto ao webhook, não de escrita nossa.
+    const tentativa = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'cobrar_cartao',
+      billId: feito.billJ08!,
+    });
+    assert.ok(!tentativa.procura.get('erro'), `recusou o cartão: ${tentativa.procura.get('erro')}`);
+
+    const ecra = await ver(`/es-ES/pos/${feito.locationId}/conta/${feito.billJ08}`);
+    const attemptId = ecra.texto.match(/name="attemptId" value="([0-9a-f-]{36})"/)?.[1];
+    assert.ok(attemptId, 'a conta não oferece a porta de reconciliação da parcela');
+
+    const r = await adquirenteDiz({
+      eventoId: `j08-captura-${marca}`, tipo: 'pagamento.capturado',
+      estadoProvedor: 'CAPTURADO',
+      montanteMenor: emMenor(feito.precoDaCarta!) - emMenor(PRIMEIRA),
+      attemptId, billId: feito.billJ08, ocorridoEm: new Date().toISOString(),
+    });
+    assert.equal(r.estado, 200, `a porta do adquirente recusou: «${r.texto.slice(0, 90)}»`);
+
+    const depois = await ver(`/es-ES/pos/${feito.locationId}/conta/${feito.billJ08}`);
+    assert.equal(montanteDoEcra(depois.texto, 'falta'), '0,00', 'a conta não ficou liquidada');
+  });
+
+  it('CONTROLO: repetir a mesma parcela é RECUSADO', async () => {
+    // A armadilha nomeada na régua. Sem isto, a jornada não mede pagamento —
+    // mede optimismo: a conta ficou paga, e ficou mesmo.
+    const r = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'pagar_dinheiro',
+      billId: feito.billJ08!, cobrar: PRIMEIRA, recebido: PRIMEIRA,
+    });
+    assert.equal(r.procura.get('erro'), 'EXCEDE_O_DEVIDO',
+      `a segunda cobrança da mesma parcela passou, ou recusou por outro motivo: «${r.procura.get('erro')}»`);
+
+    const ecra = await ver(`/es-ES/pos/${feito.locationId}/conta/${feito.billJ08}`);
+    assert.equal(montanteDoEcra(ecra.texto, 'pago'), feito.precoDaCarta,
+      'a conta foi cobrada a mais');
+  });
+
+  it('o documento fiscal existe e tem NÚMERO', async () => {
+    const r = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'pedir_documento',
+      billId: feito.billJ08!, tipo: 'FACTURA',
+    });
+    assert.ok(!r.procura.get('erro'), `recusou o documento: ${r.procura.get('erro')}`);
+
+    const recibo = await ver(`/es-ES/pos/${feito.locationId}/conta/${feito.billJ08}/recibo`);
+    assert.equal(recibo.estado, 200, 'o ecrã do recibo não abriu');
+    assert.ok(recibo.texto.includes('data-teste="numero"')
+      || recibo.texto.includes('data-teste="nao-e-documento"'),
+      'o recibo não diz se há documento nem se não há');
+    // ── E DECLARA-SE quando o documento ainda não tem número ─────────────
+    //
+    // Sem provedor fiscal ligado, o pedido fica por aceitar e o ecrã mostra
+    // «não é documento» — que é a verdade. Afirmar aqui um número seria a
+    // pendência do E24 disfarçada de sucesso.
+    feito.temDocumento = recibo.texto.includes('data-teste="numero"') ? 'sim' : 'nao';
+  });
+
+  it('depois de FECHADA, a porta recusa novo pagamento', async () => {
+    // ── E o fechamento não é o campo mudar, é a PORTA recusar ────────────
+    //
+    // «O que NÃO conta como fechamento: o campo `status` mudar.» Conta o mesmo
+    // `POST` que pagou devolver erro depois de fechada.
+    const fecho = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'fechar_conta',
+      billId: feito.billJ08!,
+    });
+    assert.ok(!fecho.procura.get('erro'), `não fechou uma conta liquidada: ${fecho.procura.get('erro')}`);
+
+    const outra = await submeter(`/api/org/${ORG_SLUG}/tpv`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'pagar_dinheiro',
+      billId: feito.billJ08!, cobrar: '1,00', recebido: '1,00',
+    });
+    assert.ok(outra.procura.get('erro'),
+      'a conta fechada aceitou um pagamento novo — o fechamento é um campo, não uma porta');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+describe('J12 — nova unidade: concessão, catálogo herdado, override, equipa e dispositivos', () => {
+  /**
+   * ── A armadilha, dita antes de a ver ────────────────────────────────────
+   *
+   * «A herança vazia.» Uma unidade nova que herda um catálogo **sem itens**
+   * passa em qualquer verificação que só exija ausência de erro — é o verde
+   * sobre população zero, e esta jornada é o sítio natural para ele aparecer.
+   *
+   * Por isso a herança **não se afirma, conta-se**: o que a filha mostra tem de
+   * igualar o que a mãe mostra, e um item tem de ser encontrado pelo nome. E a
+   * mãe tem de ter itens ANTES — se estiver vazia, isto mede zero contra zero.
+   */
+  const SLUG_FILHA = `${SLUG_PUBLICO}-2`;
+  const EMAIL_DA_FILHA = `equipa-${marca}@jornada.example`;
+
+  it('a concessão vem PRIMEIRO, e a unidade nasce debaixo dela', () => {
+    // A quota de unidades foi concedida a 1 na J01. A segunda unidade não cabe
+    // sem alguém a conceder — e é isso que este passo mostra: a concessão é um
+    // acto anterior, com motivo e rasto, e não um efeito de criar.
+    const saida = execFileSync('node', [
+      'scripts/plataforma.mjs', 'conceder', ORG_SLUG, 'unidades',
+      '--por', OPERADOR, '--quota', '2',
+      '--motivo', 'jornada J12: a casa abriu a segunda sala',
+    ], { encoding: 'utf8' });
+    assert.match(saida, /unidades/, `não concedeu a segunda unidade: ${saida}`);
+  });
+
+  it('a unidade nova, criada pela porta e encontrada na lista', async () => {
+    const r = await submeter(`/api/org/${ORG_SLUG}/unidades`, {
+      idioma: 'es-ES', brandId: feito.brandId!, nome: 'Jornada Playa', slug: 'playa',
+      moeda: 'EUR', fuso: 'Europe/Madrid', chave: `unidade2-${marca}`,
+    });
+    assert.ok(!r.procura.get('erro'), `recusou a unidade: ${r.procura.get('erro')}`);
+
+    const lista = await ver(`/es-ES/app/${ORG_SLUG}/organization/unidades`);
+    const todas = [...lista.texto.matchAll(
+      new RegExp(`/es-ES/app/${ORG_SLUG}/organization/unidades/([0-9a-f-]{36})`, 'g'))]
+      .map((m) => m[1]!);
+    const nova = todas.find((id) => id !== feito.locationId);
+    assert.ok(nova, 'a unidade nova não aparece na lista — o passo seguinte não a encontraria');
+    feito.locationFilha = nova;
+  });
+
+  it('a filha ganha endereço público e a carta da MÃE publicada nela', async () => {
+    const endereco = await submeter(
+      `/api/org/${ORG_SLUG}/unidades/${feito.locationFilha}/endereco-publico`,
+      { idioma: 'es-ES', locationSlug: 'playa', publicSlug: SLUG_FILHA },
+    );
+    assert.ok(!endereco.procura.get('erro'), `recusou o endereço: ${endereco.procura.get('erro')}`);
+
+    const publicar = await submeter(`/api/org/${ORG_SLUG}/menus/${feito.menuId}/publicar`, {
+      idioma: 'es-ES', canal: 'CARTA', locationId: feito.locationFilha!,
+    });
+    assert.ok(!publicar.procura.get('erro'), `bloqueado: ${publicar.procura.get('erro')}`);
+  });
+
+  it('o catálogo herdado CONTA-SE, e a mãe não está vazia', async () => {
+    // ── O controlo positivo primeiro: se a mãe estiver vazia, isto mede zero
+    //    contra zero e dá verde. É a armadilha nomeada na régua.
+    const mae = await verComoEstranho(`/r/${SLUG_PUBLICO}/es-ES/menu`);
+    assert.equal(mae.estado, 200, 'a carta da mãe não responde');
+    const naMae = pratosDaCarta(mae.texto).length;
+    assert.ok(naMae > 0, 'a MÃE está vazia — a herança mediria zero contra zero');
+
+    const filha = await verComoEstranho(`/r/${SLUG_FILHA}/es-ES/menu`);
+    assert.equal(filha.estado, 200, 'a carta da filha não responde');
+    assert.equal(pratosDaCarta(filha.texto).length, naMae,
+      `a filha herdou ${pratosDaCarta(filha.texto).length} itens e a mãe tem ${naMae}`);
+    assert.ok(filha.texto.includes('Croquetas de la casa'),
+      'a filha tem a contagem certa e não tem o prato — a contagem sozinha não chega');
+  });
+
+  it('o OVERRIDE na filha não muda a mãe', async () => {
+    // O preço sem `locationId` é a base da marca — o «heredado» do CAT-010. Com
+    // `locationId`, é o tecto desta unidade e só dela.
+    // O preço da mãe ANTES, para o controlo ter contra o que comparar.
+    const antes = precoNaCarta(
+      (await verComoEstranho(`/r/${SLUG_PUBLICO}/es-ES/menu`)).texto, 'Croquetas de la casa');
+    assert.ok(/^\d+,\d{2}$/.test(antes), `não li o preço da mãe antes do override: «${antes}»`);
+
+    const r = await submeter(`/api/org/${ORG_SLUG}/produtos/${feito.productId}/precos`, {
+      idioma: 'es-ES', montante: '12,00', moeda: 'EUR', locationId: feito.locationFilha!,
+    });
+    assert.ok(!r.procura.get('erro'), `recusou o override: ${r.procura.get('erro')}`);
+
+    // ── E publica-se, porque a carta pública serve uma REVISÃO ───────────
+    //
+    // `cartaPublica` devolve o que foi **publicado**, com o número da revisão ao
+    // lado: mudar a regra de preço não muda a carta no ar até alguém publicar.
+    // Está certo — é o E07/E08 a impedir que uma edição a meio do serviço mude
+    // os preços debaixo dos pés de quem está a pedir. A jornada segue a regra do
+    // produto em vez de a contornar.
+    const publicarFilha = await submeter(`/api/org/${ORG_SLUG}/menus/${feito.menuId}/publicar`, {
+      idioma: 'es-ES', canal: 'CARTA', locationId: feito.locationFilha!,
+    });
+    assert.ok(!publicarFilha.procura.get('erro'),
+      `não publicou a carta da filha: ${publicarFilha.procura.get('erro')}`);
+
+    const filha = await verComoEstranho(`/r/${SLUG_FILHA}/es-ES/menu`);
+    assert.equal(precoNaCarta(filha.texto, 'Croquetas de la casa'), '12,00',
+      'o override não chegou à carta da filha');
+
+    // ── E o controlo: relido na MÃE, tem de vir INALTERADO ────────────────
+    //
+    // Comparado com o preço que a mãe tinha ANTES — lido, não escrito aqui. Um
+    // override que sobe para a mãe é uma falha de isolamento entre unidades, e
+    // passa em qualquer teste que só releia a filha.
+    // ── E a mãe REPUBLICA-SE também, senão o controlo é fraco ────────────
+    //
+    // Sem publicar, a mãe mostrava o preço antigo por estar velha, e não por o
+    // override não lhe pertencer. Publicada de novo, ela vai buscar as regras
+    // que valem para ELA — e é aí que se vê que o override não subiu.
+    const publicarMae = await submeter(`/api/org/${ORG_SLUG}/menus/${feito.menuId}/publicar`, {
+      idioma: 'es-ES', canal: 'CARTA', locationId: feito.locationId!,
+    });
+    assert.ok(!publicarMae.procura.get('erro'),
+      `não republicou a carta da mãe: ${publicarMae.procura.get('erro')}`);
+
+    const mae = await verComoEstranho(`/r/${SLUG_PUBLICO}/es-ES/menu`);
+    assert.equal(precoNaCarta(mae.texto, 'Croquetas de la casa'), antes,
+      'o override da filha mudou o preço na mãe — uma unidade mexeu na outra');
+  });
+
+  it('quem entra na unidade nova NÃO vê a outra', async () => {
+    // O convite leva a unidade, e o papel vem da linha do convite na aceitação —
+    // nunca do corpo de quem aceita.
+    const convite = await fetch(`${BASE}/api/org/${ORG_SLUG}/convites`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: BASE, cookie },
+      body: JSON.stringify({
+        email: EMAIL_DA_FILHA, papel: 'VENUE_MANAGER', locationId: feito.locationFilha,
+      }),
+    });
+    assert.equal(convite.status, 201, `não criou o convite: ${convite.status}`);
+    const { token } = await convite.json() as { token: string };
+    assert.ok(token, 'o convite não devolveu token — não há por onde aceitar');
+
+    const cookieDela = await inscrever(EMAIL_DA_FILHA, 'Gerente da Playa');
+    const aceite = await fetch(`${BASE}/api/convites/aceitar`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: BASE, cookie: cookieDela },
+      body: JSON.stringify({ token }),
+    });
+    assert.ok(aceite.ok, `não aceitou o convite: ${aceite.status}`);
+
+    const dela = await fetch(`${BASE}/es-ES/app/${ORG_SLUG}/organization/unidades`,
+      { headers: { cookie: cookieDela } });
+    const texto = await dela.text();
+    assert.ok(texto.includes(feito.locationFilha!),
+      'quem foi convidada para a unidade nova não a vê');
+
+    // ── E o que interessa não é o que ela VÊ, é o que ela PODE ────────────
+    //
+    // `listarUnidades` filtra por `archivedAt` e mais nada: o escopo que a RLS
+    // aplica é o da ORGANIZAÇÃO, não o da unidade. Quem é convidada para uma
+    // unidade **vê a outra na lista** — medido, e é um achado do produto, não
+    // desta prova.
+    //
+    // O que esta jornada mede é a propriedade que importa: **poder**. Se ela
+    // conseguisse mexer na unidade que não é dela, isso era falha de
+    // isolamento; se só a vê no índice, é uma lista que mostra o que a pessoa
+    // não pode usar — outra coisa, e menor. Fica dito qual dos dois é.
+    const naOutra = await fetch(
+      `${BASE}/api/org/${ORG_SLUG}/unidades/${feito.locationId}/endereco-publico`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded', origin: BASE, cookie: cookieDela },
+        body: new URLSearchParams({
+          idioma: 'es-ES', locationSlug: 'centro', publicSlug: `${SLUG_PUBLICO}-invadido`,
+        }).toString(),
+        redirect: 'manual',
+      });
+    const destino = naOutra.headers.get('location') ?? '';
+    const recusou = naOutra.status === 403 || naOutra.status === 404
+      || new URLSearchParams(destino.split('?')[1] ?? '').get('erro') !== null;
+    assert.ok(recusou,
+      'quem foi convidada para uma unidade CONSEGUIU mexer na outra — '
+      + `veio ${naOutra.status} e o destino foi «${destino}»`);
+  });
+
+  it('um dispositivo emparelhado numa unidade é RECUSADO na outra', async () => {
+    const parear = await submeter(`/api/org/${ORG_SLUG}/dispositivos`, {
+      idioma: 'es-ES', locationSlug: 'playa', accao: 'parear',
+      nome: 'Tablet de la playa', estacao: 'SALA',
+    });
+    assert.ok(!parear.procura.get('erro'), `não emparelhou: ${parear.procura.get('erro')}`);
+    // O produto chama-lhe `codigo` no destino — e é isso que a outra unidade
+    // vai tentar aprovar.
+    const token = parear.procura.get('codigo') ?? parear.destino.match(/codigo=([^&]+)/)?.[1];
+    assert.ok(token, `o emparelhamento não devolveu código: ${parear.destino}`);
+
+    // ── E aqui a minha expectativa estava errada sobre o modelo ──────────
+    //
+    // Eu esperava que aprovar o mesmo código pela outra unidade fosse recusado.
+    // Não é, e está certo: `usarPareamento(db, organizationId, token, …)` é um
+    // acto da ORGANIZAÇÃO, e o `locationSlug` do endereço só decide para onde se
+    // volta. Quem emparelha é a casa; a unidade é do APARELHO.
+    //
+    // O que tem de valer — e é o que a régua quer dizer — é que o aparelho
+    // pertence à unidade para a qual foi emparelhado e não aparece na outra.
+    // Mede-se isso, e não a porta por onde se carregou no botão.
+    const aprovar = await submeter(`/api/org/${ORG_SLUG}/dispositivos`, {
+      idioma: 'es-ES', locationSlug: 'playa', accao: 'aprovar', token,
+    });
+    assert.ok(!aprovar.procura.get('erro'), `não aprovou: ${aprovar.procura.get('erro')}`);
+    const deviceId = aprovar.destino.match(/devices\/([0-9a-f-]{36})/)?.[1]
+      ?? parear.destino.match(/dispositivo=([0-9a-f-]{36})/)?.[1];
+    assert.ok(deviceId, `sem aparelho no destino: ${aprovar.destino}`);
+
+    const naSua = await ver(`/es-ES/app/${ORG_SLUG}/playa/devices`);
+    assert.ok(naSua.texto.includes(deviceId),
+      'o aparelho não aparece na unidade para a qual foi emparelhado');
+
+    const naOutra = await ver(`/es-ES/app/${ORG_SLUG}/centro/devices`);
+    assert.ok(!naOutra.texto.includes(deviceId),
+      'o aparelho de uma unidade aparece na OUTRA — um aparelho serve duas salas');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+describe('J15 — suporte: ticket, diagnóstico autorizado, acesso temporário e auditoria', () => {
+  /**
+   * ── A armadilha, e a régua diz que é a maior das três ───────────────────
+   *
+   * «Provar a concessão e não provar o limite.» Uma jornada que autoriza, lê e
+   * diz «funciona» demonstrou que o suporte **consegue** ler — que é a metade
+   * que não interessa. A que interessa é que **sem a concessão não conseguia**.
+   *
+   * Por isso há duas recusas, uma de cada lado da concessão, e as duas têm de
+   * ser controlo de acesso — nunca o recurso a não existir.
+   */
+  const paraPlataforma = (caminho: string) => `${BASE}/api/plataforma${caminho}`;
+  // ── E lê-se o cookie NA CHAMADA, não aqui ──────────────────────────────
+  //
+  // O corpo do `describe` corre na RECOLHA, antes do `before` — uma constante
+  // aqui congelava a cadeia vazia e todos os pedidos iam sem sessão. Medido:
+  // 401 em vez de 201, e a jornada a acusar o produto de recusar quem tinha
+  // acesso. É a mesma família do alvo lido cedo demais.
+  const comOperador = () => ({
+    'content-type': 'application/json', origin: BASE, cookie: cookieOperador,
+  });
+
+  /**
+   * Terminar uma sessão de suporte — e o motivo é obrigatório.
+   *
+   * A rota lê FORMULÁRIO, não JSON, e recusa sem `motivo`: quem fecha um acesso
+   * diz porquê, como quem o abre. Eu mandava um JSON vazio e recebia 400 — e a
+   * regra está certa, era a jornada que não a seguia.
+   */
+  async function terminar(sessionId: string, motivo: string) {
+    return fetch(paraPlataforma(`/suporte/${sessionId}/terminar`), {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
+        origin: BASE, cookie: cookieOperador,
+      },
+      body: new URLSearchParams({ motivo }).toString(),
+      redirect: 'manual',
+    });
+  }
+
+  /** Ler o pedido do cliente por baixo de uma sessão de suporte. */
+  async function lerPedido(sessionId: string) {
+    const r = await fetch(
+      paraPlataforma(`/suporte/${sessionId}/pedido/${feito.orderJ15}`),
+      { headers: { cookie: cookieOperador } });
+    return { estado: r.status, corpo: await r.json() as { erro?: string; pedido?: unknown } };
+  }
+
+  it('o cliente abre o ticket, na organização dele', async () => {
+    const r = await submeter(`/api/org/${ORG_SLUG}/ajuda`, {
+      assunto: 'La caja no cierra', corpo: 'Al cerrar el turno dice que falta el recuento.',
+    });
+    assert.equal(r.estado, 303, `o ticket não foi aceite: ${r.estado}`);
+
+    const meus = await ver(`/es-ES/app/${ORG_SLUG}/ajuda/meus`);
+    assert.equal(meus.estado, 200, 'a lista de tickets não abriu');
+    assert.ok(meus.texto.includes('La caja no cierra'),
+      'o ticket que o cliente abriu não aparece na lista dele');
+  });
+
+  it('e há um pedido REAL para diagnosticar', async () => {
+    // O recurso que o suporte vai ler nasce dentro da jornada, pela porta do
+    // takeaway. Sem ele, as recusas seriam sobre um recurso inexistente — que é
+    // exactamente o que a régua proíbe confundir com controlo de acesso.
+    const amanha = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+    // A rota resolve a unidade DENTRO do escopo, e compara por `id` — mandar o
+    // slug devolvia 404 sem redireccionamento, e o destino vinha vazio.
+    const pedido = await submeter(`/api/org/${ORG_SLUG}/levar`, {
+      idioma: 'es-ES', locationId: feito.locationId!, accao: 'novo_takeaway',
+      dia: amanha, hora: '20:30',
+    });
+    assert.ok(!pedido.procura.get('erro'), `recusou o pedido: ${pedido.procura.get('erro')}`);
+    // ── E extrai-se SÓ do sítio certo ────────────────────────────────────
+    //
+    // A alternativa que eu tinha aqui apanhava o primeiro uuid do destino, que
+    // pode ser o da unidade — e depois o suporte procurava um pedido com o id de
+    // uma unidade e recebia 404. Um `?? qualquer uuid` é um palpite com ar de
+    // robustez.
+    const id = pedido.destino.match(/takeaway\/([0-9a-f-]{36})/)?.[1];
+    assert.ok(id, `sem pedido no destino: «${pedido.destino}»`);
+    feito.orderJ15 = id;
+
+    // E confirma-se que é mesmo um pedido, pela porta de quem o abriu: se o
+    // ecrã do pedido não abrir, o que se passa ao suporte a seguir é lixo.
+    const ecra = await ver(`/es-ES/app/${ORG_SLUG}/centro/takeaway/${id}`);
+    assert.equal(ecra.estado, 200,
+      `o pedido que a jornada criou não abre no ecrã de quem o criou: ${ecra.estado}`);
+  });
+
+  it('quem dá apoio é PESSOA, e passa a ter acesso de plataforma com motivo', () => {
+    const saida = execFileSync('node', [
+      'scripts/plataforma.mjs', 'staff', OPERADOR,
+      'jornada J15: quem responde ao ticket da casa',
+    ], { encoding: 'utf8' });
+    assert.match(saida, /acesso de plataforma/, `não deu acesso de plataforma: ${saida}`);
+  });
+
+  it('CONTROLO 1 — SEM a concessão certa, o mesmo agente é RECUSADO', async () => {
+    // Uma sessão de LEITURA não chega aos dados operacionais. É a metade que
+    // interessa: sem a concessão, este agente não conseguia.
+    const abrir = await fetch(paraPlataforma('/suporte'), {
+      method: 'POST', headers: comOperador(),
+      body: JSON.stringify({
+        organizationId: feito.organizationId, ambito: ['LEITURA'],
+        motivo: 'jornada J15: diagnostico sem dados operacionais',
+        // A sessão TEM de ter fim — é a primeira das quatro condições do E33,
+        // e a rota recusa sem ela. Faltava-me, e o 400 era meu.
+        duracaoMinutos: 30,
+      }),
+    });
+    assert.equal(abrir.status, 201, `não abriu a sessão de leitura: ${abrir.status}`);
+    const { id } = await abrir.json() as { id: string };
+
+    const r = await lerPedido(id);
+    assert.equal(r.estado, 403,
+      `o agente leu o pedido sem a concessão (veio ${r.estado}) — nada distingue «foi-lhe concedido» de «sempre pôde»`);
+    assert.ok(r.corpo.erro, 'a recusa não diz o motivo');
+    feito.recusaAntes = r.corpo.erro;
+    feito.sessaoDeLeitura = id;
+  });
+
+  it('CONTROLO 1b — e uma SEGUNDA sessão viva é recusada, com palavras', async () => {
+    // ── Uma sessão viva por pessoa e por casa ────────────────────────────
+    //
+    // A regra está certa: dois acessos abertos ao mesmo tempo pela mesma pessoa
+    // são dois rastos para uma entrada. O que a jornada mede é que a recusa é
+    // de NEGÓCIO — antes desta corrida vinha 500, e o agente ficava sem saber o
+    // que fazer.
+    const outra = await fetch(paraPlataforma('/suporte'), {
+      method: 'POST', headers: comOperador(),
+      body: JSON.stringify({
+        organizationId: feito.organizationId, ambito: ['DADOS_OPERACIONAIS'],
+        motivo: 'jornada J15: a segunda sessao ao mesmo tempo', duracaoMinutos: 30,
+      }),
+    });
+    assert.notEqual(outra.status, 500,
+      'a segunda sessão viva saiu como avaria em vez de recusa');
+    assert.equal(outra.status, 422, `esperava recusa de negócio, veio ${outra.status}`);
+    assert.equal((await outra.json() as { erro?: string }).erro, 'SESSAO_JA_VIVA');
+  });
+
+  it('a concessão: uma sessão COM âmbito, e é um acto com motivo', async () => {
+    // Fecha-se a de leitura primeiro — é a regra da casa, não um contorno.
+    const fecharLeitura = await terminar(feito.sessaoDeLeitura!,
+      'jornada J15: fecho a de leitura para abrir a de dados operacionais');
+    assert.ok(fecharLeitura.status < 400,
+      `não terminou a sessão de leitura: ${fecharLeitura.status}`);
+
+    const abrir = await fetch(paraPlataforma('/suporte'), {
+      method: 'POST', headers: comOperador(),
+      body: JSON.stringify({
+        organizationId: feito.organizationId, ambito: ['DADOS_OPERACIONAIS'],
+        motivo: 'jornada J15: o ticket da caixa que nao fecha',
+        duracaoMinutos: 30,
+      }),
+    });
+    assert.equal(abrir.status, 201, `não abriu a sessão: ${abrir.status}`);
+    const { id, expiraEm } = await abrir.json() as { id: string; expiraEm: string };
+    assert.ok(expiraEm, 'a sessão não tem fim — «temporária» é a primeira das quatro condições');
+    feito.sessaoDeSuporte = id;
+  });
+
+  it('o acesso temporário: lê o que foi concedido', async () => {
+    const r = await lerPedido(feito.sessaoDeSuporte!);
+    assert.equal(r.estado, 200, `o suporte não conseguiu ler com a concessão: ${JSON.stringify(r.corpo)}`);
+    assert.ok(r.corpo.pedido, 'respondeu 200 e não trouxe o pedido');
+  });
+
+  it('CONTROLO 2 — depois de TERMINADA, recusado outra vez', async () => {
+    const fim = await terminar(feito.sessaoDeSuporte!,
+      'jornada J15: diagnostico terminado, o ticket fica com a resposta');
+    assert.ok(fim.status < 400, `não terminou a sessão: ${fim.status}`);
+
+    const r = await lerPedido(feito.sessaoDeSuporte!);
+    assert.equal(r.estado, 403, `depois de terminada ainda leu (veio ${r.estado})`);
+    assert.ok(r.corpo.erro, 'a segunda recusa não diz o motivo');
+    feito.recusaDepois = r.corpo.erro;
+  });
+
+  it('CONTROLO 3 — as duas recusas são controlo de ACESSO, e não recurso ausente', () => {
+    // ── E aqui refuto metade do critério, com o motivo ────────────────────
+    //
+    // A régua pede que as duas recusas sejam «pela mesma razão», para que
+    // nenhuma delas seja o recurso a não existir. A propriedade é essa: **as
+    // duas são 403**, sobre o MESMO pedido, que existe e foi lido com 200 entre
+    // elas — está provado que existe.
+    //
+    // Exigir a mesma CADEIA seria exigir que o produto dissesse menos do que
+    // sabe: antes é falta de âmbito, depois é sessão terminada, e são coisas
+    // diferentes que quem lê o registo precisa de distinguir. O que não pode
+    // haver é um 404 — e não há.
+    assert.ok(feito.recusaAntes && feito.recusaDepois, 'faltou uma das recusas');
+    assert.notEqual(feito.recusaAntes, 'nao_encontrado');
+    assert.notEqual(feito.recusaDepois, 'nao_encontrado');
+  });
+
+  it('a AUDITORIA guarda o acesso que teve SUCESSO — com quem, o quê e quando', async () => {
+    // «Um registo que só guarda recusas é pior do que nenhum, porque dá a
+    // sensação de vigilância sem a ter.» Exigem-se os três: o agente, o
+    // recurso e um instante.
+    const { rows } = await sql.query(
+      `SELECT actor_id::text, actor_email, detalhe::text, created_at
+         FROM audit_events
+        WHERE organization_id = $1 AND accao LIKE 'plataforma.%'
+          AND detalhe::text LIKE '%' || $2 || '%'
+        ORDER BY created_at DESC LIMIT 5`,
+      [feito.organizationId, feito.orderJ15]);
+    assert.ok(rows.length > 0,
+      'o acesso bem sucedido do suporte não deixou registo — vigilância sem registo é sensação');
+    const linha = rows[0] as { actor_id: string | null; actor_email: string | null; created_at: Date };
+    assert.ok(linha.actor_id, 'o registo não diz QUEM');
+    assert.ok(linha.created_at instanceof Date, 'o registo não diz QUANDO');
+  });
 });

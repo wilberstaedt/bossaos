@@ -44,15 +44,23 @@ export async function GET(
       // A sessão autoriza? As duas metades: viva **e** com âmbito.
       const sessao = await sessaoAutoriza(db as never, sessionId, 'DADOS_OPERACIONAIS');
 
-      return db.order.findFirst({
-        where: { id: orderId, organizationId: sessao.organizationId },
-        // Lista de PERMISSÃO. O que o suporte precisa para perceber o problema,
-        // e não a casa inteira: sem morada, sem contacto, sem nota do cliente.
-        select: {
-          id: true, numero: true, canal: true, estado: true, createdAt: true,
-          linhas: { select: { id: true, nome: true, quantidade: true, estado: true } },
-        },
-      });
+      void sessao;
+      // ── A leitura e o RASTO na mesma instrução ─────────────────────────
+      //
+      // O `findFirst` daqui devolvia **404 para todos os pedidos de todas as
+      // casas**: este caminho corre por `comIdentidade`, sem organização no
+      // contexto, e a `orders` tem RLS por organização. A funcionalidade inteira
+      // era inerte, e nenhuma prova a via porque nenhuma abria esta porta.
+      //
+      // A `suporte_le_pedido` verifica a concessão com o MESMO predicado da
+      // política nova, devolve a lista de permissão — o que o suporte precisa
+      // para perceber o problema, e não a casa inteira: sem morada, sem
+      // contacto, sem nota do cliente — e escreve o rasto do acesso **na mesma
+      // instrução**. Sem linha lida não há linha escrita, e não há caminho em
+      // que o suporte leia e nada fique registado.
+      const linhas = await db.$queryRaw<{ suporte_le_pedido: unknown }[]>`
+        SELECT suporte_le_pedido(${orderId}::uuid, ${sessionId}::uuid)`;
+      return linhas[0]?.suporte_le_pedido ?? null;
     });
 
     if (!dados) return NextResponse.json({ erro: 'nao_encontrado' }, { status: 404 });

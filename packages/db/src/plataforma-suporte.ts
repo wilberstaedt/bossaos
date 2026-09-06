@@ -24,6 +24,9 @@ import type { ClienteComEscopo, ClienteComIdentidade } from './escopo.ts';
 export type RecusaDaPlataforma =
   | 'SESSAO_DESCONHECIDA'
   | 'SESSAO_JA_TERMINADA'
+  /** Uma sessão viva por pessoa e por casa: duas ao mesmo tempo são dois rastos
+   *  para uma entrada. Antes disto, a violação do índice saía como 500. */
+  | 'SESSAO_JA_VIVA'
   | 'SESSAO_EXPIRADA'
   | 'FORA_DE_AMBITO'
   | 'EXCEDE_O_TECTO'
@@ -91,7 +94,16 @@ export async function abrirSessaoDeSuporte(
     const id = linhas[0]?.abrir_sessao_de_suporte as string;
     return (await db.supportSession.findFirst({ where: { id } }))!;
   } catch (erro) {
-    const texto = String(erro);
+    // ── O nome da restrição não vem sempre na mensagem ────────────────────
+    //
+    // As recusas dos GATILHOS aparecem no texto, porque o `RAISE` as escreve. A
+    // violação de um ÍNDICE ÚNICO não: o Prisma põe o nome em `meta`, e o
+    // `String(erro)` traz só «Unique constraint failed». Medido a 06/09 — o meu
+    // primeiro `includes` não apanhou nada e a rota continuou a devolver 500.
+    //
+    // Lêem-se os dois, e o que se procura é o nome, não a frase.
+    const meta = (erro as { meta?: Record<string, unknown> }).meta ?? {};
+    const texto = `${String(erro)} ${JSON.stringify(meta)}`;
     if (texto.includes('sessao_excede_o_tecto_da_casa')) {
       throw new RecusaDePlataforma('EXCEDE_O_TECTO',
         'a casa aceita menos tempo do que o pedido');
@@ -108,6 +120,27 @@ export async function abrirSessaoDeSuporte(
     }
     if (texto.includes('nao_e_da_plataforma')) {
       throw new RecusaDePlataforma('NAO_E_DA_PLATAFORMA');
+    }
+    // ── Uma sessão viva por pessoa e por casa, e a recusa é de NEGÓCIO ─────
+    //
+    // O índice `uma_sessao_viva_por_pessoa_e_casa` é a regra, e está certa: dois
+    // acessos abertos ao mesmo tempo pela mesma pessoa são dois rastos para uma
+    // entrada. O que estava errado era o que o agente recebia — a violação do
+    // índice caía no `throw erro` e a rota devolvia **500**.
+    //
+    // Medido pela J15 a 06/09: o agente com uma sessão de leitura aberta pedia
+    // uma de dados operacionais e recebia 500, sem uma palavra sobre o que
+    // fazer. É a mesma família do reenvio do webhook no E23: uma regra a
+    // funcionar e a sair como avaria.
+    // O índice chama-se `uma_sessao_por_fechar_...` desde o E33, que lhe mudou o
+    // nome de propósito: o que ele consegue garantir é «por fechar», e não
+    // «viva» — uma sessão expirada e não fechada continua a ocupar o lugar.
+    // Escrevi primeiro o nome antigo, que já não existe, e a rota continuou a
+    // devolver 500. Procura-se por prefixo, que é a parte que o rename manteve.
+    if (texto.includes('uma_sessao_por_fechar_por_pessoa_e_casa')
+        || texto.includes('uma_sessao_viva_por_pessoa_e_casa')) {
+      throw new RecusaDePlataforma('SESSAO_JA_VIVA',
+        'esta pessoa já tem uma sessão por fechar nesta casa; termina-a antes de abrir outra');
     }
     throw erro;
   }

@@ -50,8 +50,8 @@ export BETTER_AUTH_URL="$BASE_URL"
 # segredo de piloto no repositório era um segredo publicado.
 export WEBHOOK_SEGREDO_JORNADA="jornada-$(date +%s)-descartavel"
 
-GRUPOS_ESPERADOS=5
-CASOS_ESPERADOS=34
+GRUPOS_ESPERADOS=8
+CASOS_ESPERADOS=58
 falhas=0
 PID=""
 
@@ -122,7 +122,7 @@ DECLARE t record;
 BEGIN
   FOR t IN
     SELECT tgrelid::regclass AS tabela, tgname FROM pg_trigger
-     WHERE NOT tgisinternal AND tgrelid::regclass::text IN ('public_slug_owners', 'site_publications', 'site_revisions', 'site_pages', 'sites', 'menu_publications', 'menu_revisions', 'menu_categories', 'menus', 'product_channels', 'price_rules', 'products', 'categories', 'audit_events', 'role_assignments', 'memberships', 'cash_movements', 'cash_register_events', 'cash_registers', 'provider_events', 'refunds', 'payments', 'payment_attempts', 'bill_adjustments', 'bill_lines', 'bills', 'locations', 'brands', 'entitlement_grants', 'subscriptions', 'organizations', 'users')
+     WHERE NOT tgisinternal AND tgrelid IN (SELECT oid FROM pg_class WHERE relnamespace = 'public'::regnamespace AND relkind = 'r')
   LOOP
     EXECUTE format('ALTER TABLE %s DISABLE TRIGGER %I', t.tabela, t.tgname);
   END LOOP;
@@ -148,12 +148,24 @@ DELETE FROM cash_movements        WHERE organization_id IN (SELECT id FROM organ
 DELETE FROM cash_register_events  WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM cash_registers        WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM provider_events       WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
+-- A J08 pede um documento fiscal, e ele e IMUTAVEL por gatilho: apagar a conta
+-- dispara um `UPDATE ... SET bill_id = NULL` pela chave estrangeira, e o gatilho
+-- recusa-o. Apaga-se o documento primeiro. (O gatilho e' desligado pelo bloco
+-- que descobre os gatilhos das tabelas desta limpeza, agora que ela ca esta.)
+DELETE FROM fiscal_documents      WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM refunds               WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM payments              WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM payment_attempts      WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM bill_adjustments      WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM bill_lines            WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM bills                 WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
+-- Os convites apontam para a unidade (a J12 convida para a filha), e prendem-na.
+-- A J15 abre um pedido de takeaway, e ele prende a unidade.
+DELETE FROM order_lines           WHERE order_id IN (SELECT id FROM orders WHERE location_id IN (SELECT id FROM locations WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%')));
+DELETE FROM order_events          WHERE order_id IN (SELECT id FROM orders WHERE location_id IN (SELECT id FROM locations WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%')));
+DELETE FROM orders                WHERE location_id IN (SELECT id FROM locations WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%'));
+DELETE FROM devices               WHERE location_id IN (SELECT id FROM locations WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%'));
+DELETE FROM invitations           WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM locations         WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM brands            WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
 DELETE FROM entitlement_grants WHERE organization_id IN (SELECT id FROM organizations WHERE slug LIKE 'jornada-%');
@@ -167,7 +179,7 @@ DECLARE t record;
 BEGIN
   FOR t IN
     SELECT tgrelid::regclass AS tabela, tgname FROM pg_trigger
-     WHERE NOT tgisinternal AND tgrelid::regclass::text IN ('public_slug_owners', 'site_publications', 'site_revisions', 'site_pages', 'sites', 'menu_publications', 'menu_revisions', 'menu_categories', 'menus', 'product_channels', 'price_rules', 'products', 'categories', 'audit_events', 'role_assignments', 'memberships', 'cash_movements', 'cash_register_events', 'cash_registers', 'provider_events', 'refunds', 'payments', 'payment_attempts', 'bill_adjustments', 'bill_lines', 'bills', 'locations', 'brands', 'entitlement_grants', 'subscriptions', 'organizations', 'users')
+     WHERE NOT tgisinternal AND tgrelid IN (SELECT oid FROM pg_class WHERE relnamespace = 'public'::regnamespace AND relkind = 'r')
   LOOP
     EXECUTE format('ALTER TABLE %s ENABLE TRIGGER %I', t.tabela, t.tgname);
   END LOOP;

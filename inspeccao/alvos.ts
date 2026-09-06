@@ -214,7 +214,19 @@ export async function resolverAlvos(): Promise<Alvos> {
       ),
       unidadeArquivadaId: await um(
         sql,
-        `SELECT id FROM locations WHERE slug LIKE '${PREFIXO}%' AND archived_at IS NOT NULL ORDER BY slug, id LIMIT 1`,
+        // ── E esta também tem casa, mesmo acertando hoje ──────────────────
+        //
+        // Só existe uma unidade arquivada e é da A, portanto isto acerta — por
+        // **população de um**, e não por desenho. Basta a semente arquivar uma
+        // unidade da B para o `ORDER BY slug` passar a sortear, e o sintoma
+        // seria o mesmo do `productId`: um 404 que está certo, numa prova que
+        // pede a casa errada.
+        //
+        // Escapou-me na correcção 10 porque medi as tabelas das consultas que
+        // listei como «sem âmbito» e li `locations` como sendo de uma casa só —
+        // era, pelo filtro do `slug`, e não pelo da organização.
+        `SELECT id FROM locations WHERE slug LIKE '${PREFIXO}%' AND organization_id = '${ORG_A}'
+           AND archived_at IS NOT NULL ORDER BY slug, id LIMIT 1`,
         'uma unidade arquivada',
       ),
       unidadeVivaId: await um(

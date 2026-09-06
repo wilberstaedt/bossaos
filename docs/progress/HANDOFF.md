@@ -28,6 +28,86 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## As três jornadas que faltavam — J08, J12 e J15 — e as OITO numa só corrida
+
+**8 jornadas, 58 passos, 0 falhas**, com os quatro elos partidos a acender, a
+árvore limpa e os sete gatilhos do rasto repostos. A régua exige a regressão das
+anteriores **na mesma execução**, e é o que este número é.
+
+### J08 — pagamento
+Conta que nasce da **carta** (o preço é lido do que o estranho vê, e o que falta
+deriva dele), primeira parcela em dinheiro, o fecho recusado enquanto a soma não
+fecha, segunda parcela por cartão confirmada pelo **adquirente**, o documento
+fiscal, e o fechamento medido como **porta que recusa** e não como campo que
+muda. O controlo da armadilha — repetir a mesma parcela — dá `EXCEDE_O_DEVIDO`.
+
+**Refutei metade de um critério, com o motivo:** a régua pedia que uma divisão
+cujas parcelas somam menos fosse recusada **na criação**. Não existe objecto
+«divisão» neste produto: ela emerge de pagamentos parciais, e uma conta meio paga
+é um estado legítimo. O sítio onde o produto recusa a soma que não fecha é o
+**fechamento**, com `CONTA_POR_LIQUIDAR` — e é lá que se mede. O sénior aceitou.
+
+**E o sénior apanhou-me o inverso:** o primeiro passo prometia por comentário que
+o preço vinha da carta e usava um literal, comparando a conta com o mesmo literal
+que lhe tinha passado. Prosa a descrever um mecanismo que o código ao lado não
+tem — a forma do dia, agora minha. O preço passou a ser **lido**, e a J12 tinha a
+mesma família por baixo: contava `data-teste="produto"`, um marcador que não
+existe na carta pública.
+
+### J12 — nova unidade
+Concessão anterior, unidade pela porta, endereço público, carta publicada, a
+**herança contada** contra a mãe (com a mãe provada não-vazia primeiro), o
+override na filha e as **duas cartas republicadas** — sem republicar a mãe, o
+controlo passava por ela estar velha e não por o override não lhe pertencer.
+
+**Dois achados do produto, medidos:** quem é convidada para uma unidade **vê a
+outra na lista** (`listarUnidades` filtra por `archivedAt` e a RLS é por
+organização) mas **não consegue mexer** nela — o isolamento que importa aguenta,
+o que falha é o índice mostrar o que a pessoa não pode usar. E o emparelhamento
+de dispositivos é acto da **organização**, não da unidade: o que é da unidade é o
+**aparelho**, e é isso que a jornada mede.
+
+### J15 — suporte, e o defeito maior do dia
+Ticket do cliente, pedido real criado na jornada, agente que é **pessoa**, e as
+quatro condições do E33 a apanharem-me uma a uma: faltava a **duração**, faltava
+**fechar a sessão anterior**, o índice tinha outro **nome**, e faltava o
+**motivo** do fecho. Cada recusa foi uma regra a funcionar.
+
+**O acesso de suporte nunca conseguia ler nada.** A rota corre por
+`comIdentidade`, que define só `app.user_id`; a `orders` tinha uma política única
+com `organization_id = app_organizacao_actual()`. Sem organização no contexto,
+**404 para todos os pedidos de todas as casas** — a funcionalidade inteira
+inerte. Ninguém tinha visto porque `provar-plataforma.sh` e
+`provas/plataforma.test.ts` têm **zero** referências a `api/plataforma/suporte`:
+exercitam o `sessaoAutoriza` por dentro, onde o cliente é dono da tabela.
+
+**Não curei sozinho** — é isolamento entre inquilinos. Propus duas opções, o
+sénior mediu e decidiu uma terceira que a casa já tinha escolhido no E33:
+**política `FOR SELECT` com predicado próprio**. `suporte_com_concessao_viva(org)`
+verifica que esta pessoa tem sessão para aquela organização, não terminada, não
+expirada, com âmbito que permita ler; a organização vem **da linha**, nunca do
+chamador; e é só leitura. A rota **mantém** a verificação explícita, que é o que
+produz o 403 honesto — sem ela, «sem concessão» virava «sem linhas» e lia-se como
+404, exactamente o que a régua proíbe confundir com controlo de acesso.
+
+**E a auditoria escreve-se na mesma instrução da leitura.** A `audit_events`
+exige organização no contexto para inserir, e aqui não há — de propósito. Como o
+E33 fez para a concessão: uma função privilegiada que numa só instrução lê, junta
+as linhas e insere o rasto, com a CTE do registo alimentada pela da leitura. **Sem
+linha lida não há linha escrita.** A garantia não se perde por ser privilegiada:
+chama o **mesmo predicado** da política.
+
+### Dois 500 que eram regras a funcionar
+O reenvio do webhook (E23) e a segunda sessão por fechar (E33) saíam como avaria.
+Os dois curados: `ON CONFLICT DO NOTHING` num, `SESSAO_JA_VIVA` (422) no outro. E
+a distinção que os separa: **as recusas de gatilho vêm na mensagem, as de índice
+único vêm no `meta`** — o `String(erro)` traz só «Unique constraint failed».
+
+`provar-jornada.sh` **0 falhas** (8 jornadas, 58 passos, 4 elos) ·
+`validar-jornada.sh` **0** · `validar-plantes.sh` **0** ·
+`validar-alvos-com-casa.sh` **0** · `validar-rls.sh` **0** · `pnpm verificar` **0**.
+
+
 ## Correcção 10 do E34 — o alvo era de outra casa
 
 **O diagnóstico de origem foi retirado pelo sénior** (a cadeia dos identificadores
