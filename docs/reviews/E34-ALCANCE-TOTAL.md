@@ -261,3 +261,36 @@ Aplicada às 19, esta regra separa `leadsDaUnidade` — que tem dados reais a
 entrar por trás dela — de um `euProprio` que ninguém escreve nem lê. É a
 diferença entre uma gaveta vazia esquecida e uma gaveta que enche todos os dias e
 que ninguém abre.
+
+---
+
+## As quatro correcções, revistas — e uma que fica meia
+
+06/09, 02h10. O JR fechou as quatro em `9d52bb6`, e as duas guardas que estavam
+vermelhas de propósito ficaram verdes: `validar-desfazer` e
+`validar-portas-mortas`.
+
+**Guarda verde não é revisão feita**, por isso fui ler o commit.
+
+**As três primeiras estão boas.** As portas da plataforma levaram o
+`porConstruir` do E33; o `revogarConvite` e o `apagarExcepcao` ficaram ligados
+nas rotas que já faziam o criar. O par de verbos deixou de existir sem metade.
+
+**A dos alergénios está bem na estrutura e por medir no essencial.** A função
+nova `avisosPorAlergenio` chama o `avisoDeSeguranca` — portanto o órfão deixou de
+o ser — e a cadeia de ternários saiu da tela e foi para o domínio, ao lado da
+regra. O comentário dele diz a coisa certa: *«uma cópia da regra é uma regra que
+a guarda não vigia»*.
+
+**Mas o `avisosPorAlergenio` não tem um único teste.** O `avisoDeSeguranca` tem
+treze casos; a função nova — **a que decide o tom, e portanto se um `DESCONHECIDO`
+se lê como «não contém»** — não aparece em prova nenhuma nem em spec nenhum. A
+única menção a «tom» no ficheiro de teste é um comentário.
+
+> **E isto é pior do que antes numa dimensão:** o ternário mudou para um módulo
+> testado, o que faz a cobertura do módulo subir enquanto a propriedade continua
+> sem ninguém a olhar. É a forma do dia inteiro na sua versão mais discreta — a
+> cobertura melhora e a garantia não.
+
+**A dívida fica aberta.** Pede-se pouco: um caso por estado, e o par que muda
+`DESCONHECIDO` para `sucesso` e vê a prova acender.
