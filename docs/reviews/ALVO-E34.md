@@ -24,7 +24,7 @@ precisa de ser **executável**, não uma pilha.
 | 8 | Assinaturas na pasta antiga | **paga** — e era pior: três diziam-se à espera | eu |
 | 9 | `larguras.spec.ts` parece global e não é | **resolvida** — o defeito era a alegação, não a cobertura: o ficheiro passa a dizer que cobre as seis cascas | eu |
 | 10 | O meu `git add`, **três** vezes | **regra corrigida a 06/09**: `git commit -- <caminhos>`. Caminhos explícitos no `add` não chegam — o índice já pode ter coisas | eu |
-| 11 | RLS: `custom_domain_owners` | **decidida, por executar** — apagar, não proteger | JR |
+| 11 | RLS: `custom_domain_owners` | **DECISÃO REVERTIDA a 06/09** — a minha premissa era falsa. A tabela fica, e está bem como está | eu, corrigido pelo JR |
 | 12 | Provas de navegador não auto-contidas | **paga** — mensagem corrigida, `arnes-pronto.sh` escrito e ligado aos 21 guiões, com salto em 0s quando já está pronto | eu |
 
 **Cinco pagas, uma fechada sem achado, uma resolvida, três abertas minhas, uma
@@ -556,3 +556,49 @@ os caminhos **no commit**, e não só no add, o que está no índice é ignorado
 > não resolvia.** É a forma do dia aplicada às minhas próprias regras: uma
 > correcção que não foi verificada contra o mecanismo real é uma correcção que
 > tranquiliza sem proteger.
+
+
+## Dívida 11 — a minha decisão estava ERRADA, e o JR verificou antes de a executar
+
+**06/09, 06h25.** Decidi às 03h que a `custom_domain_owners` era esquema sem uso
+e mandei apagá-la: *«zero linhas, zero chamadores, zero documentos»*. **A premissa
+era falsa nos três pontos**, e o JR foi verificar antes de executar em vez de
+fazer o que lhe mandei.
+
+**Verifiquei os argumentos dele e confirmam-se:**
+
+- **Tem chamador.** A `vincular_dominio` — `SECURITY DEFINER`, na migração do E10
+  — faz `SELECT ... FROM custom_domain_owners` e `INSERT INTO
+  custom_domain_owners`. Está a 340 linhas de distância do `CREATE TABLE`, no
+  mesmo ficheiro.
+- **Zero linhas porque a prova limpa atrás de si.** A `provas/sites.test.ts` passa
+  com 27 casos e três medem esta tabela.
+- **A coluna `dominio` é a chave primária, e é ela que implementa a regra 3 do
+  E10** — *«o nome não volta ao mundo»*. Um domínio anda em cartões, ementas e
+  anúncios pagos; se a linha de dono desaparecer, outra organização reclama o
+  nome e o tráfego de quem o imprimiu passa a cair na casa errada.
+- **Não tem RLS de propósito: é cross-inquilino.** A pergunta que responde é
+  «este nome já é de alguém?», e essa só tem valor se a resposta atravessar
+  inquilinos. A protecção está noutro sítio e é **mais apertada** que RLS: o
+  `bossaos_app` tem `SELECT` e mais nada, e quem escreve é a função
+  `SECURITY DEFINER`. O `sites.test.ts:398` mede um `DELETE` pelo runtime a dar
+  *permission denied*.
+
+### O ponto cego do meu instrumento, e é o que fica
+
+**A varredura de alcance lê TypeScript. O chamador estava em SQL.**
+
+Passei a noite a caçar quatro formas — função sem chamador, tela sem porta,
+jornada sem percurso, esquema sem uso. **Esta quinta é a minha própria cegueira:
+código chamado de dentro da base, que nenhum `grep` de `.ts` alcança.** E não é
+um caso pequeno: as funções `SECURITY DEFINER` são precisamente onde vive a lógica
+mais sensível, porque é a que o runtime não pode fazer sozinho.
+
+> **Um instrumento que não lê SQL não pode declarar código morto num produto que
+> tem lógica em SQL.** A minha conclusão não estava errada por descuido — estava
+> errada por construção, e eu apresentei-a com três números que pareciam
+> conclusivos.
+
+E **ele fez o que eu peço a toda a gente**: recebeu uma ordem com uma premissa,
+foi medir a premissa, e devolveu-a com a medição. Se tivesse executado, tínhamos
+perdido a defesa contra um restaurante ficar com o domínio de outro.

@@ -56,6 +56,23 @@ custom_domain_owners:tabela CROSS-INQUILINO por desenho, e protegida por GRANT e
 # leitura passava a ver so as linhas do proprio inquilino, e a pergunta «este
 # nome ja e de alguem?» passava a responder «nao» a toda a gente.
 
+# ── A BASE RESPONDE? Sem isto, um vazio le-se como "nada a acusar" ──────────
+# Medido a 06/09 as 06h20: apontei esta guarda a uma base inexistente e a
+# primeira verificacao disse «ok, nenhuma tabela de inquilino sem RLS». O
+# controlo negativo apanhou-a e a guarda saiu a 1 — mas a PRIMEIRA LINHA mentia.
+#
+# E nao e hipotese: o ciclo das guardas na CI corre no trabalho «Rapido — sem
+# base nem navegador». Sem este passo, esta guarda daria uma linha verde falsa em
+# cada corrida da CI, e quem lesse o registo veria «ok» onde nao houve medicao.
+#
+# Ha tres respostas, e a terceira e nao medi.
+if ! psql "$MIGRATION_DATABASE_URL" -tAc "SELECT 1" >/dev/null 2>&1; then
+  printf '  \033[33mNAO MEDI\033[0m a base nao responde — esta guarda precisa dela.\n'
+  printf '           Nao e verde nem vermelho: e ausencia de medicao. Se isto\n'
+  printf '           aparece na CI, o trabalho que a corre nao tem Postgres.\n'
+  exit 2
+fi
+
 echo "1. Toda a tabela com organization_id tem RLS ligado"
 SEM_RLS="$(psql "$MIGRATION_DATABASE_URL" -tAc "
   SELECT c.relname
