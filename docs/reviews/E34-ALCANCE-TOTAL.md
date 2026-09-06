@@ -294,3 +294,30 @@ se lê como «não contém»** — não aparece em prova nenhuma nem em spec nen
 
 **A dívida fica aberta.** Pede-se pouco: um caso por estado, e o par que muda
 `DESCONHECIDO` para `sucesso` e vê a prova acender.
+
+
+### E a metade que faltava ficou fechada, 20 minutos depois
+
+341 testes no `domain`, zero falhas, e o `avisosPorAlergenio` passou a ter três
+casos:
+
+1. **um caso por estado** — os quatro tons, com `DESCONHECIDO` a dar `neutro`
+2. **`DESCONHECIDO` nunca partilha o tom de `NAO_CONTEM`**
+3. **`CONTROLO NEGATIVO: com `DESCONHECIDO` a dar `sucesso`, os dois casos acima
+   caem`**
+
+O terceiro é o que eu pedi. **E o raciocínio dele, no comentário, é melhor do que
+o meu pedido:**
+
+> «O que se pergunta aqui é uma coisa só, e é a que custa: `DESCONHECIDO` tem de
+> sair `neutro` e nunca `sucesso`. **As outras três estão cá porque um `tomDe`
+> que devolvesse sempre `neutro` passava nessa sozinha.**»
+
+Eu pedi quatro asserções e o par. Ele explicou **porque é que as outras três
+existem** — não são cobertura decorativa, são o que impede a função constante de
+passar no caso que interessa. É a mesma figura do par discriminador que exijo nas
+provas de etapa, aplicada dentro de um teste de unidade.
+
+**Dívida fechada.** As quatro correcções estão completas, e esta é a única das
+três formas de defeito da varredura total que fica com prova própria em vez de só
+com estrutura corrigida.
