@@ -3,6 +3,12 @@
 > Deixado pelo Matheus a 06/09 às 03h20, com o motor a 86% (31/36 etapas).
 > **Ler `docs/RV100.md` INTEIRO antes de qualquer outra coisa.**
 
+## Avisá-lo — pedido dele às 03h30, antes de ir dormir
+
+**Mandar push quando chegarmos aos 100% E quando começar o RV100.** Não é o
+status de rotina: é o aviso que ele pediu para acordar a saber. Escrito aqui
+porque uma sessão pode reiniciar e a promessa não pode morrer com ela.
+
 ## A ordem
 
 1. **`docs/RV100.md`, inteiro.** São 841 linhas e onze secções — reconstrução
