@@ -1,7 +1,10 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E34 — do sénior, aberta em `20dd194`. É a primeira por validar, e é assim que o medidor a deriva. **Não é minha.**
-**Estado:** **E35 IMPLEMENTADO, AGUARDANDO VALIDAÇÃO** — pacote de implantação e piloto, meu, em `docs/progress/E35.md`. E33 assinado a 06/09 em `e953a87`, e o atlas fechou **396/396**.
+**Etapa atual:** E34 — **revisão, do sénior**, aberta em `20dd194`. É a única por validar, e é assim que o medidor a deriva. **Não é minha.**
+**Estado:** **em revisão.** **35 de 36 etapas validadas**, atlas fechado em **396/396**. O E35 foi **assinado a 06/09** em `d273378` (`docs/reviews/E35.md`) — a última etapa de implementação. Do meu lado não há etapa aberta: o que corre são as **correcções que a revisão do E34 me encaminha**, uma de cada vez.
+
+**Correcção 1, encaminhada e fechada:** o fecho de caixa duplo, em `88f5a62`
+(detalhe na secção própria, mais abaixo). Aguarda a verificação do sénior.
 
 > **Duas etapas em voo ao mesmo tempo, com donos diferentes — a primeira vez no
 > projecto.** O `estado.sh` deriva a etapa actual como «a primeira que não está
