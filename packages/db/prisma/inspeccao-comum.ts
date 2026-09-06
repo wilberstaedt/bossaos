@@ -333,8 +333,29 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     DELETE FROM message_templates   WHERE assunto LIKE '${PREFIXO}%';
     DELETE FROM messaging_connectors WHERE location_id IN (SELECT id FROM locations WHERE slug LIKE '${PREFIXO}%');
     DELETE FROM reservation_blocks  WHERE motivo LIKE '${PREFIXO}%';
+    -- ── O tecto da UNIDADE não tem zona nem turno, e por isso escapava ────
+    --
+    -- (Sem crases neste comentário de propósito: isto vive dentro de um
+    --  template literal, e uma crase aqui fecha-o. Custou-me uma corrida.)
+    --
+    -- A semente cria duas regras: uma por zona e turno, e uma "toda a unidade"
+    -- com area_id e window_id a NULO — para a tela saber dizer "toda a unidade"
+    -- em vez de mostrar uma célula vazia. As duas condições acima apanham a
+    -- primeira e nunca a segunda.
+    --
+    -- Medido a 06/09, ao pôr identificadores fixos na semente: 903 linhas em
+    -- capacity_rules, todas sem zona e sem turno, uma por cada semeadura desde
+    -- que isto existe. Com identificadores aleatórios a fuga era invisível; com
+    -- identificadores fixos a segunda semeadura colide e denuncia-a. O limpar
+    -- foi escrito para que a inspecção não meça uma página que cresce, e esta
+    -- tabela crescia à mesma.
     DELETE FROM capacity_rules      WHERE window_id IN (SELECT id FROM service_windows WHERE nome LIKE '${PREFIXO}%')
-                                       OR area_id IN (SELECT id FROM service_areas WHERE nome LIKE '${PREFIXO}%');
+                                       OR area_id IN (SELECT id FROM service_areas WHERE nome LIKE '${PREFIXO}%')
+                                       OR (area_id IS NULL AND window_id IS NULL
+                                           AND location_id IN (SELECT id FROM locations
+                                                                WHERE organization_id IN (
+                                                                  SELECT id FROM organizations WHERE slug LIKE '${PREFIXO}%'
+                                                                     OR id IN (SELECT organization_id FROM locations WHERE slug LIKE '${PREFIXO}%'))));
     DELETE FROM service_windows     WHERE nome LIKE '${PREFIXO}%';
 
     DELETE FROM public_slug_owners WHERE slug LIKE '${PREFIXO}%';
