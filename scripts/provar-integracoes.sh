@@ -22,9 +22,18 @@ if [[ "$(node --version)" != "$NODE_ESPERADO" ]]; then
 fi
 
 MOTOR=packages/db/src/integracoes.ts
+# ── A porta pública mudou de casa, e o plante seguiu-a ─────────────────
+#
+# O `receberEventoDeCobranca` vivia no `integracoes.ts` e foi para o
+# `saas-publico.ts` quando a varredura de alcance mostrou que a versão com
+# escopo era um duplicado morto. O plante ficou a apontar ao ficheiro antigo
+# e o `plantar()` disse-o — «a âncora mudou; isto não mediu nada» — em vez de
+# medir o que não estava lá. É a terceira vez que este guarda-costas paga a
+# renda, depois do E28 e do E30.
+PUBLICO=packages/db/src/saas-publico.ts
 PURO=packages/domain/src/integracoes.ts
 PROVA=provas/integracoes.test.ts
-FICHEIROS=("$MOTOR" "$PURO" "$PROVA")
+FICHEIROS=("$MOTOR" "$PURO" "$PROVA" "$PUBLICO")
 COPIAS=()
 for f in "${FICHEIROS[@]}"; do c=$(mktemp); cp "$f" "$c"; COPIAS+=("$c"); done
 CHEGOU_AO_FIM=0
@@ -180,7 +189,7 @@ echo "5. CONTROLO — a assinatura passa a ser sobre a NOSSA reconstrução"
 # reconstrução do JSON não verifica nada.
 plantar <<'PY' || true
 import io
-p = 'packages/db/src/integracoes.ts'
+p = 'packages/db/src/saas-publico.ts'
 s = io.open(p, encoding='utf-8').read()
 antigo = "  const confere = assinaturaConfere(dados.corpoCru, dados.assinatura, dados.segredo);"
 assert antigo in s, 'a verificacao da assinatura nao esta onde se esperava'
@@ -191,7 +200,7 @@ PY
 correr /tmp/bossaos-int-c5.txt || true
 exigir_vermelho "caiu o corpo cru: a assinatura passa a ser sobre outra coisa" \
   "assinada sobre o corpo como chegou" /tmp/bossaos-int-c5.txt
-cp "${COPIAS[0]}" "$MOTOR"
+cp "${COPIAS[3]}" "$PUBLICO"
 
 echo
 echo "6. CONTROLO — o destino interno passa a ser aceite"

@@ -1,85 +1,43 @@
 # HANDOFF — estado do motor BossaOS
 
 **Etapa atual:** E32 — Integrações, API e cobrança do SaaS (**13 telas**).
-**Estado:** **EM CURSO.** E31 assinado a 06/09 em `90d4fe0` (`docs/reviews/E31.md`). Contrato `integracoes-e-cobranca-do-saas.md` e régua `ALVO-E32.md` escritos **antes** do código.
+**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** E31 assinado a 06/09 em `90d4fe0`. Contrato `integracoes-e-cobranca-do-saas.md` e régua `ALVO-E32.md` escritos **antes** do código.
 
+**O que muda:** é a primeira etapa em que **um estranho fala com o sistema sem
+passar por tela nenhuma** — chega um pedido com uma chave, ou um webhook de fora,
+e o produto decide sozinho se acredita. E a primeira em que **o defeito rende
+dinheiro a quem o encontrar**: não é um erro que prejudica, é uma porta que se
+atravessa de propósito.
 
-> ## ⚠ AO CHEGAR AOS 100%: PARAR E LER `docs/RV100.md`
->
-> O Matheus deixou-o a 06/09 às 03h20, com o motor a 86%. São 841 linhas —
-> reconstrução visual, comercial e de usabilidade — e o pedido dele foi
-> explícito: **ler o documento inteiro antes de tocar em código**. Tem uma
-> secção de diagnóstico obrigatório e um **portão de aprovação humana** nas
-> telas-mestre, portanto há um ponto em que se para e se espera por ele.
->
-> A ordem e o resto da fila estão em `docs/progress/DEPOIS-DOS-100.md`.
+**O ACEITE QUE DECIDE, e a garantia é a FORMA da tabela.** A
+`saas_billing_events` **não tem** `organization_id` que o webhook possa
+preencher. Tem `organization_id_alegado` — o que o corpo *disse*, guardado para
+se poder denunciar — e `organization_id_resolvido`, que só a função privilegiada
+escreve, e sempre a partir da `saas_customers`. Um caminho que quisesse confiar
+no corpo teria de escrever numa coluna cujo nome diz que ela é uma alegação. E um
+gatilho recusa a resolução que a ligação não sustente: **a mentira não chega a
+ser escrita.**
 
-**O que muda:** todas as anteriores acabavam DENTRO do sistema. **Esta acaba num
-pedaço de papel e num ecrã sozinho num corredor** — e nos dois sítios o produto
-perde a capacidade de verificar aquilo que afirma. É a etapa onde «verde não é
-alcance» deixa de ser sobre código: **o teste passa e não sai papel.**
+E a rota **não tem por onde escolher**: as portas do `saas-publico.ts` não
+recebem escopo. A primeira versão recebia, e a rota teve de inventar uma
+organização para lha dar — usava a alegada quando parecia válida. Não mudava o
+resultado, e punha o valor não confiável no caminho onde os confiáveis viajam.
 
-E isso aconteceu mesmo. A porta `kiosk_do_aparelho` devolvia o slug **interno** da
-unidade onde a carta pública espera o público; a carta do kiosk vinha vazia **em
-silêncio**, com o motor verde — 21 casos e 8 controlos, nenhum a abrir uma carta.
-Quem o apanhou foi a prova de NAVEGADOR, à primeira corrida.
+**A fronteira do E05 sobrevive.** O `REVOKE` sobre `subscriptions` e
+`entitlement_grants` está repetido nesta migração de propósito, e há um controlo
+que concede essa escrita ao runtime e vê a prova acender.
 
-**Dois clientes seguidos não partilham nada porque os dados NUNCA foram juntos.**
-A `kiosk_sessions` não tem uma única coluna com dados da pessoa — não é
-disciplina, é AUSÊNCIA. Quando há pessoa, ela vive em `customers` e o pedido
-REFERE-A pela `order_contacts`, com `ON DELETE CASCADE` do lado dela: apagar a
-pessoa leva a ligação e deixa o pedido de pé. E as **três saídas são uma função**.
+**Provas (LOCAIS — a CI continua trancada):** `provas/integracoes.test.ts` **23**
+(duas organizações) · `integracoes.test.ts` **26** ·
+`scripts/provar-integracoes.sh` **7 controlos** (verifica no fim os objectos e as
+duas permissões do E05) · `inspeccao/integracoes.spec.ts` **25** (13 telas, 5
+larguras, ES/PT/EN, 44 px, WCAG, e a API por HTTP) ·
+`provar-integracoes-no-navegador.sh` **5 controlos** · `pnpm verificar` **0**.
 
-**«Entregue à ponte» não é «imprimiu».** O enum não tem `IMPRESSO`: há resposta do
-aparelho ou não há, e o «não sei» DERIVA do tempo sem resposta. O CHECK
-`resposta_do_aparelho_ou_nada` torna impossível confirmar sem o que o aparelho
-disse — e o motor não tem `marcarComoImpresso`.
-
-**A segunda via marca-se no papel, e a marca é um NÚMERO** — a garantia não
-depende da língua do talão. **O reiniciar não abandona cobrança indeterminada:**
-o gatilho recusa e o kiosk fica pausado. Parar a máquina é caro; a alternativa é o
-produto decidir sozinho sobre dinheiro que não consegue ver.
-
-**Sem hardware não se declara homologação.** A matriz está em
-`docs/progress/E31-HOMOLOGACAO.md` com todas as linhas POR TESTAR — nunca em
-branco —, e a base não tem booleano `homologada`: tem data e assinatura, e a
-ausência das duas é a terceira resposta.
-
-**Provas (LOCAIS — a CI continua trancada pela facturação do GitHub):**
-`provas/kiosk.test.ts` **21** · `packages/domain/src/impressao.test.ts` **15** ·
-`scripts/provar-kiosk.sh` **8 controlos** (todos acendem, e o guião conta os 7
-objectos que desligou) · `inspeccao/kiosk.spec.ts` **20** (11 telas, 5 larguras,
-ES/PT/EN, 44 px, WCAG) · `scripts/provar-kiosk-no-navegador.sh` **5 controlos** ·
-`pnpm verificar` **0**.
-
-**Detalhe e achados:** `docs/progress/E31.md`.
-
-## ⚠ A tabela do E10 que me mandaram apagar NÃO é órfã — 06/09
-
-Foi-me pedido para apagar a `custom_domain_owners` do E10: zero linhas, zero
-chamadores, zero documentos. **Verifiquei antes, e a premissa não se sustenta.**
-
-- A `vincular_dominio` (`SECURITY DEFINER`, linhas 463 e 478 da migração do E10)
-  **lê e escreve** nela. O chamador não aparece num `grep` de TypeScript porque
-  vive dentro de uma função SQL.
-- Zero linhas porque a `provas/sites.test.ts` limpa atrás de si. Essa prova passa
-  hoje com **27 casos**, e três deles medem esta tabela.
-- É ela que implementa a regra 3 do E10 — **«o nome não volta ao mundo»**. Um
-  domínio anda em cartões, ementas e anúncios pagos; sem a linha de dono, outra
-  organização reclama o nome e o tráfego de quem o imprimiu cai na casa errada.
-
-**Porque é que não tem RLS, e porque é que está certo assim:** ela é
-CROSS-INQUILINO de propósito. A pergunta que responde é «este nome já é de
-alguém?», e essa pergunta só vale se a resposta atravessar inquilinos. A protecção
-está noutro sítio e é **mais apertada** do que RLS: o `bossaos_app` tem `SELECT` e
-mais nada. Ligar-lhe RLS por `organization_id` seria pior do que não fazer nada —
-a leitura passava a ver só o próprio inquilino, e a pergunta respondia «não» a
-toda a gente.
-
-**O que fiz em vez de apagar:** declarei a excepção na `validar-rls.sh` com o
-motivo escrito, **e fiz a excepção pagar prova** — secção 1b nova, que verifica
-que o runtime continua sem escrita e com leitura. Uma excepção sem verificação é
-uma porta. A guarda está verde.
+**Detalhe e achados:** `docs/progress/E32.md`. O que mais vale a pena: **um
+`CHECK` que dá NULL passa** — `array_length('{}', 1)` é NULL, e a restrição do
+âmbito recusava zero elementos em todos os casos menos exactamente o único que
+interessa.
 
 ## As quatro correcções do E34 estão fechadas — 06/09
 

@@ -2,9 +2,9 @@ import { after, before, beforeEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from 'pg';
 import {
-  RecusaDaIntegracao, aplicarEventoDeCobranca, assinarCorpo, comEscopo,
+  RecusaDaIntegracao, aplicarEventoDeCobrancaPublico, assinarCorpo, comEscopo,
   criarChave, criarEndpoint, enfileirarEntrega, ligarClienteSaas, listarChaves,
-  obterPrisma, receberEventoDeCobranca, resumirChave, revogarChave,
+  obterPrisma, receberEventoDeCobrancaPublico, resumirChave, revogarChave,
   verificarChave,
 } from '../packages/db/src/index.ts';
 import { IDS } from '../packages/db/prisma/fixtures.ts';
@@ -106,12 +106,36 @@ describe('1 · A chave mostra-se UMA vez', () => {
     // O plante escreve o valor numa coluna qualquer e vê o caso 1 cair. Se a
     // varredura não o apanhasse, ela estaria a medir a ausência de uma coluna
     // que eu escolhi, e não a ausência do segredo.
+    // ── E o plante vive numa TRANSACÇÃO que não commita ─────────────────
+    //
+    // A primeira versão escrevia a chave no campo `nome` e deixava-a lá. E a
+    // limpeza apaga por `nome LIKE 'e32-%'` — depois do plante o nome É a
+    // chave, portanto deixa de casar e a linha **sobrevive**.
+    //
+    // Consequência medida: dezassete chaves ficaram na base com o valor em
+    // claro no nome, e a tela INT-008 passou a mostrá-las inteiras a 360 px.
+    // Quem viu foi a prova de NAVEGADOR, pelo transbordo horizontal — o defeito
+    // apareceu como um problema de largura.
+    //
+    // É a lição do E31 outra vez, e desta vez custou pior: um controlo que suja
+    // o artefacto acaba a medir a sua própria sujidade. `BEGIN`/`ROLLBACK`
+    // torna isso impossível em vez de improvável.
     const { id, chave } = await novaChave(['CATALOGO_LER']);
-    await sql.query(`UPDATE api_keys SET nome = $2 WHERE id = $1`, [id, chave]);
-    const { rows } = await sql.query(
-      `SELECT to_jsonb(k)::text AS tudo FROM api_keys k WHERE k.id = $1`, [id]);
-    assert.ok(String(rows[0].tudo).includes(chave),
-      'o controlo não acendeu: a varredura não vê todas as colunas');
+    await sql.query('BEGIN');
+    try {
+      await sql.query(`UPDATE api_keys SET nome = $2 WHERE id = $1`, [id, chave]);
+      const { rows } = await sql.query(
+        `SELECT to_jsonb(k)::text AS tudo FROM api_keys k WHERE k.id = $1`, [id]);
+      assert.ok(String(rows[0].tudo).includes(chave),
+        'o controlo não acendeu: a varredura não vê todas as colunas');
+    } finally {
+      await sql.query('ROLLBACK');
+    }
+
+    // E o nome voltou ao que era — medido, não presumido.
+    const depois = await sql.query(`SELECT nome FROM api_keys WHERE id = $1`, [id]);
+    assert.ok(!String(depois.rows[0]?.nome ?? '').includes(chave),
+      'o controlo deixou a chave em claro no nome, e a limpeza já não a apanha');
   });
 
   it('a base RECUSA uma chave sem âmbito', async () => {
@@ -175,7 +199,7 @@ describe('4 · A assinatura é sobre o corpo CRU', () => {
   const corpo = '{\n  "a": 1,\n  "b": 2\n}';
 
   it('assinada sobre o corpo como chegou, confere', async () => {
-    const e = await semDono((db) => receberEventoDeCobranca(db, {
+    const e = await semDono((db) => receberEventoDeCobrancaPublico(db as never, {
       provedor: `${PREFIXO}prov`, provedorEventoId: `${PREFIXO}ev1`,
       tipo: 'subscription.updated', provedorClienteId: CLIENTE_DE_A,
       planoCodigo: 'PRO', organizationIdAlegado: null,
@@ -191,7 +215,7 @@ describe('4 · A assinatura é sobre o corpo CRU', () => {
     const reconstruido = JSON.stringify(JSON.parse(corpo));
     assert.notEqual(reconstruido, corpo, 'a reconstrução saiu igual: o caso não está montado');
 
-    const e = await semDono((db) => receberEventoDeCobranca(db, {
+    const e = await semDono((db) => receberEventoDeCobrancaPublico(db as never, {
       provedor: `${PREFIXO}prov`, provedorEventoId: `${PREFIXO}ev2`,
       tipo: 'subscription.updated', provedorClienteId: CLIENTE_DE_A,
       planoCodigo: 'PRO', organizationIdAlegado: null,
@@ -210,8 +234,8 @@ describe('5 · Reenviar não duplica', () => {
       planoCodigo: 'PRO', organizationIdAlegado: null,
       corpoCru: '{}', assinatura: assinarCorpo('{}', SEGREDO), segredo: SEGREDO,
     };
-    const a = await semDono((db) => receberEventoDeCobranca(db, entrada));
-    const b = await semDono((db) => receberEventoDeCobranca(db, entrada));
+    const a = await semDono((db) => receberEventoDeCobrancaPublico(db as never, entrada));
+    const b = await semDono((db) => receberEventoDeCobrancaPublico(db as never, entrada));
     assert.equal(a.id, b.id, 'o reenvio criou um segundo evento');
 
     const n = await sql.query(
@@ -270,7 +294,7 @@ describe('7 · O ACEITE QUE DECIDE A ETAPA', () => {
       db, IDS.orgA, `${PREFIXO}prov`, CLIENTE_DE_A, 'ana'));
 
     const corpo = JSON.stringify({ organization_id: IDS.orgB, plan: 'PRO' });
-    return semDono((db) => receberEventoDeCobranca(db, {
+    return semDono((db) => receberEventoDeCobrancaPublico(db as never, {
       provedor: `${PREFIXO}prov`, provedorEventoId: idDoEvento,
       tipo: 'subscription.updated', provedorClienteId: CLIENTE_DE_A,
       planoCodigo: 'PRO',
@@ -285,7 +309,7 @@ describe('7 · O ACEITE QUE DECIDE A ETAPA', () => {
       `SELECT plan_id FROM subscriptions WHERE organization_id = $1`, [IDS.orgB]);
 
     const e = await eventoQueAlegaOutraOrganizacao(`${PREFIXO}ataque`);
-    const estado = await semDono((db) => aplicarEventoDeCobranca(db, e.id));
+    const estado = await semDono((db) => aplicarEventoDeCobrancaPublico(db as never, e.id));
 
     const depoisB = await sql.query(
       `SELECT plan_id FROM subscriptions WHERE organization_id = $1`, [IDS.orgB]);
@@ -317,7 +341,7 @@ describe('7 · O ACEITE QUE DECIDE A ETAPA', () => {
       db.subscription.findFirst({ where: { organizationId: IDS.orgB } }));
 
     const e = await eventoQueAlegaOutraOrganizacao(`${PREFIXO}ataque-visto-pela-b`);
-    await semDono((db) => aplicarEventoDeCobranca(db, e.id));
+    await semDono((db) => aplicarEventoDeCobrancaPublico(db as never, e.id));
 
     const depois = await comB((db) =>
       db.subscription.findFirst({ where: { organizationId: IDS.orgB } }));
@@ -331,7 +355,7 @@ describe('7 · O ACEITE QUE DECIDE A ETAPA', () => {
 
   it('sem ligação nossa, o evento fica parado e NÃO muda nada', async () => {
     const corpo = JSON.stringify({ organization_id: IDS.orgB });
-    const e = await semDono((db) => receberEventoDeCobranca(db, {
+    const e = await semDono((db) => receberEventoDeCobrancaPublico(db as never, {
       provedor: `${PREFIXO}prov`, provedorEventoId: `${PREFIXO}orfao`,
       tipo: 'subscription.updated', provedorClienteId: `${PREFIXO}cus_desconhecido`,
       planoCodigo: 'PRO', organizationIdAlegado: IDS.orgB,
@@ -339,7 +363,7 @@ describe('7 · O ACEITE QUE DECIDE A ETAPA', () => {
     }));
 
     const antes = await sql.query(`SELECT organization_id, plan_id FROM subscriptions`);
-    const estado = await semDono((db) => aplicarEventoDeCobranca(db, e.id));
+    const estado = await semDono((db) => aplicarEventoDeCobrancaPublico(db as never, e.id));
     const depois = await sql.query(`SELECT organization_id, plan_id FROM subscriptions`);
 
     assert.equal(estado, 'SEM_VINCULO');
@@ -352,7 +376,7 @@ describe('7 · O ACEITE QUE DECIDE A ETAPA', () => {
     // resolvida à mão, o gatilho recusa. A mentira não chega a ser escrita.
     await comA((db) => ligarClienteSaas(
       db, IDS.orgA, `${PREFIXO}prov`, CLIENTE_DE_A, 'ana'));
-    const e = await semDono((db) => receberEventoDeCobranca(db, {
+    const e = await semDono((db) => receberEventoDeCobrancaPublico(db as never, {
       provedor: `${PREFIXO}prov`, provedorEventoId: `${PREFIXO}forcado`,
       tipo: 'subscription.updated', provedorClienteId: CLIENTE_DE_A,
       planoCodigo: 'PRO', organizationIdAlegado: null,
@@ -386,6 +410,23 @@ describe('7 · O ACEITE QUE DECIDE A ETAPA', () => {
       /permission denied|permissão negada/i);
   });
 });
+
+/**
+ * ── O grupo 2b vive na prova de NAVEGADOR, e é por uma razão ──────────────
+ *
+ * A régua manda medir que o âmbito é declarado **em cada rota**, e não num
+ * portão central. Escrevi esse grupo aqui primeiro, a importar os manipuladores
+ * directamente — e não carrega: o `node --experimental-strip-types` não resolve
+ * o `next/server` fora do Next.
+ *
+ * Podia ter medido o `comChave` em vez das rotas. Não é a mesma coisa: isso
+ * mostraria que o motor decide bem, e o que falta mostrar é que **as rotas o
+ * usam**. É exactamente a distinção que o E31 me ensinou pela via cara — o
+ * motor estava verde e a carta vinha vazia.
+ *
+ * Está em `inspeccao/integracoes.spec.ts`, contra a aplicação construída, com
+ * pedidos HTTP a sério.
+ */
 
 describe('8 · Os dois dinheiros não somam', () => {
   it('a factura do SaaS não tem ligação nenhuma à conta do jantar', async () => {

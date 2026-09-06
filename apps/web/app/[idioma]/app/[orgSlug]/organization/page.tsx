@@ -36,6 +36,12 @@ export default async function PessoasEAcessos({
 
   return (
     <div style={{ display: 'grid', gap: 32 }}>
+      {/* A cobrança do SaaS: o que a casa NOS paga. O que ela factura aos
+          clientes dela está no financeiro, e as duas não somam. */}
+      <a className="bo-lista__ligacao" data-seccao="ORG-011"
+         href={`/${idioma}/app/${orgSlug}/organization/cobranca`}>
+        {m.integracoesE32.cobranca}
+      </a>
       <div className="bo-estado__cabecalho">
         <div>
           <p className="bo-estado__sobrancelha">{m.navegacao.equipa}</p>

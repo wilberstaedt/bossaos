@@ -157,6 +157,17 @@ const PORTAS_DO_PUBLICO = [
   // fora do alcance da camada web.
   'kioskDoAparelho', 'estadoParaOEcra', 'comecarNoKiosk', 'terminarNoKiosk',
   'ligarPessoaNoKiosk', 'apagarPessoaNoKiosk',
+  // ── E32 · a chave e o webhook do SaaS ───────────────────────────────────
+  //
+  // A `autorizarChave` recebe o VALOR da chave e resolve o inquilino por ele —
+  // a organização é a resposta, não a pergunta. As duas do SaaS não têm sequer
+  // por onde receber uma organização, e é essa a garantia da fronteira 4: a
+  // rota não pode escolher uma nem que queira.
+  'autorizarChave', 'comOEscopoDaChave', 'registarChamadaPublica',
+  'receberEventoDeCobrancaPublico', 'aplicarEventoDeCobrancaPublico',
+  // O `comChave` e o `registarChamada` do lado da web são a mesma porta com
+  // outro nome: passam por elas e não abrem escopo nenhum.
+  'comChave', 'registarChamada',
 ];
 /**
  * ── E `src/visitante/` entra aqui, e isso APERTA em vez de aliviar ────────
@@ -186,8 +197,23 @@ const PORTAS_DO_PUBLICO = [
 // `comEscopo`. A primeira versão do E31 abria escopo no `carregar-kiosk.ts` e
 // esta guarda reprovou-a — o escopo mudou-se para dentro das portas, no
 // `kiosk-publico.ts`, que é onde o `src/reserva/` já o tinha.
+// ── E32 · a API pública e o webhook do SaaS entram AQUI ───────────────────
+//
+// São as duas superfícies onde «um estranho fala com o sistema sem passar por
+// tela nenhuma». Não têm sessão e nunca vão ter: uma traz uma chave, a outra
+// traz uma assinatura. Fora desta expressão caíam na regra GERAL, que lhes
+// pediria `resolverPedido` — e ficavam vermelhas para sempre pelo motivo errado.
+//
+// Aqui dentro vale-lhes a regra apertada: só portas, e **nunca** `comEscopo`. A
+// primeira versão do E32 abria escopo em `apps/web/src/api-publica.ts` e esta
+// guarda reprovou-a. **Segunda vez que ela me corrige na mesma coisa**, depois
+// do kiosk no E31 — o que diz que a lição é minha e não dela.
+// A barra final NAO e decorativa: sem ela, `src/reserva` passa a casar
+// `src/reservas/pagina.ts` — outra pasta, outra regra, e um vermelho num sitio
+// que nao tem nada a ver. Medido a 06/09, ao acrescentar o E32.
+// O `api-publica` e um FICHEIRO e por isso tem alternativa propria.
 const SO_PELO_PUBLICO =
-  /^(app\/(r|api\/publico|api\/kiosk|\[idioma\]\/kiosk)|src\/(visitante|reserva|kiosk))\//;
+  /^(app\/(r|api\/publico|api\/kiosk|api\/v1|api\/webhooks\/saas|\[idioma\]\/kiosk)\/|src\/(visitante|reserva|kiosk)\/|src\/api-publica\.ts$)/;
 /** O que uma rota pública NÃO pode tocar: são os caminhos que exigem inquilino. */
 const PROIBIDO_NO_PUBLICO = ['comEscopo', 'comIdentidade', 'obterPrisma'];
 

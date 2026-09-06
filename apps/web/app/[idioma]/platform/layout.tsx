@@ -49,6 +49,14 @@ export default async function LayoutDaPlataforma({
     { href: base, rotulo: m.plataforma.navResumo },
     { href: base, rotulo: m.plataforma.navOrganizacoes, activa: true },
     { href: `${base}/planos`, rotulo: m.plataforma.navPlanos },
+    // ── As quatro do E32 ────────────────────────────────────────────────
+    //
+    // Uma tela construída e inalcançável é a porta morta ao contrário, e mais
+    // cara: existe, funciona, e ninguém a encontra.
+    { href: `${base}/assinaturas`, rotulo: m.integracoesE32.assinaturas },
+    { href: `${base}/promocoes`, rotulo: m.integracoesE32.promocoes },
+    { href: `${base}/webhooks`, rotulo: m.integracoesE32.webhooksGlobais },
+    { href: `${base}/provedores`, rotulo: m.integracoesE32.provedores },
     // ── As três que faltam levam a MARCA, e não um `#` ──────────────────
     //
     // Um `href: '#'` parece clicável e não leva a lado nenhum: quem carrega

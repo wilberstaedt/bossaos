@@ -68,6 +68,42 @@ export const ID_DA_IMPRESSORA_DE_INSPECCAO = 'aaaa1111-1111-4111-8111-9e31c00000
  */
 export const ID_DO_KIOSK_PAUSADO = 'aaaa1111-1111-4111-8111-9e31c0000003';
 
+/**
+ * O cliente do provedor de SaaS que a semente liga à organização **A**.
+ *
+ * ── E o evento que alega a B, que é o que torna a etapa mensurável ────────
+ *
+ * A régua do E32 é explícita: a semente tem de ter DUAS organizações, senão o
+ * defeito mais perigoso da etapa é impossível de observar — não há «outra» para
+ * onde apontar. Este cliente é da A; o evento semeado diz que é da B.
+ *
+ * Ele fica visível na PLAT-005, marcado, porque uma tentativa que o sistema
+ * recusou é exactamente a coisa que alguém vai querer encontrar daqui a um ano.
+ */
+export const CLIENTE_SAAS_DE_INSPECCAO = 'insp-cus_A';
+
+/**
+ * A chave de API do arnês — **utilizável**, e é preciso que seja.
+ *
+ * ── Porque é que existe um valor escrito aqui ─────────────────────────────
+ *
+ * A régua manda medir que o âmbito é declarado por ROTA. Sem uma chave que
+ * passe, esse caso não se consegue montar: uma chave inventada é recusada pelas
+ * duas rotas por igual, e trocar o âmbito de uma delas não muda nada.
+ *
+ * Foi assim que o controlo ficou VERDE com o defeito plantado — o buraco era da
+ * prova, não do plante. Mesma figura do E31, onde faltava o cliente que se vai
+ * embora sem tocar em nada.
+ *
+ * ── E porque é que isto não é um segredo largado num repositório ──────────
+ *
+ * Ela só existe na base do ARNÊS, criada pela semeadura e apagada pela limpeza
+ * ao fim de cada passagem. Nunca é escrita numa base de produção, e o valor
+ * anuncia-o. É a mesma figura da senha `Prova-E07-http-2026` que o
+ * `catalogo-http.test.ts` já usa.
+ */
+export const CHAVE_DE_INSPECCAO = 'bk_arnes-nao-usar-fora-da-inspeccao';
+
 /** Abre a ligação com a credencial de MIGRAÇÃO, que é a que pode escrever isto. */
 export function abrirPrisma(): PrismaClient {
   const url = process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL;
@@ -146,6 +182,24 @@ export async function limpar(prisma: PrismaClient): Promise<void> {
     ALTER TABLE bill_adjustments      DISABLE TRIGGER USER;
     ALTER TABLE payments              DISABLE TRIGGER USER;
     ALTER TABLE refunds               DISABLE TRIGGER USER;
+    -- ── E32 · as integracoes e a cobranca do SaaS ────────────────────────
+    --
+    -- Os eventos primeiro: a coluna resolvida aponta para organizations com
+    -- SET NULL, mas a ordem faz o resto sair limpo. E as facturas do SaaS nao
+    -- tocam no dinheiro da refeicao — nao ha chave estrangeira entre as duas
+    -- familias, e por isso nao ha ordem a respeitar entre elas.
+    DELETE FROM saas_billing_events  WHERE provedor LIKE '${PREFIXO}%';
+    DELETE FROM saas_customers       WHERE provedor LIKE '${PREFIXO}%';
+    DELETE FROM saas_invoices        WHERE provedor LIKE '${PREFIXO}%';
+    DELETE FROM integration_logs     WHERE accao LIKE '${PREFIXO}%';
+    DELETE FROM webhook_deliveries   WHERE evento LIKE '${PREFIXO}%';
+    DELETE FROM webhook_endpoints    WHERE criado_por LIKE '${PREFIXO}%';
+    DELETE FROM integrations         WHERE provedor LIKE '${PREFIXO}%';
+    -- O prefixo do NOME e o cracha, e ele nao chega: um plante do E32 punha o
+    -- valor da chave no nome, e a linha deixava de casar. Apanha-se tambem pelo
+    -- PREFIXO da chave, que o produto escreve e nenhum plante muda.
+    DELETE FROM api_keys             WHERE nome LIKE '${PREFIXO}%' OR nome LIKE 'bk\\_%';
+
     -- ── E31 · o kiosk e a impressão saem PRIMEIRO ─────────────────────────
     --
     -- Antes dos pedidos e das contas: a sessão de kiosk aponta para os dois, e

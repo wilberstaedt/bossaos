@@ -905,6 +905,50 @@ label.bo-planos__item input[type="radio"] {
  * texto que foi para a impressora: um talão reflowed é um talão diferente, e a
  * pergunta que este ecrã responde é «o que é que saiu?».
  */
+/*
+ * Uma linha com um identificador que não se pode encurtar — o prefixo de uma
+ * chave, um endereço de webhook.
+ *
+ * `overflow-wrap: anywhere` porque estas cadeias não têm espaços nem hífenes
+ * onde partir: a 360 px, uma chave e a lista de âmbitos na mesma linha empurram
+ * a página 42 px para o lado, e o ecrã passa a rolar na horizontal. Medido na
+ * INT-008.
+ */
+/*
+ * A lista cujos itens são BLOCOS, e não linhas.
+ *
+ * `.bo-lista` tem recuo para o marcador — certo para itens de uma linha, e
+ * errado para itens que levam parágrafos por baixo: a 360 px o recuo de 64 px
+ * mais a largura do bloco dão 403, e a página passa a rolar na horizontal.
+ * Medido na INT-008, onde cada chave leva prefixo, âmbitos, prazo e um botão.
+ *
+ * Sem marcador, porque um item de várias linhas com um ponto ao lado da
+ * primeira lê-se pior do que sem ele.
+ */
+.bo-lista.bo-lista--blocos {
+  /* As duas classes, e nao so o modificador: com a mesma especificidade, quem
+     ganha e quem vem depois no ficheiro — e o `.bo-lista` esta mais abaixo.
+     Medido: o recuo continuava a aplicar-se e a pagina rolava na mesma. */
+  padding-left: 0; padding-inline-start: 0; list-style: none;
+  gap: var(--bo-espaco-md);
+}
+/*
+ * E o `min-width: 0`, que e a metade que faltava.
+ *
+ * O `.bo-lista` e uma GRELHA, e um item de grelha nao encolhe abaixo do seu
+ * `min-content`. Com um identificador longo la dentro, o `li` ficava 339 px
+ * dentro de um `ul` de 280 — mais largo do que o pai — e a pagina rolava.
+ *
+ * Medido a traçar a cadeia de ascendentes, e nao adivinhado: as duas tentativas
+ * anteriores (tirar o recuo, subir a especificidade) melhoraram o numero e nao
+ * o resolveram, porque o problema nunca esteve no recuo.
+ */
+.bo-lista.bo-lista--blocos > li { min-width: 0; }
+
+.bo-identificador {
+  overflow-wrap: anywhere; word-break: break-word;
+}
+
 .bo-talao {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   white-space: pre-wrap; overflow-x: auto;

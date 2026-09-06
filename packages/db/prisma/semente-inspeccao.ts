@@ -29,7 +29,7 @@ import { IDS } from './fixtures.ts';
 import {
   abrirPrisma, limpar, ID_DA_IMPRESSORA_DE_INSPECCAO, ID_DO_KIOSK_DE_INSPECCAO,
   ID_DO_KIOSK_PAUSADO,
-  PREFIXO, SLUG_DE_INSPECCAO, SLUG_DE_INSPECCAO_B,
+  CHAVE_DE_INSPECCAO, CLIENTE_SAAS_DE_INSPECCAO, PREFIXO, SLUG_DE_INSPECCAO, SLUG_DE_INSPECCAO_B,
 } from './inspeccao-comum.ts';
 
 export { SLUG_DE_INSPECCAO, SLUG_DE_INSPECCAO_B };
@@ -1849,6 +1849,176 @@ async function principal(): Promise<void> {
         chaveIdempotente: `${PREFIXO}k-001`,
       },
     });
+
+    // ═══════════════════════════════════════════════════════════════════
+    // E32 · integrações, chaves, webhooks e a cobrança do SaaS
+    // ═══════════════════════════════════════════════════════════════════
+    //
+    // ── A semente TEM de ter duas organizações ────────────────────────────
+    //
+    // A ligação diz que `insp-cus_A` é da organização **A**. O evento semeado
+    // alega que é da **B**. Com um inquilino só, este caso não existe — e o
+    // defeito mais perigoso da etapa fica impossível de observar.
+
+    // Integrações declaradas DESLIGADAS, com os requisitos por palavras. A base
+    // recusa `DESLIGADA` sem requisitos: um beco sem indicação é silêncio.
+    // ── O prefixo vai no PROVEDOR e não na família ────────────────────────
+    //
+    // A família é o que o produto mostra (`delivery`, `mensagens`), e sujá-la
+    // com `insp-` fazia o arnês medir um ecrã que não é o do produto. Mas a
+    // limpeza precisa de um crachá, e sem ele a segunda corrida bate na
+    // restrição única — foi o que aconteceu à primeira.
+    //
+    // O crachá é o provedor. Um critério só, e não uma lista de famílias à mão
+    // a desalinhar no dia em que se acrescentar a quarta.
+    for (const [familia, provedor, requisitos] of [
+      ['delivery', `${PREFIXO}agregador-a`, 'Falta contrato e chaves do agregador'],
+      ['mensagens', `${PREFIXO}sms-b`, 'Falta conta e remetente aprovado'],
+      ['cobranca', `${PREFIXO}provedor-saas`, 'Falta conta e chaves do provedor de assinatura'],
+    ] as const) {
+      await prisma.integration.create({
+        data: {
+          organizationId: IDS.orgA, familia, provedor,
+          estado: 'DESLIGADA', requisitos,
+        },
+      });
+    }
+
+    // Uma chave viva e uma revogada, lado a lado. Sem a revogada, a tela mostra
+    // um estado só e o par não se vê.
+    const chaveViva = await prisma.apiKey.create({
+      data: {
+        organizationId: IDS.orgA, nome: `${PREFIXO}chave do parceiro`,
+        prefixo: CHAVE_DE_INSPECCAO.slice(0, 11),
+        // O resumo do valor REAL: é o que faz a chave passar pela porta. Sem
+        // isto, nenhum caso consegue medir o âmbito por rota.
+        resumo: createHash('sha256').update(CHAVE_DE_INSPECCAO, 'utf8').digest('hex'),
+        // **Só catálogo.** É esse o ponto: ela tem de ENTRAR no catálogo e ser
+        // RECUSADA nos pedidos, e é o par que mede a declaração por rota.
+        escopos: ['CATALOGO_LER'],
+        expiraEm: new Date(Date.now() + 90 * 24 * 3600 * 1000),
+        criadaPor: 'inspeccao@exemplo.example',
+      },
+      select: { id: true },
+    });
+    await prisma.apiKey.create({
+      data: {
+        organizationId: IDS.orgA, nome: `${PREFIXO}chave que foi levada`,
+        prefixo: 'bk_insp0002', resumo: `${PREFIXO}resumo-revogado`,
+        escopos: ['CATALOGO_LER'],
+        expiraEm: new Date(Date.now() + 90 * 24 * 3600 * 1000),
+        criadaPor: 'inspeccao@exemplo.example',
+        revogadaEm: new Date(), revogadaPor: 'inspeccao@exemplo.example',
+      },
+    });
+
+    // Um registo de chamada, para a INT-010 ter o que mostrar — e para se ver
+    // que ele diz QUEM chamou, pelo id da chave e nunca pelo valor.
+    await prisma.integrationLog.create({
+      data: {
+        organizationId: IDS.orgA, apiKeyId: chaveViva.id,
+        accao: `${PREFIXO}api.catalogo.ler`, resultado: 'ok',
+        detalhe: { unidades: 2 },
+      },
+    });
+
+    const pontoDeWebhook = await prisma.webhookEndpoint.create({
+      data: {
+        organizationId: IDS.orgA, url: 'https://parceiro.example/bossaos',
+        segredoResumo: `${PREFIXO}resumo-do-segredo`,
+        eventos: [`${PREFIXO}pedido.aceite`],
+        criadoPor: `${PREFIXO}inspeccao`,
+      },
+      select: { id: true },
+    });
+    // Uma entregue e uma que desistiu: o par que mostra que os estados não
+    // colapsam num só.
+    for (const [estado, tentativas, resposta] of [
+      ['ENTREGUE', 1, 200], ['DESISTIU', 5, 500],
+    ] as const) {
+      const corpo = JSON.stringify({ evento: `${PREFIXO}pedido.aceite`, versao: 1 });
+      await prisma.webhookDelivery.create({
+        data: {
+          organizationId: IDS.orgA, endpointId: pontoDeWebhook.id,
+          evento: `${PREFIXO}pedido.aceite`, versao: 1,
+          corpo, assinatura: 'a'.repeat(64),
+          estado, tentativas, respostaEstado: resposta,
+          ...(estado === 'ENTREGUE' ? { entregueEm: new Date() } : {}),
+        },
+      });
+    }
+
+    // A LIGAÇÃO: `insp-cus_A` é da organização A. Criada por alguém autenticado.
+    await prisma.saasCustomer.create({
+      data: {
+        organizationId: IDS.orgA, provedor: `${PREFIXO}provedor-saas`,
+        provedorClienteId: CLIENTE_SAAS_DE_INSPECCAO,
+        criadoPor: 'inspeccao@exemplo.example',
+      },
+    });
+
+    // ── O evento que ALEGOU a organização B ───────────────────────────────
+    //
+    // Assinatura confere, cliente do provedor é o da A, e o corpo diz B. Fica
+    // aplicado à A — que é quem a ligação aponta — e com o motivo escrito.
+    // É a tentativa, visível na PLAT-005.
+    const corpoQueAlega = JSON.stringify({
+      id: `${PREFIXO}ev-alega`, customer: CLIENTE_SAAS_DE_INSPECCAO,
+      type: 'subscription.updated', plan: 'PRO', organization_id: IDS.orgB,
+    });
+    const eventoQueAlega = await prisma.saasBillingEvent.create({
+      data: {
+        provedor: `${PREFIXO}provedor-saas`, provedorEventoId: `${PREFIXO}ev-alega`,
+        tipo: 'subscription.updated', provedorClienteId: CLIENTE_SAAS_DE_INSPECCAO,
+        planoCodigo: 'PRO', organizationIdAlegado: IDS.orgB,
+        corpoCru: corpoQueAlega, assinaturaConfere: true,
+      },
+      select: { id: true },
+    });
+    await prisma.$queryRawUnsafe(
+      `SELECT aplicar_evento_de_cobranca('${eventoQueAlega.id}'::uuid)`);
+
+    // E um SEM ligação nenhuma: fica parado e não muda nada. É o estado que a
+    // PLAT-005 conta, e sem ele o contador ficava a zero por vácuo.
+    const corpoOrfao = JSON.stringify({
+      id: `${PREFIXO}ev-orfao`, customer: `${PREFIXO}cus_ninguem`,
+      type: 'subscription.updated', plan: 'PRO',
+    });
+    const eventoOrfao = await prisma.saasBillingEvent.create({
+      data: {
+        provedor: `${PREFIXO}provedor-saas`, provedorEventoId: `${PREFIXO}ev-orfao`,
+        tipo: 'subscription.updated', provedorClienteId: `${PREFIXO}cus_ninguem`,
+        planoCodigo: 'PRO', organizationIdAlegado: IDS.orgB,
+        corpoCru: corpoOrfao, assinaturaConfere: true,
+      },
+      select: { id: true },
+    });
+    await prisma.$queryRawUnsafe(
+      `SELECT aplicar_evento_de_cobranca('${eventoOrfao.id}'::uuid)`);
+
+    // Duas facturas do SaaS: é o que a casa NOS paga, e não toca no que ela
+    // factura aos clientes dela.
+    for (const [n, montante, estado] of [['F-001', 4900, 'paga'], ['F-002', 4900, 'aberta']] as const) {
+      await prisma.saasInvoice.create({
+        data: {
+          organizationId: IDS.orgA, provedor: `${PREFIXO}provedor-saas`,
+          provedorFacturaId: `${PREFIXO}${n}`, numero: `${PREFIXO}${n}`,
+          montanteMenor: montante, moeda: 'EUR', estado,
+          emitidaEm: new Date(),
+          ...(estado === 'paga' ? { pagaEm: new Date() } : {}),
+        },
+      });
+    }
+
+    // O caso da régua responde ANTES de o navegador tentar: o evento que alegou
+    // a B tem de ter ficado na A, senão a semeadura está a montar outra coisa.
+    const resolvido = await prisma.saasBillingEvent.findFirst({
+      where: { provedorEventoId: `${PREFIXO}ev-alega` },
+      select: { organizationIdResolvido: true, estado: true },
+    });
+    if (resolvido?.organizationIdResolvido !== IDS.orgA) {
+      throw new Error('o evento que alegou a B não ficou na A: a semente não monta o caso');
+    }
 
     // A porta estreita responde ANTES de o navegador tentar. Mesma razão da
     // carta aqui em baixo: um erro de semeadura que aparece como «a inspecção

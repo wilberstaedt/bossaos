@@ -375,9 +375,17 @@ export {
 } from './kiosk-publico.ts';
 
 export {
-  RecusaDaIntegracao, aplicarEventoDeCobranca, assinarCorpo, criarChave,
-  criarEndpoint, declararIntegracao, enfileirarEntrega, facturasDoSaas,
-  ligarClienteSaas, listarChaves, listarIntegracoes, receberEventoDeCobranca,
-  registosDaIntegracao, resumirChave, revogarChave, seguroParaSeguir,
-  verificarChave, type RecusaDeIntegracao,
+  RecusaDaIntegracao, assinarCorpo, criarChave, criarEndpoint,
+  declararIntegracao, enfileirarEntrega, entregar, facturasDoSaas,
+  ligarClienteSaas,
+  listarChaves, listarIntegracoes, registosDaIntegracao, resumirChave,
+  revogarChave, seguroParaSeguir, verificarChave, type RecusaDeIntegracao,
 } from './integracoes.ts';
+
+export {
+  aplicarEventoDeCobrancaPublico, receberEventoDeCobrancaPublico,
+} from './saas-publico.ts';
+
+export {
+  autorizarChave, comOEscopoDaChave, registarChamadaPublica, type Autorizado,
+} from './api-publica.ts';

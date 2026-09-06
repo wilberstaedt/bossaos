@@ -234,6 +234,87 @@ export function seguroParaSeguir(url: string): boolean {
   return destinoPermitido(url).ok;
 }
 
+/**
+ * Entrega uma linha da fila, seguindo redireccionamentos **à mão**.
+ *
+ * ── Porque é que os redireccionamentos se seguem à mão ────────────────────
+ *
+ * `redirect: 'follow'` faz o `fetch` seguir sozinho, e aí a validação do
+ * destino vale só para o primeiro salto. Um endereço público que responde `302`
+ * para `169.254.169.254` leva o nosso servidor lá na mesma — e o cliente que
+ * escreveu o endereço nem precisa de controlar o serviço de destino, só de o
+ * apontar a um redireccionador.
+ *
+ * Com `redirect: 'manual'` cada salto volta a passar pelo `seguroParaSeguir`, e
+ * a cadeia tem fim: cinco saltos, e depois desiste. Uma cadeia sem limite é
+ * outra forma de a mesma porta.
+ *
+ * O `buscar` é injectado para a prova poder responder sem rede. Não é para
+ * facilitar o teste: é para o teste poder montar o redireccionamento hostil,
+ * que é a coisa que ninguém consegue montar contra a internet real.
+ */
+export async function entregar(
+  db: ClienteComEscopo,
+  entregaId: string,
+  buscar: (url: string, init: RequestInit) => Promise<Response> = fetch,
+  saltosMaximos = 5,
+) {
+  const entrega = await db.webhookDelivery.findFirst({
+    where: { id: entregaId },
+    include: { endpoint: { select: { url: true } } },
+  });
+  if (!entrega) throw new RecusaDaIntegracao('DESTINO_RECUSADO', 'entrega desconhecida');
+
+  let url = entrega.endpoint.url;
+  let resposta: Response | null = null;
+
+  for (let salto = 0; salto <= saltosMaximos; salto += 1) {
+    if (!seguroParaSeguir(url)) {
+      // Não é um erro de rede: é uma recusa nossa, e fica escrita como tal.
+      return db.webhookDelivery.update({
+        where: { id: entregaId },
+        data: { estado: 'DESISTIU', tentativas: { increment: 1 } },
+      });
+    }
+
+    resposta = await buscar(url, {
+      method: 'POST',
+      redirect: 'manual',
+      headers: {
+        'content-type': 'application/json',
+        'x-bossaos-assinatura': entrega.assinatura,
+        'x-bossaos-entrega': entrega.entregaId,
+        'x-bossaos-versao': String(entrega.versao),
+      },
+      body: entrega.corpo,
+    });
+
+    if (resposta.status < 300 || resposta.status >= 400) break;
+    const seguinte = resposta.headers.get('location');
+    if (!seguinte) break;
+    url = new URL(seguinte, url).toString();
+    resposta = null;
+  }
+
+  if (!resposta) {
+    return db.webhookDelivery.update({
+      where: { id: entregaId },
+      data: { estado: 'DESISTIU', tentativas: { increment: 1 } },
+    });
+  }
+
+  const entregue = resposta.status >= 200 && resposta.status < 300;
+  return db.webhookDelivery.update({
+    where: { id: entregaId },
+    data: {
+      estado: entregue ? 'ENTREGUE' : 'FALHOU',
+      tentativas: { increment: 1 },
+      respostaEstado: resposta.status,
+      ...(entregue ? { entregueEm: new Date() } : {}),
+    },
+  });
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Cobrança do SaaS — a fronteira que decide a etapa
 // ═══════════════════════════════════════════════════════════════════════════
@@ -257,76 +338,19 @@ export function ligarClienteSaas(
 }
 
 /**
- * Grava um evento de cobrança como ele chegou.
+ * ── O que estava aqui, e porque saiu ──────────────────────────────────────
  *
- * ── O que esta função faz, e o que NÃO faz ────────────────────────────────
+ * Havia aqui um `receberEventoDeCobranca` e um `aplicarEventoDeCobranca` que
+ * recebiam `ClienteComEscopo`. **Eram duplicados mortos**: o caminho vivo é o
+ * `saas-publico.ts`, que não recebe escopo nenhum — porque quando o webhook
+ * chega ainda não se sabe de quem é, e essa é a fronteira inteira.
  *
- * Faz: verifica a assinatura sobre o corpo cru, e grava. É tudo.
- *
- * Não faz: não resolve a organização, não toca em concessões, não olha para o
- * `organization_id` do corpo a não ser para o **guardar como alegação**. O nome
- * do argumento diz isso em voz alta — `organizationIdAlegado` —, e o nome da
- * coluna também. Quem quisesse confiar nele teria de escrever a palavra
- * «alegado» e continuar mesmo assim.
- *
- * E a chamada é feita **sem escopo de inquilino**: quando o evento chega ainda
- * não se sabe de quem é. Essa é a fronteira inteira numa assinatura de função.
+ * A varredura de alcance apanhou-os sem chamador. Podia tê-los ligado a alguma
+ * coisa para calar a guarda; a resposta certa era apagá-los. Duas funções com o
+ * mesmo nome e assinaturas diferentes, uma das quais aceita um inquilino de
+ * fora, é o convite exacto para alguém chamar a errada — e a errada é a que
+ * deixa quem chama escolher a organização.
  */
-export async function receberEventoDeCobranca(
-  db: ClienteComEscopo,
-  dados: {
-    readonly provedor: string;
-    readonly provedorEventoId: string;
-    readonly tipo: string;
-    readonly provedorClienteId: string;
-    readonly planoCodigo: string | null;
-    readonly organizationIdAlegado: string | null;
-    readonly corpoCru: string;
-    readonly assinatura: string | null;
-    readonly segredo: string;
-  },
-) {
-  const confere = assinaturaConfere(dados.corpoCru, dados.assinatura, dados.segredo);
-
-  // Reenviar é normal — a rede falha. A identidade é a do provedor, e a
-  // restrição única deduplica: o segundo devolve o primeiro.
-  const jaExiste = await db.saasBillingEvent.findFirst({
-    where: { provedor: dados.provedor, provedorEventoId: dados.provedorEventoId },
-  });
-  if (jaExiste) return jaExiste;
-
-  return db.saasBillingEvent.create({
-    data: {
-      provedor: dados.provedor,
-      provedorEventoId: dados.provedorEventoId,
-      tipo: dados.tipo,
-      provedorClienteId: dados.provedorClienteId,
-      planoCodigo: dados.planoCodigo,
-      organizationIdAlegado: dados.organizationIdAlegado,
-      corpoCru: dados.corpoCru,
-      assinaturaConfere: confere,
-    },
-  });
-}
-
-/**
- * Manda aplicar um evento — e **não escolhe a organização**.
- *
- * Chama a função privilegiada, que corre como dono e resolve a organização pela
- * `saas_customers`. Esta camada não tem, e não pode ter, uma palavra a dizer
- * sobre isso: o único argumento é o identificador do evento.
- *
- * Devolve o estado com que ele ficou — incluindo `SEM_VINCULO`, que é a resposta
- * certa a um evento que ninguém pediu.
- */
-export async function aplicarEventoDeCobranca(
-  db: ClienteComEscopo, eventoId: string,
-): Promise<'RECEBIDO' | 'SEM_VINCULO' | 'APLICADO' | 'RECUSADO'> {
-  const linhas = await db.$queryRaw<{ aplicar_evento_de_cobranca: string }[]>`
-    SELECT aplicar_evento_de_cobranca(${eventoId}::uuid)`;
-  return linhas[0]?.aplicar_evento_de_cobranca as
-    'RECEBIDO' | 'SEM_VINCULO' | 'APLICADO' | 'RECUSADO';
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Integrações e o seu registo

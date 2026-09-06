@@ -28,6 +28,10 @@ export default async function PedidosDaUnidade({
 
   return (
     <div className="bo-pagina">
+      <a className="bo-lista__ligacao" data-seccao="ORD-011"
+         href={`/${idioma}/app/${orgSlug}/${locationSlug}/orders/reprocessar`}>
+        {mensagensDe(idioma).integracoesE32.reprocessar}
+      </a>
       <div className="bo-estado__cabecalho">
         <div>
           <p className="bo-estado__sobrancelha">{unidade.nome}</p>

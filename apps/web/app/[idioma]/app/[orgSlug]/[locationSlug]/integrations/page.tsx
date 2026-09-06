@@ -37,6 +37,13 @@ export default async function Integracoes({
 
   return (
     <div className="bo-pagina">
+
+      {/* O catálogo do E32 vive ao lado desta: são a mesma família, e procurar
+          as chaves de API noutro menu seria a porta morta ao contrário. */}
+      <a className="bo-lista__ligacao" data-seccao="INT-001"
+         href={`/${idioma}/app/${orgSlug}/${locationSlug}/integrations/catalogo`}>
+        {mensagensDe(idioma).integracoesE32.catalogo}
+      </a>
       <div className="bo-estado__cabecalho">
         <div>
           <p className="bo-estado__sobrancelha">{unidade.nome}</p>
