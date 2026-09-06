@@ -28,7 +28,7 @@ verificacoes=0
 # mensagem dizer "esperadas 8" enquanto a comparação usava outro número: tinha o
 # valor escrito duas vezes. Uma régua que se descreve a si própria de forma
 # diferente da que aplica é uma régua que ninguém pode acreditar.
-MINIMO_VERIFICACOES=9
+MINIMO_VERIFICACOES=12
 
 verde() { printf '  \033[32mok\033[0m   %s\n' "$1"; verificacoes=$((verificacoes + 1)); }
 vermelho() { printf '  \033[31mFALHA\033[0m %s\n' "$1"; falhas=$((falhas + 1)); verificacoes=$((verificacoes + 1)); }
@@ -118,6 +118,72 @@ elif [ "${n_runtime:-1}" -ne 0 ]; then
   vermelho "o runtime ve $n_runtime utilizadores — a identidade deixou de estar separada"
 else
   verde "o runtime ve 0 de $n_migracao utilizadores — identidade separada, com populacao a provar"
+fi
+
+echo
+echo "5. A FRONTEIRA DAS CONCESSÕES — o runtime não escreve quem pagou o quê"
+# ── Este bloco nasceu de uma falsa segurança minha, 06/09 às 07h45 ─────────
+#
+# A régua do E33 dizia, sobre o aceite que decide: «controlo: dar INSERT ao papel
+# de runtime e ver a `provar-separacao-de-credenciais.sh` acender». Fui fazê-lo:
+# dei `INSERT` em `entitlement_grants` e `subscriptions` ao `bossaos_app`, e esta
+# prova ficou **verde**. Ela cobria DDL e identidade; as concessões, nunca.
+#
+# O aceite ESTAVA provado — pela `provar-plataforma.sh`, que acendeu como devia.
+# Mas o nome desta prova promete a fronteira toda, e é aqui que qualquer pessoa a
+# vai procurar. **Uma cobertura que se presume pelo nome é a mesma família de
+# defeito que uma lista que envelhece**: ninguém a verifica porque parece óbvia.
+#
+# A fronteira está repetida em três etapas (E05, E32, E33). Passa a ter uma prova
+# no sítio onde se procura por ela.
+CONCESSOES="entitlement_grants subscriptions"
+
+# (a) Primeiro o POSITIVO. Sem isto, um nome de tabela mal escrito ou uma ligação
+# ao esquema errado davam "não escreve" — verde sobre população zero.
+if runtime "SELECT 1 FROM entitlement_grants LIMIT 1"; then
+  verde "o runtime LÊ entitlement_grants — a ligação e a tabela existem"
+else
+  vermelho "o runtime não lê entitlement_grants — as recusas abaixo não provariam nada"
+fi
+
+# (b) O CATÁLOGO: a permissão não está lá.
+sem_escrita=1
+for t in $CONCESSOES; do
+  for p in INSERT UPDATE DELETE; do
+    r=$(psql "$MIGRATION_DATABASE_URL" -tAc \
+        "SELECT has_table_privilege('bossaos_app','$t','$p')" 2>/dev/null | tr -d ' ')
+    [ "$r" = "f" ] || { sem_escrita=0; tem="$t/$p"; }
+  done
+done
+if [ "$sem_escrita" -eq 1 ]; then
+  verde "o catálogo confirma: nenhum INSERT/UPDATE/DELETE do runtime nas concessões"
+else
+  vermelho "o runtime tem ${tem:-escrita} nas concessões — a fronteira do E05 caiu"
+fi
+
+# (c) E o COMPORTAMENTO, que é o que conta. Um INSERT também falharia por uma
+# coluna obrigatória ou uma chave estrangeira, e isso não provava fronteira
+# nenhuma — por isso exijo o código do Postgres para «permissão negada», 42501,
+# e não uma recusa qualquer.
+erro_insert=$(psql "$DATABASE_URL" -X -q -v VERBOSITY=verbose \
+  -c "INSERT INTO entitlement_grants (id) VALUES (gen_random_uuid())" 2>&1)
+# ── E 42501 NÃO CHEGA: são dois mecanismos com o mesmo código ─────────────
+#
+# Escrevi isto primeiro a exigir só `42501` e apanhei-me dez minutos depois. Com
+# o `GRANT` aberto de propósito, o INSERT continuava a dar 42501 — mas vindo da
+# **RLS**, não da permissão de tabela. A linha dizia «recusada por PERMISSÃO» e
+# ficava verde com a fronteira escancarada: afirmava o que não tinha medido.
+#
+# A defesa em profundidade é real e é boa — a RLS apanha mesmo o que o GRANT
+# deixasse passar. O que não é aceitável é chamar-lhe a mesma coisa.
+if printf '%s' "$erro_insert" | grep -qi 'permission denied for table'; then
+  verde "e a tentativa real é recusada pela PERMISSÃO DE TABELA — é esta a fronteira do E05"
+elif printf '%s' "$erro_insert" | grep -qi 'row-level security'; then
+  vermelho "a recusa veio da RLS, não da permissão de tabela — o GRANT não está a ser medido aqui"
+  echo "        A escrita ficou bloqueada na mesma (defesa em profundidade), mas a"
+  echo "        fronteira sob teste é a do GRANT, e essa é a verificação acima."
+else
+  vermelho "o INSERT do runtime não foi recusado por permissão: $(printf '%s' "$erro_insert" | head -1)"
 fi
 
 if (( verificacoes < MINIMO_VERIFICACOES )); then
