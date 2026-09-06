@@ -22,7 +22,7 @@ precisa de ser **executável**, não uma pilha.
 | 6 | Código morto com ficheiro e linha | **resolvida** — a lista envelheceu; aponta para a varredura | eu |
 | 7 | Código de verificação no pacote | **medida**: as 8 chegam ao pacote. Decisão de as tirar fica aberta | JR |
 | 8 | Assinaturas na pasta antiga | **paga** — e era pior: três diziam-se à espera | eu |
-| 9 | `larguras.spec.ts` parece global e não é | **aberta** — baixa prioridade: cada etapa mede as suas | eu |
+| 9 | `larguras.spec.ts` parece global e não é | **resolvida** — o defeito era a alegação, não a cobertura: o ficheiro passa a dizer que cobre as seis cascas | eu |
 | 10 | O meu `git add -A`, duas vezes | **regra escrita**: caminhos explícitos, sempre | eu |
 | 11 | RLS: `custom_domain_owners` | **decidida, por executar** — apagar, não proteger | JR |
 | 12 | Provas de navegador não auto-contidas | **meia** — mensagem corrigida e `arnes-pronto.sh` escrito; falta ligá-lo aos 20 guiões | eu |

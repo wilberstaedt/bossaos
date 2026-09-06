@@ -9,6 +9,30 @@ import {
  * Aceite 1 do E02: 360, 390, 768, 1280 e 1440 px, sem conteúdo nem acção
  * inacessível. Seis páginas × cinco larguras, em espanhol; os outros dois
  * idiomas correm à parte, com o conteúdo longo.
+ *
+ * ── O QUE ESTE FICHEIRO COBRE, E O QUE NÃO COBRE ───────────────────────────
+ *
+ * Cobre **SEIS páginas**: as CASCAS partilhadas — `inicio`, `catalogo` e as
+ * quatro estruturas (admin, pública, staff, kds). É onde a grelha, a navegação
+ * e os alvos de toque vivem, e por isso um transbordo aqui aparece em todas as
+ * telas que assentam nelas.
+ *
+ * **NÃO cobre as 332 telas validadas do produto.** Cada etapa mede as suas
+ * próprias larguras dentro da sua própria prova de navegador — o E27 mediu
+ * catorze, o E28 onze, o E31 onze — e é aí que está a cobertura real. A
+ * `validar-movel-real.sh` cruza a alegação «móvel medido» de cada tela com o
+ * spec que a mede mesmo.
+ *
+ * ── Porque é que isto está escrito aqui ────────────────────────────────────
+ *
+ * Porque o nome do ficheiro e a lista de seis caminhos convidam à conclusão
+ * errada: **um instrumento que parece cobrir tudo e cobre seis é pior do que um
+ * buraco**, porque quem o lê para decidir se o móvel está medido decide mal.
+ *
+ * Esteve na dívida 9 do E34 com a proposta de o fazer descobrir as telas do
+ * `coverage.csv`. **Não é a correcção certa**: duplicaria o que cada etapa já
+ * mede, 332 telas × 5 larguras, para responder à mesma pergunta duas vezes. O
+ * que estava errado não era a cobertura — era a alegação.
  */
 for (const largura of LARGURAS) {
   test.describe(`${largura} px`, () => {
