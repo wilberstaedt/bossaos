@@ -7,6 +7,39 @@
 
 ## O que o E34 herda, e cada item tem endereço
 
+## Estado das doze dívidas — 06/09, 04h50
+
+Consolidado porque estavam espalhadas por catorze horas de trabalho e o E34
+precisa de ser **executável**, não uma pilha.
+
+| # | Dívida | Estado | Dono |
+| --- | --- | --- | --- |
+| 1 | Menu da plataforma sem `porConstruir` | **paga** | JR |
+| 2 | `/staff/` sem uma única ligação | **aberta** — é pergunta de produto: como chega um tablet novo ao endereço? | Matheus |
+| 3 | Alvos do arnês com forma de lotaria | **paga** — 13 consultas ordenadas, verificadas | eu |
+| 4 | Guardas que observam a forma da escrita | **fechada sem achado** — varri as 25, as três que leem prosa têm invariante textual | eu |
+| 5 | Provas que não correm na CI | **paga** — descoberta em vez de lista | eu |
+| 6 | Código morto com ficheiro e linha | **resolvida** — a lista envelheceu; aponta para a varredura | eu |
+| 7 | Código de verificação no pacote | **aberta, e o método descartado escrito** — nomes num pacote minificado não medem | eu |
+| 8 | Assinaturas na pasta antiga | **paga** — e era pior: três diziam-se à espera | eu |
+| 9 | `larguras.spec.ts` parece global e não é | **aberta** — baixa prioridade: cada etapa mede as suas | eu |
+| 10 | O meu `git add -A`, duas vezes | **regra escrita**: caminhos explícitos, sempre | eu |
+| 11 | RLS: `custom_domain_owners` | **decidida, por executar** — apagar, não proteger | JR |
+| 12 | Provas de navegador não auto-contidas | **meia** — mensagem corrigida e `arnes-pronto.sh` escrito; falta ligá-lo aos 20 guiões | eu |
+
+**Cinco pagas, uma fechada sem achado, uma resolvida, três abertas minhas, uma
+decidida à espera do JR, uma do Matheus.**
+
+E duas coisas que não são dívida mas ficam:
+
+- **A varredura ao produto inteiro** passou de 65 órfãs para 60, com 57 funções
+  novas e **zero órfãs novas**. As três que persegui estão ligadas.
+- **O `leadsDaUnidade`** saiu do E34 e foi para as decisões do Matheus como a
+  nona: não é dívida técnica, é âmbito — nenhuma etapa planeada reclama a
+  leitura dos leads.
+
+---
+
 ### 1. O menu da PLATAFORMA nunca foi medido — MEDIDO a 05/09, com dono
 
 **As três entradas são do E33** — `PLAT-007` (casos de suporte), `PLAT-016`
