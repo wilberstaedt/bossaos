@@ -198,3 +198,11 @@ export {
   identidadeDeTrabalho, mostrarSegredo, podeFicarAtrasDoPlano, sessaoViva,
   type AmbitoDeSuporte, type EstadoDaSessao, type SegredoVisivel,
 } from './plataforma.ts';
+
+export {
+  ESTADOS_DO_PACOTE, NUNCA_SOBE, arvoreLimpa, conferirImportacao,
+  degrauPodeSubir, etapasPorValidar, podeDeclararRpo, podeSubir,
+  versaoQueResponde,
+  type AvisoDeImportacao, type Degrau, type EstadoDaEtapa, type EstadoDoPacote,
+  type LeituraDaVersao, type LinhaDeImportacao,
+} from './implantacao.ts';

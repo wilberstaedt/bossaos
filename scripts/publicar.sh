@@ -39,8 +39,39 @@
 #
 # Enquanto qualquer destas faltar, este script pára num portão em vez de
 # publicar meia coisa — que é o que se pretende.
+# ── O QUE O E35 ACRESCENTOU A ESTE FICHEIRO — e o que NÃO mexeu ─────────────
+#
+# Este guião é do sénior e correu a sério. Eu reescrevi-o por inteiro à primeira
+# tentativa e **apaguei a caixa, o compose, os papéis e a migração** — deixando
+# uma demonstração de portões que não publicava nada. É o defeito do E30 outra
+# vez (escrever por cima sem ler é escrita destrutiva disfarçada de nova), e
+# desta vez sobre o ficheiro que põe o produto no ar.
+#
+# O que ficou intacto: a caixa, a porta 8140, o `--env-file`, os papéis, a
+# migração, o `git archive`, a marca da versão e as duas metades do portão 4.
+#
+# O que foi acrescentado, e porquê (régua `docs/reviews/ALVO-E35.md`):
+#
+#   · **Preparar não é publicar.** Sem `--autorizado-por`, corre os portões
+#     LOCAIS, mostra o pacote e pára ANTES de tocar no servidor.
+#   · **O portão 1 passa a NOMEAR as etapas.** O `AGUARDA=0` conta só as que
+#     dizem «implementado aguardando validação» — uma etapa `planejado` com
+#     código na árvore passava. Hoje passaria: o E34 tem trabalho feito e diz
+#     `planejado`. Os dois ficam, e o novo é mais apertado.
+#   · **O pacote é inspeccionado ANTES de subir** (`podeSubir`): nenhum `.env`,
+#     `node_modules`, `.next` ou resultado de inspecção vai para o ar.
+#   · **«Não sei» deixa de ser «errado»** no portão 4 (`versaoQueResponde`): uma
+#     etiqueta ilegível manda ver o Docker, não reconstruir.
+#
+# A árvore suja **não** é portão, de propósito: são dois agentes na mesma árvore
+# e o `git archive` já garante o que sobe. Fica como aviso, e o aviso diz o que
+# NÃO vai.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+
+# `--` para a leitura das decisões puras, que vivem no domínio e não aqui: uma
+# decisão em `bash` não se testa, testa-se o guião inteiro com rede e servidor.
+decidir() { node --experimental-strip-types -e "$1" "${@:2}"; }
 
 VPS="root@31.220.111.39"
 CHAVE="$HOME/.deploys/ilora/ilora_vps_ed25519"
@@ -71,6 +102,22 @@ DOMINIO="bossaos.mwdeveloper.tech"
 
 erro() { echo "ERRO: $1" >&2; exit 1; }
 
+# ── Preparar não é publicar ─────────────────────────────────────────────────
+# A autorização é explícita, de quem manda, e fica registada **com as palavras
+# dele** — não um `sim`. Há história disto neste vault: um runbook dizia «nunca
+# fazer deploy neste motor», o dono autorizou por escrito, o motor publicou, e o
+# runbook ficou três horas a mentir.
+AUTORIZADO_POR=""
+REF_ARG=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --autorizado-por) AUTORIZADO_POR="${2:-}"; shift 2 ;;
+    --commit)         REF_ARG="${2:-}"; shift 2 ;;
+    -*) erro "argumento desconhecido: $1" ;;
+    *)  REF_ARG="$1"; shift ;;
+  esac
+done
+
 # ── PORTÃO 1: não se publica o que não foi assinado ─────────────────────────
 # O portão que só este projecto pode ter, e o mais importante dos quatro. O
 # motor inteiro existe para que nada passe sem segunda assinatura; publicar por
@@ -79,8 +126,49 @@ erro() { echo "ERRO: $1" >&2; exit 1; }
 # ficava com dois valores - o portao recusou publicar dizendo "ha 0\n0 etapas
 # por validar". Falhou FECHADO, que e a direccao certa para um defeito num
 # portao, e por isso e que so o descobri a tentar publicar e nao em producao.
-AGUARDA="$(bash scripts/estado.sh 2>/dev/null | tr ' ' '\n' | grep -oE '^AGUARDA=[0-9]+' | cut -d= -f2)"
-[ "${AGUARDA:-1}" = "0" ] || erro "há ${AGUARDA:-?} etapa(s) por validar — assina antes de publicar"
+#
+# ── E O MEDIDOR MORRE EXACTAMENTE QUANDO ISTO ESTIVER PRONTO ────────────────
+#
+# Achado a 06/09, no controlo do E35. O `estado.sh` deriva a etapa actual como
+# «a primeira que não está validada» e **rebenta se não houver nenhuma**:
+#
+#     ERRO: nao consegui derivar a etapa actual de docs/progress/ETAPAS.md
+#
+# Ou seja: com o projecto TODO validado — a única situação em que este portão
+# devia abrir — o `estado.sh` sai a 1, o `pipefail` mata a atribuição, e o
+# `set -e` mata o guião **antes da primeira linha de saída**. Zero texto,
+# código 1: indistinguível de um portão a recusar, e sem dizer qual.
+#
+# Não mexo no medidor, que é partilhado e não é meu. Mexo aqui: a falha dele
+# passa a ser NÃO MEDI, e o portão fica pelo `POR_VALIDAR`, que lê a matriz
+# directamente e não precisa de derivar etapa nenhuma.
+AGUARDA="$( { bash scripts/estado.sh 2>/dev/null || true; } | tr ' ' '\n' | grep -oE '^AGUARDA=[0-9]+' | cut -d= -f2 || true)"
+if [ -z "${AGUARDA:-}" ]; then
+  echo "==> NÃO MEDI o contador de etapas em espera: o medidor não respondeu."
+  echo "    O portão continua, pela leitura directa da matriz."
+else
+  [ "$AGUARDA" = "0" ] || erro "há $AGUARDA etapa(s) por validar — assina antes de publicar"
+fi
+
+# ── E o AGUARDA sozinho não chega ───────────────────────────────────────────
+# Conta só quem diz «implementado aguardando validação». Uma etapa `planejado`
+# com código já escrito na árvore passa por aqui sem ser vista — e não é
+# hipótese: a 06/09 o E34 tinha quatro correcções feitas e dizia `planejado`.
+#
+# `etapasPorValidar` lê a matriz e NOMEIA quem falta. Nomear importa: «há 2 por
+# validar» manda procurar, «E34 E35» manda assinar.
+POR_VALIDAR="$(decidir '
+import { etapasPorValidar } from "./packages/domain/src/implantacao.ts";
+import { readFileSync } from "node:fs";
+const matriz = [];
+for (const linha of readFileSync("docs/progress/ETAPAS.md", "utf8").split("\n")) {
+  const m = /^\|\s*(E\d{2})\s*\|([^|]*)\|/.exec(linha);
+  if (m) matriz.push({ etapa: m[1], estado: m[2].replace(/[*_`]/g, "").trim() });
+}
+process.stdout.write(etapasPorValidar(matriz).join(" "));
+')"
+[ -z "$POR_VALIDAR" ] \
+  || erro "por validar na matriz: $POR_VALIDAR — o que iria para o ar inclui código que ninguém reviu"
 
 # ── PORTÃO 2: publica-se um COMMIT, não a árvore ────────────────────────────
 # A primeira versão exigia árvore limpa e depois fazia `rsync ./`, que envia o
@@ -93,10 +181,51 @@ AGUARDA="$(bash scripts/estado.sh 2>/dev/null | tr ' ' '\n' | grep -oE '^AGUARDA
 # que exijo ao produto — garantia por impossibilidade, não por regra.
 #
 # Por omissão, o último commit; ou o que for passado no primeiro argumento.
-REF="${1:-HEAD}"
+# (O `AUTORIZADO_POR` é lido no topo, antes dos portões, para não haver caminho
+# nenhum em que se chegue ao servidor sem passar por esta variável.)
+REF="${REF_ARG:-HEAD}"
 git rev-parse --verify --quiet "$REF^{commit}" >/dev/null || erro "commit inválido: $REF"
 VERSAO="$(git rev-parse --short "$REF")"
 echo "==> a publicar $VERSAO em $DOMINIO"
+
+# A árvore suja é AVISO e não portão: dois agentes mexem nesta árvore e o
+# `git archive` já garante que o disco não vai. O aviso existe para quem publica
+# saber que o que tem aberto no editor **não** está no que vai para o ar.
+SUJOS="$(git status --porcelain | grep -c . || true)"
+[ "${SUJOS:-0}" = "0" ] \
+  || echo "    (aviso: ${SUJOS} ficheiro(s) por commitar NÃO vão neste pacote)"
+
+# ── O pacote inspecciona-se ANTES de subir, e é o MESMO que sobe ────────────
+# A primeira versão inspeccionava um tar e enviava outro por `git archive |
+# ssh`: dois artefactos, e a inspecção media o que não ia. Agora é um ficheiro
+# só, lido e depois enviado.
+PACOTE="$(mktemp -d)/bossaos-$VERSAO.tar"
+git archive --format=tar -o "$PACOTE" "$REF"
+MAUS="$(tar -tf "$PACOTE" | decidir '
+import { podeSubir } from "./packages/domain/src/implantacao.ts";
+let d = "";
+process.stdin.on("data", (c) => { d += c; });
+process.stdin.on("end", () => {
+  process.stdout.write(d.split("\n").map((x) => x.trim())
+    .filter((x) => x && !podeSubir(x)).slice(0, 5).join(" "));
+});
+')"
+[ -z "$MAUS" ] || erro "o pacote leva ficheiros que nunca sobem: $MAUS"
+echo "    pacote verificado: $(tar -tf "$PACOTE" | grep -c .) ficheiros, nenhum segredo"
+
+# ── E É AQUI QUE SE PÁRA, se ninguém autorizou ──────────────────────────────
+# Tudo o que vem a seguir toca no servidor. Os portões locais já correram: o que
+# falta é a única coisa que um guião não pode dar a si próprio.
+if [ -z "$AUTORIZADO_POR" ]; then
+  echo
+  echo "    Portões locais abertos. Pacote pronto em:"
+  echo "      $PACOTE"
+  echo
+  echo "    MAS NÃO SE PUBLICA: falta a autorização. Preparar não é publicar."
+  echo "      scripts/publicar.sh $REF --autorizado-por \"<nome>, <data>: «<as palavras dele>»\""
+  exit 0
+fi
+echo "    AUTORIZADO POR: $AUTORIZADO_POR"
 
 # ── PORTÃO 3: os segredos vivem no servidor ─────────────────────────────────
 # Nunca sobem daqui. Sem eles o deploy pára, em vez de arrancar com um exemplo e
@@ -111,7 +240,7 @@ $SSH "[ -f $RAIZ/.env.prod ]" \
 # a diferença que quero medir.
 # O envio: o commit inteiro, e nada do disco. Sem `--delete` em lado nenhum e
 # sem tocar no `.env.prod`, que vive lá e nunca sobe daqui.
-git archive --format=tar "$REF" | $SSH "mkdir -p $RAIZ && tar -x -C $RAIZ"
+$SSH "mkdir -p $RAIZ && tar -x -C $RAIZ" < "$PACOTE"
 # A marca da versão, escrita DEPOIS de extrair e ANTES de construir. Se o build
 # não pegar, o contentor antigo continua a servir a marca antiga — que é
 # precisamente a diferença que o portão 4 mede.
@@ -173,7 +302,21 @@ VIVO="$($SSH "curl -sf http://localhost:$PORTA/api/health" || true)"
 # O que prova: o contentor no ar foi construído deste commit. Com o /api/health
 # acima, que prova que ele serve, são as duas metades da pergunta.
 NO_AR="$($SSH "docker inspect --format '{{ index .Config.Labels \"bossaos.versao\" }}' bossaos_web" 2>/dev/null | tr -d '\r' || true)"
-[ "$NO_AR" = "$VERSAO" ] \
-  || erro "no ar está '${NO_AR:-nada}' e eu construí '$VERSAO' — o build não pegou"
+# ── E «não sei» NÃO é «errado» ──────────────────────────────────────────────
+# A versão anterior colapsava os dois: uma etiqueta ilegível dava
+# "no ar está 'nada'", que se lê como build falhado. São duas coisas e mandam
+# fazer coisas diferentes — uma manda reconstruir, a outra manda ver porque é
+# que o Docker não respondeu. Colapsá-las faz alguém reconstruir durante uma
+# hora um build que estava certo.
+LEITURA="$(decidir '
+import { versaoQueResponde } from "./packages/domain/src/implantacao.ts";
+const r = versaoQueResponde(process.argv[1] || null, process.argv[2]);
+console.log(!r.sabe ? "NAO_SEI" : r.coincide ? "COINCIDE" : "DIFERENTE:" + r.noAr);
+' "$NO_AR" "$VERSAO")"
+case "$LEITURA" in
+  COINCIDE)    : ;;
+  DIFERENTE:*) erro "no ar está '${LEITURA#DIFERENTE:}' e eu construí '$VERSAO' — o build não pegou" ;;
+  *)           erro "NÃO MEDI a etiqueta bossaos.versao de bossaos_web — isto NÃO é «versão errada», é não saber. Ver o Docker no servidor." ;;
+esac
 
 echo "==> no ar e confirmado: $VERSAO em https://$DOMINIO"

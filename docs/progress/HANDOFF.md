@@ -1,7 +1,14 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E33 — Administração da plataforma, suporte e governança (**19 telas**).
-**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** E32 assinado a 06/09 em `e13b318`. Contrato `plataforma-e-suporte.md` e régua `ALVO-E33.md` escritos **antes** do código.
+**Etapa atual:** E34 — do sénior, aberta em `20dd194`. É a primeira por validar, e é assim que o medidor a deriva. **Não é minha.**
+**Estado:** **E35 IMPLEMENTADO, AGUARDANDO VALIDAÇÃO** — pacote de implantação e piloto, meu, em `docs/progress/E35.md`. E33 assinado a 06/09 em `e953a87`, e o atlas fechou **396/396**.
+
+> **Duas etapas em voo ao mesmo tempo, com donos diferentes — a primeira vez no
+> projecto.** O `estado.sh` deriva a etapa actual como «a primeira que não está
+> validada», e por isso diz E34: está certo pela definição dele e não consegue
+> dizer que o E35 avançou noutra mão. Fica escrito aqui em vez de se ajustar o
+> medidor à resposta — quem chega lê as duas linhas e não vai refazer nem o E34
+> nem o E35.
 
 > ## ⚠ AO CHEGAR AOS 100%: PARAR E LER `docs/RV100.md`
 >
@@ -17,6 +24,69 @@
 > `validar-gatilho-rv100.sh` apanhou-o. É a minha própria regra a apanhar-me —
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
+
+## E35 — pacote de implantação e piloto (MEU, aguarda validação)
+
+**Contrato** `docs/architecture/implantacao-e-piloto.md` e **régua**
+`docs/reviews/ALVO-E35.md`, os dois escritos antes do código. **Zero telas** — é
+a única etapa do projecto sem uma tela nova.
+
+**O que muda:** todas as outras construíram o produto; esta constrói o caminho
+até ele estar a funcionar numa casa. E é a primeira cujo contrato não foi escrito
+por dedução — o sénior escreveu-o **depois de publicar o staging com nove
+paragens**. Não há gatilho na base que impeça uma publicação errada: o que há são
+**portões que recusam**, e um portão que ninguém prova a recusar é uma linha de
+log.
+
+**Os quatro portões** (`scripts/publicar.sh`, decisões em
+`packages/domain/src/implantacao.ts` porque uma decisão em `bash` não se testa):
+assinatura (`etapasPorValidar`), commit (`arvoreLimpa` + `git archive`, e o que
+sobe existe em git porque não há outra maneira de lá chegar), segredos
+(`podeSubir`), versão (`versaoQueResponde`, lida da etiqueta `bossaos.versao`
+**pelo Docker e não através do produto**). **Preparar não é publicar:** sem
+`--autorizado-por` prepara, prova e PARA, e a autorização vai nas palavras de
+quem manda.
+
+**Ensaio de restauração medido** a 06/09 06:19 UTC: **0,56 s**, com amostra
+verificada (produtos=5, pedidos=9, movimentos=7, 5 gatilhos de stock repostos) —
+e o guião **recusa** emitir RPO ou RTO a partir daí.
+
+**Importação a seco que não abre ligação nenhuma**, com a lista de conferência a
+sair antes de a casa aceitar, e o alergénio vazio a virar aviso `DESCONHECIDO` e
+nunca «não contém».
+
+**`docs/releases/pilot.md` com três estados** — feito, pendente, **não medido** —
+e sem uma única célula em branco, medido com sonda negativa.
+
+**⚠ O achado que pesa mais do que a etapa: reescrevi por cima do `publicar.sh`
+e apaguei-o.** O ficheiro é do sénior, tinha corrido a sério, e levava a caixa, a
+chave, a porta verificada à mão, o `--env-file .env.prod`, os papéis, a migração
+e as duas metades do portão 4. O que escrevi era uma demonstração de portões que
+**não publicava nada**, e só dei por isso a ler o `git diff` antes de commitar.
+Original **reposto do git**, portões acrescentados **dentro** dele. Três coisas
+minhas caíram por não caberem, e a que interessa é esta: **a árvore limpa como
+portão estava errada** — o sénior não a exige de propósito (dois agentes na mesma
+árvore), e a garantia é o `git archive`, não a regra. Ficou como aviso. A
+etiqueta que eu tinha inventado não existe: é `bossaos.versao` em `bossaos_web`.
+
+**E o medidor morre exactamente quando isto estiver pronto.** O `estado.sh`
+rebenta se não houver etapa por validar; com `pipefail` e `set -e`, matava o
+`publicar.sh` **antes da primeira linha de saída** — zero texto, código 1,
+indistinguível de um portão a recusar. Apanhou-o a casa de mentira do controlo,
+que tem as 36 validadas. Não mexi no medidor: a falha dele passa a **NÃO MEDI** e
+o portão fica pela leitura directa da matriz.
+
+**Provas (LOCAIS):** `packages/domain` **421 casos, 0 falhas** ·
+`scripts/provar-implantacao.sh` **0 falhas** (cenário 0 que TEM de passar + os
+quatro portões violados **à vez** + 4 controlos) · `ensaiar-restauracao.sh` **0
+falhas** · detalhe e achados em `docs/progress/E35.md`.
+
+**Pendências declaradas:** não há servidor de piloto (o portão 4 nunca leu uma
+imagem a sério), não há casa piloto (nenhuma pessoa testada nos seis guiões de
+formação), e não há RPO nem RTO porque não há calendário de cópias.
+
+
+## E33 — assinado a 06/09 em `e953a87` (histórico)
 
 **O que muda:** todas as outras deram poder a quem trabalha na casa. **Esta dá-o
 a quem vende o sistema** — a nós. Até aqui protegemos o restaurante de enganos e
