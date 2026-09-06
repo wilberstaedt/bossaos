@@ -25,8 +25,26 @@ ok()   { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 
 varrer() {  # <directorio-raiz> -> imprime "MORTO <guiao> <ficheiro> <texto>" e "VIVO"
   python3 - "$1" <<'PYV'
-import re, glob, io, os, sys, ast
+import re, glob, io, os, sys, ast, subprocess
 raiz = sys.argv[1]
+# ── A ancora ausente tem DUAS causas, e o diagnostico errado cimenta o defeito ─
+#
+# 06/09, 17h. Uma corrida do JR foi morta a meio e o `trap` que restaura nao
+# chegou a correr: o `dispositivos.ts` ficou com o defeito PLANTADO la dentro.
+# Esta guarda ter-lhe-ia chamado «plante em letra morta» — e quem lesse isso iria
+# consertar o PLANTE para casar com o texto plantado, cimentando o defeito no
+# produto para sempre. Detectava a condicao e nomeava-a ao contrario.
+#
+# Distinguir e' simples e nao depende de saber ler o texto de substituicao (so 20
+# dos blocos usam `.replace(` legivel): se a ancora sumiu E o ficheiro esta SUJO
+# no git, alguem deixou um plante aplicado. Se sumiu com o ficheiro limpo, o
+# plante e' que morreu.
+try:
+    _st = subprocess.run(['git','-C',raiz,'status','--porcelain'],
+                         capture_output=True, text=True, timeout=30)
+    sujos = set(l[3:].strip() for l in _st.stdout.splitlines() if len(l) > 3)
+except Exception:
+    sujos = set()
 # ── E lê as DUAS formas de invocar um plante ──────────────────────────────
 # A primeira versão só conhecia `python3 - <<'TAG'`. Media 172 blocos e dizia-o
 # como se fossem todos — e havia **162 noutra forma**, `plantar <<'TAG'`, que ela
@@ -103,13 +121,18 @@ for g in sorted(glob.glob(os.path.join(raiz, 'scripts/provar-*.sh'))):
         f = os.path.join(raiz, a.group(1))
         if not os.path.exists(f):
             print('MORTO', os.path.basename(g), a.group(1), '(ficheiro nao existe)'); continue
-        print(('VIVO' if txt in io.open(f, encoding='utf-8').read() else 'MORTO'),
-              os.path.basename(g), a.group(1), txt[:56].replace('\n', '\\n'))
+        if txt in io.open(f, encoding='utf-8').read():
+            estado = 'VIVO'
+        elif a.group(1) in sujos:
+            estado = 'APLICADO'
+        else:
+            estado = 'MORTO'
+        print(estado, os.path.basename(g), a.group(1), txt[:56].replace('\n', '\\n'))
 PYV
 }
 
 # ── O detector prova-se antes de julgar, nos dois sentidos ─────────────────
-S=$(mktemp -d); trap 'rm -rf "$S"' EXIT
+S=$(mktemp -d); G=$(mktemp -d); trap 'rm -rf "$S" "$G"' EXIT
 mkdir -p "$S/scripts" "$S/alvo"
 printf 'a frase que existe\nsegunda linha\n' > "$S/alvo/f.ts"
 cat > "$S/scripts/provar-sonda.sh" <<'SONDA'
@@ -144,6 +167,39 @@ else
   echo; echo "  $falhas FALHA(S)."; exit "$falhas"
 fi
 
+# ── E a sonda das TRES respostas, num repositorio de verdade ───────────────
+#
+# O ramo APLICADO nasceu a 06/09 e um ramo que nunca foi visto a acender nao vale
+# nada. Esta sonda e' um repositorio git de brincar com os tres casos, e o
+# TERCEIRO e' o que importa: prova que o ramo novo nao ENGOLE o diagnostico
+# velho. Sem ele, um detector que dissesse APLICADO a tudo passava aqui.
+mkdir -p "$G/scripts" "$G/alvo"
+cat > "$G/scripts/provar-sonda.sh" <<'SONDAG'
+plantar <<'PYG' || true
+p = 'alvo/f.ts'
+antigo = "a frase que existe"
+PYG
+SONDAG
+printf 'a frase que existe\n' > "$G/alvo/f.ts"
+if git -C "$G" init -q >/dev/null 2>&1 \
+   && git -C "$G" add -A >/dev/null 2>&1 \
+   && git -C "$G" -c user.email=s@s -c user.name=s commit -qm base >/dev/null 2>&1; then
+  r1=$(varrer "$G" | awk '{print $1}')
+  printf 'a frase PLANTADA\n' > "$G/alvo/f.ts"
+  r2=$(varrer "$G" | awk '{print $1}')
+  git -C "$G" add -A >/dev/null 2>&1
+  git -C "$G" -c user.email=s@s -c user.name=s commit -qm refactor >/dev/null 2>&1
+  r3=$(varrer "$G" | awk '{print $1}')
+  if [ "$r1" = VIVO ] && [ "$r2" = APLICADO ] && [ "$r3" = MORTO ]; then
+    ok "as tres respostas distinguem-se: pega / deixado aplicado / letra morta"
+  else
+    erro "as tres respostas confundem-se: vi $r1 / $r2 / $r3 e deviam ser VIVO / APLICADO / MORTO"
+    echo; echo "  $falhas FALHA(S)."; exit "$falhas"
+  fi
+else
+  printf '  NAO MEDI a sonda das tres respostas — nao consegui criar o repositorio de sonda\n'
+fi
+
 echo
 echo "Plantes dos guiões de prova"
 saida=$(varrer .)
@@ -158,6 +214,19 @@ if [ "${vivos:-0}" -lt 50 ]; then
 fi
 ok "$vivos plantes ainda pegam"
 [ "${ileg:-0}" -gt 0 ] && printf '  NAO MEDI %s bloco(s) noutra forma — nao concluo nada sobre eles\n' "$ileg"
+
+aplicados=$(printf '%s\n' "$saida" | grep -c '^APLICADO' || true)
+if [ "${aplicados:-0}" -gt 0 ]; then
+  erro "$aplicados PLANTE(S) APLICADO(S) NA ARVORE — o ficheiro tem o defeito lá dentro:"
+  printf '%s\n' "$saida" | grep '^APLICADO' | sed 's/^APLICADO /           /'
+  echo
+  echo "        Isto NAO e' um plante morto: e' um defeito por RESTAURAR. Uma"
+  echo "        corrida morta a meio nao da ao trap a hipotese de repor o"
+  echo "        ficheiro. Repoe-o (git checkout --) ANTES de commitar seja o que"
+  echo "        for — senao o defeito plantado vai no commit seguinte."
+else
+  ok "nenhum plante deixado aplicado na arvore"
+fi
 
 if [ "${mortos:-0}" -gt 0 ]; then
   erro "$mortos plante(s) em LETRA MORTA — o texto alvo já não existe:"
