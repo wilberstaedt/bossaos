@@ -1,7 +1,7 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E31 — Kiosk, terminais e impressão (**11 telas**).
-**Estado:** **IMPLEMENTADO, AGUARDANDO VALIDAÇÃO.** E30 assinado a 06/09 em `1dc90bc` (`docs/reviews/E30.md`), medido em duas voltas por causa da máquina. Contrato `kiosk-e-impressao.md` e régua `ALVO-E31.md` escritos **antes** do código.
+**Etapa atual:** E32 — Integrações, API e cobrança do SaaS (**13 telas**).
+**Estado:** **EM CURSO.** E31 assinado a 06/09 em `90d4fe0` (`docs/reviews/E31.md`). Contrato `integracoes-e-cobranca-do-saas.md` e régua `ALVO-E32.md` escritos **antes** do código.
 
 
 > ## ⚠ AO CHEGAR AOS 100%: PARAR E LER `docs/RV100.md`
