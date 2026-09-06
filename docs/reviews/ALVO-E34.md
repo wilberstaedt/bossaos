@@ -124,7 +124,34 @@ alternativa viva), **2 que NÃO se apagam** porque são capacidade em falta
 a auditoria é escrita e ninguém a lê), e **2 por ler** (permissões, que não se
 apagam por estatística de uso).
 
-### 7. Código de verificação no pacote publicado
+### 7. Código de verificação no pacote publicado — TENTEI MEDIR E NÃO CONSEGUI
+
+**06/09, 03h50.** Agora que há um pacote publicado no VPS, tentei responder à
+dívida com medição em vez de suspeita: procurei os nomes das funções
+só-de-verificação dentro do `.next/server` servido.
+
+Deu **cinco zeros** — `sobrepoe`, `sindromes`, `penalidadePorMascara`,
+`descodificar`, `identificadorAdivinhavel` — e eu ia concluir que o empacotador
+as remove.
+
+**O controlo positivo desmontou isso.** Procurei três funções que **têm** de
+estar lá, e o `avisoDeSeguranca` — chamado pela tela pública dos alergénios —
+deu **zero também**. O build de produção **minifica e renomeia**: procurar nomes
+num pacote minificado não mede presença.
+
+> **Os cinco zeros não são «não está lá»: são «não medi».** E só o soube porque
+> pus um controlo positivo — sem ele, teria fechado a dívida com uma conclusão
+> confortável e falsa. É a quinta vez nesta sessão que um zero meu queria dizer
+> outra coisa.
+
+**A dívida fica aberta, com o método já descartado escrito.** Quem lhe pegar a
+seguir não precisa de repetir o meu caminho: para responder a isto é preciso
+olhar para o grafo de importações do empacotador, ou marcar as funções de
+verificação e ver se o marcador sobrevive — não procurar nomes no resultado.
+
+*O que a dívida dizia quando foi aberta:*
+
+### 7-bis. Código de verificação no pacote publicado
 
 As funções do `qr.ts` e o `sobrepoe` existem para **verificar** o produto, não
 para o servir. Não é defeito; é peso num pacote que se publica.
