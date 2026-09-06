@@ -919,3 +919,61 @@ inventei uma contradição que não existia — «a suite falha à mão mas o gu
 corre passou» — e ainda lhe dei uma hipótese razoável. Uma explicação plausível
 para um facto que eu próprio fabriquei é a coisa mais difícil de desfazer,
 porque ela **soa** a trabalho bem feito.
+
+## O contorno que traz a asserção que o mata — 06/09
+
+O JR anotou duas vezes a mesma coisa: um valor de que o caminho precisa e que
+**nenhuma superfície entrega** — o `organizationId` na J14, o `recibo_publico` na
+J08. Duas ocorrências fazem uma classe, e fui medir a população em vez de a
+coleccionar de duas em duas.
+
+**São sete as leituras directas à base em `provas/jornada.test.ts`, e a
+classificação é limpa:**
+
+| | quantas | o que são |
+| --- | --- | --- |
+| verificação de invariante | 4 | a organização não existir antes; a caixa não fechar duas vezes; os reembolsos; o registo de auditoria da J15 |
+| diagnóstico no ramo de falha | 2 | lêem a auditoria para **dizer o motivo** quando a publicação bloqueia, em vez de o adivinhar |
+| **contorno de lacuna do produto** | **1** | o `organizationId`, porque nenhum ecrã o mostra |
+
+O `recibo_publico` nem contorno tem: o ecrã do recibo diz `numero` ou
+`nao-e-documento`, e a prova regista **qual dos dois viu** em vez de afirmar um
+número que não existe. É lacuna declarada, não andaime.
+
+**Uma só em sete. A classe existe e não é epidemia** — e isso só se soube por se
+ter contado, em vez de se ter concluído das duas que apareceram.
+
+### A técnica, que é o que fica
+
+No único contorno, ele escreveu isto a seguir:
+
+```
+assert.ok(!ecra.texto.includes(id),
+  'o ecrã já mostra o identificador da organização — este passo deixou de fazer sentido');
+```
+
+**O contorno traz a asserção que o mata.** No dia em que o produto expuser o
+identificador, o passo **falha** — e a falha diz que o andaime pode ser deitado
+abaixo. Sem isto, um contorno sobrevive à razão que o criou: a lacuna fecha, o
+atalho fica, e ninguém volta a olhar porque estava verde.
+
+É a mesma doença da lista de excepções que ninguém revisita, na forma de código
+em vez de configuração. E a cura tem a mesma forma: **a declaração tem de caducar
+sozinha.**
+
+**A regra:** todo o andaime que existe por falta de uma superfície do produto tem
+de carregar a asserção que o apaga. Um `TODO` não serve — não corre. Um
+comentário não serve — não corre. Só serve uma asserção que **fica vermelha**
+quando a razão do andaime desaparecer.
+
+### E porque é que hoje NÃO fiz disto uma guarda
+
+Seria natural pôr aqui um contador com tecto, como fiz nas suites sem guião. Não
+pus, e a razão é a mesma que faz uma guarda valer: **o ficheiro está a ser escrito
+neste momento** — a J12 e a J15 estão a nascer. Um tecto sobre um ficheiro em
+construção fica vermelho a cada passo legítimo, e uma guarda que grita sem razão
+gasta o crédito de que precisa quando gritar com razão.
+
+Fica para quando as oito jornadas estiverem escritas. **Isto é adiamento
+declarado, não esquecimento** — que é a diferença entre uma pendência e uma
+dívida escondida.
