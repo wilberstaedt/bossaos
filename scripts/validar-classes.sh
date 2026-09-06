@@ -111,12 +111,45 @@ echo "2. CONTROLO NEGATIVO — uma classe inventada"
 ALVO="apps/web/app/[idioma]/app/[orgSlug]/catalogo/page.tsx"
 COPIA=$(mktemp); cp "$ALVO" "$COPIA"
 trap 'cp "$COPIA" "$ALVO"; rm -f "$COPIA"' EXIT INT TERM
-python3 - "$ALVO" <<'PY'
+
+# ── O NOME É NOVO EM CADA CORRIDA, e isso não é enfeite ───────────────────
+#
+# A 06/09 um plante do controlo 3 ficou COMMITADO na árvore — a corrida anterior
+# morreu antes do `trap`. Consequência dupla, e a segunda é a que interessa:
+#
+#   1. codigo falso em produção;
+#   2. **o controlo 2 deixou de medir**. Ele substitui `className="bo-pagina"`,
+#      e o resíduo tinha comido essa âncora. O plante não aplicou, o `grep` não
+#      achou nada, e a guarda disse «não mede nada» sem dizer porquê.
+#
+# Com um nome novo por corrida, um resíduo nunca se confunde com o plante desta
+# — e a ÂNCORA verifica-se antes, que é o que faltava.
+MARCA="$$-$(date +%s)"
+
+# ── E o plante prova que aplicou ──────────────────────────────────────────
+#
+# É o `plantar()` dos guiões do E31 e do E32, trazido para aqui: se a âncora
+# mudou — ou já foi comida por um resíduo —, isto diz-o em vez de medir o
+# vazio. Um controlo que não aplicou e reporta é pior do que um que falha.
+plantar_classe() {
+  local antes; antes=$(md5 -q "$ALVO" 2>/dev/null || md5sum "$ALVO" | cut -d' ' -f1)
+  python3 - "$ALVO" "$1" "$2" <<'PY'
 import pathlib, sys
 p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding='utf-8')
-p.write_text(s.replace('className="bo-pagina"', 'className="bo-pagina bo-classe-que-nao-existe"', 1), encoding='utf-8')
+p.write_text(s.replace('className="bo-pagina"', sys.argv[2].replace('@@', sys.argv[3]), 1),
+             encoding='utf-8')
 PY
-if grep -q '^FALTA bo-classe-que-nao-existe' <<<"$(ler)"; then
+  local depois; depois=$(md5 -q "$ALVO" 2>/dev/null || md5sum "$ALVO" | cut -d' ' -f1)
+  if [[ "$antes" == "$depois" ]]; then
+    vermelho "o plante NAO APLICOU — a ancora className=\"bo-pagina\" nao esta em $ALVO"
+    echo "        Provavel residuo de uma corrida anterior morta a meio. Isto nao mediu nada."
+    return 1
+  fi
+}
+
+if ! plantar_classe 'className="bo-pagina bo-classe-que-nao-existe-@@"' "$MARCA"; then
+  :
+elif grep -q "^FALTA bo-classe-que-nao-existe-$MARCA" <<<"$(ler)"; then
   verde "apanhou a classe inventada"
 else
   vermelho "não apanhou uma classe que não existe — o guarda não mede nada"
