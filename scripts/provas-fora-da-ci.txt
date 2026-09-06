@@ -1,0 +1,75 @@
+# Provas que a CI NÃO corre, e porquê.
+#
+# Formato: <guião>: <motivo>. Uma linha por prova, o motivo escrito por
+# extenso — «uma excepção sem motivo é uma lista de coisas que alguém
+# desistiu de perceber».
+#
+# ── E esta lista TEM DE CADUCAR ────────────────────────────────────────────
+#
+# A `validar-provas-na-ci.sh` reprova uma entrada que já não precise de estar
+# aqui: um guião que não existe, ou um que a CI também corre por nome. Sem
+# isso, uma excepção posta num dia difícil fica para sempre e ninguém a vê.
+
+# Os agregadores de marco respondem a outra pergunta: nao e "as provas passam?"
+# mas "o marco AINDA esta aprovado?". Chamam provas que a CI ja corre, por isso
+# aqui so duplicariam o tempo pela mesma informacao. Correm-se a mao quando
+# alguem poe o marco em duvida — foi assim que o E21 foi reprovado e reaberto.
+provar-marco-e11.sh: agregador de marco; chama provas que a CI já corre, e a pergunta dele faz-se à mão
+provar-marco-e21.sh: agregador de marco; chama provas que a CI já corre, e a pergunta dele faz-se à mão
+provar-tudo.sh: é o corredor que chama os outros; correr aqui era correr tudo duas vezes
+provar-jornada.sh: já corre por nome no trabalho `base_longas`, que lhe dá a aplicação construída
+provar-catalogo.sh: já corre por nome no trabalho `base_longas`
+provar-acesso.sh: já corre por nome no trabalho `base_longas`
+provar-recuperacao-e-mfa.sh: já corre por nome no trabalho `base_mfa`, que precisa do serviço de correio
+
+# ── As de navegador ──────────────────────────────────────────────────────
+# O `pnpm inspeccionar` corre `playwright test` SEM `--project`, portanto colhe
+# tudo o que `inspeccao/` tem e as 22 provas de navegador já correm no trabalho
+# `navegador`. Estes guiões plantam defeitos e reconstroem a aplicação a cada
+# controlo; correrem aqui era a mesma medição pela terceira vez, e em série.
+provar-analitica-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-compras-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-crm-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-financeiro-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-fiscal-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-host-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-integracoes-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-kds-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-kiosk-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-levar-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-mensagens-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-pagamentos-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-plataforma-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-ponto-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-reserva-publica-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-reservas-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-sala-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-staff-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-stock-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-tema-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-tpv-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+provar-visitante-no-navegador.sh: os casos dela já correm no trabalho `navegador` pelo `pnpm inspeccionar`; este guião só acrescenta os plantes, que precisam de reconstruir a aplicação por controlo
+
+# ── As que a CI corre POR NOME, com a explicacao ao lado ─────────────────
+# Ficam de fora da descoberta para nao correrem duas vezes. E o motivo e
+# verificavel: a guarda exige que cada uma destas esteja MESMO nomeada no
+# workflow — no dia em que alguem tirar a linha, a excepcao caduca e acende.
+provar-descidas.sh: já corre por nome no workflow, com o comentário que explica o que ela mede
+provar-isolamento.sh: já corre por nome no workflow, com o comentário que explica o que ela mede
+provar-migracoes-do-zero.sh: já corre por nome no workflow, com o comentário que explica o que ela mede
+provar-onboarding.sh: já corre por nome no workflow, com o comentário que explica o que ela mede
+provar-planos.sh: já corre por nome no workflow, com o comentário que explica o que ela mede
+provar-plataforma.sh: já corre por nome no workflow, com o comentário que explica o que ela mede
+provar-prontidao.sh: já corre por nome no workflow, com o comentário que explica o que ela mede
+provar-publicacao.sh: já corre por nome no workflow, com o comentário que explica o que ela mede
+provar-separacao-de-credenciais.sh: já corre por nome no workflow, com o comentário que explica o que ela mede
+
+# ── UMA PROVA QUE NINGUEM CORRE, e nao e excepcao: e um achado ────────────
+#
+# `provas/reserva-publica.test.ts` nao e alcancada por guiao NENHUM — nem por
+# este ficheiro, nem pelos nomeados, nem a mao. O `provar-reserva-publica-no-
+# navegador.sh` corre o SPEC de inspeccao, que e outro ficheiro.
+#
+# Nao a ponho como excepcao porque nao ha motivo para a excepcionar: ha um
+# ficheiro de prova sem corredor. Fica escrito aqui e no HANDOFF ate alguem
+# decidir se lhe faz um guiao ou se ela ja nao serve.

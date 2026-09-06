@@ -471,6 +471,57 @@ jobs:
         # Onze controlos negativos.
         run: ./scripts/provar-publicacao.sh
 
+      # ── E as PROVAS descobrem-se, como as guardas ────────────────────────
+      #
+      # A secção acima nomeia treze guiões, e a pergunta certa não é sobre
+      # guiões: é sobre **ficheiros**. Medido a 06/09: os treze alcançam **12
+      # das 40** provas de `provas/*.test.ts`. **28 nunca corriam aqui.**
+      #
+      # E o pior é o cruzamento: dos sete ficheiros com os casos concorrentes
+      # que dão por provadas as famílias do saldo, das reservas e da
+      # deduplicação, **seis** estavam nos 28 — caixa, contas, pedidos,
+      # reservas, sala, sites. Os invariantes davam-se por provados e só se
+      # provavam quando alguém os corria à mão; um push que os partisse passava.
+      # Na mesma lista estavam as provas do dinheiro: caixa, contas, fiscal,
+      # financeiro, portas-do-dinheiro, adquirente, stock.
+      #
+      # A casa já tinha o remédio uma secção acima — `for g in
+      # scripts/validar-*.sh` — e foi por isso que as guardas escritas ontem
+      # entraram aqui sem ninguém tocar em lista nenhuma. É o mesmo aqui.
+      #
+      # As excepções vivem em `scripts/provas-fora-da-ci.txt`, **com motivo
+      # escrito**, e a `validar-provas-na-ci.sh` fá-las CADUCAR: uma entrada que
+      # nomeia um guião inexistente, ou que diz «corre por nome» sem estar
+      # nomeada, é uma falha. Uma excepção posta num dia difícil não fica para
+      # sempre.
+      - name: Provas (descobertas, não listadas)
+        run: |
+          set -uo pipefail
+          falhou=0
+          corridas=0
+          saltadas=0
+          for g in scripts/provar-*.sh; do
+            [ -x "$g" ] || continue
+            nome=$(basename "$g")
+            if motivo=$(grep -m1 "^${nome}:" scripts/provas-fora-da-ci.txt); then
+              echo "── ${motivo#*: }  ($nome)"
+              saltadas=$((saltadas + 1))
+              continue
+            fi
+            echo "::group::$g"
+            if ./"$g"; then echo "ok $nome"; else echo "FALHOU $nome"; falhou=1; fi
+            corridas=$((corridas + 1))
+            echo "::endgroup::"
+          done
+          # O mesmo piso que as guardas têm: se o glob não casar nada, o `for`
+          # corre uma vez com o padrão literal e isto saía verde sobre zero.
+          if [ "$corridas" -lt 20 ]; then
+            echo "VERDE SOBRE POPULACAO ZERO: so $corridas provas correram, esperadas 20 ou mais."
+            exit 1
+          fi
+          echo "$corridas provas corridas, $saltadas declaradas fora."
+          exit "$falhou"
+
       - name: Migrações aplicadas e sem desvio
         run: pnpm db:migrate:status
 

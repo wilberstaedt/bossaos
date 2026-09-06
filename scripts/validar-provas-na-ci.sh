@@ -25,25 +25,20 @@ falhas=0
 erro() { printf '  \033[31mERRO\033[0m %s\n' "$1"; falhas=$((falhas+1)); }
 ok()   { printf '  \033[32mok\033[0m   %s\n' "$1"; }
 
-# ── As excepcoes, com o motivo. Sem motivo nao e excepcao, e' esquecimento. ──
+# ── As excepcoes vivem num FICHEIRO, e a CI le o MESMO ──────────────────────
 #
-# Formato: nome do ficheiro, dois pontos, o porque. Uma linha.
-declare -a EXCEPCOES=(
-  "provar-tudo.sh:e o corredor de todas as outras; correr-se a si proprio na CI duplicava tudo"
-  # Os agregadores de marco respondem a outra pergunta: nao e "as provas passam?"
-  # mas "o marco AINDA esta aprovado?". Chamam provas que a CI ja corre, por isso
-  # aqui so duplicariam o tempo pela mesma informacao. Correm-se a mao quando
-  # alguem poe o marco em duvida - foi assim que o E21 foi reprovado e reaberto.
-  "provar-marco-e11.sh:agregador de marco; chama provas que a CI ja corre, e a pergunta dele faz-se a mao"
-  "provar-marco-e21.sh:agregador de marco; chama provas que a CI ja corre, e a pergunta dele faz-se a mao"
-)
+# Estavam aqui, num array desta guarda. E a CI nomeava as provas a mao noutro
+# sitio — duas listas com a mesma responsabilidade, e nenhuma sabia da outra.
+#
+# Agora ha uma so: `scripts/provas-fora-da-ci.txt`, lida por esta guarda e pelo
+# passo "Provas (descobertas, nao listadas)" do workflow. Uma excepcao que
+# alguem acrescente aqui muda o que a CI corre, e o contrario tambem — que e o
+# ponto de haver uma lista so.
+EXCEPCOES_FICH="scripts/provas-fora-da-ci.txt"
 
 motivo_da_excepcao() {
-  local alvo="$1" e
-  for e in "${EXCEPCOES[@]}"; do
-    [ "${e%%:*}" = "$alvo" ] && { echo "${e#*:}"; return 0; }
-  done
-  return 1
+  local alvo="$1"
+  grep -m1 "^${alvo}:" "$EXCEPCOES_FICH" 2>/dev/null | cut -d: -f2- | sed 's/^ *//'
 }
 
 echo "Toda a prova corre na CI, ou declara porque nao?"
@@ -112,7 +107,7 @@ for f in scripts/provar-*.sh; do
     na_ci=$((na_ci+1))
   elif cat=$(coberta_por_descoberta "$nome"); then
     descobertas=$((descobertas+1))
-  elif motivo=$(motivo_da_excepcao "$nome"); then
+  elif motivo=$(motivo_da_excepcao "$nome"); [ -n "$motivo" ]; then
     declaradas=$((declaradas+1))
     echo "  ── $nome fora da CI: $motivo"
   else
@@ -131,6 +126,47 @@ if printf '%s' "$conteudo_ci" | grep -qF "$inventado" || motivo_da_excepcao "$in
   erro "o controlo negativo nao vale: o nome inventado foi encontrado"
 else
   ok "controlo negativo: um nome nao declarado seria acusado"
+fi
+
+# ── A LISTA DE EXCEPCOES TEM DE CADUCAR ─────────────────────────────────────
+#
+# Uma excepcao posta num dia dificil fica para sempre se ninguem a revisitar, e
+# passa a ser um sitio onde se esconde uma prova que ninguem corre. Duas formas
+# de caducar, e as duas sao verificaveis:
+#
+#   1. nomeia um guiao que JA NAO EXISTE — o ficheiro foi apagado ou mudou de
+#      nome, e a linha ficou a proteger um fantasma;
+#   2. diz "corre por nome" e o workflow JA NAO A NOMEIA — a linha do `run:`
+#      saiu, e a prova deixou de correr em qualquer sitio sem ninguem dar por
+#      isso. Esta e a que interessa: e a forma de a excepcao passar de
+#      "corre noutro sitio" a "nao corre em lado nenhum" em silencio.
+echo
+echo "As excepcoes ainda precisam de existir?"
+caducadas=0
+while IFS= read -r linha; do
+  case "$linha" in ''|'#'*) continue;; esac
+  nome="${linha%%:*}"
+  motivo="${linha#*: }"
+  if [ ! -f "scripts/$nome" ]; then
+    erro "excepcao CADUCADA: scripts/$nome ja nao existe"
+    caducadas=$((caducadas+1))
+  elif printf '%s' "$motivo" | grep -qi 'corre por nome\|corre por nome no workflow\|ja corre por nome'; then
+    if ! grep -q "run: \./scripts/$nome" "$CI"; then
+      erro "excepcao CADUCADA: $nome diz que corre por nome, e o workflow ja nao a nomeia"
+      caducadas=$((caducadas+1))
+    fi
+  fi
+done < "$EXCEPCOES_FICH"
+[ "$caducadas" -eq 0 ] && ok "as $(grep -vc '^#\|^$' "$EXCEPCOES_FICH") excepcoes ainda se justificam"
+
+# ── E o controlo desta verificacao ──────────────────────────────────────────
+# Sem isto, um `grep` partido dizia "todas se justificam" para sempre.
+SONDA=$(mktemp); trap 'rm -f "$SONDA"' EXIT
+printf 'provar-que-nunca-existiu.sh: já corre por nome no workflow\n' > "$SONDA"
+if [ -f "scripts/provar-que-nunca-existiu.sh" ]; then
+  erro "controlo invalido: o guiao de mentira existe mesmo"
+else
+  ok "controlo: uma excepcao a um guiao inexistente seria acusada"
 fi
 
 [ "$falhas" -eq 0 ] && echo "  Nenhuma prova esquecida." || echo "  $falhas prova(s) sem decisao."

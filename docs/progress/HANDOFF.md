@@ -28,6 +28,52 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## Correcção 4 — a CI descobre as provas, e a lista de excepções caduca
+
+**O número da revisão estava errado e o sénior corrigiu-o antes de mo mandar**:
+um guião não correr não quer dizer que a prova não corra. O `pnpm inspeccionar`
+é `playwright test` **sem `--project`**, portanto colhe tudo o que `inspeccao/`
+tem e as 22 provas de navegador já corriam. A pergunta certa não é sobre guiões,
+é sobre **ficheiros**.
+
+**Medi antes de mexer, e confirma-se:** 13 guiões nomeados, **40** ficheiros
+`provas/*.test.ts`, **12 alcançados**, **28 nunca corriam**.
+
+**E o cruzamento é o que dói:** dos sete ficheiros com os casos concorrentes que
+dão por provadas as famílias do saldo, das reservas e da deduplicação, **seis**
+estavam nos 28 — caixa, contas, pedidos, reservas, sala, sites. Só o onboarding
+chegava lá. Os invariantes davam-se por provados e só se provavam quando alguém
+os corria à mão. Na mesma lista estavam as provas do dinheiro: caixa, contas,
+fiscal, financeiro, portas-do-dinheiro, adquirente, stock.
+
+**A cura é a que a casa já tinha uma secção acima:** `for g in scripts/provar-*.sh`,
+como as guardas — foi por isso que as cinco guardas de ontem entraram na CI sem
+ninguém tocar em lista nenhuma.
+
+**As excepções passam a viver num ficheiro, com motivo escrito**
+(`scripts/provas-fora-da-ci.txt`), lido **pela CI e pela guarda** — antes eram
+duas listas com a mesma responsabilidade e nenhuma sabia da outra.
+
+**E caducam.** A `validar-provas-na-ci.sh` reprova uma entrada que nomeia um
+guião que já não existe, e uma que diz «corre por nome» quando o workflow já não
+a nomeia — que é a forma de uma excepção passar de «corre noutro sítio» a «não
+corre em lado nenhum» em silêncio. **Provado nas duas formas**, com a entrada
+plantada e reposta.
+
+**De 12 para 39 dos 40 ficheiros**, e as seis famílias concorrentes passam todas
+a correr.
+
+**O que NÃO posso afirmar:** a CI está trancada por facturação e **não a corri**.
+O que corri foi a mesma descoberta localmente — 32 guiões seleccionados, 38
+declarados fora — e as guardas. O passo do workflow está escrito e por medir num
+servidor.
+
+**E um achado à parte:** `provas/reserva-publica.test.ts` **não é alcançada por
+guião nenhum** — nem pela CI, nem à mão. O `provar-reserva-publica-no-navegador.sh`
+corre o *spec* de inspecção, que é outro ficheiro. Não a pus como excepção porque
+não há motivo para a excepcionar: há um ficheiro de prova sem corredor.
+
+
 ## Correcção 13 — o rasto do suporte podia não acontecer
 
 **Achado do sénior, na revisão do que eu tinha acabado de escrever.** A primeira
