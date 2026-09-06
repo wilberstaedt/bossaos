@@ -3,6 +3,17 @@
 **Etapa atual:** E33 — Administração da plataforma, suporte e governança (**19 telas**).
 **Estado:** **EM CURSO.** E32 assinado a 06/09 em `e13b318` (`docs/reviews/E32.md`). Contrato `plataforma-e-suporte.md` e régua `ALVO-E33.md` escritos **antes** do código.
 
+> ## ⚠ AO CHEGAR AOS 100%: PARAR E LER `docs/RV100.md`
+>
+> Deixado pelo Matheus a 06/09 às 03h20. 841 linhas — reconstrução visual,
+> comercial e de usabilidade. O pedido foi **ler o documento inteiro antes de
+> tocar em código**. Tem diagnóstico obrigatório e um **portão de aprovação
+> humana** nas telas-mestre: há um ponto em que se para e se espera por ele.
+>
+> **E avisá-lo por push** — nos 100% e quando o RV100 arrancar. Pediu-o antes de
+> ir dormir. A ordem e o resto da fila estão em `docs/progress/DEPOIS-DOS-100.md`.
+
+
 **O que muda:** é a primeira etapa em que **um estranho fala com o sistema sem
 passar por tela nenhuma** — chega um pedido com uma chave, ou um webhook de fora,
 e o produto decide sozinho se acredita. E a primeira em que **o defeito rende
