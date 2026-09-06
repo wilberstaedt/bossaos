@@ -44,6 +44,16 @@ sites-publicos.spec.ts"
 # O tecto. Nao e decorativo: subir isto e um acto deliberado que fica no diff.
 TECTO=9
 
+# ── E o mesmo para as provas de no, que ate 06/09 nao tinham guarda nenhuma ──
+#
+# A correccao 4 pos a CI a descobrir os guioes por glob e a alcançar 39 das 40
+# provas de `provas/`. A que sobra e um ORFAO que o JR encontrou e documentou:
+# existe `provar-reserva-publica-no-navegador.sh`, que corre o SPEC, e ninguem
+# corre o `provas/reserva-publica.test.ts`. Um ficheiro de prova sem guiao nao da
+# verde nem vermelho - desaparece, tal e qual as suites de navegador.
+EM_DIVIDA_PROVAS="reserva-publica.test.ts"
+TECTO_PROVAS=1
+
 falhas=0
 erro() { echo "  FALHA $1"; falhas=$((falhas+1)); }
 naomedi() { echo "  NAO MEDI $1"; exit 2; }
@@ -125,10 +135,43 @@ if [ "$n_divida" -gt "$TECTO" ]; then
   erro "a divida subiu: $n_divida suites sem guiao, e o tecto e $TECTO. Subir o tecto e um acto deliberado - se e mesmo para subir, sobe-o a mao no ficheiro."
 fi
 
+# ── A mesma pergunta, na pasta das provas de no ─────────────────────────────
+p_cobertas=0; p_divida=0; p_sem=""
+for f in provas/*.test.ts; do
+  [ -e "$f" ] || continue
+  nome=$(basename "$f")
+  if coberto_por_algum "$nome"; then p_cobertas=$((p_cobertas+1)); continue; fi
+  case "$EM_DIVIDA_PROVAS" in
+    "$nome"|*"
+$nome"|"$nome
+"*|*"
+$nome
+"*) p_divida=$((p_divida+1)); p_sem="$p_sem $nome" ;;
+    *) erro "provas/$nome nao e nomeado por guiao nenhum E nao esta declarado. Um ficheiro de prova assim nao da verde nem vermelho: desaparece." ;;
+  esac
+done
+printf '%s\n' "$EM_DIVIDA_PROVAS" | while IFS= read -r nome; do
+  [ -n "$nome" ] || continue
+  if [ ! -f "provas/$nome" ]; then echo "  FALHA declaracao obsoleta: provas/$nome ja nao existe."
+  elif coberto_por_algum "$nome"; then echo "  FALHA declaracao obsoleta: provas/$nome ja tem guiao. Tira-o e BAIXA O TECTO."
+  fi
+done > /tmp/bossaos-provas-obsoletas.txt
+if [ -s /tmp/bossaos-provas-obsoletas.txt ]; then
+  cat /tmp/bossaos-provas-obsoletas.txt
+  falhas=$((falhas+$(wc -l < /tmp/bossaos-provas-obsoletas.txt | tr -d ' ')))
+fi
+rm -f /tmp/bossaos-provas-obsoletas.txt
+if [ "$p_divida" -gt "$TECTO_PROVAS" ]; then
+  erro "a divida das provas subiu: $p_divida sem guiao, e o tecto e $TECTO_PROVAS."
+fi
+
 echo "  ok    $n_cobertas nomeadas por algum guiao"
 echo "  ok    $n_desenho sem guiao POR DESENHO"
 echo "  DIVIDA $n_divida sem guiao (tecto $TECTO):$sem_guiao"
 echo "         estas falham sem aparecer em relatorio nenhum - foi assim que o divida-movel ficou partido em silencio"
+
+echo "  ok    $p_cobertas provas de no nomeadas por algum guiao"
+echo "  DIVIDA $p_divida prova(s) de no sem guiao (tecto $TECTO_PROVAS):$p_sem"
 
 if [ "$falhas" -gt 0 ]; then echo "FALHOU: $falhas"; exit 1; fi
 echo "OK"
