@@ -1502,3 +1502,128 @@ verdes: seo (com três controlos negativos), pilar offline, classes, três líng
 - **Termos e cookies** continuam sem rota, logo fora do sitemap.
 - **Nada de teclado nem leitor de ecrã** neste lote — o `<head>` não tem foco.
 - **Não medi a aparência.** Secção 7, e é do Matheus.
+
+---
+
+## L1j — o fecho da secção 6
+
+Instrumento: `inspeccao/rv100-fecho.spec.ts`, guião `scripts/provar-fecho-mkt.sh`.
+Evidência em `evidence/fecho/`, oito páginas × cinco larguras.
+
+### Dois achados já estavam fechados, e verifiquei-os por outro caminho
+
+| achado | estado real | como confirmei |
+| --- | --- | --- |
+| **RV100-014** — herói inglês | **fechado desde a L1b** | `git log -S`: mudou em `c33ad24`. Percorri os oito commits anteriores que tocam `en.json` e todos liam «Your whole restaurant» |
+| **RV100-008** — cinco de oito cabem em 900 px | **fechado desde a L1b** | medido nas oito: **zero** cabem. O `.bo-mkt__seccao` passou a `--bo-espaco-gigante` e a mudança é global, não da home |
+
+O respiro entre secções é **128** e o mínimo de **48** é o `padding` do próprio
+herói, não um intervalo entre secções — o §4.4 pede 80–128 entre secções e está
+cumprido.
+
+### RV100-012 — o coral passa a ter função
+
+| | antes | depois |
+| --- | ---: | ---: |
+| elementos com o acento (8 páginas, 1440) | **0** | **5** |
+| secções escuras | **0** | **5** |
+
+As cinco são as que usam `.bo-mkt__fecho`. As três obrigações foram calculadas
+**antes** de escrever o CSS, e a terceira é a que mata a versão ingénua:
+
+```
+coral sobre #102E35 ............ 4,71:1  passa como texto      (>= 4,5)
+fronteira do botão coral ....... 4,71:1  passa como elemento   (>= 3)
+rótulo #102E35 sobre coral ..... 4,71:1  passa como texto      (>= 4,5)
+rótulo BRANCO sobre coral ...... 3,05:1  FALHA — por isso não se usa
+hover #ff7a63 .................. 5,61:1  nas duas obrigações
+```
+
+**`coralSobreEscuro` continua a marcar 0, e é correcto:** o botão pinta o seu
+próprio fundo coral, portanto a subida ao fundo efectivo pára nele e não chega à
+secção. Esse contador mede coral-**texto**-sobre-escuro, e o que usei foi coral-
+**preenchimento**. Digo-o em vez de o apresentar como se medisse o que não mede.
+
+### RV100-016 — a FAQ
+
+Quatro perguntas → **dez**, em três grupos: gerais, equipamentos, cobrança e
+planos. A `/faq` cresceu de 1285 para **2053** px.
+
+**Não reutiliza as chaves `cobranca*` da `/plans`.** Aquelas explicam como a
+cobrança funciona a quem já compara planos; estas são **objecções** de quem
+ainda decide se avança. Trazer as outras para cá era a `/faq` ser a `/plans`
+outra vez.
+
+### O defeito que eu tinha previsto e descartado mal
+
+A guarda de contraste reprovou a `/pilot` a 360 px: **1,17:1**.
+
+O `.bo-mkt__destaque` traz **fundo claro próprio** e herdava a cor **branca** da
+secção escura. Eu tinha pensado exactamente neste caso e concluído *«o destaque
+tem fundo próprio, logo o texto fica escuro»*. **Fundo próprio não é cor
+própria:** a cor herda-se, o fundo não, e foi essa assimetria que me escapou.
+
+Com `--bo-texto-primario` sobre o mesmo fundo dá **12,31:1**. Uma revisão a olho
+não apanhava isto — o texto continuava lá, apenas ilegível.
+
+### Quatro defeitos do meu próprio instrumento, e como cada um apareceu
+
+Nenhum apareceu por a ferramenta dizer que algo correu mal.
+
+1. **O detector de coral comparava HEX com RGB.** Lia `--bo-acento` (`#F5664D`) e
+   comparava com `getComputedStyle().color` (`rgb(245, 102, 77)`). Nunca iguais,
+   logo `usaCoral` era **zero por construção** — no antes e no depois. E o zero
+   era **plausível**, porque o RV100-012 diz que o coral está ausente. Só
+   apareceu porque o número **não se mexeu** depois de uma mudança que tinha de o
+   mexer. Passa a normalizar pelo browser e leva controlo positivo que planta um
+   elemento coral e exige vê-lo.
+2. **O estado partilhado não sobrevive a um worker reiniciado.** Acumulava num
+   `const` de módulo; o Playwright reinicia o worker depois de uma falha e o
+   array voltava a `[]`. Escreveu **20 registos em vez de 40** sem se queixar — a
+   `/plans` passou e não estava lá. O meu controlo perguntava `> 0`, e 20 é maior
+   do que zero. **A pergunta certa é se estão todas.** Cada página escreve agora
+   o seu ficheiro e a junção lê do disco, exigindo 8 × 5 exactos — e na corrida
+   seguinte foi essa asserção que recusou escrever sete páginas como se fossem
+   oito.
+3. **`page.goto` sem relógio próprio.** Herdava o orçamento do teste inteiro:
+   uma navegação pendurada consumia os cinco minutos e o relatório culpava *o
+   teste*. O pendurado era `networkidle` na única página com cinco composições —
+   as variantes do `srcset` adiavam o silêncio de rede. Agora `load` com 45 s.
+4. **O teste media as oito páginas num só.** Falhou a 5 e a 15 minutos, e as três
+   que falharam eram as três **mais longas**; as quatro que passaram, as mais
+   curtas. **Um instrumento que só mede as páginas pequenas mede o tamanho, não o
+   defeito.** Um teste por página, e os quatro ajudantes caros saíram — já são
+   medidos pela `marketing.spec.ts` a 360 px e por cada lote na sua página.
+
+### Três escritas perdidas em silêncio
+
+O `.bo-mkt__faq-grupo` desapareceu do CSS **três vezes** depois de eu o escrever,
+e o `.bo-mkt__fecho` escuro uma. Em todas, o script imprimiu sucesso. Apanhou-as
+a `validar-classes.sh` uma vez e o **build** outra — nunca a mensagem do script.
+Passei a escrever com `with` e a **fazer `grep` ao ficheiro depois de cada
+escrita**. Uma mensagem de sucesso minha não é prova de nada.
+
+### Regressão
+
+`marketing.spec.ts` **65/65**, população inteira. Guardas verdes: classes, três
+línguas, preços, cobertura, SEO, pilar offline, dados fictícios. `pnpm lint`
+limpo.
+
+**Uma guarda vermelha que NÃO é minha:** a `validar-suites-com-guiao.sh` reprova
+`inspeccao/alergenios-na-carta.spec.ts`, ficheiro **por versionar** que não é
+deste lote. O meu `rv100-fecho.spec.ts` está coberto pelo `provar-fecho-mkt.sh`,
+e a única falha nomeia só aquele ficheiro. Não lhe toquei.
+
+### O que NÃO foi feito, e é o que fica da secção 6
+
+- **RV100-009** — o herói acaba em **x = 728** em seis páginas (`/product`,
+  `/plans`, `/pilot`, `/trust`, `/demo`; a `/faq` em 652). Só a home e a
+  `/getting-started` chegam a 1256. Fechá-lo exige heróis de duas colunas com
+  mídia em seis páginas: é um lote, não um resto.
+- **RV100-010** — faltam **dois** blocos do §6.3: *produto em movimento* e
+  *módulos principais*. Os outros doze existem.
+- **`/trust` ↔ home** — cinco das doze chaves da `/trust` são o bloco 10 da home
+  (`confianca1/2/3`, `confiancaTitulo`, `confiancaTexto`), e são o único conteúdo
+  dela além do quarto pilar.
+- **Expansão de texto: continua NÃO MEDI**, mesma razão de sempre.
+- **Não medi a aparência.** Secção 7, e é do Matheus.

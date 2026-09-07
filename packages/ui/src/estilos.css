@@ -1267,6 +1267,16 @@ label.bo-planos__item input[type="radio"] {
 .bo-mkt__passos { display: grid; gap: var(--bo-espaco-lg); counter-reset: passo; }
 @media (min-width: 768px) { .bo-mkt__passos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .bo-mkt__passo { border-left: 3px solid var(--bo-acento-sinal); padding-left: var(--bo-espaco-md); min-width: 0; }
+/* O cabecalho de um grupo de perguntas.
+   Classe propria e nao `.bo-mkt__familia` reaproveitada: aquela e' o cabecalho
+   de grupo DA TABELA de planos, e usa-la aqui era a mesma mentira de nome que
+   recusei ao dar `.bo-mkt__horas` as horas em vez de `.bo-mkt__preco`. */
+.bo-mkt__faq-grupo {
+  font-family: var(--bo-fonte-titulo);
+  font-size: 18px;
+  color: var(--bo-texto-secundario);
+  margin-bottom: var(--bo-espaco-md);
+}
 .bo-mkt__faq { display: grid; gap: var(--bo-espaco-lg); max-width: 68ch; }
 .bo-mkt__faq h3 { margin-bottom: var(--bo-espaco-xs); overflow-wrap: anywhere; }
 .bo-mkt__tabela-envolve { overflow-x: auto; }
@@ -1368,12 +1378,45 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
 /* O fecho: a última coisa da página antes do rodapé, e a única secção com
    superfície própria — é o que a separa das onze anteriores sem lhe dar cor
    nova. */
+/* O fecho e' a UNICA seccao escura da familia, e e' ai que o coral existe.
+   ───────────────────────────────────────────────────────────────────────────
+   O RV100-012 diz que o coral esta praticamente ausente da superficie
+   comercial. A resposta obvia — o coral no CTA sobre a areia — esta medida e e'
+   FALSA: sobre `--bo-superficie-base` a fronteira do coral da 2,77:1, e nenhum
+   dos 17 tokens serve de fundo a um botao cheio sobre a areia.
+
+   Mas o coral sobre o VERDE-ESCURO da 4,71:1. Verifiquei as tres obrigacoes
+   desta composicao antes de a escrever, e a terceira e' a que mata a versao
+   ingenua:
+
+     coral sobre #102E35 ............ 4,71:1  passa como texto      (>= 4,5)
+     fronteira do botao coral ....... 4,71:1  passa como elemento   (>= 3)
+     rotulo #102E35 sobre coral ..... 4,71:1  passa como texto      (>= 4,5)
+     rotulo BRANCO sobre coral ...... 3,05:1  FALHA — por isso nao se usa
+
+   Logo o coral com funcao nao e' um token que faltasse: e' uma COMPOSICAO, e
+   vive numa seccao escura com o rotulo em verde-escuro. */
 .bo-mkt__fecho {
-  background: var(--bo-superficie-suave);
+  background: var(--bo-superficie-inversa);
+  color: var(--bo-texto-inverso);
   border-radius: var(--bo-raio-cartao);
   padding-left: var(--bo-espaco-xl);
   padding-right: var(--bo-espaco-xl);
 }
+.bo-mkt__fecho h2 { color: var(--bo-texto-inverso); }
+/* Areia e nao branco puro no corpo: 13,05:1 continua muito acima do limiar. */
+.bo-mkt__fecho .bo-publico__texto { color: var(--bo-superficie-base); }
+/* O CTA coral, com o rotulo em verde-escuro. Branco aqui seria 3,05:1. */
+.bo-mkt__fecho .bo-botao--primario { background: var(--bo-acento); color: var(--bo-primaria); }
+/* Hover medido tambem: #ff7a63 da 5,61:1 no rotulo e na fronteira. */
+.bo-mkt__fecho .bo-botao--primario:hover:not(:disabled) { background: #ff7a63; }
+/* O destaque TRAZ O SEU PROPRIO FUNDO CLARO e herdava a cor branca da seccao
+   escura: branco sobre #E9EFEC da **1,17:1**, medido pela guarda a 360 px na
+   /pilot. Eu tinha pensado nisto e concluido mal — escrevi que «o destaque tem
+   fundo proprio, logo o texto fica escuro». Fundo proprio nao e' cor propria: a
+   cor herda-se e o fundo nao, e foi essa assimetria que me escapou.
+   Com `--bo-texto-primario` sobre o mesmo fundo da 12,31:1. */
+.bo-mkt__fecho .bo-mkt__destaque { color: var(--bo-texto-primario); }
 /* Sem `margin-top` própria, e isso foi medido e corrigido: com ela, o respiro
    antes do fecho dava **192 px** no desktop e 128 no telemóvel — acima dos
    80-128 e dos 56-80 que o §4.4 fixa. A superfície própria já o separa das onze
