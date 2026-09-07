@@ -439,3 +439,124 @@ abaixo do limiar WCAG.
 - **A afirmação corrigida do `faq4`** foi verificada por leitura de código e
   pelas provas existentes — **não corri eu uma prova nova de rede cortada**.
 - **Nada de teclado nem leitor de ecrã** nos blocos novos.
+
+---
+
+## L1c · a página de planos (MKT-005)
+
+**Instrumento:** `inspeccao/rv100-planos.spec.ts`, corrido por
+`scripts/provar-planos-mkt.sh <antes|depois>`. Cinco larguras × três línguas.
+Evidência em `evidence/planos/`.
+
+### A restrição que decidia o lote: não ser a secção da home outra vez
+
+Medido, e não afirmado. Extraí as chaves de i18n que cada ficheiro usa —
+directas (`k.x`) e indirectas (as das constantes de topo) — e cruzei-as:
+
+| | chaves | partilhadas |
+| --- | ---: | ---: |
+| `page.tsx` (home) | 93 | — |
+| `plans/page.tsx` | 62 | **11** |
+
+E as onze são todas **unidade ou nome próprio**, nenhuma é conteúdo:
+
+`planoStarter` · `planoRestaurant` · `planoPro` (nomes próprios) ·
+`precoMes` · `precoAno` · `precoEquivalente` · `precoImposto` ·
+`precoAOrcar` · `precoImplantacao` · `precoImplantacaoSozinho` (unidades) ·
+`pedirDemo` (rótulo de acção).
+
+São partilhadas **de propósito**: «al mes» escrito em duas chaves diferentes é
+como uma tabela de preços se dessincroniza de si própria. As **51 chaves só
+desta página** são o que a secção da home não dá.
+
+### O que mudou
+
+| | antes | depois |
+| --- | ---: | ---: |
+| secções | **2** | **7** |
+| famílias na comparação | **0** | **3** |
+| linhas de capacidade | **3** | **8** |
+| valores monetários | **0** | **10 por vista** |
+| blocos com preço / com IVA ao lado | **0 / 0** | **6 / 6** |
+| altura rolável a 1440 | 1073 | **3915** |
+
+Os oito requisitos do §6.5, um a um: cartões de decisão ✓ · recomendação
+justificada ✓ · comparação completa e responsiva ✓ · as três famílias ✓ · CTA
+coerente com disponibilidade ✓ · implantação separada ✓ · adicionais e
+dependências ✓ · FAQ de cobrança e mudança de plano ✓.
+
+### A comparação não está escrita — é derivada
+
+As linhas saem de `capacidadesDoPlano()`, novo em `planos.ts`, que faz a união
+dos `promete` da `DESTAQUES`. Isso importa porque a `provas/planos.test.ts` já
+compara a `DESTAQUES` com o **catálogo real na base** e reprova qualquer plano
+que prometa o que não concede — com controlo negativo para a guarda não passar
+por uma tabela vazia. Uma tabela escrita à mão na landing seria uma segunda
+verdade a envelhecer sozinha; derivada, fica coberta por essa prova sem precisar
+de guarda própria.
+
+Duas fontes independentes concordam com o resultado: o `cores_publicas` da
+`PRECIFICACAO.json` (Starter `fixas_bossaos`, os outros `personalizaveis`) bate
+certo com a linha «colores propios» sair a não/sim/sim.
+
+### Dois valores que estavam na fonte e ninguém lia
+
+`precoDoPlano()` passou a devolver **`horasDeImplantacao`** (2 / 4 / 8), e o
+domínio passou a exportar **`COMISSAO_DIRECTOS`**. Os dois estavam na
+`PRECIFICACAO.json` e iam ser escritos à mão nesta página.
+
+O zero da comissão é o caso que interessa: **zero é um valor comercial, não uma
+ausência.** «Sem comissão» escrito à mão continua a prometer zero no dia em que
+deixar de o ser. Renderiza-se pela fonte, e sai `0 %` em espanhol e `0%` em
+inglês porque o `formatarNumero` passou a aceitar opções de local — uma
+percentagem não se escreve juntando `%` a um número.
+
+### O CTA coerente com disponibilidade: não há botão de contratar
+
+Verifiquei antes de escrever: **não existe registo público, nem checkout, nem
+pagamento** neste repositório. A entrada faz-se por convite
+(`/auth/invite/[token]`) e a única porta pública é a demo. Um botão «Contratar»
+seria uma porta morta — a classe de mentira que a `validar-portas-mortas.sh`
+existe para apanhar.
+
+O padrão é o da tela do tema, como me foi indicado: **não se esconde o caminho**,
+muda-se-lhe o peso. Demo em primário, entrar em secundário, e a página **diz por
+escrito** que não há botão de contratar e porquê. Um ecrã nunca é o mecanismo.
+
+### A tabela, medida nos dois sentidos
+
+A 360 px: a **página não rola** (transbordo 0) **e** a caixa rola por dentro
+(312 px de caixa para 544 de tabela). As duas, porque só a primeira passaria
+também com uma tabela esmagada ou vazia. Igual antes e depois — a propriedade
+sobreviveu à passagem de 3 para 8 linhas e de 3 para 4 colunas.
+
+### O que o meu próprio instrumento me apanhou
+
+A primeira passagem deu **6 blocos com preço e só 3 com a nota de IVA ao lado**.
+Os três em falta eram os cartões de implantação: mostravam euros sem dizer «IVA
+aparte, por establecimiento». O §6.5 diz «todos os valores», e a implantação é
+um deles. Corrigido, e a segunda passagem deu **6/6**.
+
+Registo-o porque é a diferença entre uma nota solitária no fim da página e a
+nota **junto de cada preço** — e porque a medição foi feita para apanhar
+exactamente isto, em vez de eu contar ocorrências globais e chamar-lhe verde.
+
+### Regressão
+
+`marketing.spec.ts`: **68 verdes, ficheiro não tocado, nenhuma asserção
+alterada** — incluindo o caso que exige que a tabela role dentro da caixa a
+360 px. `pnpm verificar` verde, **396 IDs intactos**. Guardas verdes: preços,
+três línguas, dados fictícios, portas mortas, coral da arte, classes, suites com
+guião. **Zero anomalias em 15 combinações** de língua × largura.
+
+### O que NÃO foi medido
+
+- **A aparência.** Secção 7, e do Matheus.
+- **A `/product`** continua a repetir os três cartões da home chave por chave.
+  Não lhe toquei — é outro lote, e fica dito que o defeito continua lá.
+- **A FAQ de cobrança não foi verificada contra o produto.** As respostas sobre
+  subir e descer de plano descrevem o que a `previaDeDescida` e o ecrã de
+  mudança fazem, mas **não corri uma prova** que o confirme ponto por ponto.
+  É a mesma disciplina do quarto pilar da confiança: escrevi o que o produto
+  parece fazer, e digo que não o medi.
+- **Nada de teclado nem leitor de ecrã** na tabela nova.

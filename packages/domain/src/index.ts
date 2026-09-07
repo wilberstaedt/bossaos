@@ -69,7 +69,8 @@ export {
 } from './precos.ts';
 
 export {
-  MENSALIDADES_NUM_ANO, IMPOSTOS_INCLUIDOS, MOEDA_COMERCIAL, precoDoPlano, coresPublicasDoPlano,
+  MENSALIDADES_NUM_ANO, IMPOSTOS_INCLUIDOS, MOEDA_COMERCIAL, COMISSAO_DIRECTOS,
+  precoDoPlano, coresPublicasDoPlano,
   planosComAnualIncoerente, type CodigoDePlano, type PrecoDePlano,
 } from './precificacao.ts';
 

@@ -1694,3 +1694,14 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
   padding: 0;
 }
 .bo-lista-horas a { min-height: var(--bo-toque-publico); }
+
+/* A linha de família na tabela de comparação (§6.5): «catálogo e web»,
+   «operação», «gestão avançada». É um cabeçalho de grupo e não uma linha de
+   dados — fundo próprio e alinhamento à esquerda para se ler como separador. */
+.bo-mkt__familia {
+  background: var(--bo-superficie-suave);
+  font-family: var(--bo-fonte-titulo);
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}

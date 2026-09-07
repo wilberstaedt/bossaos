@@ -41,6 +41,14 @@ export interface PrecoDePlano {
   implantacaoSozinho: number | null;
   /** Cêntimos. `null` significa **por definir**, nunca "grátis". */
   implantacaoAssistida: number | null;
+  /**
+   * Horas de acompanhamento incluídas na implantação assistida.
+   *
+   * Sai da fonte pela mesma razão que os preços: «duas horas» numa página
+   * comercial é uma promessa de trabalho, e uma promessa escrita à mão
+   * dessincroniza-se do dia em que a tabela mudar.
+   */
+  horasDeImplantacao: number | null;
 }
 
 /**
@@ -59,6 +67,16 @@ export const MENSALIDADES_NUM_ANO: number = fonte.anual.mensalidades_cobradas;
 export const IMPOSTOS_INCLUIDOS: boolean = fonte.impostos.incluidos;
 
 /**
+ * A comissão sobre pedidos e reservas DIRECTOS, em percentagem.
+ *
+ * Está a zero na fonte, e é por isso que precisa de sair de lá em vez de virar
+ * a frase «sem comissão» escrita à mão numa landing: zero é um **valor
+ * comercial**, não uma ausência. No dia em que deixar de ser zero, uma frase
+ * escrita à mão continua a prometer que é.
+ */
+export const COMISSAO_DIRECTOS: number = fonte.comissao_pedidos_e_reservas_directos;
+
+/**
  * O preço de um plano, ou `null` se a fonte não o tiver.
  *
  * `null` e não um valor por omissão: *«um campo sem valor não vira gratuito,
@@ -69,6 +87,7 @@ export function precoDoPlano(codigo: string): PrecoDePlano | null {
   const p = (fonte.planos as Record<string, {
     mensal: number; anual: number;
     implantacao_sozinho: number | null; implantacao_assistida: number | null;
+    horas_implantacao?: number;
   } | undefined>)[codigo];
   if (!p) return null;
   return {
@@ -81,6 +100,7 @@ export function precoDoPlano(codigo: string): PrecoDePlano | null {
     equivalenteMensal: Math.round(p.anual / 12),
     implantacaoSozinho: p.implantacao_sozinho,
     implantacaoAssistida: p.implantacao_assistida,
+    horasDeImplantacao: p.horas_implantacao ?? null,
   };
 }
 

@@ -47,6 +47,15 @@ export function formatarHora(data: Date, idioma: Idioma, fuso = 'Europe/Madrid')
   return new Intl.DateTimeFormat(idioma, { timeStyle: 'short', timeZone: fuso }).format(data);
 }
 
-export function formatarNumero(n: number, idioma: Idioma): string {
-  return new Intl.NumberFormat(idioma).format(n);
+export function formatarNumero(
+  n: number,
+  idioma: Idioma,
+  opcoes?: Intl.NumberFormatOptions,
+): string {
+  // As opções são opcionais e aditivas: sem elas, o comportamento é o mesmo de
+  // sempre. Existem porque uma percentagem NÃO se escreve juntando `%` a um
+  // número — «0 %» em espanhol e «0%» em inglês diferem num espaço, e essa
+  // diferença é do sítio, não de quem chama. Formatá-la na página seria pôr
+  // uma regra de local fora do único ficheiro que as conhece.
+  return new Intl.NumberFormat(idioma, opcoes).format(n);
 }

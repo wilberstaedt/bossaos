@@ -1,0 +1,317 @@
+[
+  {
+    "idioma": "es-ES",
+    "largura": 360,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "familias": [],
+    "linhas": 3,
+    "precos": 0,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "tabela": {
+      "existe": true,
+      "rolaDentro": true,
+      "larguraDaCaixa": 312,
+      "larguraDaTabela": 544
+    },
+    "alturaRolavel": 1514
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "familias": [],
+    "linhas": 3,
+    "precos": 0,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "tabela": {
+      "existe": true,
+      "rolaDentro": true,
+      "larguraDaCaixa": 342,
+      "larguraDaTabela": 544
+    },
+    "alturaRolavel": 1476
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 768,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "familias": [],
+    "linhas": 3,
+    "precos": 0,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "tabela": {
+      "existe": true,
+      "rolaDentro": false,
+      "larguraDaCaixa": 720,
+      "larguraDaTabela": 720
+    },
+    "alturaRolavel": 1265
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "familias": [],
+    "linhas": 3,
+    "precos": 0,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "tabela": {
+      "existe": true,
+      "rolaDentro": false,
+      "larguraDaCaixa": 1072,
+      "larguraDaTabela": 1072
+    },
+    "alturaRolavel": 1073
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 1440,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "familias": [],
+    "linhas": 3,
+    "precos": 0,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "tabela": {
+      "existe": true,
+      "rolaDentro": false,
+      "larguraDaCaixa": 1072,
+      "larguraDaTabela": 1072
+    },
+    "alturaRolavel": 1073
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 360,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "familias": [],
+    "linhas": 3,
+    "precos": 0,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "tabela": {
+      "existe": true,
+      "rolaDentro": true,
+      "larguraDaCaixa": 312,
+      "larguraDaTabela": 544
+    },
+    "alturaRolavel": 1514
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "familias": [],
+    "linhas": 3,
+    "precos": 0,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "tabela": {
+      "existe": true,
+      "rolaDentro": true,
+      "larguraDaCaixa": 342,
+      "larguraDaTabela": 544
+    },
+    "alturaRolavel": 1476
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 768,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "familias": [],
+    "linhas": 3,
+    "precos": 0,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "tabela": {
+      "existe": true,
+      "rolaDentro": false,
+      "larguraDaCaixa": 720,
+      "larguraDaTabela": 720
+    },
+    "alturaRolavel": 1265
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "familias": [],
+    "linhas": 3,
+    "precos": 0,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "tabela": {
+      "existe": true,
+      "rolaDentro": false,
+      "larguraDaCaixa": 1072,
+      "larguraDaTabela": 1072
+    },
+    "alturaRolavel": 1073
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 1440,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "familias": [],
+    "linhas": 3,
+    "precos": 0,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "tabela": {
+      "existe": true,
+      "rolaDentro": false,
+      "larguraDaCaixa": 1072,
+      "larguraDaTabela": 1072
+    },
+    "alturaRolavel": 1073
+  },
+  {
+    "idioma": "en",
+    "largura": 360,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "familias": [],
+    "linhas": 3,
+    "precos": 0,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "tabela": {
+      "existe": true,
+      "rolaDentro": true,
+      "larguraDaCaixa": 312,
+      "larguraDaTabela": 544
+    },
+    "alturaRolavel": 1562
+  },
+  {
+    "idioma": "en",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "familias": [],
+    "linhas": 3,
+    "precos": 0,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "tabela": {
+      "existe": true,
+      "rolaDentro": true,
+      "larguraDaCaixa": 342,
+      "larguraDaTabela": 544
+    },
+    "alturaRolavel": 1524
+  },
+  {
+    "idioma": "en",
+    "largura": 768,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "familias": [],
+    "linhas": 3,
+    "precos": 0,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "tabela": {
+      "existe": true,
+      "rolaDentro": false,
+      "larguraDaCaixa": 720,
+      "larguraDaTabela": 720
+    },
+    "alturaRolavel": 1265
+  },
+  {
+    "idioma": "en",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "familias": [],
+    "linhas": 3,
+    "precos": 0,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "tabela": {
+      "existe": true,
+      "rolaDentro": false,
+      "larguraDaCaixa": 1072,
+      "larguraDaTabela": 1072
+    },
+    "alturaRolavel": 1073
+  },
+  {
+    "idioma": "en",
+    "largura": 1440,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "familias": [],
+    "linhas": 3,
+    "precos": 0,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "tabela": {
+      "existe": true,
+      "rolaDentro": false,
+      "larguraDaCaixa": 1072,
+      "larguraDaTabela": 1072
+    },
+    "alturaRolavel": 1073
+  }
+]

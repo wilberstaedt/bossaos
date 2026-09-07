@@ -73,3 +73,31 @@ export const TEXTO_DA_CAPACIDADE: Readonly<Record<string, string>> = {
   tpv: 'tpvStockGestao',
   stock: 'tpvStockGestao',
 };
+
+/**
+ * As capacidades que um plano promete, derivadas da tabela acima.
+ *
+ * ── Porque é que isto se deriva em vez de se escrever ─────────────────────
+ *
+ * A página de planos precisa de uma comparação por linha — «reservas: Starter
+ * não, Restaurant sim, Pro sim» — e a tentação é escrever essa tabela à mão na
+ * página comercial. Uma segunda tabela é uma segunda verdade: no dia em que o
+ * catálogo mudar, a `DESTAQUES` é corrigida (a prova obriga) e a da landing
+ * fica a prometer o que o portão recusa.
+ *
+ * A `provas/planos.test.ts` já compara a `DESTAQUES` com o catálogo REAL na base
+ * e reprova qualquer promessa que o plano não conceda — com controlo negativo
+ * para a guarda não passar por uma tabela vazia. Derivando daqui, a comparação
+ * comercial fica coberta por essa prova sem precisar de guarda própria.
+ *
+ * O `tudoDe` faz o trabalho de herança sozinho: ele **lista** as capacidades do
+ * plano de baixo em vez de as referenciar por nome, e é por isso que a união
+ * simples chega.
+ */
+export function capacidadesDoPlano(codigo: string): ReadonlySet<Capacidade> {
+  const conjunto = new Set<Capacidade>();
+  for (const destaque of DESTAQUES[codigo] ?? []) {
+    for (const prometida of destaque.promete) conjunto.add(prometida);
+  }
+  return conjunto;
+}
