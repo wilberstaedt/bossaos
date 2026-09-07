@@ -643,3 +643,55 @@ simultâneos. **A regra responde-se no DOM**, contando primários visíveis por
 ecrã renderizado, que é exactamente o que o arnês da landing já faz para a
 moldura. Fica NÃO MEDI com o método nomeado, e não fica «conforme» por o
 contador ter dado bem em 67 de 75.
+
+---
+
+## §12.2, «não há prova social ou promessa inventada» — CONFORME, e é o melhor resultado da noite
+
+### Prova social: não existe nenhuma
+
+Procurei na copy comercial contagens de clientes, depoimentos, nomes e métricas.
+**Zero números em toda a superfície comercial** — nenhum «500 restaurantes
+confiam em nós», nenhum «30% mais rápido». As palavras `clientes`,
+`restaurantes` e `confiança` aparecem quatro vezes e li-as todas, porque
+substring já me enganou quatro vezes esta noite: são um facto técnico sobre
+unicidade de endereço, um rótulo de navegação, um título de secção e o nome de
+uma capacidade.
+
+**A ausência de números numa página comercial é uma decisão, não um esquecimento.**
+Números inventados são a forma mais barata de prova social e a mais difícil de
+retirar depois.
+
+### E as promessas que existem, todas com guarda
+
+A secção de confiança faz **três afirmações falsificáveis**. Fui procurar quem as
+prova:
+
+| a promessa | quem a guarda |
+| --- | --- |
+| «Os teus dados são teus — exporta quando quiseres, num formato que qualquer folha de cálculo abre» | `provar-publicacao.sh`, `provas/publicacao.test.ts`, `provas/plataforma.test.ts` |
+| «Dizemos o que não sabemos — um alergénio não declarado aparece como desconhecido, nunca como "não contém"» | `validar-alergenios.sh` |
+| «Isolamento entre restaurantes — a base recusa-se a ler dados de outro» | `validar-rls.sh`, `provar-isolamento-no-produto.sh` |
+
+E a primeira é literalmente verdadeira, não aproximadamente: a rota devolve
+`content-type: text/csv; charset=utf-8` com
+`content-disposition: attachment; filename="catalogo.csv"`. **«Qualquer folha de
+cálculo abre» é o CSV com o MIME certo**, e é isso que está lá.
+
+### O contraste que dá a lição, e é o mesmo produto
+
+Há três horas o implementador encontrou que o `faq4` prometia que **«a sala
+continua a trabalhar e sincroniza quando a ligação volta»** — falso nas duas
+metades. Hoje mede-se a diferença entre as duas copies:
+
+**Os três pilares foram escritos a partir do que o produto faz. A resposta da FAQ
+foi escrita a partir do que soa tranquilizador.**
+
+Um dos caminhos produz frases que uma guarda consegue provar; o outro produz uma
+frase que ninguém pode provar porque não é verdade. **E as duas viviam no mesmo
+ficheiro de traduções**, indistinguíveis para qualquer contador de palavras.
+
+É por isso que este teste — *para cada promessa, quem a prova?* — vale mais do
+que procurar palavras proibidas. **Uma promessa inventada não usa vocabulário
+diferente de uma promessa verdadeira.** Só se distinguem indo ao código ver qual
+delas alguém consegue fazer ficar vermelha.
