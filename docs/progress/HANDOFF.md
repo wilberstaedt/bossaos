@@ -3108,3 +3108,37 @@ as quatro falhas **individualmente**, que é a diferença que estava em causa �
 mas não é a mesma coisa que a suite completa, e digo-o em vez de o disfarçar.
 
 **Fase 1 fechada. Fase 2 libertada.**
+
+## 08/09 00h55 — a fita métrica da revisão, calibrada antes de servir
+
+A folha dos catorze números era **um documento**. Quando a Fase 2 aterrar eu vou
+querer medi-los num comando, não voltar a sondar à mão. `scripts/medir-norte.mjs`.
+
+**E não é uma guarda.** Mede e relata; não recusa nada, não devolve código de
+saída com significado e não entra no `validar-no-commit`. A guarda que fecha o
+portão da Fase 2 é do JR e mede a página que **ele** construir. Isto é a fita de
+quem revê — **e quem revê não assina o que constrói.**
+
+### Calibrei-a antes de a usar, e é por isso que se pode acreditar nela
+
+Apontei-a à landing em produção, cujos valores eu já tinha medido **à mão** uma
+hora antes. Devolveu **os mesmos**: H1 52, H1 móvel 34, H2 26, lead 16, cabeçalho
+102, logótipo 145, herói 759, captura 588, 13 secções, 7103 px e 10 689 no
+telemóvel.
+
+**Um instrumento novo aponta-se primeiro a um sujeito de resposta conhecida.**
+Hoje enganei-me várias vezes por não o fazer — a varredura das guardas cegas, a
+lista de candidatos por nome de ficheiro, a contagem que dizia zero por causa de
+códigos de cor.
+
+### E deu um número que eu não tinha
+
+**Fundos distintos: 2**, contra um alvo de ≥ 3. O primeiro ponto da lista de
+reprovação — «fundo areia em todas as secções» — deixa de ser uma frase e passa
+a ser **2 contra 3**.
+
+### O que fica por fazer da Fase 0
+
+**0.4 — capturar «Mesas em tempo real»**, o «antes» da segunda tela-mestre.
+Continua por fazer: exige sessão e `build`, o JR está a construir a landing, e a
+máquina está em `ATENÇÃO`. **Declarado, não esquecido.**
