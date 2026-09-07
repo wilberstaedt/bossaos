@@ -142,3 +142,66 @@ Tudo o que falta exige **um navegador**, e é isto:
 
 **Nenhum destes está bloqueado por aprovação nenhuma.** É trabalho por fazer, com
 população conhecida.
+
+---
+
+## A dependência que «bloqueia a maior parte da secção 7» — medida, e não bloqueia
+
+O inventário do implementador diz que **uma só dependência** gate a M03, M04,
+M05, M06, a mídia dos blocos em falta, o herói a 38–41% e o RV100-023: o
+inquilino de demonstração estar ausente. **É a afirmação mais consequente sobre o
+que falta, e fui medi-la.**
+
+**Primeiro facto: a base não tem o inquilino de demonstração ausente — tem tudo
+ausente.**
+
+```
+organizations  →  0
+locations      →  0
+```
+
+**Isso não é perda: é o estado normal entre corridas.** O arnês semeia e limpa; a
+base vazia é o resultado de a última limpeza ter funcionado.
+
+**Segundo facto: o inquilino materializa-se a pedido, e prova-o.** Corri o
+`provar-demonstracao.sh`:
+
+```
+ok  duas corridas, a mesma impressão (b06bec96…)
+ok  controlo negativo: a impressão muda quando um prato muda
+ok  kds-cozinha 200 · sala-servico 200 · catalogo 200
+ok  sala-tablet 200 · carta-movel 200
+ok  todas as composições passaram o controlo de sujidade
+```
+
+**E depois de correr, `organizations = 0` outra vez.** Semeia, serve, limpa.
+
+### O que isto desfaz, e o que deixa de pé
+
+**A carta pública não está em falta.** A entrada `carta-movel` do
+`capturar-demonstracao.mjs` tem esta rota:
+
+```js
+rota: `/r/${SLUG_DA_DEMO}/es-ES/menu`
+```
+
+**É exactamente a rota que dava 404** — e serve **200** dentro da janela semeada.
+O 404 não é a carta a não existir: é a medição a acontecer **fora da janela**.
+
+**Portanto o RV100-023 não está bloqueado**, e a secção 7 também não. O que é
+verdade, e continua a ser, é mais estreito e mais accionável:
+
+> **As capturas da secção 7 têm de correr dentro de uma janela semeada** — que é
+> exactamente o que o `capturar-demonstracao.mjs` já faz.
+
+**Não é uma dependência em falta. É um passo que existe e que é preciso invocar.**
+
+### Porque é que registo isto com este cuidado
+
+Era a afirmação mais consequente do inventário, e se ficasse de pé mudava o plano
+da secção 7 inteira — alguém iria semear uma casa partilhada à mão, ou pior,
+construir uma dependência nova para resolver uma que não existe.
+
+**O que a desfez foi correr a coisa em vez de a raciocinar**, e o sinal foi o
+mesmo de sempre: um facto independente — cinco capturas a 200 — que contradizia
+o 404.
