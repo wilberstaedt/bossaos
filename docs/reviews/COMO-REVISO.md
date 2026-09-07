@@ -1080,3 +1080,61 @@ dar-me razão.
 
 **É para isto que são dois.** Não para dividir trabalho — para que o erro de um
 tenha alguém do outro lado com um instrumento diferente.
+
+---
+
+## Proteger trabalho em voo sem lhe tocar — 07/09
+
+Com dois implementadores a mexer na mesma árvore e uma sessão já perdida esta
+noite, apareceu um problema que não é de revisão mas mata revisões: **horas de
+trabalho por commitar, numa sessão que pode morrer.**
+
+O reflexo errado é commitar por eles. Fi-lo por acidente às três da manhã, com um
+`git add -A` numa pasta partilhada, e o histórico ficou com trabalho de outro
+debaixo da minha mensagem.
+
+**O que funciona:**
+
+```
+git stash create "descrição"     # devolve o objecto, NÃO mexe na árvore
+git tag -f salvaguarda-… <obj>   # dá-lhe nome recuperável
+```
+
+`stash create` produz o *commit* de salvaguarda e **não toca na bancada** — o
+`md5` dos ficheiros deles fica idêntico, e o `git status` continua a mostrar o
+mesmo número de modificados. Verifiquei as duas coisas das duas vezes.
+
+**E uma lição sobre a etiqueta.** À primeira chamei-lhe `salvaguarda-jr-alvos` e
+estava certo; à segunda repeti o nome e **metade dos 15 ficheiros era do outro
+agente** — o `pilot/page.tsx` e o `trust/page.tsx` do lote que eu tinha acabado
+de passar. Uma etiqueta que mente sobre o que guarda é pior do que não existir:
+quem recuperar dali fica a achar que tem só o trabalho de um.
+
+Corrigi para `salvaguarda-dois-agentes`. **A rede de segurança também precisa de
+dizer a verdade sobre o que apanhou.**
+
+---
+
+## Fui procurar uma violação e encontrei a justificação escrita — 07/09
+
+A `marketing.spec.ts` esteve intacta em cinco lotes seguidos, com `git diff` de
+zero linhas, e de repente apareceu com **22 inserções e uma remoção**. A remoção
+é que importa: o §11.1 proíbe reescrever um teste para ele ficar verde.
+
+A linha removida era a âncora do MKT-010: `marcador: '.bo-mkt__passos'`.
+
+**E a justificação estava no diff, antes de eu perguntar:** aquele elemento **era
+o defeito**. O RV100-013 diz que a página de piloto «recicla dois passos da
+implantação e não tem um único facto de piloto» — os passos eram as chaves
+`passo3` e `passo4`, as mesmas do `/getting-started`, palavra por palavra.
+Tirá-los levou a âncora com eles.
+
+E a distinção que a torna legítima está medida, não afirmada: **nenhuma asserção
+foi tocada.** As três que correm sobre aquela rota — transbordo, alvos de 44 px,
+contraste — continuam iguais e continuam a correr. **Mudou o selector que espera
+pela página, não o que se exige dela.**
+
+**A regra que fica:** «não reescrever um teste para ficar verde» não proíbe mexer
+num teste. Proíbe mexer no que ele **exige**. Um marcador que aponta para o
+elemento que um achado mandou remover **tem** de mudar — e a prova de que a
+mudança é honesta é o conjunto de asserções ficar byte a byte.
