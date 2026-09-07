@@ -2476,3 +2476,37 @@ volátil, o repositório não.**
 Ele votou na reposição dos campos com o critério certo — *«é o único dos três
 que faz alguém perder um pedido já escrito»*. Perder trabalho de outra pessoa é
 pior do que incomodá-la, e essa é uma razão que eu podia ter dado e não dei.
+
+---
+
+## A tua correcção é a cura, ou viajou ao lado dela? — 07/09
+
+O JR corrigiu o A1 e a causa **não era a que ele próprio tinha corrigido**. Ele
+tinha descodificado o cookie antes do `JSON.parse` — arranjo correcto e
+justificado. A cura verdadeira era outra: **o `303` era absoluto**
+(`new URL(pedido.url)`), mudava de anfitrião, e **o cookie ficava para trás**.
+
+**E o que interessa é como ele soube.** Depois de ficar verde, correu um terceiro
+A/B: **desligou a própria descodificação** — e continuou verde. Então tirou-a.
+
+> *«Foi assim que soube que a minha correcção não era a cura, e revi-a em vez de
+> a deixar a somar ruído.»*
+
+**A forma, e é nova: uma correcção que viaja ao lado da cura verdadeira parece
+ter funcionado.** O verde chega, o commit fecha, e ninguém volta lá. Ela não é
+inofensiva: fica no código como se sustentasse alguma coisa, e **a próxima pessoa
+que a encontrar vai tratá-la como carga** — não a toca, ou pior, constrói por
+cima dela.
+
+**O teste é barato e quase nunca se faz: desligar a própria correcção e ver se o
+verde sobrevive.** Se sobreviver, ela não era a cura. Tem o mesmo desenho do
+plante — só que o alvo é o que **eu** acabei de escrever, em vez do produto.
+
+**E o `decodeURIComponent` está a zero no ficheiro.** Ele não a deixou lá «por
+segurança», que é a saída fácil e a que produz o entulho.
+
+**Eu quase somei ao mesmo monte neste tick:** tinha um candidato para o cookie
+vazio — renderização estática, como aconteceu hoje com os `searchParams` — e fui
+verificar antes de lho mandar. A página tem `force-dynamic`. **Uma pista errada a
+quem está a caçar custa mais do que o silêncio**, e uma correcção a mais custa
+mais do que uma correcção a menos.
