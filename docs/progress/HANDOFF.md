@@ -28,6 +28,49 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## Registo por email fechado — segurança, num domínio público
+
+`emailAndPassword: { enabled: true }` sem `disableSignUp` faz o `better-auth`
+1.7.2 registar `POST /api/auth/sign-up/email` **exista ou não uma página**. O
+produto é por convite e está escrito no próprio ficheiro: a cura põe o código a
+dizer o que ele já declarava. Régua em `docs/reviews/ALVO-REGISTO-ABERTO.md`,
+commit `fe64a4b`. Guarda: `scripts/validar-registo-fechado.sh`.
+
+> **O sinal da cura NÃO era o 404 que a régua previa, e isso mediu-se.** O
+> `disableSignUp` não desregista a rota — **recusa a operação**:
+> `EMAIL_PASSWORD_SIGN_UP_DISABLED`, 400. Uma guarda a exigir 404 ficaria
+> vermelha para sempre sobre uma cura que funciona, e a saída fácil seria
+> concluir que a cura não pegou e ir procurar outra. O que interessa não é a rota
+> desaparecer: é **não se poder criar conta**.
+
+| na mesma corrida | resposta |
+| --- | --- |
+| rota inventada | **404** — o controlo: 404 significa «não registada» |
+| `sign-in/email` | **400** `VALIDATION_ERROR` — uma rota viva responde |
+| `sign-up/email` | **400** `EMAIL_PASSWORD_SIGN_UP_DISABLED` |
+| convite | `[token]` 404 · `/aceitar` 401 — **vivo** |
+
+**Controlo negativo:** cura desligada → `PASSWORD_TOO_SHORT`, ou seja a rota
+aceita registos e só a política de senha a parou; guarda **vermelha, exit 1**.
+
+**E a sonda nunca cria conta:** senha de um carácter — com a cura o
+`disableSignUp` responde antes da política, sem ela é a política que recusa.
+**131 utilizadores antes e 131 depois.** Uma prova de segurança que precisasse de
+criar a conta para saber se podia criá-la seria o próprio defeito a correr.
+
+### A consequência: medida, e já não presumida
+
+O sénior escreveu que sem `Membership` era *provável* cair num vazio, e não o
+mediu. Mediu-se **sem criar nada**: 125 dos 131 utilizadores desta base já não
+têm pertença. Com um deles, pelo `comIdentidade`, sob RLS:
+
+**organizações 0 · filiações 0 · unidades 0 · pedidos 0**
+
+**Âmbito, declarado:** isto mede a **camada de dados** pelo invólucro que o
+produto usa. Não percorre todas as superfícies HTTP — uma rota que consultasse
+fora do `comIdentidade` não estaria coberta. **A exposição estava provada; a
+consequência está agora medida com este limite escrito ao lado.**
+
 ## O `sizes` mentia ao navegador — e não eram duas composições, eram quatro
 
 O sénior mediu duas ampliadas e mandou o `sizes` descrever a ranhura verdadeira.
