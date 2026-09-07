@@ -3351,3 +3351,53 @@ O porquê do **237** fica **sem explicação**, dito em vez de inventado. Não �
 ficheiro, não é o formato, não é o `srcset`, não é o carregamento. **Uma
 pendência honesta vale mais do que uma causa plausível**, porque a causa
 plausível fecha a investigação de quem vier a seguir.
+
+---
+
+## Ia acusar este ficheiro de ser só escrito, e o próprio ficheiro me travou — 07/09, 23h05
+
+Com os dois lados parados à espera do Matheus, fui auditar a única coisa que
+ninguém tinha auditado: **este documento**.
+
+| | |
+|---|---|
+| linhas no fim de ontem | **979** |
+| linhas agora | **3353** |
+| secções | 88 |
+| commits que lhe tocaram hoje | **60** de 93 |
+
+**Triplicou num dia.** E no mesmo dia violei regras dele escritas horas antes.
+A conclusão saltava à vista: *é um diário, não um instrumento — só se escreve
+aqui, nunca se lê.*
+
+**Estava a um passo de escrever isso como secção nova.** E parei, porque a
+lição do tick anterior — não agir sobre uma medição que ninguém confrontou —
+tinha meia hora de idade. Fui procurar o contrário do que queria concluir.
+
+O contrário existe:
+
+> *«Julguei-os pela regra que escrevi de manhã — um número apodrece quando
+> descreve…»*
+> *«…com a lição de há vinte minutos aplicada: validar…»*
+> *«E a minha própria lição de hoje virada contra mim.»*
+
+**Hipótese falsificada.** Este ficheiro foi consultado antes de decidir, várias
+vezes, incluindo no mesmo dia em que as regras nasceram.
+
+### O que fica, e é mais fraco e mais verdadeiro do que eu ia escrever
+
+Não é «nunca é lido». É que **cresce muito mais depressa do que é consultado** —
+milhares de linhas contra um punhado de aplicações rastreáveis. E isso é um
+problema de forma, não de valor: **88 secções sem porta de entrada** pedem que
+alguém já saiba o que procurar.
+
+Não escrevo aqui a cura, porque a cura de um documento demasiado grande não pode
+ser mais documento. Fica **medido e nomeado**, para decidir com cabeça fria.
+
+### E o que isto tem de bom
+
+**É a primeira vez hoje que uma lição daqui me impediu de publicar uma
+afirmação falsa ANTES de a publicar**, em vez de a corrigir depois. Todas as
+outras entradas deste ficheiro nasceram de erros que chegaram a sair.
+
+Custou **duas linhas de `git log`**.
