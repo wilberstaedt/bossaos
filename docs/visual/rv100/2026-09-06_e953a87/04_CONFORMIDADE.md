@@ -695,3 +695,61 @@ ficheiro de traduções**, indistinguíveis para qualquer contador de palavras.
 que procurar palavras proibidas. **Uma promessa inventada não usa vocabulário
 diferente de uma promessa verdadeira.** Só se distinguem indo ao código ver qual
 delas alguém consegue fazer ficar vermelha.
+
+---
+
+## §12.3, «teclado e foco» — e o padrão que já apanhei duas vezes esta noite
+
+### O mecanismo está certo, e vem da plataforma
+
+O `Dialogo.tsx` é construído **sobre o `<dialog>` nativo** com `showModal()`, e o
+comentário explica o porquê melhor do que eu explicaria:
+
+> *«`showModal()` dá de graça três coisas que quase toda a gente reimplementa
+> mal: o foco fica **preso** dentro do diálogo, `Escape` fecha, e ao fechar o foco
+> **volta ao elemento que o abriu**. Essa última é o aceite 2 do E02, e é a que
+> mais se perde numa implementação à mão — quem fecha um modal com o teclado fica
+> atirado para o topo da página e perde o sítio onde estava.»*
+
+**Verifiquei que o comentário não mente:** `showModal()` na linha 41, `close()` na
+42, ouvinte de `cancel` na 52. E não há `<dialog>` cru em lado nenhum — todos os
+diálogos passam pelo componente.
+
+**Nota de método, quinta vez esta noite.** Procurei `role="dialog"` e
+`aria-modal` e obtive **zero no produto inteiro**, com o atlas a declarar 20 IDs
+de diálogo. Ia daí para um defeito de acessibilidade. O elemento nativo **tem
+semântica implícita** e não precisa da role — eu tinha procurado o meu
+vocabulário outra vez.
+
+### E a prova existe, é boa, e mede a página errada
+
+O `inspeccao/foco.spec.ts` tem cinco casos e um deles é um **controlo negativo**
+que distingue foco preso de foco solto. É o desenho que eu exijo.
+
+**Mas os cinco correm contra `/es-ES/interno/catalogo`** — o catálogo de desenho.
+Uma página.
+
+Os 20 IDs que o atlas classifica como diálogo são momentos do produto:
+`Cancelar la suscripción` · `¿Traemos la cuenta?` · `Un plato se ha agotado` ·
+`Renovar el acceso de la mesa` · `Identifica tu turno`. **Nenhum está coberto.**
+
+### O padrão, e é a terceira vez que aparece hoje
+
+| a prova | mede | devia medir |
+| --- | --- | --- |
+| `capturas.spec.ts` | 6 páginas `/interno/*` | 396 IDs do atlas |
+| `foco.spec.ts` | `/interno/catalogo` | os 20 momentos de diálogo |
+
+**A página que existe para mostrar os componentes está a servir de produto em
+duas provas.** E percebe-se porquê: é o sítio mais fácil do mundo para provar
+coisas sobre componentes — estão todos lá, sem sessão, sem dados, sem estado.
+
+**É também o menos informativo.** Um foco que se comporta bem no catálogo prova o
+componente; não prova que o «trazemos a conta?» de um telemóvel ao serviço
+devolve o foco ao botão certo. **O componente está provado; o produto não.**
+
+Achado (P2): estender o `foco.spec.ts` aos momentos reais. O mecanismo é nativo,
+portanto a expectativa é que passe — **e é exactamente por isso que vale a pena
+correr**: uma prova que se espera que passe e passa por uma razão que se conhece
+é barata; a mesma prova que falha revelaria que algum diálogo não passa pelo
+componente.
