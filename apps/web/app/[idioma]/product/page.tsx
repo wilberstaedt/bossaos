@@ -1,3 +1,4 @@
+import { Botao } from '@bossaos/ui';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
 import { AvisoDeDemonstracao, Composicao } from '../../../src/componentes/Demonstracao.tsx';
@@ -115,8 +116,8 @@ export default async function Produto({ params }: { params: Promise<{ idioma: Id
         <h2 id="t-produto-fecho">{k.prodFechoTitulo}</h2>
         <p className="bo-publico__texto">{k.prodFechoTexto}</p>
         <p className="bo-mkt__chamada">
-          <a className="bo-botao bo-botao--primario" href={`/${idioma}/demo`}>{k.pedirDemo}</a>
-          <a className="bo-botao bo-botao--secundario" href={`/${idioma}/plans`}>{k.verPlanos}</a>
+          <Botao tom="primario" href={`/${idioma}/demo`}>{k.pedirDemo}</Botao>
+          <Botao tom="secundario" href={`/${idioma}/plans`}>{k.verPlanos}</Botao>
         </p>
       </section>
     </MolduraMkt>

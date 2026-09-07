@@ -1,3 +1,4 @@
+import { Botao } from '@bossaos/ui';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
 import type { Metadata } from 'next';
@@ -93,7 +94,7 @@ export default async function Privacidade({ params }: { params: Promise<{ idioma
         <h2 id="t-pendente">{k.privacidadePendente}</h2>
         <p className="bo-mkt__destaque">{k.privacidadePendenteTexto}</p>
         <p className="bo-mkt__chamada">
-          <a className="bo-botao bo-botao--secundario" href={`/${idioma}/demo`}>{k.pedirDemo}</a>
+          <Botao tom="secundario" href={`/${idioma}/demo`}>{k.pedirDemo}</Botao>
         </p>
       </section>
     </MolduraMkt>

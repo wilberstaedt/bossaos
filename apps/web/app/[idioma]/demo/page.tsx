@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { Aviso } from '@bossaos/ui';
+import { Aviso, Botao } from '@bossaos/ui';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
 import type { Metadata } from 'next';
@@ -172,7 +172,7 @@ export default async function Demo({
 
           <p className="bo-publico__texto">{k.demoPassoSeguinte}</p>
 
-          <p><button type="submit" className="bo-botao bo-botao--primario">{k.demoEnviar}</button></p>
+          <p><Botao tom="primario" type="submit">{k.demoEnviar}</Botao></p>
         </form>
       </section>
     </MolduraMkt>

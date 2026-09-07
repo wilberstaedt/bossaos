@@ -105,14 +105,44 @@ corrida de capturas está em voo.
 inquilino de demonstração persistente e ligá-lo à landing é uma escolha de
 produto, não um conserto. **Fica levantado, não corrigido.**
 
-## A3 · Botões escritos à mão no caminho comercial · **BAIXA**
+## A3 · Botões escritos à mão no caminho comercial · **BAIXA** · FECHADO
 
-**O que se vê.** A montra levou a landing a zero `className="bo-botao"` escrito à
-mão. O resto do caminho comercial tem **14**, com a maior concentração em
-`apps/web/app/[idioma]/getting-started/page.tsx:124,125,246,247`.
+### A reconciliação, feita ANTES de corrigir
 
-**Correcção proposta.** O `Botao` já aceita `href` desde `ec194bc` — é
-substituição directa. Não está partido: é dívida, e fica classificada como tal.
+O sénior contou **10** e eu contei **14**, e a diferença não era erro de nenhum
+dos dois: **eram populações diferentes**. Ele contou em seis ficheiros de rota;
+eu contei nos que a travessia alcança a partir da landing.
+
+| ficheiro | ele | eu |
+| --- | ---: | ---: |
+| `getting-started` | 4 | 4 |
+| `plans` | 2 | 2 |
+| `product` | 2 | 2 |
+| `faq` | 1 | 1 |
+| `demo` | 1 | 1 |
+| `trust`, landing | 0 | 0 |
+| **`demo/thanks`** | — | **1** |
+| **`pilot`** | — | **2** |
+| **`privacy`** | — | **1** |
+| | **10** | **14** |
+
+**A soma fecha: 10 + 4 = 14, e os quatro extra são alcançáveis.** O `/pilot`
+está na navegação de marketing, o `/privacy` é ligado do próprio formulário de
+demonstração, e o `/demo/thanks` é onde aterra quem converteu — a travessia
+chegou aos três a partir da landing, sem sessão. **Corrigir dez deixava quatro
+vivos em páginas que ninguém tinha visitado**, que é exactamente o modo como
+estas dívidas sobrevivem.
+
+### A correcção
+
+Os 14 passaram a `Botao` — 13 com `href`, e o do `/demo` como
+`<Botao tom="primario" type="submit">`, que continua a submeter o formulário
+porque o `type` do chamador vence o `type="button"` do componente. Total no
+produto: **274 → 260**. A landing continua a **zero**.
+
+**Medido no DOM e não na contagem**, que é o que a montra me ensinou: os 14
+rendem, os 14 navegam, **zero inertes**. Uma conversão que deixasse um `<a>` sem
+`href` continuaria a contar como convertida e não levava ninguém a lado nenhum.
 
 ---
 

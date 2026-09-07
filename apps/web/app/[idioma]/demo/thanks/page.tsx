@@ -1,4 +1,4 @@
-import { Aviso } from '@bossaos/ui';
+import { Aviso, Botao } from '@bossaos/ui';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../../src/componentes/Marketing.tsx';
 import type { Metadata } from 'next';
@@ -49,9 +49,9 @@ export default async function Obrigado({
           <Aviso tom="info" titulo={k.obrigadoTitulo}>{k.demoRepetido}</Aviso>
         ) : null}
         <p className="bo-mkt__chamada">
-          <a className="bo-botao bo-botao--secundario" href={`/${idioma}/product`}>
+          <Botao tom="secundario" href={`/${idioma}/product`}>
             {k.verProduto}
-          </a>
+          </Botao>
         </p>
       </section>
     </MolduraMkt>

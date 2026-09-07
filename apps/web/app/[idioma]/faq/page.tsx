@@ -1,3 +1,4 @@
+import { Botao } from '@bossaos/ui';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
 import type { Metadata } from 'next';
@@ -101,7 +102,7 @@ export default async function Faq({ params }: { params: Promise<{ idioma: Idioma
           </div>
         ))}
         <p className="bo-mkt__chamada" style={{ marginTop: 'var(--bo-espaco-xl)' }}>
-          <a className="bo-botao bo-botao--secundario" href={`/${idioma}/demo`}>{k.contactar}</a>
+          <Botao tom="secundario" href={`/${idioma}/demo`}>{k.contactar}</Botao>
         </p>
       </section>
     </MolduraMkt>

@@ -1,3 +1,4 @@
+import { Botao } from '@bossaos/ui';
 import {
   COMISSAO_DIRECTOS, MENSALIDADES_NUM_ANO, MOEDA_COMERCIAL, precoDoPlano,
 } from '@bossaos/domain';
@@ -290,10 +291,10 @@ export default async function Planos({ params }: { params: Promise<{ idioma: Idi
         <h2 id="t-contratar">{k.contratarTitulo}</h2>
         <p className="bo-publico__texto">{k.contratarTexto}</p>
         <p className="bo-mkt__chamada">
-          <a className="bo-botao bo-botao--primario" href={`/${idioma}/demo`}>{k.pedirDemo}</a>
-          <a className="bo-botao bo-botao--secundario" href={`/${idioma}/auth/login`}>
+          <Botao tom="primario" href={`/${idioma}/demo`}>{k.pedirDemo}</Botao>
+          <Botao tom="secundario" href={`/${idioma}/auth/login`}>
             {m.entrar.accao}
-          </a>
+          </Botao>
         </p>
       </section>
     </MolduraMkt>

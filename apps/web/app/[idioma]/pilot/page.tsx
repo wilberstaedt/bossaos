@@ -1,3 +1,4 @@
+import { Botao } from '@bossaos/ui';
 import { MOEDA_COMERCIAL, precoDoPlano } from '@bossaos/domain';
 import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
@@ -111,7 +112,7 @@ export default async function Piloto({ params }: { params: Promise<{ idioma: Idi
           <p className="bo-mkt__preco-nota">{k.precoImplantacaoSozinho}</p>
           <p className="bo-mkt__preco-nota">{k.precoImposto}</p>
           <p className="bo-mkt__chamada">
-            <a className="bo-botao bo-botao--secundario" href={`/${idioma}/plans`}>{k.verPlanos}</a>
+            <Botao tom="secundario" href={`/${idioma}/plans`}>{k.verPlanos}</Botao>
           </p>
         </section>
       ) : null}
@@ -126,7 +127,7 @@ export default async function Piloto({ params }: { params: Promise<{ idioma: Idi
         <h2 id="t-sem-nomes">{k.pilotoSemNomes}</h2>
         <p className="bo-mkt__destaque">{k.pilotoSemNomesTexto}</p>
         <p className="bo-mkt__chamada">
-          <a className="bo-botao bo-botao--primario" href={`/${idioma}/demo`}>{k.pedirDemo}</a>
+          <Botao tom="primario" href={`/${idioma}/demo`}>{k.pedirDemo}</Botao>
         </p>
       </section>
     </MolduraMkt>

@@ -1,3 +1,4 @@
+import { Botao } from '@bossaos/ui';
 import { MOEDA_COMERCIAL, precoDoPlano } from '@bossaos/domain';
 import { formatarDinheiro, formatarNumero, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
@@ -121,8 +122,8 @@ export default async function Comecamos({ params }: { params: Promise<{ idioma: 
           <h1>{k.implantacaoPagina}</h1>
           <p className="bo-publico__texto">{k.implantacaoPaginaTexto}</p>
           <p className="bo-mkt__chamada">
-            <a className="bo-botao bo-botao--primario" href={`/${idioma}/demo`}>{k.pedirDemo}</a>
-            <a className="bo-botao bo-botao--secundario" href={`/${idioma}/plans`}>{k.verPlanos}</a>
+            <Botao tom="primario" href={`/${idioma}/demo`}>{k.pedirDemo}</Botao>
+            <Botao tom="secundario" href={`/${idioma}/plans`}>{k.verPlanos}</Botao>
           </p>
         </div>
         <div className="bo-mkt__heroi-media">
@@ -243,8 +244,8 @@ export default async function Comecamos({ params }: { params: Promise<{ idioma: 
         <h2 id="t-fecho">{k.implantacaoFechoTitulo}</h2>
         <p className="bo-publico__texto">{k.implantacaoFechoTexto}</p>
         <p className="bo-mkt__chamada">
-          <a className="bo-botao bo-botao--primario" href={`/${idioma}/demo`}>{k.pedirDemo}</a>
-          <a className="bo-botao bo-botao--secundario" href={`/${idioma}/plans`}>{k.verPlanos}</a>
+          <Botao tom="primario" href={`/${idioma}/demo`}>{k.pedirDemo}</Botao>
+          <Botao tom="secundario" href={`/${idioma}/plans`}>{k.verPlanos}</Botao>
         </p>
       </section>
     </MolduraMkt>
