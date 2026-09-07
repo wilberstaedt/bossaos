@@ -231,3 +231,41 @@ lenta, teclado virtual, zoom a 200%, preços grandes, nomes longos.
 Nove por medir num total de dez não é «conforme com ressalvas»: é a secção 9
 **por medir**, com dois pontos verificados dentro dela. Digo o número para que
 ninguém leia o que está acima como um veredicto sobre a secção inteira.
+
+### Dois casos a mais do §9.2, e uma retractação minha no meio
+
+**Tabelas sem dados e com muitas colunas — CONFORME, e com um cuidado raro.**
+Os estados vazios existem e são sete no catálogo. E um deles diz isto:
+
+> `"semDadosExplica": "Nobody measured: this is not the same as zero."`
+
+**O produto distingue «ninguém mediu» de «zero» na sua própria cara.** É a mesma
+doutrina das três respostas com que eu fecho as etapas, escrita numa mensagem de
+interface para o dono do restaurante ler. Um ecrã que mostra zero onde ninguém
+mediu é um ecrã que mente com um número — e este recusa-se.
+
+Para as colunas, a `.bo-tabela--adaptavel` esconde o cabeçalho visualmente e
+mantém-no para o leitor de ecrã (`width: 1px; height: 1px; clip-path: inset(50%)`),
+que é a forma correcta e não a de o apagar.
+
+**Zoom a 200% — NÃO MEDI, e retiro um defeito que quase escrevi.** Contei «31
+alturas fixas em px contra 11 unidades relativas» e ia daí para um risco de
+zoom. Fui ver as 31 antes de as reportar: **quase todas são `line-height`** — o
+meu padrão `height: *[0-9]+px` casa com o hífen de `line-height`, e um
+`line-height` em px ao lado de um `font-size` em px é o que se deve fazer.
+
+Contadas como deve ser, são **5 `min-height`** — que são os alvos de toque, e
+esses **devem** ser físicos, senão um dedo deixa de caber ao mudar a fonte — e
+**8 alturas rígidas**, das quais várias são o truque de 1×1 px do leitor de ecrã,
+uma barra de 12 px, um glifo de 5 px e um avatar de 28 px. **Nenhuma é
+contentor de texto.**
+
+Não há defeito de zoom aqui, e também não há prova de que não haja: sob zoom de
+página o navegador escala px na mesma, e o caso que distingue os dois é o
+utilizador que só aumenta a **fonte**. Isso mede-se ao vivo, e ao vivo não medi.
+
+**Nono instrumento meu a falhar hoje, e a nona vez que só a pergunta de
+seguimento o apanhou.** O padrão já não é acidente: sempre que um número chega
+sozinho e conveniente, ele está a contar outra coisa. A regra que fica é a que
+já custou o dia todo — **antes de reportar um número, ler as linhas que ele
+contou.**

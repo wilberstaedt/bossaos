@@ -1,0 +1,902 @@
+[
+  {
+    "id": "MKT-001",
+    "pagina": "home",
+    "rota": "/es-ES",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 1200,
+      "altura": 60,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 1200,
+      "altura": 65,
+      "topo": 1107.6
+    },
+    "marca": {
+      "caixa": {
+        "largura": 81.5,
+        "altura": 28,
+        "topo": 16
+      },
+      "ligada": false,
+      "destino": null,
+      "nomeAcessivel": null,
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": false,
+      "ligacoes": 7,
+      "visiveis": 7,
+      "agrupamentos": 7,
+      "linhas": 2,
+      "capsulas": 7,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "login": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "menu": [],
+    "rodapeEstrutura": {
+      "ligacoes": 0,
+      "grupos": 0,
+      "texto": "Hecho con BossaOS"
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "El producto BossaOS",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Compara los planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Así empezamos contigo",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Aprende con la operación real",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Una base para trabajar con confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Resolvemos tus dudas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      }
+    ]
+  },
+  {
+    "id": "MKT-004",
+    "pagina": "produto",
+    "rota": "/es-ES/product",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 1200,
+      "altura": 77.2,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 1200,
+      "altura": 82.2,
+      "topo": 817.8
+    },
+    "marca": {
+      "caixa": {
+        "largura": 81.5,
+        "altura": 28,
+        "topo": 24.6
+      },
+      "ligada": false,
+      "destino": null,
+      "nomeAcessivel": null,
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": false,
+      "ligacoes": 7,
+      "visiveis": 7,
+      "agrupamentos": 7,
+      "linhas": 2,
+      "capsulas": 7,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "login": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "menu": [],
+    "rodapeEstrutura": {
+      "ligacoes": 0,
+      "grupos": 0,
+      "texto": "Hecho con BossaOS"
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "El producto BossaOS",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Compara los planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Así empezamos contigo",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Aprende con la operación real",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Una base para trabajar con confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Resolvemos tus dudas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      }
+    ]
+  },
+  {
+    "id": "MKT-005",
+    "pagina": "planos",
+    "rota": "/es-ES/plans",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 1200,
+      "altura": 76.5,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 1200,
+      "altura": 81.5,
+      "topo": 818.5
+    },
+    "marca": {
+      "caixa": {
+        "largura": 81.5,
+        "altura": 28,
+        "topo": 24.3
+      },
+      "ligada": false,
+      "destino": null,
+      "nomeAcessivel": null,
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": false,
+      "ligacoes": 7,
+      "visiveis": 7,
+      "agrupamentos": 7,
+      "linhas": 2,
+      "capsulas": 7,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "login": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "menu": [],
+    "rodapeEstrutura": {
+      "ligacoes": 0,
+      "grupos": 0,
+      "texto": "Hecho con BossaOS"
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "El producto BossaOS",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Compara los planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Así empezamos contigo",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Aprende con la operación real",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Una base para trabajar con confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Resolvemos tus dudas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      }
+    ]
+  },
+  {
+    "id": "MKT-006",
+    "pagina": "implantacao",
+    "rota": "/es-ES/getting-started",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 1200,
+      "altura": 73.9,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 1200,
+      "altura": 78.9,
+      "topo": 821.1
+    },
+    "marca": {
+      "caixa": {
+        "largura": 81.5,
+        "altura": 28,
+        "topo": 22.9
+      },
+      "ligada": false,
+      "destino": null,
+      "nomeAcessivel": null,
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": false,
+      "ligacoes": 7,
+      "visiveis": 7,
+      "agrupamentos": 7,
+      "linhas": 2,
+      "capsulas": 7,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "login": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "menu": [],
+    "rodapeEstrutura": {
+      "ligacoes": 0,
+      "grupos": 0,
+      "texto": "Hecho con BossaOS"
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "El producto BossaOS",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Compara los planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Así empezamos contigo",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Aprende con la operación real",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Una base para trabajar con confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Resolvemos tus dudas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      }
+    ]
+  },
+  {
+    "id": "MKT-007",
+    "pagina": "demo",
+    "rota": "/es-ES/demo",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 1200,
+      "altura": 60,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 1200,
+      "altura": 65,
+      "topo": 1129.4
+    },
+    "marca": {
+      "caixa": {
+        "largura": 81.5,
+        "altura": 28,
+        "topo": 16
+      },
+      "ligada": false,
+      "destino": null,
+      "nomeAcessivel": null,
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": false,
+      "ligacoes": 7,
+      "visiveis": 7,
+      "agrupamentos": 7,
+      "linhas": 2,
+      "capsulas": 7,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "login": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "menu": [],
+    "rodapeEstrutura": {
+      "ligacoes": 0,
+      "grupos": 0,
+      "texto": "Hecho con BossaOS"
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "El producto BossaOS",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Compara los planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Así empezamos contigo",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Aprende con la operación real",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Una base para trabajar con confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Resolvemos tus dudas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      }
+    ]
+  },
+  {
+    "id": "MKT-008",
+    "pagina": "confianca",
+    "rota": "/es-ES/trust",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 1200,
+      "altura": 71.5,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 1200,
+      "altura": 76.5,
+      "topo": 823.5
+    },
+    "marca": {
+      "caixa": {
+        "largura": 81.5,
+        "altura": 28,
+        "topo": 21.7
+      },
+      "ligada": false,
+      "destino": null,
+      "nomeAcessivel": null,
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": false,
+      "ligacoes": 7,
+      "visiveis": 7,
+      "agrupamentos": 7,
+      "linhas": 2,
+      "capsulas": 7,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "login": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "menu": [],
+    "rodapeEstrutura": {
+      "ligacoes": 0,
+      "grupos": 0,
+      "texto": "Hecho con BossaOS"
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "El producto BossaOS",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Compara los planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Así empezamos contigo",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Aprende con la operación real",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Una base para trabajar con confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Resolvemos tus dudas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      }
+    ]
+  },
+  {
+    "id": "MKT-009",
+    "pagina": "faq",
+    "rota": "/es-ES/faq",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 1200,
+      "altura": 60,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 1200,
+      "altura": 65,
+      "topo": 901.4
+    },
+    "marca": {
+      "caixa": {
+        "largura": 81.5,
+        "altura": 28,
+        "topo": 16
+      },
+      "ligada": false,
+      "destino": null,
+      "nomeAcessivel": null,
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": false,
+      "ligacoes": 7,
+      "visiveis": 7,
+      "agrupamentos": 7,
+      "linhas": 2,
+      "capsulas": 7,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "login": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "menu": [],
+    "rodapeEstrutura": {
+      "ligacoes": 0,
+      "grupos": 0,
+      "texto": "Hecho con BossaOS"
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "El producto BossaOS",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Compara los planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Así empezamos contigo",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Aprende con la operación real",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Una base para trabajar con confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Resolvemos tus dudas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      }
+    ]
+  },
+  {
+    "id": "MKT-010",
+    "pagina": "piloto",
+    "rota": "/es-ES/pilot",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 1200,
+      "altura": 96.5,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 1200,
+      "altura": 101.5,
+      "topo": 798.5
+    },
+    "marca": {
+      "caixa": {
+        "largura": 81.5,
+        "altura": 28,
+        "topo": 34.3
+      },
+      "ligada": false,
+      "destino": null,
+      "nomeAcessivel": null,
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": false,
+      "ligacoes": 7,
+      "visiveis": 7,
+      "agrupamentos": 7,
+      "linhas": 2,
+      "capsulas": 7,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "login": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "menu": [],
+    "rodapeEstrutura": {
+      "ligacoes": 0,
+      "grupos": 0,
+      "texto": "Hecho con BossaOS"
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "El producto BossaOS",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Compara los planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Así empezamos contigo",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Aprende con la operación real",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Una base para trabajar con confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Resolvemos tus dudas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      }
+    ]
+  },
+  {
+    "id": "MKT-011",
+    "pagina": "obrigado",
+    "rota": "/es-ES/demo/thanks",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 1200,
+      "altura": 166.9,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 1200,
+      "altura": 171.9,
+      "topo": 728.1
+    },
+    "marca": {
+      "caixa": {
+        "largura": 81.5,
+        "altura": 28,
+        "topo": 69.4
+      },
+      "ligada": false,
+      "destino": null,
+      "nomeAcessivel": null,
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": false,
+      "ligacoes": 7,
+      "visiveis": 7,
+      "agrupamentos": 7,
+      "linhas": 2,
+      "capsulas": 7,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "login": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "menu": [],
+    "rodapeEstrutura": {
+      "ligacoes": 0,
+      "grupos": 0,
+      "texto": "Hecho con BossaOS"
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "El producto BossaOS",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Compara los planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Así empezamos contigo",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Aprende con la operación real",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Una base para trabajar con confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Resolvemos tus dudas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      }
+    ]
+  },
+  {
+    "id": "MKT-012",
+    "pagina": "naoencontrado",
+    "rota": "/es-ES/404",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 1200,
+      "altura": 166.9,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 1200,
+      "altura": 171.9,
+      "topo": 728.1
+    },
+    "marca": {
+      "caixa": {
+        "largura": 81.5,
+        "altura": 28,
+        "topo": 69.4
+      },
+      "ligada": false,
+      "destino": null,
+      "nomeAcessivel": null,
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": false,
+      "ligacoes": 7,
+      "visiveis": 7,
+      "agrupamentos": 7,
+      "linhas": 2,
+      "capsulas": 7,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "login": {
+      "quantos": 0,
+      "destinos": []
+    },
+    "menu": [],
+    "rodapeEstrutura": {
+      "ligacoes": 0,
+      "grupos": 0,
+      "texto": "Hecho con BossaOS"
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "El producto BossaOS",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Compara los planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Así empezamos contigo",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Aprende con la operación real",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Una base para trabajar con confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Resolvemos tus dudas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      }
+    ]
+  }
+]
