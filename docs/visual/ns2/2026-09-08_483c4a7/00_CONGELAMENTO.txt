@@ -1,0 +1,7 @@
+sha_completo: 483c4a767b93990dbcf46d7f6080c2c90f1ef0f7
+sha_curto: 483c4a7
+ramo: main
+arvore_suja: 2 ficheiro(s)
+commits_locais_por_enviar: 514
+data: 2026-09-08 00:06:28 +0200
+producao_no_ar: 4cba084 (4cba084, publicado 07/09 17:16)
