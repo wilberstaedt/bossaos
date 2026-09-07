@@ -864,3 +864,43 @@ existe.
 Esta foi a terceira vez hoje que a sonda apanhou o detector, e não o produto.
 Sem ela, o commit dizia «119 de 128 protegidas» com um número inventado por um
 bug meu, e ninguém teria por onde duvidar.
+
+---
+
+## RV100-024 REABERTO — a cura estava inerte (07/09, `0be1c65`)
+
+O sénior fechou o achado com o defeito lá dentro, e eu tinha-lho entregue assim.
+Duas rotas reais davam **500** enquanto a minha guarda dizia **128 de 128 verde**.
+
+### O erro de raiz: confirmei uma verdade que não era a pergunta
+
+Fui ao runtime do Prisma verificar que `InconsistentColumnData` mapeia para
+`P2023`, escrevi «verificado e não presumido», e era verdade. Mas a pergunta era
+**qual o código que ESTA falha produz**, e a resposta é `P2007`, com a mensagem
+`invalid input syntax for type uuid`. O mecanismo escutou o código errado desde
+o primeiro commit: esteve inerte em todos os caminhos.
+
+**A regra:** verificar que um facto existe não é verificar que é o facto
+relevante. A pergunta certa não é «este código existe?» — é «é este que sai
+quando isto acontece?», e só a medição no sítio responde.
+
+### O verde emprestado, que é a mesma família
+
+Com a tradução **desligada**, o kiosk e a carta continuavam a dar 404. Esses 404
+eram o «não encontrado» próprio das rotas, e eu li-os como prova de que a cura
+funcionava num dos caminhos. **Um verde que vem de outro sítio parece igual ao
+verde que se procura** — e só o controlo negativo os separa.
+
+### Medir adopção não é medir resultado
+
+A guarda contava páginas que chamam o invólucro. Isso responde «uma página nova
+fica coberta?», que é útil, e **não** responde «o produto faz o que diz». Agora o
+veredicto vem do código HTTP em rotas reais, cada uma com par de controlo (UUID
+válido inexistente), e a adopção ficou como âmbito.
+
+### E um portão meu que reprovava a reescrita
+
+A guarda verificava a **grafia** do mecanismo (`IdentificadorMalFormado) notFound()`).
+Quando a cura passou a perguntar pela estrutura, o portão deu NÃO MEDI sobre
+código que estava lá e a funcionar. Um guarda que verifica como uma coisa está
+escrita reprova quem a melhora e deixa passar quem a quebra.
