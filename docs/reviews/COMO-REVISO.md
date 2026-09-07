@@ -3136,3 +3136,50 @@ E o piso fica piso, não igualdade. Com a aplicação em baixo as secções emit
 **menos** verificações; uma igualdade trocaria a mensagem certa — «a aplicação
 não arrancou» — pela errada — «a prova não correu inteira». **Um piso perde-se
 com o tempo, mas perde-se para o lado seguro.**
+
+---
+
+## A nota menor era a terceira porta — 07/09, 21h15 (o achado é do JR)
+
+Passei-lhe duas notas dele próprio, marcadas por mim como **menores e não
+bloqueantes**: o `mktemp` na forma antiga, e uma cópia temporária órfã quando o
+ajudante é lido duas vezes. A primeira era mesmo menor. **A segunda não era uma
+nota de arrumação — era a terceira porta para a doença deste ficheiro.**
+
+O ajudante fazia `NEXT_ENV_COPIA=""` no topo. Uma segunda leitura na mesma
+corrida apagava o que a primeira tinha guardado. O ficheiro órfão é o sintoma
+visível; o que custa é o outro lado — **`repor` devolve 0 e não repõe nada.**
+
+Verifiquei-o eu, com o «antes» tirado do `git`:
+
+| versão | depois de re-ler | `repor` | temporário |
+|---|---|---|---|
+| `e173c1b` | `[]` — **desarmada em silêncio** | devolveu **0** | ficou órfão |
+| `d365304` | mantém o valor — **armada** | repõe | limpo |
+
+`repor` a devolver **0** é, literalmente, dar-se por cumprido sem ter feito nada.
+É a mesma forma das outras duas portas deste ficheiro, e das três foi esta a que
+eu classifiquei como arrumação.
+
+### E ao verificá-lo errei o sujeito duas vezes seguidas
+
+Primeiro sourcei a versão antiga a partir de `/tmp`: o `BASH_SOURCE` resolveu
+para `//apps/web/…` e o que disparou foi a **guarda do caminho**, não o que eu
+queria testar. **Inconclusivo, não confirmado** — e a diferença entre as duas
+palavras é a diferença entre rever e assinar por hábito.
+
+Depois tirei o «antes» de `HEAD~2`, que **já era a cura dele**. O controlo veio
+verde dos dois lados e não provava nada. Só ao exigir que o «antes» mostrasse a
+linha `NEXT_ENV_COPIA=""` é que fiquei com um controlo a sério.
+
+**Um controlo negativo que não falha não é um controlo — é uma segunda corrida
+do controlo positivo com outro nome.** E a única defesa é obrigar o «antes» a
+provar que é o antes, antes de acreditar no depois.
+
+### O que ele fez e eu não tinha pedido
+
+Disse, sobre o `mktemp` no GNU, que **raciocinou a partir do contrato
+documentado e não mediu**, porque não há GNU nesta máquina. Podia ter escrito a
+mesma frase sem a ressalva e eu não tinha maneira de saber. **Separar a metade
+medida da metade raciocinada, sem ninguém perguntar, é o que faz uma revisão
+valer alguma coisa.**
