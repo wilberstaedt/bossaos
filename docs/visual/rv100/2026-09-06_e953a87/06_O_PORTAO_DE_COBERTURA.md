@@ -100,3 +100,46 @@ as telas vão mudar, e capturar antes é deitar fora. Mas a **enumeração**, a
 **resolução dos 23 parâmetros** e a **semente da cauda** não dependem de estética
 nenhuma e podem ser construídas enquanto se espera. É o item certo para pôr a
 correr em paralelo assim que houver mão livre.
+
+---
+
+## Correcção ao que escrevi acima: as justificações não existem, mas a dívida está contada
+
+Escrevi há duas horas que «não há uma única justificação» e usei isso para dizer
+que o portão exige as 792 inteiras. **A frase está certa e a leitura estava
+incompleta**, e a diferença importa.
+
+É verdade que a coluna `mobile` do `coverage.csv` diz
+`obrigatório/adaptado à superfície` nas **396**, sem uma excepção. Mas existe,
+desde 04/09, um segundo sítio que eu não tinha ido ver:
+**`docs/progress/DIVIDA-MOVEL.txt`**, com **46 IDs** que estão assinados como
+validados e **não têm prova de móvel**. A `validar-movel.sh` lê essa lista, deixa
+passar os 46 e **reprova qualquer ID novo** nas mesmas condições. Tecto que só
+desce à mão.
+
+E o cabeçalho do ficheiro aplica a doutrina das três respostas à cobertura,
+melhor do que eu a tinha aplicado aqui:
+
+> «Não são defeitos conhecidos: **são medições que NÃO ACONTECERAM**, e por isso
+> não se diz que estão bem. Estão aqui para que a dívida seja contada em vez de
+> invisível, e para que a guarda possa reprovar dívida NOVA sem reprovar 66 vezes
+> por dia — que é como as guardas acabam desligadas.»
+
+**Dívida declarada não é justificação, e a distinção não é semântica.** Uma
+justificação diz *«esta composição não precisa de existir»*; a dívida diz
+*«precisa, e ainda não foi feita»*. Os 46 continuam a contar para as 792. O que
+muda é o retrato: não é que ninguém tenha olhado para a cobertura móvel — é que
+alguém olhou, contou o que faltava e pôs um tecto.
+
+**E há um facto melhor do que o total: 29 dos 46 são `RES-B-001` a `RES-B-029`.**
+Sessenta e três por cento da dívida de móvel é **uma família — as reservas**.
+Isso torna-a um trabalho, e não uma varredura: medir as reservas em móvel resolve
+quase dois terços da lista de uma vez.
+
+**Nota de método, e é a terceira vez esta noite.** Contei a lista com
+`^[A-Z]+-[0-9]+` e obtive **17** onde a guarda dizia 46. Não publiquei os 17: fui
+ver os bytes das linhas que faltavam e são `RES-B-001`, um ID de **dois
+segmentos** que o meu padrão não admite porque espera dígito logo após o
+primeiro hífen. **O número em desacordo consigo próprio foi o que impediu o
+erro** — se eu tivesse escrito um padrão que desse 46 à primeira por acaso, tinha
+publicado 46 sem nunca ver que a dívida era quase toda de reservas.
