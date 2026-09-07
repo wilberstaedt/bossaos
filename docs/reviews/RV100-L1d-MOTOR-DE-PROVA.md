@@ -84,3 +84,52 @@ não quis fechar duas coisas medindo uma. Sem formatos optimizados, porque
 há 390, 1280 e 1440, e ele diz isso em vez de chamar 1280 de tablet.
 
 **L1d fechado. Nada aprovado** — a estética é da secção 7 e é do Matheus.
+
+---
+
+## Consequência do lote, apanhada três horas depois pela guarda certa
+
+`scripts/validar-alvos-com-casa.sh` passou a **FALHA**, e é a melhor espécie de
+vermelho: **a guarda avisou disto antes de acontecer, com estas palavras**, que
+são minhas de há semanas:
+
+> *«Hoje pode acertar por só haver um candidato. Isso é acertar por **população,
+> não por desenho**: basta a semente criar o segundo.»*
+
+**A semente criou o segundo.** O inquilino de demonstração fez o número de
+tabelas com linhas em mais de uma casa passar de **6 para 11** — medi as duas
+pontas: o meu inventário de guardas de há três horas registou «6 tabela; 5
+consulta», e agora são 11 e 3.
+
+### O que está em risco, e o que não está
+
+As três consultas vivem em **`inspeccao/alvos.ts`** — o resolvedor de alvos do
+arnês — e procuram por prefixo:
+
+```
+alvos.ts:282  SELECT id FROM production_stations WHERE nome LIKE '${PREFIXO}%' …
+alvos.ts:287  SELECT id FROM production_tasks WHERE station_id IN (…)
+```
+
+**Não é fuga entre inquilinos em produção.** É correcção do arnês: com duas
+casas na base, o resolvedor pode devolver uma estação da **demonstração** quando
+o teste queria a da **inspecção**. E são precisamente `production_stations` e
+`production_tasks` — os dados do KDS, que é a superfície onde o motor de prova
+acabou de tirar a captura.
+
+O prefixo é uma **convenção de nome**, não um âmbito. Funcionou enquanto havia
+uma casa só.
+
+### Uma hipótese minha que testei e não se confirmou
+
+Vi «12 consultas» numa corrida e «3» na seguinte, e escrevi que a base estava a
+ser mexida por baixo. **Fui testar e não reproduz:** três corridas seguidas dão
+11 e 3, e não há processo de Playwright ou Prisma vivo. Fica **uma leitura
+anómala e quatro consistentes** — digo-o assim em vez de promover uma observação
+a padrão.
+
+### Para quem construiu a semente
+
+O arranjo é dar casa às três consultas, não mudar o prefixo. Um prefixo mais
+específico volta a acertar por população — que é exactamente o que a mensagem da
+guarda reprova pelo nome.
