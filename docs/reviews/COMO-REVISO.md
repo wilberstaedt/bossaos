@@ -2018,3 +2018,41 @@ O alvo é **o momento em que a prova é mostrada a alguém**: antes de eu emitir
 artefactos que vão nessa entrega**. Fora desse momento, ela é um relatório
 honesto de dívida. **A frescura não é uma propriedade do repositório; é uma
 condição de quem apresenta.**
+
+---
+
+## Verificar a entrega: dois instrumentos a mentir na mesma sessão, em sentidos opostos — 07/09
+
+Publiquei o preview do §7.1 e disse ao Matheus que abria no telemóvel.
+**Publicar não é entregar**, por isso fui ver — e o que se passou a seguir vale
+mais do que a verificação.
+
+**Primeiro instrumento: os meus cliques não chegavam ao iframe.** Cliquei numa
+captura: nada. Cliquei na lupa: nada. Ia concluir que a página estava partida.
+**O que me salvou foi mandar o clique a um alvo que não pode falhar** — uma
+pastilha de navegação, que é um `<a href="#M03">` puro. Também não fez nada. **Um
+âncora de HTML não se parte;** logo o defeito estava na entrega do clique, e não
+na página. É o mesmo raciocínio do alvo que não podia exibir o defeito, virado do
+avesso: aqui usei de propósito um alvo que **tinha** de responder.
+
+**Segundo instrumento: o meu servidor local corrompia o texto.** Para testar o
+gesto fora do sandbox servi o mesmo ficheiro por HTTP — e apareceu `telemÃ³vel`,
+`pÃ¡gina`. Ia registar um defeito de codificação. **Medi antes:** o ficheiro é
+UTF-8 válido, e o meu `python3 -m http.server` manda `Content-type: text/html`
+**sem `charset`** — o browser cai em latin-1. **A corrupção era do transporte, e
+o mesmo ficheiro tinha aparecido correcto na artifact minutos antes.**
+
+**Dois falsos defeitos do produto na mesma verificação, ambos meus, em direcções
+opostas:** um fez uma página que funciona parecer partida; o outro fez um
+ficheiro correcto parecer corrompido.
+
+**E a saída foi a mesma nos dois casos: mudar o CAMINHO até ao sujeito, mantendo
+o sujeito idêntico.** O gesto que o sandbox não me deixava dar, dei-o pelo
+fragmento do URL — `:target` é conduzido por navegação, não por clique — e a
+ampliação abriu, provada no mesmo ficheiro. **Quando o instrumento não alcança o
+sujeito, troca-se o instrumento e não a conclusão.**
+
+**E o que fica por medir, dito: não verifiquei o toque DENTRO do sandbox.** O
+mecanismo é âncora + `:target`, sem JavaScript nenhum — tirei o JS precisamente
+para não haver um ponto único de falha — e está provado a funcionar no ficheiro
+idêntico. Mas provado ali, não lá. É NÃO MEDI, e escreve-se assim.
