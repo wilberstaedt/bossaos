@@ -242,3 +242,72 @@ tipo: parece uma explicação.
 Não re-mediu-se aqui nada — re-correr os 18 é o trabalho do próprio `AF100`, e
 é grande. **O que muda é que a decadência passa a estar declarada em vez de
 implícita.** Uma tabela que não diz de que commit fala parece falar do actual.
+
+---
+
+## Por onde se volta a medir cada critério — 08/09
+
+> Dos 26 critérios, 8 foram re-medidos a 07/09 e trazem a hora, e 1 já citava um
+> guião (`validar-no-commit`). **Estes são os 17 que restavam**, e o objectivo
+> não é re-medi-los: é que quem os quiser re-medir saiba por onde — e saiba
+> quais é que **nem por guião se medem**.
+>
+> **Regra aplicada, e é a que dá valor a isto:** o NOME de um guião não prova
+> que ele mede o critério. Cada citação abaixo foi **corrida**, e ao lado está a
+> **linha da saída** que fala do critério. Onde o guião passava mas nada na saída
+> falava do critério, **não foi citado** — um verde ao lado não é resposta.
+
+### Os cinco que se re-medem por guião
+
+| critério | guião | a linha que o diz |
+| --- | --- | --- |
+| não existe identidade antiga ou paralela | `validar-coral-da-arte.sh` (saída 0) | `ok  o coral da arte não entra em interface` |
+| preços vêm da fonte aprovada | `validar-precos.sh` (saída 0) | `ok  3 planos, valores em cêntimos inteiros` · `ok  nenhum valor em euros escrito à mão fora da vitrina` |
+| SEO e partilha configurados | `validar-seo.sh` (saída 0) | `ok  12 pastas de rota, todas classificadas` · `Metadados por rota: 0 falhas.` |
+| tema Starter e personalização respeitam limites | `provar-tema.sh` (saída 0) | `ok  caiu a recusa por plano ao guardar` — é o controlo negativo a mostrar que a recusa por plano existe |
+| 396 IDs rastreados | `validar-cobertura.sh` (saída 0) | `ok  nenhum ID perdido (396 de 396)` |
+
+**Uma ressalva declarada:** o `validar-seo.sh` cobre os metadados por rota. **Não
+cobre** a pendência de produção que o próprio veredicto nomeia — o
+`NEXT_PUBLIC_SITE_URL` por definir, sem o qual os canónicos apontam para
+`localhost`. Essa metade continua por medir.
+
+### Os onze que são juízo humano, e porquê
+
+| critério | porque não há guião |
+| --- | --- |
+| logo e ícone aprovados usados correctamente | é comparação com os ficheiros aprovados; nada mede «usado correctamente» |
+| identidade reconhecível sem depender só do wordmark | reconhecibilidade não se mede por regra — o próprio veredicto diz MEDIDO EM PARTE |
+| tipografia, espaço, raios, bordas e movimento tokenizados | são cinco famílias; a `validar-tipografia-minima.sh` cobre **uma** (o piso de 14/20). Citá-la seria dar um verde de 1/5 por resposta |
+| as seis páginas têm conteúdo suficiente | «suficiente» é editorial |
+| não há prova social ou promessa inventada | a `validar-dados-ficticios.sh` mede **dados fabricados em experiências reais**, que é outro assunto: aqui a pergunta é sobre promessas na copy |
+| footer institucional completo para o estado real | ver a nota das armadilhas abaixo |
+| shells diferenciam as cinco superfícies | a `validar-superficies.sh` mede o que **desaparece** dentro do fundo, não a diferenciação entre shells |
+| tarefas frequentes rápidas e claras | «clara» é juízo, e o próprio veredicto já o dizia |
+| loading, empty, error, offline, denied, upgrade coerentes | «coerentes» compara seis estados entre si; nenhum guião o faz |
+| não há P1/P2 visual aberto | é a leitura do dossiê de achados |
+| P3 aceite com decisão, responsável e prazo | idem |
+
+### O que fica fora das duas colunas
+
+**telas-mestre aprovadas propagadas** não é juízo humano nem falta de guião: está
+**bloqueado por desenho** — a §8 põe a propagação depois da aprovação. Fica na
+sua própria linha para não se confundir «não se pode medir» com «não se mede
+ainda».
+
+### As cinco armadilhas de nome, que é o que a régua avisava
+
+Casar palavras com nomes de ficheiro apanhou cinco candidatos errados, e todos
+teriam mandado a próxima pessoa correr um guião que não responde à pergunta:
+
+| candidato pelo nome | o que mede mesmo |
+| --- | --- |
+| `validar-assinaturas.sh` | **não** é assinatura visual: é uma tela não poder estar `validado` se a etapa dela não foi validada |
+| `validar-juncao-identidade.sh` · `provar-identidades.sh` | identidade de **utilizador** (o runtime não junta `users`), não identidade de **marca** |
+| `validar-dados-ficticios.sh` | dados fabricados a chegar a experiências reais, não promessas inventadas na copy |
+| `validar-portas-mortas.sh` | passa a zero, mas fala de **entradas de menu anónimas** — nada na saída fala do rodapé |
+| `validar-registo-coerente.sh` | uma **etapa** não se contradizer no documento; nada sobre P1/P2/P3 |
+
+**A do coral é a que mais interessa**, porque a amostra da régua propunha
+`provar-identidades` para «não existe identidade antiga ou paralela» e o certo é
+`validar-coral-da-arte`. O nome acertava na palavra e errava no sujeito.
