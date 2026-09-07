@@ -206,3 +206,80 @@ foi medida.
 Medir antes do redesenho é medir duas vezes. **Fica registado como sequência,
 não como pendência:** as reservas medem-se em móvel **depois** da propagação, e
 aí resolvem-se 29 das 46 de uma vez.
+
+---
+
+## Terceira medição, e desta vez o portão está mais LONGE — o URL não chega
+
+No tick anterior escrevi que os parâmetros estavam quase todos resolvidos e que
+sobravam três rotas em 396. **Isso era verdade sobre parâmetros e falso sobre
+alcance**, e a diferença é a maior deste documento.
+
+Os 396 IDs **não são 396 endereços**. São **151 endereços distintos**:
+
+| | quantos |
+| --- | ---: |
+| IDs alcançáveis só com o URL (endereço único) | **120** |
+| IDs que partilham endereço com outro — exigem **estado** | **276** |
+| destes, sem URL nenhum — `(na rota que executa a acção)` | **16** |
+
+O `/staff/[locationId]` sozinho carrega **23 IDs**; o `/pos/[locationId]`, 22; o
+`/kds/[locationId]/[stationId]`, 16.
+
+**E o atlas já dizia isto, numa coluna que eu não tinha lido.** A `composicao`
+classifica cada ID por natureza: 322 «página/painel a compor», 20 «diálogo ou
+etapa do fluxo», 13 «estado de rota», 15 «estado transversal», 8 «aba», 4
+«variação de rota», 2 «secção da landing page». A informação estava lá desde o
+princípio.
+
+### O que isto faz às 792
+
+Uma captura deixa de ser «ir ao URL e fotografar»:
+
+- **~240 capturas** (120 IDs × 2) são quase mecânicas;
+- **~552** exigem **chegar a um estado** — abrir um diálogo, trocar de aba,
+  avançar um passo de fluxo;
+- e **32** (16 × 2) exigem **provocar uma condição** que não tem endereço:
+  um erro, uma recusa de plano, uma unidade arquivada. Essas não se navegam,
+  fazem-se acontecer.
+
+## O padrão dos meus dois erros, e vale mais do que qualquer dos dois
+
+Dois ticks seguidos oscilei a estimativa, e pelo mesmo defeito de forma:
+
+| tick | o que medi | o que presumi | resultado |
+| --- | --- | --- | --- |
+| anterior | o que as rotas **pedem** | o que o arnês **já dá** | estimativa **inflacionada** |
+| este | os **parâmetros** | o **alcance** | estimativa **deflacionada** |
+
+**Medi um eixo com cuidado e presumi o segundo — duas vezes, em direcções
+opostas.** É a mesma família do «zero chamadores» e do «zero hex»: um lado da
+conta trabalhado e o outro herdado da minha intuição. A regra que fica:
+**quando a estimativa muda muito entre duas medições, a variável nova não é a
+resposta — é o eixo que eu não tinha medido.**
+
+---
+
+## Decisão: o `?section=` e os três IDs da landing
+
+O implementador mediu que `/es-ES`, `?section=product` e `?section=plans` servem
+HTML **byte a byte igual** (md5 `e703360c…`), por causa do
+`dynamic = 'force-static'`, que entrega `searchParams` vazio na pré-renderização.
+Ele não decidiu sozinho e fez bem: as duas saídas que via — landing dinâmica a
+cada pedido, ou partir os 396 — custam mais do que o defeito.
+
+**Decido que não há alteração de produto, e a razão está no próprio atlas.** A
+coluna `composicao` do MKT-002 diz **«seção da landing page»**, e a evidência
+escreve o motivo: *«MKT-001/002/003 são secções do mesmo endereço, por parâmetro
+— um endereço partilhável não pode mudar com o que o visitante rolou»*.
+
+Quer dizer: **o `?section=` nunca devia servir HTML diferente.** Servir o mesmo
+byte é o comportamento correcto para um endereço que se quer partilhável. O
+defeito não está no produto — está no **mapa**, que promete no `rota_sugerida` um
+parâmetro que distingue e não distingue.
+
+**O que muda é o critério de verificação**, e isso é meu: MKT-002 e MKT-003
+verificam-se pela **presença da sua secção na página única**, e não por uma
+resposta distinta. Fica escrito aqui e **não toco no `coverage.csv` neste
+tick** — dois agentes estão a derivar trabalho desse ficheiro agora, e mexer no
+mapa debaixo de quem o lê é como se partem corridas.
