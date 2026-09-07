@@ -28,6 +28,60 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## O portão antes da Fase 2 — linha de base verde, e cinco plantes eram meus
+
+Três itens, e o `validar-no-commit` fecha a **0 falhas**. Commits `9d2df00`,
+`7a520bb` e o dos corredores.
+
+**1 · Os cinco papéis ganharam ficha.** `--bo-sobre-superficie`, `--bo-accao`,
+`--bo-sobre-accao`, `--bo-navegacao-activa` e `--bo-foco-contraste`. **A minha
+primeira tentativa foi prosa e o teste continuou vermelho:** o `fichas.test.ts`
+exige cada `--bo-*` do `:root` na **correspondência** (com valor) ou nas
+**derivadas** (a apontar a outra). O do contraste tem valor literal e foi para a
+primeira; os outros quatro apontam a outra e foram para as segundas. **Escrever a
+razão num comentário não registou nada.** 43/0.
+
+**2 · O acento da linha 1714: justificado, e não trocado.** Medido no
+`.bo-mkt__fecho`, que é **verde**: o acento da marca dá **4,71** e o de sinal
+3,73. Trocar *piorava* — o rótulo caía abaixo dos 4,5 que texto comum exige. O
+token de sinal existe para ganhar sobre a areia; sobre o verde perde. Fica escrito
+que **a guarda não sabe distinguir a superfície**: pergunta pelo token e não por
+cima de que fundo ele assenta.
+
+**3 · Sete plantes em letra morta, e cinco vieram de mim.**
+
+| plante | porque morreu |
+| --- | --- |
+| kds, staff, visitante | o `h1 data-tela` mudou de casa quando consolidei o `CabecalhoDePagina` |
+| analítica, tpv | a barra lateral que refiz acrescentou `icone` e `grupo` a cada entrada |
+| analítica (2.º) | o vazio passou de `<span>` a `<td>` |
+| reservas | só a indentação desceu dois espaços |
+
+**Duas alterações minhas mataram cinco controlos negativos ao mesmo tempo, e eu
+não corri esta guarda.** Um plante em letra morta não prova nada **e acusa o
+produto**: o `exigir_vermelho` corre contra um produto intacto, passa, e o guião
+conclui que a asserção é vazia. Todos re-ancorados no sítio onde o texto vive
+**agora** — 312 plantes com 7 mortos passaram a **319 com zero**.
+
+**E três vermelhas que o portão destapou por baixo:** o teste das fichas (acima),
+dois silenciadores `2>/dev/null` em traps nunca declarados, e **duas suites que
+não davam verde nem vermelho** — o `ns2-visual` e o `caminho-da-demo` não eram
+nomeados por guião nenhum. Escrevi-lhes corredor e declarei-os no `POR_DESENHO`.
+
+> **Dois enganos meus no caminho, e ambos do mesmo feitio.** Inseri a declaração
+> **depois da aspa de fecho** da variável — declarada fora da declaração, e a
+> guarda continuou vermelha a dizer a verdade. E os corredores novos chamavam
+> **«a suite reprovou»** ao que era *não consegui medir*: num checkout sem build
+> acusavam o produto de um defeito que ninguém mediu.
+
+```
+validar-no-commit  saída 0
+  ok  vê vermelho no de3eb52 e verde no e13b318
+  13 NÃO MEDI — as guardas de navegador, declaradas
+  ok  todas as guardas verdes sobre o COMMIT, e não só sobre a bancada
+  O que se publica está medido: 0 falhas.
+```
+
 ## North Star v2 — Fase 1 entregue, o sistema mínimo das duas telas-mestre
 
 Fundos e secções, tipografia de display, cabeçalho e rodapé, botões, molduras,
