@@ -724,6 +724,12 @@ p { margin: 0; }
   display: flex; align-items: center;
   min-height: var(--bo-toque-operacao);
   overflow-wrap: anywhere;
+  /* Faltavam as duas: sem `color` e sem `text-decoration`, as ligações saíam
+     com o azul sublinhado por omissão do navegador — no meio de um ecrã que não
+     tem mais nada azul. Uma regra que define geometria e esquece a cor deixa o
+     navegador decidir, e o navegador não sabe deste produto. */
+  color: var(--bo-sobre-superficie);
+  text-decoration: none;
 }
 
 /* A fila local (E15). Estas classes estavam a ser usadas desde o primeiro dia do
@@ -1341,6 +1347,33 @@ label.bo-planos__item input[type="radio"] {
   color: var(--bo-publico-texto); text-decoration: none;
 }
 .bo-publico__seccoes a[aria-current='page'] { font-weight: 700; border-color: var(--bo-navegacao-activa); }
+
+/* ── A navegação de secções INTERNA ──────────────────────────────────────────
+ *
+ * O staff vestia `bo-publico__seccoes` — a folha do SÍTIO PÚBLICO — e herdava
+ * daí duas coisas que não são dele: o raio de cápsula (999 px) onde a régua
+ * manda 10 px para controlos, e `--bo-publico-texto`, um token do canal que o
+ * restaurante configura, num ecrã de operação onde não pinta nada.
+ *
+ * Isto é a mesma navegação sem a herança errada. Pede as cores ao contrato da
+ * superfície, portanto serve o claro e o escuro sem uma regra por superfície.
+ *
+ * MEDIDO, e fica escrito para quem agendar o resto: são CINCO os componentes a
+ * vestir a classe pública — o staff (movido aqui), o KDS, os relatórios, a sala
+ * e o sítio. O último é público e está no seu lugar; os outros três são a mesma
+ * herança e não os movo nesta tarefa, que é a do staff. */
+.bo-seccoes {
+  display: flex; flex-wrap: wrap; gap: var(--bo-espaco-sm);
+  padding: 0 var(--bo-margem-movel);
+  max-width: var(--bo-largura-maxima); margin: 0 auto;
+}
+.bo-seccoes a {
+  display: inline-flex; align-items: center;
+  min-height: var(--bo-toque-operacao); padding: 0 var(--bo-espaco-md);
+  border: 1px solid var(--bo-borda); border-radius: var(--bo-raio-controlo);
+  color: var(--bo-sobre-superficie); text-decoration: none;
+}
+.bo-seccoes a[aria-current='page'] { font-weight: 700; border-color: var(--bo-navegacao-activa); }
 .bo-publico__heroi { display: grid; gap: var(--bo-espaco-md); }
 .bo-publico__heroi h1 { font-size: 32px; line-height: 1.15; overflow-wrap: anywhere; }
 @media (min-width: 768px) { .bo-publico__heroi h1 { font-size: 44px; } }

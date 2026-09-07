@@ -79,7 +79,7 @@ export function NavegacaoDoStaff({
   const s = mensagensDe(idioma).staffE15 as unknown as Record<string, string | undefined>;
   const base = `/${idioma}/staff/${locationId}`;
   return (
-    <nav className="bo-publico__seccoes" aria-label={s.turno} data-teste="navegacao">
+    <nav className="bo-seccoes" aria-label={s.seccoes ?? s.turno} data-teste="navegacao">
       {SECCOES_DO_STAFF.filter((x) => x.principal).map((x) => (
         <a key={x.rota} href={`${base}${x.rota}`} data-seccao={x.id}
            aria-current={actual === x.rota ? 'page' : undefined}>

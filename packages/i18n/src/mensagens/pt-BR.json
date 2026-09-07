@@ -1726,7 +1726,8 @@
       "ja_fechada": "Essa mesa já foi fechada.",
       "linha_desconhecida": "Esse artigo já não está no pedido.",
       "pedido_desconhecido": "Esse pedido já não existe."
-    }
+    },
+    "seccoes": "Seções"
   },
   "kdsE16": {
     "accaoApagarRegra": "Remover",

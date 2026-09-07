@@ -43,7 +43,10 @@ export default async function TurnoDoStaff({
       <CabecalhoDoStaff idioma={idioma} locationId={locationId} unidade={unidade.nome}
                         titulo={s.turno} tela="STAFF-001" actual="" />
 
-      <p className="bo-campo__ajuda" data-teste="operador">{actor.email}</p>
+      {/* O NOME de quem está ao balcão, e o email só se não houver nome. O
+          `sessao.ts` já resolve `actor.nome` — mostrar o email era mostrar a
+          credencial onde se esperava a pessoa. */}
+      <p className="bo-campo__ajuda" data-teste="operador">{actor.nome || actor.email}</p>
 
       <PainelDaFila
         particao={particao}

@@ -1726,7 +1726,8 @@
       "ja_fechada": "That table has already been closed.",
       "linha_desconhecida": "That item is no longer in the order.",
       "pedido_desconhecido": "That order no longer exists."
-    }
+    },
+    "seccoes": "Sections"
   },
   "kdsE16": {
     "accaoApagarRegra": "Remove",
