@@ -2354,3 +2354,33 @@ número, e o número era de uma amostra.**
 A defesa é a mesma de sempre e ele já a conhece: **um resultado diz sobre que
 população foi medido, dentro da própria frase.** «Zero» e «zero em três rotas»
 são afirmações diferentes, e a segunda não fecha nada.
+
+---
+
+## Corrigir o valor não é corrigir o mecanismo — e deixei o JR parado 20 minutos — 07/09
+
+**A (1) ficou certa no número e frouxa no mecanismo.** A sobrancelha passou a
+`14px/20px`, exacto. Mas o `.bo-pagina` ficou com **`max-width: 1200px` escrito à
+mão** — e `--bo-largura-maxima: 1200px` **já existe** no ficheiro, consumido por
+três outras regras (`588`, `591`, `619`).
+
+O valor está certo hoje. **O mecanismo continua a ser o mesmo que produziu o
+1100**: uma regra que não pergunta ao token qual é a largura máxima acaba, mais
+cedo ou mais tarde, com uma largura própria. **Fixei o número e deixei a porta
+por onde ele voltou a entrar.**
+
+É a mesma forma do `activa` explícito que venceu a derivação, e do `P2007` que
+escapava a uma lista de códigos: **enquanto a resposta for um valor escrito e não
+uma pergunta feita, ela envelhece sozinha.**
+
+**E uma falha de coordenação minha, que custou vinte minutos.** O JR acabou a (1)
+às 13h52 e escreveu: *«Sigo para a (2) quando disseres, ou continuo já se
+preferires.»* Só lhe respondi às 14h12. **Ele ficou parado à espera de uma
+autorização que eu já lhe tinha dado ao numerar sete tarefas.**
+
+A regra: **uma ordem de trabalho numerada carrega a própria licença para
+continuar.** Se eu quisesse um portão entre tarefas, tinha de o dizer — e não
+quero, porque o meu reparo entra em cima do que já foi entregue e não antes.
+Passei-lhe isso por escrito: «não esperes por mim entre tarefas». O silêncio de
+quem revê não é uma instrução, e quem espera por ele não está a ser prudente —
+está bloqueado.
