@@ -1,3 +1,4 @@
+import { CabecalhoDePagina } from '@bossaos/ui';
 import { notFound } from 'next/navigation';
 import { tarefasDaEstacao } from '@bossaos/db';
 import { type Idioma } from '@bossaos/i18n';
@@ -5,9 +6,7 @@ import {
   agoraNoServidor, carregarKds, estacaoDaUnidade,
 } from '../../../../../../src/kds/carregar-kds.ts';
 import { comEscopoDoPedido } from '../../../../../../src/sessao.ts';
-import {
-  Bilhete, CabecalhoDoKds, textosDoKds, type TarefaNoEcra,
-} from '../../../../../../src/kds/PecasDoKds.tsx';
+import { Bilhete, textosDoKds, type TarefaNoEcra } from '../../../../../../src/kds/PecasDoKds.tsx';
 import { NavegacaoDoKds } from '../../../../../../src/kds/NavegacaoDoKds.tsx';
 import { AccoesDoBilhete } from '../../../../../../src/kds/AccoesDoBilhete.tsx';
 
@@ -37,7 +36,7 @@ export default async function ComecarNoKds({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKds sobrancelha={`${unidade.nome} · ${estacao.nome}`}
+      <CabecalhoDePagina sobrancelha={`${unidade.nome} · ${estacao.nome}`}
                       titulo={s.comecar} tela="KDS-004" />
       <NavegacaoDoKds idioma={idioma} locationId={locationId} stationId={stationId}
                       actual="/comecar" />

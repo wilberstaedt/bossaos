@@ -1,14 +1,12 @@
 import { notFound } from 'next/navigation';
-import { Aviso } from '@bossaos/ui';
+import { Aviso, CabecalhoDePagina } from '@bossaos/ui';
 import { tarefasDaEstacao } from '@bossaos/db';
 import { type Idioma } from '@bossaos/i18n';
 import {
   agoraNoServidor, carregarKds, estacaoDaUnidade,
 } from '../../../../../../src/kds/carregar-kds.ts';
 import { comEscopoDoPedido } from '../../../../../../src/sessao.ts';
-import {
-  Bilhete, CabecalhoDoKds, textosDoKds, type TarefaNoEcra,
-} from '../../../../../../src/kds/PecasDoKds.tsx';
+import { Bilhete, textosDoKds, type TarefaNoEcra } from '../../../../../../src/kds/PecasDoKds.tsx';
 import { NavegacaoDoKds } from '../../../../../../src/kds/NavegacaoDoKds.tsx';
 
 export const dynamic = 'force-dynamic';
@@ -45,7 +43,7 @@ export default async function PriorizarNoKds({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKds sobrancelha={`${unidade.nome} · ${estacao.nome}`}
+      <CabecalhoDePagina sobrancelha={`${unidade.nome} · ${estacao.nome}`}
                       titulo={s.priorizar} tela="KDS-008" />
       <NavegacaoDoKds idioma={idioma} locationId={locationId} stationId={stationId}
                       actual="/priorizar" />

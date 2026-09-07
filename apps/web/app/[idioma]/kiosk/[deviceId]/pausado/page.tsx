@@ -1,7 +1,7 @@
-import { Aviso } from '@bossaos/ui';
+import { Aviso, CabecalhoDePagina } from '@bossaos/ui';
 import { type Idioma } from '@bossaos/i18n';
 import { carregarKiosk } from '../../../../../src/kiosk/carregar-kiosk.ts';
-import { CabecalhoDoKiosk, textosDoKiosk } from '../../../../../src/kiosk/PecasDoKiosk.tsx';
+import { textosDoKiosk } from '../../../../../src/kiosk/PecasDoKiosk.tsx';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +40,7 @@ export default async function KioskPausado({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKiosk sobrancelha={kiosk.nome} titulo={s.pausado} tela="KIOSK-007" />
+      <CabecalhoDePagina sobrancelha={kiosk.nome} titulo={s.pausado} tela="KIOSK-007" />
 
       {razao === 'COBRANCA_POR_RESOLVER' ? (
         <div data-teste="pausado-cobranca">

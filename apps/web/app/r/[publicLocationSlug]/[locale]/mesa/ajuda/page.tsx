@@ -1,11 +1,10 @@
+import { CabecalhoDePagina } from '@bossaos/ui';
 import { type Idioma } from '@bossaos/i18n';
 import { carregarVisita, chamadasDaVisitaActual } from '../../../../../../src/visitante/carregar-visita.ts';
 import {
   ChamadasDaMesa, RespostaDaChamada,
 } from '../../../../../../src/visitante/ChamadasDaMesa.tsx';
-import {
-  CabecalhoDaVisita, NavegacaoDaVisita, textosDoVisitante,
-} from '../../../../../../src/visitante/PecasDoVisitante.tsx';
+import { NavegacaoDaVisita, textosDoVisitante } from '../../../../../../src/visitante/PecasDoVisitante.tsx';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +40,7 @@ export default async function ComoPodemosAjudar({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDaVisita sobrancelha={`${s.naMesa} ${visitante.mesaCodigo}`}
+      <CabecalhoDePagina sobrancelha={`${s.naMesa} ${visitante.mesaCodigo}`}
                          titulo={s.comoAjudamos} tela="MENU-012" />
       <NavegacaoDaVisita idioma={idioma} base={base} actual="/ajuda" />
 

@@ -1,12 +1,10 @@
-import { Etiqueta } from '@bossaos/ui';
+import { CabecalhoDePagina, Etiqueta } from '@bossaos/ui';
 import { estadoDerivado, totalDoPedido } from '@bossaos/domain';
 import { formatarDinheiro, formatarHora, type Idioma } from '@bossaos/i18n';
 import {
   carregarVisita, pedidosDaMesa, producaoDaMesa,
 } from '../../../../../../src/visitante/carregar-visita.ts';
-import {
-  CabecalhoDaVisita, NavegacaoDaVisita, porChaveDoVisitante, textosDoVisitante,
-} from '../../../../../../src/visitante/PecasDoVisitante.tsx';
+import { NavegacaoDaVisita, porChaveDoVisitante, textosDoVisitante } from '../../../../../../src/visitante/PecasDoVisitante.tsx';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +39,7 @@ export default async function AssimVaiOTeuPedido({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDaVisita sobrancelha={`${s.naMesa} ${visitante.mesaCodigo}`}
+      <CabecalhoDePagina sobrancelha={`${s.naMesa} ${visitante.mesaCodigo}`}
                          titulo={s.assimVai} tela="MENU-010" />
       <NavegacaoDaVisita idioma={idioma} base={base} actual="/andamento" />
 

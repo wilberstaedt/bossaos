@@ -1,14 +1,12 @@
 import { notFound } from 'next/navigation';
-import { Etiqueta } from '@bossaos/ui';
+import { CabecalhoDePagina, Etiqueta } from '@bossaos/ui';
 import { estadoDerivado } from '@bossaos/db';
 import { type Idioma } from '@bossaos/i18n';
 import {
   agoraNoServidor, carregarKds, estacaoDaUnidade,
 } from '../../../../../../src/kds/carregar-kds.ts';
 import { comEscopoDoPedido } from '../../../../../../src/sessao.ts';
-import {
-  CabecalhoDoKds, TempoDoBilhete, porChaveDoKds, textosDoKds,
-} from '../../../../../../src/kds/PecasDoKds.tsx';
+import { TempoDoBilhete, porChaveDoKds, textosDoKds } from '../../../../../../src/kds/PecasDoKds.tsx';
 import { NavegacaoDoKds } from '../../../../../../src/kds/NavegacaoDoKds.tsx';
 
 export const dynamic = 'force-dynamic';
@@ -63,7 +61,7 @@ export default async function PasseDoKds({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKds sobrancelha={`${unidade.nome} · ${estacao.nome}`}
+      <CabecalhoDePagina sobrancelha={`${unidade.nome} · ${estacao.nome}`}
                       titulo={s.passe} tela="KDS-012" />
       <NavegacaoDoKds idioma={idioma} locationId={locationId} stationId={stationId}
                       actual="/passe" />

@@ -1,9 +1,8 @@
+import { CabecalhoDePagina } from '@bossaos/ui';
 import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { totalDoPedido } from '@bossaos/domain';
 import { carregarVisita, pedidosDaMesa } from '../../../../../../src/visitante/carregar-visita.ts';
-import {
-  CabecalhoDaVisita, NavegacaoDaVisita,
-} from '../../../../../../src/visitante/PecasDoVisitante.tsx';
+import { NavegacaoDaVisita } from '../../../../../../src/visitante/PecasDoVisitante.tsx';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +40,7 @@ export default async function PagarNaMesa({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDaVisita sobrancelha={t.naMesa} titulo={t.pagar} tela="MENU-014" />
+      <CabecalhoDePagina sobrancelha={t.naMesa} titulo={t.pagar} tela="MENU-014" />
       <p data-teste="total">{formatarDinheiro(total, idioma)}</p>
 
       {/* A dependência em falta diz-se, e não se disfarça com um botão inerte. */}

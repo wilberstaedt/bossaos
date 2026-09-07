@@ -1,10 +1,9 @@
+import { CabecalhoDePagina } from '@bossaos/ui';
 import { formatarHora, type Idioma } from '@bossaos/i18n';
 import {
   carregarVisita, pedidosDaMesa,
 } from '../../../../../src/visitante/carregar-visita.ts';
-import {
-  CabecalhoDaVisita, NavegacaoDaVisita, textosDoVisitante,
-} from '../../../../../src/visitante/PecasDoVisitante.tsx';
+import { NavegacaoDaVisita, textosDoVisitante } from '../../../../../src/visitante/PecasDoVisitante.tsx';
 import { lerCarrinho } from '../../../../../src/visitante/carrinho.ts';
 
 export const dynamic = 'force-dynamic';
@@ -30,7 +29,7 @@ export default async function EstaVisita({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDaVisita sobrancelha={`${s.naMesa} ${visitante.mesaCodigo}`}
+      <CabecalhoDePagina sobrancelha={`${s.naMesa} ${visitante.mesaCodigo}`}
                          titulo={s.estaVisita} tela="MENU-011" />
       <NavegacaoDaVisita idioma={idioma} base={base} actual="" />
 

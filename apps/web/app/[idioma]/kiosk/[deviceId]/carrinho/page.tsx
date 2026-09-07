@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
-import { Aviso } from '@bossaos/ui';
+import { Aviso, CabecalhoDePagina } from '@bossaos/ui';
 import { formatarDinheiro, type Idioma } from '@bossaos/i18n';
 import { carregarKiosk } from '../../../../../src/kiosk/carregar-kiosk.ts';
-import { CabecalhoDoKiosk, textosDoKiosk } from '../../../../../src/kiosk/PecasDoKiosk.tsx';
+import { textosDoKiosk } from '../../../../../src/kiosk/PecasDoKiosk.tsx';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +47,7 @@ export default async function KioskCarrinho({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKiosk sobrancelha={kiosk.nome} titulo={s.carrinho} tela="KIOSK-004" />
+      <CabecalhoDePagina sobrancelha={kiosk.nome} titulo={s.carrinho} tela="KIOSK-004" />
 
       {linhas.length === 0 ? (
         <div data-teste="carrinho-vazio">

@@ -1,11 +1,9 @@
-import { Aviso, Etiqueta } from '@bossaos/ui';
+import { Aviso, CabecalhoDePagina, Etiqueta } from '@bossaos/ui';
 import { listarDispositivos } from '@bossaos/db';
 import { formatarDataHora, type Idioma } from '@bossaos/i18n';
 import { carregarKds } from '../../../../../src/kds/carregar-kds.ts';
 import { comEscopoDoPedido } from '../../../../../src/sessao.ts';
-import {
-  CabecalhoDoKds, porChaveDoKds, textosDoKds,
-} from '../../../../../src/kds/PecasDoKds.tsx';
+import { porChaveDoKds, textosDoKds } from '../../../../../src/kds/PecasDoKds.tsx';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,7 +28,7 @@ export default async function EcrasDeCozinha({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKds sobrancelha={unidade.nome} titulo={s.ecras} tela="KDS-015" />
+      <CabecalhoDePagina sobrancelha={unidade.nome} titulo={s.ecras} tela="KDS-015" />
 
       <p data-teste="quantas">{estacoes.length}</p>
       {estacoes.length === 0 ? (

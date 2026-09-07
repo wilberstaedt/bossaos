@@ -1,10 +1,8 @@
-import { Aviso } from '@bossaos/ui';
+import { Aviso, CabecalhoDePagina } from '@bossaos/ui';
 import { cartaPublica } from '@bossaos/db';
 import { formatarDinheiro, type Idioma } from '@bossaos/i18n';
 import { carregarVisita } from '../../../../../../src/visitante/carregar-visita.ts';
-import {
-  CabecalhoDaVisita, NavegacaoDaVisita, textosDoVisitante,
-} from '../../../../../../src/visitante/PecasDoVisitante.tsx';
+import { NavegacaoDaVisita, textosDoVisitante } from '../../../../../../src/visitante/PecasDoVisitante.tsx';
 import { lerCarrinho } from '../../../../../../src/visitante/carrinho.ts';
 import { obterBase } from '../../../../../../src/servidor.ts';
 
@@ -63,7 +61,7 @@ export default async function OTeuPedido({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDaVisita sobrancelha={`${s.naMesa} ${visitante.mesaCodigo}`}
+      <CabecalhoDePagina sobrancelha={`${s.naMesa} ${visitante.mesaCodigo}`}
                          titulo={s.oTeuPedido} tela="MENU-007" />
       <NavegacaoDaVisita idioma={idioma} base={base} actual="/pedido" />
 

@@ -1,14 +1,12 @@
 import { notFound } from 'next/navigation';
-import { Aviso, Etiqueta } from '@bossaos/ui';
+import { Aviso, CabecalhoDePagina, Etiqueta } from '@bossaos/ui';
 import { estadoDerivado } from '@bossaos/db';
 import { formatarHora, type Idioma } from '@bossaos/i18n';
 import {
   agoraNoServidor, carregarKds, estacaoDaUnidade,
 } from '../../../../../../../src/kds/carregar-kds.ts';
 import { comEscopoDoPedido } from '../../../../../../../src/sessao.ts';
-import {
-  CabecalhoDoKds, TempoDoBilhete, porChaveDoKds, textosDoKds,
-} from '../../../../../../../src/kds/PecasDoKds.tsx';
+import { TempoDoBilhete, porChaveDoKds, textosDoKds } from '../../../../../../../src/kds/PecasDoKds.tsx';
 import { NavegacaoDoKds } from '../../../../../../../src/kds/NavegacaoDoKds.tsx';
 
 export const dynamic = 'force-dynamic';
@@ -59,7 +57,7 @@ export default async function FichaDoBilhete({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKds sobrancelha={`${unidade.nome} · ${estacao.nome}`}
+      <CabecalhoDePagina sobrancelha={`${unidade.nome} · ${estacao.nome}`}
                       titulo={`${tarefa.pedido.numero} · ${tarefa.linha.nome}`} tela="KDS-003" />
       <NavegacaoDoKds idioma={idioma} locationId={locationId} stationId={stationId} actual="" />
 

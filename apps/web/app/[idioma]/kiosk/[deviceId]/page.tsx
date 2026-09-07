@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
-import { Etiqueta } from '@bossaos/ui';
+import { CabecalhoDePagina, Etiqueta } from '@bossaos/ui';
 import { IDIOMAS, type Idioma } from '@bossaos/i18n';
 import { carregarKiosk } from '../../../../src/kiosk/carregar-kiosk.ts';
-import { CabecalhoDoKiosk, textosDoKiosk } from '../../../../src/kiosk/PecasDoKiosk.tsx';
+import { textosDoKiosk } from '../../../../src/kiosk/PecasDoKiosk.tsx';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +34,7 @@ export default async function KioskInicio({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKiosk sobrancelha={kiosk.nome} titulo={s.bemVindo} tela="KIOSK-001" />
+      <CabecalhoDePagina sobrancelha={kiosk.nome} titulo={s.bemVindo} tela="KIOSK-001" />
 
       <h2>{s.escolheIdioma}</h2>
       <ul className="bo-lista" data-teste="idiomas">

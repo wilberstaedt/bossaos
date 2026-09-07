@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation';
-import { Aviso } from '@bossaos/ui';
+import { Aviso, CabecalhoDePagina } from '@bossaos/ui';
 import { listarDispositivos, tarefasDaEstacao } from '@bossaos/db';
 import { formatarDataHora, type Idioma } from '@bossaos/i18n';
 import { carregarKds, estacaoDaUnidade } from '../../../../../../src/kds/carregar-kds.ts';
 import { comEscopoDoPedido } from '../../../../../../src/sessao.ts';
-import { CabecalhoDoKds, textosDoKds } from '../../../../../../src/kds/PecasDoKds.tsx';
+import { textosDoKds } from '../../../../../../src/kds/PecasDoKds.tsx';
 import { NavegacaoDoKds } from '../../../../../../src/kds/NavegacaoDoKds.tsx';
 
 export const dynamic = 'force-dynamic';
@@ -48,7 +48,7 @@ export default async function LigacaoDaEstacao({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKds sobrancelha={`${unidade.nome} · ${estacao.nome}`}
+      <CabecalhoDePagina sobrancelha={`${unidade.nome} · ${estacao.nome}`}
                       titulo={s.semLigacao} tela="STATE-012" />
       <NavegacaoDoKds idioma={idioma} locationId={locationId} stationId={stationId}
                       actual="/ligacao" />

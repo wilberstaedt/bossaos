@@ -1,10 +1,9 @@
-import { Aviso, Etiqueta } from '@bossaos/ui';
+import { Aviso, CabecalhoDePagina, Etiqueta } from '@bossaos/ui';
 import { formatarDataHora, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { filaDaUnidade } from '@bossaos/db';
 import { estadoDeImpressao } from '@bossaos/domain';
 import { carregarKds } from '../../../../../../src/kds/carregar-kds.ts';
 import { comEscopoDoPedido } from '../../../../../../src/sessao.ts';
-import { CabecalhoDoKds } from '../../../../../../src/kds/PecasDoKds.tsx';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,7 +57,7 @@ export default async function FallbackDeImpressao({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKds sobrancelha={unidade.nome} titulo={s.fallback} tela="KDS-016" />
+      <CabecalhoDePagina sobrancelha={unidade.nome} titulo={s.fallback} tela="KDS-016" />
 
       <p className="bo-campo__ajuda">{s.fallbackAjuda}</p>
 

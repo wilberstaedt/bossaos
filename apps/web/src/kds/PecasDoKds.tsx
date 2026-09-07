@@ -23,32 +23,6 @@ export function porChaveDoKds(s: TextosDoKds, chave: string): string | null {
 }
 
 /**
- * O cabeçalho de uma tela do KDS.
- *
- * ── `data-tela` quer dizer «esta página identifica-se a si própria» ───────
- *
- * É a correcção que o E15 trouxe, e que a régua do E16 manda **não desfazer**.
- * Lá, a navegação escrevia o id de cada secção em todas as páginas, e o marcador
- * ficava satisfeito em qualquer tela — a asserção que afirma «cheguei aqui» não
- * conseguia falhar. Ligações levam `data-seccao`; só o cabeçalho leva
- * `data-tela`.
- */
-export function CabecalhoDoKds({
-  sobrancelha, titulo, tela,
-}: {
-  sobrancelha: string; titulo: string; tela: string;
-}) {
-  return (
-    <div className="bo-estado__cabecalho">
-      <div>
-        <p className="bo-estado__sobrancelha">{sobrancelha}</p>
-        <h1 data-tela={tela}>{titulo}</h1>
-      </div>
-    </div>
-  );
-}
-
-/**
  * O tempo de um bilhete. **Do carimbo do servidor, e os dois do servidor.**
  *
  * ── Porque é que o «agora» vem de fora ────────────────────────────────────

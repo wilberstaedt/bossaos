@@ -1,3 +1,4 @@
+import { CabecalhoDePagina } from '@bossaos/ui';
 import { notFound } from 'next/navigation';
 import { repartirBacklog } from '@bossaos/domain';
 import { tarefasDaEstacao } from '@bossaos/db';
@@ -6,9 +7,7 @@ import {
   agoraNoServidor, carregarKds, estacaoDaUnidade,
 } from '../../../../../../src/kds/carregar-kds.ts';
 import { comEscopoDoPedido } from '../../../../../../src/sessao.ts';
-import {
-  Bilhete, CabecalhoDoKds, textosDoKds, type TarefaNoEcra,
-} from '../../../../../../src/kds/PecasDoKds.tsx';
+import { Bilhete, textosDoKds, type TarefaNoEcra } from '../../../../../../src/kds/PecasDoKds.tsx';
 import { NavegacaoDoKds } from '../../../../../../src/kds/NavegacaoDoKds.tsx';
 
 export const dynamic = 'force-dynamic';
@@ -44,7 +43,7 @@ export default async function EsperaNoKds({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKds sobrancelha={`${unidade.nome} · ${estacao.nome}`}
+      <CabecalhoDePagina sobrancelha={`${unidade.nome} · ${estacao.nome}`}
                       titulo={s.emEspera} tela="KDS-010" />
       <NavegacaoDoKds idioma={idioma} locationId={locationId} stationId={stationId}
                       actual="/espera" />

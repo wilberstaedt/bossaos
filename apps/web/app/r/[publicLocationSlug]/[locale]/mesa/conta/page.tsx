@@ -1,3 +1,4 @@
+import { CabecalhoDePagina } from '@bossaos/ui';
 import { totalDoPedido } from '@bossaos/domain';
 import { formatarDinheiro, type Idioma } from '@bossaos/i18n';
 import {
@@ -6,9 +7,7 @@ import {
 import {
   ChamadasDaMesa, RespostaDaChamada,
 } from '../../../../../../src/visitante/ChamadasDaMesa.tsx';
-import {
-  CabecalhoDaVisita, NavegacaoDaVisita, textosDoVisitante,
-} from '../../../../../../src/visitante/PecasDoVisitante.tsx';
+import { NavegacaoDaVisita, textosDoVisitante } from '../../../../../../src/visitante/PecasDoVisitante.tsx';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,7 +47,7 @@ export default async function TrazemosAConta({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDaVisita sobrancelha={`${s.naMesa} ${visitante.mesaCodigo}`}
+      <CabecalhoDePagina sobrancelha={`${s.naMesa} ${visitante.mesaCodigo}`}
                          titulo={s.trazemosAConta} tela="MENU-013" />
       <NavegacaoDaVisita idioma={idioma} base={base} actual="/conta" />
 

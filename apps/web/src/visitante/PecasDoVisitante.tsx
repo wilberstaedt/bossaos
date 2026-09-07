@@ -13,28 +13,6 @@ export function porChaveDoVisitante(s: TextosDoVisitante, chave: string): string
 }
 
 /**
- * O cabeçalho de uma tela do visitante.
- *
- * `data-tela` quer dizer **esta página identifica-se a si própria** — a correcção
- * que o E15 pagou caro e que a régua do E16 mandou não desfazer. As ligações
- * levam `data-seccao`; uma ligação para uma página não é a página.
- */
-export function CabecalhoDaVisita({
-  sobrancelha, titulo, tela,
-}: {
-  sobrancelha: string; titulo: string; tela: string;
-}) {
-  return (
-    <div className="bo-estado__cabecalho">
-      <div>
-        <p className="bo-estado__sobrancelha">{sobrancelha}</p>
-        <h1 data-tela={tela}>{titulo}</h1>
-      </div>
-    </div>
-  );
-}
-
-/**
  * A navegação da visita, numa tabela só.
  *
  * Sete secções, todas alcançáveis a partir de qualquer uma. Quem está sentado

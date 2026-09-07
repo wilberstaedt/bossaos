@@ -20,24 +20,3 @@ export function porChaveDoKiosk(s: TextosDoKiosk, chave: string): string | null 
   return typeof valor === 'string' ? valor : null;
 }
 
-/**
- * O cabeçalho de uma tela do kiosk.
- *
- * `data-tela` quer dizer «esta página identifica-se a si própria» — a correcção
- * que o E15 pagou caro e que as réguas seguintes mandam não desfazer. Ligações
- * levam `data-seccao`; só o cabeçalho leva `data-tela`.
- */
-export function CabecalhoDoKiosk({
-  sobrancelha, titulo, tela,
-}: {
-  sobrancelha: string; titulo: string; tela: string;
-}) {
-  return (
-    <div className="bo-estado__cabecalho">
-      <div>
-        <p className="bo-estado__sobrancelha">{sobrancelha}</p>
-        <h1 data-tela={tela}>{titulo}</h1>
-      </div>
-    </div>
-  );
-}

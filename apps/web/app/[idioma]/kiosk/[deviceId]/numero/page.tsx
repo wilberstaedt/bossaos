@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
-import { Aviso } from '@bossaos/ui';
+import { Aviso, CabecalhoDePagina } from '@bossaos/ui';
 import { type Idioma } from '@bossaos/i18n';
 import { carregarKiosk } from '../../../../../src/kiosk/carregar-kiosk.ts';
-import { CabecalhoDoKiosk, textosDoKiosk } from '../../../../../src/kiosk/PecasDoKiosk.tsx';
+import { textosDoKiosk } from '../../../../../src/kiosk/PecasDoKiosk.tsx';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +33,7 @@ export default async function KioskNumero({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKiosk sobrancelha={kiosk.nome} titulo={s.confirmado} tela="KIOSK-006" />
+      <CabecalhoDePagina sobrancelha={kiosk.nome} titulo={s.confirmado} tela="KIOSK-006" />
 
       {sessao?.pedido ? (
         <p className="bo-estado__numero" data-teste="numero">{sessao.pedido.numero}</p>

@@ -1,9 +1,7 @@
-import { Aviso, Etiqueta } from '@bossaos/ui';
+import { Aviso, CabecalhoDePagina, Etiqueta } from '@bossaos/ui';
 import { type Idioma } from '@bossaos/i18n';
 import { carregarKds } from '../../../../src/kds/carregar-kds.ts';
-import {
-  CabecalhoDoKds, porChaveDoKds, textosDoKds,
-} from '../../../../src/kds/PecasDoKds.tsx';
+import { porChaveDoKds, textosDoKds } from '../../../../src/kds/PecasDoKds.tsx';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +27,7 @@ export default async function EstacoesDoKds({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKds sobrancelha={unidade.nome} titulo={s.estacao} tela="KDS-001" />
+      <CabecalhoDePagina sobrancelha={unidade.nome} titulo={s.estacao} tela="KDS-001" />
 
       {/* Contado antes de afirmar seja o que for. */}
       <p data-teste="quantas">{estacoes.length}</p>

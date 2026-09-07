@@ -1,11 +1,10 @@
+import { CabecalhoDePagina } from '@bossaos/ui';
 import { notFound, redirect } from 'next/navigation';
 import { formatarDinheiro, type Idioma } from '@bossaos/i18n';
 import { cartaPublica } from '@bossaos/db';
 import { IDIOMAS_DE_CONTEUDO, produtoDaCarta, type IdiomaDeConteudo } from '@bossaos/domain';
 import { obterBaseDeEcra } from '../../../../../../../../src/servidor.ts';
-import {
-  CabecalhoDaVisita, NavegacaoDaVisita, textosDoVisitante,
-} from '../../../../../../../../src/visitante/PecasDoVisitante.tsx';
+import { NavegacaoDaVisita, textosDoVisitante } from '../../../../../../../../src/visitante/PecasDoVisitante.tsx';
 import { visitanteDaRequisicao } from '../../../../../../../../src/visitante/sessao-do-visitante.ts';
 
 export const dynamic = 'force-dynamic';
@@ -49,7 +48,7 @@ export default async function AoTeuGosto({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDaVisita sobrancelha={`${s.naMesa} ${visitante.mesaCodigo}`}
+      <CabecalhoDePagina sobrancelha={`${s.naMesa} ${visitante.mesaCodigo}`}
                          titulo={s.aTeuGosto} tela="MENU-006" />
       <NavegacaoDaVisita idioma={idioma} base={base} actual="" />
 

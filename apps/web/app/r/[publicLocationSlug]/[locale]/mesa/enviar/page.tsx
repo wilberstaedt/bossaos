@@ -1,10 +1,9 @@
+import { CabecalhoDePagina } from '@bossaos/ui';
 import { randomUUID } from 'node:crypto';
 import { cartaPublica } from '@bossaos/db';
 import { type Idioma } from '@bossaos/i18n';
 import { carregarVisita } from '../../../../../../src/visitante/carregar-visita.ts';
-import {
-  CabecalhoDaVisita, NavegacaoDaVisita, textosDoVisitante,
-} from '../../../../../../src/visitante/PecasDoVisitante.tsx';
+import { NavegacaoDaVisita, textosDoVisitante } from '../../../../../../src/visitante/PecasDoVisitante.tsx';
 import { lerCarrinho } from '../../../../../../src/visitante/carrinho.ts';
 import { obterBase } from '../../../../../../src/servidor.ts';
 
@@ -48,7 +47,7 @@ export default async function ProntoParaEnviar({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDaVisita sobrancelha={`${s.naMesa} ${visitante.mesaCodigo}`}
+      <CabecalhoDePagina sobrancelha={`${s.naMesa} ${visitante.mesaCodigo}`}
                          titulo={s.prontoParaEnviar} tela="MENU-008" />
       <NavegacaoDaVisita idioma={idioma} base={base} actual="/pedido" />
 

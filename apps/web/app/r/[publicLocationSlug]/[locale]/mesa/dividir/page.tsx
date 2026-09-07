@@ -1,10 +1,9 @@
+import { CabecalhoDePagina } from '@bossaos/ui';
 import { dividirEmPartes } from '@bossaos/domain';
 import { totalDoPedido } from '@bossaos/domain';
 import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { carregarVisita, pedidosDaMesa } from '../../../../../../src/visitante/carregar-visita.ts';
-import {
-  CabecalhoDaVisita, NavegacaoDaVisita,
-} from '../../../../../../src/visitante/PecasDoVisitante.tsx';
+import { NavegacaoDaVisita } from '../../../../../../src/visitante/PecasDoVisitante.tsx';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +40,7 @@ export default async function DividirNaMesa({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDaVisita sobrancelha={t.naMesa} titulo={t.dividir} tela="MENU-015" />
+      <CabecalhoDePagina sobrancelha={t.naMesa} titulo={t.dividir} tela="MENU-015" />
       <form method="get" className="bo-forma">
         <label htmlFor="partes">{t.quantos}</label>
         <input id="partes" name="partes" type="text" inputMode="numeric"

@@ -1,5 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
-import { Etiqueta } from '@bossaos/ui';
+import { CabecalhoDePagina, Etiqueta } from '@bossaos/ui';
 import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { cartaPublica } from '@bossaos/db';
 import {
@@ -7,7 +7,7 @@ import {
 } from '@bossaos/domain';
 import { obterBase } from '../../../../../../src/servidor.ts';
 import { carregarKiosk } from '../../../../../../src/kiosk/carregar-kiosk.ts';
-import { CabecalhoDoKiosk, textosDoKiosk } from '../../../../../../src/kiosk/PecasDoKiosk.tsx';
+import { textosDoKiosk } from '../../../../../../src/kiosk/PecasDoKiosk.tsx';
 
 export const dynamic = 'force-dynamic';
 
@@ -65,7 +65,7 @@ export default async function KioskProduto({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKiosk sobrancelha={produto.nome} titulo={s.opcoes} tela="KIOSK-003" />
+      <CabecalhoDePagina sobrancelha={produto.nome} titulo={s.opcoes} tela="KIOSK-003" />
 
       <p className="bo-publico__preco" data-teste="preco">
         {produto.preco ? formatarDinheiro(produto.preco, idioma) : '—'}

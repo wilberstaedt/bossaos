@@ -1,10 +1,11 @@
+import { CabecalhoDePagina } from '@bossaos/ui';
 import { redirect } from 'next/navigation';
 import { formatarDinheiro, type Idioma } from '@bossaos/i18n';
 import { cartaPublica } from '@bossaos/db';
 import { IDIOMAS_DE_CONTEUDO, type IdiomaDeConteudo } from '@bossaos/domain';
 import { obterBase } from '../../../../../src/servidor.ts';
 import { carregarKiosk } from '../../../../../src/kiosk/carregar-kiosk.ts';
-import { CabecalhoDoKiosk, textosDoKiosk } from '../../../../../src/kiosk/PecasDoKiosk.tsx';
+import { textosDoKiosk } from '../../../../../src/kiosk/PecasDoKiosk.tsx';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,7 +49,7 @@ export default async function KioskMenu({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKiosk sobrancelha={kiosk.nome} titulo={s.menu} tela="KIOSK-002" />
+      <CabecalhoDePagina sobrancelha={kiosk.nome} titulo={s.menu} tela="KIOSK-002" />
 
       {!servida || servida.carta.categorias.length === 0 ? (
         <p data-teste="carta-vazia">{s.carrinhoVazio}</p>

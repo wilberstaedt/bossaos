@@ -1,5 +1,5 @@
 import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
-import { Etiqueta } from '@bossaos/ui';
+import { CabecalhoDePagina, Etiqueta } from '@bossaos/ui';
 import { NavegacaoDoStaff } from './NavegacaoDoStaff.tsx';
 
 /**
@@ -54,17 +54,12 @@ export function CabecalhoDoStaff({
   idioma: Idioma; locationId: string; unidade: string;
   titulo: string; tela: string; actual: string;
 }) {
+  // Este COMPÕE, e é por isso que continua a ter nome próprio: é o cabeçalho
+  // de página mais a navegação do Staff. Os outros três — KDS, visita, kiosk —
+  // eram cópias byte a byte do bloco e foram apagados.
   return (
     <>
-      <div className="bo-estado__cabecalho">
-        <div>
-          <p className="bo-estado__sobrancelha">{unidade}</p>
-          {/* O ID do atlas no DOM. A inspecção afirma-o em cada visita: sem ele,
-              uma rota que desviasse mediria outra tela e dizia verde cinco
-              vezes — é a lição do arnês do E10. */}
-          <h1 data-tela={tela}>{titulo}</h1>
-        </div>
-      </div>
+      <CabecalhoDePagina sobrancelha={unidade} titulo={titulo} tela={tela} />
       <NavegacaoDoStaff idioma={idioma} locationId={locationId} actual={actual} />
     </>
   );

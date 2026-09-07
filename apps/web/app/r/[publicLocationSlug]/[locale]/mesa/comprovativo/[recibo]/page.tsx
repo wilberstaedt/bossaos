@@ -1,9 +1,8 @@
+import { CabecalhoDePagina } from '@bossaos/ui';
 import { notFound } from 'next/navigation';
 import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { carregarVisita } from '../../../../../../../src/visitante/carregar-visita.ts';
-import {
-  CabecalhoDaVisita, textosDoVisitante,
-} from '../../../../../../../src/visitante/PecasDoVisitante.tsx';
+import { textosDoVisitante } from '../../../../../../../src/visitante/PecasDoVisitante.tsx';
 import { PagamentoEmComprovacao } from '../../../../../../../src/pagamento/PagamentoEmComprovacao.tsx';
 import { comprovativoDaVisita } from '../../../../../../../src/visitante/carregar-visita.ts';
 
@@ -38,7 +37,7 @@ export default async function Comprovativo({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDaVisita sobrancelha={t.naMesa} titulo={t.comprovativo} tela="MENU-016" />
+      <CabecalhoDePagina sobrancelha={t.naMesa} titulo={t.comprovativo} tela="MENU-016" />
       {dados.emComprovacao ? (
         <PagamentoEmComprovacao idioma={idioma} />
       ) : (

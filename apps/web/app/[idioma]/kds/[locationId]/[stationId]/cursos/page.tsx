@@ -1,9 +1,10 @@
+import { CabecalhoDePagina } from '@bossaos/ui';
 import { notFound } from 'next/navigation';
 import { listarTiposDeServico } from '@bossaos/db';
 import { type Idioma } from '@bossaos/i18n';
 import { carregarKds, estacaoDaUnidade } from '../../../../../../src/kds/carregar-kds.ts';
 import { comEscopoDoPedido } from '../../../../../../src/sessao.ts';
-import { CabecalhoDoKds, textosDoKds } from '../../../../../../src/kds/PecasDoKds.tsx';
+import { textosDoKds } from '../../../../../../src/kds/PecasDoKds.tsx';
 import { NavegacaoDoKds } from '../../../../../../src/kds/NavegacaoDoKds.tsx';
 
 /** Minutos desde a meia-noite local → `HH:MM`. O fuso é da unidade. */
@@ -43,7 +44,7 @@ export default async function CursosDoKds({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKds sobrancelha={`${unidade.nome} · ${estacao.nome}`}
+      <CabecalhoDePagina sobrancelha={`${unidade.nome} · ${estacao.nome}`}
                       titulo={s.cursos} tela="KDS-006" />
       <NavegacaoDoKds idioma={idioma} locationId={locationId} stationId={stationId}
                       actual="/cursos" />

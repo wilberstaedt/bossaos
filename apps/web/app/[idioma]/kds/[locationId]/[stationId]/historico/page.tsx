@@ -1,3 +1,4 @@
+import { CabecalhoDePagina } from '@bossaos/ui';
 import { notFound } from 'next/navigation';
 import { tarefasDaEstacao } from '@bossaos/db';
 import { formatarHora, type Idioma } from '@bossaos/i18n';
@@ -5,9 +6,7 @@ import {
   carregarKds, estacaoDaUnidade,
 } from '../../../../../../src/kds/carregar-kds.ts';
 import { comEscopoDoPedido } from '../../../../../../src/sessao.ts';
-import {
-  CabecalhoDoKds, porChaveDoKds, textosDoKds,
-} from '../../../../../../src/kds/PecasDoKds.tsx';
+import { porChaveDoKds, textosDoKds } from '../../../../../../src/kds/PecasDoKds.tsx';
 import { NavegacaoDoKds } from '../../../../../../src/kds/NavegacaoDoKds.tsx';
 
 export const dynamic = 'force-dynamic';
@@ -37,7 +36,7 @@ export default async function HistoricoDoKds({
 
   return (
     <div className="bo-pagina">
-      <CabecalhoDoKds sobrancelha={`${unidade.nome} · ${estacao.nome}`}
+      <CabecalhoDePagina sobrancelha={`${unidade.nome} · ${estacao.nome}`}
                       titulo={s.historico} tela="KDS-011" />
       <NavegacaoDoKds idioma={idioma} locationId={locationId} stationId={stationId}
                       actual="/historico" />

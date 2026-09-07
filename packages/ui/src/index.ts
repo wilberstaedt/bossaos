@@ -23,6 +23,7 @@ export {
 export { Botao, type BotaoProps, type TomDoBotao, type Densidade } from './componentes/Botao.tsx';
 export { Etiqueta, type EtiquetaProps, type TomDeEtiqueta } from './componentes/Etiqueta.tsx';
 export { Cartao, type CartaoProps } from './componentes/Cartao.tsx';
+export { CabecalhoDePagina, type CabecalhoDePaginaProps } from './componentes/CabecalhoDePagina.tsx';
 export { Campo, Seletor, type CampoProps, type SeletorProps } from './componentes/Campo.tsx';
 export { Aviso, type AvisoProps, type TomDeAviso } from './componentes/Aviso.tsx';
 export { Tabela, type TabelaProps, type Coluna } from './componentes/Tabela.tsx';
