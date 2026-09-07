@@ -515,3 +515,78 @@ menu da plataforma estavam a `#` sem declaração. **O âmbito dela são as
 definições de menu, não as ligações em JSX.** A guarda está certa dentro do seu
 âmbito; o que se aprende é que o âmbito tem uma fronteira, e esta ligação cai do
 lado de fora dela.
+
+---
+
+## §12.2, «SEO e compartilhamento estão configurados» — NÃO CUMPRIDO
+
+Medido com o alcance controlado primeiro: **373 `page.tsx` e 7 `layout.tsx`**
+alcançados, portanto os zeros abaixo são zeros e não pathspec cego.
+
+| o que o §12.2 implica | ficheiros que o declaram |
+| --- | ---: |
+| `openGraph` | **0** |
+| `twitter` | **0** |
+| `canonical` | **0** |
+| `alternates` (hreflang) | **0** |
+| `sitemap` | **0** |
+| `generateMetadata` | 1 |
+| `metadata` estático | 3 |
+
+E os três que existem contam a história toda. O `apps/web/app/[idioma]/layout.tsx`
+declara:
+
+```ts
+export const metadata: Metadata = {
+  title: 'BossaOS',
+  description: 'Sistema operativo do restaurante.',
+};
+```
+
+**Um título e uma descrição para tudo o que vive sob `[idioma]`** — as sete
+rotas comerciais (`/`, `/product`, `/plans`, `/getting-started`, `/faq`,
+`/trust`, `/demo`) e o resto. É um objecto **estático**, e três linhas abaixo o
+próprio ficheiro diz que *«os três idiomas são gerados em build: não há
+negociação em tempo de pedido»*. Ou seja: **três construções estáticas, todas a
+carregar a mesma descrição em português**, incluindo a espanhola — que é a
+língua do piloto.
+
+Do lado bom, e é real: o `404` põe `robots: { index: false }` e a carta pública
+põe `index: true` explicitamente. Quem escreveu isso sabia o que estava a fazer;
+o que falta é ter sido feito para as outras vinte e tal.
+
+### Porque é que isto não é uma questão de higiene
+
+**1. Sem `alternates`, as três línguas competem em vez de se declararem.** Sete
+rotas × três idiomas são vinte e uma páginas que, para um motor de busca, são
+conteúdo duplicado sem relação. O `hreflang` existe exactamente para dizer «esta
+é a versão espanhola daquela», e não está lá.
+
+**2. Sem `openGraph`, um link partilhado não tem cartão.** E isto toca no
+negócio, não na técnica: a venda deste produto é por contacto directo. Quando o
+link do BossaOS for para um WhatsApp ou um LinkedIn, o que o interlocutor vê é
+uma linha de texto cinzenta em vez de uma imagem com a proposta. **É a primeira
+impressão do produto, e é a única superfície que se vê antes de alguém decidir
+clicar.**
+
+**3. Um título para sete páginas** faz com que o resultado de busca de «planos»
+e o de «confiança» sejam indistinguíveis.
+
+### Critério de correcção
+
+Não é «acrescentar tags». É:
+
+1. `generateMetadata` por rota comercial, com título e descrição **vindos do
+   i18n** — as 2343 chaves × 3 já existem e já têm guarda de completude;
+2. `alternates.languages` com as três, mais o `canonical` de cada;
+3. `openGraph` com imagem — e aqui há uma dependência real: **a imagem de
+   partilha não existe**, e inventá-la é trabalho de marca, não de metadados.
+   Registo como dependência e não como dívida;
+4. `sitemap.ts` gerado das rotas do atlas, e não escrito à mão — uma lista à mão
+   fica velha na primeira rota nova, que é o mesmo defeito que a CI já teve com
+   as guardas em lista em vez de glob.
+
+**Não mando isto ao implementador agora.** Ele está na moldura, e o §6.8 do
+plano põe os metadados no fim do trabalho da landing — interromper agora
+trocava uma correcção barata por uma cara. Fica registado para o fecho da
+secção 6.
