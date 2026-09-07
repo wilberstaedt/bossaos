@@ -16,7 +16,20 @@
 #
 # O `playwright.config.ts` parametriza a PORTA e nao o directorio de build: dois
 # processos escrevem o mesmo `.next`. Foi isso que produziu, esta noite, um
-# `200` seguido de `500` na mesma rota e um `next-env.d.ts` a oscilar.
+# `200` seguido de `500` na mesma rota.
+#
+# ── Correccao de 07/09: o `next-env.d.ts` a oscilar NAO era este sintoma ──
+#
+# Esta nota juntava-lhe "e um `next-env.d.ts` a oscilar", como se fosse mais um
+# efeito do `.next` partilhado. Nao era, e a causa esta agora PROVADA: aquele
+# ficheiro contem `import "./.next/types/..."`, um caminho que segue o
+# directorio de build, e um arranque com `NEXT_DIST_DIR` reescreve-o -- medido
+# com `.next-prova`, mudou em nove segundos. Acontecia com UM processo so.
+#
+# Fica corrigido em vez de reescrito por cima: um comentario que aponta para a
+# causa errada e' pior do que nenhum, porque manda a proxima pessoa procurar no
+# sitio errado -- e este mandava-a procurar concorrencia onde havia um efeito
+# deterministico de uma variavel de ambiente.
 #
 set -uo pipefail
 cd "$(dirname "$0")/.."
@@ -39,6 +52,15 @@ command -v psql >/dev/null || naomedi "psql nao encontrado"
 # seguido de `500` na mesma rota. Uma captura construida num directorio que
 # outro processo pode reescrever nao e' prova de nada.
 export NEXT_DIST_DIR="${NEXT_DIST_DIR:-.next-mestres}"
+
+# E porque ele isola, reescreve o `next-env.d.ts`, que e' versionado. O trap fica
+# ARMADO JA: se o guiao morrer entre aqui e o arranque do servidor, o ficheiro e'
+# reposto na mesma. Mais abaixo este trap e' substituido por um que faz as duas
+# coisas -- ver a nota la, porque um trap a apagar outro em silencio seria pior
+# do que nao ter nenhum.
+. "$(dirname "$0")/next-env-intacto.sh"
+guardar_next_env
+trap repor_next_env EXIT INT TERM
 
 PORTA="${PORTA_MESTRES:-3020}"
 SEMENTE="node --experimental-strip-types packages/db/prisma/semente-demonstracao.ts"
@@ -121,7 +143,9 @@ fi
 BETTER_AUTH_URL="http://127.0.0.1:$PORTA" \
   pnpm --filter @bossaos/web exec next start -p "$PORTA" >/tmp/mestres-servidor.log 2>&1 &
 SERVIDOR=$!
-trap 'kill "$SERVIDOR" 2>/dev/null' EXIT INT TERM
+# As DUAS coisas no mesmo trap, e nao dois traps: um segundo `trap ... EXIT`
+# substitui o primeiro em silencio, e o que se perdia aqui era matar o servidor.
+trap 'kill "$SERVIDOR" 2>/dev/null; repor_next_env' EXIT INT TERM
 pronto=0
 for _ in $(seq 1 60); do
   curl -sf "http://127.0.0.1:$PORTA/api/health" >/dev/null 2>&1 && { pronto=1; break; }

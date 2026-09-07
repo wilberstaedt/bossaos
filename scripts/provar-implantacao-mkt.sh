@@ -23,6 +23,12 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
+# O build com `NEXT_DIST_DIR` reescreve o `next-env.d.ts`, que é versionado.
+# Este guião repõe-no ao sair, por qualquer via — ver `next-env-intacto.sh`.
+. "$(dirname "$0")/next-env-intacto.sh"
+guardar_next_env
+trap repor_next_env EXIT INT TERM
+
 FASE="${1:-}"
 DESTINO="docs/visual/rv100/2026-09-06_e953a87/evidence/implantacao"
 naomedi() { printf '  NAO MEDI %s\n' "$1"; exit 2; }
