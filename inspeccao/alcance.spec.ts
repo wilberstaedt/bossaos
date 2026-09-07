@@ -100,7 +100,12 @@ test.describe('As 792 composições: por onde se lá chega', () => {
       const falta = c.falta.length > 0 ? c.falta.join(' ') : (c.provocarComo ?? '');
       linhas.push([c.id, c.etapa, `"${c.natureza}"`, c.como, c.endereco ?? '', abre, `"${falta}"`, String(c.irmaos.length)].join(','));
     }
-    writeFileSync(MAPA, `${linhas.join('\n')}\n`);
+    // CRLF por causa do `.gitattributes` (`*.csv text eol=crlf`). Escrevi-o em
+    // LF à primeira e a árvore ficava limpa nesta máquina e SUJA em qualquer
+    // checkout novo — o ficheiro apareceria modificado a cada corrida. É a
+    // mesma dor que o `.gitattributes` já documenta: a 03/09 o `coverage.csv`
+    // virou CRLF e escondeu 12 mudanças reais no meio de 397.
+    writeFileSync(MAPA, `${linhas.join('\r\n')}\r\n`);
 
     // ── O ÂMBITO ──────────────────────────────────────────────────────────
     const conta = (f: (c: (typeof composicoes)[number]) => boolean) => composicoes.filter(f).length;
