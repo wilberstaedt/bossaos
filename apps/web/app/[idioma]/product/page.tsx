@@ -1,6 +1,8 @@
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
 import { AvisoDeDemonstracao, Composicao } from '../../../src/componentes/Demonstracao.tsx';
+import type { Metadata } from 'next';
+import { metadadosDaRota } from '../../../src/seo/metadados.ts';
 
 /**
  * MKT-004 · «El producto BossaOS» (atlas p. 10)
@@ -31,6 +33,13 @@ import { AvisoDeDemonstracao, Composicao } from '../../../src/componentes/Demons
  * composição não aguentar ser vista, corrige-se a composição.
  */
 export const dynamic = 'force-static';
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ idioma: Idioma }> },
+): Promise<Metadata> {
+  const { idioma } = await params;
+  return metadadosDaRota(idioma, '/product');
+}
 
 export default async function Produto({ params }: { params: Promise<{ idioma: Idioma }> }) {
   const { idioma } = await params;

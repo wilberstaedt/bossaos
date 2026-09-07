@@ -1,6 +1,8 @@
 import { ACCOES_QUE_EXIGEM_REDE, type AccaoQueExigeRede } from '@bossaos/fila';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
+import type { Metadata } from 'next';
+import { metadadosDaRota } from '../../../src/seo/metadados.ts';
 
 /**
  * MKT-008 · «Una base para trabajar con confianza» (atlas p. 16)
@@ -46,6 +48,13 @@ import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
  * mostram, e o que a `provar-fila.sh` já mede.
  */
 export const dynamic = 'force-static';
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ idioma: Idioma }> },
+): Promise<Metadata> {
+  const { idioma } = await params;
+  return metadadosDaRota(idioma, '/trust');
+}
 
 const PILARES = ['confianca1', 'confianca2', 'confianca3'] as const;
 

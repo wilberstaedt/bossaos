@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { IDIOMAS, resolverIdioma } from '@bossaos/i18n';
+import { FICHEIROS_NA_RAIZ } from './src/seo/rotas.ts';
 
 /** Cabeçalho onde viaja o identificador do pedido, ida e volta. */
 export const CABECALHO_REQUEST_ID = 'x-request-id';
@@ -34,7 +35,13 @@ export function proxy(pedido: NextRequest) {
   // longo para o mesmo destino, e mudar um endereço impresso custa reimprimir.
   const cartaPublica = caminho === '/r' || caminho.startsWith('/r/');
 
-  if (!caminho.startsWith('/api/') && !cartaPublica && !temIdioma(caminho)) {
+  // Os ficheiros da raiz também não levam idioma, e o `robots.txt` é o caso que
+  // obriga: o protocolo manda lê-lo em `/robots.txt` e mais lado nenhum, por
+  // isso um 307 para `/es-ES/robots.txt` não o move de sítio — apaga-o. Estava
+  // a acontecer, e só apareceu quando o ficheiro passou a existir.
+  const ficheiroDaRaiz = (FICHEIROS_NA_RAIZ as readonly string[]).includes(caminho);
+
+  if (!caminho.startsWith('/api/') && !cartaPublica && !ficheiroDaRaiz && !temIdioma(caminho)) {
     const idioma = resolverIdioma(pedido.headers.get('accept-language'));
     const destino = new URL(`/${idioma}${caminho === '/' ? '' : caminho}`, pedido.url);
     destino.search = pedido.nextUrl.search;

@@ -4,6 +4,8 @@ import {
 import { formatarDinheiro, formatarNumero, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
 import { capacidadesDoPlano } from '../../../src/componentes/planos.ts';
+import type { Metadata } from 'next';
+import { metadadosDaRota } from '../../../src/seo/metadados.ts';
 
 /**
  * MKT-005 · «Compara los planes» (atlas p. 11)
@@ -47,6 +49,13 @@ import { capacidadesDoPlano } from '../../../src/componentes/planos.ts';
  * horizontal — não uma tabela com o seu próprio deslocamento.
  */
 export const dynamic = 'force-static';
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ idioma: Idioma }> },
+): Promise<Metadata> {
+  const { idioma } = await params;
+  return metadadosDaRota(idioma, '/plans');
+}
 
 const PLANOS = [
   { codigo: 'STARTER', nome: 'planoStarter', titulo: 'recomendaStarter', porque: 'recomendaStarterTexto' },

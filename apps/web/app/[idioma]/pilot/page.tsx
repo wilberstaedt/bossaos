@@ -1,6 +1,8 @@
 import { MOEDA_COMERCIAL, precoDoPlano } from '@bossaos/domain';
 import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
+import type { Metadata } from 'next';
+import { metadadosDaRota } from '../../../src/seo/metadados.ts';
 
 /**
  * MKT-010 · «Aprende con la operación real» (atlas p. 17)
@@ -41,6 +43,13 @@ import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
  * promessa nova: é a mesma, dita onde importa — antes de alguém entrar.
  */
 export const dynamic = 'force-static';
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ idioma: Idioma }> },
+): Promise<Metadata> {
+  const { idioma } = await params;
+  return metadadosDaRota(idioma, '/pilot');
+}
 
 /** Os dois lados do compromisso, e a saída. Factos de processo. */
 const BLOCOS = [

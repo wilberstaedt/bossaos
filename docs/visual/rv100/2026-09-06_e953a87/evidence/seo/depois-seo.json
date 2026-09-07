@@ -1,0 +1,676 @@
+{
+  "resumo": {
+    "paginas": 27,
+    "titulosDistintos": {
+      "es-ES": 9,
+      "pt-BR": 9,
+      "en": 9
+    },
+    "descricoesDistintas": {
+      "es-ES": 9,
+      "pt-BR": 9,
+      "en": 9
+    },
+    "descricoesDistintasPorRota": {
+      "/": 3,
+      "/product": 3,
+      "/plans": 3,
+      "/getting-started": 3,
+      "/pilot": 3,
+      "/trust": 3,
+      "/faq": 3,
+      "/demo": 3,
+      "/privacy": 3
+    },
+    "comCanonical": 27,
+    "comHreflangCompleto": 27,
+    "comOgImagem": 27,
+    "comIcone": 27,
+    "sitemap": {
+      "estado": 200,
+      "entradas": 27,
+      "comAlternates": 81
+    },
+    "robots": {
+      "estado": 200,
+      "temSitemap": true,
+      "disallows": 34
+    },
+    "naoIndexaveis": [
+      {
+        "caminho": "/demo/thanks",
+        "estado": 200,
+        "titulo": "Solicitud enviada · BossaOS",
+        "descricao": "Tu solicitud de demo está guardada. Te escribimos en un día laborable para acordar la hora.",
+        "robots": "noindex, nofollow",
+        "canonical": "http://localhost:3000/es-ES/demo/thanks",
+        "hreflang": [
+          "en",
+          "es-ES",
+          "pt-BR",
+          "x-default"
+        ],
+        "ogTitulo": "Solicitud enviada · BossaOS",
+        "ogImagem": "http://localhost:3000/og.png",
+        "ogAlt": "La sala de Bossa Demo, el restaurante de demostración de BossaOS: mesas abiertas y una comanda en curso, capturadas del producto real.",
+        "ogLocale": "es-ES",
+        "icones": [
+          "/icon.png?icon.349vikk_x1y-0.png"
+        ]
+      },
+      {
+        "caminho": "/404",
+        "estado": 200,
+        "titulo": "BossaOS",
+        "descricao": "Sistema operativo do restaurante.",
+        "robots": "noindex, nofollow",
+        "canonical": null,
+        "hreflang": [],
+        "ogTitulo": null,
+        "ogImagem": null,
+        "ogAlt": null,
+        "ogLocale": null,
+        "icones": [
+          "/icon.png?icon.349vikk_x1y-0.png"
+        ]
+      },
+      {
+        "caminho": "/app",
+        "estado": 404,
+        "robots": null,
+        "titulo": null
+      },
+      {
+        "caminho": "/staff",
+        "estado": 404,
+        "robots": null,
+        "titulo": null
+      },
+      {
+        "caminho": "/auth/login",
+        "estado": 200,
+        "titulo": "BossaOS",
+        "descricao": "Sistema operativo do restaurante.",
+        "robots": "noindex, nofollow",
+        "canonical": null,
+        "hreflang": [],
+        "ogTitulo": null,
+        "ogImagem": null,
+        "ogAlt": null,
+        "ogLocale": null,
+        "icones": [
+          "/icon.png?icon.349vikk_x1y-0.png"
+        ]
+      }
+    ]
+  },
+  "paginas": [
+    {
+      "idioma": "es-ES",
+      "rota": "/",
+      "titulo": "BossaOS · Todo tu restaurante. Un solo ritmo.",
+      "descricao": "Carta, sala, cocina, reservas y gestión sobre la misma base, sin copiar la comanda a mano entre pantallas.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/es-ES",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "BossaOS · Todo tu restaurante. Un solo ritmo.",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "La sala de Bossa Demo, el restaurante de demostración de BossaOS: mesas abiertas y una comanda en curso, capturadas del producto real.",
+      "ogLocale": "es-ES",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "es-ES",
+      "rota": "/product",
+      "titulo": "El producto por dentro · BossaOS",
+      "descricao": "El catálogo que alimenta la carta pública, la comanda de la sala y la pantalla de la cocina, con capturas del producto real.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/es-ES/product",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "El producto por dentro · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "La sala de Bossa Demo, el restaurante de demostración de BossaOS: mesas abiertas y una comanda en curso, capturadas del producto real.",
+      "ogLocale": "es-ES",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "es-ES",
+      "rota": "/plans",
+      "titulo": "Planes y precios · BossaOS",
+      "descricao": "Starter, Restaurant y Pro: precio mensual y anual, IVA aparte, por establecimiento, y la implantación separada de la suscripción.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/es-ES/plans",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Planes y precios · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "La sala de Bossa Demo, el restaurante de demostración de BossaOS: mesas abiertas y una comanda en curso, capturadas del producto real.",
+      "ogLocale": "es-ES",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "es-ES",
+      "rota": "/getting-started",
+      "titulo": "Implantación · BossaOS",
+      "descricao": "Los cuatro pasos, cuánto acompañamiento llevas y qué conviene tener listo antes de empezar. Los aparatos van aparte.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/es-ES/getting-started",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Implantación · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "La sala de Bossa Demo, el restaurante de demostración de BossaOS: mesas abiertas y una comanda en curso, capturadas del producto real.",
+      "ogLocale": "es-ES",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "es-ES",
+      "rota": "/pilot",
+      "titulo": "Qué es un piloto · BossaOS",
+      "descricao": "Qué pasa en un piloto, qué se compromete cada lado, y qué te llevas si sale mal. Sin nombres de terceros.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/es-ES/pilot",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Qué es un piloto · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "La sala de Bossa Demo, el restaurante de demostración de BossaOS: mesas abiertas y una comanda en curso, capturadas del producto real.",
+      "ogLocale": "es-ES",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "es-ES",
+      "rota": "/trust",
+      "titulo": "Confianza · BossaOS",
+      "descricao": "Tus datos son tuyos y se exportan, el sistema dice lo que no sabe, y sin red el límite está dicho en vez de fingido.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/es-ES/trust",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Confianza · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "La sala de Bossa Demo, el restaurante de demostración de BossaOS: mesas abiertas y una comanda en curso, capturadas del producto real.",
+      "ogLocale": "es-ES",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "es-ES",
+      "rota": "/faq",
+      "titulo": "Preguntas frecuentes · BossaOS",
+      "descricao": "Objeciones comerciales, técnicas y de equipamiento, respondidas contra lo que el sistema hace hoy.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/es-ES/faq",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Preguntas frecuentes · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "La sala de Bossa Demo, el restaurante de demostración de BossaOS: mesas abiertas y una comanda en curso, capturadas del producto real.",
+      "ogLocale": "es-ES",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "es-ES",
+      "rota": "/demo",
+      "titulo": "Pedir una demo · BossaOS",
+      "descricao": "Media hora con tu carta delante. Enviar el formulario no contrata nada y te escribimos en un día laborable.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/es-ES/demo",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Pedir una demo · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "La sala de Bossa Demo, el restaurante de demostración de BossaOS: mesas abiertas y una comanda en curso, capturadas del producto real.",
+      "ogLocale": "es-ES",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "es-ES",
+      "rota": "/privacy",
+      "titulo": "Tratamiento de datos · BossaOS",
+      "descricao": "Qué se recoge en el formulario de demo, para qué se usa, quién puede leerlo y qué todavía no está decidido.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/es-ES/privacy",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Tratamiento de datos · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "La sala de Bossa Demo, el restaurante de demostración de BossaOS: mesas abiertas y una comanda en curso, capturadas del producto real.",
+      "ogLocale": "es-ES",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "pt-BR",
+      "rota": "/",
+      "titulo": "BossaOS · Todo o seu restaurante. Um só ritmo.",
+      "descricao": "Cardápio, salão, cozinha, reservas e gestão sobre a mesma base, sem copiar o pedido à mão entre telas.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/pt-BR",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "BossaOS · Todo o seu restaurante. Um só ritmo.",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "O salão do Bossa Demo, o restaurante de demonstração do BossaOS: mesas abertas e um pedido em curso, capturados do produto real.",
+      "ogLocale": "pt-BR",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "pt-BR",
+      "rota": "/product",
+      "titulo": "O produto por dentro · BossaOS",
+      "descricao": "O catálogo que alimenta o cardápio público, o pedido do salão e a tela da cozinha, com capturas do produto real.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/pt-BR/product",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "O produto por dentro · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "O salão do Bossa Demo, o restaurante de demonstração do BossaOS: mesas abertas e um pedido em curso, capturados do produto real.",
+      "ogLocale": "pt-BR",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "pt-BR",
+      "rota": "/plans",
+      "titulo": "Planos e preços · BossaOS",
+      "descricao": "Starter, Restaurant e Pro: preço mensal e anual, IVA à parte, por estabelecimento, e a implantação separada da assinatura.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/pt-BR/plans",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Planos e preços · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "O salão do Bossa Demo, o restaurante de demonstração do BossaOS: mesas abertas e um pedido em curso, capturados do produto real.",
+      "ogLocale": "pt-BR",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "pt-BR",
+      "rota": "/getting-started",
+      "titulo": "Implantação · BossaOS",
+      "descricao": "Os quatro passos, quanto acompanhamento você leva e o que convém ter pronto antes de começar. Os aparelhos vão à parte.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/pt-BR/getting-started",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Implantação · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "O salão do Bossa Demo, o restaurante de demonstração do BossaOS: mesas abertas e um pedido em curso, capturados do produto real.",
+      "ogLocale": "pt-BR",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "pt-BR",
+      "rota": "/pilot",
+      "titulo": "O que é um piloto · BossaOS",
+      "descricao": "O que acontece num piloto, com o que cada lado se compromete, e o que você leva se der errado. Sem nomes de terceiros.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/pt-BR/pilot",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "O que é um piloto · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "O salão do Bossa Demo, o restaurante de demonstração do BossaOS: mesas abertas e um pedido em curso, capturados do produto real.",
+      "ogLocale": "pt-BR",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "pt-BR",
+      "rota": "/trust",
+      "titulo": "Confiança · BossaOS",
+      "descricao": "Seus dados são seus e se exportam, o sistema diz o que não sabe, e sem rede o limite está dito em vez de fingido.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/pt-BR/trust",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Confiança · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "O salão do Bossa Demo, o restaurante de demonstração do BossaOS: mesas abertas e um pedido em curso, capturados do produto real.",
+      "ogLocale": "pt-BR",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "pt-BR",
+      "rota": "/faq",
+      "titulo": "Perguntas frequentes · BossaOS",
+      "descricao": "Objeções comerciais, técnicas e de equipamento, respondidas contra o que o sistema faz hoje.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/pt-BR/faq",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Perguntas frequentes · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "O salão do Bossa Demo, o restaurante de demonstração do BossaOS: mesas abertas e um pedido em curso, capturados do produto real.",
+      "ogLocale": "pt-BR",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "pt-BR",
+      "rota": "/demo",
+      "titulo": "Pedir uma demo · BossaOS",
+      "descricao": "Meia hora com o seu cardápio na frente. Enviar o formulário não contrata nada e a gente escreve em um dia útil.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/pt-BR/demo",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Pedir uma demo · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "O salão do Bossa Demo, o restaurante de demonstração do BossaOS: mesas abertas e um pedido em curso, capturados do produto real.",
+      "ogLocale": "pt-BR",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "pt-BR",
+      "rota": "/privacy",
+      "titulo": "Tratamento de dados · BossaOS",
+      "descricao": "O que é coletado no formulário de demo, para que é usado, quem pode ler e o que ainda não está definido.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/pt-BR/privacy",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Tratamento de dados · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "O salão do Bossa Demo, o restaurante de demonstração do BossaOS: mesas abertas e um pedido em curso, capturados do produto real.",
+      "ogLocale": "pt-BR",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "en",
+      "rota": "/",
+      "titulo": "BossaOS · Your restaurant. One rhythm.",
+      "descricao": "Menu, floor, kitchen, bookings and management on one base, with no order retyped by hand between screens.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/en",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "BossaOS · Your restaurant. One rhythm.",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "The floor of Bossa Demo, the BossaOS demonstration restaurant: open tables and an order in progress, captured from the real product.",
+      "ogLocale": "en",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "en",
+      "rota": "/product",
+      "titulo": "The product from the inside · BossaOS",
+      "descricao": "The catalogue that feeds the public menu, the floor order and the kitchen screen, with captures of the real product.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/en/product",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "The product from the inside · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "The floor of Bossa Demo, the BossaOS demonstration restaurant: open tables and an order in progress, captured from the real product.",
+      "ogLocale": "en",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "en",
+      "rota": "/plans",
+      "titulo": "Plans and pricing · BossaOS",
+      "descricao": "Starter, Restaurant and Pro: monthly and yearly price, VAT not included, per venue, and onboarding kept separate from the subscription.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/en/plans",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Plans and pricing · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "The floor of Bossa Demo, the BossaOS demonstration restaurant: open tables and an order in progress, captured from the real product.",
+      "ogLocale": "en",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "en",
+      "rota": "/getting-started",
+      "titulo": "Onboarding · BossaOS",
+      "descricao": "The four steps, how much accompaniment you get, and what is worth having ready before we start. Hardware sits apart.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/en/getting-started",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Onboarding · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "The floor of Bossa Demo, the BossaOS demonstration restaurant: open tables and an order in progress, captured from the real product.",
+      "ogLocale": "en",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "en",
+      "rota": "/pilot",
+      "titulo": "What a pilot is · BossaOS",
+      "descricao": "What happens in a pilot, what each side commits to, and what you take with you if it goes badly. No third-party names.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/en/pilot",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "What a pilot is · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "The floor of Bossa Demo, the BossaOS demonstration restaurant: open tables and an order in progress, captured from the real product.",
+      "ogLocale": "en",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "en",
+      "rota": "/trust",
+      "titulo": "Trust · BossaOS",
+      "descricao": "Your data is yours and exports, the system says what it does not know, and off the network the limit is stated rather than faked.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/en/trust",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Trust · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "The floor of Bossa Demo, the BossaOS demonstration restaurant: open tables and an order in progress, captured from the real product.",
+      "ogLocale": "en",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "en",
+      "rota": "/faq",
+      "titulo": "Frequently asked questions · BossaOS",
+      "descricao": "Commercial, technical and hardware objections, answered against what the system does today.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/en/faq",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Frequently asked questions · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "The floor of Bossa Demo, the BossaOS demonstration restaurant: open tables and an order in progress, captured from the real product.",
+      "ogLocale": "en",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "en",
+      "rota": "/demo",
+      "titulo": "Book a demo · BossaOS",
+      "descricao": "Half an hour with your menu in front of you. Sending the form signs nothing and we write within one working day.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/en/demo",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Book a demo · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "The floor of Bossa Demo, the BossaOS demonstration restaurant: open tables and an order in progress, captured from the real product.",
+      "ogLocale": "en",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    },
+    {
+      "idioma": "en",
+      "rota": "/privacy",
+      "titulo": "Data handling · BossaOS",
+      "descricao": "What the demo form collects, what it is used for, who can read it, and what is not settled yet.",
+      "robots": "index, follow",
+      "canonical": "http://localhost:3000/en/privacy",
+      "hreflang": [
+        "en",
+        "es-ES",
+        "pt-BR",
+        "x-default"
+      ],
+      "ogTitulo": "Data handling · BossaOS",
+      "ogImagem": "http://localhost:3000/og.png",
+      "ogAlt": "The floor of Bossa Demo, the BossaOS demonstration restaurant: open tables and an order in progress, captured from the real product.",
+      "ogLocale": "en",
+      "icones": [
+        "/icon.png?icon.349vikk_x1y-0.png"
+      ]
+    }
+  ]
+}

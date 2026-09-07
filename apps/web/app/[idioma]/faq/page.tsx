@@ -1,5 +1,7 @@
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
+import type { Metadata } from 'next';
+import { metadadosDaRota } from '../../../src/seo/metadados.ts';
 
 /**
  * MKT-009 · «Resolvemos tus dudas» (atlas p. 15)
@@ -10,6 +12,13 @@ import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
  * conteúdo suficiente para justificar esconder o que quer que seja.
  */
 export const dynamic = 'force-static';
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ idioma: Idioma }> },
+): Promise<Metadata> {
+  const { idioma } = await params;
+  return metadadosDaRota(idioma, '/faq');
+}
 
 const PERGUNTAS = ['faq1', 'faq2', 'faq3', 'faq4'] as const;
 

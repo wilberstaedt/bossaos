@@ -1,6 +1,8 @@
 import { Aviso } from '@bossaos/ui';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../../src/componentes/Marketing.tsx';
+import type { Metadata } from 'next';
+import { metadadosDaRota } from '../../../../src/seo/metadados.ts';
 
 /**
  * MKT-011 · «Tu solicitud está enviada» (atlas p. 18)
@@ -16,6 +18,17 @@ import { MolduraMkt } from '../../../../src/componentes/Marketing.tsx';
  * não uma promessa: não há por onde chegar a este ecrã sem ter passado por lá.
  */
 export const dynamic = 'force-dynamic';
+
+/**
+ * NAO INDEXAVEL, e nao por omissao: e' o destino de um POST. Indexa-la punha
+ * um ecra de "obrigado" nos resultados de pesquisa sem o pedido que o explica.
+ */
+export async function generateMetadata(
+  { params }: { params: Promise<{ idioma: Idioma }> },
+): Promise<Metadata> {
+  const { idioma } = await params;
+  return metadadosDaRota(idioma, '/demo/thanks', { indexavel: false });
+}
 
 export default async function Obrigado({
   params, searchParams,

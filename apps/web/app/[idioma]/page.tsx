@@ -2,6 +2,8 @@ import { MENSALIDADES_NUM_ANO, MOEDA_COMERCIAL, precoDoPlano } from '@bossaos/do
 import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../src/componentes/Marketing.tsx';
 import { AvisoDeDemonstracao, Composicao } from '../../src/componentes/Demonstracao.tsx';
+import type { Metadata } from 'next';
+import { metadadosDaRota } from '../../src/seo/metadados.ts';
 
 /**
  * MKT-001 · «Todo tu restaurante. Un solo ritmo.» (atlas p. 1)
@@ -53,6 +55,13 @@ import { AvisoDeDemonstracao, Composicao } from '../../src/componentes/Demonstra
  * produto», que o §10 reprova pelo nome. Esperam pelo motor de prova.
  */
 export const dynamic = 'force-static';
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ idioma: Idioma }> },
+): Promise<Metadata> {
+  const { idioma } = await params;
+  return metadadosDaRota(idioma, '');
+}
 
 /** Os três planos, na ordem de progressão que o §6.5 pede. */
 const PLANOS = [

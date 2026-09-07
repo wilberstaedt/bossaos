@@ -1341,3 +1341,164 @@ commit**. Mas o balanço honesto é este: o `NEXT_DIST_DIR` resolve o servidor,
 não resolve o tipo, e **mexe num ficheiro versionado**. Para medir em paralelo a
 sério, a resposta é uma árvore de trabalho separada — e as duas limitações que
 encontrei são o argumento a favor disso, não contra.
+
+---
+
+## L1i — metadados, hreflang e partilha (§6.8, RV100-007)
+
+Instrumento: `inspeccao/rv100-seo.spec.ts`, guião `scripts/provar-seo-mkt.sh`.
+Guarda: `scripts/validar-seo.sh`. Evidência em `evidence/seo/`.
+
+### O antes, medido e não citado
+
+| | antes | depois |
+| --- | --- | --- |
+| títulos **distintos** entre 9 rotas | **1** por língua | **9** por língua |
+| descrições **distintas** entre 9 rotas | **1** por língua | **9** por língua |
+| descrições distintas por rota, entre línguas | **1** | **3** |
+| páginas com `canonical` | 0 | **27** |
+| páginas com `hreflang` completo | 0 | **27** |
+| páginas com `og:image` | 0 | **27** |
+| páginas com ícone | 0 | **27** |
+| `sitemap.xml` | **404** | **200**, 27 entradas, 81 alternates |
+| `robots.txt` | **404** | **200**, com sitemap e 34 `Disallow` |
+
+O título único era `'BossaOS'` e a descrição única era `'Sistema operativo do
+restaurante.'` — **em português, servida também em espanhol**, que é a língua do
+piloto.
+
+**A medição central não é «tem `<title>`».** É quantos títulos **distintos**
+existem entre as nove rotas: o defeito dava nove títulos e passaria qualquer
+contagem de presença. O mesmo em segunda volta para a descrição, entre as três
+línguas da mesma rota — **uma** significava a portuguesa servida nas três.
+
+### A omissão passou a ser NÃO INDEXAR
+
+Debaixo de `/[idioma]` não vivem só as rotas comerciais: vivem `/app`, `/staff`,
+`/kds`, `/pos`, `/kiosk`, `/auth`, `/interno`, `/platform` e `/onboarding`.
+
+Havia duas maneiras de cumprir «páginas autenticadas fora de indexação».
+Enumerar as autenticadas e negá-las — e a próxima nasce indexável, porque
+ninguém se lembra de a acrescentar. Ou **negar por omissão na moldura e obrigar
+a comercial a pedir**, que é o que está feito: `metadadosDaRota` põe
+`index: true` explicitamente nas nove.
+
+**Entre os dois erros escolhi o que se descobre:** com lista de negação, uma rota
+de sessão nova aparece no Google e ninguém dá por isso; com negação por omissão,
+uma rota comercial nova não aparece — e essa nota-se, porque alguém a quer lá.
+
+Medido: `/es-ES/auth/login` responde 200 e **`noindex, nofollow`**.
+
+### O defeito que só apareceu quando o ficheiro passou a existir
+
+`/robots.txt` respondia **307 para `/es-ES/robots.txt`**. E `/es-ES/robots.txt`
+**não serve para nada**: o protocolo manda ler o `robots.txt` na raiz do domínio
+e mais lado nenhum. O redireccionamento não o movia de sítio — **apagava-o**.
+
+A causa é o `apps/web/proxy.ts` (o `middleware` renomeado do Next 16), que
+redirecciona para `/{idioma}{caminho}` tudo o que não comece por `/api/` nem
+`/r/`. É uma **lista de excepções**, e por isso cada rota nova na raiz nasce com
+idioma à frente.
+
+**E eu quase não o encontrei por procurar o nome errado:** o meu primeiro
+`find` foi por `middleware.ts` e devolveu «sem middleware». O ficheiro chama-se
+`proxy.ts` desde o Next 16, e está escrito no próprio ficheiro. Procurei pelo
+nome antigo e concluí que a coisa não existia — que é a forma de erro que este
+repositório já registou como *«um instrumento que não alcança o alvo tem de
+FALHAR»*, aplicada a mim.
+
+Corrigido com `FICHEIROS_NA_RAIZ`, declarada no `rotas.ts` e importada pelo
+proxy — e não com uma expressão regular escrita dentro do proxy, porque é a
+mesma pergunta que aquele módulo já responde.
+
+E o `/og.png` respondia **500**: dentro de `app/` o Next só reconhece os nomes
+das convenções (`icon`, `opengraph-image`, `favicon`). Passou para
+`apps/web/public/`. **Não uso a convenção `opengraph-image.png`** de propósito:
+com ela o texto alternativo vem de um `.alt.txt` ao lado, que é **um** ficheiro
+e portanto **uma** língua — e o alt desta imagem diz que o restaurante é de
+demonstração, frase que tem de existir nas três.
+
+### A origem NÃO é `bossaos.com`, e a razão está no repositório
+
+> «bossaos.com e @bossaos são nomes **pretendidos**, sem posse ou
+> disponibilidade presumida.»
+> — `docs/bossaos/PROMPTS_COMPLETOS.md`, linha 577
+
+Um `canonical` é uma afirmação para uma máquina: *«o endereço oficial desta
+página é este»*. Escrever lá um domínio que a documentação declara não possuído
+seria publicar uma posse que não existe, **num sítio que ninguém relê** — um
+`<link rel=canonical>` não se vê no ecrã.
+
+Vem de `NEXT_PUBLIC_SITE_URL`, e sem ela vale `http://localhost:3000`: falso em
+produção e **obviamente** falso. Um domínio plausível mas errado passa
+despercebido; `localhost` num canonical salta à vista de quem olhe. É a mesma
+disciplina do preço de aparelho que não inventei na L1f e do texto legal que não
+dei por revisto na L1g.
+
+### O sitemap não sai do atlas, e a razão é medida
+
+A instrução dizia «gerado do atlas». Fui ver o que o atlas dá para os doze MKT, e
+**três dariam entradas erradas**:
+
+- `MKT-002` e `MKT-003` são `?section=product` e `?section=plans` — **o mesmo
+  byte da home**, com `md5` medido no `06_O_PORTAO_DE_COBERTURA.md`. Três
+  entradas para uma página é conteúdo duplicado declarado por nós;
+- `MKT-006` diz `/[locale]/onboarding` e a rota real é `/getting-started` — a
+  divergência é do atlas, registada como **RV100-020, aceite**;
+- `MKT-011` (`/demo/thanks`) e `MKT-012` (`/404`) não se indexam.
+
+**O atlas é o registo dos IDs e é excelente nisso** — é o que mantém os 396. Não
+é um mapa de endereços indexáveis.
+
+A objecção da instrução continua certa: *«uma lista à mão fica velha na primeira
+rota nova»*. Por isso a lista **não vive sozinha**: a `validar-seo.sh` compara-a
+com o sistema de ficheiros e reprova quando aparece uma pasta de rota que
+ninguém classificou. Uma rota nova obriga a uma decisão explícita — indexável ou
+não —, o que é mais do que um glob daria, porque um glob indexaria sozinho a
+próxima rota autenticada.
+
+### Zero dados estruturados, e é uma decisão
+
+O §6.8 permite JSON-LD «somente para factos verdadeiros». Os factos que um
+JSON-LD comercial normalmente carrega — `aggregateRating`, `reviewCount`,
+contagem de clientes — **não existem**: a superfície comercial inteira tem zero
+prova social, por decisão. **Um dado estruturado é uma afirmação para uma
+máquina**, e vale-lhe a mesma regra: se uma guarda não o prova, não se escreve.
+Não os ponho para preencher um campo.
+
+### O favicon a tamanho real, e a OG medida pelo método da L1e
+
+O ícone aprovado tinha **zero usos**. Está agora em `app/icon.png` (512 px), e
+olhei-o a **16 px**, que é o tamanho real de um favicon.
+
+Medido em vez de julgado a olho: o glifo ocupa **91,3% da largura** da tela
+(bbox 1145×1254 de 1254), ou seja **~14,6 px efectivos** a 16. **Não há margem
+para recuperar** — a arte já está justa. A silhueta do «b» coral aguenta; a onda
+interior quase fecha. Uma variante simplificada para tamanho pequeno é decisão
+de composição, e composição é a secção 7.
+
+A imagem de partilha é a composição da sala, a **1200 × 630**, que é **83% da
+largura a que foi capturada** (1200 de 1440) — pelo método da L1e, e acima dos
+74–84% da `/product`. Abri-a e verifiquei o que se lê: o texto do produto é
+legível **e a imagem marca-se sozinha** — mostra `bossa-demo` e
+`demo@bossaos.invalid`, num TLD reservado que por definição não resolve. Uma
+captura de um restaurante inventado partilhada numa rede social sem marca
+ler-se-ia como um cliente real; esta traz a marca dentro dos pixéis, e o alt
+di-lo por extenso nas três línguas.
+
+### Regressão
+
+`marketing.spec.ts` **65/65**, população inteira. **396 IDs intactos.** Guardas
+verdes: seo (com três controlos negativos), pilar offline, classes, três línguas
+(2550 chaves), preços, cobertura, portas mortas. `pnpm lint` limpo. E o
+`next-env.d.ts` ficou **intacto** desta vez — verifiquei, depois da lição da L1h.
+
+### O que NÃO foi feito
+
+- **`NEXT_PUBLIC_SITE_URL` não está definida em lado nenhum.** O canonical de
+  produção aponta a `localhost` até alguém a definir. É dependência de fora e
+  fica declarada, não inventada.
+- **Expansão de texto: continua NÃO MEDI**, mesma razão.
+- **Termos e cookies** continuam sem rota, logo fora do sitemap.
+- **Nada de teclado nem leitor de ecrã** neste lote — o `<head>` não tem foco.
+- **Não medi a aparência.** Secção 7, e é do Matheus.

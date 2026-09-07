@@ -1,6 +1,8 @@
 import { Aviso } from '@bossaos/ui';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
+import type { Metadata } from 'next';
+import { metadadosDaRota } from '../../../src/seo/metadados.ts';
 
 /**
  * MKT-007 · «Ve BossaOS en una demo» (atlas p. 13)
@@ -19,6 +21,13 @@ import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
  * sobrevive a um recarregar e é o servidor quem decide o que dizer.
  */
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ idioma: Idioma }> },
+): Promise<Metadata> {
+  const { idioma } = await params;
+  return metadadosDaRota(idioma, '/demo');
+}
 
 export default async function Demo({
   params, searchParams,
