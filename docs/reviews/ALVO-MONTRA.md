@@ -83,3 +83,44 @@ em **duas** fendas — *placeholder* e botão. Ele foi ver e são **três**: ser
 também de nome da secção de resultados. **A minha contagem era um piso outra
 vez** — parei no primeiro par que vi em vez de perguntar quantas fendas a chave
 serve. Ele generalizou; eu instanciei.
+
+---
+
+## Veredicto (2), (3) e (4) — 15h45, medido na imagem
+
+| critério | resultado |
+| --- | --- |
+| (2) uma chave por fenda | **passa** — `buscar` = «¿Qué te apetece?» (sugestão), `accaoBuscar` = **«Buscar»** (acção), `resultados` = «Resultados» (secção) |
+| (3) o *placeholder* cabe | **passa** — lê-se inteiro, com o `?` |
+| (4) idiomas com nome | **passa** — «Español · Português · English», sem códigos e **sem bandeiras** |
+
+**E o achado é a ligação entre a (2) e a (3), que ele viu e eu não:** o botão
+passou de uma **frase** («¿Qué te apetece?») a uma **palavra** («Buscar»), o
+campo ao lado ganhou a largura que faltava, e o texto deixou de cortar.
+**Um defeito de conteúdo estava a produzir um defeito de disposição** — e eu
+tinha-os listado como dois itens independentes na régua. Eram um.
+
+**A minha contagem, outra vez, era um piso.** Escrevi que a chave servia **duas**
+fendas; ele foi ver e eram **três** — a secção de resultados também. Parei no
+primeiro par em vez de perguntar quantas fendas a chave serve.
+
+**E ele fez o que interessa mais do que a correcção: escreveu a guarda.**
+`validar-rotulo-em-duas-fendas.sh` corre a zero, **com a sonda a acender antes do
+veredicto**, e — o melhor — **declara o que não apanha**: rótulo repartido por
+ficheiros diferentes, ou o mesmo texto escrito duas vezes à mão em vez de vir de
+uma chave. Uma guarda que nomeia os próprios pontos cegos vale mais do que uma
+que só diz que passou.
+
+## Observado e não levantado como defeito
+
+«Para compartir» aparece como pastilha de filtro **e** como cabeçalho da secção
+logo abaixo. **Não é a mesma doença**: a pastilha é um controlo de estado e o
+cabeçalho nomeia o que está em baixo — quando o filtro está activo, coincidem por
+consequência e não por reutilização. Fica registado como **observado**, não como
+achado, e a diferença é essa.
+
+## E a página foi republicada
+
+Capturas frescas (25/25, 15h39, depois do último commit de produto às 15h37), a
+guarda da frescura deixou gerar, e o mesmo URL mostra agora a barra lateral
+refeita, o Staff sem o título repetido, e a carta com nomes de idioma.
