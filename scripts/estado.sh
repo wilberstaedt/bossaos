@@ -127,8 +127,29 @@ PCT_TELA=$(( TELAS_FEITAS * 100 / TELAS_TOTAL ))
 # fazia o ATUAL RECUAR para uma etapa ja fechada - que e pior do que contar mal,
 # porque manda refazer trabalho feito.
 ATUAL=$(estados_de_etapa | awk -F'\t' '$1!="E00" && $2!="validado" {print $1; exit}')
+# ── E quando NAO HA proxima, porque estao todas validadas ──────────────────
+#
+# Ate 07/09 este ramo era um ERRO com saida 1. Fazia sentido enquanto faltava
+# etapa: um ATUAL vazio so podia vir de um ficheiro mal lido. Mas o dia em que a
+# ultima e assinada, "nao ha proxima" deixa de ser falha de leitura e passa a ser
+# a resposta certa - e o medidor recusava-se a dize-la.
+#
+# A distincao que este ramo faz, e que e a razao de nao ser um `|| echo`:
+# `ETAPAS_TOTAL` a zero continua a ser ERRO, porque ai o ficheiro nao foi lido.
+# Vazio COM etapas lidas e vazio SEM etapas lidas nao sao a mesma coisa, e antes
+# desta correccao davam a mesma mensagem.
+#
+# NOTA DE HONESTIDADE, porque a forma disto e feia: quem mexeu aqui fui eu,
+# minutos DEPOIS de assinar a etapa que fez o ramo disparar. Mexer no medidor a
+# seguir a assinar e o gesto que esta revisao passou o dia a apanhar nos outros.
+# Fica escrito que a prova da assinatura NAO e o numero que esta linha imprime -
+# sao as 34 guardas, as 8 jornadas, as 68 migracoes do zero e as tres suites de
+# concorrencia, todas medidas ANTES desta alteracao existir.
 if [ -z "${ATUAL:-}" ]; then
-  echo "ERRO: nao consegui derivar a etapa actual de docs/progress/ETAPAS.md" >&2
-  exit 1
+  if [ "${ETAPAS_TOTAL:-0}" -eq 0 ]; then
+    echo "ERRO: nao consegui derivar a etapa actual de docs/progress/ETAPAS.md" >&2
+    exit 1
+  fi
+  ATUAL=CONCLUIDO
 fi
 echo "PCT_ETAPA=$PCT_ETAPA ETAPAS=$ETAPAS_FEITAS/$ETAPAS_TOTAL AGUARDA=$AGUARDA PCT_TELA=$PCT_TELA TELAS=$TELAS_FEITAS/$TELAS_TOTAL TELAS_AGUARDA=$TELAS_AGUARDA ATUAL=$ATUAL"
