@@ -109,3 +109,30 @@ falharam hoje falharam por confundir os dois.
 
 A guarda dele já leva a lição escrita no âmbito: *«um fundo com alfa é uma
 camada, não um fundo»*.
+
+---
+
+## Tarefa (3) — o coral fora da navegação do KDS, fechada a 14h55
+
+**A letra:** coral no ecrã do KDS passou de **276 px** para **0**, medido nas
+duas capturas (a de antes tirada do próprio `git show` do commit anterior).
+
+**Mas zero coral prova que a violação saiu, não que o intento foi cumprido.** A
+regra do manual é **comparativa** — «coral e cítrico não devem disputar atenção
+com o estado dos pedidos» —, e o que ela quer é que **o que salta seja o que está
+a queimar**. Removê-la podia deixar o ecrã sem nada a saltar, o que cumpre a
+letra e falha o propósito.
+
+**Fui medir o outro lado.** Ordenei todas as cores do ecrã por saturação:
+
+| saturação | cor | área |
+| ---: | --- | ---: |
+| **1,00** | `#8A5100` | 198 px |
+| 0,55 | `#F6ECE0` | 2 204 px |
+| 0,54 | `#102E35` — a superfície | 96,6 % |
+
+`#8A5100` é o `--bo-estado-aviso`, e `#F6ECE0` é o fundo do par. **A coisa mais
+saturada do ecrã do KDS passou a ser a etiqueta de estado do pedido.**
+
+**Passa nas duas leituras**, e é a segunda que interessa: uma regra escrita como
+proibição só se verifica de verdade medindo o que ficou no lugar do que saiu.
