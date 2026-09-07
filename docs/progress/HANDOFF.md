@@ -3142,3 +3142,45 @@ a ser **2 contra 3**.
 **0.4 — capturar «Mesas em tempo real»**, o «antes» da segunda tela-mestre.
 Continua por fazer: exige sessão e `build`, o JR está a construir a landing, e a
 máquina está em `ATENÇÃO`. **Declarado, não esquecido.**
+
+## 08/09 01h00 — a landing da Fase 2 entregue, e uma discrepância que corrige os dois
+
+Ele entregou a primeira metade e passou às Mesas. Revi o que está comitado sem o
+interromper. **Os dez números que ele declara ainda não os verifiquei**: exigem
+`build` e servidor, ele está a construir a segunda metade e a máquina esteve em
+`ATENÇÃO`. Ficam por medir, declarados.
+
+### Mas um deles discordava do meu, e o desacordo era o achado
+
+Ele escreve **«fundos distintos 1 → 4»**. A minha fita mediu **2** no «antes».
+Discordávamos sobre o **antes**, não sobre o depois — e fui ver, à espera de ser
+eu o errado.
+
+    12 secções  rgba(0, 0, 0, 0)   transparentes sobre a areia do body
+     1 secção   rgb(16, 46, 53)    verde profundo — «Media hora, con tu carta delante»
+
+**A escura não é o rodapé** — verifiquei, `rodape=nao`. É o **CTA final**, e já
+estava em verde profundo antes de qualquer redesign.
+
+**Correcção dos dois lados:**
+
+- o «antes» dele está errado: são **2**, não 1, e o delta honesto é **2 → 4**;
+- **a minha frase também estava larga.** Escrevi que isto quantificava «fundo
+  areia em todas as secções». Não são todas: são **12 de 13**.
+
+Não é um número grande, mas é o tipo de coisa que **infla um resultado** — e a
+mudança real que o norte pede não é «a página deixa de ser monocroma», que já
+não era: é **o herói deixar de ser areia**, que é outra afirmação e mais difícil.
+
+### O que ele resolveu e vale a pena reter
+
+**O H2 não era um valor errado: era ESPECIFICIDADE.** O `.ns-titulo` saía a 20 px
+porque `.bo-publico h2` é (0,1,1) e `.ns-titulo` é (0,1,0) — **perde por
+construção, esteja onde estiver no ficheiro**. E curou empatando com
+`h2.ns-titulo` e ganhando por ordem, **sem `!important`** — porque o
+`!important` *«ganhava a discussão e escondia que a folha tem duas famílias a
+disputar o mesmo h2»*.
+
+E declarou um erro próprio: mediu **três vezes** um servidor que não era o que
+tinha construído — sete `next-server` vivos e o `next start` a falhar em silêncio
+para o log. **É o mesmo erro que eu cometi hoje com a imagem do Docker.**
