@@ -1,4 +1,4 @@
-# RV100 — onde isto está, medido às 06:00 de 07/09
+# RV100 — onde isto está, medido às 08:30 de 07/09
 
 > Escrito para ser a **primeira coisa lida**, porque a noite produziu oito
 > documentos e ninguém acorda para ler oito. Os números aqui foram medidos ao
@@ -117,3 +117,46 @@ vezes.**
 mesmo byte, e isso é o comportamento **correcto** para um endereço partilhável —
 o atlas já lhes chama «secção da landing page». O que mente é o `rota_sugerida`.
 Mudei o critério de verificação e não o produto.
+
+---
+
+## Actualização das 08:30 — o que mudou desde as 06:00
+
+| | 06:00 | **agora** |
+| --- | ---: | ---: |
+| corredor **na bancada** | 32 verdes · 4 falhas · 2 não-medi | **40 verdes · 0 falhas · 1 não-medi** |
+| achados corrigidos | 5 de 20 | **14 de 21** |
+| guardas | 38 | **41** |
+| revisões de lote escritas | 5 | **13** |
+| commits desta noite | 83 | **99** |
+| **por empurrar** | 284 | **309** |
+
+**O corredor limpou-se sozinho**, e a razão importa: às 06:00 as quatro vermelhas
+eram *plantes por repor* e *suites novas sem guião*. Os plantes foram repostos —
+um por mim, um pelo implementador — e os guiões foram escritos por quem criou as
+suites. **Nenhuma das quatro era defeito de produto**, como estava escrito, e
+todas fecharam por trabalho e não por tempo.
+
+**O que se fechou desde então:** a implantação e os equipamentos, a demo e o
+consentimento, a confiança e o piloto, e o SEO inteiro — quatro lotes, cada um
+com revisão escrita e verificação minha.
+
+**E um achado novo, meu:** `RV100-021` — a **única porta de conversão do produto**
+devolve o formulário vazio numa recusa do servidor. Nome, restaurante, email,
+telefone e a mensagem livre perdem-se todos. O produto sabe repovoar em 76
+ficheiros; é o sítio onde não se fez, e é onde acaba todo o funil.
+
+### Três incidentes que valem mais do que os números
+
+**Um plante estava aplicado em código de produção** — a página que divide a conta
+no TPV, com a âncora de teste renomeada. **Não estava commitado**, e repus.
+
+**Outro estava na limpeza da base**, a impedi-la de apagar 64 pedidos órfãos por
+corrida, numa base partilhada por dois agentes. **Reposto, e os órfãos foram a
+zero** — a previsão que o implementador fez cumpriu-se à minha frente.
+
+**E um detector dava zero por construção** enquanto media o achado que diz que o
+coral está ausente. **Um instrumento partido a concordar com a hipótese que devia
+testar** — a forma de erro mais perigosa da noite, porque produz o número que se
+espera. O que o apanhou não foi o valor: foi **a derivada**, o número não se mexer
+depois de uma mudança que tinha de o mexer.
