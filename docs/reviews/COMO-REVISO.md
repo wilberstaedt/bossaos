@@ -2868,3 +2868,27 @@ trabalho — está parado no sítio certo, que é à porta de quem decide. Enqua
 espero, o que me cabe é não inventar trabalho para parecer ocupado, e **manter o
 que já está medido a não apodrecer** — que foi, aliás, metade do que fiz nas
 últimas horas e o que mais defeitos deu.
+
+### Avisar antes de duplicar, e o que ele já tinha percebido sozinho — 19h45
+
+Tinha ficado no terminal do JR um pedido por enviar — *«escreve a régua da
+distância e mede o KDS»* — e eu tinha acabado de a escrever e de a medir. **Se
+aquele texto lhe chegasse, ele repetia vinte minutos de trabalho.** Avisei-o, com
+os números, para a guarda que ele vai escrever depois.
+
+**E ele já tinha percebido a parte difícil sem que ninguém lha dissesse:** que a
+guarda **não se pode escrever antes de o Matheus decidir**, porque o mínimo
+depende da saída — *«se o texto crescer, o mínimo passa a ser o que a geometria
+pedir; se o produto passar a declarar que ecrã precisa, o mínimo fica onde está e
+o que muda é a documentação»*.
+
+**Isso é a coisa certa a fazer com uma medição que aponta para uma escolha:
+parar.** Uma guarda escrita antes da decisão fixaria um dos dois futuros por
+omissão — e ninguém veria que a escolha tinha sido feita por um guião em vez de
+por uma pessoa.
+
+**Passei-lhe também as duas lições que me custaram a tarde**, para não lhe
+custarem a ele: que o critério eu tinha declarado imedível «por natureza» e era
+só inconveniente de medir; e que o mesmo instrumento **não** explica o piso de
+14 px do manual — a essa distância até 12 px tem folga tripla. **Um instrumento
+que resolve um caso quer resolver os outros, e é aí que ele começa a mentir.**
