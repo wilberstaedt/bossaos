@@ -2283,3 +2283,36 @@ própria construção escreve — senão o instrumento invalida a sua própria p
 sempre que corre.** E a página de aprovação passou a ser gerada por um guião que
 **se recusa a produzir** se alguma captura for anterior à fonte mais recente: a
 verificação deixa de depender de eu me lembrar dela.
+
+---
+
+## A porta de fuga é onde um defeito curado se esconde — 07/09
+
+Deixei a barra inferior do telemóvel como **NÃO MEDI** ao fechar a revisão da
+barra lateral. Fui medi-la, e encontrei a **quarta instância** do defeito que já
+tinha sido curado «na classe».
+
+A cura é boa: a `EstruturaAdmin` passou a **derivar** o item aceso do caminho, e
+os chamadores deixaram de ter de saber. Mas ela traz uma **porta de fuga
+deliberada** — se o chamador passar `activa` explicitamente, esse valor **vence**
+a derivação. Existe por uma razão legítima: o catálogo de desenho monta maquetas
+com `href="#"`, que não têm rota para derivar.
+
+**E é exactamente por essa porta que o defeito antigo sobreviveu.** O
+`platform/layout.tsx:106` continua a passar `activa: true` no primeiro item da
+barra inferior — e no MESMO ficheiro, vinte linhas acima, está escrito que ali se
+removeu «a TERCEIRA instância da mesma doença». **Removeu-se na navegação lateral
+e ficou na barra inferior**, dois blocos abaixo, no mesmo componente, na mesma
+sessão.
+
+**A regra: uma cura que admite excepção só está fechada depois de se contar quem
+usa a excepção.** Derivar por omissão não cura nada enquanto alguém continuar a
+passar o valor à mão — apenas **muda o defeito de sítio, do código para a lista
+de chamadas**. E a contagem separa em dois grupos que não se parecem: o catálogo
+de desenho **precisa** da porta (maquetas sem rota); uma rota real que a usa
+**é o defeito outra vez**.
+
+**O que isto diz sobre o meu NÃO MEDI:** eu podia tê-lo escrito como «partilha a
+derivação, portanto está coberto» — era plausível, era quase verdade, e teria
+deixado a quarta instância viva. **Um NÃO MEDI honesto vale mais do que uma
+inferência razoável**, e este pagou-se na primeira vez que fui medi-lo.
