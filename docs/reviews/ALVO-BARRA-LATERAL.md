@@ -116,3 +116,49 @@ Se, quando houver servidor, ela disser outra coisa sobre o código não corrigid
 **o defeito é da sonda e não do produto** — e quero sabê-lo antes de a usar para
 aprovar o trabalho de outra pessoa. Uma previsão escrita antes da medição é a
 única forma de um instrumento novo poder falhar à minha frente.
+
+---
+
+## Veredicto — 07/09 às 14h05, medido por mim
+
+A previsão registada às 13h35 não chegou a ser testável contra o código antigo: a
+correcção já tinha entrado quando consegui um servidor. **Fica por cumprir, e
+digo-o em vez de a dar por verificada.**
+
+| critério | veredicto | como |
+| --- | --- | --- |
+| 1 · activo segue a rota | **passa** | raiz→`Inicio`, `/catalogo`→`Catálogo`, `/ir/reservas`→`Reservas`, **exactamente 1** em cada |
+| — controlo: rota sem item | **passa** | `/ajuda/nada-disto-existe` → **0 acesos**, sem *fallback* |
+| — armadilha do prefixo | **passa** | a raiz é prefixo de todas e **não** acende em todas |
+| 2 · barra inferior | **NÃO MEDI** | partilha a derivação, mas é outro array e não a exercitei |
+| 3 · trocador mostra unidade | **passa** | `bossa-demo` + «Switch location», **sem `@`**. E ele **não inventou**: mediu que não há unidade resolvida neste nível e disse-o |
+| 4 · família de ícones | **passa** | **14 formas distintas em 14**, grelha 24, traço 2, `aria-hidden` em todos |
+| 5 · activo indica sem gritar | **passa** | fundo composto `rgb(40,67,73)`, texto branco, **10,57:1**; peso **600 vs 400** — não é só cor |
+
+**Consequência do agrupamento, para o Matheus e não para mim:** com
+`OPERATIONS / SUPPLY / BUSINESS`, três dos catorze itens ficam **abaixo da dobra**
+a 900 px de altura. Os catorze estão no DOM e a lateral rola; antes viam-se todos
+sem rolar. É uma troca de desenho — legibilidade contra alcance sem rolagem — e
+quem a decide é ele.
+
+## E os meus três instrumentos partidos nesta revisão
+
+Nenhum foi defeito do produto:
+
+1. **Importei `playwright` em vez de `@playwright/test`**, e resolveu para um
+   pacote GLOBAL à espera de um browser que a casa não tem. A casa já tinha a
+   forma certa em `capturar-mestres.mjs`; eu escrevi o nome óbvio em vez do nome
+   usado.
+2. **Arranquei o servidor sem `BETTER_AUTH_URL`** e a inscrição da demo deu 403.
+   Lê-se como produto a recusar; era o meu arranque incompleto.
+3. **Tratei um fundo translúcido como opaco** e o rácio deu **1,00:1** — branco
+   sobre branco. O fundo era branco a 10 % sobre a lateral escura, e a cor que
+   importa é a **composta**: `rgb(40,67,73)`, e o rácio real **10,57:1**.
+
+**O terceiro é o que me incomoda**, porque eu já tinha escrito nesta mesma régua
+que «um rácio é propriedade de um PAR». Sabia a regra e escolhi o par errado —
+**a transparência é meio par invisível.** Um `backgroundColor` com alfa não é um
+fundo; é uma camada. Quem mede contraste tem de compor até à primeira camada
+opaca, e um valor de `1,00:1` devia ter-me acendido a luz por ser absurdo à cara:
+**um rácio de exactamente 1,00 quase nunca é uma medição, é uma cor consigo
+própria.**

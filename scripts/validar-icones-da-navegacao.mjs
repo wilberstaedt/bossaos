@@ -22,7 +22,7 @@
  *
  * Três respostas: OK (0) · FALHOU (1) · NÃO MEDI (2).
  */
-import { chromium } from 'playwright';
+import { chromium } from '@playwright/test';
 import { abrirSessao } from './sessao-da-demo.mjs';
 
 const OK = 0, FALHOU = 1, NAO_MEDI = 2;
