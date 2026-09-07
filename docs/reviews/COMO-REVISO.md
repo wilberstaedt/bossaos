@@ -1817,3 +1817,39 @@ decoração.
 utilizador vive — o código HTTP que sai — e não a presença do mecanismo que
 supostamente o produz.** E sempre que eu aceitar uma ponta «por declaração», o
 achado fica ABERTO até ela ser medida, sem excepção.
+
+---
+
+## Varri os meus próprios vistos à procura da duodécima forma — e não havia segunda — 07/09
+
+Apanhado o fecho que media adopção em vez de resultado, a pergunta seguinte é
+óbvia: **quantos dos outros vistos que assinei têm o mesmo defeito?** Uma forma
+nova não vale nada se só se aplicar ao caso em que foi descoberta.
+
+Passei os 24 achados por um crivo — a linguagem do `status` que fala de
+**presença** (usa, chama, alcança, existe, declarado) contra a que fala de
+**resultado** (renderiza, mede, http, 404, píxeis, bytes, ao vivo). Quatro
+fecharam com mais presença do que resultado. Julguei os dois piores a sério:
+
+- **RV100-017** — fechei-o a dizer que «o `mktE10.demoAviso` diz ao visitante que
+  os pratos são inventados». **Uma chave de tradução existir não é o visitante
+  lê-la.** Fui ver: `Demonstracao.tsx:82` renderiza-a mesmo, num `<p>`, nas três
+  línguas, com fundo, respiro e largura de leitura — não está escondida — e o
+  componente chega a quatro rotas, a home entre elas. **Aguenta-se.**
+- **RV100-011** — fechei-o na caixa de consentimento «existe, não é pré-marcada».
+  A pergunta certa não é o ecrã, é **se a distinção chega onde os dados vivem**.
+  Chega: o esquema tem `consentimentoMarketing` **e** `consentimentoEm`, omissão
+  a `false`, e a rota grava-o. **Aguenta-se, e melhor do que eu o escrevi.**
+
+**O resultado da varredura é que não há segunda ocorrência.** Escrevo-o porque é
+a parte que interessa: **depois de apanhar uma falha real, a varredura seguinte
+fica sob pressão para render alguma coisa.** Um detector que precisa de encontrar
+acaba por encontrar — e teria sido fácil promover «o contraste de 14px sobre a
+superfície suave está por medir» a achado, quando isso é outra pergunta que se
+me atravessou no caminho e não a que eu tinha ido fazer.
+
+**A regra que fica: uma varredura que sai vazia é um resultado, e escreve-se.**
+O que muda é a redacção dos vistos, não os vistos: nos dois casos eu tinha
+medido bem e **descrito mal** — creditei a presença do mecanismo quando o que me
+tinha convencido foi o resultado. Um `status` que descreve a prova errada ensina
+a forma errada a quem o ler, mesmo quando o veredicto está certo.
