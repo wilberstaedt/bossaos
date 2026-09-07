@@ -50,7 +50,7 @@
 | 396 IDs rastreados | **conforme** |
 | 792 composições capturadas ou justificadas | **não conforme — 0 de 792.** Mapeado: 120 alcançáveis por URL, 202 exigem estado, 16 provocam-se |
 | não há P1/P2 visual aberto | **conforme** — zero abertos nos 22 achados |
-| P3 aceite com decisão, responsável e prazo | **NÃO MEDI** |
+| P3 aceite com decisão, responsável e prazo | **satisfeito por ausência, com a população provada** |
 | testes e build passam no commit final | **conforme** — `validar-no-commit.sh` verde contra o commit |
 
 ---
@@ -98,3 +98,26 @@ acento, e eu não o medi — tipografia, espaçamento e forma também a carregam
 juízo humano e é do Matheus, na aprovação visual. O que eu entrego é o facto que
 ele não tinha: **duas das seis telas-mestre não têm acento nenhum.** Se isso é a
 calma que um backoffice quer, ou identidade a faltar, decide ele a olhar.
+
+
+## O critério dos P3 aceites — satisfeito por ausência, e a ausência é provada — 07/09
+
+Um critério sem sujeitos passa por não ter nada que o viole, e é aí que mora o
+verde vazio. Por isso não o escrevo como «conforme» seco: escrevo a população.
+
+**A partição fecha.** 24 achados = **9 P1 + 8 P2 + 6 P3 + 1 P4**, e a soma bate
+com o total. Os seis P3, um a um: `RV100-014`, `-016`, `-017`, `-018`, `-019`
+corrigidos, `RV100-022` MEDIDO. **P3 aceites: zero.** O critério não tem sujeitos
+— não porque uma busca não devolveu nada, mas porque a lista inteira foi contada
+e cada P3 tem um estado que não é `accepted`.
+
+**E o que a letra deixa de fora, digo à mesma:** há **um** achado aceite, o
+`RV100-020`, e é **P4**. Tem decisão registada — «a correcção é no atlas, e quem
+o assina é que a faz» — o que nomeia um responsável **por função e não por
+pessoa**, e **não tem prazo nenhum**.
+
+Pela letra, não conta: o critério fala de P3. Pelo espírito, é exactamente o caso
+que ele quer cobrir. **Não o resolvo sozinho por duas razões:** o dono é quem
+assina o atlas, e um prazo é um compromisso — nenhuma das duas coisas é minha
+para inventar. **Fica para o Matheus, nomeada, e não escondida atrás de um
+critério que tecnicamente passa.**
