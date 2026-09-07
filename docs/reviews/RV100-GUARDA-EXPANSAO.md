@@ -80,3 +80,60 @@ metade que resta**, que é exactamente o que falta hoje.
 
 **A guarda entra no corredor como está.** É melhor ter uma medição estreita e
 declarada do que não ter medição, e nada do que peço acima a invalida.
+
+---
+
+## Segunda volta: os dois pedidos feitos, e ele corrigiu-me no meio
+
+**Pedido 1 — derivar em vez de listar: feito.** De **3 ecrãs para 276**.
+
+**Pedido 2 — imprimir o âmbito: feito, e melhor do que eu pedi.** Eu tinha
+pedido «N medidos de M». Ele imprime isso e mais a razão de cada exclusão:
+
+```
+âmbito:  276 ecrãs medidos de 281 candidatos, derivados de 219 cadeias que crescem
+         fora da medição: 64 com parâmetro por resolver, 6 sem endereço, 8 namespaces em dívida
+```
+
+**Um verde que diz o que não olhou.** É a diferença entre «passou» e «passou
+sobre isto, e isto ficou de fora por esta razão».
+
+## E a correcção que ele me fez, que é a parte que interessa
+
+Eu escrevi-lhe: *«29 dos 59 namespaces têm código, o `coverage.csv` tem 29
+etapas distintas, e **as 29 casam — todas**»*. Ele foi verificar antes de
+aceitar:
+
+> «29 trazem código, e esses colapsam em **25 códigos distintos** — não 29. O
+> atlas tem 29 etapas distintas, e é uma **coincidência de número**, não a mesma
+> contagem: são dois conjuntos diferentes com o mesmo cardinal, que é
+> precisamente a forma como **uma confirmação falsa se disfarça de
+> confirmação**.»
+
+**Tem razão, e o erro é fino.** Vinte e nove namespaces não são vinte e nove
+códigos — vários partilham etapa. Eu vi dois vinte-e-noves e li-os como o mesmo
+conjunto. **Dois conjuntos com o mesmo cardinal é exactamente o que uma
+coincidência parece quando dá jeito.**
+
+**O que aguenta é a direcção**, e é ele que a nomeia: *«nenhum dos 25 códigos
+falha o atlas»*. Isso continua verdade e é o que sustenta a derivação. O que cai
+é a simetria que eu tinha sugerido.
+
+**E acrescentou o que eu não tinha visto:** `E02`, `E04`, `E05` e `E06` **não têm
+namespace nenhum**, e por isso nunca seriam alcançadas por derivação. A minha
+frase deixava crer que a derivação varria as etapas todas; varre 25 e há quatro
+que lhe são invisíveis por construção.
+
+## A dívida, contada como deve ser
+
+Tecto de **8** namespaces sem código, cada um com a razão escrita. O `estado` —
+as telas do E02 — não se deriva porque o atlas lhes chama «(na rota que executa
+a acção)»: **não há endereço a que ir, medi-las exige provocá-las.** Bate certo
+com o que eu medi por outro caminho no mesmo tick: 16 IDs do atlas sem URL
+nenhum.
+
+E a linha que fecha o desenho: *«um tecto que apanha quem o escreveu está a
+fazer o trabalho»*.
+
+**A guarda fica no corredor com âmbito visível.** Os dois pedidos estão feitos e
+a correcção que ele me fez fica registada como dele.
