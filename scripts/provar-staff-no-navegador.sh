@@ -365,11 +365,21 @@ echo "9. CONTROLO NEGATIVO — o marcador da tela deixa de existir"
 # sem barulho: tira o `data-tela` do cabecalho e exige que a prova acenda.
 PECAS=apps/web/src/staff/PecasDoStaff.tsx
 ORIG_PECAS=$(mktemp); cp "$PECAS" "$ORIG_PECAS"
+# O marcador MUDOU DE CASA a 07/09: os tres cabecalhos identicos —
+# CabecalhoDoKds, CabecalhoDaVisita e CabecalhoDoKiosk — foram
+# consolidados no `CabecalhoDePagina` de `packages/ui`, e o `PecasDoStaff.tsx`
+# deixou de o escrever. O plante ficou em letra morta: o `exigir_vermelho`
+# corria contra um produto intacto, passava, e o guiao concluia que a
+# assercao era vazia. Re-ancorado no sitio onde o marcador vive AGORA,
+# que e' o que o plante quer mudar — nao no ficheiro onde vivia.
 plantar <<'PYMARCA' || true
 import io
-p = 'apps/web/src/staff/PecasDoStaff.tsx'
+p = 'packages/ui/src/componentes/CabecalhoDePagina.tsx'
 s = io.open(p, encoding='utf-8').read()
-antigo = "          <h1 data-tela={tela}>{titulo}</h1>"
+# A indentacao tambem mudou com a casa: no `PecasDoStaff` o `h1` estava dois
+# niveis mais fundo (dez espacos), no `CabecalhoDePagina` sao oito. Um plante
+# nao casa por parecenca — casa pelo texto exacto.
+antigo = "        <h1 data-tela={tela}>{titulo}</h1>"
 assert antigo in s, 'o marcador do cabecalho nao esta onde se esperava'
 # `tela` continua usada (fica no atributo de dados generico), logo compila.
 novo = "          <h1 data-titulo-de={tela}>{titulo}</h1>"

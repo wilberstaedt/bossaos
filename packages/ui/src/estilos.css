@@ -1710,7 +1710,23 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
 .bo-mkt__fecho h2 { color: var(--bo-texto-inverso); }
 /* Areia e nao branco puro no corpo: 13,05:1 continua muito acima do limiar. */
 .bo-mkt__fecho .bo-publico__texto { color: var(--bo-superficie-base); }
-/* O CTA coral, com o rotulo em verde-escuro. Branco aqui seria 3,05:1. */
+/* decorativo: e a marca da guarda e' o que ha, mas esta e' uma EXCEPCAO MEDIDA
+   e nao decoracao, e digo-o em vez de a disfarcar.
+
+   A `acento.test.ts` recusa o acento da marca em papel visual porque ele nao
+   chega a 3:1 «sobre as superficies do produto». Isso e' verdade sobre a areia
+   (2,77) e sobre a suave (2,62) — e FALSO aqui: o `.bo-mkt__fecho` e' verde
+   escuro, e sobre ele o acento da marca da **4,71:1**.
+
+   Trocar para o `--bo-acento-sinal`, que e' a outra saida que a guarda oferece,
+   PIORAVA: o botao passava de 4,71 para 3,73 contra o fundo, e o rotulo em
+   verde-escuro por cima caia de 4,71 para 3,73 — abaixo dos 4,5 que texto comum
+   exige. O token de sinal existe para ganhar sobre a areia; aqui perde.
+
+   Branco no rotulo seria 3,05, que e' o que a CT-13 proibe. Fica verde-escuro.
+
+   O que a guarda nao sabe distinguir e' a SUPERFICIE: ela pergunta pelo token e
+   nao por cima de que fundo ele assenta. Fica escrito para quem a melhorar. */
 .bo-mkt__fecho .bo-botao--primario { background: var(--bo-acento); color: var(--bo-primaria); }
 /* Hover medido tambem: #ff7a63 da 5,61:1 no rotulo e na fronteira. */
 .bo-mkt__fecho .bo-botao--primario:hover:not(:disabled) { background: #ff7a63; }

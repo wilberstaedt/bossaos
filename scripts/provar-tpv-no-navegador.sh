@@ -290,11 +290,15 @@ echo "10. CONTROLO NEGATIVO — a porta do TPV volta a ser um #"
 # É o único controlo desta suite que não mexe numa tela: mexe no MENU. As 19
 # telas continuam todas lá, todas provadas, e a suite tem de acender na mesma —
 # porque uma tela a que ninguém chega é uma tela que não existe.
+# A ANCORA MUDOU porque a barra lateral foi refeita a 07/09: cada entrada
+# passou a levar `icone` e `grupo`, e o texto exacto que este plante procurava
+# deixou de existir. O plante ficava em letra morta — corria contra um produto
+# intacto, passava, e o guiao concluia que a assercao era vazia.
 plantar <<'PYPORTA' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/layout.tsx'
 s = io.open(p, encoding='utf-8').read()
-antigo = "    { href: `/${idioma}/pos`, rotulo: m.navegacao.caixa, accao: 'caixa.ler' },"
+antigo = "    { href: `/${idioma}/pos`, rotulo: m.navegacao.caixa, icone: 'caixa', grupo: GRUPOS.Operacao, accao: 'caixa.ler' },"
 assert antigo in s, 'a porta do TPV nao esta onde se esperava'
 io.open(p, 'w', encoding='utf-8').write(
     s.replace(antigo, "    { href: '#', rotulo: m.navegacao.caixa, accao: 'caixa.ler' },", 1))

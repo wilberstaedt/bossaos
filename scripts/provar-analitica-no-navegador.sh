@@ -114,11 +114,14 @@ echo "2. CONTROLO NEGATIVO — «sem dados» passa a escrever-se como ZERO"
 #
 # As duas coisas escrevem-se iguais, o ecrã fica alinhado e bonito, e quem lê
 # fecha o turno de almoço de uma casa que ninguém mediu.
+# O vazio deixou de ser um `<span>` solto e passou a uma celula da tabela.
+# O plante procura TEXTO EXACTO: mudou o elemento, mudou a indentacao, e ele
+# calou-se em vez de acusar.
 plantar <<'PYAUSENCIA' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/page.tsx'
 s = io.open(p, encoding='utf-8').read()
-antigo = '              <span data-teste="sem-dados">{t.semDados}</span>'
+antigo = '                <td colSpan={4} data-teste="sem-dados">{t.semDados}</td>'
 assert antigo in s, 'a marca do sem-dados nao esta onde se esperava'
 io.open(p, 'w', encoding='utf-8').write(
     s.replace(antigo, '              <span data-teste="medido">0</span>', 1))
@@ -212,11 +215,15 @@ repor "$TRABALHO"
 
 echo
 echo "7. CONTROLO NEGATIVO — o «início» volta a ser uma entrada morta"
+# A ANCORA MUDOU porque a barra lateral foi refeita a 07/09: cada entrada
+# passou a levar `icone` e `grupo`, e o texto exacto que este plante procurava
+# deixou de existir. O plante ficava em letra morta — corria contra um produto
+# intacto, passava, e o guiao concluia que a assercao era vazia.
 plantar <<'PYINICIO' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/layout.tsx'
 s = io.open(p, encoding='utf-8').read()
-antigo = "    { href: `/${idioma}/app/${orgSlug}`, rotulo: m.navegacao.inicio, accao: null },"
+antigo = "    { href: `/${idioma}/app/${orgSlug}`, rotulo: m.navegacao.inicio, icone: 'inicio', grupo: GRUPOS.Operacao, accao: null },"
 assert antigo in s, 'a entrada do inicio nao esta onde se esperava'
 io.open(p, 'w', encoding='utf-8').write(
     s.replace(antigo, "    { href: '#', rotulo: m.navegacao.inicio, accao: null },", 1))

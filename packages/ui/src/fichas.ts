@@ -101,6 +101,58 @@ export const foco = {
   cor: '#102E35',
   espessura: 2,
   afastamento: 2,
+  /**
+   * A SEGUNDA faixa do anel, e nasceu de uma medição.
+   *
+   * Um anel de uma cor só assume que sabe o que está por trás dele. No KDS não
+   * sabia: a página é escura, os botões de acção são creme, e há remendos
+   * claros no meio — com o anel creme dava 13,05:1 sobre a página e 1,06:1
+   * sobre dois deles. Mudar a cor só mudava quais ficavam invisíveis.
+   *
+   * Duas faixas encostadas, de tom oposto, contrastam **entre si** 13,05:1:
+   * seja qual for o fundo, uma delas destaca-se. Troca uma suposição por uma
+   * garantia, e é a técnica que a própria WCAG nomeia para fundo desconhecido.
+   */
+  contraste: '#F7F4EC',
+} as const;
+
+// ── O contrato de superfície ─────────────────────────────────────────────────
+
+/**
+ * Tokens de PAPEL, e não de valor — e é por isso que não têm um hexadecimal.
+ *
+ * A pergunta que estes cinco respondem não é «que cor é». É «o que é que esta
+ * superfície promete a quem for desenhado nela». A superfície declara; o
+ * componente pergunta pelo papel. Foi assim que se acabou com as listas de
+ * pares componente×superfície que se escreviam **depois** de alguém dar pelo
+ * defeito — trinta e nove linhas de `.bo-kds .x { … }` que registavam em vez de
+ * prevenir.
+ *
+ * Ficam registados aqui porque entraram no CSS a 07/09 com a cura do anel de
+ * foco e ficaram sem ficha: um token sem ficha é um valor solto com outro nome.
+ *
+ * **O que cada superfície atribui hoje:**
+ *
+ * | papel | superfície clara | escura (`.bo-inverso`, `.bo-kds`) | `.ns-seccao--verde` |
+ * | --- | --- | --- | --- |
+ * | `sobreSuperficie` | `texto.primario` | `texto.inverso` | `texto.inverso` |
+ * | `accao` | `marca.primaria` | `superficie.base` | **`acentoSinal`** |
+ * | `sobreAccao` | `texto.inverso` | `marca.primaria` | `marca.primaria` |
+ * | `navegacaoActiva` | `acentoSinal` | `texto.inverso` | — |
+ * | `focoContraste` | `superficie.base` | `marca.primaria` | `marca.primaria` |
+ *
+ * A coluna do North Star é a única que põe **coral na acção**, e tem razão
+ * medida: nenhum coral serve 3:1 sobre a areia **e** 4,5:1 com texto verde por
+ * cima — as luminâncias exigidas são ≤ 0,2684 e ≥ 0,2795, e não se tocam. A
+ * saída não é um terceiro coral, é o texto grande da 1.4.3, que baixa o limiar
+ * para 3:1 e abre a janela onde o `acentoSinal` cabe.
+ */
+export const contratoDeSuperficie = {
+  sobreSuperficie: 'a tinta legível sobre esta superfície',
+  accao: 'o fundo do que se carrega',
+  sobreAccao: 'a tinta dentro da acção',
+  navegacaoActiva: 'o que marca a secção onde já se está',
+  focoContraste: 'a segunda faixa do anel de foco',
 } as const;
 
 // ── Tipografia ───────────────────────────────────────────────────────────────
@@ -201,6 +253,7 @@ export type TokenTemavel = (typeof TOKENS_TEMAVEIS)[number];
 
 export const fichas = {
   marca,
+  contratoDeSuperficie,
   superficie,
   texto,
   linha,

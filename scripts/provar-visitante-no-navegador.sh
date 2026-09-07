@@ -197,9 +197,16 @@ cp "$ORIG_RENOVAR" "$RENOVAR"
 
 echo
 echo "5. CONTROLO NEGATIVO — o marcador da tela deixa de existir"
+# O marcador MUDOU DE CASA a 07/09: os tres cabecalhos identicos —
+# CabecalhoDoKds, CabecalhoDaVisita e CabecalhoDoKiosk — foram
+# consolidados no `CabecalhoDePagina` de `packages/ui`, e o `PecasDoVisitante.tsx`
+# deixou de o escrever. O plante ficou em letra morta: o `exigir_vermelho`
+# corria contra um produto intacto, passava, e o guiao concluia que a
+# assercao era vazia. Re-ancorado no sitio onde o marcador vive AGORA,
+# que e' o que o plante quer mudar — nao no ficheiro onde vivia.
 plantar <<'PYMARCA' || true
 import io
-p = 'apps/web/src/visitante/PecasDoVisitante.tsx'
+p = 'packages/ui/src/componentes/CabecalhoDePagina.tsx'
 s = io.open(p, encoding='utf-8').read()
 antigo = "        <h1 data-tela={tela}>{titulo}</h1>"
 assert antigo in s, 'o marcador do cabecalho nao esta onde se esperava'

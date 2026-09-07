@@ -158,11 +158,13 @@ echo "2. CONTROLO NEGATIVO OBRIGATÓRIO — a SERIALIZAÇÃO desaparece"
 # O que TEM de cair é a contagem da zona. O caso da mesma mesa **não** pode cair:
 # quem o segura é a exclusão, e se caísse este controlo estaria a medir «alguma
 # coisa parou» em vez do desvio de escrita.
+# So a INDENTACAO mudou — o bloco desceu dois espacos — e isso bastou para o
+# plante deixar de casar. Um plante nao casa por parecenca: casa pelo texto.
 plantar <<'PYSERIAL' || true
 import io
 p = 'packages/db/src/escopo.ts'
 s = io.open(p, encoding='utf-8').read()
-antigo = "    if (comLock) {\n      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${chaveDeSerializacao}))`;\n    }"
+antigo = "      if (comLock) {\n        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${chaveDeSerializacao}))`;\n      }"
 assert antigo in s, 'o lock nao esta onde se esperava'
 s = s.replace(antigo, "    // sem lock")
 antigo2 = "  }, { isolationLevel: 'Serializable' });"
