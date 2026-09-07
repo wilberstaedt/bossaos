@@ -17,6 +17,32 @@
 export const IDIOMAS_DE_CONTEUDO = ['es-ES', 'pt-BR', 'en'] as const;
 export type IdiomaDeConteudo = (typeof IDIOMAS_DE_CONTEUDO)[number];
 
+/**
+ * O nome de cada língua **na própria língua**.
+ *
+ * ── Porque é que isto não vive no catálogo de mensagens ───────────────────
+ *
+ * «Español» chama-se Español para quem lê espanhol, para quem lê português e
+ * para quem lê inglês. Não é uma tradução — é o nome próprio de uma coisa, e
+ * pô-lo no catálogo dava nove entradas para três factos, com oito hipóteses de
+ * divergirem.
+ *
+ * ── E porque é que não é uma bandeira ─────────────────────────────────────
+ *
+ * Uma bandeira é um país. O espanhol de Espanha e o de qualquer outro sítio não
+ * partilham bandeira nenhuma, e o inglês tem duas dúzias delas. O que a carta
+ * pergunta a quem janta é a LÍNGUA em que quer ler.
+ *
+ * O que estava a ser mostrado era `es-ES`, `pt-BR`, `en` — um código de
+ * localização, que é uma etiqueta de sistema e não uma palavra que alguém
+ * sentado à mesa reconheça.
+ */
+export const NOME_DO_IDIOMA: Readonly<Record<IdiomaDeConteudo, string>> = {
+  'es-ES': 'Español',
+  'pt-BR': 'Português',
+  en: 'English',
+};
+
 export type EstadoDaTraducao = 'pendente' | 'revisada' | 'obsoleta';
 
 /**

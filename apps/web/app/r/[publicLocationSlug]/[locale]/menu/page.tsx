@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { Etiqueta, variaveisDoTema } from '@bossaos/ui';
 import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { abertoAgora, cartaPublica, horarioPublico, registarConsulta, temaPublico } from '@bossaos/db';
-import { IDIOMAS_DE_CONTEUDO, procurarNaCarta, type IdiomaDeConteudo } from '@bossaos/domain';
+import { IDIOMAS_DE_CONTEUDO, NOME_DO_IDIOMA, procurarNaCarta, type IdiomaDeConteudo } from '@bossaos/domain';
 import { obterBase, obterLogger } from '../../../../../src/servidor.ts';
 import { visitanteDaRequisicao } from '../../../../../src/visitante/sessao-do-visitante.ts';
 
@@ -97,7 +97,7 @@ export default async function CartaPublica({
     ? carta.categorias.find((x) => x.id === procura.categoria)
     : undefined;
   const aMostrar = encontrados
-    ? [{ id: 'busca', nome: c.buscar, produtos: encontrados }]
+    ? [{ id: 'busca', nome: c.resultados, produtos: encontrados }]
     : categoria ? [categoria] : carta.categorias;
 
   const base = `/r/${publicLocationSlug}/${idioma}/menu`;
@@ -200,8 +200,8 @@ export default async function CartaPublica({
       <nav className="bo-publico__idiomas" aria-label={c.tuIdioma}>
         {IDIOMAS_DE_CONTEUDO.map((x) => (
           <a key={x} href={`/r/${publicLocationSlug}/${x}/menu`}
-             aria-current={x === idioma ? 'page' : undefined}>
-            {x}
+             aria-current={x === idioma ? 'page' : undefined} lang={x}>
+            {NOME_DO_IDIOMA[x]}
           </a>
         ))}
       </nav>
@@ -211,7 +211,7 @@ export default async function CartaPublica({
         <label htmlFor="q" className="bo-so-leitor">{c.buscar}</label>
         <input id="q" name="q" type="search" defaultValue={termo}
                placeholder={c.buscar} className="bo-campo__controlo" />
-        <button type="submit" className="bo-botao bo-botao--secundario">{c.buscar}</button>
+        <button type="submit" className="bo-botao bo-botao--secundario">{c.accaoBuscar}</button>
       </form>
 
       {/* MENU-003 · as categorias, também por ligação. */}

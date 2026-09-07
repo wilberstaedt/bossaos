@@ -96,7 +96,7 @@ export {
 } from './ficheiros.ts';
 
 export {
-  IDIOMAS_DE_CONTEUDO, impressaoDoTexto, estadoDaTraducao, resolverTexto, coberturaPorIdioma,
+  IDIOMAS_DE_CONTEUDO, NOME_DO_IDIOMA, impressaoDoTexto, estadoDaTraducao, resolverTexto, coberturaPorIdioma,
   type IdiomaDeConteudo, type EstadoDaTraducao, type Traducao,
   type TextoResolvido, type OrigemDoTexto, type CoberturaDeIdioma,
 } from './traducoes.ts';
