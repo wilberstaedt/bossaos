@@ -21,6 +21,7 @@ SAIDA = sys.argv[1] if len(sys.argv) > 1 else '/tmp/telas-mestre.html'
 # cópia dela seria a duplicação que este repositório passou o dia a fechar.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from frescura_do_produto import mais_recente_do_produto as _mais_recente  # noqa: E402
+from frescura_do_produto import mtimes_reescritos as _reescritos  # noqa: E402
 
 def mais_recente_do_produto():
     return _mais_recente(RAIZ)
@@ -33,6 +34,28 @@ def anda(o):
     elif isinstance(o, list):
         for v in o: anda(v)
 anda(json.load(open(os.path.join(D, 'mestres.json'))))
+
+# ── Antes de comparar datas, perguntar se as datas querem dizer alguma coisa ──
+#
+# Isto comparava `mtime` de captura contra `mtime` de fonte, e num `clone` ou
+# `worktree` fresco o git escreve TUDO no mesmo instante. Medido a 07/09 num
+# worktree deste repositório: a janela inteira do checkout foi de **0,067 s**.
+#
+# E o que saía daqui não era um verde falso — era uma RECUSA falsa: «25 capturas
+# anteriores à fonte mais recente do produto», um número tirado de 67 ms de
+# ordem de escrita do git. Pior, dois worktrees independentes deram o MESMO 25,
+# porque o git escreve por ordem estável.
+#
+# **Ruído determinista é pior do que ruído.** Reproduz-se, parece uma medição, e
+# sobrevive à verificação de quem desconfiar e correr outra vez.
+#
+# A resposta honesta num sítio onde as datas foram reescritas não é «recuso» nem
+# «aprovo» — é NÃO MEDI. O canário vive na peça partilhada; aqui só se pergunta.
+if _reescritos(RAIZ):
+    print("NAO MEDI: as datas de ficheiro desta copia foram reescritas por um")
+    print("          checkout, e a frescura das capturas mede-se por elas.")
+    print("          Corre isto onde as capturas sao produzidas.")
+    sys.exit(2)
 
 produto = mais_recente_do_produto()
 velhas = [e for e in L if os.stat(os.path.join(RAIZ, e['ficheiro'])).st_mtime < produto]
