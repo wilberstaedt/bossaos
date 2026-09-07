@@ -1685,3 +1685,59 @@ O `.next` partilhado não aparece em `lsof`, não tem porta, não tem dono visí
 usa** — tem de ser isolado por quem monta o arnês.
 
 **Foi a única vez esta noite em que a resposta certa não era uma guarda melhor.**
+
+---
+
+## Uma cura que muda o que uma sonda antiga mede — 07/09
+
+Ao fechar o P1 do id mal formado, o JR pôs a cura na camada de âmbito: um
+segmento que não é UUID passa a dar **404** em vez de 500.
+
+**E isso mudou, em silêncio, o que uma sonda de outro agente media.** Ele
+escreveu-o:
+
+> «A cura do `escopo.ts` faz com que a minha antiga sonda `nao-e-um-uuid` devolva
+> agora 404 **por outra razão** — deixou de testar o que testava.»
+
+A sonda **continua a passar**. O 404 que ela esperava continua a chegar. **Só que
+já não vem do ramo que ela queria exercitar** — vem da validação nova, a montante,
+e o `!dados → notFound()` nunca é alcançado.
+
+**É a irmã silenciosa do plante por repor.** O plante deixa um defeito onde não
+devia estar; isto deixa **uma sonda a apontar para onde já não há nada**. As duas
+sobrevivem a uma corrida verde.
+
+**A defesa dele foi trocar o sujeito da sonda**, e não o resultado esperado:
+passou a usar **um UUID verdadeiro que pertence a outra casa**, que continua a
+exercitar o ramo certo.
+
+**A regra que fica:** quando uma correcção intercepta uma condição **a montante**,
+toda a sonda que dependia de essa condição chegar ao fundo passa a medir outra
+coisa — **e passa na mesma**. Corrigir alguma coisa obriga a perguntar **que
+provas atravessavam o sítio que se acabou de fechar**.
+
+---
+
+## E a minha hipótese do `not-found` caiu — falsificada por um traço
+
+Propus que o `denied` saísse em branco porque um `notFound()` lançado num
+**layout** se resolve no `not-found` do segmento **pai**, e a raiz não tem
+ficheiro.
+
+**Falso, e verifiquei-o:** o `notFound()` está **na página**
+(`organization/unidades/[locationId]/page.tsx:51`), o layout tem **zero**
+chamadas, e há exactamente **um** `not-found.tsx` na árvore, sob `[idioma]` — que
+devia apanhá-lo.
+
+**E o que ele fez a seguir é o que eu queria ter feito primeiro:** em vez de
+acusar o produto com os dois factos ainda em contradição, **tirou a própria
+medição da equação**. O `waitUntil: 'domcontentloaded'` pode fotografar **antes**
+de a interface de erro chegar no fluxo — *«a mesma forma do verde falso que eu já
+me tinha apanhado: um instrumento a produzir a resposta que eu esperava»*.
+
+O arnês novo **distingue em vez de confirmar**, com três saídas que querem dizer
+coisas diferentes: marcador presente → a captura estava em corrida; HTML
+substancial sem marcador → renderiza-se outra coisa; HTML vazio → o branco é do
+produto.
+
+**Uma medição que só sabe dizer «passa» ou «falha» não podia separar estes três.**
