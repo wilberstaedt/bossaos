@@ -32,7 +32,7 @@ expected: largura >= 120 px no cabeçalho desktop; alvo 144-168 px (§4.1)
 observed: 81 x 28 px, medido no DOM e confirmado pela aritmética do componente — `Wordmark({ altura = 28 })` com `width = round(2137/736 * altura)`; os dois sítios que o usam chamam-no sem argumento
 evidence: evidence/baseline/medidas-1440.json · 01_BASELINE.md
 fix_criteria: `altura={50}` dá 145 px; medir no navegador e não na aritmética
-status: open
+status: corrigido — VERIFICADO PELO REVISOR na evidência: 81,5x28 `ligada:false` -> 145,5x50 `ligada:true` (moldura/antes-1440 e depois-1440). O critério pedia medir no navegador e não na aritmética, e foi
 ```
 
 ```yaml
@@ -60,7 +60,7 @@ expected: composições com telas reais e determinísticas do build; produto leg
 observed: `media = 1` em todas as oito páginas, e essa uma é a própria marca
 evidence: evidence/baseline/medidas-1440.json
 fix_criteria: hero e bloco de módulos com capturas reais do produto, geradas por instrumento determinístico e com alt contextual
-status: open
+status: corrigido — VERIFICADO PELO REVISOR: cinco composições reais ligadas por componente (`Demonstracao.tsx`), não por caminho. Abri a do KDS e olhei: pratos reais em espanhol, pedido A128 a aparecer também na sala. Zero `insp-`, zero `example`, zero "Aún no medido"
 ```
 
 ```yaml
@@ -102,7 +102,7 @@ expected: ES/PT/EN visível, encontrável sem depender do rodapé (§6.1, §6.8)
 observed: nenhum componente de troca de idioma na família MKT; existe no site do restaurante (`bo-publico__idiomas`, em SitePublico.tsx)
 evidence: 01_BASELINE.md hipótese 11
 fix_criteria: seletor no cabeçalho, com a rota localizada preservada e a escolha persistida
-status: open
+status: corrigido — VERIFICADO PELO REVISOR na evidência: `idiomas.quantos` 0 -> 4, com destinos `/pt-BR` e `/en` e a rota mantida
 ```
 
 ```yaml
@@ -138,13 +138,13 @@ id: RV100-009
 severity: P2
 surface: marketing
 screen_or_route: as oito páginas comerciais
-summary: o conteúdo do hero acaba antes de metade da largura em sete das oito páginas
+summary: o conteúdo do hero acaba antes de metade da largura em SEIS das oito páginas (corrigido pelo revisor: o resumo dizia sete e a tabela da própria linha de base dizia seis)
 impact: marca
 expected: composição equilibrada entre mensagem e produto; espaço vazio com função (§6.2, §4.4)
 observed: seis páginas acabam em x=728 de 1440, a FAQ em 652, a home em 1256 (número por explicar)
 evidence: evidence/baseline/medidas-1440.json
 fix_criteria: hero em duas colunas com mídia do produto à direita; nenhuma metade de viewport vazia por ausência de conteúdo
-status: open
+status: parcial — a home foi reconstruída e VERIFICADO PELO REVISOR na evidência: 728 -> 1256 a 1440 e 648 -> 1176 a 1280, com `ocupaDireita` a virar de false para true. As outras páginas comerciais NÃO foram medidas de novo e ficam abertas
 ```
 
 ```yaml
@@ -158,7 +158,7 @@ expected: header/hero, problema, base única, produto em movimento, módulos, pa
 observed: hero, "una base para cada parte del servicio" e "un plan para tu restaurante"
 evidence: evidence/baseline/home-1440.png
 fix_criteria: os catorze blocos como secções da MKT-001 — sem rotas novas, para os 396 IDs do §12.5 continuarem 396; `?section=` continua a isolar o bloco pedido
-status: open
+status: parcial — 3 de 14 passou a 11 de 14. Faltam três blocos
 ```
 
 ```yaml
@@ -232,7 +232,7 @@ observed: a `PRECIFICACAO.md` não fala de hardware tirando "kiosk e conectores 
 evidence: docs/bossaos/PRECIFICACAO.md · docs/bossaos/DECISOES.md D16
 fix_criteria: escrever a secção na forma condicional do próprio §6.6 ("pode precisar de", "sujeito a homologação"), nunca como kit fechado
 decisao: autorizada-por-antecipacao (00_AUTORIZACAO.md) — avanço com a linguagem condicional; o que não faço é fechar um kit que o D16 deixa pendente, porque isso não é uma decisão dele em aberto, é um facto que não existe
-status: open
+status: corrigido — VERIFICADO PELO REVISOR nas três línguas com padrão por língua: as três ressalvas do §6.6 presentes e a 16 px. A dependência que o achado nomeia confirma-se (63 linhas no PRECIFICACAO.md, zero vocabulário de equipamento) e foi resolvida na voz condicional do próprio §6.6, marcada autorizada em avanço
 ```
 
 ```yaml
@@ -260,7 +260,7 @@ expected: dados demonstrativos claramente artificiais, que nunca representem cli
 observed: os itens levam o prefixo `insp-` e o inquilino chama-se "Marina Bistró" — ficção que não se anuncia como tal
 evidence: packages/db/prisma/fixtures.ts · packages/db/prisma/semente-inspeccao.ts
 fix_criteria: dataset próprio de demonstração, sem prefixo de arnês, com nome que se leia como demonstração; a semeadura de inspecção fica intocada
-status: open
+status: corrigido — VERIFICADO PELO REVISOR: o inquilino chama-se "Bossa Demo" e o `mktE10.demoAviso` diz ao visitante que os pratos, as mesas e a comanda são inventados. O §6.4 cumprido a DECLARAR, que é melhor do que fazer os dados parecerem falsos
 ```
 
 ```yaml
