@@ -52,8 +52,25 @@ fi
 NEXT_ENV_FICHEIRO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/apps/web/next-env.d.ts"
 NEXT_ENV_COPIA=""
 
+# ── Ausente é caminho errado, nunca «ainda não há» ────────────────────────
+#
+# Isto era `[ -f … ] || return 0`, e o JR apanhou-o na revisão de a2da008: com o
+# ficheiro ausente a cópia ficava vazia, o `repor` desistia também, e a protecção
+# ficava **armada a não fazer nada, sem uma palavra** — a forma exacta que a
+# guarda do `BASH_SOURCE` existe para impedir. Eu tinha fechado uma porta para o
+# caminho errado calado e deixado a outra aberta.
+#
+# O `next-env.d.ts` é versionado e existe em qualquer checkout. «Ausente» não
+# significa «ainda não foi gerado»: significa sempre que o caminho está errado.
+#
+# E é `exit`, não `return`: os seis correm com `set -uo pipefail` e **sem `-e`**.
+# Um `return 1` seria ruidoso e deixava a protecção desligada à mesma, que é
+# trocar um defeito calado por um defeito com legenda.
 guardar_next_env() {
-  [ -f "$NEXT_ENV_FICHEIRO" ] || return 0
+  if [ ! -f "$NEXT_ENV_FICHEIRO" ]; then
+    echo "next-env-intacto.sh: nao encontrei $NEXT_ENV_FICHEIRO — o caminho esta errado, abortado" >&2
+    exit 1
+  fi
   NEXT_ENV_COPIA="$(mktemp -t next-env)"
   cp "$NEXT_ENV_FICHEIRO" "$NEXT_ENV_COPIA"
 }
@@ -63,8 +80,12 @@ guardar_next_env() {
 # função é desfazer o que o build fez, não arrumar a árvore de outra pessoa.
 repor_next_env() {
   [ -n "$NEXT_ENV_COPIA" ] && [ -f "$NEXT_ENV_COPIA" ] || return 0
+  # A mesma porta, do outro lado: um `cp` que falha aqui deixava o ficheiro sujo
+  # e o trap dava-se por cumprido. Corre dentro de um trap, portanto não pode
+  # abortar — mas tem de DIZER, senão volta a ser a protecção calada.
   if ! cmp -s "$NEXT_ENV_COPIA" "$NEXT_ENV_FICHEIRO"; then
-    cp "$NEXT_ENV_COPIA" "$NEXT_ENV_FICHEIRO"
+    cp "$NEXT_ENV_COPIA" "$NEXT_ENV_FICHEIRO" \
+      || echo "next-env-intacto.sh: NAO consegui repor $NEXT_ENV_FICHEIRO — ficou sujo" >&2
   fi
   rm -f "$NEXT_ENV_COPIA"
   NEXT_ENV_COPIA=""
