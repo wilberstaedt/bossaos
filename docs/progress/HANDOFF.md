@@ -28,6 +28,45 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## O `sizes` mentia ao navegador — e não eram duas composições, eram quatro
+
+O sénior mediu duas ampliadas e mandou o `sizes` descrever a ranhura verdadeira.
+Medi as ranhuras no navegador a várias larguras e o defeito era maior. Commit
+`e62b2c0`.
+
+| | antes | depois |
+| --- | ---: | ---: |
+| `/product` sala e kds a 1440 | **1,49** | 0,99 |
+| `/product` sala e kds a 1024 | **1,91** | 0,95 |
+| `/product` catálogo a 1024 | **1,27** | 0,95 |
+| landing sala e kds a 1024 | **1,04** | 0,87 |
+| `/getting-started` tablet a 1024 | **1,16** | 0,87 |
+| telemóvel | 0,88 | **0,88** — não regrediu |
+
+O `sizes` é uma promessa: o navegador escolhe o ficheiro por ela **antes** de
+saber a largura real, e uma promessa pequena de mais faz-lhe buscar pequeno e
+esticar. **Ampliar é o mesmo defeito que encolher, do outro lado.** As ranhuras
+medidas ficam como constantes no componente — a ranhura é um facto da composição
+da página, e um facto vive num sítio.
+
+**E o `[ ! -d .next ]` passou de acidente a decisão.** Olhava para a raiz com o
+build em `apps/web/.next`: nunca encontrava nada e reconstruía sempre. O sénior
+concordou em não corrigir o caminho e discordou de deixar como estava — *um
+acidente protector é uma armadilha para quem o ler a seguir e o arrumar com a
+melhor das intenções*. A condição morta saiu e a decisão ficou escrita.
+
+> **Uma pendência declarada, que não sei explicar.** A `carta-movel` mede
+> **1,65** em secretária e 1,44 no telemóvel, e não é do `sizes` nem nasceu
+> agora — media o mesmo antes. O ficheiro tem **390×844**, o optimizador serve
+> **390×844 em PNG e em webp**, e o Chrome descodifica **237×514**. Não consigo
+> explicar a diferença e não a mascaro. E a minha primeira leitura atribuiu-a à
+> imagem por carregar: com `complete` verdadeiro e a imagem no ecrã, lê o mesmo.
+
+**Aviso operacional do sénior, registado:** o trap do `next-env.d.ts` vive nos
+seis guiões, portanto **qualquer build manual continua exposto**. Quem construir
+fora deles faz `source` do `next-env-intacto.sh` e arma o trap, ou verifica a
+árvore antes de comitar.
+
 ## O canário e as capturas de telemóvel — duas curas na mesma família
 
 **O canário, e a minha guarda tinha o mesmo cegamento da irmã.** Comparar
