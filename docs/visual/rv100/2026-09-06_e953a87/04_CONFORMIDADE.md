@@ -815,3 +815,45 @@ anuncia: *«dizemos o que não sabemos»*.
 Não é uma coincidência bonita. **É a mesma pessoa a aplicar a mesma regra na
 revisão e no produto**, e é a única das quatro afirmações comerciais que eu
 verifiquei que tem risco de vida do outro lado.
+
+---
+
+## §9.2, «preços grandes e combinações de moeda/locale» — CONFORME, e a diferença que parece defeito
+
+| | €19,99 | **€1490** (o anual PRO) | €1.000.000 |
+| --- | --- | --- | --- |
+| es-ES | `19,99 €` | **`1490,00 €`** | `1.000.000,00 €` |
+| pt-BR | `€ 19,99` | **`€ 1.490,00`** | `€ 1.000.000,00` |
+| en | `€19.99` | **`€1,490.00`** | `€1,000,000.00` |
+
+**O espanhol não põe separador de milhares a quatro dígitos, e isso está
+correcto** — é a convenção da língua, e o `Intl.NumberFormat` implementa-a. O
+símbolo também troca de lado: depois em espanhol, antes nas outras duas.
+
+**Registo isto porque é exactamente a diferença que gera um relatório de bug
+falso.** O anual do PRO são €1490, e quem abrir a página espanhola ao lado da
+portuguesa vê `1490,00 €` contra `€ 1.490,00` e conclui que uma está partida.
+**Nenhuma está.**
+
+### E a decisão que está por baixo, que é a que interessa
+
+O `formatarDinheiro` **lança** se lhe derem um montante fraccionário, e a razão
+está escrita no código:
+
+> *«Um montante fraccionário aqui significa que alguém fez contas em euros
+> algures atrás. **Falhar alto é melhor do que arredondar em silêncio.**»*
+
+Verifiquei que lança mesmo. **É a mesma família da decisão do `canonical`**: entre
+uma falha que se vê e uma que passa despercebida, escolheram a que se vê. Num
+sistema que trata dinheiro, um arredondamento silencioso é a perda que ninguém
+consegue reconstruir depois.
+
+### Nota de método — a décima primeira, e morreu antes de sair
+
+A minha primeira medição deu **`ERRO` nas três línguas e nos nove valores**.
+Inventei a assinatura — chamei `formatarDinheiro(cêntimos, 'EUR', idioma)` e a
+função recebe `({ montanteMenor, moeda }, idioma)`.
+
+**Nove erros seguidos e uniformes deviam ter-me feito desconfiar de mim antes do
+produto**, e fizeram: fui ler a assinatura em vez de escrever o achado. É o mesmo
+reflexo que hoje já me salvou do «zero chamadores» e do «zero hex».
