@@ -1,0 +1,902 @@
+[
+  {
+    "idioma": "es-ES",
+    "largura": 360,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 5,
+    "titulos": [
+      "Qué pasa desde que dices que sí hasta el primer servicio",
+      "Así empezamos contigo",
+      "Cuánto acompañamiento llevas, y cuánto cuesta",
+      "Lo que conviene tener listo, y lo que no va incluido",
+      "El primer paso es media hora"
+    ],
+    "passos": 4,
+    "blocosComPreco": 3,
+    "blocosComIva": 3,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 2,
+        "menorFonte": 16
+      },
+      "naoIncluido": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      },
+      "semKitFechado": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      },
+      {
+        "alt": "El mismo salón en una tableta, que es el aparato",
+        "semAlt": false,
+        "renderizada": 312,
+        "capturada": 834,
+        "servida": 359,
+        "escala": 37,
+        "escalaServida": 87
+      }
+    ],
+    "alturaRolavel": 5740
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 5,
+    "titulos": [
+      "Qué pasa desde que dices que sí hasta el primer servicio",
+      "Así empezamos contigo",
+      "Cuánto acompañamiento llevas, y cuánto cuesta",
+      "Lo que conviene tener listo, y lo que no va incluido",
+      "El primer paso es media hora"
+    ],
+    "passos": 4,
+    "blocosComPreco": 3,
+    "blocosComIva": 3,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 2,
+        "menorFonte": 16
+      },
+      "naoIncluido": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      },
+      "semKitFechado": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      },
+      {
+        "alt": "El mismo salón en una tableta, que es el aparato",
+        "semAlt": false,
+        "renderizada": 342,
+        "capturada": 834,
+        "servida": 390,
+        "escala": 41,
+        "escalaServida": 88
+      }
+    ],
+    "alturaRolavel": 5592
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 768,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 5,
+    "titulos": [
+      "Qué pasa desde que dices que sí hasta el primer servicio",
+      "Así empezamos contigo",
+      "Cuánto acompañamiento llevas, y cuánto cuesta",
+      "Lo que conviene tener listo, y lo que no va incluido",
+      "El primer paso es media hora"
+    ],
+    "passos": 4,
+    "blocosComPreco": 3,
+    "blocosComIva": 3,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 2,
+        "menorFonte": 16
+      },
+      "naoIncluido": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      },
+      "semKitFechado": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      },
+      {
+        "alt": "El mismo salón en una tableta, que es el aparato",
+        "semAlt": false,
+        "renderizada": 720,
+        "capturada": 834,
+        "servida": 768,
+        "escala": 86,
+        "escalaServida": 94
+      }
+    ],
+    "alturaRolavel": 4505
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 5,
+    "titulos": [
+      "Qué pasa desde que dices que sí hasta el primer servicio",
+      "Así empezamos contigo",
+      "Cuánto acompañamiento llevas, y cuánto cuesta",
+      "Lo que conviene tener listo, y lo que no va incluido",
+      "El primer paso es media hora"
+    ],
+    "passos": 4,
+    "blocosComPreco": 3,
+    "blocosComIva": 3,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 2,
+        "menorFonte": 16
+      },
+      "naoIncluido": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      },
+      "semKitFechado": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      },
+      {
+        "alt": "El mismo salón en una tableta, que es el aparato",
+        "semAlt": false,
+        "renderizada": 588,
+        "capturada": 834,
+        "servida": 576,
+        "escala": 71,
+        "escalaServida": 102
+      }
+    ],
+    "alturaRolavel": 3508
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 1440,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 5,
+    "titulos": [
+      "Qué pasa desde que dices que sí hasta el primer servicio",
+      "Así empezamos contigo",
+      "Cuánto acompañamiento llevas, y cuánto cuesta",
+      "Lo que conviene tener listo, y lo que no va incluido",
+      "El primer paso es media hora"
+    ],
+    "passos": 4,
+    "blocosComPreco": 3,
+    "blocosComIva": 3,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 2,
+        "menorFonte": 16
+      },
+      "naoIncluido": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      },
+      "semKitFechado": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      },
+      {
+        "alt": "El mismo salón en una tableta, que es el aparato",
+        "semAlt": false,
+        "renderizada": 588,
+        "capturada": 834,
+        "servida": 648,
+        "escala": 71,
+        "escalaServida": 91
+      }
+    ],
+    "alturaRolavel": 3508
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 360,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 5,
+    "titulos": [
+      "O que acontece desde o seu sim até o primeiro serviço",
+      "Como começamos com você",
+      "Quanto acompanhamento você leva, e quanto custa",
+      "O que convém ter pronto, e o que não vai incluído",
+      "O primeiro passo é meia hora"
+    ],
+    "passos": 4,
+    "blocosComPreco": 3,
+    "blocosComIva": 3,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 2,
+        "menorFonte": 16
+      },
+      "naoIncluido": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      },
+      "semKitFechado": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      },
+      {
+        "alt": "O mesmo salão num tablet, que é o aparelho que f",
+        "semAlt": false,
+        "renderizada": 312,
+        "capturada": 834,
+        "servida": 360,
+        "escala": 37,
+        "escalaServida": 87
+      }
+    ],
+    "alturaRolavel": 5818
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 5,
+    "titulos": [
+      "O que acontece desde o seu sim até o primeiro serviço",
+      "Como começamos com você",
+      "Quanto acompanhamento você leva, e quanto custa",
+      "O que convém ter pronto, e o que não vai incluído",
+      "O primeiro passo é meia hora"
+    ],
+    "passos": 4,
+    "blocosComPreco": 3,
+    "blocosComIva": 3,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 2,
+        "menorFonte": 16
+      },
+      "naoIncluido": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      },
+      "semKitFechado": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      },
+      {
+        "alt": "O mesmo salão num tablet, que é o aparelho que f",
+        "semAlt": false,
+        "renderizada": 342,
+        "capturada": 834,
+        "servida": 390,
+        "escala": 41,
+        "escalaServida": 88
+      }
+    ],
+    "alturaRolavel": 5473
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 768,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 5,
+    "titulos": [
+      "O que acontece desde o seu sim até o primeiro serviço",
+      "Como começamos com você",
+      "Quanto acompanhamento você leva, e quanto custa",
+      "O que convém ter pronto, e o que não vai incluído",
+      "O primeiro passo é meia hora"
+    ],
+    "passos": 4,
+    "blocosComPreco": 3,
+    "blocosComIva": 3,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 2,
+        "menorFonte": 16
+      },
+      "naoIncluido": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      },
+      "semKitFechado": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      },
+      {
+        "alt": "O mesmo salão num tablet, que é o aparelho que f",
+        "semAlt": false,
+        "renderizada": 720,
+        "capturada": 834,
+        "servida": 768,
+        "escala": 86,
+        "escalaServida": 94
+      }
+    ],
+    "alturaRolavel": 4529
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 5,
+    "titulos": [
+      "O que acontece desde o seu sim até o primeiro serviço",
+      "Como começamos com você",
+      "Quanto acompanhamento você leva, e quanto custa",
+      "O que convém ter pronto, e o que não vai incluído",
+      "O primeiro passo é meia hora"
+    ],
+    "passos": 4,
+    "blocosComPreco": 3,
+    "blocosComIva": 3,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 2,
+        "menorFonte": 16
+      },
+      "naoIncluido": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      },
+      "semKitFechado": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      },
+      {
+        "alt": "O mesmo salão num tablet, que é o aparelho que f",
+        "semAlt": false,
+        "renderizada": 588,
+        "capturada": 834,
+        "servida": 576,
+        "escala": 71,
+        "escalaServida": 102
+      }
+    ],
+    "alturaRolavel": 3480
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 1440,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 5,
+    "titulos": [
+      "O que acontece desde o seu sim até o primeiro serviço",
+      "Como começamos com você",
+      "Quanto acompanhamento você leva, e quanto custa",
+      "O que convém ter pronto, e o que não vai incluído",
+      "O primeiro passo é meia hora"
+    ],
+    "passos": 4,
+    "blocosComPreco": 3,
+    "blocosComIva": 3,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 2,
+        "menorFonte": 16
+      },
+      "naoIncluido": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      },
+      "semKitFechado": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      },
+      {
+        "alt": "O mesmo salão num tablet, que é o aparelho que f",
+        "semAlt": false,
+        "renderizada": 588,
+        "capturada": 834,
+        "servida": 648,
+        "escala": 71,
+        "escalaServida": 91
+      }
+    ],
+    "alturaRolavel": 3480
+  },
+  {
+    "idioma": "en",
+    "largura": 360,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 5,
+    "titulos": [
+      "What happens between your yes and the first service",
+      "How we start with you",
+      "How much accompaniment you get, and what it costs",
+      "What is worth having ready, and what is not included",
+      "The first step is half an hour"
+    ],
+    "passos": 4,
+    "blocosComPreco": 3,
+    "blocosComIva": 3,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 2,
+        "menorFonte": 16
+      },
+      "naoIncluido": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      },
+      "semKitFechado": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      },
+      {
+        "alt": "The same floor on a tablet, which is the device ",
+        "semAlt": false,
+        "renderizada": 312,
+        "capturada": 834,
+        "servida": 360,
+        "escala": 37,
+        "escalaServida": 87
+      }
+    ],
+    "alturaRolavel": 5672
+  },
+  {
+    "idioma": "en",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 5,
+    "titulos": [
+      "What happens between your yes and the first service",
+      "How we start with you",
+      "How much accompaniment you get, and what it costs",
+      "What is worth having ready, and what is not included",
+      "The first step is half an hour"
+    ],
+    "passos": 4,
+    "blocosComPreco": 3,
+    "blocosComIva": 3,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 2,
+        "menorFonte": 16
+      },
+      "naoIncluido": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      },
+      "semKitFechado": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      },
+      {
+        "alt": "The same floor on a tablet, which is the device ",
+        "semAlt": false,
+        "renderizada": 342,
+        "capturada": 834,
+        "servida": 390,
+        "escala": 41,
+        "escalaServida": 88
+      }
+    ],
+    "alturaRolavel": 5471
+  },
+  {
+    "idioma": "en",
+    "largura": 768,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 5,
+    "titulos": [
+      "What happens between your yes and the first service",
+      "How we start with you",
+      "How much accompaniment you get, and what it costs",
+      "What is worth having ready, and what is not included",
+      "The first step is half an hour"
+    ],
+    "passos": 4,
+    "blocosComPreco": 3,
+    "blocosComIva": 3,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 2,
+        "menorFonte": 16
+      },
+      "naoIncluido": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      },
+      "semKitFechado": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      },
+      {
+        "alt": "The same floor on a tablet, which is the device ",
+        "semAlt": false,
+        "renderizada": 720,
+        "capturada": 834,
+        "servida": 768,
+        "escala": 86,
+        "escalaServida": 94
+      }
+    ],
+    "alturaRolavel": 4509
+  },
+  {
+    "idioma": "en",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 5,
+    "titulos": [
+      "What happens between your yes and the first service",
+      "How we start with you",
+      "How much accompaniment you get, and what it costs",
+      "What is worth having ready, and what is not included",
+      "The first step is half an hour"
+    ],
+    "passos": 4,
+    "blocosComPreco": 3,
+    "blocosComIva": 3,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 2,
+        "menorFonte": 16
+      },
+      "naoIncluido": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      },
+      "semKitFechado": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      },
+      {
+        "alt": "The same floor on a tablet, which is the device ",
+        "semAlt": false,
+        "renderizada": 588,
+        "capturada": 834,
+        "servida": 576,
+        "escala": 71,
+        "escalaServida": 102
+      }
+    ],
+    "alturaRolavel": 3484
+  },
+  {
+    "idioma": "en",
+    "largura": 1440,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 5,
+    "titulos": [
+      "What happens between your yes and the first service",
+      "How we start with you",
+      "How much accompaniment you get, and what it costs",
+      "What is worth having ready, and what is not included",
+      "The first step is half an hour"
+    ],
+    "passos": 4,
+    "blocosComPreco": 3,
+    "blocosComIva": 3,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 2,
+        "menorFonte": 16
+      },
+      "naoIncluido": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      },
+      "semKitFechado": {
+        "naPagina": true,
+        "noCorpo": true,
+        "ocorrenciasNoCorpo": 1,
+        "menorFonte": 16
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      },
+      {
+        "alt": "The same floor on a tablet, which is the device ",
+        "semAlt": false,
+        "renderizada": 588,
+        "capturada": 834,
+        "servida": 648,
+        "escala": 71,
+        "escalaServida": 91
+      }
+    ],
+    "alturaRolavel": 3484
+  }
+]

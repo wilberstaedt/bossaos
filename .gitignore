@@ -1,5 +1,9 @@
 node_modules/
 .next/
+# A pasta de build de quem mede em paralelo (`NEXT_DIST_DIR`, definido em
+# apps/web/next.config.ts). Dois processos a escrever no mesmo `.next` devolvem
+# 500 que não são da página, e um build dentro do repositório é sujidade.
+.next-*/
 dist/
 out/
 *.tsbuildinfo

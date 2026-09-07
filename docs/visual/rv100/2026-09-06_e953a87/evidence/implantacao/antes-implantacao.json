@@ -1,0 +1,722 @@
+[
+  {
+    "idioma": "es-ES",
+    "largura": 360,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "titulos": [
+      "Así empezamos contigo",
+      "Así empezamos contigo"
+    ],
+    "passos": 4,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "naoIncluido": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "semKitFechado": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      }
+    ],
+    "alturaRolavel": 1742
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "titulos": [
+      "Así empezamos contigo",
+      "Así empezamos contigo"
+    ],
+    "passos": 4,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "naoIncluido": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "semKitFechado": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      }
+    ],
+    "alturaRolavel": 1742
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 768,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "titulos": [
+      "Así empezamos contigo",
+      "Así empezamos contigo"
+    ],
+    "passos": 4,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "naoIncluido": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "semKitFechado": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      }
+    ],
+    "alturaRolavel": 1277
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "titulos": [
+      "Así empezamos contigo",
+      "Así empezamos contigo"
+    ],
+    "passos": 4,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "naoIncluido": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "semKitFechado": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      }
+    ],
+    "alturaRolavel": 1085
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 1440,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "titulos": [
+      "Así empezamos contigo",
+      "Así empezamos contigo"
+    ],
+    "passos": 4,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "naoIncluido": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "semKitFechado": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      }
+    ],
+    "alturaRolavel": 1085
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 360,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "titulos": [
+      "Como começamos com você",
+      "Como começamos com você"
+    ],
+    "passos": 4,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "naoIncluido": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "semKitFechado": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      }
+    ],
+    "alturaRolavel": 1796
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "titulos": [
+      "Como começamos com você",
+      "Como começamos com você"
+    ],
+    "passos": 4,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "naoIncluido": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "semKitFechado": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      }
+    ],
+    "alturaRolavel": 1748
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 768,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "titulos": [
+      "Como começamos com você",
+      "Como começamos com você"
+    ],
+    "passos": 4,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "naoIncluido": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "semKitFechado": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      }
+    ],
+    "alturaRolavel": 1335
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "titulos": [
+      "Como começamos com você",
+      "Como começamos com você"
+    ],
+    "passos": 4,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "naoIncluido": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "semKitFechado": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      }
+    ],
+    "alturaRolavel": 1143
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 1440,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "titulos": [
+      "Como começamos com você",
+      "Como começamos com você"
+    ],
+    "passos": 4,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "naoIncluido": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "semKitFechado": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      }
+    ],
+    "alturaRolavel": 1143
+  },
+  {
+    "idioma": "en",
+    "largura": 360,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "titulos": [
+      "How we start with you",
+      "How we start with you"
+    ],
+    "passos": 4,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "naoIncluido": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "semKitFechado": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      }
+    ],
+    "alturaRolavel": 1742
+  },
+  {
+    "idioma": "en",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "titulos": [
+      "How we start with you",
+      "How we start with you"
+    ],
+    "passos": 4,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "naoIncluido": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "semKitFechado": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      }
+    ],
+    "alturaRolavel": 1718
+  },
+  {
+    "idioma": "en",
+    "largura": 768,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "titulos": [
+      "How we start with you",
+      "How we start with you"
+    ],
+    "passos": 4,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "naoIncluido": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "semKitFechado": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      }
+    ],
+    "alturaRolavel": 1277
+  },
+  {
+    "idioma": "en",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "titulos": [
+      "How we start with you",
+      "How we start with you"
+    ],
+    "passos": 4,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "naoIncluido": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "semKitFechado": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      }
+    ],
+    "alturaRolavel": 1085
+  },
+  {
+    "idioma": "en",
+    "largura": 1440,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 2,
+    "titulos": [
+      "How we start with you",
+      "How we start with you"
+    ],
+    "passos": 4,
+    "blocosComPreco": 0,
+    "blocosComIva": 0,
+    "ressalvas": {
+      "homologacao": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "naoIncluido": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      },
+      "semKitFechado": {
+        "naPagina": false,
+        "noCorpo": false,
+        "ocorrenciasNoCorpo": 0,
+        "menorFonte": null
+      }
+    },
+    "imagens": [
+      {
+        "alt": "BossaOS",
+        "semAlt": false,
+        "renderizada": 145,
+        "capturada": null,
+        "servida": 256,
+        "escala": null,
+        "escalaServida": 57
+      }
+    ],
+    "alturaRolavel": 1085
+  }
+]

@@ -16,6 +16,12 @@ export default tseslint.config(
     ignores: [
       '**/node_modules/**',
       '**/.next/**',
+      // A pasta de build de quem mede em paralelo (`NEXT_DIST_DIR`, em
+      // apps/web/next.config.ts). Sem esta linha o `pnpm lint` entra no build e
+      // devolve 32 762 erros de código gerado — que não são do repositório e
+      // afogam os que são. Medido a 07/09: com a pasta presente, 100% dos erros
+      // vinham de lá.
+      '**/.next-*/**',
       '**/dist/**',
       '**/.storage/**',
       'packages/db/prisma/migrations/**',

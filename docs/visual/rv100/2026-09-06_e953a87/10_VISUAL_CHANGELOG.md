@@ -832,3 +832,152 @@ suites com guião.
   `/getting-started`, `/pilot`, `/trust`, `/faq` e `/demo` continuam sem mídia.
 - **Nada de teclado nem leitor de ecrã** sobre as figuras novas.
 - **Não medi a aparência.** Secção 7, e é do Matheus.
+
+---
+
+## L1f — a implantação e os equipamentos (MKT-006)
+
+Instrumento: `inspeccao/rv100-implantacao.spec.ts`, guião
+`scripts/provar-implantacao-mkt.sh`. Evidência em `evidence/implantacao/`,
+`antes-implantacao.json` e `depois-implantacao.json`, cinco larguras × três
+línguas.
+
+### O que a página era, medido antes de lhe tocar
+
+| | antes | depois | régua |
+| --- | ---: | ---: | --- |
+| secções | 2 | **5** | §6.3.8 e §6.3.9 |
+| blocos com preço / com nota de IVA | 0 / 0 | **3 / 3** | §6.5 «todos os valores» |
+| ressalvas do §6.6 no corpo | 0 de 3 | **3 de 3** | §6.6 |
+| composições do produto | 0 | **1** | §6.4 |
+| altura rolável a 1440 (es-ES) | 1085 | **3508** | — |
+| anomalias em 15 combinações | 0 | **0** | §11.1 |
+
+O `h1` e o `h2` eram **a mesma chave** — `comecamosTitulo` duas vezes, medido em
+`antes-implantacao.json` no campo `titulos`: `['Así empezamos contigo', 'Así
+empezamos contigo']`. A página dizia o próprio nome duas vezes antes de dizer o
+que faz, e os quatro passos eram os da secção 9 da home palavra por palavra.
+
+### A dependência do §6.6 não existe, e a saída é o próprio §6.6
+
+O §6.6 manda «usar a linguagem vigente em `PRECIFICACAO.md`». Contei nesse
+ficheiro: **63 linhas, seis menções aos planos e ZERO** ocorrências de
+*hardware*, *equipamento*, *aparelho*, *terminal*, *impressora*, *gaveta*,
+*leitor* e *homologação*. O `.json` também não tem nenhuma. A instrução aponta
+para uma linguagem que não existe.
+
+A saída é a voz condicional em que o próprio §6.6 está escrito — «pode precisar
+de», «conforme operação», «quando aplicáveis» — e é essa que a página usa.
+Avança como **autorizada por antecipação** (`00_AUTORIZACAO.md`), nunca como
+decidida por ele. **O que não avança é preço de aparelho ou modelo nomeado:** o
+D16 da `DECISOES.md` é pendente externo, e um kit fechado publicado sobre uma
+decisão que não existe seria dado falso na pior superfície possível.
+
+### As três ressalvas medem-se com o tamanho de letra ao lado
+
+Um contador de ocorrências de «homologação» dá **verde a uma nota de rodapé a
+11 px**. Por isso o instrumento emparelha cada ressalva do §6.6 com o **menor
+tamanho de letra** em que ela aparece, e exige que seja num `<p>`/`<li>` dentro
+de uma secção.
+
+| ressalva | antes | depois |
+| --- | --- | --- |
+| nenhum modelo compatível sem homologação | ausente da página | **2 ocorrências no corpo, 16 px** |
+| compra, garantia, rede, montagem, cabeamento não incluídos | ausente | **1 no corpo, 16 px** |
+| nenhum kit fechado | ausente | **1 no corpo, 16 px** |
+
+Nas três línguas e a 390 px, que é onde a letra pequena dói. A palavra medida na
+segunda é **cabeamento**, por ser a menos reutilizável da lista: «rede» e
+«montagem» aparecem noutros contextos comerciais, cabeamento não. E a terceira
+casa a frase inteira (`kit cerrado|kit fechado|closed kit`) e não `cerrad`, que
+apanharia «precio cerrado» dos adicionais e dava verde pela razão errada.
+
+### O corte que não repete a `/plans`
+
+A `/plans` mostra o dinheiro em grande e as horas como nota, porque lá a pergunta
+é «quanto custa». Aqui o número grande é o das **horas de acompanhamento**,
+porque a pergunta é «quanto tempo estão comigo». Mesma fonte — `precoDoPlano()`,
+que lê a `PRECIFICACAO.json` —, corte diferente.
+
+Classe própria, `.bo-mkt__horas`, e não `.bo-mkt__preco` reaproveitada: uma
+classe chamada preço a segurar um número de horas é uma mentira de nome.
+
+Os quatro passos ficam com o **nome** partilhado com a home (`passo1..4`) e ganham
+um detalhe que é desta página (`passo1Detalhe..4`). O `passoNTexto` da home fica
+na home — repeti-lo aqui era a página ser a secção outra vez.
+
+### Um defeito do meu próprio instrumento, apanhado pelo número que não podia existir
+
+A primeira versão da escala dividia a largura renderizada pela **`naturalWidth`**.
+Deu 87, 88, 94, **102** e 91 por cento — e o **102** denunciou-a: nenhuma imagem
+se renderiza acima da escala a que foi capturada.
+
+A causa é o `srcset`. Com `next/image`, a `naturalWidth` é a largura da variante
+que o browser descarregou, escolhida a partir do `sizes` e portanto **próxima da
+largura renderizada por desenho**. O denominador andava com o numerador: a razão
+media o *pipeline de entrega* e dava sempre ~100%, em qualquer composição.
+
+O denominador certo é a largura da **captura**, que vive no nome do ficheiro por
+convenção (`sala-tablet-834.png`) e está corroborada no `composicoes.json`. Com
+ele, a mesma página lê-se assim:
+
+| largura | renderizada | capturada | **escala** | escala servida |
+| ---: | ---: | ---: | ---: | ---: |
+| 360 | 312 | 834 | **37%** | 87% |
+| 390 | 342 | 834 | **41%** | 88% |
+| 768 | 720 | 834 | **86%** | 94% |
+| 1280 | 588 | 834 | **71%** | 102% |
+| 1440 | 588 | 834 | **71%** | 91% |
+
+As duas razões ficam gravadas, porque respondem a perguntas diferentes: `escala`
+é legibilidade (§6.4), `escalaServida` é se o `srcset` acertou. A segunda
+continua verde — e é por isso que sozinha não provava nada.
+
+**E o 37% não o escondo:** é a mesma miniatura que a L1e reprovou no herói da
+home. A 360 px é aritmético e não é composição — nenhuma captura de 834 px passa
+de ~43% num telemóvel de 360. A saída é uma captura da sala em largura de
+telemóvel, ou não pôr mídia no herói do telemóvel. **Fica medido, não resolvido:
+é composição, e composição é a secção 7 e é do Matheus.**
+
+### Regressão
+
+`marketing.spec.ts`: **65 verdes, `git diff` de 0 linhas, nenhuma asserção
+alterada** — a âncora do MKT-006 é `.bo-mkt__passos` e ela não se mexeu.
+**396 IDs intactos**, impressão da referência a conferir. Guardas verdes:
+classes (com controlo negativo), três línguas (2488 chaves, com controlo
+negativo), preços, dinheiro, dados fictícios, suites com guião. `pnpm lint`
+limpo. Provas de nó do `@bossaos/i18n`: 19/19.
+
+**Zero anomalias nas 15 combinações**, antes e depois: sem rolagem horizontal,
+sem alvos abaixo de 44 px, sem elementos fora do ecrã, sem contrastes sob o
+limiar.
+
+### Duas coisas que este lote arrumou fora da página, e digo porquê
+
+**A pasta do build passou a vir do ambiente** (`NEXT_DIST_DIR`, omissão `.next`).
+A `playwright.config.ts` já tinha parametrizado a PORTA com este motivo escrito:
+*«a terceira apanhou um `.next` a meio de dois builds a colidir»*. A porta
+resolveu o primeiro caso e **o terceiro ficou por resolver** — dois processos com
+portas diferentes continuam a escrever nos mesmos ficheiros. Apanhei-o ao vivo:
+`/es-ES/getting-started` respondeu **200 a um pedido e 500 ao seguinte**, com o
+código igual nos dois. O 500 não era da página.
+
+**E o `pnpm lint` passou a ignorar essa pasta.** Sem a linha, entrava no build e
+devolvia **32 762 erros de código gerado** que afogavam os do repositório —
+medido: 100% dos erros vinham de lá.
+
+### O que NÃO foi feito, e porquê
+
+- **Expansão de texto: NÃO MEDI.** A `validar-expansao-de-texto.sh` precisa de
+  semear a base, e a base é partilhada com outra sessão que está a correr suites
+  neste momento. Corri-a duas vezes e a segunda devolveu NÃO MEDI pelo próprio
+  controlo negativo («a sonda não acendeu»). Parei aí: continuar era semear por
+  cima do trabalho de quem está a medir ao lado. **É a verificação mais relevante
+  que fica em aberto**, porque a cópia nova é mais longa em PT e EN do que a que
+  substituiu.
+- **O herói a 37–41% no telemóvel**, medido acima. Composição.
+- **Nada de teclado nem leitor de ecrã** sobre a página nova.
+- **Metadados por rota** (§6.8) continuam por fazer nesta página, como nas outras.
+- **`11_OPEN_FINDINGS.md` não foi tocado.** Mudar o `status` do RV100-015 seria eu
+  a assinar a minha própria revisão.
+- **Não medi a aparência.** Secção 7, e é do Matheus.

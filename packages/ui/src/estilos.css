@@ -1294,6 +1294,19 @@ label.bo-planos__item input[type="radio"] {
 .bo-mkt__preco-ano { margin: 0; font-size: 15px; }
 .bo-mkt__preco-nota { margin: 0; font-size: 14px; color: var(--bo-texto-secundario); }
 
+/* As HORAS de acompanhamento, quando são elas a resposta e não o preço.
+   ───────────────────────────────────────────────────────────────────────────
+   Classe própria, e não `.bo-mkt__preco` reaproveitada: uma classe chamada
+   preço a segurar um número de horas é uma mentira de nome — primo do
+   `bo-alergenio` que não existia e não caía em lado nenhum.
+
+   Na `/plans` o número grande é o dinheiro, porque lá a pergunta é «quanto
+   custa». Na implantação é o tempo, porque a pergunta é «quanto tempo estão
+   comigo». Mesma escala tipográfica, significados diferentes, nomes
+   diferentes. */
+.bo-mkt__horas { font-size: 20px; margin: 0; }
+.bo-mkt__horas strong { font-family: var(--bo-fonte-titulo); font-size: 32px; line-height: 1.1; }
+
 /* A regra do ano — dez mensalidades — dita numa linha que se vê.
    Fundo suave e não coral: sobre a areia o coral da marca dá 2,77:1 e não chega
    a 3, e este bloco é um destaque com texto lá dentro. */
