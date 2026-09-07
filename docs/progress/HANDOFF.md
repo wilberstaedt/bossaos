@@ -2364,8 +2364,8 @@ Verifiquei o `e62b2c0` em **6 larguras × 3 rotas** — 390, 768, 1024, 1280, 14
 
 | | pior escala |
 |---|---|
-| secretária (≥768) | **1,65** — e é a `carta-movel`, a que ele declarou em aberto |
-| telemóvel (<768) | **1,44** — a mesma carta |
+| secretária (≥768) | ~~**1,65** — a `carta-movel`~~ → **RETIRADO a 22h50: 0,99. O número era da métrica, não da imagem** |
+| telemóvel (<768) | ~~**1,44**~~ → **RETIRADO: 0,88** |
 
 **Tudo o resto está em 0,99 ou abaixo.** A afirmação dele confirma-se, incluindo
 a ressalva. **Assinado.**
@@ -2419,3 +2419,47 @@ foi assim que já lhe disse coisas que não tinha verificado.
 
 **A referência `7b94eff` fica retirada.** O que está pronto é `HEAD`, e prova-se
 outra vez no momento de disparar.
+
+
+## 07/09 22h50 — retiro os 1,65 e 1,44: a carta não tinha defeito
+
+O JR foi à carta e o alvo caiu **do lado do instrumento**. Verifiquei eu, com um
+diferencial que ele não fez — as **seis** imagens da página, mesmo instrumento:
+
+| imagem | `naturalWidth` | recurso decodificado |
+|---|---|---|
+| `sala-estreita-390`, `kds-estreito-390`, `catalogo-estreito-390` | 390×844 | 390×844 |
+| `logoname` | 256×88 | 256×88 |
+| **`carta-movel-390`** | **237×514** | **390×844** |
+
+**Cinco concordam, uma não.** A imagem está bem e o visitante vê-a nítida; o que
+mente é o `naturalWidth` daquele elemento. Os **1,65 e 1,44 que eu assinei e
+disse ao Matheus saíram de dividir pela métrica mentirosa** — a escala real da
+carta é **0,88**, igual às outras três.
+
+**Não há excepção: a cura do `sizes` está limpa em tudo.** 0,99 em secretária,
+0,88 no telemóvel. O meu «pior caso» era um artefacto.
+
+### E o pior é que eu tinha a contradição no ecrã
+
+Há uma hora imprimi este quadro:
+
+    carta-movel-390    servido  237px -> 342px   escala 1.44
+    sala-estreita-390  servido  390px -> 342px   escala 0.88
+
+Dois ficheiros que eu tinha acabado de medir com `sips` como **390×844 ambos**,
+a reportarem larguras servidas diferentes, **lado a lado na minha própria
+saída**. Não confrontei uma linha com a outra.
+
+**A frase é dele e fica com o nome dele:** *«uma medição que ninguém confronta
+com outra é uma opinião com números.»*
+
+E acrescento o que a minha parte ensina: **o confronto não precisava de
+instrumento novo.** Precisava de olhar para duas linhas da mesma tabela e
+perguntar porque é que discordam. O diferencial mais barato que existe é a
+população que já se mediu.
+
+**Fica sem explicação o porquê do 237**, e digo-o em vez de inventar uma — não é
+o ficheiro, não é o formato, não é o `srcset`, não é o carregamento. Sem cura,
+porque não há defeito: **uma guarda construída sobre `naturalWidth` daria
+vermelho para sempre num sítio onde não há nada para consertar.**
