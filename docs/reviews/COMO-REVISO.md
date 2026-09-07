@@ -2758,3 +2758,32 @@ distinguido as duas formas de contar.**
 no ar com o anel a 1,00:1**, e assim fica até o Matheus autorizar de novo. A
 autorização das 17h09 foi para aquele momento e aquele commit; **não a estico
 para um segundo disparo só porque seria conveniente.**
+
+---
+
+## Treze decisões escaladas uma a uma não são uma lista — 07/09, 18h40
+
+Fiz o balanço do que resta e quase tudo está com o Matheus. Depois contei: **126
+commits hoje, e treze decisões escaladas** — cada uma num aviso de duas linhas,
+no momento em que apareceu.
+
+**Nenhuma delas estava errada. O conjunto é que não existia.** Ele ficou com
+treze perguntas espalhadas por nove horas de mensagens, sem sítio nenhum onde as
+visse juntas — e sem forma de saber que eram treze.
+
+**É a minha própria lição de hoje virada contra mim.** Escrevi de manhã, quando o
+JR ia recapturar 39 artefactos por eu não lhe ter passado uma decisão: *«uma
+decisão registada no meu documento e não no canal dele não está tomada, está
+guardada»*. **Escalar no momento certo e nunca consolidar tem o mesmo efeito:
+cada peça chegou, e o todo não.**
+
+Fiz-lhe a lista única, agrupada pelo que a decisão destrava — trabalho parado,
+negócio, desenho, e o que só ele pode julgar. **Com recomendação onde tenho uma**,
+porque treze perguntas sem resposta sugerida é um fardo e não ajuda; e sem
+nenhuma onde o juízo é dele, porque inventar uma opinião sobre o que se reconhece
+como identidade seria fingir que medi o que não medi.
+
+**E o número que fecha a página é o que interessa:** 19 de 26 critérios
+conformes, e **dos sete que faltam, quatro estão naquela lista à espera dele.**
+Nenhum deles é trabalho por fazer. É a diferença entre «falta-nos 27%» e
+«falta-te decidir quatro coisas» — e a segunda é accionável.
