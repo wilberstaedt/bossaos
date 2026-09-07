@@ -714,3 +714,42 @@ deixando o `alvos.ts` de HEAD na árvore partilhada. Reparei e repus logo, e ref
 o A/B com `trap ... EXIT`. **Um controlo que repõe no fim só repõe se chegar ao
 fim** — e numa árvore partilhada, o que não repõe não é um controlo, é um
 estrago com temporizador.
+
+---
+
+## Acessibilidade dinâmica (07/09, `515ca44`)
+
+`scripts/validar-acessibilidade-dinamica.sh` + `inspeccao/acessibilidade-dinamica.spec.ts`.
+Era o único buraco do dossiê que não esperava por aprovação nenhuma. A pasta
+`evidence/accessibility/` deixou de estar vazia.
+
+Menu móvel devolve o foco · **62 focáveis** em 3 superfícies, nenhum abaixo de
+3:1 · **18/18** acções alcançadas com Tab · 200% sem rolar na horizontal.
+
+### O fundo de trás do anel não é o fundo do elemento
+
+A primeira corrida acusou 7 controlos a 1.00:1 — os botões primários escuros,
+cujo fundo calha ser a cor do anel. Mas o token é `outline-offset: 2px`: o anel
+desenha-se **fora** da caixa, sobre o fundo do **pai**. Corrigido pelo
+afastamento, o mesmo detector dá 0 de 62, e os «Book a demo» que eu ia acusar
+têm 13,05:1. **Uma acusação evitada por medir onde a coisa está, e não onde é
+cómodo medi-la.**
+
+### Um zero só conta depois de a sonda acender
+
+Cada um dos quatro detectores tem sonda que lhe planta o defeito que deve achar.
+As plantas são **no DOM**, porque os ficheiros da moldura estão em voo — e um
+plante que não se repõe numa árvore partilhada é um estrago com temporizador.
+
+E o guião conta os **marcadores** que as sondas imprimem, não linhas do
+relatório: o projecto `preparar` corre como dependência do `chromium` e os seus
+três casos entravam na conta, dando «7 sondas» havendo quatro.
+
+### Terceira vez no mesmo dia: um controlo que não testa o que diz
+
+O primeiro controlo da sonda do anel mudava o `cssText` da planta — e havia um
+ouvinte de `focus` que repunha o anel branco. O controlo passou sem ter medido
+nada. Antes disso, um `.slice` depois do ponto-e-vírgula fez o exit 2 vir da
+sonda em vez da população. **O padrão: escrevi o controlo, vi o código de saída
+certo, e quase não fui ler PORQUE é que ele saiu assim.** O código de saída certo
+pelo motivo errado é indistinguível do certo, até se ler a mensagem.
