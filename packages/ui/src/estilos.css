@@ -52,6 +52,9 @@
   --bo-sobre-superficie: var(--bo-texto-primario);
   --bo-accao: var(--bo-primaria);
   --bo-sobre-accao: var(--bo-texto-inverso);
+  /* O que marca a secção activa de uma navegação. Em superfície clara é o
+     acento-sinal; nas escuras do serviço não é — ver a nota abaixo. */
+  --bo-navegacao-activa: var(--bo-acento-sinal);
   --bo-borda: #D7DEDA;
 
   /* ── Estados operacionais — FIXOS, não seguem o tema do cliente ────────── */
@@ -163,6 +166,22 @@ p { margin: 0; }
   --bo-sobre-superficie: var(--bo-texto-inverso);
   --bo-accao: var(--bo-superficie-base);
   --bo-sobre-accao: var(--bo-primaria);
+  /* ── O coral sai da NAVEGAÇÃO do serviço ────────────────────────────────
+   *
+   * O manual é textual: o coral e o cítrico não disputam atenção com o estado
+   * dos pedidos. E era isso que acontecia — a secção activa do KDS levava
+   * `--bo-acento-sinal` na borda, e num ecrã lido a metro e meio o olho vai ao
+   * saturado antes de ir ao que importa, que é saber que bilhete está atrasado.
+   *
+   * A regra do coral e a que a apagava tinham a MESMA especificidade (0,2,1) e
+   * ganhava a que vinha depois no ficheiro. Uma cor decidida por ordem de linha
+   * é uma cor que muda quando alguém arruma o ficheiro — e o remendo seria
+   * pôr outra regra ainda mais abaixo.
+   *
+   * Aqui a superfície declara o que marca uma secção activa, e a regra da
+   * navegação pergunta pelo papel. Deixa de haver disputa: não há duas regras a
+   * pintar a mesma coisa. */
+  --bo-navegacao-activa: var(--bo-texto-inverso);
 }
 
 /* Sobre superfície escura o anel escuro desaparece. */
@@ -1296,7 +1315,7 @@ label.bo-planos__item input[type="radio"] {
   border: 1px solid var(--bo-borda); border-radius: var(--bo-raio-capsula);
   color: var(--bo-publico-texto); text-decoration: none;
 }
-.bo-publico__seccoes a[aria-current='page'] { font-weight: 700; border-color: var(--bo-acento-sinal); }
+.bo-publico__seccoes a[aria-current='page'] { font-weight: 700; border-color: var(--bo-navegacao-activa); }
 .bo-publico__heroi { display: grid; gap: var(--bo-espaco-md); }
 .bo-publico__heroi h1 { font-size: 32px; line-height: 1.15; overflow-wrap: anywhere; }
 @media (min-width: 768px) { .bo-publico__heroi h1 { font-size: 44px; } }

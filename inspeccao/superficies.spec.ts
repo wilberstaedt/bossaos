@@ -159,6 +159,32 @@ test.describe('Superfícies: nada desaparece dentro do seu fundo', () => {
     const contornos = maus.filter((m) => CONTORNO_JA_CONHECIDO.test(m));
     const outros = maus.filter((m) => !CONTORNO_JA_CONHECIDO.test(m));
 
+    // ── E o coral não entra nas superfícies do SERVIÇO ────────────────────
+    //
+    // O manual é textual: o coral e o cítrico não disputam atenção com o estado
+    // dos pedidos. No KDS o coral estava na NAVEGAÇÃO — a secção activa levava
+    // `--bo-acento-sinal` na borda — e num ecrã lido a metro e meio o olho vai
+    // ao saturado antes de ir ao bilhete atrasado.
+    //
+    // Mede-se a cor RESOLVIDA e não a regra: as duas que disputavam tinham a
+    // mesma especificidade e ganhava a última do ficheiro, coisa que muda quando
+    // alguém arruma o CSS.
+    const coral: string[] = [];
+    for (const s of superficies.filter((x) => x.escura)) {
+      await page.goto(s.url, { waitUntil: 'domcontentloaded' });
+      const achados = await page.evaluate(() => Array.from(document.querySelectorAll<HTMLElement>('body *'))
+        .filter((el) => {
+          const st = getComputedStyle(el);
+          return [st.color, st.backgroundColor, st.borderTopColor, st.borderBottomColor,
+            st.borderLeftColor, st.borderRightColor].some((c) => /rgb\(216, 90, 68\)/.test(c));
+        })
+        .map((el) => `${el.tagName}.${String(el.className).slice(0, 24)}`));
+      for (const x of achados) coral.push(`${s.id} · ${x}`);
+    }
+    console.log(`CORAL escuras=${superficies.filter((x) => x.escura).length} ocorrencias=${coral.length}`);
+    expect(coral, `o coral está nas superfícies do serviço, a disputar atenção com o estado dos pedidos:\n${coral.slice(0, 6).join('\n')}`)
+      .toEqual([]);
+
     console.log(`AMBITO superficies=${superficies.length} medidas=${medidos} maus=${outros.length}`
       + ` contornosFracos=${contornos.length} tecto=${TECTO_CONTORNOS_FRACOS}`);
     for (const c of contornos.slice(0, 4)) console.log(`CONTORNO-FRACO ${c}`);

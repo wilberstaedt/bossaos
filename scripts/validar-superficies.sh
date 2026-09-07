@@ -70,11 +70,23 @@ ambito() {
   echo "           primeiro fundo OPACO — um fundo com alfa é uma camada, não um"
   echo "           fundo, e mede-se uma cor contra si própria."
   echo "           FORA: o que está fora do ecrã e o que leva \`aria-hidden\`."
+  echo "           E mede o CORAL nas $(sed -n 's/.*CORAL escuras=\([0-9]*\).*/\1/p' "$SAIDA" | tail -1) superfícies escuras:"
+  echo "           $(grep -o 'CORAL .*' "$SAIDA" | tail -1). O manual diz que o coral não"
+  echo "           disputa atenção com o estado dos pedidos, e mede-se a cor RESOLVIDA"
+  echo "           — as duas regras que disputavam tinham a mesma especificidade."
 }
 
+# Duas regras, dois títulos. A primeira versão anunciava sempre «desaparece
+# dentro do fundo», e o controlo negativo do coral saía com o diagnóstico da
+# outra regra — o código de saída certo pelo motivo mal contado.
 if [ "$ESTADO" -ne 0 ]; then
-  vermelho "há coisas a desaparecer dentro do seu fundo:"
-  sed 's/\x1b\[[0-9;]*m//g' "$SAIDA" | grep -E '· .*:1$' | head -8 | sed 's/^ */           /'
+  if grep -q 'o coral está nas superfícies do serviço' "$SAIDA"; then
+    vermelho "o coral está na navegação do serviço, a disputar com o estado dos pedidos:"
+    sed 's/\x1b\[[0-9;]*m//g' "$SAIDA" | grep -oE 'CORAL-[A-Z]+ .*|· [A-Z]+\.bo-[a-z_-]*' | head -6 | sed 's/^/           /'
+  else
+    vermelho "há coisas a desaparecer dentro do seu fundo:"
+    sed 's/\x1b\[[0-9;]*m//g' "$SAIDA" | grep -E '· .*:1$' | head -8 | sed 's/^ */           /'
+  fi
   ambito
   exit "$FALHOU"
 fi
