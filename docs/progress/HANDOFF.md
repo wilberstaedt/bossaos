@@ -28,6 +28,47 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## A guarda do cabeçalho — prevenção, e não propagação
+
+**O sénior travou-me a caminho dos 267 e a razão não é prudência:** converter
+esses ecrãs é **propagação**, e o §8.3 do RV100 põe a propagação explicitamente
+**depois** da aprovação visual humana. *«Arruma antes de replicar.»* A tarefa
+está atrás de um portão que não é nosso.
+
+O que cabe deste lado é impedir a próxima geração do problema:
+`scripts/validar-cabecalho-pelo-componente.sh`.
+
+**É uma CATRACA e não um portão.** Uma guarda vermelha nos 267 seria vermelha
+desde o primeiro dia, e uma guarda permanentemente vermelha é ignorada — a razão
+já estava escrita na `validar-provas-frescas.sh`. A dívida existente vive num
+inventário (`docs/progress/cabecalho-por-converter.txt`, 267 entradas) e é aceite
+tal como está. **O que a guarda recusa é o ecrã 268.**
+
+**O critério reconciliou-se sozinho com a contagem do revisor:** 269 ficheiros
+escrevem `bo-estado__cabecalho` e todos escrevem também a sobrancelha; outros 6
+usam só a sobrancelha noutra composição e não duplicam. Menos o próprio
+componente, **267** — o número a que ele chegou por outro caminho. O sinal é o
+**contentor**, que é o que o componente possui.
+
+**Dois controlos, e o segundo pesa tanto como o primeiro.** (A) ecrã novo
+escrito à mão → **exit 1**, com o caminho nomeado. (B) uma conversão simulada →
+**exit 0**, reportada como progresso com o `--fixar` numa linha. O (B) existe
+porque *uma medida que acusa quem está certo é pior do que medida nenhuma*: quem
+converte um ecrã não pode ficar com a guarda vermelha na mão, ou o atrito de
+fazer a coisa certa passa a ser maior do que o de a adiar.
+
+> **Uma correcção minha no meio:** li o código de saída do controlo B por
+> `PIPESTATUS`, que não existe em zsh, e veio vazio. Era o meu instrumento e não
+> a guarda — repetido sem o cano, deu 0.
+
+**Fica em aberto e não é meu** — tudo escalado ao Matheus: o A2 (o caminho
+comercial não leva a nenhuma superfície do produto), o «Sin enviar: 0» do Staff,
+o verde-lima com duas cores para activo, e um quarto que o sénior viu na captura:
+o KDS explica numa frase que o tempo vem do selo do servidor. **É verdadeira e a
+decisão está certa, mas é uma tela de parede lida a metros por quem não tem mãos
+livres.** Terceira superfície com o mesmo padrão: o produto explica-se dentro de
+si próprio, e explicar-se ocupa o lugar de mostrar.
+
 ## A lista A1/A2/A3 e os três degraus seguintes — fechados numa passagem
 
 **Regra nova, e o sénior fixou-a por escrito:** *uma lista numerada é
