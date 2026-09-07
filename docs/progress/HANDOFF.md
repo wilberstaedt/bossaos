@@ -28,6 +28,58 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## North Star v2 — Fase 1 entregue, o sistema mínimo das duas telas-mestre
+
+Fundos e secções, tipografia de display, cabeçalho e rodapé, botões, molduras,
+bento, cartões de preço, shell autenticado e a mesa visual com estados. Prefixo
+`ns-`: as 396 telas continuam em `bo-` e **nada aqui as toca**. Commit `3929a91`.
+**Não é a landing** — essa é a Fase 2.
+
+**Medido na página renderizada** (`/es-ES/interno/ns2`), com a população
+declarada, porque a régua proíbe medir no código:
+
+| | |
+| --- | --- |
+| ritmo | **5 secções, 4 fundos distintos**, herói verde e não areia |
+| escala | display **72** a 1440 e **44** a 390; título 48; lead 21 |
+| CTA | coral sobre verde **3,73:1**; texto 3,73 com rótulo **grande** (19px/700) |
+| bento | 4 áreas, **3 larguras distintas** [773, 379, 379, 1168] |
+| mesas | grelha de 6 colunas, 6 mesas, 4 estados, **nenhuma em `<ul>`** |
+| shell | barra lateral **248px**, activo com **barra coral** de 3px |
+
+**Sonda:** pintadas todas as secções de areia, a contagem cai a 1 e a guarda
+acende. **Regressão:** `validar-classes`, `validar-tres-linguas` e
+`validar-superficies` a zero — a última é a que apanharia contraste.
+
+### Os tokens não mudam, e a razão é uma impossibilidade demonstrada
+
+O norte lista coral **`#F5664D`** e o código tem **`#D85A44`**. Não é descuido: o
+RV100 escureceu-o para passar 3:1 sobre a areia.
+
+| coral | sobre areia | texto verde-profundo por cima |
+| --- | ---: | ---: |
+| `#F5664D` (norte/ADR) | 2,77 | 4,71 |
+| `#D85A44` (código) | 3,50 | 3,73 |
+
+**Nenhum serve as duas exigências:** para 3:1 sobre areia a luminância tem de ser
+**≤ 0,2684**; para 4,5:1 com texto verde, **≥ 0,2795**. Os intervalos não se
+tocam — não é escolher melhor. A saída não é um terceiro coral: **é o tamanho do
+texto**. A 1.4.3 pede 3:1 para texto grande (≥18,66px negrito), e aí a janela
+abre para ≥0,1696, onde o `#D85A44` (0,2233) cabe. O rótulo do CTA é 19px/700
+por essa razão medida, e não por gosto.
+
+> **Uma armadilha do arnês, e custou-me tempo.** O ficheiro chamava-se
+> `ns2-sistema.spec.ts` e o Playwright **ignorou-o em silêncio**: as expressões
+> do `playwright.config` não estão ancoradas, e `/tema\.spec\.ts/` casa com
+> «ns2-sis**tema.spec.ts**». Não há erro — o teste apenas não existe. É a mesma
+> família do `[idioma]` a ser classe de caracteres: **uma expressão a casar TEXTO
+> onde se queria um NOME.** Renomeei para `ns2-visual.spec.ts` e verifiquei que
+> não casa com nenhum dos 29 padrões. **Ancorar os padrões é a cura de raiz e
+> não a fiz** — mexe na suite de toda a gente e não é desta fase.
+
+**Estado:** Fase 1 entregue e **não aprovada por mim**. A Fase 2 (a landing e a
+tela de mesas) só depois da revisão.
+
 ## Cada portão diz por onde se re-mede — e cinco nomes mentiam
 
 Dos 17 critérios que não citavam nada: **cinco** re-medem-se por guião, **onze**
