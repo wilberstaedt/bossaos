@@ -259,3 +259,39 @@ a republicação: um diff mostra o que mudou, a captura mostra o que ficou.
 
 **O que a carta ganhou** fica dito também: o acento está lá, **188 px** de coral
 num filete sob «Abierto ahora» — editorial, discreto, e sem disputar com nada.
+
+---
+
+## Publicar: preparado e à espera das palavras dele — 15h15
+
+O Matheus pediu para ver em `bossaos.mwdeveloper.tech` em vez de em capturas.
+**Corrigi-me primeiro:** às 11h11 disse-lhe que não havia CI nem caminho de
+publicação. **Estava errado.** Existe `.github/workflows/ci.yml`, existe
+`docs/runbooks/publicar.md` — escrito depois de uma publicação com **nove
+paragens**, oito delas defeito de instrumento — e existe `scripts/publicar.sh`
+com a caixa toda decidida: servidor, chave, raiz, **porta 8140 verificada livre e
+não deduzida**, domínio, e `.env.prod` que **vive lá e nunca sobe daqui**.
+
+**Corri o modo de preparação**, que é o modo normal e não toca no servidor:
+
+```
+pacote verificado: 2144 ficheiros, nenhum segredo
+Portões locais abertos.
+MAS NÃO SE PUBLICA: falta a autorização. Preparar não é publicar.
+```
+
+**O guião exige as PALAVRAS dele como argumento, não um `sim` meu** — e o
+runbook explica porquê, com um incidente deste mesmo vault: um runbook passou
+três horas a dizer «nunca publicar neste motor» enquanto o dono já tinha
+autorizado por escrito e o motor já tinha publicado. **Um `sim` que eu escrevo
+não é rasto de nada; a frase dele é.**
+
+**E o guião avisou de uma coisa que eu não teria pensado em dizer-lhe:** *«8
+ficheiros por commitar NÃO vão neste pacote»*. É o JR a meio de uma tarefa. Se
+publicássemos agora, o que ele veria seria o commit `d43d0f5` — **não o que está
+na minha árvore de trabalho**, e a diferença entre as duas é exactamente o
+trabalho em curso. Um instrumento que declara o que **não** leva vale mais do que
+um que só diz o que fez.
+
+Fica em espera de duas decisões dele, ambas não-técnicas: a frase de autorização,
+e os **402 commits** por enviar para o GitHub.
