@@ -455,3 +455,36 @@ oito da noite**.
 e já lhe devolvi três dessa natureza hoje. Mas registo o padrão, porque é a
 terceira superfície onde aparece: **o produto explica-se dentro de si próprio**,
 e explicar-se ocupa o lugar de mostrar.
+
+---
+
+## O anel de foco do KDS é invisível — quarta instância da mesma família — 17h10
+
+Medi a acessibilidade dinâmica nas superfícies **com sessão**, que estavam
+declaradas como dívida, com a mesma régua das públicas: anel contra o fundo
+**atrás do anel**, alcance por `Tab`, e 200% sem rolagem horizontal.
+
+| superfície | anel de foco | 200% |
+| --- | --- | --- |
+| backoffice | **13,05:1** | sem rolagem |
+| Staff | 13,05:1 | **rola 3 px** (198 > 195) |
+| **KDS** | **1,00:1** | sem rolagem |
+
+**`1,00:1` é a assinatura que eu já aprendi a ler hoje: uma cor consigo
+própria.** O anel é `#102E35` e o fundo do KDS é `#102E35`. **Quem navegar a
+cozinha com o teclado não vê onde está.**
+
+**É a quarta vez que esta família aparece**, e a lista tem uma forma só: uma peça
+desenhada para fundo claro pousada na superfície escura. As duas primeiras estão
+documentadas em 39 linhas de CSS defensivo que já foram apagadas; a terceira foi
+o botão primário invisível; **esta é o foco.**
+
+**E a cura já existe** — é o contrato de superfície que o JR construiu:
+`--bo-accao`, `--bo-sobre-accao`, `--bo-sobre-superficie`. **Falta o foco entrar
+nele.** Não é preciso inventar mecanismo nenhum: falta um `--bo-foco-cor` que a
+superfície escura redefina, exactamente como fez com a acção.
+
+**O momento em que apareceu importa:** medi isto **minutos antes** de publicar, e
+publiquei à mesma porque o Matheus tinha autorizado e o defeito não bloqueia um
+teste. **Mas disse-lho na mesma mensagem** — não quero que ele o descubra sozinho
+e conclua que ninguém tinha visto.
