@@ -2316,3 +2316,41 @@ de desenho **precisa** da porta (maquetas sem rota); uma rota real que a usa
 derivação, portanto está coberto» — era plausível, era quase verdade, e teria
 deixado a quarta instância viva. **Um NÃO MEDI honesto vale mais do que uma
 inferência razoável**, e este pagou-se na primeira vez que fui medi-lo.
+
+---
+
+## Generalizar o critério e amostrar a população são movimentos opostos — 07/09
+
+Passei ao JR uma tarefa estreita: «sobe estas DUAS classes de 12 para 14 px».
+Ele fez melhor do que eu pedi e escreveu-o bem:
+
+> «A régua apanhou-me a mim. Fiz a sonda medir **todo o texto de corpo abaixo de
+> 14 px** e não as duas classes — a régua não é sobre uma classe, é sobre o que
+> se lê.»
+
+E a sonda larga apanhou **quatro**, dos quais os quatro eram **dele**: os títulos
+de grupo que ele próprio escrevera na barra lateral uma hora antes, a 11 px.
+**Uma correcção de há uma hora tinha criado o defeito que a correcção de agora
+existia para apagar** — e só a versão larga do critério o viu.
+
+**O meu erro está antes disso: transformei uma REGRA numa TAREFA.** «Nunca corpo
+abaixo de 14 px» virou «arranja estas duas classes», e a tarefa deixaria quatro
+violações vivas. Quem recebe uma lista de sítios corrige sítios; quem recebe a
+regra procura sítios. **Passar a regra custa o mesmo e cobre o que eu não vi.**
+
+**Mas ele reportou «zero», e a saída dele diz `0, em três rotas`.** Fui contar as
+declarações abaixo de 14 px e ficaram **quatro** no ficheiro. Julgadas uma a uma:
+`.bo-mkt__seta` é o glifo `▾` com `aria-hidden` (isento), a de 831 é um crachá
+redondo de iniciais (discutível), `.bo-admin__etapa` não tem uso em `.tsx`
+(provável CSS morto) — e **`.bo-plano__capacidade` é a lotação de uma mesa,
+texto a sério, a 12 px**, num ecrã que as três rotas não visitaram.
+
+**A forma, e é nova: generalizar o CRITÉRIO e amostrar a POPULAÇÃO são movimentos
+opostos, e fazer o primeiro bem esconde que se fez o segundo.** A sonda passou de
+duas classes para «todo o texto», o que é uma vitória real — e mediu-o em três
+rotas de 382, o que é um piso outra vez. **O rigor no predicado deu confiança ao
+número, e o número era de uma amostra.**
+
+A defesa é a mesma de sempre e ele já a conhece: **um resultado diz sobre que
+população foi medido, dentro da própria frase.** «Zero» e «zero em três rotas»
+são afirmações diferentes, e a segunda não fecha nada.
