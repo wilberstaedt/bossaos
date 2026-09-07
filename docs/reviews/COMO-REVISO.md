@@ -2892,3 +2892,33 @@ custarem a ele: que o critério eu tinha declarado imedível «por natureza» e 
 só inconveniente de medir; e que o mesmo instrumento **não** explica o piso de
 14 px do manual — a essa distância até 12 px tem folga tripla. **Um instrumento
 que resolve um caso quer resolver os outros, e é aí que ele começa a mentir.**
+
+### Fui arranjar o `next-env.d.ts` e não havia nada para arranjar — 20h00
+
+Ficara na fila do JR uma tarefa: pôr o `next-env.d.ts` no `.gitignore`. A razão
+parecia boa — foi esse ficheiro que hoje de manhã fez a minha guarda da frescura
+declarar **as 25 capturas velhas**, porque o build o tocava e ele passava a ser
+«a fonte mais recente do produto».
+
+**Fui verificar antes de mexer, e o ficheiro está idêntico ao committado.** A
+árvore está limpa. Não há deriva nenhuma.
+
+**A sujidade era minha.** O ficheiro contém `import "./.next/types/routes.d.ts"`
+— um caminho que **segue o directório de build**. Os meus builds isolados
+(`NEXT_DIST_DIR=.next-revisao`, `.next-mao`, `.next-acess`), que adoptei
+precisamente para não colidir com o JR, **reescrevem-lhe esses imports**; o build
+normal seguinte repõe-nos.
+
+**E isso é uma coisa que vale a pena guardar: a cura de uma colisão criou
+outra.** Isolar o directório de build resolveu duas construções a escreverem o
+mesmo `.next` — e passou a mexer num ficheiro versionado que aponta para ele.
+Menor, e reversível sozinha, mas real.
+
+**A recomendação é não fazer nada:** o Next diz para o commitar, ele não está a
+derivar, e ignorá-lo esconderia uma deriva verdadeira se algum dia houver uma.
+**Fui à procura de um defeito e o que encontrei foi o meu próprio rasto** — que é
+melhor resultado do que a alteração que eu ia mandar fazer.
+
+*(A explicação do `NEXT_DIST_DIR` é a que encaixa em tudo o que observei — o
+ficheiro sujo logo a seguir aos meus builds isolados, limpo depois de um normal.
+**Não a provei correndo o experimento**, e digo-o em vez de a dar por assente.)*
