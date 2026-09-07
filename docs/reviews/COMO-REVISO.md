@@ -1920,3 +1920,39 @@ zeros do backoffice e da carta eram reais**, subindo a tolerância a 90 e 150 �
 continuam zero, e só a 240 acendem, que é largura a apanhar ruído. Um zero
 verdadeiro aguenta a tolerância a crescer; um zero de instrumento não se
 distingue sem lhe mexer.
+
+---
+
+## Um alvo de controlo que não podia falhar — e a exigência que o apanha — 07/09
+
+Fecho do RV100-024, e a última volta trouxe a peça que faltava. Eu tinha medido
+que o controlo negativo cobria só metade das vias. **A causa era pior do que
+cobertura: os dois alvos do lado do ecrã eram incapazes de exibir o defeito.**
+O kiosk já validava o uuid — com um comentário a descrever esta mesma falha — e
+a ficha da carta procura o produto num instantâneo em memória, sem tocar em
+coluna nenhuma. **Os 404 deles eram das rotas, e ficavam verdes com a tradução
+desligada porque nunca dependeram dela.**
+
+**A correcção geral não foi trocar os alvos. Foi exigir que eles se mexam:**
+
+> Com a tradução inerte, **cada alvo TEM de deixar de dar 404.** Um alvo que
+> continue em 404 não está a medir a tradução — está a medir a rota, e a guarda
+> diz isso em vez de o deixar passar por prova.
+
+Isto é o controlo a validar-se **alvo a alvo**, e não no conjunto. Um verde
+agregado esconde um alvo morto; a exigência de movimento não o consegue esconder.
+E o plante passou a ser **encontrado**, não escrito à mão — substitui-se a
+chamada ao reconhecedor em todos os sítios onde ela existe, por isso uma via
+nova amanhã fica coberta **por existir**, sem ninguém se lembrar dela.
+
+**E o número fugiu quatro vezes.** `P2007`, `P2010`, `22P02`, `P2023` — quatro
+formas do mesmo facto, e cada vez que se acrescentava um código à lista aparecia
+outro caminho com o seguinte. **A frase do Postgres é a mesma nas quatro, porque
+é ela que descreve o que aconteceu.** A regra: quando uma condição enumera
+códigos e a lista não pára de crescer, é sinal de que se está a perguntar pelo
+mensageiro e não pelo facto.
+
+**O fecho é meu e com prova minha nos dois lados:** limpo dá verde 4/4; o plante
+na sessão dá vermelho; o plante no ecrã dá **agora** vermelho nas duas rotas de
+`/platform` — o mesmo experimento que uma hora antes dava verde. É isso, e só
+isso, que autoriza a assinatura.
