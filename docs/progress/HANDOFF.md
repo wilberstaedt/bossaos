@@ -28,6 +28,49 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## O canário e as capturas de telemóvel — duas curas na mesma família
+
+**O canário, e a minha guarda tinha o mesmo cegamento da irmã.** Comparar
+`mtime` dos dois lados diz **verde num clone ou worktree fresco**, onde o git
+reescreve tudo agora e os dois lados ficam iguais. Vive em
+`scripts/frescura_do_produto.py` — **uma implementação, dois leitores**, e restam
+**zero** cópias do canário em bash. Commit `a0ed8ad`.
+
+| controlo | resultado |
+| --- | --- |
+| worktree fresco, `validar-capturas-de-marketing` | **NÃO MEDI, exit 2** |
+| worktree fresco, `validar-provas-frescas` | **NÃO MEDI, exit 2** |
+
+> **E um erro meu no caminho:** corri o controlo do worktree **antes** de
+> comitar, e o worktree trouxe a versão comitada do módulo — sem canário. Testei
+> o código errado e o resultado era plausível. É a forma do dia, e desta vez o
+> sujeito errado era a minha própria alteração.
+
+**No telemóvel não se encolhe uma captura: tira-se outra.** Terceira fotografia
+do Matheus, já medida pelo sénior — quatro das cinco composições eram de
+secretária e chegavam ao telemóvel a um quarto do tamanho. Commit `7c4cf33`.
+
+| | antes | agora |
+| --- | ---: | ---: |
+| catálogo / sala | 1440→342, texto a **3,3 px** | 390→342, **12,3 px** |
+| KDS | 1280→342, **3,7 px** | 390→342, **12,3 px** |
+| tablet | 834→342, **5,7 px** | partilha a estreita da sala |
+
+Três capturas novas tiradas a 390 px nos três idiomas — **24 ao todo**. A
+escolha é `<picture>` e não duas `<Image>` escondidas: o navegador descarrega as
+duas mesmo com `display:none`, e pagar dois ficheiros para mostrar um seria
+curar legibilidade com um defeito de desempenho.
+
+**Medido na página servida**, não no código: o telemóvel recebe
+`sala-estreita-390` e `kds-estreito-390`; a secretária continua com
+`sala-servico-1440`. Guarda a **24/24**, canário ok, duas sondas acesas, exit 0.
+
+**Levantado e não decidido:** a composição `tablet` partilha a estreita da
+`sala` — num telemóvel não há layout de tablet para mostrar, mas em `/product` as
+duas aparecem e passam a ser a mesma imagem duas vezes. Escolher outro ecrã é
+editorial. **E os pratos em espanhol na captura pt-BR estão certos** — são dados
+do inquilino, não texto de interface, e o sénior já os escalou ao Matheus.
+
 ## As cinco imagens que um comprador vê — um conjunto por idioma, e uma guarda
 
 Duas fotografias do Matheus a dizer que o domínio ainda está feio, e por trás
