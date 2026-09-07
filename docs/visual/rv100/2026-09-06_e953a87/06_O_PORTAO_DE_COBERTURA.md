@@ -143,3 +143,66 @@ segmentos** que o meu padrão não admite porque espera dígito logo após o
 primeiro hífen. **O número em desacordo consigo próprio foi o que impediu o
 erro** — se eu tivesse escrito um padrão que desse 46 à primeira por acaso, tinha
 publicado 46 sem nunca ver que a dívida era quase toda de reservas.
+
+---
+
+## Segunda correcção, e desta vez o portão está MUITO mais perto do que eu disse
+
+Escrevi que o trabalho eram «23 parâmetros, com oito comuns e uma cauda de
+catorze que exige entidades na base». Fui construir a resolução e descobri que
+**ela já está construída**: `inspeccao/alvos.ts`, 364 linhas, **36 campos**.
+
+Cruzei os 23 parâmetros das rotas contra o que ele expõe:
+
+| | quantos | quais |
+| --- | ---: | --- |
+| **resolvem já** | **15** | `productId`, `orderId`, `deviceId`, `menuId`, `categoryId`, `orgId`, `brandId`, `groupId`, `membershipId`, `token`, `query`, `recibo`, e três por sinónimo: `locationId`←`unidadeDoStaff`, `stationId`←`estacaoDeProducao`, `reservaId`←`reservaDeHoje` |
+| não resolvem | 8 | abaixo |
+
+**E os oito que faltam não são o que eu disse que eram.** Chamei-lhes «cauda que
+exige entidades». São, na maioria, **constantes**:
+
+- `orgSlug` (222 rotas) e `locationSlug` (175) — **verificados**:
+  `marina-oropesa` e `puerto` estão no arnês em cinco ficheiros
+  (`autenticar.setup.ts`, `alvos.ts`, `analitica.spec.ts`, `ecras-derivados.ts`).
+  Não são entidades a criar; são nomes a saber.
+- `locale` (49) e `idioma` (35) — as três línguas, e o `IDIOMAS` já existe em
+  `inspeccao/ajudas.ts`.
+- `publicLocationSlug` (36) e `brandSlug` (27) — **NÃO MEDI**. Presumo que sejam
+  igualmente constantes da casa semeada, e presumir não é medir. Ficam assim
+  escritos até alguém os ver.
+
+**Sobram três rotas em 396**, e são estas:
+
+```
+MENU-009   /r/[publicLocationSlug]/[locale]/menu/orders/[publicOrderId]?view=sent
+MENU-010   /r/[publicLocationSlug]/[locale]/menu/orders/[publicOrderId]
+PUB-006    /r/[publicLocationSlug]/[locale]/news/[postSlug]
+```
+
+Duas entidades: **um pedido público** e **um artigo de notícias**. É isso.
+
+### O que isto muda na estimativa, e porque é que eu a tinha inflacionado
+
+Eu disse «23 parâmetros e uma cauda que custa». A verdade é **quinze já
+resolvidos, seis constantes (quatro verificados, dois por ver) e duas entidades
+por semear**.
+
+**O erro foi de método e é o mesmo de sempre:** contei o que as rotas *pedem* e
+não fui ver o que o arnês *já dá*. Medir a procura sem medir a oferta produz uma
+estimativa que só sabe crescer. É a versão de planeamento do erro que hoje já me
+deu «zero chamadores» e «zero hex»: **um lado da conta medido com cuidado e o
+outro presumido.**
+
+## E uma decisão que tomei neste tick: não medir móvel nas reservas agora
+
+Os `RES-B-001` a `029` são dois terços da dívida de móvel e a tentação era
+fechá-los já. **Não os fecho, e a razão é o calendário e não o esforço:** o §8 da
+RV100 propaga o redesenho a todas as telas depois da aprovação. Medir agora o
+móvel de vinte e nove telas de reserva é produzir evidência de um desenho que
+está prestes a mudar — e a evidência exige a frase que afirma que *aquela* tela
+foi medida.
+
+Medir antes do redesenho é medir duas vezes. **Fica registado como sequência,
+não como pendência:** as reservas medem-se em móvel **depois** da propagação, e
+aí resolvem-se 29 das 46 de uma vez.
