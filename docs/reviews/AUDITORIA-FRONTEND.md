@@ -121,3 +121,42 @@ o cálculo está certo, a injecção está certa, a cobertura é real. **Elas pr
 tudo excepto que alguém vê o resultado** — e é exactamente por isso que o
 `grep -c 'var(--bo-publico-acento'` a devolver **0** vale mais do que as quatro
 juntas. Um token é motor; sem uma regra que o consuma, não tem carroçaria.
+
+---
+
+## Tarefa (4) fechada — e o ciclo fecha-se com o instrumento com que abriu
+
+**O token morto passou a pintar.**
+
+| | antes | agora |
+| --- | ---: | ---: |
+| regras que consomem `var(--bo-publico-acento)` | **0** | **1** |
+| píxeis de acento na carta pública | **0** | **188** |
+
+**O «antes» era meu, de há três horas.** Contei os píxeis de acento nas 25
+capturas, a carta deu zero, e eu registei o facto **recusando-me a decidir** se
+era calma deliberada ou identidade em falta — porque isso é juízo do Matheus.
+A auditoria encontrou a causa (quatro suítes de prova, zero consumidores), o JR
+ligou-a, e **a mesma contagem confirma a cura**.
+
+**O arco completo tem a forma que eu quero em toda a revisão:** o mesmo
+instrumento nas duas pontas, com a causa medida por terceiros no meio. Eu tinha
+o sintoma e não o inventei em diagnóstico; alguém achou o mecanismo; a cura
+verifica-se contra o número original.
+
+**E as quatro suítes continuaram verdes o tempo todo — antes e depois.** Nunca
+mentiram: testavam o cálculo do token, e o cálculo estava certo. **O que valia
+mais do que as quatro era um `grep -c` a devolver zero consumidores** — uma
+pergunta que nenhuma delas fazia.
+
+## As três correcções que devolvi, verificadas
+
+| o que eu apontei | como ficou |
+| --- | --- |
+| `.bo-pagina` com `1200px` à mão | **`max-width: var(--bo-largura-maxima)`** — passou a perguntar em vez de afirmar |
+| lotação da mesa a 12 px, fora das três rotas medidas | **14 px/20 px** |
+| população do «nunca abaixo de 14 px» | **4 → 1**, e o que resta é `.bo-mkt__seta`, o glifo `▾` com `aria-hidden` |
+
+A última é a que tem a forma certa: **uma partição que fecha com a excepção
+declarada**, e não um piso. O que sobra sobra por uma razão escrita — não é
+texto, é um símbolo — e o crachá discutível e o CSS morto saíram os dois.
