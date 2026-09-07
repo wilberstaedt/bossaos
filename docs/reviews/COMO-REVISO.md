@@ -2602,3 +2602,42 @@ perguntar.
 
 Pacote reverificado agora: **2154 ficheiros, nenhum segredo, portões abertos**,
 do commit `701af29`. Pára na autorização, como deve.
+
+---
+
+## Medi a imagem errada porque uma configuração alheia tinha um valor por omissão — 07/09
+
+Disse ao Matheus, com confiança, que **o guião da demonstração não ia na imagem
+de produção**. Era falso, e a forma como falhei é a mais fina do dia.
+
+Corri a verificação com o mesmo mecanismo do guião de publicação:
+
+```
+docker compose ... run --rm --entrypoint sh bossaos-web -c 'ls packages/db/prisma/*.ts'
+```
+
+O serviço está declarado como `image: bossaos-web:${VERSAO:-latest}`. **Eu não
+defini `VERSAO`**, portanto o `docker compose` resolveu para **`latest`** — uma
+imagem antiga — enquanto a que está a servir foi construída e etiquetada com a
+versão do commit. **Medi uma imagem que não é a que está no ar.**
+
+E a resposta que ela me deu era **coerente**: quatro ficheiros, nomes
+plausíveis, ordem alfabética certa. **Nada na saída sugeria que o sujeito fosse
+outro.** O que me salvou foi o Dockerfile não bater com a conclusão — `COPY . .`,
+sem `.dockerignore`, sem poda entre fases. **Uma explicação que contradiz o
+mecanismo tem de ser duvidada antes do mecanismo.**
+
+Fui então ao contentor **a correr** (`docker exec bossaos_web`) e lá estão os
+**seis** ficheiros.
+
+**A forma, e é nova: um valor por omissão numa configuração que eu não escrevi
+trocou-me o sujeito em silêncio.** Não foi um erro meu de digitação nem uma
+suposição minha — foi `:-latest` a preencher um espaço que eu nem sabia que
+estava vazio. **Quando um comando aceita uma variável, medir sem a definir não é
+medir com o valor certo: é medir com o de outra pessoa.**
+
+**E o custo real foi eu ter dito a alguém uma coisa falsa com confiança.** Não
+foi um número errado num documento — foi uma frase ao dono do produto sobre o
+que a instalação dele leva. Corrigi-a no minuto seguinte, mas a lição é anterior:
+**a confiança com que eu disse aquilo não vinha da medição, vinha de ela ser
+coerente.**
