@@ -86,6 +86,9 @@ mudou por uma razão datada, e é a razão que interessa.
 A evidência usada é a que já existia em `evidence/baseline/`; não gerei capturas
 novas, porque gerar evidência que já existe é trabalho a fingir.
 
-O que fica em pé antes do primeiro lote de código: cinco achados esperam decisão
-do Matheus (RV100-011, 013, 014, 015 e a metade legal do 005) e nenhum deles
-bloqueia o lote L1.
+O que fica em pé antes do primeiro lote de código: **nada espera por ele.** O
+`00_AUTORIZACAO.md` destrava as escolhas comerciais da landing por antecipação —
+o hero inglês e a linguagem de equipamentos avançam assim. Dois avançam só até
+onde podem, e não por formalismo: o piloto sai sem nome de terceiro (consentimento
+de outra pessoa não é pendência dele) e a privacidade sai como estrutura sem texto
+dado por revisto.

@@ -5,9 +5,19 @@
 >
 > `status: open` significa medido e por corrigir. **Nada aqui está corrigido.**
 >
-> As entradas marcadas `decisao: matheus` não são minhas para fechar — são
-> mensagem comercial, promessa, preço ou texto legal. Ficam registadas e o
-> trabalho segue à volta delas, que é o que a regra da casa manda.
+> **Sobre as decisões comerciais desta secção:** o `00_AUTORIZACAO.md` regista
+> que o Matheus destravou, por escrito e por antecipação, as pendências dele
+> dentro do produto — e nomeia a secção 6 («mensagem comercial, promessa e preço
+> na landing») entre elas. As entradas marcadas
+> `decisao: autorizada-por-antecipacao` avançam **sem** ele decidir e ficam assim
+> escritas: autorizada em avanço, nunca decidida por ele. Ele vê o resultado
+> depois de feito, que é o preço que pagou de olhos abertos.
+>
+> **Duas coisas essa autorização não pode cobrir**, e ficam marcadas
+> `decisao: fora-do-alcance-da-autorizacao`: autorizar o **nome de um terceiro**
+> em copy pública, que não é pendência dele mas consentimento de outra pessoa; e
+> dar por revisto um **texto legal** que ninguém com responsabilidade legal leu.
+> Nesses dois avanço na estrutura e paro no conteúdo, em vez de parar em tudo.
 
 ---
 
@@ -161,8 +171,8 @@ impact: acessibilidade
 expected: diferenciar contacto transaccional de consentimento para marketing (§6.7); rotas de privacidade, termos e cookies conforme disponibilidade (§6.3.14)
 observed: cinco campos (nome, email, restaurante, telefone, mensagem) gravados em `demo_requests`, sem texto de privacidade na página nem na rota da API; não existe rota de privacidade, termos ou cookies no repositório
 evidence: apps/web/app/[idioma]/demo/page.tsx · apps/web/app/api/publico/demo/route.ts
-fix_criteria: texto de privacidade aprovado, ligado do formulário, e decisão sobre existir ou não caixa de consentimento de marketing
-decisao: matheus
+fix_criteria: rota de privacidade e ligação a partir do formulário; distinção entre o contacto pedido e autorização para marketing
+decisao: fora-do-alcance-da-autorizacao — a estrutura avança por antecipação; o TEXTO legal fica por rever por quem responde por ele, e isso não é uma pendência que o Matheus tenha destravado escrevendo que confia em mim
 status: open
 ```
 
@@ -190,8 +200,8 @@ impact: conversao
 expected: somente factos aprovados e identificados como piloto; sem depoimento inventado (§6.3.11)
 observed: os dois "passos" da página são as chaves `passo3` e `passo4`, as mesmas do /getting-started
 evidence: apps/web/app/[idioma]/pilot/page.tsx
-fix_criteria: factos de piloto autorizados, identificados como piloto. O único piloto referido no repositório é um acordo separado com um restaurante identificável, e não uso nome de cliente em copy pública sem autorização escrita
-decisao: matheus
+fix_criteria: factos de piloto autorizados e identificados como piloto. O único piloto referido no repositório é um acordo separado com um restaurante identificável
+decisao: fora-do-alcance-da-autorizacao — o Matheus destravou as decisões DELE; o nome de um terceiro em copy pública é consentimento de outra pessoa e não dele. A página avança sem nome e sem depoimento
 status: open
 ```
 
@@ -205,8 +215,8 @@ impact: marca
 expected: "Your restaurant. One rhythm." (§6.2)
 observed: "Your whole restaurant. One rhythm." em packages/i18n/src/mensagens/en.json; ES e PT batem certo
 evidence: packages/i18n/src/mensagens/en.json
-fix_criteria: alinhar ao §6.2, que é o documento mais recente e chama àquele texto "aprovado" — ou registar que a palavra a mais é deliberada
-decisao: matheus
+fix_criteria: alinhar ao §6.2, que é o documento mais recente e chama àquele texto "aprovado"
+decisao: autorizada-por-antecipacao (00_AUTORIZACAO.md) — alinho ao §6.2 e fica escrito que ele vê depois
 status: open
 ```
 
@@ -220,8 +230,8 @@ impact: conversao
 expected: software separado de hardware, reaproveitamento sujeito a homologação, sem kit fechado inexistente (§6.6)
 observed: a `PRECIFICACAO.md` não fala de hardware tirando "kiosk e conectores de marketplaces não têm preço fechado"; a `DECISOES.md` marca o D16 — hardware incluído — como pendente externo
 evidence: docs/bossaos/PRECIFICACAO.md · docs/bossaos/DECISOES.md D16
-fix_criteria: escrever a secção na forma condicional do próprio §6.6 ("pode precisar de", "sujeito a homologação"), nunca como kit fechado — e confirmar se essa lista é política assumida
-decisao: matheus
+fix_criteria: escrever a secção na forma condicional do próprio §6.6 ("pode precisar de", "sujeito a homologação"), nunca como kit fechado
+decisao: autorizada-por-antecipacao (00_AUTORIZACAO.md) — avanço com a linguagem condicional; o que não faço é fechar um kit que o D16 deixa pendente, porque isso não é uma decisão dele em aberto, é um facto que não existe
 status: open
 ```
 
@@ -307,5 +317,16 @@ status: accepted
 | P4 | 1 — 020, aceite |
 | **total** | **20** |
 
-Cinco esperam decisão do Matheus: RV100-011, 013, 014, 015 e a metade legal do
-005. O §12.5 exige zero P1 e P2 abertos para a RV100 fechar.
+**Nenhum destes espera pelo Matheus para o trabalho arrancar.** O
+`00_AUTORIZACAO.md` destrava as decisões comerciais da landing por antecipação —
+RV100-014 e 015 avançam assim, e ficam escritos como *autorizados em avanço*,
+nunca como decididos por ele.
+
+Dois avançam só até onde podem: o **RV100-013** constrói a página de piloto sem
+nome de terceiro e sem depoimento, e o **RV100-011** constrói a rota e a ligação
+mas não dá por revisto o texto legal. A autorização dele é sobre pendências dele;
+o consentimento de outra pessoa e a responsabilidade legal não são dele para
+dar — e forçá-las seria usar a confiança que ele me deu para uma coisa que ele
+não me deu.
+
+O §12.5 exige zero P1 e P2 abertos para a RV100 fechar.

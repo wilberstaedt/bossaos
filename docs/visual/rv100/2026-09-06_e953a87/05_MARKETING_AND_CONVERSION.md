@@ -80,7 +80,10 @@ planos, não como décima primeira rota.
 ## 2. As oito páginas, uma a uma
 
 Legenda: **C** = composição (hierarquia, ritmo, espaço, foco) · **T** = conteúdo
-(mensagem, prova, clareza comercial) · **P** = precisa de decisão do Matheus.
+(mensagem, prova, clareza comercial) · **P** = conteúdo que não nasce de um facto
+do repositório. Depois do `00_AUTORIZACAO.md`, quase todos os **P** avançam
+autorizados por antecipação; os dois que não avançam estão nomeados na secção 3 e
+no `11_OPEN_FINDINGS.md`.
 
 ### 2.1 Moldura (`MolduraMkt` + `EstruturaPublica`) — atinge as dez rotas
 
@@ -93,6 +96,12 @@ Legenda: **C** = composição (hierarquia, ritmo, espaço, foco) · **T** = cont
 | sem menu móvel, sem botão, sem drawer | menu com nome, foco, fecho e scroll | **C** |
 | `<footer>` com `{assinatura}` = «Hecho con BossaOS» | footer completo: produto, planos, recursos, idiomas, contacto, redes, login, privacidade, termos, cookies | **C** para a estrutura (o `EstruturaPublica` já aceita `rodape`; a `MolduraMkt` não o passa) · **P** para privacidade/termos/cookies/redes, que **não existem** |
 | sem sticky | sticky só se não consumir área útil | — |
+
+**E há um sétimo defeito na moldura que não é meu para registar outra vez:** a
+secção 4 mediu, em paralelo, que o `EstruturaPublica` renderiza `{marca}` **nu,
+sem `<a href>`** — o §6.1 pede «logo clicável» e clicar no logótipo não faz nada.
+Fica aqui como referência cruzada e não como achado novo, para não haver dois IDs
+para o mesmo defeito. Corrige-se no mesmo lote que o tamanho.
 
 **O footer é o sítio onde o §6.3.14 e o §10 se cruzam mal.** O §10 falha a RV100
 por «footer sem rotas institucionais mínimas»; o §6.3.14 diz «conforme
@@ -284,9 +293,24 @@ mas também nada que ver), e a home tem **três focos** com o mesmo peso visual.
 - as perguntas de equipamento e de cobrança na FAQ;
 - o quarto pilar de confiança, **depois** de medido contra o código.
 
-**Conteúdo que não é meu — vai para `11_OPEN_FINDINGS.md` e segue:** os factos do
-piloto, o aviso de privacidade e o consentimento, as rotas legais, as redes
-sociais, a política de equipamentos e a imagem Open Graph.
+**Conteúdo que era do Matheus e ele destravou.** O `00_AUTORIZACAO.md`, escrito
+esta madrugada, nomeia a secção 6 — «mensagem comercial, promessa e preço na
+landing» — entre as pendências que ele autorizou por antecipação. O hero inglês,
+a política de equipamentos na forma condicional do §6.6 e as escolhas de mensagem
+**avançam**, e ficam escritas como *autorizadas em avanço*, nunca como decididas
+por ele. Ele vê depois de feito; foi o preço que aceitou pagar.
+
+**Duas coisas continuam fora do alcance dessa autorização**, e não por
+formalismo. Ele destravou pendências **dele**:
+
+- **o nome de um terceiro em copy pública** é consentimento de outra pessoa, não
+  dele. A página de piloto avança sem nome e sem depoimento;
+- **o texto legal de privacidade** avança como estrutura — rota, ligação a partir
+  do formulário, distinção entre contacto e marketing — e não como texto dado por
+  revisto. Uma autorização que diz «confio em ti» não é uma revisão jurídica.
+
+Usar a confiança que ele deu para uma coisa que ele não deu seria a maneira mais
+fácil de a gastar.
 
 ---
 
@@ -321,8 +345,8 @@ lado direito vazio.**
 | **L2** | **Planos** | única página com decisão tomada e fonte já em código; é o «preço aprovado omitido» que o §10 reprova; não depende do motor de prova |
 | **L3** | **Implantação + equipamentos** | a implantação já tem o conteúdo certo e só precisa de composição; herda os valores da L2; equipamentos entra como bloco, não como rota |
 | **L4** | **Produto** | reutiliza o motor de prova da L1 sem o reinventar |
-| **L5** | **Confiança + piloto** | trabalho de verificação de facto, não de composição; o piloto depende de decisão do Matheus e pode ficar parcial |
-| **L6** | **Demo** | conversão; depende da decisão sobre privacidade e consentimento |
+| **L5** | **Confiança + piloto** | trabalho de verificação de facto, não de composição; o piloto sai sem nome de terceiro e sem depoimento, e diz-se que é isso que ele é |
+| **L6** | **Demo** | conversão; a estrutura de privacidade e consentimento entra, o texto legal fica por rever |
 | **L7** | **FAQ** | último de propósito: absorve as objecções que as seis páginas anteriores levantam |
 | **L8** | **§6.8 transversal** | metadata por página, canonical, hreflang, sitemap, robots, OG, favicon — só depois de as páginas existirem, senão descreve-se o que ainda vai mudar |
 
