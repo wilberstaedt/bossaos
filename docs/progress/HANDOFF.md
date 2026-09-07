@@ -28,6 +28,48 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## Montra — os quatro itens da régua, FECHADOS pelo sénior a 15h50
+
+A régua está em `docs/reviews/ALVO-MONTRA.md`, escrita **antes** de a entrega
+existir. Ordem nova do Matheus: o que um comprador vê antes de falar com alguém
+passa à frente do que só quem já comprou vê. Commits `ec194bc` e `93da39b`.
+
+**(1)** O `Botao` passou a aceitar `href` — **um componente, dois elementos**, e
+não um `BotaoLigacao` ao lado, que era o defeito a curar e não a cura. A landing
+foi a **zero** `className="bo-botao` escrito à mão (283 → 274, as nove eram
+dela). A união é discriminada: com `href`, o TypeScript recusa `disabled` e
+`aCarregar` — uma ligação desactivada não existe.
+
+**(2)** `publicoE09.buscar` servia **três** fendas e não duas: sugestão do campo,
+rótulo do botão e nome da secção de resultados. Duas chaves novas nas três
+línguas (`accaoBuscar`, `resultados`). E a guarda em vez da instância:
+`scripts/validar-rotulo-em-duas-fendas.sh`, com sonda a acender antes do
+veredicto e o âmbito a declarar o que **não** apanha.
+
+**(3) O achado desta ronda, e é a ligação com a (2).** O *placeholder* cortado
+não era um campo estreito: era o **botão largo**, que levava a mesma frase de 16
+caracteres. Medido nos dois estados — com o rótulo longo o campo tem 133 px
+úteis, com «Buscar» tem 213, e o texto precisa de 128. **Um defeito de conteúdo
+produzia um defeito de disposição**, e a régua listava-os como itens
+independentes. Eram um.
+
+> **E a lição fica, porque a minha medição por números teria dito que passava nos
+> dois casos:** 128 ≤ 133 por cinco pixéis. Quem tinha razão era o olho. Cinco
+> pixéis de folga num texto renderizado não são folga, e o `measureText` de uma
+> lona não resolve a fonte como o campo a resolve. **Foi a captura que decidiu**,
+> que é exactamente o que a régua mandava — «medida na captura, não no CSS».
+
+**(4)** `es-ES`/`pt-BR`/`en` passaram a Español/Português/English, cada um na
+própria língua e com `lang` no elemento. Vive no **domínio** (`NOME_DO_IDIOMA`) e
+não no catálogo de traduções: pô-lo lá dava nove entradas para três factos. E não
+é bandeira — uma bandeira é um país.
+
+**Pendência que não é minha:** a `validar-provas-frescas.sh` acusa 39 dos 65
+artefactos como anteriores ao produto. As 25 telas-mestre estão frescas (15h39,
+depois do commit das 15h37); os 39 são o dossiê `docs/visual/rv100/…/evidence/`.
+Recapturá-los precisa do seed da demo e da porta — **recurso partilhado com o
+outro implementador**, e não lhe toco sem o sénior dizer.
+
 ## Correcção 5 — o varredor ganhou quem o chame, e o `sentar` morto foi apagado
 
 **A pergunta era do sénior e a resposta veio com instrumento que funciona:** o
