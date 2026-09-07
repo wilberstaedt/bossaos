@@ -2955,3 +2955,30 @@ de commitar.
 ficheiro no fim, com o mesmo `trap` que o JR usou hoje para repor plantes. **Um
 defeito latente com cura de três linhas não se deixa à espera de disparar** — e o
 único aviso que teríamos era o próximo a clonar o repositório.
+
+### Um comentário que aponta para a causa errada é pior do que nenhum — 20h30
+
+Ao passar a cura do `next-env.d.ts` ao JR, pedi-lhe **duas** coisas, e a segunda
+é a que me interessa mais.
+
+A primeira é a de sempre: **não basta o `trap` existir.** Correr o guião e ver o
+ficheiro limpo no fim não prova que o `trap` repõe — prova que nada o sujou, ou
+que repôs. **Só desligando o `trap` de propósito e vendo a árvore ficar suja é
+que ele fica provado.** Um `trap` que nunca falhou não demonstrou nada.
+
+A segunda: **actualizar o comentário da linha 19 do `provar-mestres.sh`.** Ele
+diz *«um `next-env.d.ts` a oscilar»* e atribui a oscilação ao `.next`
+partilhado — que era a melhor explicação disponível quando foi escrito, e é
+errada.
+
+**Um comentário que aponta para a causa errada é pior do que nenhum.** Um
+ficheiro sem explicação manda a próxima pessoa investigar; um com a explicação
+errada manda-a investigar **no sítio errado**, e com a confiança de quem já leu
+a resposta. **A prosa que ajuda e a prosa que atrasa têm exactamente o mesmo
+aspecto** — e a diferença entre as duas só aparece quando alguém vai lá com um
+problema a sério.
+
+**É a última forma do dia, e rima com a primeira.** De manhã descobri um `catch`
+largo escrito de propósito, com a razão ao lado, que engolia o defeito que a
+funcionalidade tinha desde que nascera. **As duas são defesas bem-intencionadas
+que passaram a esconder aquilo de que protegiam.**
