@@ -36,24 +36,51 @@ já não tem.
 **Onde.** Escreve: `apps/web/app/api/publico/demo/route.ts:92`. Lê:
 `apps/web/app/[idioma]/demo/page.tsx:49-57`.
 
-**A causa, medida e não suposta.** O cookie sai *percent-encoded* e a página faz
-`JSON.parse` do valor cru:
+**A causa — e a primeira que escrevi aqui estava ERRADA.**
+
+> **Fica o erro escrito, porque foi ele que me ensinou a medir isto.** Eu tinha
+> publicado neste ficheiro que a causa era o cookie sair *percent-encoded* e a
+> página fazer `JSON.parse` do valor cru. Medi o frasco de cookies do
+> **navegador**, vi `%7B%22nome%22…`, e concluí sobre o que o **servidor** lê.
+> São coisas diferentes: o `cookies().get()` do Next devolve o valor já
+> descodificado. Corrigi a descodificação, reconstruí, e o defeito **continuou
+> lá** — foi o build fresco a desmentir-me, não um raciocínio melhor.
+
+A causa verdadeira, medida no cabeçalho do 303:
 
 ```
-CRU                            %7B%22nome%22%3A%22Inspeccao%22...
-JSON.parse(cru)                LANÇA · Unexpected token '%'
-JSON.parse(decodeURIComponent) passa
+POST  chega a   http://127.0.0.1:3018/api/publico/demo
+303   Location  http://localhost:3018/es-ES/demo?erro=campos     ← o anfitrião MUDOU
+GET   seguinte  (SEM CABECALHO COOKIE)
 ```
 
-**E o que a esconde é a defesa.** O `catch` da linha 57 é largo *de propósito* —
-está escrito que é para um cookie corrompido não impedir o formulário de aparecer.
-É exactamente ele que engole isto e devolve `{}` **sempre**. A funcionalidade é o
-RV100-021: documentada em prosa, com a razão escrita ao lado, e **morta a 100%
-desde que existe**. Nenhum teste falhava, porque nenhum media isto.
+**O `destino()` construía o endereço com `new URL(pedido.url)`, e o `pedido.url`
+do Next não é o que o navegador escreveu.** Para o navegador, `127.0.0.1` e
+`localhost` são sítios diferentes: o `Set-Cookie` fica no anfitrião que
+respondeu, o GET seguinte vai para o outro, e o cookie **nunca é enviado**. A
+página não perdia o que leu — nunca recebeu nada para ler.
 
-**Correcção proposta.** Descodificar antes de interpretar, e **estreitar o
-`catch`** para deixar de engolir a diferença entre «não há cookie» e «o cookie
-não se lê». Um `catch` que não distingue as duas é o que fez esta falha viver.
+**E o caso é alcançável por uma pessoa real, o que fecha a severidade.** O
+padrão do servidor exige ponto no domínio (`packages/domain/src/leads.ts:59`) e
+o `type="email"` do navegador **aceita** `joao@gmail`. Quem se esquece do `.com`
+passa a validação nativa, é recusado pelo servidor, e perdia os cinco campos —
+incluindo a mensagem livre, que é a única que teve de pensar.
+
+**Correcção aplicada.** `Location` **relativo**: o navegador resolve-o contra o
+pedido que fez, e um redireccionamento relativo não pode mudar de sítio. Uma
+linha, em `apps/web/app/api/publico/demo/route.ts:42`. **A página não foi
+tocada** — o código dela estava certo.
+
+**E fecha um risco maior do que o medido:** um `pedido.url` que reporte
+`localhost` em produção mandava o cliente para a máquina dele. Não o observei em
+produção e não o afirmo; o que afirmo é que a forma relativa torna isso
+impossível por construção.
+
+**Prova.** `inspeccao/caminho-da-demo.spec.ts`, com controlo negativo nos dois
+sentidos: reposto o redireccionamento absoluto a prova fica **vermelha** nos
+cinco campos; com o relativo fica **verde**. E um terceiro A/B, para não deixar
+uma correcção sem justificação: desligada a descodificação, **continua verde** —
+foi assim que soube que a minha primeira correcção não era a cura, e a revi.
 
 ## A2 · Não há demonstração para clicar · **MÉDIA, e é de negócio**
 
@@ -89,12 +116,26 @@ substituição directa. Não está partido: é dívida, e fica classificada como
 
 ---
 
+## O ponto 4 da régua — a demonstração diz que é uma demonstração
+
+**Não é medível neste caminho, e a razão é o A2.** A régua pergunta se o aviso
+aparece **no percurso**; o percurso nunca chega ao inquilino de demonstração,
+porque nada na landing lhe aponta e ele é efémero. Não há aviso em falta: não há
+ecrã. Fica em NÃO MEDI, preso ao A2 — resolvido o A2, isto passa a ter resposta.
+
 ## O que está são, e foi medido
 
 - O envio que **resulta** funciona nas três línguas e chega ao `/demo/thanks`.
 - Os dois erros dizem coisas **diferentes**: validação e falha de escrita não
   partilham mensagem, e a de validação não manda ninguém esperar.
 - A caixa de consentimento de marketing **não nasce marcada**.
+- **O registo fica mesmo**, e isto é o que a régua exigia acima do obrigado:
+  confirmado por `SELECT` na `demo_requests` pela ligação de migração, com marca
+  única por corrida — e com controlo da própria consulta, que devolve zero para
+  um endereço nunca submetido.
+- Os 15 destinos (cinco × três línguas) dão 200 sem sair do idioma, o destino
+  inventado dá 404, e nenhum ecrã do percurso mostra correio técnico, bloco de
+  depuração ou chave de tradução crua.
 
 ## Duas correcções à minha própria medição
 
@@ -102,7 +143,12 @@ substituição directa. Não está partido: é dívida, e fica classificada como
    **validação nativa do `type="email"`** a travar o envio — o pedido nunca saiu.
    Desligada a validação do navegador, o servidor faz o correcto. Uma medição que
    nunca chega ao servidor não mede o servidor.
-2. O 404 da carta pública, acima. **Não é defeito.**
+2. O 404 da carta pública. **Não é defeito** — era o inquilino já não estar lá.
+3. A causa do A1, acima. **Duas vezes o mesmo erro no mesmo dia:** medir uma
+   coisa e concluir sobre outra vizinha. No M06 foi o código a falar por uma
+   imagem; aqui foi o frasco do navegador a falar pelo servidor. O que me
+   apanhou das duas vezes foi ir buscar a medição directa — a captura, e o
+   cabeçalho do 303.
 
 ## Declarado
 

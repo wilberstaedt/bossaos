@@ -40,13 +40,32 @@ export async function POST(pedido: Request): Promise<Response> {
   const pedidoIdioma = texto('idioma');
   const idioma = (IDIOMAS as readonly string[]).includes(pedidoIdioma) ? pedidoIdioma : 'es-ES';
 
+  /**
+   * O destino é RELATIVO, e essa é a linha que faz o resto funcionar.
+   *
+   * ── O que a versão absoluta partia ────────────────────────────────────
+   *
+   * Isto fazia `new URL(pedido.url)` e mandava o endereço inteiro. Medido a
+   * 07/09 no caminho comercial: o pedido entra em `http://127.0.0.1:3018` e o
+   * `Location` sai `http://localhost:3018` — **o anfitrião muda no meio do
+   * 303**, porque o `pedido.url` do Next não é o que o navegador escreveu.
+   *
+   * Para o navegador, `127.0.0.1` e `localhost` são sítios **diferentes**. O
+   * `Set-Cookie` da recusa fica no anfitrião que respondeu, o GET seguinte vai
+   * para o outro, e **o cookie nunca é enviado**: quem escreveu mal o email
+   * perdia os cinco campos, e não por causa do cookie — por causa do endereço.
+   *
+   * Um `Location` relativo não pode mudar de sítio: o navegador resolve-o
+   * contra o pedido que fez. Fecha a perda de cookie e fecha, com ela, um
+   * risco maior que estava por acontecer — um `pedido.url` que reporte
+   * `localhost` em produção mandava o cliente para a máquina dele.
+   *
+   * 303: depois de um POST o navegador segue com GET, e um recarregar não
+   * reenvia o formulário.
+   */
   const destino = (caminho: string, procura = '') => {
-    const url = new URL(pedido.url);
-    url.pathname = `/${idioma}${caminho}`;
-    url.search = procura;
-    // 303: depois de um POST o navegador segue com GET, e um recarregar não
-    // reenvia o formulário.
-    return NextResponse.redirect(url, { status: 303 });
+    const alvo = `/${idioma}${caminho}${procura ? `?${procura}` : ''}`;
+    return new NextResponse(null, { status: 303, headers: { Location: alvo } });
   };
 
   try {
