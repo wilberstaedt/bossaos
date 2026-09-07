@@ -617,3 +617,58 @@ O `.next` foi reconstruído por outro processo a meio da minha corrida e a guard
 disse «a sonda não acendeu» — falso, e a acusar o instrumento errado. Um
 arranque falhado tem agora diagnóstico próprio. A `provar-staff-no-navegador.sh`
 já tinha aprendido isto a 04/09: **um vermelho de arranque não é uma medição.**
+
+---
+
+## RV100 §12.5 — o enumerador das 792 (07/09, `1d2544f`)
+
+`scripts/validar-alcance-das-composicoes.sh` + `inspeccao/alcance.ts` +
+`alcance.spec.ts`. Enumera e classifica os 396 IDs; **não captura** — o §8
+propaga o redesenho depois da aprovação humana e uma captura de hoje fotografa
+um desenho que vai mudar. Mapa em `docs/progress/alcance-das-composicoes.csv`.
+
+**A partição, e fecha:** 178 só-URL · 202 estado-partilhado · 16 provocar = 396.
+**163 dos 165 endereços resolvíveis abrem.** 142 composições estão prontas a
+capturar hoje (só-URL com porta aberta); 202 precisam de um passo lá dentro; 37
+estão bloqueadas por parâmetro.
+
+### O achado: eu estava a ler a coluna errada, e fui encaminhado para ela
+
+O atlas tem `rota_sugerida` **e** `rota_detalhada`. A primeira medição deu 28
+portas fechadas, 27 do catálogo: a sugerida diz `/brands/[brandSlug]/catalog`,
+que não existe no sistema de ficheiros. O produto tem `/app/[orgSlug]/catalogo`
+— e é isso que a `rota_detalhada` desses 27 diz. A coluna chama-se «sugerida» e
+é mesmo isso: uma proposta. Nas ~87 linhas em que a detalhada traz rota em vez
+de um marcador, foi ao produto confirmar, e ganha. Só isso levou as portas
+abertas de 96/124 para 163/165.
+
+**Regra que fica:** quando duas colunas dizem a mesma coisa de maneiras
+diferentes, a que foi verificada ganha — e descobre-se qual foi medindo, não
+perguntando ao nome da coluna.
+
+### O sítio público não tem porta, e é uma raiz e não três
+
+`publicLocationSlug`, `publicOrderId`, `postSlug` e `recibo` vivem **todos** sob
+`/r/[publicLocationSlug]/`. `SELECT public_slug FROM locations` devolve NULO nas
+três unidades da semente: nenhuma unidade está publicada, e por isso 36 IDs não
+têm porta. Não são identificadores em falta aqui e ali. A `provar-jornada.sh`
+publica com slug `jornada-%` e limpa no fim — **o caminho existe e falta
+trazê-lo para o arnês**, e é o próximo degrau óbvio de quem quiser subir de 142.
+
+### Duas portas fechadas que são do atlas
+
+`/app/[orgSlug]/help` (o produto tem `ajuda`) e `.../catalog/duplicate`. Cinco
+IDs atrás delas.
+
+### O piso, que é o que faz disto uma guarda
+
+`PISO_DE_PORTAS_ABERTAS = 163`, medido. Um enumerador que só conta não reprova
+nada — é um relatório. Cinco saídas exercitadas: OK, FALHOU (piso), e três
+NÃO MEDI (sonda cega, população amputada, prova sem mapa).
+
+### E outra vez o medidor a acusar o medido
+
+Prefixei um ponto de API com a língua e li o 404 como porta fechada; e o
+`page.goto` rebentou com «Download is starting» no `qr.svg` — um recurso não se
+navega, pede-se. **Uma porta fechada por culpa do medidor conta-se como defeito
+do medido**, que é a mesma família das quatro da guarda de expansão.
