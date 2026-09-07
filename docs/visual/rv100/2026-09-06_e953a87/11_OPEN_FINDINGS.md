@@ -333,7 +333,7 @@ observed: medido pelo implementador ao construir o estado `erro` do M03 — `fin
 evidence: capturas M03-erro e M04-erro do lote M (páginas em branco a 5851 e 2740 bytes) · schema.prisma
 fix_criteria: validar o formato do segmento antes da consulta e devolver `notFound()`; medir com um id malformado numa rota que EXISTE — um caminho inventado dá 500 por outra razão e não prova nada. E a correcção é da classe, não da instância: uma rota corrigida deixa 163 iguais
 decisao: nao-precisa-de-autorizacao
-status: open — encontrado ao construir o entregável `erro` do §7, que é para o que a lista serve
+status: corrigido NA CLASSE — VERIFICADO PELO REVISOR. O mecanismo vive em `packages/db/src/escopo.ts` e traduz o `P2023` do Prisma (que vem do `22P02` do Postgres) num 404, dos dois lados: o nome na base e o `notFound()` na web. A guarda `validar-id-de-rota-validado.sh` corre a zero e **a partição fecha**: 128 páginas sob um segmento de id, 128 alcançam o invólucro, **0 vão à base por fora dele e 0 não tocam na base** — completude e não piso, que foi a lição que o próprio JR tirou do seu `> 0`. Sonda a acender numa página que escapa. A contagem reconcilia com a minha: 164 ficheiros = 128 páginas + 33 de `api/` (que devolvem JSON e validam à mão) + layouts. FICA DECLARADO POR ELE e aceito: a ponta do navegador — que o 404 CHEGA ao cliente — está por medir no arnês
 ```
 
 ```yaml
