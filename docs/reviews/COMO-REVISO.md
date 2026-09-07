@@ -1352,3 +1352,55 @@ diferente, o que importa para as apanhar:
 
 **Um piso não é uma medição de completude.** Diz que não está vazio, e é tudo o
 que diz.
+
+---
+
+## O princípio que fecha as onze formas — 07/09
+
+O implementador da landing acabou um relatório com quatro defeitos de instrumento
+que ele próprio encontrou **no mesmo lote**: o `usaCoral` que era zero por
+construção, duas escritas de CSS perdidas em silêncio, um controlo de população
+que não distinguia 20 de 40, e uma navegação sem relógio próprio que consumia o
+orçamento do teste inteiro e fazia o relatório **culpar o teste**.
+
+E fechou com a frase que resume tudo o que esta noite produziu:
+
+> «Todos apareceram de **um número que não se mexeu, um ficheiro que não mudou,
+> ou uma contagem que não bateu** — **nunca da ferramenta a reportar sucesso.**»
+
+### Porque é que isto é a regra e não um resumo
+
+Olhando para trás, **nenhuma das onze formas foi apanhada pela saída do próprio
+instrumento**. Nem uma.
+
+- O `\b` do `git grep` deu **zero**, e o zero parecia uma resposta.
+- O `height:.*px` deu **31**, e 31 parecia uma contagem.
+- O `-g` sem fronteira **passou**, verde.
+- O `> 0` sobre 20 registos **passou**, verde.
+- O detector do coral deu **zero**, e o zero era o esperado.
+
+**Todos reportaram sucesso ou um número plausível.** O que os apanhou foi sempre
+uma coisa exterior ao instrumento:
+
+| o que denunciou | quantas vezes |
+| --- | --- |
+| um número que **não se mexeu** depois de uma mudança que o obrigava | 2 |
+| um **segundo número** da mesma coisa que discordava | 4 |
+| um **controlo** apontado a um alvo onde eu sabia a resposta | 3 |
+| um **ficheiro** cujo `mtime` desmentia o relatório | 1 |
+| uma **contagem** que não batia com a esperada | 1 |
+
+### O que isto obriga a fazer
+
+**Um instrumento nunca é testemunha de si próprio.** Ler a saída dele — verde,
+vermelho, um número — não diz nada sobre ele ter medido.
+
+Portanto, antes de escrever qualquer resultado:
+
+1. **mexer uma coisa que obriga o número a mexer-se**, e confirmar que ele se
+   mexeu — é a derivada, e apanhou a forma que nenhuma regra apanhava;
+2. **obter o mesmo facto por um caminho diferente**, e comparar;
+3. **apontar o detector a um alvo conhecido**, e exigir que acerte;
+4. **perguntar «estão todos?»**, e não «há algum?».
+
+Nenhuma destas quatro lê a saída do instrumento. **É de propósito.**
