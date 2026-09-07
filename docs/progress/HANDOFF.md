@@ -2331,3 +2331,42 @@ agora. E a causa está no `sizes`:
 
 **A dica mente ao navegador**, ele vai buscar o ficheiro certo para 50vw, e
 depois estica-o. Uma declaração que discorda da realidade — a família do dia.
+
+## 07/09 22h15 — o `sizes`, revisto e assinado, e o que eu tinha medido a menos
+
+Verifiquei o `e62b2c0` em **6 larguras × 3 rotas** — 390, 768, 1024, 1280, 1440,
+1920 sobre `/product`, a landing e o `getting-started` — e no `currentSrc`:
+
+| | pior escala |
+|---|---|
+| secretária (≥768) | **1,65** — e é a `carta-movel`, a que ele declarou em aberto |
+| telemóvel (<768) | **1,44** — a mesma carta |
+
+**Tudo o resto está em 0,99 ou abaixo.** A afirmação dele confirma-se, incluindo
+a ressalva. **Assinado.**
+
+### E a lição é minha
+
+Eu medi a **1440 px** e dei o defeito por descrito: duas composições, 1,49×. Ele
+mediu **a várias larguras** e encontrou **1,91× a 1024**, e mais duas rotas
+afectadas — landing e `getting-started`. **Amostrei um ponto e chamei-lhe o
+defeito.** É a mesma lição dos botões escritos à mão, onde a minha lista deu 10
+e a travessia dele deu 14.
+
+E a formulação é dele: **«o `sizes` é uma promessa, e o navegador escolhe o
+ficheiro por ela antes de saber a largura real»** — logo uma promessa pequena de
+mais faz buscar pequeno e esticar. **Ampliar é o mesmo defeito que encolher, do
+outro lado.**
+
+### O que eu acrescento ao caso da carta, que fica aberto
+
+Medi os ficheiros, e **eliminam-se como causa**:
+
+| | dimensões |
+|---|---|
+| `carta-movel-390`, es-ES / pt-BR / en | **390×844** |
+| `sala-estreita-390`, `kds-estreito-390`, `catalogo-estreito-390` | **390×844** |
+
+**São idênticos aos que funcionam.** Se o ficheiro é o mesmo e o resultado
+difere, a diferença está em **como é renderizada** — não no que foi capturado.
+A carta é a única que já era estreita e por isso não passou pelo `<picture>`.
