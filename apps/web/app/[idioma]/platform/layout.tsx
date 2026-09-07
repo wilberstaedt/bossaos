@@ -103,7 +103,14 @@ export default async function LayoutDaPlataforma({
       rodapeLateral={<span>{m.comum.ayudaSoporte}</span>}
       utilizador={{ iniciais: actor.email.slice(0, 2).toUpperCase(), nome: actor.nome || actor.email }}
       navegacaoInferior={[
-        { href: base, rotulo: m.navegacao.inicio, activa: true },
+        // Sem `activa: true`: e a QUARTA instancia do mesmo defeito, e
+        // sobreviveu na porta de fuga da propria cura. O `EstruturaAdmin` passou
+        // a derivar o activo da rota **quando o chamador nao diz nada** — e eu
+        // deixei a porta aberta para o catalogo de desenho, que precisa de
+        // forcar. Uma excepcao legitima e um sitio onde o defeito se esconde:
+        // as tres que eu corrigi calaram-se, esta ficou a gritar Inicio em
+        // todas as rotas da plataforma.
+        { href: base, rotulo: m.navegacao.inicio },
         { href: `${base}/implantacoes`, rotulo: m.navegacao.trabalho },
         { href: `${base}/flags`, rotulo: m.navegacao.mais },
       ]}
