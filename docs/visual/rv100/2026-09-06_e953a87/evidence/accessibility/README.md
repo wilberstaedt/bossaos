@@ -1,13 +1,13 @@
 # Acessibilidade dinâmica — medida no navegador
 
-Gerado por `scripts/validar-acessibilidade-dinamica.sh` em 2026-09-07 08:38.
+Gerado por `scripts/validar-acessibilidade-dinamica.sh` em 2026-09-07 17:38.
 A metade estática está no `07_INDICE_DE_EVIDENCIAS.md`; esta é a que exige navegador.
 
 | o quê | medida | resultado |
 | --- | --- | --- |
 | menu móvel devolve o foco ao accionador | 1 menu (o único do produto) | conforme |
-| anel de foco vs. fundo de trás do anel | 62 focáveis, 3 superfícies | conforme, mínimo 3:1 |
-| acções principais alcançáveis com Tab | 18/18 | conforme |
+| anel de foco vs. fundo de trás do anel | 63 focáveis, 3 superfícies | conforme, mínimo 3:1 |
+| acções principais alcançáveis com Tab | 19/19 | conforme |
 | 200% de zoom sem rolar na horizontal | 3 superfícies | conforme |
 
 ## O que NÃO está aqui
