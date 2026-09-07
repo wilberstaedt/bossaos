@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { resolverAlvos, type Alvos } from './alvos.ts';
+import { universo, resolverRota, TECTO_DA_DIVIDA } from './ecras-derivados.ts';
 
 /**
  * O texto CRESCE quando se traduz, e o ecrã não cresce com ele.
@@ -69,13 +70,34 @@ function candidatas(base: Cadeias, outra: Cadeias): Array<{ chave: string; razao
 interface Medicao {
   /** Quantos elementos de texto foram efectivamente medidos nesta página. */
   medidos: number;
-  maus: Array<{ texto: string; excesso: number }>;
+  maus: Array<{ caminho: string; texto: string; excesso: number; prova: string }>;
 }
 
 async function transbordos(page: Page): Promise<Medicao> {
   return page.evaluate(() => {
-    const maus: Array<{ texto: string; excesso: number }> = [];
+    const maus: Array<{ caminho: string; texto: string; excesso: number; prova: string }> = [];
     let medidos = 0;
+
+    // ── Identidade do elemento, e não o texto dele ─────────────────────────
+    //
+    // Este caminho existe por causa de um erro meu que só apareceu quando a
+    // guarda passou de 3 para 281 ecrãs. Eu guardava os textos que transbordam
+    // em inglês e comparava-os com os textos que transbordam em espanhol, para
+    // descontar o que já era defeito de desenho. Só que «Postal code» nunca é
+    // igual a «Código postal»: o desconto era LETRA MORTA e a guarda acusava de
+    // tradução o que já estava partido em inglês. Um elemento é o mesmo nas três
+    // línguas pelo sítio que ocupa na árvore, não pelo que diz.
+    const caminhoDe = (el: HTMLElement): string => {
+      const partes: string[] = [];
+      let n: HTMLElement | null = el;
+      while (n && n !== document.body) {
+        const pai: HTMLElement | null = n.parentElement;
+        if (!pai) break;
+        partes.unshift(`${n.tagName}:${Array.prototype.indexOf.call(pai.children, n)}`);
+        n = pai;
+      }
+      return partes.join('>');
+    };
     for (const el of Array.from(document.querySelectorAll<HTMLElement>('body *'))) {
       const texto = (el.textContent ?? '').trim();
       if (texto.length < 12 || el.children.length > 0) continue;
@@ -90,59 +112,160 @@ async function transbordos(page: Page): Promise<Medicao> {
       // não é visível), não o nome da classe: excluir por nome era voltar a
       // medir a grafia em vez do facto, e era mentir no dia em que a classe
       // mudasse de nome.
-      const estilo = getComputedStyle(el);
-      const invisivel =
-        caixa.width <= 1 ||
-        caixa.height <= 1 ||
-        estilo.visibility === 'hidden' ||
-        estilo.opacity === '0' ||
-        caixa.right <= 0 ||
-        caixa.left >= window.innerWidth;
-      if (invisivel) continue;
+      // Uma caixa de 1 px que esconde o que passa torna invisível TUDO o que
+      // está lá dentro, e não só a si própria. O `<th>` acusado media 80 px e
+      // estava dentro do ecrã: quem o escondia era um `<thead>` de 1 px com
+      // `overflow:hidden`, o cabeçalho de tabela que o telemóvel troca por
+      // cartões. Terceira vez hoje que é a mesma receita — a regra («excluir
+      // pela propriedade, não pelo nome da classe») estava certa e eu tinha-a
+      // aplicado a um nível só.
+      const escondido = (() => {
+        for (let a: HTMLElement | null = el; a && a !== document.documentElement; a = a.parentElement) {
+          const sa = getComputedStyle(a);
+          if (sa.visibility === 'hidden' || sa.display === 'none' || sa.opacity === '0') return true;
+          const ba = a.getBoundingClientRect();
+          if ((ba.width <= 1 || ba.height <= 1) && /hidden|clip/.test(`${sa.overflowX}${sa.overflowY}`)) return true;
+        }
+        return false;
+      })();
+      if (escondido) continue;
+      if (caixa.width <= 1 || caixa.height <= 1) continue;
+      if (caixa.right <= 0 || caixa.left >= window.innerWidth) continue;
 
       medidos += 1;
-      const cortado = el.scrollWidth - el.clientWidth;
-      const pai = el.parentElement?.getBoundingClientRect();
-      const saiu = pai ? Math.round(caixa.right - pai.right) : 0;
-      const excesso = Math.max(cortado, saiu);
-      if (excesso > 1) maus.push({ texto: texto.slice(0, 80), excesso });
+
+      // ── O que «não caber» quer mesmo dizer ────────────────────────────────
+      //
+      // A primeira versão fazia `caixa.right - pai.right`. Com 281 ecrãs isso
+      // rebentou: acusou um `<th>` de sair 147 px do `<tr>`, e um `<tr>` tem
+      // caixa de 32 px porque a caixa de uma linha de tabela não é o contentor
+      // de nada. O texto não estava cortado — `scrollWidth` era igual ao
+      // `clientWidth`. Media a distância a um pai arbitrário e chamava-lhe
+      // transbordo.
+      //
+      // O defeito que esta guarda persegue é texto que fica INVISÍVEL por ser
+      // maior do que o sítio onde o puseram. Isso tem três formas, e só três:
+      const estilos = getComputedStyle(el);
+
+      //   1. o próprio elemento corta o seu texto (o `text-overflow` clássico)
+      const proprioCorta = /hidden|clip/.test(estilos.overflowX);
+      const cortado = proprioCorta ? el.scrollWidth - el.clientWidth : 0;
+
+      //   2. um antepassado esconde o que passa da borda dele. Só `hidden` e
+      //      `clip` contam: `auto` e `scroll` são scroll POR DESENHO, e um
+      //      painel que rola não é uma tradução que não cabe.
+      let porAntepassado = 0;
+      let rolavel = false;
+      let quemCorta = '';
+      for (let a = el.parentElement; a && a !== document.documentElement; a = a.parentElement) {
+        const sa = getComputedStyle(a);
+
+        // Um antepassado que não sabe dizer a sua largura não pode julgar
+        // transbordo. `tr`, `thead` e `tbody` têm `clientWidth` ZERO — não é
+        // uma caixa de 0 px, é a ausência de caixa de cliente. Tratei esse zero
+        // como borda interior e acusei um `<th>` de sair 178 px de uma linha
+        // cuja borda direita eu tinha calculado em 41 px, com o `<th>` inteiro
+        // visível dentro do ecrã e o texto por cortar. É o mesmo erro do `<tr>`
+        // de 32 px, uma camada acima: usar um número que existe para responder
+        // a uma pergunta que ele não responde.
+        if (a.clientWidth === 0) continue;
+
+        if (/auto|scroll/.test(sa.overflowX)) { rolavel = true; break; }
+        if (/hidden|clip/.test(sa.overflowX)) {
+          const ca = a.getBoundingClientRect();
+          const borda = parseFloat(sa.borderLeftWidth) || 0;
+          porAntepassado = Math.round(caixa.right - (ca.left + borda + a.clientWidth));
+          quemCorta = `${a.tagName}.${String(a.className).slice(0, 24)}`
+            + `[${sa.display} ovX=${sa.overflowX} caixa=${Math.round(ca.left)}..${Math.round(ca.right)} clientW=${a.clientWidth}]`;
+          break;
+        }
+      }
+
+      //   3. sai do ecrã, e não há nada por onde o alcançar. Se algum
+      //      antepassado rola na horizontal, o texto está lá — é chegar-lhe.
+      const foraDoEcra = rolavel ? 0 : Math.round(caixa.right - document.documentElement.clientWidth);
+
+      const excesso = Math.max(cortado, porAntepassado, foraDoEcra);
+
+      // ── A falha carrega a sua própria prova ───────────────────────────────
+      //
+      // Gastei três sondas por fora a tentar perceber uma acusação, e a página
+      // já tinha mudado entre a acusação e a verificação. Uma medição que não
+      // diz COMO mediu obriga a repetir a corrida para a julgar — e a corrida
+      // seguinte é outro estado do mundo.
+      const regra = excesso === cortado ? 'cortado-em-si'
+        : excesso === porAntepassado ? 'cortado-por-antepassado'
+          : 'fora-do-ecra';
+      if (excesso > 1) {
+        maus.push({
+          caminho: caminhoDe(el),
+          texto: texto.slice(0, 80),
+          excesso,
+          prova: `${regra} ${el.tagName} caixa=${Math.round(caixa.left)}..${Math.round(caixa.right)}`
+            + ` ecra=${document.documentElement.clientWidth} scroll=${el.scrollWidth}/${el.clientWidth}`
+            + (quemCorta ? ` corta=${quemCorta}` : ''),
+        });
+      }
     }
     return { medidos, maus };
   });
 }
 
-interface Ecra { id: string; caminho: (a: Alvos, l: string) => string; porque: string }
-
 /**
- * Os ecrãs onde as cadeias que mais crescem vivem.
+ * O endereço de um ecrã do atlas, na língua pedida.
  *
- * É uma lista, e uma lista envelhece — mas a alternativa era mapear chave para
- * ecrã por adivinhação. Estes dois são os que a medição nomeou: o `kdsE16` e o
- * `integracoesE32` são os namespaces das duas cadeias de topo.
+ * ── Uma armadilha que quase passou ────────────────────────────────────────
+ *
+ * O router é `app/[idioma]/…`, mas **333 das 380 rotas do atlas estão escritas
+ * sem o prefixo** (`/app/[orgSlug]/…`). Pedir uma delas assim devolve 200 — e
+ * não porque funcione: o servidor **redirige para `/es-ES`**, o idioma por
+ * omissão. A minha primeira sonda visitou 12 ecrãs «em inglês» e mediu espanhol
+ * nos doze, e a linha base em inglês teria sido espanhol comparado consigo
+ * próprio. Daí a normalização aqui, e daí os dois controlos em `medir`.
  */
-const ECRAS: Ecra[] = [
-  {
-    id: 'KDS-001',
-    caminho: (a, l) => `/${l}/kds/${a.unidadeDoStaff}`,
-    porque: 'a superfície com menos folga: corre a 18 px por ser lida ao longe',
-  },
-  {
-    id: 'KDS-002',
-    caminho: (a, l) => `/${l}/kds/${a.unidadeDoStaff}/${a.estacaoDeProducao}`,
-    porque: 'a fila da estação, onde os cartões são estreitos por desenho',
-  },
-  {
-    id: 'INT-008',
-    caminho: (_a, l) => `/${l}/app/marina-oropesa/puerto/integrations/chaves`,
-    porque: 'onde vive o `integracoesE32.reprocessar`, a cadeia que mais cresce',
-  },
-];
+function enderecoNa(molde: string, alvos: Alvos, lingua: string): string | null {
+  const semPrefixo = molde.replace(/^\/\[(locale|idioma)\]/, '');
+  const resolvido = resolverRota(semPrefixo, alvos, lingua);
+  return resolvido === null ? null : `/${lingua}${resolvido}`;
+}
+
+type Falha = { porque: 'estado' | 'lingua' | 'vazio'; detalhe: string };
+
+/** Mede um ecrã numa língua, ou diz porque não o mediu. Nunca finge que mediu. */
+async function medir(
+  page: Page, molde: string, alvos: Alvos, lingua: string,
+): Promise<{ ok: true; medicao: Medicao } | { ok: false; falha: Falha }> {
+  const endereco = enderecoNa(molde, alvos, lingua);
+  if (endereco === null) return { ok: false, falha: { porque: 'vazio', detalhe: 'rota não resolve' } };
+
+  const resposta = await page.goto(endereco, { waitUntil: 'domcontentloaded' });
+
+  // ── Controlo 1: a página existe ──────────────────────────────────────────
+  // A página de «não encontrado» TEM texto, e está traduzida. Sem isto ela
+  // entrava na contagem como se fosse um ecrã do produto, e o denominador
+  // passava a mentir para cima — que é a forma de um âmbito enganar.
+  const estado = resposta?.status() ?? 0;
+  if (estado !== 200) return { ok: false, falha: { porque: 'estado', detalhe: `${estado} em ${endereco}` } };
+
+  // ── Controlo 2: é MESMO a língua que eu pedi ─────────────────────────────
+  // Comparar `en` com `es-ES` só significa alguma coisa se as duas visitas
+  // forem a línguas diferentes. Se o caminho final não começa pela língua
+  // pedida, houve desvio e o que se mediria era uma página contra si própria.
+  const caminho = new URL(page.url()).pathname;
+  if (!caminho.startsWith(`/${lingua}/`) && caminho !== `/${lingua}`) {
+    return { ok: false, falha: { porque: 'lingua', detalhe: `pedi ${lingua}, dei em ${caminho}` } };
+  }
+
+  const medicao = await transbordos(page);
+  if (medicao.medidos === 0) return { ok: false, falha: { porque: 'vazio', detalhe: endereco } };
+  return { ok: true, medicao };
+}
 
 test.describe('A tradução cresce, e o ecrã não cresce com ela', () => {
   test('o que cabe em inglês tem de caber na língua do piloto', async ({ page }) => {
+    test.setTimeout(600_000);
     const alvos = await resolverAlvos();
     const en = idioma('en');
-    const linhas: string[] = [];
 
     // ── População primeiro ────────────────────────────────────────────────
     //
@@ -154,33 +277,53 @@ test.describe('A tradução cresce, e o ecrã não cresce com ela', () => {
     expect(total, 'POPULACAO-ZERO: nenhuma cadeia cresce 30% — o leitor está cego ou os ficheiros são iguais')
       .toBeGreaterThan(0);
 
+    // ── O universo, derivado e não escolhido ──────────────────────────────
+    const chaves = [...new Set([...porLingua['es-ES'], ...porLingua['pt-BR']].map((c) => c.chave))];
+    const u = universo(chaves, alvos, 'en');
+    expect(u.divida.length, `a dívida de namespaces sem código subiu para ${u.divida.length} (tecto ${TECTO_DA_DIVIDA}): ${u.divida.join(' ')}`)
+      .toBeLessThanOrEqual(TECTO_DA_DIVIDA);
+
     await page.setViewportSize(LARGURA_APERTADA);
 
-    for (const ecra of ECRAS) {
-      // O inglês primeiro: é ele que diz o que era para caber.
-      await page.goto(ecra.caminho(alvos, 'en'));
-      await page.waitForLoadState('networkidle');
-      const emIngles = await transbordos(page);
+    const linhas: string[] = [];
+    const naoMedidos: string[] = [];
+    let medidos = 0;
 
-      // O filtro do invisível pode, ele próprio, esvaziar a população. Se um
-      // ecrã não deu UM elemento para medir, não há verde possível: ou a rota
-      // não abriu, ou o detector passou a excluir tudo.
-      // O prefixo é um sinal para o guião: população vazia é NÃO MEDI (saída 2),
-      // e não «o texto não cabe» (saída 1). Sem ele, um ecrã que deixasse de
-      // abrir seria reportado como um defeito de tradução que não existe.
-      expect(emIngles.medidos, `POPULACAO-ZERO: ${ecra.id} não deu texto nenhum para medir em inglês — ${ecra.porque}`)
-        .toBeGreaterThan(0);
-      const cabiaEmIngles = new Set(emIngles.maus.map((t) => t.texto));
+    for (const ecra of u.visitaveis) {
+      // O inglês primeiro: é ele que diz o que era para caber.
+      const base = await medir(page, ecra.molde, alvos, 'en');
+      if (!base.ok) { naoMedidos.push(`${ecra.id} en:${base.falha.porque}`); continue; }
+      const jaTransbordavaEmIngles = new Set(base.medicao.maus.map((t) => t.caminho));
+      medidos += 1;
 
       for (const lingua of ['es-ES', 'pt-BR'] as const) {
-        await page.goto(ecra.caminho(alvos, lingua));
-        await page.waitForLoadState('networkidle');
-        for (const t of (await transbordos(page)).maus) {
-          if (cabiaEmIngles.has(t.texto)) continue; // já transbordava em inglês: é desenho, não tradução
-          linhas.push(`${ecra.id} · ${lingua} · +${t.excesso}px · «${t.texto}»`);
+        const outra = await medir(page, ecra.molde, alvos, lingua);
+        if (!outra.ok) { naoMedidos.push(`${ecra.id} ${lingua}:${outra.falha.porque}`); continue; }
+        for (const t of outra.medicao.maus) {
+          if (jaTransbordavaEmIngles.has(t.caminho)) continue; // desenho, não tradução
+          linhas.push(`${ecra.id} · ${lingua} · +${t.excesso}px · «${t.texto}» · ${t.prova}`);
         }
       }
     }
+
+    // ── O ÂMBITO, para o guião o poder imprimir no fecho ───────────────────
+    //
+    // Um verde chamado `validar-expansao-de-texto` lê-se como «a expansão está
+    // tratada». Só é verdade dentro do denominador, e numa varredura de 36
+    // guardas o nome e o código de saída atravessam mas o qualificador não.
+    // Por isso o número sai daqui em linha própria, e o guião repete-o no fecho.
+    console.log(
+      `AMBITO medidos=${medidos} candidatos=${u.visitaveis.length}`
+      + ` semEndereco=${u.semEndereco.length} porResolver=${u.porResolver.length}`
+      + ` divida=${u.divida.length} chaves=${chaves.length}`,
+    );
+    for (const n of naoMedidos.slice(0, 20)) console.log(`NAO-MEDIDO ${n}`);
+
+    // Um universo derivado que não deu um único ecrã medido é o leitor cego
+    // outra vez — e agora com mais formas de cegar: o atlas mudar de colunas, o
+    // arnês não ter sessão, o prefixo de língua deixar de existir.
+    expect(medidos, `POPULACAO-ZERO: nenhum dos ${u.visitaveis.length} ecrãs derivados deu texto para medir`)
+      .toBeGreaterThan(0);
 
     expect(linhas, `o texto traduzido não cabe onde o inglês cabia:\n${linhas.join('\n')}`)
       .toEqual([]);

@@ -108,9 +108,28 @@ correr() {
     --reporter=line "$@" 2>&1
 }
 
+# ── Um vermelho de ARRANQUE não é uma medição ─────────────────────────────
+#
+# A `provar-staff-no-navegador.sh` já tinha aprendido isto a 04/09 e eu não o
+# tinha nesta guarda: quando o servidor da inspecção não arranca, o Playwright
+# sai com código 1 e TODA a suite fica vermelha sem ter corrido um caso. Aqui
+# apanhou-me ao vivo — o `.next` estava a ser reconstruído por outro processo
+# (`pnpm build && next start -p 3013`) e a minha guarda disse «a sonda não
+# acendeu», que é falso e acusa o instrumento errado.
+#
+# O `.next` é recurso partilhado como a árvore, a base e a porta.
+arranque_falhou() { # $1 = ficheiro de saída
+  grep -qE 'config.webServer was not able to start|Could not find a production build' "$1"
+}
+
 SAIDA_SONDA=/tmp/bossaos-expansao-sonda.txt
 correr -g 'SONDA' >"$SAIDA_SONDA"
 ESTADO_SONDA=$?
+if arranque_falhou "$SAIDA_SONDA"; then
+  naomedi "o servidor da inspecção não arrancou — o \`.next\` está em reconstrução noutro processo?"
+  grep -oE 'Could not find a production build[^"]*|Exit code: [0-9]*' "$SAIDA_SONDA" | head -2 | sed 's/^/           /'
+  exit "$NAO_MEDI"
+fi
 if [ "$ESTADO_SONDA" -ne 0 ]; then
   naomedi "a sonda não acendeu: o detector não fica VERMELHO nem com uma cadeia longa injectada."
   sed 's/^/           /' "$SAIDA_SONDA" | tail -8
@@ -125,6 +144,11 @@ ESTADO=$?
 
 # «Nenhum teste encontrado» é o leitor cego outra vez, não um verde e não uma
 # falha de texto: o Playwright também sai com código 1 nesse caso.
+if arranque_falhou "$SAIDA"; then
+  naomedi "o servidor da inspecção caiu a meio — nada foi medido."
+  exit "$NAO_MEDI"
+fi
+
 if grep -q 'No tests found' "$SAIDA"; then
   naomedi "o Playwright não encontrou o caso principal — nada foi medido."
   exit "$NAO_MEDI"
@@ -140,21 +164,49 @@ if [ "$ANTES" != "$DEPOIS" ]; then
 fi
 verde "os três ficheiros de mensagens ficaram byte a byte"
 
+# ── O ÂMBITO, lido da prova e repetido em TODAS as saídas ─────────────────
+#
+# Um verde chamado `validar-expansao-de-texto` lê-se como «a expansão está
+# tratada». Significa outra coisa: que nos ecrãs MEDIDOS o texto cabe. Numa
+# varredura de 36 guardas o nome e o código de saída atravessam, o qualificador
+# não — e um verde sem denominador engana quem o lê para decidir. Por isso o
+# número sai da prova em linha própria e é repetido aqui, nas três saídas.
+AMBITO=$(grep -o 'AMBITO .*' "$SAIDA" | tail -1)
+ambito() {
+  if [ -z "$AMBITO" ]; then
+    echo "  âmbito:  desconhecido — a prova não declarou quantos ecrãs mediu"
+    return
+  fi
+  local med cand sem porres div ch
+  med=$(sed -n 's/.*medidos=\([0-9]*\).*/\1/p' <<<"$AMBITO")
+  cand=$(sed -n 's/.*candidatos=\([0-9]*\).*/\1/p' <<<"$AMBITO")
+  sem=$(sed -n 's/.*semEndereco=\([0-9]*\).*/\1/p' <<<"$AMBITO")
+  porres=$(sed -n 's/.*porResolver=\([0-9]*\).*/\1/p' <<<"$AMBITO")
+  div=$(sed -n 's/.*divida=\([0-9]*\).*/\1/p' <<<"$AMBITO")
+  ch=$(sed -n 's/.*chaves=\([0-9]*\).*/\1/p' <<<"$AMBITO")
+  echo "  âmbito:  $med ecrãs medidos de $cand candidatos, derivados de $ch cadeias que crescem"
+  echo "           fora da medição: $porres com parâmetro por resolver, $sem sem endereço, $div namespaces em dívida"
+}
+
 # População vazia sai por aqui, e não pelo vermelho: um ecrã que não abre não é
 # um defeito de tradução, e chamar-lhe isso era acusar o inocente.
 if grep -q 'POPULACAO-ZERO' "$SAIDA"; then
   naomedi "um dos ecrãs não deu texto para medir — sem população, não há verde nem vermelho."
   grep -o 'POPULACAO-ZERO:[^"]*' "$SAIDA" | head -3 | sed 's/^/           /'
+  ambito
   exit "$NAO_MEDI"
 fi
 
 if [ "$ESTADO" -ne 0 ]; then
   vermelho "há texto traduzido que não cabe onde o inglês cabia:"
   grep -E '·.*px·|· \+[0-9]+px|KDS-|INT-' "$SAIDA" | head -12 | sed 's/^/           /'
+  ambito
   exit "$FALHOU"
 fi
 
 verde "o que cabe em inglês cabe também em es-ES e pt-BR, nos ecrãs medidos"
 echo
-echo "  O texto cabe: 0 falhas."
+ambito
+echo
+echo "  O texto cabe nos ecrãs medidos: 0 falhas."
 exit "$OK"
