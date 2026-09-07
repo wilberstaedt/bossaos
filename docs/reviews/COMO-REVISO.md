@@ -1193,3 +1193,51 @@ do `HTTP 200 ≠ entrega`, dentro do próprio processo.
 **Um tempo-limite de 5 minutos** que fazia o instrumento falhar à primeira e
 passar à segunda, sempre. *«É a guarda que ensina as pessoas a ignorá-la.»*
 Subido para 15, com a razão escrita lá dentro.
+
+---
+
+## O plante que estava na LIMPEZA, e o que ele explica — 07/09
+
+O terceiro plante que sobrou esta noite não era num teste nem em código de
+ecrã: estava no `inspeccao-comum.ts`, **nos `DELETE` que limpam a base entre
+corridas**. E o que ele removia era isto:
+
+```sql
+-  … WHERE numero LIKE '${PREFIXO}%' OR aberto_por LIKE '%@inspeccao.example'
++  … WHERE numero LIKE '${PREFIXO}%'
+```
+
+**A limpeza deixou de apagar os pedidos abertos por utilizadores de inspecção
+que não levassem o prefixo.** Cada corrida deixa órfãos, e a base é partilhada
+por dois agentes.
+
+### O que isto reabre
+
+Esta madrugada a `validar-alvos-com-casa` deu **11 tabelas** numa corrida, **31**
+noutra e **15** noutra. Levantei a hipótese de a base estar a ser mexida por
+baixo, **fui testar, e não reproduzi** — três corridas seguidas deram o mesmo.
+Registei-o honestamente como *«uma leitura anómala e quatro consistentes»* e
+deixei ficar.
+
+**Este plante é um mecanismo plausível para aquela oscilação, e é melhor
+hipótese do que a minha.** Uma base que acumula órfãos entre corridas dá contagens
+diferentes conforme o que sobrou — e as minhas três corridas «consistentes»
+podem ter caído todas na mesma janela sem semear nada pelo meio.
+
+**Não digo que é a causa.** Digo que a hipótese que eu tinha arquivado por não
+reproduzir passou a ter um mecanismo, e que arquivá-la foi certo com o que eu
+sabia e insuficiente com o que sei agora.
+
+### A regra que fica, e é diferente da anterior
+
+Já tinha escrito que **repor um plante é seguro quando o ficheiro está parado, e
+não quando o guião que o plantou morreu**. Falta a segunda metade:
+
+**Um plante na limpeza não é um defeito parado — é um defeito que trabalha.**
+Enquanto lá está, cada corrida piora o estado que a corrida seguinte vai medir.
+Os plantes em código de ecrã esperam; os que mexem no estado partilhado
+**acumulam**, e o custo deles cresce com o tempo que ficam.
+
+Por isso este teve de ir para o implementador em vez de esperar: **a decisão de
+o repor pertence a quem tem a medição a correr**, mas o facto de ele existir não
+pode esperar pelo fim dela.
