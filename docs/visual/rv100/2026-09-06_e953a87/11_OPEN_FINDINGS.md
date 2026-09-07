@@ -143,7 +143,7 @@ impact: marca
 expected: composição equilibrada entre mensagem e produto; espaço vazio com função (§6.2, §4.4)
 observed: seis páginas acabam em x=728 de 1440, a FAQ em 652, a home em 1256 (número por explicar)
 evidence: evidence/baseline/medidas-1440.json
-fix_criteria: hero em duas colunas com mídia do produto à direita; nenhuma metade de viewport vazia por ausência de conteúdo
+fix_criteria: CORRIGIDO PELO REVISOR a 07/09 — o meu critério dizia «herói em duas colunas com mídia do produto à direita», e isso é mais prescritivo do que a regra que serve. O §10 proíbe «metade do herói vazia **por falta de mídia OU COMPOSIÇÃO**»: o defeito é o vazio POR AUSÊNCIA, não a ausência de imagem. A mídia é uma saída; uma composição que use a largura é outra, e numa FAQ é provavelmente a certa — pôr uma captura de produto ao lado de perguntas seria mídia decorativa, que o §6.4 reprova. O teste é a frase do §10, não o número: a metade direita está vazia porque ninguém a compôs, ou porque a composição decidiu assim?
 status: parcial — a home foi reconstruída e VERIFICADO PELO REVISOR na evidência: 728 -> 1256 a 1440 e 648 -> 1176 a 1280, com `ocupaDireita` a virar de false para true. As outras páginas comerciais NÃO foram medidas de novo e ficam abertas
 ```
 
