@@ -61,3 +61,25 @@ língua, e o espanhol de Espanha e o de outro sítio partilham bandeira nenhuma.
 - **A minha leitura do diff.** Os quatro vêem-se na captura, e é lá que os meço —
   foi assim que apanhei o duplicado do Staff que sete commits certos não
   mostraram.
+
+---
+
+## Veredicto (1) — 15h50, medido por mim
+
+| critério | resultado |
+| --- | ---: |
+| a landing a **zero** escrito à mão | **0** — total 283 → 274, e as nove eram dela |
+| não nascer um segundo componente | só existe `Botao.tsx` |
+| com `href`, ser mesmo uma ligação | `return <a className={classes} …>` (linha 66) |
+
+**E foi mais longe do que a régua pedia.** A união é **discriminada**: com `href`,
+o TypeScript **recusa** `disabled` e `aCarregar`. A razão está escrita e é boa —
+*«uma ligação desactivada não existe: ou se navega, ou não se põe lá a
+ligação»*. **O estado errado deixou de ter nome**, que é a mesma disciplina que a
+casa já tinha usado no `LigacaoDeNavegacao`.
+
+**Nota sobre o meu próprio achado, na (2):** eu tinha contado a chave `c.buscar`
+em **duas** fendas — *placeholder* e botão. Ele foi ver e são **três**: serve
+também de nome da secção de resultados. **A minha contagem era um piso outra
+vez** — parei no primeiro par que vi em vez de perguntar quantas fendas a chave
+serve. Ele generalizou; eu instanciei.
