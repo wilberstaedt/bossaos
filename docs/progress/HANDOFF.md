@@ -2617,10 +2617,9 @@ guarda vermelha para sempre sobre uma cura que funciona.
 
 ### Nota 1 — o «131 → 131» não se consegue voltar a correr
 
-Foi a prova dele de que nada foi criado. **Não a consegui verificar:** a base de
-desenvolvimento está **inteiramente vazia** — `users`, `organizations`,
-`locations`, `memberships`, `invitations`, tudo a zero — e nenhuma outra base
-tem essa população.
+Foi a prova dele de que nada foi criado. ~~**Não a consegui verificar:** a base de desenvolvimento está inteiramente
+vazia.~~ **ERRADO, e corrigido às 23h05 — ver a secção seguinte.** A base tem
+mesmo 131 utilizadores. Eu contei como `bossaos_app`, que sob RLS vê **zero**.
 
 **A conclusão aguenta** (confirmei-a por outro caminho), mas o número é um
 **instantâneo**, e um instantâneo de segurança que ninguém pode re-correr decai
@@ -2642,3 +2641,40 @@ passa a criar uma conta a sério**, e nada no guião o impede.
 **A guarda contar os utilizadores antes e depois** torna o «131 → 131» um
 invariante que corre sempre (nota 1) **e** transforma a segurança da sonda de
 convenção em mecanismo (nota 2). Nenhuma delas bloqueia: a cura está provada.
+
+
+## 07/09 23h05 — o «0 contra 131»: dois contadores certos, e a variável era QUEM pergunta
+
+Eu escrevi, e comitei, que a base de desenvolvimento estava **inteiramente
+vazia**. **Está errado.** Verifiquei-o eu, a pedido da explicação dele:
+
+| papel | `select count(*) from users` |
+|---|---|
+| `bossaos_app` — o do produto, e o do meu `DATABASE_URL` | **0** |
+| `bossaos_migrate` — dono da tabela | **131** |
+
+`relrowsecurity = true`, `relforcerowsecurity = false`, políticas
+`autenticacao_ve_identidades` e `identidade_propria`. **O dono passa ao lado do
+RLS; o papel do produto sem identidade não vê uma linha.**
+
+**Mesma base, mesma tabela, mesma consulta, nenhum erro em lado nenhum, duas
+respostas.** Não é o instrumento errado nem o sujeito errado — é uma terceira
+variável que nem me ocorreu declarar: **a identidade que faz a pergunta.**
+
+E cometi-o **no tick em que estava a rever alguém por disciplina de medição**,
+e escrevi-o como facto sobre cinco tabelas.
+
+### O que ele fez com isto, e é a melhor parte
+
+A guarda conta **pelo papel de migração**, e diz porquê no âmbito: com o papel
+do produto o invariante seria **`0 == 0` para sempre** — uma guarda que nunca
+poderia falhar. **O meu erro tornou-se a razão documentada da escolha dele.**
+
+### O que verifiquei e o que não
+
+- **Verifiquei:** a guarda corre e passa — `131 → 131`, convite vivo,
+  `EMAIL_PASSWORD_SIGN_UP_DISABLED`, saída 0. E a explicação do RLS, papel a
+  papel, com a mesma consulta.
+- **NÃO verifiquei:** o controlo B dele — a guarda a recusar quando a população
+  mexe. Exige plantar uma linha dentro da janela de ~2 s entre as duas
+  contagens, e não o refiz. **Fica dito em vez de assumido.**
