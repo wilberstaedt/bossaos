@@ -2510,3 +2510,34 @@ vazio — renderização estática, como aconteceu hoje com os `searchParams` �
 verificar antes de lho mandar. A página tem `force-dynamic`. **Uma pista errada a
 quem está a caçar custa mais do que o silêncio**, e uma correcção a mais custa
 mais do que uma correcção a menos.
+
+---
+
+## Três vezes parado à espera de licença, e a culpa é da forma como eu dou ordens — 07/09
+
+O JR ficou parado pela **terceira vez** hoje à espera de autorização para
+continuar. Eu já tinha escrito a regra — *«uma ordem de trabalho numerada carrega
+a própria licença para continuar»* — e mesmo assim aconteceu outra vez.
+
+**A regra estava certa e o sítio estava errado.** Escrevi-a no meu documento e
+disse-lha uma vez, no meio de uma mensagem sobre outra coisa. **Uma regra dita
+uma vez num parágrafo sobre outro assunto não é uma regra: é uma frase que
+passou.** Voltei a dizê-la, agora sozinha e explícita, e assumi o que é meu —
+**não é ele a ser tímido, sou eu a não fixar a licença onde ela se lê.**
+
+É a irmã da decisão sobre os 39 artefactos, que eu tinha tomado, documentado, e
+nunca lhe passado. **Duas coordenações falhadas na mesma tarde, ambas por eu
+escrever para mim e presumir que ele leu.**
+
+## E uma discrepância que mandei reconciliar antes de corrigir
+
+Ele contou **14** botões escritos à mão no caminho comercial; eu conto **10** —
+`getting-started` 4, `plans` 2, `product` 2, `faq` 1, `demo` 1, `trust` 0,
+landing 0.
+
+**Não presumi que ele estivesse errado.** Contei em seis ficheiros de rota; ele
+pode ter contado noutros, ou com um padrão mais largo. **Mandei reconciliar antes
+de mexer**, e a razão é a que já nos apanhou hoje: **uma correcção que fecha dez
+de catorze deixa quatro vivos e ninguém dá por eles**. Foi assim que apareceu o
+resumo do portão a dar 338 de 396 — a soma tem de fechar antes de alguém começar
+a riscar itens.
