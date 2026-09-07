@@ -753,3 +753,65 @@ portanto a expectativa é que passe — **e é exactamente por isso que vale a p
 correr**: uma prova que se espera que passe e passa por uma razão que se conhece
 é barata; a mesma prova que falha revelaria que algum diálogo não passa pelo
 componente.
+
+---
+
+## §9.1, «filtros e busca não escondem resultados sem feedback» — CONFORME
+
+Emparelhei cada superfície de busca com a sua mensagem de vazio, em vez de contar
+umas e outras. **Três superfícies, três mensagens**, e uma delas por propriedade
+(`vazio={m.plataforma.semRegistos}`), que os meus três nomes de chave não
+apanhavam. **Nona vez esta noite que procurei os meus nomes em vez do mecanismo**
+— e a nona vez que o segundo olhar desfez o achado antes de ele ser escrito.
+
+E a busca de produtos funciona **sem JavaScript**: *«um GET com o termo na URL»*.
+Casa com a troca que aceitei na moldura.
+
+---
+
+## O achado que veio por acidente, e é o melhor sobre o carácter deste produto
+
+Ao ler a página de produtos para desmentir o meu falso achado, dei com um
+comentário: *«diz "sin precio" quando não há regra — **não zero**. Um produto sem
+preço…»*. Fui contar onde mais isto acontece.
+
+**O produto distingue AUSÊNCIA de ZERO em nove sítios, e com a mesma gramática:**
+
+| chave | o que diz |
+| --- | --- |
+| `analiticaE30.semDadosExplica` | *«Nobody measured: **this is not the same as zero**.»* |
+| `catalogoE07.notaAlergenos` | *«**Not declared is not the same as does not contain.** Nobody has said…»* |
+| `publicoE09.notaAlergenosPublica` | *«Not declared is not the same as does not contain. **Ask the team**…»* |
+| `catalogoE07.semPreco` · `publicoE09` · `pedidosE14` | «No price» |
+| `temaE12.semPreco` | «To be quoted» |
+| `plataforma.semRegistos` · `integracoesE32` | «Nothing to show **yet**» |
+
+**A mesma frase aparece duas vezes com sujeitos diferentes** — «isto não é o mesmo
+que zero» e «não declarado não é o mesmo que não contém». Uma é sobre medição. A
+outra é sobre **alergénios**, e essa pode matar alguém.
+
+E a versão pública não é a interna: no catálogo diz «ninguém declarou»; na carta
+que o cliente lê **diz-lhe para perguntar à equipa**. Quem escreveu isto percebeu
+que o utilizador da frase é diferente e que a acção disponível é diferente.
+
+### E o inverso também está escrito
+
+O implementador da página de planos escreveu, sobre uma comissão de 0%:
+
+> «**Zero é um valor comercial, não uma ausência.** "Sem comissão" escrito à mão
+> continua a prometer zero no dia em que deixar de o ser.»
+
+**As duas direcções da mesma distinção**, tratadas com o mesmo cuidado: um zero
+que é ausência não se mostra como zero, e um zero que é valor não se escreve à
+mão.
+
+### Porque é que isto me interessa como revisor
+
+**É a mesma doutrina com que eu fecho etapas** — três respostas e não duas:
+certo, errado e NÃO MEDI. O produto tem-na na cara do utilizador, com uma guarda
+por trás (`validar-alergenios.sh`, 228 linhas) e um pilar de confiança que a
+anuncia: *«dizemos o que não sabemos»*.
+
+Não é uma coincidência bonita. **É a mesma pessoa a aplicar a mesma regra na
+revisão e no produto**, e é a única das quatro afirmações comerciais que eu
+verifiquei que tem risco de vida do outro lado.
