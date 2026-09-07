@@ -3309,3 +3309,45 @@ provado», e prova-se outra vez no momento de disparar.
 
 Reprovei o pacote em `HEAD` — preparar não é publicar, e sem `--autorizado-por`
 o guião corre os portões e pára.
+
+---
+
+## O diferencial mais barato é a população que já se mediu — 07/09, 22h55
+
+Assinei um achado falso e retirei-o uma hora depois. A `carta-movel` não estava
+ampliada a 1,65× — o `naturalWidth` daquele elemento diz **237×514** sobre um
+recurso que é **390×844**. Dividi a largura mostrada por um número mentiroso.
+
+O que o desfez foi um **diferencial**: as seis imagens da mesma página, medidas
+com o **mesmo** instrumento. Cinco concordam com o recurso decodificado, uma
+não. Não foi preciso instrumento novo, nem hipótese, nem leitura de código.
+
+### E a contradição já estava na minha própria saída
+
+Uma hora antes eu imprimi isto:
+
+    carta-movel-390    servido  237px -> 342px   escala 1.44
+    sala-estreita-390  servido  390px -> 342px   escala 0.88
+
+Tinha acabado de medir **os dois ficheiros com `sips`: 390×844 ambos**. Dois
+ficheiros idênticos em disco, a reportarem larguras servidas diferentes, **duas
+linhas uma debaixo da outra**. Li-as como dois factos em vez de as ler como uma
+contradição.
+
+**Uma tabela não confronta as suas próprias linhas. Isso é trabalho de quem a
+lê**, e é o mais barato que há: não custa uma medição nova, custa uma pergunta —
+*porque é que estas duas discordam, se deviam concordar?*
+
+A frase que fecha isto é do JR: **«uma medição que ninguém confronta com outra é
+uma opinião com números.»**
+
+### E a decisão de não curar é tão importante como a cura
+
+Não há nada para consertar: a imagem está certa e o visitante vê-a nítida. Uma
+guarda construída sobre `naturalWidth` **daria vermelho para sempre num sítio
+onde não há defeito** — e um alarme permanente treina toda a gente a ignorá-lo.
+
+O porquê do **237** fica **sem explicação**, dito em vez de inventado. Não é o
+ficheiro, não é o formato, não é o `srcset`, não é o carregamento. **Uma
+pendência honesta vale mais do que uma causa plausível**, porque a causa
+plausível fecha a investigação de quem vier a seguir.
