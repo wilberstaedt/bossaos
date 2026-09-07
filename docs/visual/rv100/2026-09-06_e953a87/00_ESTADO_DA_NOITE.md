@@ -21,7 +21,28 @@ As quatro vermelhas de agora são: uma *suite* nova ainda sem guião
 repor em ficheiros que o JR está a editar, e um ID que alega móvel medido.
 **Nenhuma é defeito de produto.**
 
-**A leitura honesta:** o corredor só se lê com os agentes parados. Um dia
+**E há um comando que responde à pergunta que tu tens mesmo**, que eu fui
+descobrir depois de escrever isto:
+
+```
+./scripts/validar-no-commit.sh
+```
+
+Corre as **37 guardas contra o conteúdo do COMMIT**, num worktree à parte, em vez
+de contra a bancada. Acabei de o correr: **verde**. O cabeçalho dele diz a
+distinção que eu ia perdendo — *«as guardas leem a ÁRVORE DE TRABALHO; o que se
+publica é o COMMIT»* — e foi escrito ontem de manhã depois de a mesma coisa ter
+acontecido **duas vezes**: o E32 e o E33 foram commitados com plante lá dentro,
+e o commit que corrigiu o primeiro *«removeu a INSTÂNCIA e não impediu a
+CLASSE, por isso voltou uma etapa depois»*.
+
+**Ia escrever que nada impede um plante de ser commitado.** Procurei «plante»
+dentro do `validar-no-commit.sh` e não encontrei — porque ele enumera as guardas
+por **glob**, não por lista, e inclui a dos plantes sem lhe chamar o nome.
+Procurei a palavra em vez do mecanismo, pela sexta vez esta noite.
+
+**A leitura honesta:** o corredor só se lê com os agentes parados — e o commit
+lê-se sempre. Um dia
 tentei provar que a base oscilava sob carga e não consegui reproduzir; hoje a
 prova apareceu sozinha noutra forma — não é a base que oscila, são **os
 ficheiros a meio**.
