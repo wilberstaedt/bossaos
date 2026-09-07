@@ -424,3 +424,34 @@ nada.**
 levantado com a proposta escrita em `docs/reviews/STAFF-E-KDS-ACHADOS.md`. É a
 terceira coisa que lhe devolvo em vez de decidir por ele — com o A2 e o verde-lima
 — e as três têm a mesma natureza: **medi o facto, o juízo é dele.**
+
+---
+
+## Republicada com o Staff e o KDS, e um achado novo na imagem — 16h45
+
+Recapturei (25/25, limpeza sem restos, o único estado por explicar continua a ser
+o M05 offline já julgado) e republiquei. **O botão «Marcar lista» é agora um
+botão claro e visível sobre a superfície escura** — o contrato de superfície a
+funcionar — e as pastilhas de navegação perderam o contorno coral.
+
+**E olhando para a imagem apareceu uma coisa que nenhum diff mostrava:** o KDS
+tem, por baixo dos contadores, uma frase explicativa —
+
+> *«El tiempo se cuenta desde el sello del servidor, nunca desde el reloj de esta
+> tablet.»*
+
+**Numa tela de parede, lida a metros, no meio de um serviço.** É a mesma doença
+que o agente do backoffice mediu naquela tela — *prosa explicativa onde deviam
+estar dados* — e aqui é pior, porque o KDS é o ecrã onde ninguém tem as mãos
+livres para ler documentação.
+
+**A frase é verdadeira e a decisão que ela descreve está certa** — o carimbo vem
+do servidor e não do relógio do aparelho, e isso já foi medido e é bom desenho.
+**O defeito não é o conteúdo, é o sítio:** uma garantia sobre a proveniência do
+tempo é para o contrato técnico e para quem instala, **não para o cozinheiro às
+oito da noite**.
+
+**Fica levantado e não corrigido** — tirar texto de um ecrã é decisão de produto,
+e já lhe devolvi três dessa natureza hoje. Mas registo o padrão, porque é a
+terceira superfície onde aparece: **o produto explica-se dentro de si próprio**,
+e explicar-se ocupa o lugar de mostrar.
