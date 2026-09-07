@@ -322,6 +322,21 @@ status: MEDIDO pelo JR a 07/09 e CONFORME — os 14 aparecem, cabem, lêem-se, e
 ```
 
 ```yaml
+id: RV100-024
+severity: P1
+surface: backoffice
+screen_or_route: /[idioma]/app/[orgSlug]/[locationSlug]/… — qualquer rota sob um segmento de id
+summary: um segmento de URL que não seja UUID provoca 500 não tratado, em vez de 404
+impact: robustez — entrada controlada pelo utilizador a produzir uma falha não tratada
+expected: um id malformado é indistinguível de um id inexistente para quem navega; a resposta é 404, não 500
+observed: medido pelo implementador ao construir o estado `erro` do M03 — `findFirst({ where: { id: locationId } })` leva o segmento do URL para uma coluna `@db.Uuid` e **lança antes de o `notFound()` ser alcançado**. Verificado pelo revisor que as colunas são mesmo `@db.Uuid` (schema:54, 234, 235). E a ausência tem forma de CLASSE: **164 ficheiros vivem sob um segmento `[algumaCoisaId]`, e em 40 páginas amostradas ZERO validam o formato antes de consultar** — com controlo positivo, porque o mesmo detector encontra validação em rotas de `api/`
+evidence: capturas M03-erro e M04-erro do lote M (páginas em branco a 5851 e 2740 bytes) · schema.prisma
+fix_criteria: validar o formato do segmento antes da consulta e devolver `notFound()`; medir com um id malformado numa rota que EXISTE — um caminho inventado dá 500 por outra razão e não prova nada. E a correcção é da classe, não da instância: uma rota corrigida deixa 163 iguais
+decisao: nao-precisa-de-autorizacao
+status: open — encontrado ao construir o entregável `erro` do §7, que é para o que a lista serve
+```
+
+```yaml
 id: RV100-020
 severity: P4
 surface: marketing
