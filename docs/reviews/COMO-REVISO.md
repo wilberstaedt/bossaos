@@ -1304,3 +1304,51 @@ fazer o trabalho do teardown no estado de outra pessoa.**»*
 
 É a mesma regra pela qual eu guardei o trabalho em voo dele com `stash create` em
 vez de commitar por ele.
+
+---
+
+## A décima primeira forma: o controlo de população que só pergunta «há alguma coisa» — 07/09
+
+Encontrada pelo implementador da landing, **no instrumento dele**, e confirmada
+por mim **no meu**.
+
+O arnês dele acumulava resultados num array de módulo. **O Playwright reinicia o
+worker depois de uma falha** — logo um worker novo carregava o módulo de novo e o
+array voltava a `[]`. Escreveu **20 registos em vez de 40**, e não se queixou: a
+página que faltava tinha passado e simplesmente não estava na saída.
+
+> «**O meu controlo de população perguntava `> 0`, e 20 é maior do que zero.**»
+
+### E fui ver as minhas
+
+A `validar-coral-da-arte.sh`, que eu escrevi esta noite, dizia:
+
+```bash
+[ "$total" -gt 100 ] || naomedi "so $total ficheiros alcancados"
+```
+
+**Varria 709 ficheiros.** Se o pathspec caísse para 200 — uma pasta renomeada, um
+glob que deixa de casar — a guarda **passava**, a varrer um terço do produto e a
+reportar verde.
+
+Corrigi-a: a população passou a ser **declarada** (`POPULACAO_DECLARADA=690`), e
+uma queda abaixo dela dá `NÃO MEDI` em vez de silêncio. Provei nas duas direcções
+— com um número impossível dá `exit 2` e nomeia a queda; reposto, verde a 717.
+
+**As outras não estão todas corrigidas**, e digo-o: a `validar-dados-ficticios.sh`
+tem o mesmo `-gt 100` sobre 672 ficheiros. Fica registado aqui, e não fingido.
+
+### A diferença entre esta e a décima
+
+Parecem a mesma coisa — «um controlo que não sabe falhar» — e o mecanismo é
+diferente, o que importa para as apanhar:
+
+- **A décima**: o detector produz **a resposta que se espera**. O zero do coral
+  era plausível porque o achado dizia que o coral está ausente. **Defende-se
+  plantando o que se espera não encontrar.**
+- **A décima primeira**: o controlo produz **um passe seja qual for a
+  resposta**. `> 0` não distingue 40 de 20. **Defende-se perguntando "estão
+  todos?" em vez de "há algum?".**
+
+**Um piso não é uma medição de completude.** Diz que não está vazio, e é tudo o
+que diz.

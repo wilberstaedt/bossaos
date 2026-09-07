@@ -51,7 +51,25 @@ echo "alcance:"
 lista=$(git ls-files 'apps/web/app/*' 'apps/web/src/*' 'packages/*/src/*' \
         | grep -E '\.(ts|tsx)$')
 total=$(printf '%s\n' "$lista" | grep -c . || true)
+# ── Um chao de populacao nao detecta uma populacao a meio ───────────────────
+#
+# Isto dizia `-gt 100`, e varria 709 ficheiros. Se o pathspec caisse para 200 —
+# uma pasta renomeada, um glob que deixa de casar — a guarda PASSAVA, a varrer um
+# terco do produto e a reportar verde.
+#
+# O implementador da landing encontrou a mesma forma no instrumento dele a
+# 07/09: um array de modulo que o Playwright reiniciava depois de uma falha,
+# escrevendo 20 registos em vez de 40. A frase dele e a que fica:
+# «o meu controlo de populacao perguntava > 0, e 20 e maior do que zero».
+#
+# A pergunta certa nao e "ha alguma coisa" — e "estao todos". Como nao ha uma
+# segunda fonte independente para o numero, declara-se: o piso so desce a mao, e
+# uma queda e um sinal em vez de um silencio.
+POPULACAO_DECLARADA=690   # observado 709 a 07/09; margem para ficheiros removidos
 [ "$total" -gt 100 ] || naomedi "so $total ficheiros alcancados - o pathspec nao chega ao codigo"
+if [ "$total" -lt "$POPULACAO_DECLARADA" ]; then
+  naomedi "a populacao caiu de $POPULACAO_DECLARADA declarados para $total - ou apagaram ficheiros, ou o alcance encolheu. Confirma qual, e so entao baixa o numero a mao."
+fi
 # Controlo positivo de população: a lista tem de conter o sítio onde o valor
 # VIVE. Se não contiver, este guião podia estar a varrer a pasta errada e a dar
 # verde sobre nada.
