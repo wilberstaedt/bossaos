@@ -101,18 +101,16 @@ const SINONIMOS: Record<string, keyof Alvos> = {
  *
  * Sem isto esta guarda nunca podia ficar vermelha: um enumerador que só conta
  * não reprova nada, e um instrumento que não sabe reprovar não é uma guarda —
- * é um relatório. O número foi medido, não estipulado: 163 das 165 portas
- * resolvíveis abrem hoje.
+ * é um relatório. O número foi medido, não estipulado.
  *
- * As duas que não abrem são achados do atlas e não do produto, e ficam
- * nomeadas para ninguém as ir procurar outra vez:
- *   CAT-0xx  `/app/[orgSlug]/brands/[brandSlug]/catalog/duplicate` — a família
- *            do catálogo mudou para `/app/[orgSlug]/catalogo` e esta linha
- *            ficou para trás, sem `rota_detalhada` que a corrigisse.
- *   ORG-0xx  `/app/[orgSlug]/help` — o produto tem `ajuda`, verificado no
- *            sistema de ficheiros. O atlas está em inglês, a rota em português.
+ * Subiu de 163 para **165** a 07/09, e a subida é a prova de que o piso serve:
+ * as duas portas que faltavam eram linhas erradas do atlas, não telas em falta.
+ * O produto usa inglês nas rotas públicas de marketing e **português nas
+ * internas** — `catalogo/duplicar`, `ajuda` — e o atlas assumiu inglês em tudo.
+ * Corrigidas as cinco linhas, as duas portas abriram e cinco composições
+ * entraram. Um piso que nunca sobe é um piso que ninguém está a olhar.
  */
-export const PISO_DE_PORTAS_ABERTAS = 163;
+export const PISO_DE_PORTAS_ABERTAS = 165;
 
 export const RAIZ_DO_PUBLICO = 'nenhuma unidade tem public_slug — o sítio público não tem porta';
 const SEM_RESOLUCAO = new Set(['publicLocationSlug', 'publicOrderId', 'postSlug', 'recibo']);

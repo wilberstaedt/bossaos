@@ -72,7 +72,7 @@ CAT-024,E08,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/traducoes,s
 CAT-025,E08,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/menus/[menuId]/publicar,sim,"",0
 CAT-026,E08,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/menus/[menuId]/historico,sim,"",0
 CAT-027,E08,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/importar,sim,"",0
-CAT-028,E30,"página/painel a compor",so-url,/app/[orgSlug]/brands/[brandSlug]/catalog/duplicate,nao(404),"",0
+CAT-028,E30,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/duplicar,sim,"",0
 MENU-001,E09,"página/painel a compor",estado-partilhado,/r/[publicLocationSlug]/[locale]/menu,bloqueado,"publicLocationSlug locale",1
 MENU-002,E09,"variação de rota",so-url,/r/[publicLocationSlug]/[locale]/menu (ligações de idioma),bloqueado,"publicLocationSlug locale",0
 MENU-003,E09,"variação de rota",so-url,/r/[publicLocationSlug]/[locale]/menu?categoria=,bloqueado,"publicLocationSlug locale",0
@@ -347,10 +347,10 @@ SET-011,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[location
 SET-012,E08,"página/painel a compor",so-url,/app/[orgSlug]/organization/exportar,sim,"",0
 SET-013,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/settings,sim,"",7
 SET-014,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/settings,sim,"",7
-HELP-001,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/help,nao(404),"",3
-HELP-002,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/help,nao(404),"",3
-HELP-003,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/help,nao(404),"",3
-HELP-004,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/help,nao(404),"",3
+HELP-001,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/ajuda,sim,"",3
+HELP-002,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/ajuda,sim,"",3
+HELP-003,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/ajuda,sim,"",3
+HELP-004,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/ajuda,sim,"",3
 PLAT-001,E33,"página/painel a compor",estado-partilhado,/platform,sim,"",14
 PLAT-002,E05,"página/painel a compor",estado-partilhado,/platform,sim,"",14
 PLAT-003,E05,"página/painel a compor",so-url,/platform/[orgId],sim,"",0

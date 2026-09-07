@@ -31,12 +31,12 @@ cd "$(dirname "$0")/.."
 #              sem alguem levantar o numero a mao - o que aparece num diff.
 POR_DESENHO="rv100-baseline.spec.ts:medicao de base do RV100, escrita a 06/09 no diagnostico da seccao 2; o guiao vem com a etapa do RV100 e nao antes
 expansao.spec.ts:TEM corredor - o scripts/validar-expansao-de-texto.sh - mas a descoberta aqui so varre provar-*.sh. Alargar o glob a validar-*.sh seria errado e nao e esquecimento: esta guarda LISTA os nove nomes de EM_DIVIDA dentro dela propria, e o grep passaria a ver-se a si mesma como corredor deles. A divida toda ficava verde por auto-referencia. Fica declarado ate a descoberta saber distinguir quem CORRE um ficheiro de quem apenas o NOMEIA
-alcance.spec.ts:mesma razao que o expansao.spec.ts acima - o corredor e o scripts/validar-alcance-das-composicoes.sh, uma guarda validar-* que a descoberta daqui nao varre"
+alcance.spec.ts:mesma razao que o expansao.spec.ts acima - o corredor e o scripts/validar-alcance-das-composicoes.sh, uma guarda validar-* que a descoberta daqui nao varre
+foco.spec.ts:pago a 07/09 - passou a ter corredor, o scripts/validar-foco-nos-momentos.sh. Mesma razao dos dois acima para nao ser descoberto: a descoberta so varre provar-*.sh"
 
 EM_DIVIDA="capturas.spec.ts
 divida-movel-auth.spec.ts
 divida-movel.painel.spec.ts
-foco.spec.ts
 larguras.spec.ts
 marketing.spec.ts
 painel.spec.ts
@@ -44,7 +44,7 @@ publico.spec.ts
 sites-publicos.spec.ts"
 
 # O tecto. Nao e decorativo: subir isto e um acto deliberado que fica no diff.
-TECTO=9
+TECTO=8
 
 # ── E o mesmo para as provas de no, que ate 06/09 nao tinham guarda nenhuma ──
 #
