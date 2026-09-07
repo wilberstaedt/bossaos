@@ -136,6 +136,36 @@ export const SEGREDO_DE_GESTAO = 'insp-segredo-de-gestao-para-medir';
 export const ORG_A = '11111111-1111-4111-8111-111111111111';
 export const EMAIL_DO_ARNES = 'painel@inspeccao.example';
 
+/**
+ * A casa da inspecção, em SQL, para as consultas dizerem de quem são.
+ *
+ * ── Porque é que isto apareceu ────────────────────────────────────────────
+ *
+ * A `validar-alvos-com-casa` ficou vermelha quando a semente de demonstração
+ * criou a segunda casa, e a mensagem dela — escrita semanas antes — já dizia
+ * porquê com estas palavras: *«hoje pode acertar por só haver um candidato, e
+ * isso é acertar por população e não por desenho; basta a semente criar o
+ * segundo»*. As tabelas com linhas em mais de uma casa passaram de 6 para 11.
+ *
+ * As três consultas em falta eram todas a `production_stations`, e procuravam
+ * só por prefixo. Não é fuga entre inquilinos em produção — é o RESOLVEDOR do
+ * arnês, que com duas casas na base pode devolver a estação da DEMONSTRAÇÃO
+ * quando o teste queria a da INSPECÇÃO. E são precisamente os dados do KDS.
+ *
+ * ── E a cura não é um prefixo mais fino ───────────────────────────────────
+ *
+ * Afinar o prefixo volta a acertar por população, que é o que a guarda reprova
+ * pelo nome, e a semente seguinte parte-o outra vez. O que se dá é CASA: a
+ * organização e a unidade onde o KDS da inspecção corre — a mesma `puerto` que
+ * o `unidadeDoStaff` resolve, que é a que aparece no endereço `/kds/…`.
+ *
+ * Medido antes de mudar: as três resolvem o mesmo id com e sem casa. A
+ * correcção é de desenho e não mexe nos alvos — se alguma suite partir, partiu
+ * por outro motivo, e não por o alvo ter mudado debaixo dela.
+ */
+const CASA_DA_INSPECCAO = `(SELECT id FROM locations
+   WHERE organization_id = '${ORG_A}' AND slug = 'puerto' AND archived_at IS NULL LIMIT 1)`;
+
 async function um(sql: Client, consulta: string, oQue: string): Promise<string> {
   const { rows } = await sql.query(consulta);
   const id = (rows[0] as { id: string } | undefined)?.id;
@@ -236,11 +266,14 @@ export async function resolverAlvos(): Promise<Alvos> {
         'a unidade viva da inspecção',
       ),
       orgId: ORG_A,
-      tableId: await um(sql, `SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%' ORDER BY codigo LIMIT 1`, 'uma mesa'),
+      tableId: await um(sql, `SELECT id FROM service_tables WHERE organization_id = '${ORG_A}'
+           AND codigo LIKE '${PREFIXO}%' ORDER BY codigo LIMIT 1`, 'uma mesa'),
       sessionId: await um(
         sql,
-        `SELECT id FROM table_sessions WHERE estado <> 'FECHADA'
-           AND table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%') ORDER BY id LIMIT 1`,
+        `SELECT id FROM table_sessions WHERE organization_id = '${ORG_A}' AND estado <> 'FECHADA'
+           AND table_id IN (SELECT id FROM service_tables
+                             WHERE organization_id = '${ORG_A}' AND codigo LIKE '${PREFIXO}%')
+          ORDER BY id LIMIT 1`,
         'uma sessão de mesa aberta'),
       // Dois dispositivos, e não um: a ficha mede-se num ACTIVO e a revogação
       // precisa de um que ainda não esteja revogado. Com um só, a segunda visita
@@ -259,7 +292,7 @@ export async function resolverAlvos(): Promise<Alvos> {
       // depende da ordem em que a base devolve linhas não é um resultado.
       //
       // O alvo passa a dizer o nome do pedido que significa.
-      orderId: await um(sql, `SELECT id FROM orders WHERE numero = '${PREFIXO}A001'`, 'o pedido insp-A001'),
+      orderId: await um(sql, `SELECT id FROM orders WHERE organization_id = '${ORG_A}' AND numero = '${PREFIXO}A001'`, 'o pedido insp-A001'),
       unidadeDoStaff: await um(
         sql,
         `SELECT id FROM locations WHERE organization_id = '${ORG_A}'
@@ -268,37 +301,47 @@ export async function resolverAlvos(): Promise<Alvos> {
       sessionIdDoStaff: await um(
         sql,
         `SELECT s.id FROM table_sessions s
-           JOIN service_tables t ON t.id = s.table_id
-          WHERE s.estado <> 'FECHADA' AND t.codigo = '${PREFIXO}21 del Staff' LIMIT 1`,
+           JOIN service_tables t ON t.id = s.table_id AND t.organization_id = s.organization_id
+          WHERE s.organization_id = '${ORG_A}' AND s.estado <> 'FECHADA'
+            AND t.codigo = '${PREFIXO}21 del Staff' LIMIT 1`,
         'a sessão de mesa do Staff'),
       estacaoDeProducao: await um(
         sql,
         `SELECT id FROM production_stations
-          WHERE nome LIKE '${PREFIXO}%' AND tipo = 'PREPARACAO' AND archived_at IS NULL
+          WHERE organization_id = '${ORG_A}' AND location_id = ${CASA_DA_INSPECCAO}
+            AND nome LIKE '${PREFIXO}%' AND tipo = 'PREPARACAO' AND archived_at IS NULL
           ORDER BY ordem LIMIT 1`,
         'a estação de produção da inspecção'),
       estacaoDeExpo: await um(
         sql,
         `SELECT id FROM production_stations
-          WHERE nome LIKE '${PREFIXO}%' AND tipo = 'EXPO' AND archived_at IS NULL ORDER BY nome, id LIMIT 1`,
+          WHERE organization_id = '${ORG_A}' AND location_id = ${CASA_DA_INSPECCAO}
+            AND nome LIKE '${PREFIXO}%' AND tipo = 'EXPO' AND archived_at IS NULL
+          ORDER BY nome, id LIMIT 1`,
         'a estação de expo'),
       tarefaDeProducao: await um(
         sql,
         `SELECT id FROM production_tasks
-          WHERE station_id IN (SELECT id FROM production_stations WHERE nome LIKE '${PREFIXO}%')
+          WHERE organization_id = '${ORG_A}'
+            AND station_id IN (
+              SELECT id FROM production_stations
+               WHERE organization_id = '${ORG_A}' AND location_id = ${CASA_DA_INSPECCAO}
+                 AND nome LIKE '${PREFIXO}%')
           ORDER BY criada_em LIMIT 1`,
         'uma tarefa de produção'),
       mesaComQr: await um(
         sql,
         `SELECT id FROM service_tables
-          WHERE codigo LIKE '${PREFIXO}%' AND qr_segredo_hash IS NOT NULL ORDER BY codigo, id LIMIT 1`,
+          WHERE organization_id = '${ORG_A}' AND codigo LIKE '${PREFIXO}%'
+            AND qr_segredo_hash IS NOT NULL ORDER BY codigo, id LIMIT 1`,
         'uma mesa com QR emitido'),
       visitanteVivo: await um(
         sql,
         `SELECT g.id FROM guest_sessions g
            JOIN table_sessions ts ON ts.id = g.table_session_id
           WHERE g.estado = 'ACTIVA' AND ts.estado <> 'FECHADA'
-            AND g.table_id IN (SELECT id FROM service_tables WHERE codigo LIKE '${PREFIXO}%')
+            AND g.table_id IN (SELECT id FROM service_tables
+                                WHERE organization_id = '${ORG_A}' AND codigo LIKE '${PREFIXO}%')
           LIMIT 1`,
         'uma sessão de visitante viva'),
       esperaViva: await um(
@@ -313,7 +356,7 @@ export async function resolverAlvos(): Promise<Alvos> {
         'a reserva de hoje do arnês'),
       pedidoParaLevar: await um(
         sql,
-        `SELECT id FROM orders WHERE numero = '${PREFIXO}L0' LIMIT 1`,
+        `SELECT id FROM orders WHERE organization_id = '${ORG_A}' AND numero = '${PREFIXO}L0' LIMIT 1`,
         'o pedido de takeaway do arnês'),
       // Nomeados, e não `LIKE ... LIMIT 1`: um alvo sem ordem é uma lotaria que
       // passa por sorte da ordem física das linhas. Aprendido no E20, à custa

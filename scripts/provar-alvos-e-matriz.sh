@@ -103,10 +103,16 @@ plantar <<'PYALVO' || true
 import io
 p = 'inspeccao/alvos.ts'
 s = io.open(p, encoding='utf-8').read()
-antigo = "SELECT id FROM orders WHERE numero = '${PREFIXO}A001'"
-assert antigo in s, 'o alvo do pedido nao esta onde se esperava'
-io.open(p, 'w', encoding='utf-8').write(
-    s.replace(antigo, "SELECT id FROM orders WHERE numero = '${PREFIXO}K000'", 1))
+# A ancora e o NUMERO do pedido, e nao a consulta inteira.
+#
+# Era o texto todo, e partiu-se a 07/09 quando a consulta passou a dizer de que
+# casa e (`organization_id = ...`, correccao da validar-alvos-com-casa). O
+# plante deixou de aplicar e a guarda disse-o alto — mas uma ancora que se
+# partia com qualquer reescrita da consulta media a GRAFIA. O que este plante
+# quer mudar e o pedido a que o alvo aponta, e e nisso que passa a pegar.
+antigo = "'${PREFIXO}A001'"
+assert s.count(antigo) == 1, 'o numero do pedido do alvo nao esta onde se esperava'
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, "'${PREFIXO}K000'", 1))
 PYALVO
 correr /tmp/bossaos-alvos-errado.txt pedidos.spec.ts
 exigir_vermelho "caiu o alvo: a prova mediu outro pedido e não deu por isso" \

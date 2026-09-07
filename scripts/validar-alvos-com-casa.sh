@@ -77,5 +77,18 @@ if [ "$sem" -gt 0 ]; then
   echo "        populacao, nao por desenho: basta a semente criar o segundo."
 fi
 
+# ── O AMBITO, para o verde nao ser lido como maior do que e ───────────────
+#
+# «alvos com casa» verde nao quer dizer «o arnes esta isolado». Quer dizer: das
+# tabelas que HOJE tem linhas em mais de uma casa, as consultas do alvos.ts
+# dizem todas de qual. O denominador move-se com a semente — foi de 6 para 11 e
+# depois para 31 no mesmo dia, a medida que a demonstracao povoou mais tabelas —
+# e um verde sem ele nao distingue «esta certo» de «ainda so ha uma casa».
+echo
+echo "  ambito:  $n_duas tabela(s) com linhas em MAIS DE UMA casa, hoje, perguntadas a base."
+echo "           $com consulta(s) do alvos.ts a dizer de qual; $sem sem dizer."
+echo "           O que nao se mede aqui: tabelas de uma casa so (o detector nao"
+echo "           lhes toca), e as consultas fora do alvos.ts."
+
 [ "$falhas" -eq 0 ] && { echo "OK"; exit 0; }
 echo "FALHOU: $falhas"; exit 1
