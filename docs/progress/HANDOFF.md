@@ -3068,3 +3068,43 @@ em silêncio por um padrão não ancorado.
 
 Ele já está a escrever os dois guiões — `validar-caminho-da-demo.sh` e
 `validar-sistema-ns2.sh` estão na árvore por comitar. **Não interrompo.**
+
+## 08/09 00h50 — FASE 1 FECHADA, e a linha de base está a zero
+
+Verifiquei **as quatro falhas uma a uma**, correndo:
+
+| | antes | agora |
+|---|---|---|
+| testes de UI | 41/2 | **43 passam, 0 falham** |
+| `validar-plantes` | saída 1, 7 mortos | **0** — `319 plantes ainda pegam` |
+| `validar-silenciadores` | saída 1 | **0** — 149 guiões |
+| `validar-suites-com-guiao` | saída 1 | **0** — 35 nomeadas, 11 por desenho, 8 de dívida com tecto 8 |
+
+### E fechei a coisa que eu tinha declarado por verificar
+
+No tick anterior escrevi que não corri a prova da Fase 1 ao vivo. **Corri agora**,
+pelo corredor que ele escreveu:
+
+    validar-sistema-ns2   saida=0
+    AMBITO seccoes=5 bento=4 mesas=6 falhas=0
+
+**5 secções, 4 áreas de bento, 6 mesas, zero falhas** — população declarada, e a
+suite mede a página renderizada.
+
+### O corredor não é um nome para calar o acusador
+
+Desconfiei de dois ficheiros de 8 linhas no `--stat` e fui lê-los: as 8 linhas
+eram **o diff**, não o ficheiro. O corredor tem três valores, verifica porta
+ocupada, suite ausente e `POPULACAO-ZERO`, e **distingue «o servidor não
+arrancou» de «a suite reprovou»** — com um comentário a dizer porquê: *«foi assim
+que esta guarda ficou vermelha contra o HEAD, num checkout sem build»*. **Ele já
+tinha apanhado o falso-vermelho sozinho.**
+
+### O que NÃO corri, e porquê
+
+**O `validar-no-commit` inteiro.** O `mac-health` está em `ATENÇÃO` com **101 MB
+livres** e 5 agentes, e esta máquina teve quatro kernel panics sob carga. Corri
+as quatro falhas **individualmente**, que é a diferença que estava em causa —
+mas não é a mesma coisa que a suite completa, e digo-o em vez de o disfarçar.
+
+**Fase 1 fechada. Fase 2 libertada.**
