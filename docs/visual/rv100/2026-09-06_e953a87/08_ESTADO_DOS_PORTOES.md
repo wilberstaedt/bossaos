@@ -25,9 +25,9 @@
 | LP mostra o produto real e a proposta **numa viewport** | **parcial** — cinco composições ligadas e o herói a 1256, mas «numa viewport» é um limite de altura que **não medi** |
 | as seis páginas têm conteúdo suficiente | **conforme** — todas reconstruídas com revisão escrita |
 | preços vêm da fonte aprovada | **conforme** — `precoDoPlano()`, nada à mão |
-| CTAs com hierarquia e destinos funcionais | **parcial** — resta **um** `href="#"` em 419 ficheiros, na maqueta da pré-visualização (P3) |
+| CTAs com hierarquia e destinos funcionais | **parcial** — resta **exactamente um** `href="#"` em todo o código, na maqueta da pré-visualização de tema (P3), medido às 12h30 de 07/09. O «em 419 ficheiros» que aqui estava já era falso: são 739. O número que sustenta o veredicto é o **um**, e esse mantém-se |
 | não há prova social ou promessa inventada | **conforme** — **zero números** em toda a superfície comercial |
-| ES, PT e EN completos | **conforme** — 2402 chaves × 3, com guarda |
+| ES, PT e EN completos | **conforme** — e o veredicto assenta num INVARIANTE e não num retrato: *as três têm exactamente as mesmas chaves*, imposto por `validar-tres-linguas.sh` (verde às 12h32 de 07/09, com controlo negativo por dentro). O retrato de hoje é 2595 cadeias em cada uma — estava aqui «2402», que era verdade quando foi escrito. Um invariante não apodrece; um retrato apodrece |
 | SEO e partilha configurados | **conforme, com uma pendência de produção**: o `NEXT_PUBLIC_SITE_URL` não está definido, e sem ele os canónicos apontam para `localhost` |
 | footer institucional completo para o estado real | **conforme** — 11 ligações, e **sem rotas inventadas**: termos e cookies não existem e não se ligam |
 

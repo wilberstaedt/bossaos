@@ -2111,3 +2111,39 @@ com a mesma confiança no dia em que deixa de ser verdade.
 medido, dentro da própria frase.** Sem a hora, ninguém sabe se precisa de o
 remedir — e um portão relido daqui a uma semana é exactamente o sítio onde isso
 importa. **Não é rigor a mais: é a diferença entre um facto e a memória de um.**
+
+---
+
+## Um invariante não apodrece; um retrato apodrece — e a prova estava dentro da guarda — 07/09
+
+Emiti o `PRONTO` apoiado nas linhas do portão, por isso fui remedir as que
+assentam em contagens. **Os três veredictos sobreviveram. Nenhum dos números
+sobreviveu.**
+
+| o portão dizia | medido às 12h30 |
+| --- | --- |
+| `2402` chaves × 3 | **2595** — as três continuam iguais |
+| um `href="#"` em **419** ficheiros | um — mas são **739** ficheiros |
+| `NEXT_PUBLIC_SITE_URL` por definir | continua por definir |
+
+**É isto que torna um número velho perigoso: ele não vira a conclusão.** Se
+virasse, alguém dava por ela. Como não vira, nada obriga a remedir, e a frase
+continua a ler-se com a mesma confiança enquanto apodrece por dentro.
+
+**E a lição melhor não é «pôr a hora» — é escolher o que se afirma.** «2402
+chaves × 3» é um **retrato**, e um retrato só é verdade num instante. «As três
+têm exactamente as mesmas chaves» é um **invariante**: cresce com o produto e
+continua verdadeiro. O mesmo para os CTA — o número que sustenta o veredicto é o
+**um** que falta, não os 419 ficheiros onde ele não está.
+
+**A prova disto apareceu dentro da própria guarda das línguas, e é a coisa mais
+limpa que vi hoje:** o cabeçalho dela diz *«medido a 06/09: 2343 chaves em cada
+um dos três»* — e a guarda, ao correr, mede **2595**. **No mesmo ficheiro, a
+parte que MEDE está viva e a parte que AFIRMA apodreceu.** Não há melhor
+argumento para preferir uma guarda a uma frase.
+
+**E um pormenor que não deixei por explicar:** eu contei 2596 e a guarda conta
+2595. Não é erro de nenhum — há **2595 cadeias e uma lista** (`reservasE18.dias`,
+os nomes dos dias), e eu contava a lista como folha. Duas medições a discordar
+por **um** quase sempre são duas definições, não uma avaria; mas isso só se sabe
+depois de ir ver, e «quase sempre» não é uma verificação.
