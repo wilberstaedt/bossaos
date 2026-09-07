@@ -65,6 +65,8 @@
 
   /* ── Foco — acessibilidade, não decoração ──────────────────────────────── */
   --bo-foco-cor: #102E35;
+  /* A segunda faixa do anel. Ver a regra do `:focus-visible` para o porquê. */
+  --bo-foco-contraste: #F7F4EC;
   --bo-foco-espessura: 2px;
   --bo-foco-afastamento: 2px;
 
@@ -150,9 +152,27 @@ p { margin: 0; }
 /* Foco visível em tudo o que recebe teclado. Uma regra, sem excepções: a
    primeira coisa que desaparece num sistema de design é o anel de foco, e quem
    dá por isso é quem navega sem rato. */
+/* ── Duas faixas, porque uma cor não serve dois fundos ──────────────────────
+ *
+ * Um anel de uma cor só assume que sabe o que está por trás dele. No KDS não
+ * sabe: a página é escura, os botões de acção são creme, e há remendos claros
+ * no meio. Medido a 07/09 com o anel creme — **conforme sobre a página escura
+ * (13,05:1) e invisível sobre dois remendos claros (1,06:1 e 1,10:1)**. Mudar a
+ * cor só mudava quais dos três ficavam invisíveis.
+ *
+ * Por isso o anel leva duas faixas encostadas, uma clara e uma escura: o
+ * `outline` e uma sombra imediatamente a seguir. **As duas contrastam entre si**
+ * — 13,05:1 — portanto seja qual for o fundo, uma delas destaca-se dele. É a
+ * técnica que a própria WCAG nomeia para indicadores sobre fundo desconhecido,
+ * e troca uma suposição por uma garantia.
+ *
+ * A sombra é desenhada por baixo do `outline`, e o `spread` soma a espessura ao
+ * afastamento para a faixa de fora começar exactamente onde a de dentro acaba. */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: var(--bo-foco-espessura) solid var(--bo-foco-cor);
   outline-offset: var(--bo-foco-afastamento);
+  box-shadow: 0 0 0 calc(var(--bo-foco-espessura) * 2 + var(--bo-foco-afastamento))
+              var(--bo-foco-contraste);
   border-radius: var(--bo-raio-controlo);
 }
 
@@ -182,11 +202,33 @@ p { margin: 0; }
    * navegação pergunta pelo papel. Deixa de haver disputa: não há duas regras a
    * pintar a mesma coisa. */
   --bo-navegacao-activa: var(--bo-texto-inverso);
-}
 
-/* Sobre superfície escura o anel escuro desaparece. */
-.bo-inverso :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline-color: var(--bo-realce);
+  /* ── O anel de foco entra no contrato, e é por isso que o KDS o perdeu ──
+   *
+   * O anel vivia numa regra à parte — `.bo-inverso :where(…):focus-visible` —
+   * e o `.bo-kds` entrou nesta lista de tokens e **não** naquela. Duas listas
+   * para a mesma pergunta «esta superfície é escura?»: acrescentar uma
+   * superfície obrigava a lembrar as duas, e quem se esquece não recebe erro.
+   *
+   * O resultado foi medido na instalação no ar: `--bo-foco-cor` é `#102E35`,
+   * que é exactamente `--bo-primaria`, o fundo do KDS. **1,00:1 — a cor do
+   * anel era a cor do fundo.** Quem navegasse a cozinha a teclado não via onde
+   * estava. É a quarta vez que esta família aparece: uma peça desenhada para
+   * fundo claro pousada na superfície escura.
+   *
+   * ── Creme e não lima, e a razão já estava escrita acima ─────────────────
+   *
+   * O lima dá 11,10:1 e cumpria. O creme dá **13,05:1** — e é o mesmo número
+   * que o backoffice e o Staff já medem, portanto as três superfícies passam a
+   * dizer a mesma coisa. Mais: o lima é o sinal de ESTADO do pedido e o KDS
+   * tem zero píxeis dele de propósito. Um anel lima, ainda que só ao teclado,
+   * punha o sinal onde ele não significa nada.
+   *
+   * O anel passa a ser a TINTA da superfície: escura sobre claro, clara sobre
+   * escuro. Uma regra, sem excepção — e a regra genérica lá em cima já
+   * pergunta pelo token, não pela cor. */
+  --bo-foco-cor: var(--bo-superficie-base);
+  --bo-foco-contraste: var(--bo-primaria);
 }
 
 @media (prefers-reduced-motion: reduce) {

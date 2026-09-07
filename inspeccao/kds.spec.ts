@@ -178,6 +178,152 @@ test.describe('KDS a 360 px — o tablet da cozinha', () => {
     }
   });
 
+  /**
+   * O ANEL DE FOCO vê-se contra o fundo do KDS.
+   *
+   * ── Porque é que esta medição não existia ─────────────────────────────
+   *
+   * A `validar-acessibilidade-dinamica.sh` mede o anel, e **declara no âmbito
+   * que o KDS fica de fora**: corre sem sessão, e o KDS exige uma. Era dívida
+   * escrita, não esquecimento — e foi na instalação no ar que ela cobrou.
+   *
+   * Medido a 07/09: `--bo-foco-cor` era `#102E35`, que é exactamente
+   * `--bo-primaria`, o fundo do KDS. **1,00:1 — a cor do anel era a cor do
+   * fundo.** Quem navegasse a cozinha a teclado não via onde estava.
+   *
+   * A causa era de estrutura e não de cor: o anel vivia numa regra
+   * `.bo-inverso :where(…)` e o `.bo-kds` tinha entrado só na lista de tokens.
+   * **Duas listas para a pergunta «esta superfície é escura?»** — e quem
+   * acrescenta a terceira superfície não recebe erro nenhum ao esquecer uma.
+   *
+   * Aqui mede-se o RESULTADO e não a regra: foca-se a sério, lê-se a cor que o
+   * navegador calculou, e compara-se com o fundo que está mesmo por trás.
+   */
+  test('o anel de foco vê-se contra o fundo — 1,4,11 pede 3:1', async ({ page }) => {
+    const MINIMO = 3;
+    const falhas: string[] = [];
+    let medidos = 0;
+
+    for (const tela of telas(alvos)) {
+      await visitar(page, tela, 'es-ES', alvos);
+      const r = await page.evaluate((minimo) => {
+        const lum = (cor: string) => {
+          const m = cor.match(/\d+(\.\d+)?/g);
+          if (!m || m.length < 3) return null;
+          const c = m.slice(0, 3).map((x) => Number(x) / 255)
+            .map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4));
+          return 0.2126 * (c[0] as number) + 0.7152 * (c[1] as number) + 0.0722 * (c[2] as number);
+        };
+        const razao = (a: string, b: string) => {
+          const [la, lb] = [lum(a), lum(b)];
+          if (la === null || lb === null) return null;
+          const [alto, baixo] = la > lb ? [la, lb] : [lb, la];
+          return (alto + 0.05) / (baixo + 0.05);
+        };
+        /* O fundo POR TRÁS DO ANEL — e o anel não está onde o elemento está.
+           
+           Com `outline-offset` positivo o anel é desenhado FORA da caixa do
+           elemento, portanto quem está por trás dele é o PAI. À primeira
+           subi a linhagem a partir do próprio elemento e li o preenchimento
+           do botão: no KDS o botão é creme e o anel é creme, e a medição
+           acusou 1,00:1 num anel que na verdade assenta no fundo escuro da
+           página e dá 13,05:1. Era o instrumento a apontar ao sujeito errado,
+           outra vez, e a produzir um número plausível.
+
+           Com afastamento negativo o anel cairia por cima do elemento e o
+           sujeito seria o próprio — por isso isto pergunta, em vez de assumir. */
+        const fundoDeTras = (el: Element, afastamento: number): string => {
+          let n: Element | null = afastamento >= 0 ? el.parentElement : el;
+          while (n) {
+            const c = getComputedStyle(n).backgroundColor;
+            if (c && !/rgba?\([^)]*,\s*0\)/.test(c) && c !== 'transparent') return c;
+            n = n.parentElement;
+          }
+          return getComputedStyle(document.body).backgroundColor;
+        };
+        const focaveis = [...document.querySelectorAll<HTMLElement>(
+          'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])')];
+        const maus: string[] = [];
+        let vistos = 0;
+        for (const el of focaveis) {
+          if (!el.offsetParent && getComputedStyle(el).position !== 'fixed') continue;
+          el.focus();
+          const e = getComputedStyle(el);
+          const cor = e.outlineColor;
+          const espessura = parseFloat(e.outlineWidth) || 0;
+          if (espessura === 0 || e.outlineStyle === 'none') {
+            maus.push(`sem anel: <${el.tagName.toLowerCase()}> «${(el.textContent ?? '').trim().slice(0, 24)}»`);
+            continue;
+          }
+          vistos += 1;
+          const afastamento = parseFloat(e.outlineOffset) || 0;
+          const atras = fundoDeTras(el, afastamento);
+          /* O anel tem DUAS faixas e vê-se se QUALQUER uma se destacar do
+             fundo. Exigir as duas reprovaria o desenho que resolve o problema:
+             a faixa que iguala o fundo é precisamente a que a outra cobre. */
+          const companheira = (e.boxShadow.match(/rgba?\([^)]*\)/) ?? [])[0] ?? null;
+          const rz = Math.max(
+            razao(cor, atras) ?? 0,
+            companheira ? (razao(companheira, atras) ?? 0) : 0,
+          );
+          if (rz > 0 && rz < minimo) {
+            maus.push(`${rz.toFixed(2)}:1 · anel ${cor}/${companheira ?? 'sem 2.ª faixa'} sobre ${atras}`
+              + ` · <${el.tagName.toLowerCase()}> «${(el.textContent ?? '').trim().slice(0, 24)}»`);
+          }
+        }
+        return { maus, vistos };
+      }, MINIMO);
+      medidos += r.vistos;
+      for (const m of r.maus.slice(0, 3)) falhas.push(`${tela.id} · ${m}`);
+    }
+
+    /* ── A SONDA exerce o CRITÉRIO, e não só o DOM ───────────────────────
+       
+       A primeira versão pintava o `outline` da cor do fundo e verificava que a
+       cor tinha ficado lá. Isso prova que consegui mexer no DOM — não prova que
+       a guarda acende, e com o anel de duas faixas nem sequer seria um defeito:
+       a segunda faixa continuava a ver-se.
+       
+       Aqui apagam-se AS DUAS faixas contra o fundo e corre-se a MESMA conta que
+       o veredicto usa. Se ela não descer abaixo do mínimo, o detector é cego. */
+    const sonda = await page.evaluate((minimo) => {
+      const el = document.querySelector<HTMLElement>('a[href], button');
+      if (!el) return 'sem focavel';
+      const pai = el.parentElement ?? document.body;
+      const fundo = getComputedStyle(pai).backgroundColor;
+      el.style.setProperty('outline-color', fundo, 'important');
+      el.style.setProperty('box-shadow', `0 0 0 6px ${fundo}`, 'important');
+      el.focus();
+      const e = getComputedStyle(el);
+      const lum = (cor: string) => {
+        const m = cor.match(/\d+(\.\d+)?/g);
+        if (!m || m.length < 3) return null;
+        const c = m.slice(0, 3).map((x) => Number(x) / 255)
+          .map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4));
+        return 0.2126 * (c[0] as number) + 0.7152 * (c[1] as number) + 0.0722 * (c[2] as number);
+      };
+      const razao = (a: string, b: string) => {
+        const [la, lb] = [lum(a), lum(b)];
+        if (la === null || lb === null) return 0;
+        const [alto, baixo] = la > lb ? [la, lb] : [lb, la];
+        return (alto + 0.05) / (baixo + 0.05);
+      };
+      const companheira = (e.boxShadow.match(/rgba?\([^)]*\)/) ?? [])[0] ?? null;
+      const pior = Math.max(razao(e.outlineColor, fundo),
+        companheira ? razao(companheira, fundo) : 0);
+      el.style.removeProperty('outline-color');
+      el.style.removeProperty('box-shadow');
+      return pior < minimo ? 'acendeu' : `CEGA (${pior.toFixed(2)}:1)`;
+    }, MINIMO);
+    console.log(`SONDA-ANEL ${sonda}`);
+    console.log(`AMBITO-ANEL focaveis=${medidos} falhas=${falhas.length}`);
+    for (const f of falhas) console.log(`FALHA-ANEL ${f}`);
+
+    expect(sonda, 'SONDA-CEGA: o anel pintado da cor do fundo não foi reconhecido').toBe('acendeu');
+    expect(medidos, 'POPULACAO-ZERO: nenhum focável do KDS foi medido').toBeGreaterThan(20);
+    expect(falhas, `o anel de foco do KDS não se vê:\n${falhas.join('\n')}`).toEqual([]);
+  });
+
   test('o contraste cumpre a WCAG', async ({ page }) => {
     for (const tela of telas(alvos)) {
       await visitar(page, tela, 'es-ES', alvos);

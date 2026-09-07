@@ -106,11 +106,24 @@ async function anelSemContraste(page: Page): Promise<{ medidos: number; maus: Ac
       const lFundo = fundo === null ? null : luminancia(fundo);
       medidos += 1;
       if (lAnel === null || lFundo === null) continue;
-      const razao = (Math.max(lAnel, lFundo) + 0.05) / (Math.min(lAnel, lFundo) + 0.05);
+      // ── O anel tem DUAS faixas, e vê-se se qualquer uma se destacar ───────
+      //
+      // Uma cor só assume que sabe o que está por trás. Não sabe: o mesmo botão
+      // primário assenta ora em faixa clara ora em faixa escura, e foi assim
+      // que os CTA do herói ficaram com anel escuro sobre fundo escuro, 1,00:1,
+      // no que está publicado. A cura foi encostar-lhe uma segunda faixa de
+      // tom oposto — e esta medição tem de a ver, ou reprova a própria cura.
+      //
+      // Exigir que AS DUAS contrastem seria pior do que não medir: a faixa que
+      // iguala o fundo é exactamente a que a outra existe para cobrir.
+      const par = (estilo.boxShadow.match(/rgba?\([^)]*\)/) ?? [])[0] ?? null;
+      const lPar = par === null ? null : luminancia(par);
+      const contraste = (l: number) => (Math.max(l, lFundo) + 0.05) / (Math.min(l, lFundo) + 0.05);
+      const razao = Math.max(contraste(lAnel), lPar === null ? 0 : contraste(lPar));
       if (razao < minimo) {
         maus.push({
           onde: `${el.tagName}"${(el.textContent ?? '').trim().slice(0, 24)}"`,
-          detalhe: `anel ${cor} sobre ${fundo} = ${razao.toFixed(2)}:1`,
+          detalhe: `anel ${cor}${par ? ` + ${par}` : ' (faixa única)'} sobre ${fundo} = ${razao.toFixed(2)}:1`,
         });
       }
     }
