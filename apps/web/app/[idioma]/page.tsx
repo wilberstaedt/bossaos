@@ -252,7 +252,7 @@ export default async function Landing({
           própria. O destaque do Restaurant é editorial — borda coral e
           elevação — e não um crachá «popular» sem justificação. */}
       {mostrar('plans') ? (
-        <section className="ns-seccao ns-seccao--suave" id="plans" data-ns="planos"
+        <section className="ns-seccao ns-seccao--coral" id="plans" data-ns="planos"
                  aria-labelledby="t-plans">
           <div>
             <h2 className="ns-titulo" id="t-plans">{k.planosTitulo}</h2>
@@ -337,7 +337,7 @@ export default async function Landing({
                 </details>
               ))}
             </div>
-            <div className="ns-fecho">
+            <div className="ns-fecho ns-fecho--coral">
               <h3 className="ns-titulo">{k.ctaFinalTitulo}</h3>
               <p className="ns-lead">{k.ctaFinalTexto}</p>
               <p className="ns-chamada">

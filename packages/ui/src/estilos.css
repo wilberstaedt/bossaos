@@ -2389,7 +2389,7 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
   .ns-heroi__grelha { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--bo-espaco-xl); }
 }
 .ns-heroi__media { margin: 0; position: relative; display: grid; gap: var(--bo-espaco-md); }
-.ns-heroi__segunda { width: 62%; margin-left: auto; margin-top: calc(var(--bo-espaco-xl) * -1); }
+.ns-heroi__segunda { width: 74%; margin-left: auto; margin-top: calc(var(--bo-espaco-xl) * -1); }
 .ns-chamada { display: flex; flex-wrap: wrap; gap: var(--bo-espaco-md); margin: var(--bo-espaco-lg) 0 0; }
 /* O sinal em lima: continuidade, nunca perigo nem dinheiro. */
 .ns-sinal { color: var(--bo-realce); font-weight: 600; font-size: 15px; margin-top: var(--bo-espaco-md); }
@@ -2495,3 +2495,46 @@ h3.ns-linha-do-tempo__nome, h3.ns-titulo-pequeno, h3.ns-preco__nome { line-heigh
 .ns-papeis .ns-moldura img { object-fit: cover; object-position: top; height: 520px; }
 .ns-bento__lado .ns-moldura { max-height: 380px; }
 .ns-bento__lado .ns-moldura img { object-fit: cover; object-position: top; height: 380px; }
+
+/* ── A faixa CORAL, e porque é só aqui e no fecho ──────────────────────────
+ *
+ * O norte pede coral como foco em 10–15% e «em áreas maiores apenas uma ou duas
+ * vezes por página». Medido antes: **0,1%** — o coral existia só em filetes.
+ *
+ * As duas áreas são a secção de planos e o painel do fecho. E a regra que
+ * decide o que pode assentar nelas é de contraste, não de gosto: o rótulo em
+ * verde-escuro sobre o coral dá **3,73:1**, que passa para TEXTO GRANDE (≥18,66
+ * px negrito) e não para texto comum. Por isso sobre o coral só vive o título
+ * de secção, que é 48 px, e o corpo continua sobre branco — os cartões de preço
+ * assentam em cima da faixa e levam o texto pequeno com eles. */
+/* A faixa leva mais ar do que as outras de propósito: é uma das duas áreas
+   grandes que o norte pede, e uma faixa apertada volta a ser um filete. */
+.ns-seccao--coral { background: var(--bo-acento-sinal); color: var(--bo-primaria); padding-block: clamp(56px, 5.6vw, 112px); }
+.ns-seccao--coral h2.ns-titulo { color: var(--bo-primaria); }
+.ns-fecho--coral {
+  background: var(--bo-acento-sinal); color: var(--bo-primaria);
+  border-radius: 24px; padding: var(--bo-espaco-xl);
+}
+.ns-fecho--coral .ns-titulo, .ns-fecho--coral .ns-lead { color: var(--bo-primaria); }
+
+/* A linha coral do herói: o §4.2 pede «uma linha coral ou curva liga
+   visualmente as três superfícies». Não é ornamento solto — nasce da moldura
+   principal e corre até à segunda, que é o percurso que a comanda faz. */
+.ns-heroi__media { position: relative; }
+.ns-heroi__media::before {
+  content: ''; position: absolute; z-index: 0;
+  inset-inline: 8%; top: 46%; height: 10px; border-radius: 999px;
+  background: var(--bo-acento-sinal);
+}
+.ns-heroi__media > * { position: relative; z-index: 1; }
+
+/* O destaque do Restaurant é EDITORIAL, que é o que o §4.6 pede em vez de um
+   crachá «popular» sem justificação: uma faixa coral no topo do cartão, com o
+   nome do plano em verde-escuro. O nome é 24 px negrito, portanto texto grande
+   — e sobre o coral isso pede 3:1, que os 3,73 cumprem. */
+.ns-preco--destaque { padding-top: 0; overflow: hidden; }
+.ns-preco--destaque .ns-preco__nome {
+  background: var(--bo-acento-sinal); color: var(--bo-primaria);
+  margin: 0 calc(var(--bo-espaco-lg) * -1) var(--bo-espaco-md);
+  padding: var(--bo-espaco-md) var(--bo-espaco-lg);
+}

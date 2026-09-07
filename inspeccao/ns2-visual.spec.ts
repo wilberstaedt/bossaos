@@ -184,3 +184,154 @@ test.describe('North Star v2 — o sistema da Fase 1', () => {
     expect(falhas, `o sistema da Fase 1 não cumpre:\n${falhas.join('\n')}`).toEqual([]);
   });
 });
+
+/**
+ * AS TREZE CONDIÇÕES DE REPROVAÇÃO do §8, medidas na landing servida.
+ *
+ * A régua `ALVO-NORTH-STAR-V2.md` traduziu-as em instrumento e limiar. Onze
+ * medem-se aqui; a 4 (capturas como anexos) é **juízo humano declarado** e a 13
+ * (o executor aprovar-se) é **processo**, e nenhuma das duas se finge medida.
+ */
+test.describe('North Star v2 — as condições de reprovação, na landing', () => {
+  test('as onze que se medem', async ({ page }) => {
+    test.setTimeout(900_000);
+    const falhas: string[] = [];
+    const AREIA = 'rgb(247, 244, 236)';
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const r = await page.goto('/es-ES', { waitUntil: 'networkidle' });
+    expect(r?.status(), 'POPULACAO-ZERO: a landing não respondeu 200').toBe(200);
+
+    const d = await page.evaluate((areia) => {
+      const sec = [...document.querySelectorAll('section[data-ns]')];
+      const fundos = sec.map((e) => getComputedStyle(e).backgroundColor);
+      const heroi = sec.find((e) => e.getAttribute('data-ns') === 'heroi');
+      // Cartões de texto SEMELHANTES: mesma classe, e sem imagem dentro. Um
+      // cartão com captura não é «mais um cartão de texto».
+      const cartoes = [...document.querySelectorAll('article, .ns-bento__area, .ns-preco')]
+        .filter((e) => !e.querySelector('img')).length;
+      // Área de produto contra área de texto nos primeiros 1800 px.
+      const dentro = (e: Element) => e.getBoundingClientRect().top + window.scrollY < 1800;
+      const areaImg = [...document.querySelectorAll('img')].filter(dentro)
+        .reduce((t, e) => t + e.getBoundingClientRect().width * e.getBoundingClientRect().height, 0);
+      const areaTexto = [...document.querySelectorAll('p, h1, h2, h3, li')].filter(dentro)
+        .reduce((t, e) => t + e.getBoundingClientRect().width * e.getBoundingClientRect().height, 0);
+      const capa = heroi?.querySelector('img') as HTMLImageElement | null;
+      return {
+        seccoes: sec.length,
+        fundosDistintos: new Set(fundos).size,
+        heroiEhAreia: heroi ? getComputedStyle(heroi).backgroundColor === areia : true,
+        cartoes,
+        areaImg: Math.round(areaImg), areaTexto: Math.round(areaTexto),
+        capaLargura: capa ? Math.round(capa.getBoundingClientRect().width) : 0,
+        capaNatural: capa?.naturalWidth ?? 0,
+        frases: [...document.querySelectorAll('p')].map((e) => (e.textContent ?? '').trim())
+          .filter((t) => t.length > 30),
+      };
+    }, AREIA);
+
+    // ── 1 · fundo areia em todas as secções ─────────────────────────────
+    console.log(`C1 seccoes=${d.seccoes} fundosDistintos=${d.fundosDistintos} heroiAreia=${d.heroiEhAreia}`);
+    if (d.fundosDistintos < 3) falhas.push(`C1: ${d.fundosDistintos} fundos distintos (mínimo 3)`);
+    if (d.heroiEhAreia) falhas.push('C1: o herói é areia');
+
+    // ── 2 · mais de dez cartões de texto semelhantes ────────────────────
+    console.log(`C2 cartoesDeTexto=${d.cartoes}`);
+    if (d.cartoes > 10) falhas.push(`C2: ${d.cartoes} cartões de texto (máximo 10)`);
+
+    // ── 3 · o herói mostra uma interface LEGÍVEL ────────────────────────
+    const escala = d.capaNatural ? d.capaLargura / d.capaNatural : 0;
+    const textoNoEcra = 14 * escala;
+    console.log(`C3 capa=${d.capaLargura}/${d.capaNatural} escala=${escala.toFixed(2)} texto14=${textoNoEcra.toFixed(1)}px`);
+    if (d.capaLargura < 650) falhas.push(`C3: a captura tem ${d.capaLargura}px (mínimo 650)`);
+    if (textoNoEcra < 11) falhas.push(`C3: texto de 14px do produto chega a ${textoNoEcra.toFixed(1)}px (mínimo 11)`);
+
+    // ── 5 · mais de oito blocos narrativos ──────────────────────────────
+    if (d.seccoes > 8) falhas.push(`C5: ${d.seccoes} blocos (máximo 8)`);
+
+    // ── 6 · coral e lima só como detalhe ────────────────────────────────
+    //
+    // A régua diz «área de PÍXEIS por cor». Somar caixas de elementos não é
+    // isso: uma caixa transparente conta como se pintasse, e uma cor herdada
+    // conta duas vezes. Aqui fotografa-se a página e contam-se os píxeis que
+    // saíram — que é a mesma disciplina de medir o que o navegador pintou.
+    const tiro = (await page.screenshot({ fullPage: true })).toString('base64');
+    const cores = await page.evaluate(async (b64) => {
+      const img = new Image();
+      await new Promise((ok) => { img.onload = ok; img.src = `data:image/png;base64,${b64}`; });
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const ctx = c.getContext('2d');
+      if (!ctx) return null;
+      ctx.drawImage(img, 0, 0);
+      const d = ctx.getImageData(0, 0, c.width, c.height).data;
+      const perto = (r: number, g: number, b: number, a: number[], t = 26) =>
+        Math.abs(r - (a[0] as number)) <= t && Math.abs(g - (a[1] as number)) <= t
+        && Math.abs(b - (a[2] as number)) <= t;
+      let coral = 0; let lima = 0; let verde = 0; let claro = 0;
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i] as number; const g = d[i + 1] as number; const b = d[i + 2] as number;
+        if (perto(r, g, b, [216, 90, 68])) coral += 1;
+        else if (perto(r, g, b, [221, 234, 145])) lima += 1;
+        else if (perto(r, g, b, [16, 46, 53])) verde += 1;
+        else if (perto(r, g, b, [247, 244, 236]) || perto(r, g, b, [255, 255, 255], 6)) claro += 1;
+      }
+      const total = c.width * c.height;
+      return { coral, lima, verde, claro, total };
+    }, tiro);
+    if (!cores) falhas.push('POPULACAO-ZERO: não consegui contar píxeis');
+    else {
+      const pc = (n: number) => (n / cores.total) * 100;
+      console.log(`C6 coral=${pc(cores.coral).toFixed(1)}% lima=${pc(cores.lima).toFixed(2)}%`
+        + ` verde=${pc(cores.verde).toFixed(1)}% claro=${pc(cores.claro).toFixed(1)}%`);
+      if (cores.lima <= 0) falhas.push('C6: lima com zero presença');
+      if (pc(cores.coral) < 8) {
+        falhas.push(`C6: coral a ${pc(cores.coral).toFixed(1)}% da página (mínimo 8)`);
+      }
+    }
+
+    // ── 7 · mais texto que produto nas duas primeiras telas ─────────────
+    console.log(`C7 areaImg=${d.areaImg} areaTexto=${d.areaTexto}`);
+    if (d.areaImg < d.areaTexto) {
+      falhas.push(`C7: nos primeiros 1800px o texto ocupa ${d.areaTexto} e o produto ${d.areaImg}`);
+    }
+
+    // ── 8 · /product repete a home ──────────────────────────────────────
+    await page.goto('/es-ES/product', { waitUntil: 'networkidle' });
+    const doProduto = await page.evaluate(() => [...document.querySelectorAll('p')]
+      .map((e) => (e.textContent ?? '').trim()).filter((t) => t.length > 30));
+    const comuns = d.frases.filter((f) => doProduto.includes(f)).length;
+    const pct = d.frases.length ? (comuns / d.frases.length) * 100 : 0;
+    console.log(`C8 frasesHome=${d.frases.length} comuns=${comuns} (${pct.toFixed(0)}%)`);
+    if (d.frases.length === 0) falhas.push('POPULACAO-ZERO: a home não deu frases para comparar');
+    else if (pct >= 30) falhas.push(`C8: ${pct.toFixed(0)}% das frases da home repetem-se em /product`);
+
+    // ── 10 · o móvel é o desktop empilhado ──────────────────────────────
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/es-ES', { waitUntil: 'networkidle' });
+    const soMovel = await page.evaluate(() => {
+      const visivel = (e: Element) => {
+        const c = e.getBoundingClientRect();
+        return c.width > 0 && c.height > 0;
+      };
+      return [...document.querySelectorAll('source[media]')].length
+        + [...document.querySelectorAll('[class*="movel"], [class*="movil"]')].filter(visivel).length;
+    });
+    console.log(`C10 componentesSoMovel=${soMovel}`);
+    if (soMovel < 1) falhas.push('C10: nada distingue o móvel do desktop empilhado');
+
+    // ── 11 · métricas ou depoimentos inventados ─────────────────────────
+    const inventado = await page.evaluate(() => {
+      const texto = document.body.innerText;
+      // Números com % ou «x» de resultado, e aspas de depoimento.
+      const suspeitos = texto.match(/\b\d+\s?%|\b\d+x\b|«[^»]{40,}»/g) ?? [];
+      return suspeitos.slice(0, 5);
+    });
+    console.log(`C11 suspeitos=${inventado.length} ${JSON.stringify(inventado)}`);
+    if (inventado.length > 0) falhas.push(`C11: possível métrica ou depoimento: ${inventado.join(' · ')}`);
+
+    console.log(`AMBITO-C13 medidas=11 juizoHumano=1 processo=1 falhas=${falhas.length}`);
+    for (const f of falhas) console.log(`FALHA ${f}`);
+    expect(falhas, `condições de reprovação:\n${falhas.join('\n')}`).toEqual([]);
+  });
+});
