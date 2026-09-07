@@ -28,6 +28,48 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## As cinco imagens que um comprador vê — um conjunto por idioma, e uma guarda
+
+Duas fotografias do Matheus a dizer que o domínio ainda está feio, e por trás
+delas **dois defeitos que nenhuma guarda nossa via**. Régua escrita antes:
+`docs/reviews/ALVO-CAPTURAS-DE-MARKETING.md`. Commit `62ca7ce`.
+
+**Estavam em espanhol em todas as línguas** — e não era o idioma a não propagar:
+**não existia mecanismo para propagar**. Um conjunto só de cinco PNG, com
+`es-ES` cravado nas cinco rotas e no contexto do navegador. Agora há três
+conjuntos, a rota é função do idioma e o contexto segue-a; uma sessão só, com o
+`storageState` partilhado por três contextos, porque abrir três entradas batia
+no limitador de abuso de propósito.
+
+**E estavam sete horas atrasadas** — imagens das 10:15 com dezasseis commits ao
+produto desde então. A `carta-movel` mostrava o campo de busca **cortado**, o
+defeito corrigido nesse mesmo dia. A página que vende o produto anunciava o que
+se tinha acabado de tirar.
+
+**A guarda era o ponto principal, e a mecânica já existia sem estar apontada
+aqui.** A `pagina-de-aprovacao.py` recusa-se a gerar se alguma captura for
+anterior à fonte mais nova do produto, e nunca fora apontada às únicas cinco
+imagens que um comprador vê. Saiu para `scripts/frescura_do_produto.py` — uma
+implementação, dois leitores — e a nova é
+`scripts/validar-capturas-de-marketing.sh`.
+
+| prova | resultado |
+| --- | --- |
+| idioma, medido na **imagem** | **3 somas distintas em 3**, nas cinco composições (antes: iguais) |
+| idioma, medido na **página** | landing es-ES serve `kds-cozinha.1u663dbd`, pt-BR serve `.3kanb4m` |
+| controlo A · frescura | `touch` numa fonte → **recusa**, exit 1; `mtime` reposto → verde |
+| controlo B · idioma | duas línguas com a mesma imagem → **recusa**, nomeando a composição |
+| sondas | as duas acendem antes de qualquer veredicto |
+
+> **E uma asserção que eu parti e que me apanhou:** o `provar-demonstracao.sh`
+> verificava `"$DESTINO/kds-cozinha-1280.png"`, o caminho plano. Com um conjunto
+> por idioma esse ficheiro deixou de existir e ele reprovou — fez o trabalho
+> dele. Passou a perguntar pelos **três**: um KDS em espanhol e nenhum em
+> português era exactamente o defeito que isto veio fechar.
+
+Não toquei nos preços nem no texto de marketing — os dois títulos trocados na
+página de planos ficam na lista do Matheus, como a régua manda.
+
 ## O `next-env.d.ts` — um defeito latente, e a defesa era vigilância
 
 O sénior provou a hipótese que tinha deixado em aberto: um build com
