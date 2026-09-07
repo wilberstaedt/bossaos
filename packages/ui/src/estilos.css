@@ -401,8 +401,15 @@ p { margin: 0; }
 
 /* ── Estado transversal ──────────────────────────────────────────────────── */
 .bo-estado { display: flex; flex-direction: column; gap: var(--bo-espaco-xl); }
+/* 14/20 e não 12: a régua do manual fixa os rótulos em 14/20 e diz que NADA de
+   corpo desce abaixo de 14. Uma sobrancelha em maiúsculas e com espaçamento é
+   precisamente o texto que mais sofre com o tamanho — o `letter-spacing` que a
+   torna legível como rótulo é o mesmo que a torna difícil de ler em corpo
+   pequeno. O peso, as maiúsculas e o espaçamento ficam: o que estava errado era
+   o tamanho, e só ele muda. */
 .bo-estado__sobrancelha {
-  font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  font-size: 14px; line-height: 20px;
+  font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--bo-texto-secundario);
 }
 .bo-estado__cabecalho { display: flex; gap: var(--bo-espaco-xl); align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
@@ -520,9 +527,13 @@ p { margin: 0; }
  * que são o que a pessoa veio clicar. */
 .bo-admin__grupo { display: flex; flex-direction: column; gap: 2px; }
 .bo-admin__grupo + .bo-admin__grupo { margin-top: var(--bo-espaco-lg); }
+/* 14/20, e não os 11 px que aqui escrevi há uma hora. A régua do manual diz
+   rótulos a 14/20 e NADA de corpo abaixo de 14 — e um título de grupo é um
+   rótulo. Escrevi-o pequeno para não competir com os itens, e a maneira de não
+   competir é a opacidade e o peso, não encolher até deixar de se ler. */
 .bo-admin__grupo-titulo {
   margin: 0 0 var(--bo-espaco-xs) var(--bo-espaco-lg);
-  font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+  font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: 0.08em;
   text-transform: uppercase; opacity: 0.55;
 }
 
@@ -885,7 +896,7 @@ p { margin: 0; }
    que o `.bo-publico__conteudo` tinha, e apareceu no mesmo dia — o QR do E09
    (320 px fixos mais o preenchimento do cartão) esticava a página inteira a
    360 px, e nenhuma tela do painel tinha sido medida em móvel até agora. */
-.bo-pagina { max-width: 1100px; margin: 0 auto; padding: var(--bo-espaco-xxl) var(--bo-margem-secretaria) var(--bo-espaco-xxxl); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--bo-espaco-xxl); }
+.bo-pagina { max-width: 1200px; margin: 0 auto; padding: var(--bo-espaco-xxl) var(--bo-margem-secretaria) var(--bo-espaco-xxxl); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--bo-espaco-xxl); }
 @media (max-width: 767px) { .bo-pagina { padding: var(--bo-espaco-xl) var(--bo-margem-movel) var(--bo-espaco-xxl); gap: var(--bo-espaco-xl); } }
 
 /* Os três cartões de plano. `auto-fit` e não três colunas fixas: em 768 px o
@@ -923,7 +934,10 @@ label.bo-planos__item input[type="radio"] {
 .bo-uso__valor { font-family: var(--bo-fonte-titulo); font-size: 28px; line-height: 1.15; margin: 0; font-variant-numeric: tabular-nums; }
 /* "Aún no medido" não é um número, e não se lhe dá o peso de um. */
 .bo-uso__valor--ausente { font-size: 18px; color: var(--bo-texto-secundario); }
-.bo-uso__nota { color: var(--bo-texto-secundario); font-size: 13px; margin: 0; }
+/* 14/20: a nota é CORPO, e a régua não abre excepção para texto de apoio — é
+   precisamente o texto de apoio que fica pequeno primeiro. Apareceu a medir a
+   correcção das outras duas, e é a mesma regra. */
+.bo-uso__nota { color: var(--bo-texto-secundario); font-size: 14px; line-height: 20px; margin: 0; }
 
 /* Tema por plano. */
 .bo-tema { display: grid; gap: var(--bo-espaco-xxl); grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr); align-items: start; }
