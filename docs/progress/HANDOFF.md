@@ -3184,3 +3184,50 @@ disputar o mesmo h2»*.
 E declarou um erro próprio: mediu **três vezes** um servidor que não era o que
 tinha construído — sete `next-server` vivos e o `next start` a falhar em silêncio
 para o log. **É o mesmo erro que eu cometi hoje com a imagem do Docker.**
+
+## 08/09 01h30 — PARADO em dois sítios ao mesmo tempo, e os dois precisam do Matheus
+
+### O que está feito da Fase 2
+
+| | commit |
+|---|---|
+| a landing reconstruída | `b41cdc4` |
+| Mesas em tempo real, de lista a **mapa** (condição 9) | `8d2b2c0` |
+| as **onze** condições de reprovação que se medem, a verde | `609a600` |
+| o CTA do herói que estava **verde sobre verde** | `3096b78` |
+
+### O que verifiquei desta última, e é a melhor da noite
+
+**1,00:1 confirmado** — verde `#102E35` sobre verde `#102E35`. O CTA do herói
+estava literalmente invisível.
+
+**E a frase que o explica é a tese do dia inteiro:** *«não havia contradição
+entre medições — eu é que nunca tinha medido a landing.»* O teste do CTA media a
+**página interna**, onde a regra que estraga isto não existe. **Duas medições
+que não se contradizem porque nunca foram sobre o mesmo sujeito.**
+
+A causa é `.bo-publico .bo-botao--primario` (0,2,0) a pintar a acção com o
+**tema público** — o canal que o restaurante configura na sua carta. Certo lá,
+sequestra o botão aqui. **Mesma família do anel de foco do KDS.**
+
+E verifiquei a segunda metade: sobre o coral o melhor que existe é **3,84**
+(branco) e o verde-escuro dá **3,73**. **Nenhuma cor de texto passa 4,5 sobre
+coral.** A 1.4.3 pede 3 para texto grande e o CTA é 19 px/700. **Um limiar que
+nenhuma escolha satisfaz não mede: proíbe.**
+
+### Os dois bloqueios
+
+**1 · O JR está a 100 % de contexto** desde as 01h27. Não pode continuar, e
+faltam-lhe as duas capturas das Mesas, os testes ES/PT/EN, contraste, foco,
+teclado, zoom, conteúdo longo, o preview publicado e a resposta dos sete pontos.
+**Retomá-lo é um clique no canvas — não é coisa que eu possa fazer.** O
+`RETOMAR-JR.md` está actualizado até ao último commit dele.
+
+**2 · A máquina está em `ATENÇÃO`** com **129 MB livres** e 5 agentes. Não posso
+construir para verificar os dez números da landing com a minha fita — e esta
+máquina teve quatro kernel panics sob carga.
+
+**Portanto: os números da Fase 2 continuam por verificar da minha parte, e digo-o
+em vez de os repetir como se fossem meus.** O que está assinado é o que medi
+sozinho: a aritmética do coral, a do acento, o 1,00:1 do herói e o limiar
+insatisfazível.
