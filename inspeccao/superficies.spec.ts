@@ -46,6 +46,58 @@ const TECTO_CONTORNOS_FRACOS = 9;
 const CONTORNO_JA_CONHECIDO = /bo-campo__controlo|bo-botao--secundario|bo-botao bo-botao--s/;
 
 test.describe('Superfícies: nada desaparece dentro do seu fundo', () => {
+  test('o acento da casa pinta alguma coisa na carta pública', async ({ page }) => {
+    // ── Quatro suites verdes sobre nada ─────────────────────────────────────
+    //
+    // O `--bo-publico-acento` é o único canal de cor que um restaurante
+    // configura na carta. Era calculado, injectado no DOM e coberto por quatro
+    // ficheiros de prova — e não havia UMA regra de CSS a consumi-lo: a carta
+    // media zero pixéis de acento.
+    //
+    // As quatro provas testavam que o token EXISTE. Nenhuma testava que ele
+    // PINTA, e é essa a diferença entre um token e uma cor.
+    //
+    // O papel é decorativo de propósito: a `acento.test.ts` proíbe o acento em
+    // controlos e sinais porque a cor vem do restaurante e não se garante 3:1.
+    // Um filete não diz nada — o nome da casa está escrito por cima.
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const r = await page.goto('/r/insp-marina-oropesa/es-ES/menu', { waitUntil: 'domcontentloaded' });
+    expect(r?.status(), 'POPULACAO-ZERO: a carta pública não abriu').toBe(200);
+
+    const m = await page.evaluate(() => {
+      const raiz = document.querySelector<HTMLElement>('.bo-publico');
+      const cab = document.querySelector<HTMLElement>('.bo-publico__cabecalho');
+      if (!raiz || !cab) return null;
+      const token = getComputedStyle(raiz).getPropertyValue('--bo-publico-acento').trim();
+      const filete = getComputedStyle(cab, '::after');
+      return {
+        token,
+        cor: filete.backgroundColor,
+        pixeis: Math.round(parseFloat(filete.width) || 0) * Math.round(parseFloat(filete.height) || 0),
+      };
+    });
+    expect(m, 'POPULACAO-ZERO: a carta não tem `.bo-publico__cabecalho`').not.toBeNull();
+    console.log(`ACENTO token=${m?.token} cor=${m?.cor} pixeis=${m?.pixeis}`);
+    expect(m?.token, 'o token do acento não chega ao DOM').toBeTruthy();
+    expect(m?.pixeis ?? 0, 'o filete não tem área — não há onde pintar').toBeGreaterThan(0);
+    // ── A caixa não é a tinta ───────────────────────────────────────────────
+    //
+    // A primeira versão contava pixéis e dava-os por pintados. Pus a cor a
+    // `transparent` no controlo negativo e a prova continuou verde com 192
+    // pixéis: uma caixa de 64×3 sem tinta nenhuma. Medir a área é medir onde a
+    // cor caberia, não se ela lá está.
+    expect(m?.cor, 'o filete existe e não tem cor — a caixa não é a tinta')
+      .not.toMatch(/rgba\(0, 0, 0, 0\)|transparent/);
+    // E é a cor do TOKEN, não uma cor qualquer: o que se prova é que o canal do
+    // restaurante chega ao pixel, e não que alguém pintou ali um risco.
+    const [rr, gg, bb] = (m?.cor.match(/\d+/g) ?? []).map(Number);
+    const doToken = (m?.token ?? '').replace('#', '');
+    expect(
+      [rr, gg, bb].map((x) => (x ?? 0).toString(16).padStart(2, '0')).join(''),
+      `o filete está pintado de ${m?.cor} e o token da casa é #${doToken}`,
+    ).toBe(doToken.toLowerCase());
+  });
+
   test('texto e controlos distinguem-se do que está por trás', async ({ page }) => {
     test.setTimeout(600_000);
     const a = await resolverAlvos();

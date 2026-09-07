@@ -945,7 +945,12 @@ p { margin: 0; }
    que o `.bo-publico__conteudo` tinha, e apareceu no mesmo dia — o QR do E09
    (320 px fixos mais o preenchimento do cartão) esticava a página inteira a
    360 px, e nenhuma tela do painel tinha sido medida em móvel até agora. */
-.bo-pagina { max-width: 1200px; margin: 0 auto; padding: var(--bo-espaco-xxl) var(--bo-margem-secretaria) var(--bo-espaco-xxxl); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--bo-espaco-xxl); }
+/* `--bo-largura-maxima` e nao 1200 escrito a mao: o token ja existia com este
+   valor e ja era consumido por quatro regras. Escrevi o numero e o valor estava
+   certo HOJE — mas o mecanismo que o produz e o mesmo que produziu o 1100, e uma
+   resposta escrita envelhece sozinha enquanto uma pergunta feita nao. E o padrao
+   que acabei de curar no botao, e caí nele na mesma tarefa. */
+.bo-pagina { max-width: var(--bo-largura-maxima); margin: 0 auto; padding: var(--bo-espaco-xxl) var(--bo-margem-secretaria) var(--bo-espaco-xxxl); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--bo-espaco-xxl); }
 @media (max-width: 767px) { .bo-pagina { padding: var(--bo-espaco-xl) var(--bo-margem-movel) var(--bo-espaco-xxl); gap: var(--bo-espaco-xl); } }
 
 /* Os três cartões de plano. `auto-fit` e não três colunas fixas: em 768 px o
@@ -1216,6 +1221,26 @@ label.bo-planos__item input[type="radio"] {
 .bo-publico h2 { margin: 0 0 var(--bo-espaco-md); font-size: 20px; }
 
 .bo-publico__cabecalho { display: grid; gap: var(--bo-espaco-sm); justify-items: start; }
+
+/* ── O filete da casa ────────────────────────────────────────────────────────
+ *
+ * decorativo: é o único canal de cor que um restaurante configura na carta, e
+ * até aqui era calculado, injectado no DOM, coberto por quatro suites de prova —
+ * e não pintava um pixel. Quatro verdes sobre nada.
+ *
+ * Decoração e não indicador, e a distinção é a que a `acento.test.ts` guarda: a
+ * cor vem do restaurante e não se garante que chegue a 3:1 sobre a superfície,
+ * portanto não pode dizer nada. Aqui não diz: o nome da casa está escrito por
+ * cima em texto, a navegação tem o seu próprio marcador, e quem não vir este
+ * filete não perde informação nenhuma — perde a marca, que é o que ele é. */
+.bo-publico__cabecalho::after {
+  content: '';
+  display: block;
+  width: 64px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--bo-publico-acento);
+}
 
 /* Fora de horas a carta continua toda aqui — isto é um aviso, não uma cortina. */
 .bo-publico__fechado {
