@@ -132,11 +132,25 @@ menos uma secção — sem isso, uma página que não carregou passaria por medi
 | faq | sim (966) | 2 | 1 | 652 |
 | demo | sim (1194) | 2 | 1 | 728 |
 
-**Hipótese 3 — CONFIRMADA, com o número corrigido.** O conteúdo do hero acaba em
-**x = 728** de 1440 em sete das oito páginas: os **49% da direita não têm nada**.
-A observação de 05/09 dizia 468 px; o valor real é 728. O problema é o mesmo, a
-medida não era — e é exactamente por isto que o §2.2 manda revalidar em vez de
-herdar.
+**Hipótese 3 — CONFIRMADA, com o número corrigido DUAS vezes.** O conteúdo do
+hero acaba em **x = 728** de 1440 em **seis** das oito páginas: os **49% da
+direita não têm nada**. A observação de 05/09 dizia 468 px; o valor real é 728.
+O problema é o mesmo, a medida não era — e é exactamente por isto que o §2.2
+manda revalidar em vez de herdar.
+
+**A segunda correcção é a um número meu, e foi o implementador que a apanhou.**
+Eu escrevi aqui «sete das oito» e a minha própria tabela, três linhas acima, diz
+seis: a FAQ acaba em 652 e a home em 1256. Fui contar e ele tem razão. Escrevi
+uma prosa que a minha própria medição desmentia e não reli uma contra a outra —
+a tabela estava certa desde o princípio, o resumo dela é que não estava.
+
+**E a correcção torna o achado mais afiado, não menos.** Com «sete das oito», a
+home era uma excepção e mais nada. Com seis, veem-se três regimes: a **FAQ é a
+pior de todas** (652, ou seja **55%** de vazio à direita, e não 49), as seis
+partilham exactamente o mesmo 728 — que é repetição de molde, não coincidência —
+e a **home, a 1256, é a única que ocupa a largura**. Porquê a home e só a home
+continua por explicar, e fica registado como número por explicar, não como
+número resolvido.
 
 **Hipótese 6 — CONFIRMADA, e a minha primeira medida era fina de mais.** Comparei
 as páginas por uma impressão digital de contagens de elementos e **nenhuma se
