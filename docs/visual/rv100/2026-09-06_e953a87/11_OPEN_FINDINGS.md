@@ -307,6 +307,21 @@ status: open — encontrado pelo revisor a 07/09, depois do lote L1g
 ```
 
 ```yaml
+id: RV100-022
+severity: P3
+surface: publico
+screen_or_route: carta pública · /r/[publicLocationSlug]/[locale]/menu/produto/[produtoId]
+summary: o caso extremo do §9.2 — «alérgenos extensos» — nunca foi renderizado; o máximo que alguma prova de interface usa são 4 dos 13
+impact: usabilidade na superfície que o cliente do restaurante lê
+expected: §9.2 manda testar «alérgenos e modificadores extensos». O domínio já o faz: `revisaoDaFicha(ALERGENIOS_UE.map(CONTEM))` dá `completa: true` e `porDeclarar: 0`
+observed: o `ALERGENIOS_UE` tem **13**. Nenhuma prova de `inspeccao/` ou `provas/` o importa. O máximo nomeado em qualquer teste acima do domínio são **4 dos 13**, em `provas/catalogo.test.ts`; as três specs que mencionam alergénios nomeiam **zero** — testam o texto do aviso, não a lista
+evidence: `packages/domain/src/alergenios.ts` · `packages/domain/src/alergenios.test.ts:138` · `provas/catalogo.test.ts`
+fix_criteria: renderizar um prato com os 13 na CARTA PÚBLICA e medir transbordo, alvos e legibilidade — não no catálogo interno, porque o ecrã que decide se alguém come é o que o cliente lê. Um prato com 4 alergénios não prova nada sobre 13
+decisao: nao-precisa-de-autorizacao
+status: open — encontrado pelo revisor a 07/09
+```
+
+```yaml
 id: RV100-020
 severity: P4
 surface: marketing
