@@ -977,3 +977,106 @@ gasta o crédito de que precisa quando gritar com razão.
 Fica para quando as oito jornadas estiverem escritas. **Isto é adiamento
 declarado, não esquecimento** — que é a diferença entre uma pendência e uma
 dívida escondida.
+
+---
+
+## A noite das nove formas — 06→07/09
+
+Uma noite inteira de revisão da RV100, com dois implementadores. Contei **mais de
+quinze** medições minhas que deram a resposta errada, e nenhuma por descuido:
+cada uma tinha um instrumento plausível a apontar para o sítio errado.
+
+**Escrevo-as por FORMA e não por instância**, porque a lição está escrita a três
+metros daqui, no cabeçalho do `validar-no-commit.sh`: *«o commit que corrigiu
+isto removeu a INSTÂNCIA e não impediu a CLASSE, por isso voltou uma etapa
+depois»*.
+
+### 1. Procurei o meu vocabulário em vez do do produto — seis vezes
+
+Procurei `offline` e tive zero: o produto chama-lhe **`semRede`**. Procurei
+`acessibilidade` e encontrei o `provar-acesso.sh`, que é sobre **autorização**.
+Procurei `role="dialog"` e tive zero no produto inteiro: o `<dialog>` **nativo**
+tem semântica implícita. Procurei `plante` dentro do `validar-no-commit.sh` e não
+estava lá, porque ele enumera as guardas por **glob**.
+
+**A pergunta que resolve:** *como é que ESTE código chamaria a esta coisa?* E
+quando não sei, pergunto ao artefacto — o catálogo de desenho enumerou-me os
+seis estados que eu andava a adivinhar.
+
+### 2. Substring a passar por palavra — quatro vezes
+
+`lorem` dentro de `valorEm`. `logo` dentro de `catálogo`. `tema` dentro de
+`sistema` — e essa é um **defeito do produto**, porque o `-g` do guião do tema
+não tem fronteira e arrasta quatro casos alheios. `iva` dentro de `alternativa`
+e de `activa`.
+
+### 3. Uma funcionalidade que a ferramenta não tem — duas vezes
+
+`git grep -E '\bfoo'` **não casa nada**: o `\b` não existe ali. Deu-me um «zero
+chamadores» e um «zero literais de cor», ambos falsos, e o segundo só caiu
+porque corri o mesmo padrão contra um ficheiro onde eu **sabia** haver 26.
+
+### 4. Contei o texto do programa e chamei-lhe a coisa que ele desenha — três vezes
+
+`height: [0-9]+px` contou **`line-height`** e quase me deu um defeito de zoom
+inexistente. Contar `bo-botao--primario` por ficheiro deu três primários no ecrã
+que fecha contas — e eram **três ramos de um ternário**, um só renderiza.
+
+**Regra:** uma regra sobre o que se vê responde-se no DOM. Uma contagem no
+código-fonte responde a outra pergunta.
+
+### 5. O cano comeu o código de saída — duas vezes
+
+`cmd | tail` devolve o estado do `tail`. Deu-me `exit=0` com `FALHA` impressa por
+baixo. **Está escrito no meu próprio runbook** e voltei a fazer.
+
+### 6. Li o número como a explicação que me convinha — duas vezes
+
+«Zero `<dialog>` cru» tem duas leituras: *tudo passa pelo componente* e *não há
+diálogos*. **Escolhi a primeira sem dar por isso** e o implementador provou a
+segunda. E vi **dois vinte-e-noves** — namespaces com código, etapas no atlas — e
+li-os como o mesmo conjunto; são 29 e 25, e ele disse-o melhor do que eu diria:
+*«dois conjuntos com o mesmo cardinal é como uma confirmação falsa se disfarça de
+confirmação»*.
+
+### 7. Medi um eixo e presumi o segundo — duas vezes, em direcções opostas
+
+Contei o que as rotas **pedem** sem ver o que o arnês **já dá**: estimativa
+inflacionada. Depois medi os **parâmetros** e presumi o **alcance**: deflacionada.
+
+**Regra que fica:** quando a estimativa oscila muito entre duas medições, a
+variável nova não é a resposta — **é o eixo que eu não tinha medido**.
+
+### 8. Inflexão — duas vezes
+
+`simultan` não apanha `SIMULTÂNEAS`. `reveja|rever` não apanha **«Revise»**, e
+por isso contei 3 recuperações em 23 quando havia mais.
+
+### 9. Assumi a forma de um identificador — uma vez
+
+`^[A-Z]+-[0-9]+` deu **17** onde a guarda dizia 46. Os 29 em falta eram
+`RES-B-001` — **dois segmentos**. E o desacordo foi o que salvou a medição: um
+padrão que desse 46 por acaso teria escondido que a dívida é quase toda de
+reservas.
+
+---
+
+### O que separou os erros que morreram dos que iam para o relatório
+
+Todos foram apanhados pela mesma coisa, e não foi cuidado: **um segundo número
+que discordava do primeiro**, ou **um controlo apontado a um sítio onde eu sabia
+a resposta**.
+
+O implementador escreveu-o na sua sonda melhor do que eu: *«um detector partido
+reporta exactamente o mesmo que um produto sem diálogos: zero»*. **Zero não é uma
+medição** enquanto o mesmo instrumento não acertar num alvo conhecido.
+
+### E o que isto diz sobre a revisão a dois
+
+Das nove formas, **três foram-me apanhadas pelos implementadores** — o «zero
+diálogos», os «dois vinte-e-noves» e a régua do herói que não media nada na home.
+Nenhuma delas eu teria encontrado sozinho, porque em todas eu tinha um número a
+dar-me razão.
+
+**É para isto que são dois.** Não para dividir trabalho — para que o erro de um
+tenha alguém do outro lado com um instrumento diferente.
