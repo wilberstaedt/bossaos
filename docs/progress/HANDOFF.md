@@ -2752,3 +2752,40 @@ Auditar as minhas próprias afirmações deu **um defeito real** — o registo
 aberto, que estava no ar — e **duas confirmações**, esta e a das fixtures. A
 afirmação aguenta, e agora sei **o que a sustenta** em vez de me lembrar de a
 ter feito.
+
+## 07/09 23h35 — a armadilha que eu nomeei voltou a morder, com a cura de segurança dentro
+
+Há dois ticks escrevi: **«nunca nomear um commit numa promessa de publicação»**.
+Voltou a acontecer **no mesmo serão** — e desta vez com um defeito de segurança
+em jogo.
+
+O pacote que eu preparei às 22h30 era `ccef01b`. Desde então entraram **as duas
+alterações de autenticação**. E medi o que está **ao vivo**:
+
+    ocorrências de `disableSignUp` no código publicado: 0
+
+**Se ele autorizasse «o pacote», a cura de segurança não ia.** A porta continua
+aberta em produção neste momento.
+
+### E a boa notícia, que fui verificar em vez de supor
+
+Os **portões 1 e 2 correm ANTES da verificação de autorização** — o guião
+re-prova sempre, autorizado ou não, e publica `HEAD` por omissão. **O mecanismo
+é são.** O risco vivia inteiramente na minha linguagem: só quem for buscar a
+referência que eu nomeei publica a versão velha, e a única pessoa a quem eu dei
+referências foi ele.
+
+### O pacote novo, verificado por dentro
+
+Re-preparado em `HEAD` (`2cf3dc0`) — portões abertos, saída 0, **recusou
+publicar por falta de autorização**. E não fiquei pelo intervalo de commits:
+
+| | |
+|---|---|
+| `disableSignUp: true` **dentro do tar** | linha 86 de `packages/auth/src/autenticacao.ts` |
+| ficheiros | 2183 |
+| capturas | 30, os três idiomas |
+| com forma de segredo | 1 — `.env.example`, o mesmo de sempre |
+
+**Ler o intervalo de commits diria a mesma coisa e não seria a mesma prova.**
+O que vai no ar é o que está no ficheiro dentro do pacote.
