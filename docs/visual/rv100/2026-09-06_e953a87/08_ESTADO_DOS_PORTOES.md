@@ -13,7 +13,7 @@
 | --- | --- |
 | logo e ícone aprovados usados correctamente | **conforme** — assinatura `145×50` ligada (era `81×28` solta); `app/icon.png` vem do ícone aprovado |
 | identidade reconhecível sem depender só do wordmark | **MEDIDO EM PARTE** |
-| coral, verde-lima, verde-escuro e superfícies com funções consistentes | **MEDIDO a 07/09 15h25, e NÃO É consistente** — «activo» tem **duas cores**: a barra do backoffice usa `--bo-realce` (lima `#DDEA91`) e a navegação pública e do Staff usa `--bo-navegacao-activa`, que resolve para `--bo-acento-sinal` (coral `#D85A44`). Uma função, dois tokens, duas cores. Píxeis: lima em M01 **1294**, M02 ~420, M03 **72**, e **zero** em Staff, KDS e carta |
+| coral, verde-lima, verde-escuro e superfícies com funções consistentes | **NÃO PASSA.** MEDIDO a 07/09 15h25, e **não é consistente** — «activo» tem **duas cores**: a barra do backoffice usa `--bo-realce` (lima `#DDEA91`) e a navegação pública e do Staff usa `--bo-navegacao-activa`, que resolve para `--bo-acento-sinal` (coral `#D85A44`). Uma função, dois tokens, duas cores. Píxeis: lima em M01 **1294**, M02 ~420, M03 **72**, e **zero** em Staff, KDS e carta |
 | tipografia, espaço, raios, bordas e movimento tokenizados | **conforme** — verificado número a número contra o manual na secção 3 |
 | não existe identidade antiga ou paralela | **conforme** — os dois corais são um sistema com fronteira medida no ADR 0001, e escrevi a guarda que a mantém |
 | tema Starter e personalização respeitam limites | **conforme** — o ecrã desce o botão a secundário e é o servidor que recusa |
@@ -37,9 +37,9 @@
 | --- | --- |
 | shells diferenciam as cinco superfícies | **conforme** — alvos de toque por superfície, 44 no público e 48 na operação |
 | tarefas frequentes rápidas e claras | **MEDIDO EM PARTE** — «rápida» medida, «clara» é juízo humano |
-| touch, teclado, foco, zoom e conteúdo extremo | **MEDIDO nas superfícies COM SESSÃO a 07/09 17h10, e há um NÃO CONFORME** — backoffice: anel **13,05:1**, 200% sem rolagem, conforme. Staff: anel 13,05:1, mas a 200% **rola 3 px** (198 > 195). KDS: **anel a 1,00:1** — a cor do anel é a cor do fundo, logo quem navega a teclado não vê onde está. As públicas continuam conformes (62 focáveis, 18/18 por `Tab`, 200% sem rolagem) |
+| touch, teclado, foco, zoom e conteúdo extremo | **NÃO PASSA — critério COMPOSTO, e vale o pior das partes.** **MEDIDO nas superfícies COM SESSÃO a 07/09 17h10, e há um NÃO CONFORME** — backoffice: anel **13,05:1**, 200% sem rolagem, conforme. Staff: anel 13,05:1, mas a 200% **rola 3 px** (198 > 195). KDS: **anel a 1,00:1** — a cor do anel é a cor do fundo, logo quem navega a teclado não vê onde está. As públicas continuam conformes (62 focáveis, 18/18 por `Tab`, 200% sem rolagem) |
 | loading, empty, error, offline, denied, upgrade coerentes | **conforme** |
-| KDS legível à distância e Staff com uma mão | **MEDIDO a 07/09 17h20, e o Staff é CONFORME COM RESSALVA** — na rota real com sessão, a 390×844: **10 alvos, página de 844 px (nada exige rolar), zero alvos abaixo de 48 px**. As ACÇÕES (`Añadir`, `Reintentar ahora`) estão a **y=704**, na zona do polegar; a NAVEGAÇÃO está a **y=128–408**, no terço superior, que é o mais difícil de alcançar com uma mão. Funciona para o que se FAZ; alcança-se pior o que se NAVEGA, e isso é juízo de desenho. O KDS a metros passou a **MEDIDO a 07/09 19h15, e NÃO PASSA nos casos comuns** — é geometria, não opinião: o corpo a **18 px** subtende **10,7′** numa TV de 43" a 2 m, contra os **16′** da norma ergonómica. Só chega ao confortável a 55"/1,5 m ou 65"/≤2 m. Para 43" a 2 m seriam precisos **27 px** |
+| KDS legível à distância e Staff com uma mão | **NÃO PASSA — critério COMPOSTO, e vale o pior das partes.** Junta duas superfícies numa célula só, e as duas divergem: qualquer veredicto único aqui mente numa delas. **MEDIDO a 07/09 17h20, e o Staff é CONFORME COM RESSALVA** — na rota real com sessão, a 390×844: **10 alvos, página de 844 px (nada exige rolar), zero alvos abaixo de 48 px**. As ACÇÕES (`Añadir`, `Reintentar ahora`) estão a **y=704**, na zona do polegar; a NAVEGAÇÃO está a **y=128–408**, no terço superior, que é o mais difícil de alcançar com uma mão. Funciona para o que se FAZ; alcança-se pior o que se NAVEGA, e isso é juízo de desenho. O KDS a metros passou a **MEDIDO a 07/09 19h15, e NÃO PASSA nos casos comuns** — é geometria, não opinião: o corpo a **18 px** subtende **10,7′** numa TV de 43" a 2 m, contra os **16′** da norma ergonómica. Só chega ao confortável a 55"/1,5 m ou 65"/≤2 m. Para 43" a 2 m seriam precisos **27 px** |
 | não há regressão de comportamento | **conforme** — `marketing.spec.ts` **68/68**, corrido às 12h18 de 07/09. Estava aqui «65/65», que era verdade quando foi escrito: entretanto nasceram três provas. Um número num portão sem a hora a que foi medido apodrece em silêncio |
 
 ## §12.5 — Portão de cobertura · 6 critérios
@@ -177,3 +177,34 @@ não vou dá-lo por medido com um número tirado da página errada.
 **É a mesma família do que apanhei hoje três vezes:** um instrumento que devolve
 um número plausível sobre o sujeito errado. A diferença é que desta vez o número
 era pequeno de mais para ser verdade, e foi isso que o denunciou.
+
+
+## Porque é que dois critérios passaram a dizer «NÃO PASSA» primeiro — 07/09 22h00
+
+**Nenhuma medição mudou nesta revisão. Mudou o que a célula diz primeiro.**
+
+Dois destes critérios juntam coisas diferentes numa célula só — «KDS legível à
+distância **e** Staff com uma mão», «touch, teclado, foco, zoom **e** conteúdo
+extremo». As metades divergem: o Staff é conforme com ressalva e o KDS **não
+passa**; o teclado e o zoom passam e o foco do backoffice **não**.
+
+Um critério composto **não pode ter um veredicto único** — qualquer resposta
+mente numa das metades. E mentia para o lado optimista, porque a célula abria
+com a metade boa. **Um classificador que leia a primeira palavra arruma-o nos
+conformes, e foi exactamente o que o meu fez hoje.**
+
+A regra passa a ser a do resto do repositório: **um critério com partes vale o
+pior das suas partes**, e a célula diz isso antes de explicar. Igual ao tecto por
+superfície das guardas — um total deixa um defeito novo esconder-se atrás de um
+resolvido.
+
+### O que isto faz ao número, e o número piora
+
+| | |
+|---|---|
+| o que eu disse ao Matheus às 17h18 | **19 conformes** de 26 |
+| o que é verdade agora | **18** |
+
+E a descida não é desta revisão: aconteceu às **19h15**, quando o KDS passou a
+medido-e-não-conforme. **Eu reportei a subida do «medidos» e não reportei a
+descida do «conformes».** Troquei para a métrica que subia, sem o dizer.
