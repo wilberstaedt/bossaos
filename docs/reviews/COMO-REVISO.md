@@ -1778,3 +1778,42 @@ Não me chegou como instrumento — chegou como *achado*, já com a forma de
 conclusão. Toda a doutrina aqui é sobre não acreditar nos meus instrumentos; o
 que me faltava é que **a saída de outro agente é um instrumento na mesma**, e o
 facto de vir escrita em prosa afirmativa esconde-o melhor do que qualquer código.
+
+---
+
+## A décima segunda forma: uma guarda que conta a ADOPÇÃO de um mecanismo, não o seu RESULTADO — 07/09
+
+**Fechei o P1 dos ids malformados e a cura tem um buraco.** A frase com que o
+fechei foi esta, e é o próprio erro:
+
+> «A partição fecha: 128 páginas sob um segmento de id, 128 alcançam o invólucro,
+> 0 vão à base por fora dele.»
+
+**A partição é estanque — e sobre a propriedade errada.** «Alcançar o invólucro»
+não é «devolver 404». Contei **quantas páginas adoptaram o mecanismo**, e chamei
+a isso ter provado **que o mecanismo funciona**. São coisas diferentes, e a
+distância entre elas é exactamente onde o defeito vive: **há três invólucros de
+escopo e a cura cobre dois.** `comEscopo` e `comIdentidade` traduzem o `P2023`;
+**`comEscopoSerializavel` não tem tradutor nenhum** — tem um `exigirUuid` de um
+único campo, que parece cobertura e guarda um id de vários.
+
+**Todas as minhas defesas passaram.** O controlo negativo acendia numa página
+que escapasse ao invólucro — e nenhuma escapa. A contagem reconciliava. A sonda
+funcionava. **Nada disto podia ver o buraco, porque tudo media a mesma
+propriedade: quem chama, e não o que sai.**
+
+**É a irmã da população que fecha por soma.** Ali o erro era um piso (`> 0`) onde
+era preciso completude; aqui a completude está lá, perfeita, **medida sobre o
+predicado errado**. Uma partição correcta sobre a propriedade errada é mais
+perigosa do que uma contagem frouxa, porque exibe rigor.
+
+**E eu tinha escrito a saída no próprio registo:** «FICA DECLARADO POR ELE e
+aceito: a ponta do navegador — que o 404 CHEGA ao cliente — está por medir.»
+**Nomeei a única coisa que faltava medir e fechei o achado à mesma.** Nomear uma
+lacuna não é fechá-la; escrevê-la ao lado de um veredicto de conforme faz dela
+decoração.
+
+**A regra que fica: uma guarda tem de medir o RESULTADO na ponta de que o
+utilizador vive — o código HTTP que sai — e não a presença do mecanismo que
+supostamente o produz.** E sempre que eu aceitar uma ponta «por declaração», o
+achado fica ABERTO até ela ser medida, sem excepção.
