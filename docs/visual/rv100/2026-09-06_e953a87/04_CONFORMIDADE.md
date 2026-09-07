@@ -937,3 +937,54 @@ lotes:**
 **As duas cadeias de que ele mais desconfiava são as duas que mais crescem — e
 cabem.** É o fecho que uma declaração de `NÃO MEDI` merece: não «passou», mas
 «passou sobre exactamente aquilo que estava em causa».
+
+---
+
+## O terceiro estado por explicar do M05: o KDS **nota**, noutro sítio
+
+A captura do M05 mediu **697 caracteres antes e depois** da queda de rede e
+concluiu que *«o KDS não nota»* — com um controlo válido, porque o M04 no mesmo
+método mexe de 371 para 440.
+
+**A medição está certa e a conclusão não.** O ecrã principal não muda — **e é
+deliberado.**
+
+Existe uma rota `kds/[locationId]/[stationId]/**ligacao**`, alcançável do ecrã
+principal pela cápsula **«Tu estación de trabajo»** (a chave `estacao`), e o
+estado tem texto próprio: `estacaoSemLigacao` — *«Esta estación no ha dado señal.
+Lo que esté por preparar…»*.
+
+**E a decisão está escrita na própria página, com o requisito citado:**
+
+> «É um **ESTADO**, não um alerta que passa. *«Estação offline gera alerta — não
+> um ícone discreto que ninguém olha»*, e **nenhuma informação pode existir só
+> como um apito**. Isto fica no ecrã e **sobrevive a uma recarga**.»
+
+E resolve primeiro o que quem chega ali precisa de saber:
+
+> «Esta tela mostra o **último sinal** e diz, por palavras, que **um sinal não é
+> uma entrega**. E mostra o que está por preparar apesar disso: **uma estação sem
+> ligação não perde trabalho** — o trabalho está na base, contado, e é isso que
+> quem chega a este ecrã em pânico precisa de ler primeiro.»
+
+### Duas superfícies, dois desenhos de offline, os dois deliberados
+
+**No Staff, o offline manifesta-se em linha** — o `Sin enviar` e a contagem do
+que está pendente **naquele telemóvel**. É a mão que compõe o pedido, e a
+informação tem de estar onde a mão está.
+
+**No KDS, é um ecrã.** É uma superfície montada na parede, lida ao longe, onde um
+banner que aparece e desaparece é exactamente o «ícone discreto que ninguém
+olha».
+
+**Não é um defeito, e também não é um verde limpo.** O que fica em aberto é uma
+pergunta de desenho — **se o ecrã principal deve também sinalizar**, e não se o
+mecanismo existe. **Existe, é alcançável e sobrevive a uma recarga.** E a
+resposta a essa pergunta é da secção 7, e é do Matheus.
+
+### Nota de método — a décima terceira
+
+Procurei `ligacao` no ecrã principal, tive zero, e ia escrever que o KDS não leva
+lá ninguém. **A cápsula chama-se «Tu estación de trabajo».** Procurei o nome da
+rota em vez do rótulo que o cozinheiro lê — e **eu tinha a captura à minha
+frente, com a cápsula lá escrita, há sete horas**.
