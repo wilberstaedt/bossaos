@@ -2841,3 +2841,30 @@ precisa.
 
 **É a defesa mais barata que encontrei o dia todo:** entre um número que exige
 manutenção e um que não a exige, muitas vezes só está um verbo.
+
+---
+
+## Verifiquei as duas páginas que lhe mandei, e digo onde o motor está — 19h00
+
+Mandei ao Matheus dois links hoje — o percurso de teste e a lista de decisões — e
+**não tinha aberto nenhum**. É a minha própria regra, e já me mordeu duas vezes
+neste dia. Abri: as duas renderizam, no tema dele, com os endereços tocáveis, o
+bloco de acesso legível e as recomendações separadas do que é juízo dele.
+
+**E digo o estado do motor sem o maquilhar.** Os últimos ticks tiveram rendimento
+a cair: acabei a corrigir um tempo verbal num documento que só eu leio. Não foi
+trabalho inútil — a regra que saiu dali é boa — mas **não é onde o projecto
+precisa de mim.**
+
+A razão é simples e não é um problema: **quase tudo o que resta está com ele.**
+
+- **Bloqueado na palavra dele:** publicar o pacote que corrige o anel invisível.
+- **Bloqueado no portão dele:** a propagação às 396 telas e as 792 composições.
+- **Decisões dele:** as treze da lista, das quais quatro são critérios de portão.
+- **Não medível por mim:** o KDS lido a metros.
+
+**Fica dito, e é o oposto de uma queixa:** o motor não está parado por falta de
+trabalho — está parado no sítio certo, que é à porta de quem decide. Enquanto
+espero, o que me cabe é não inventar trabalho para parecer ocupado, e **manter o
+que já está medido a não apodrecer** — que foi, aliás, metade do que fiz nas
+últimas horas e o que mais defeitos deu.
