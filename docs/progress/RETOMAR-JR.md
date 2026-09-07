@@ -1077,3 +1077,92 @@ de guarda, senão é um esconderijo.**
 **O que os une: em todos, o instrumento decidiu o que existe.** E o que os
 apanhou foi sempre a mesma coisa — plantar o defeito e exigir ver o vermelho,
 antes de acreditar em qualquer zero.
+
+---
+
+# ⚠ O NORTH STAR VISUAL v2 — escrito 08/09 01h15, com o JR a 98% de contexto
+
+**Se estás a ler isto numa sessão nova, é isto que estava a acontecer.** O
+documento acima é de 07/09 14h48 e não sabe nada do que se segue.
+
+## O que é
+
+O Matheus deu um norte novo a 08/09: `docs/bossaos/NORTH_STAR_VISUAL_V2.md`.
+**A interpretação visual da RV100 está REPROVADA** — «parece documentação
+organizada em componentes» — e não se propaga mais aquele padrão.
+
+Reconstrói-se **a landing espanhola** e **uma tela autenticada, «Mesas em tempo
+real»**, com direcção artística a sério. Conceito **Bossa in Motion**.
+
+## Os limites duros, e são o mais fácil de esquecer a meio de um redesign
+
+- **Fases 0, 1 e 2 APENAS.** Paras em `NORTH STAR PRONTA PARA NATHALIA`.
+- **Não declaras aprovação em nome da Nathalia.** O §11 é dela; nenhum número
+  substitui o olho dela.
+- **Não propagas às 396 telas.** Isso é a Fase 3 e só depois da aprovação
+  **escrita**.
+- **Não corres a AF100.**
+- Zero depoimentos, clientes ou métricas inventadas. Sem fotografia de pessoas.
+- **Não assinas o teu próprio resultado.**
+
+## Onde está o estado
+
+| | |
+|---|---|
+| congelamento e inventário | `docs/visual/ns2/2026-09-08_483c4a7/` |
+| régua dos **14 números** (§3.2, §4) | `docs/reviews/ALVO-NUMEROS-DO-NORTE.md` |
+| régua das **13 condições de reprovação** (§8) | `docs/reviews/ALVO-NORTH-STAR-V2.md` |
+| fita métrica do sénior | `scripts/medir-norte.mjs` — **mede, não é guarda** |
+| a tua guarda da Fase 1 | `inspeccao/ns2-visual.spec.ts` + `scripts/validar-sistema-ns2.sh` |
+
+## Decisões JÁ TOMADAS — não as voltes a discutir
+
+**O coral.** O norte lista `#F5664D`; o código tem `#D85A44`. **Nenhum serve as
+duas exigências** e está demonstrado: para 3:1 sobre areia é preciso L ≤ 0,2684;
+para 4,5:1 com texto verde é preciso L ≥ 0,2795. **Os intervalos não se tocam.**
+A saída **não é um terceiro coral** — é o **tamanho do texto**: com texto grande
+basta 3:1, a janela abre para ≥ 0,1696 e o `#D85A44` cabe. **O rótulo do CTA é
+19 px/700 por razão medida.**
+
+**O acento na linha 1714.** Fica o acento da marca e **não** o
+`--bo-acento-sinal`: sobre o **verde** do `.bo-mkt__fecho` o acento dá **4,71** e
+o sinal dá **3,73**, abaixo dos 4,5. **Trocar piorava.** A guarda pergunta pelo
+token e não pela superfície — está justificado em comentário, de propósito.
+
+**O prefixo `ns-`.** As 396 telas continuam em `bo-`. Nada do novo lhes toca.
+
+**O H2 não era um valor errado: era ESPECIFICIDADE.** `.bo-publico h2` é (0,1,1)
+e `.ns-titulo` é (0,1,0) — perde por construção, esteja onde estiver. Curou-se a
+empatar com `h2.ns-titulo` e a ganhar por ordem, **sem `!important`**.
+
+## Armadilhas já pagas nesta frente — não as pagues outra vez
+
+1. **Mediste três vezes um servidor que não era o teu.** Sete `next-server`
+   vivos, porta ocupada, `next start` a falhar em silêncio para o log. Confirma
+   sempre **qual** servidor responde antes de acreditar na medição.
+2. **O Playwright ignora ficheiros em silêncio.** Os padrões do
+   `playwright.config` **não estão ancorados**: `/tema\.spec\.ts/` casava com
+   `ns2-sistema.spec.ts`. Um ficheiro de teste que não corre não dá erro.
+3. **Sete plantes estavam em letra morta** e cinco vieram de alterações tuas.
+   Um plante morto **não prova nada e ACUSA o produto**. Corre
+   `validar-plantes.sh` depois de mexer em marcação.
+4. **Uma suite sem corredor «não dá verde nem vermelho: desaparece.»**
+
+## Onde a coisa estava
+
+- **Fase 0** feita pelo sénior. Falta só **capturar «Mesas em tempo real»**
+  (0.4), bloqueada por máquina.
+- **Fase 1 FECHADA** a 08/09 00h50, com a linha de base **a zero**: testes de UI
+  43/0, `validar-plantes` 0 com 319 a pegar, `validar-silenciadores` 0,
+  `validar-suites-com-guiao` 0.
+- **Fase 2 a meio.** A landing entregue em `b41cdc4`; as Mesas em `8d2b2c0`.
+  **Os números da landing ainda NÃO foram verificados pelo sénior.**
+- **Correcção pendente:** o «antes» dos fundos distintos é **2**, não 1 — o CTA
+  final já era verde. O delta honesto é **2 → 4**.
+
+## O que falta para o portão da Fase 2
+
+As seis capturas obrigatórias (LP e Mesas, 1440×900 e 390×844, primeira
+viewport e página completa), testes em ES/PT/EN, contraste, foco, teclado, zoom
+e conteúdo longo, **um preview verificável publicado**, e a resposta com os sete
+pontos do §9. **Depois páras.**
