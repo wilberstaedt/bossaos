@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { Aviso } from '@bossaos/ui';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
@@ -37,6 +38,24 @@ export default async function Demo({
 }) {
   const { idioma } = await params;
   const { erro } = await searchParams;
+  /**
+   * O que a pessoa escreveu, devolvido depois de uma recusa (RV100-021).
+   *
+   * Vazio quando não houve recusa — e nesse caso os campos nascem vazios, como
+   * devem. O `catch` é largo de propósito: um cookie corrompido não pode
+   * impedir o formulário de aparecer, e a consequência de o ignorar é a de
+   * antes, não um ecrã partido.
+   */
+  const repor = await (async () => {
+    try {
+      const cru = (await cookies()).get('bo_demo_repor')?.value;
+      if (!cru) return {} as Record<string, string>;
+      const v = JSON.parse(cru) as Record<string, unknown>;
+      return Object.fromEntries(
+        Object.entries(v).filter(([, x]) => typeof x === 'string'),
+      ) as Record<string, string>;
+    } catch { return {} as Record<string, string>; }
+  })();
   const k = mensagensDe(idioma).mktE10;
 
   return (
@@ -77,27 +96,28 @@ export default async function Demo({
           <input type="hidden" name="idioma" value={idioma} />
           <div className="bo-campo">
             <label className="bo-campo__rotulo" htmlFor="nome">{k.demoNome}</label>
-            <input className="bo-campo__controlo" id="nome" name="nome" required
+            <input className="bo-campo__controlo" id="nome" name="nome" defaultValue={repor.nome ?? ''} required
                    autoComplete="name" maxLength={200} />
           </div>
           <div className="bo-campo">
             <label className="bo-campo__rotulo" htmlFor="email">{k.demoEmail}</label>
-            <input className="bo-campo__controlo" id="email" name="email" type="email" required
+            <input className="bo-campo__controlo" id="email" name="email" defaultValue={repor.email ?? ''} type="email" required
                    autoComplete="email" maxLength={320} />
           </div>
           <div className="bo-campo">
             <label className="bo-campo__rotulo" htmlFor="restaurante">{k.demoRestaurante}</label>
-            <input className="bo-campo__controlo" id="restaurante" name="restaurante" required
+            <input className="bo-campo__controlo" id="restaurante" name="restaurante" defaultValue={repor.restaurante ?? ''} required
                    autoComplete="organization" maxLength={200} />
           </div>
           <div className="bo-campo">
             <label className="bo-campo__rotulo" htmlFor="telefone">{k.demoTelefone}</label>
-            <input className="bo-campo__controlo" id="telefone" name="telefone"
+            <input className="bo-campo__controlo" id="telefone" name="telefone" defaultValue={repor.telefone ?? ''}
                    autoComplete="tel" inputMode="tel" maxLength={40} />
           </div>
           <div className="bo-campo">
             <label className="bo-campo__rotulo" htmlFor="mensagem">{k.demoMensagem}</label>
-            <textarea id="mensagem" name="mensagem" maxLength={4000} />
+            <textarea id="mensagem" name="mensagem" maxLength={4000}
+                      defaultValue={repor.mensagem ?? ''} />
           </div>
           {/* ── O consentimento para MARKETING, separado e por marcar ───────
               O §6.7 manda «diferenciar contacto transaccional de consentimento

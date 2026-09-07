@@ -90,12 +90,20 @@ export default async function Confianca({ params }: { params: Promise<{ idioma: 
       </section>
 
       <section className="bo-mkt__seccao" aria-labelledby="pilares">
-        <h2 id="pilares">{k.confiancaTitulo}</h2>
+        <h2 id="pilares">{k.confiancaPaginaTitulo}</h2>
+        <p className="bo-publico__texto">{k.confiancaPaginaTexto}</p>
         <div className="bo-mkt__grelha">
           {PILARES.map((p) => (
             <article key={p} className="bo-mkt__cartao">
               <h3>{k[p]}</h3>
               <p>{k[`${p}Texto` as keyof typeof k] as string}</p>
+              {/* A PROVA de cada pilar — o que a secção da home não carrega.
+                  O bloco 10 da home mostra estes mesmos três pilares com o
+                  mesmo texto; era isso que fazia desta página o bloco da home
+                  com mais espaço. O que ela pode dar a mais não é mais copy: é
+                  COMO se verifica cada afirmação, que é a única coisa que uma
+                  secção de resumo não tem sítio para dizer. */}
+              <p className="bo-mkt__prova">{k[`${p}Prova` as keyof typeof k] as string}</p>
             </article>
           ))}
 
@@ -113,6 +121,7 @@ export default async function Confianca({ params }: { params: Promise<{ idioma: 
               ))}
             </ul>
             <p>{k.confianca4Nota}</p>
+            <p className="bo-mkt__prova">{k.confianca4Prova}</p>
           </article>
         </div>
       </section>

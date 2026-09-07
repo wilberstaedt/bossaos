@@ -1727,3 +1727,112 @@ línguas, preços, cobertura, SEO, pilar offline, portas mortas. `pnpm lint` lim
   razão a mais para não se resolver com as capturas actuais: são de 1440.
 - **Expansão de texto: NÃO MEDI.**
 - **Não medi a aparência.** Secção 7, e é do Matheus.
+
+---
+
+## L1l — fechar a secção 6
+
+### RV100-010 — os dois blocos que faltavam
+
+A home passa de **11 para 13 secções** (hero + 12 blocos; com o rodapé, os
+catorze do §6.3). Secções da MKT-001, **sem rotas novas**: os 396 IDs continuam
+396, verificado.
+
+- **Bloco 4, produto em movimento:** os cinco momentos da MESMA comanda. Cada
+  linha diz um facto que o produto cumpre — o tempo vindo do servidor, o «TODAS
+  as tarefas» que faz a penúltima não bastar, a recusa do pagamento sem rede —
+  e não uma promessa geral.
+- **Bloco 5, módulos principais:** quatro cartões, **zero ícones**. Cada um diz
+  o que a parte faz e uma consequência verificável: o preço que não mexe nas
+  contas já abertas, o ecrã que não chama enviado ao que está no telemóvel, o
+  indicador que diz «não medido» em vez de mostrar um zero.
+
+**Os dois blocos ficam sem mídia, e digo porquê em vez de deixar a lacuna
+calada.** As cinco composições foram capturadas a 1440, 1280, 834 e 390. Numa
+meia coluna rendem 38-41% — o defeito medido e por resolver no herói; à largura
+toda repetiriam o que a `/product` já mostra. A saída é recapturar à largura
+certa, e isso precisa do inquilino de demonstração, **que neste momento não está
+na base**. O bloco 5 liga à `/product`, que é quem tem as telas.
+
+### A duplicação `/trust` ↔ home
+
+| | chaves | partilhadas | próprias |
+| --- | ---: | ---: | ---: |
+| antes da L1h | 5 | **5 — 100%** | 0 |
+| depois da L1l | **21** | 8 — 38% | **13** |
+
+As oito partilhadas são os três pilares e o título da secção, e **é correcto que
+o sejam**: a `/trust` é a página de confiança e o bloco 10 da home é o seu
+resumo. O que ela passou a ter que a secção não pode carregar é **a prova de
+cada pilar** — como o leitor verifica a afirmação sem acreditar em nós. Uma
+secção de resumo não tem sítio para dizer isso.
+
+### RV100-021 — o formulário devolve o que a pessoa escreveu
+
+**5 de 5 campos**, medido através de uma recusa REAL do servidor.
+
+A armadilha do critério está respeitada e escrita no instrumento: deixar um
+campo obrigatório vazio não serve de prova, porque o navegador recusa a
+submissão antes de sair do ecrã e o servidor nunca vê nada — o teste ficaria
+verde sem tocar no defeito. O que se submete é **`a@b`**: válido para
+`type="email"` (o navegador não exige ponto) e recusado pelo `validarLead` (o
+padrão exige). É a única forma de exercitar o caminho `erro=campos`.
+
+**E não vai na barra de endereço.** A saída óbvia era `?nome=…&email=…`, e são
+dados pessoais: iriam para o histórico, para o `Referer` da ligação seguinte e
+para os registos de qualquer intermediário — numa página que acabou de prometer
+o contrário. Vai num cookie `httpOnly`, `SameSite=Lax`, de **dois minutos**, que
+o próprio JavaScript da página não lê. Não é recolha nova: é o eco do que a
+pessoa acabou de escrever a voltar ao ecrã de onde saiu. Não se apaga na
+leitura porque um componente de servidor não escreve cabeçalhos — expira
+sozinho, e é por isso que dura pouco.
+
+### Um achado do arnês que vale para produção
+
+O teste falhava com **0 de 5** mesmo com o cookie a ser emitido correctamente. A
+causa: a rota constrói o redireccionamento a partir de `request.url`, que o Next
+normaliza para **`localhost`**, enquanto o arnês corria em **`127.0.0.1`**. São
+origens diferentes para cookies: o cookie ficava guardado num host e o 303
+levava a outro.
+
+Provei o mecanismo por fora com `curl -L` e frasco de cookies no mesmo host, e
+volta tudo — `Ana`, `a@b`, `Casa`, `600`. Alinhei o arnês em `localhost`.
+
+**Não mexi no `destino()`**, e é deliberado: construir o destino a partir do
+cabeçalho `Host` é o arranjo natural e é **território de injecção de Host** —
+mexer nisso ao fim de um lote, sozinho, num sítio que decide para onde um
+utilizador é enviado, não é uma correcção, é um risco. Fica dito: **por trás de
+um proxy, a origem que a rota devolve pode não ser a do cliente**, e isso afecta
+o cookie e o destino do 303.
+
+### RV100-023 — NÃO CORRIGIDO, e a razão é que eu não o consegui reproduzir
+
+Procurei os quatro `<nav>` das superfícies públicas e **todos já têm
+`min-height: 44px`**: `.bo-publico__seccoes` (linha 1180), `.bo-publico__idiomas`
+e `.bo-publico__categorias` (1105), `.bo-mkt__rodape-grupo` (1763). E o
+`.bo-staff`/`.bo-kds` já reforçavam o primeiro.
+
+**Cheguei a escrever uma regra nova antes de verificar, e ela era redundante** —
+teria fechado o achado no papel sem mudar um pixel. Removi-a. É a forma mais
+sedutora do verde vazio: uma correcção que parece uma correcção.
+
+Tentei medir ao vivo e não consigo: `/r/<slug>/<idioma>/menu` responde **404**
+nas três casas existentes (`playa`, `puerto`, `sala`) — a carta publicada não
+está na base. Não semeio: é a base partilhada com outra sessão.
+
+**Fica NÃO MEDI, e o que me falta é o selector.** Quem mediu tem-no; com ele
+fecho isto em minutos, e sem ele só posso adivinhar.
+
+### Regressão
+
+`marketing.spec.ts` **65/65**, população inteira. Guardas verdes: classes, três
+línguas (2595 chaves), preços, cobertura (396), SEO, pilar offline, dados
+fictícios, portas mortas. `pnpm lint` limpo.
+
+### O que fica
+
+- **RV100-023**, à espera do selector.
+- **Mídia nos blocos 4 e 5** e o **herói da home a 38-41%**: os dois dependem de
+  recapturar à largura certa, e isso depende do inquilino de demonstração.
+- **Expansão de texto: NÃO MEDI**, mesma razão de sempre.
+- **Não medi a aparência.** Secção 7, e é do Matheus.

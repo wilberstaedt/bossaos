@@ -217,10 +217,63 @@ test.describe('RV100 · demo e conversão', () => {
       privacidade[idioma] = r?.status() ?? 0;
     }
 
+    /**
+     * RV100-021 — a recusa devolve o que a pessoa escreveu.
+     *
+     * ── A armadilha está no que se submete ────────────────────────────────
+     *
+     * Deixar um campo obrigatório vazio NÃO serve de prova: o navegador recusa
+     * a submissão antes de sair do ecrã, o servidor nunca vê nada, e o teste
+     * ficaria verde sem tocar no defeito. É a mesma família do controlo que
+     * passa sobre população zero.
+     *
+     * O que se submete é `a@b`: **válido para `type="email"`** — o navegador
+     * deixa passar, porque não exige um ponto — e **recusado pelo
+     * `validarLead`**, cujo padrão exige `@` e ponto. É uma recusa REAL do
+     * servidor, que é a única que exercita o caminho `erro=campos`.
+     */
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/es-ES/demo', { waitUntil: 'domcontentloaded' });
+    const escrito = {
+      nome: 'Ana Reposição',
+      email: 'a@b',
+      restaurante: 'Casa da Prova',
+      telefone: '+34 600 000 000',
+      mensagem: 'Isto é a mensagem que custa mais a reescrever.',
+    };
+    for (const [campo, valor] of Object.entries(escrito)) {
+      await page.fill(`#${campo}`, valor);
+    }
+    await page.click('form[action="/api/publico/demo"] button[type="submit"]');
+    await page.waitForURL(/\/demo\?erro=campos/, { timeout: 20_000 });
+
+    const reposto = await page.evaluate(() => {
+      const v = (id: string) =>
+        (document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement | null)?.value ?? null;
+      return {
+        nome: v('nome'), email: v('email'), restaurante: v('restaurante'),
+        telefone: v('telefone'), mensagem: v('mensagem'),
+      };
+    });
+    const reposicao = {
+      submetido: escrito,
+      reposto,
+      camposRepostos: Object.entries(escrito).filter(([c, val]) => reposto[c as keyof typeof reposto] === val).length,
+      total: Object.keys(escrito).length,
+    };
+    expect(
+      reposicao.camposRepostos,
+      `só ${reposicao.camposRepostos} de ${reposicao.total} campos voltaram: ${JSON.stringify(reposto)}`,
+    ).toBe(reposicao.total);
+
+    // CONTROLO: a recusa foi mesmo do SERVIDOR e não do navegador — se o
+    // navegador tivesse bloqueado, nunca teríamos chegado a `?erro=campos`.
+    expect(page.url(), 'não passámos pelo caminho de recusa do servidor').toContain('erro=campos');
+
     mkdirSync(DESTINO, { recursive: true });
     writeFileSync(
       `${DESTINO}/${FASE}-demo.json`,
-      JSON.stringify({ paginas: recolha, erros, privacidade, controloDeCookies }, null, 2) + '\n',
+      JSON.stringify({ paginas: recolha, erros, privacidade, controloDeCookies, reposicao }, null, 2) + '\n',
     );
   });
 });

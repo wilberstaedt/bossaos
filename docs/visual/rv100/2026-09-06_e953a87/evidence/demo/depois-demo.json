@@ -28,7 +28,13 @@
       },
       "ligacaoPrivacidade": "/es-ES/privacy",
       "cookies": 0,
-      "terceiros": [],
+      "terceiros": [
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo"
+      ],
       "seccoes": 2,
       "alturaRolavel": 2310
     },
@@ -60,7 +66,13 @@
       },
       "ligacaoPrivacidade": "/es-ES/privacy",
       "cookies": 0,
-      "terceiros": [],
+      "terceiros": [
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo"
+      ],
       "seccoes": 2,
       "alturaRolavel": 2286
     },
@@ -92,7 +104,13 @@
       },
       "ligacaoPrivacidade": "/es-ES/privacy",
       "cookies": 0,
-      "terceiros": [],
+      "terceiros": [
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo"
+      ],
       "seccoes": 2,
       "alturaRolavel": 1901
     },
@@ -124,9 +142,15 @@
       },
       "ligacaoPrivacidade": "/es-ES/privacy",
       "cookies": 0,
-      "terceiros": [],
+      "terceiros": [
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo"
+      ],
       "seccoes": 2,
-      "alturaRolavel": 1709
+      "alturaRolavel": 1669
     },
     {
       "idioma": "es-ES",
@@ -156,9 +180,15 @@
       },
       "ligacaoPrivacidade": "/es-ES/privacy",
       "cookies": 0,
-      "terceiros": [],
+      "terceiros": [
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo"
+      ],
       "seccoes": 2,
-      "alturaRolavel": 1709
+      "alturaRolavel": 1669
     },
     {
       "idioma": "pt-BR",
@@ -188,7 +218,13 @@
       },
       "ligacaoPrivacidade": "/pt-BR/privacy",
       "cookies": 0,
-      "terceiros": [],
+      "terceiros": [
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo"
+      ],
       "seccoes": 2,
       "alturaRolavel": 2334
     },
@@ -220,7 +256,13 @@
       },
       "ligacaoPrivacidade": "/pt-BR/privacy",
       "cookies": 0,
-      "terceiros": [],
+      "terceiros": [
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo"
+      ],
       "seccoes": 2,
       "alturaRolavel": 2310
     },
@@ -252,7 +294,13 @@
       },
       "ligacaoPrivacidade": "/pt-BR/privacy",
       "cookies": 0,
-      "terceiros": [],
+      "terceiros": [
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo"
+      ],
       "seccoes": 2,
       "alturaRolavel": 1901
     },
@@ -284,9 +332,15 @@
       },
       "ligacaoPrivacidade": "/pt-BR/privacy",
       "cookies": 0,
-      "terceiros": [],
+      "terceiros": [
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo"
+      ],
       "seccoes": 2,
-      "alturaRolavel": 1709
+      "alturaRolavel": 1669
     },
     {
       "idioma": "pt-BR",
@@ -316,9 +370,15 @@
       },
       "ligacaoPrivacidade": "/pt-BR/privacy",
       "cookies": 0,
-      "terceiros": [],
+      "terceiros": [
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo"
+      ],
       "seccoes": 2,
-      "alturaRolavel": 1709
+      "alturaRolavel": 1669
     },
     {
       "idioma": "en",
@@ -348,7 +408,13 @@
       },
       "ligacaoPrivacidade": "/en/privacy",
       "cookies": 0,
-      "terceiros": [],
+      "terceiros": [
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo"
+      ],
       "seccoes": 2,
       "alturaRolavel": 2286
     },
@@ -380,7 +446,13 @@
       },
       "ligacaoPrivacidade": "/en/privacy",
       "cookies": 0,
-      "terceiros": [],
+      "terceiros": [
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo"
+      ],
       "seccoes": 2,
       "alturaRolavel": 2262
     },
@@ -412,7 +484,13 @@
       },
       "ligacaoPrivacidade": "/en/privacy",
       "cookies": 0,
-      "terceiros": [],
+      "terceiros": [
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo"
+      ],
       "seccoes": 2,
       "alturaRolavel": 1901
     },
@@ -444,9 +522,15 @@
       },
       "ligacaoPrivacidade": "/en/privacy",
       "cookies": 0,
-      "terceiros": [],
+      "terceiros": [
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo"
+      ],
       "seccoes": 2,
-      "alturaRolavel": 1709
+      "alturaRolavel": 1669
     },
     {
       "idioma": "en",
@@ -476,9 +560,15 @@
       },
       "ligacaoPrivacidade": "/en/privacy",
       "cookies": 0,
-      "terceiros": [],
+      "terceiros": [
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo",
+        "http://localhost:3000/pt-BR/demo",
+        "http://localhost:3000/en/demo",
+        "http://localhost:3000/es-ES/demo"
+      ],
       "seccoes": 2,
-      "alturaRolavel": 1709
+      "alturaRolavel": 1669
     }
   ],
   "erros": {
@@ -508,5 +598,23 @@
     "comOControlo": 1,
     "depoisDeLimpar": 0,
     "acendeu": true
+  },
+  "reposicao": {
+    "submetido": {
+      "nome": "Ana Reposição",
+      "email": "a@b",
+      "restaurante": "Casa da Prova",
+      "telefone": "+34 600 000 000",
+      "mensagem": "Isto é a mensagem que custa mais a reescrever."
+    },
+    "reposto": {
+      "nome": "Ana Reposição",
+      "email": "a@b",
+      "restaurante": "Casa da Prova",
+      "telefone": "+34 600 000 000",
+      "mensagem": "Isto é a mensagem que custa mais a reescrever."
+    },
+    "camposRepostos": 5,
+    "total": 5
   }
 }

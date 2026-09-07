@@ -240,6 +240,60 @@ export default async function Landing({
         </section>
       ) : null}
 
+      {/* ── 4 · produto em movimento (§6.3.4) ──────────────────────────────
+          A narrativa que faltava: os cinco momentos por que passa a MESMA
+          comanda. Cada linha diz um facto que o produto cumpre — o tempo do
+          servidor, o «TODAS as tarefas», a recusa do pagamento sem rede — e não
+          uma promessa geral.
+
+          Sem mídia, e digo porquê em vez de deixar a lacuna calada: as cinco
+          composições existentes foram capturadas a 1440, 1280, 834 e 390. Numa
+          meia coluna rendem 38-41%, que é o defeito medido e por resolver no
+          herói; a largura toda repetiria o que a `/product` já mostra. A saída
+          é capturar de novo à largura certa, e isso precisa do inquilino de
+          demonstração, que neste momento não está na base. A ligação leva a
+          quem tem as telas. */}
+      {inteira ? (
+        <section className="bo-mkt__seccao" id="movimento" aria-labelledby="t-movimento">
+          <h2 id="t-movimento">{k.movimentoTitulo}</h2>
+          <p className="bo-publico__texto">{k.movimentoTexto}</p>
+          <ol className="bo-mkt__passos">
+            {(['movimento1', 'movimento2', 'movimento3', 'movimento4', 'movimento5'] as const).map((m) => (
+              <li key={m} className="bo-mkt__passo">
+                <h3>{k[m]}</h3>
+                <p>{k[`${m}Texto` as keyof typeof k] as string}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : null}
+
+      {/* ── 5 · módulos principais (§6.3.5) ────────────────────────────────
+          «Telas reais e RESULTADOS OPERACIONAIS, não somente ícones» — e não há
+          um único ícone aqui. Cada cartão diz o que a parte faz e uma
+          consequência verificável: o preço que não mexe nas contas abertas, o
+          ecrã que não chama enviado ao que está no telemóvel, o indicador que
+          diz «não medido» em vez de mostrar zero. */}
+      {inteira ? (
+        <section className="bo-mkt__seccao" id="modulos" aria-labelledby="t-modulos">
+          <h2 id="t-modulos">{k.modulosTitulo}</h2>
+          <p className="bo-publico__texto">{k.modulosTexto}</p>
+          <div className="bo-mkt__grelha">
+            {(['modulo1', 'modulo2', 'modulo3', 'modulo4'] as const).map((m) => (
+              <article className="bo-mkt__cartao" key={m}>
+                <h3>{k[m]}</h3>
+                <p>{k[`${m}Texto` as keyof typeof k] as string}</p>
+              </article>
+            ))}
+          </div>
+          <p className="bo-mkt__chamada">
+            <a className="bo-botao bo-botao--secundario" href={`/${idioma}/product`}>
+              {k.modulosVerProduto}
+            </a>
+          </p>
+        </section>
+      ) : null}
+
       {/* ── 8 · equipamentos (§6.6, na forma condicional que ele próprio usa) */}
       {inteira ? (
         <section className="bo-mkt__seccao" id="equipamentos" aria-labelledby="t-equipamentos">

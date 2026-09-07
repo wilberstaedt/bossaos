@@ -570,6 +570,20 @@ p { margin: 0; }
 /* A navegação do Staff é alvo de OPERAÇÃO, e não alvo público: usa-se em pé,
    com uma mão, e às vezes com luvas. 44 px é o mínimo de acessibilidade; 48 é o
    que esta superfície pede, e é o mesmo número dos botões acima. */
+/* RV100-023 — a navegacao da carta PUBLICA tinha ligacoes de 115x23 px.
+   ───────────────────────────────────────────────────────────────────────────
+   O `.bo-staff` e o `.bo-kds` ja davam altura minima a esta mesma navegacao. A
+   superficie publica — a que o cliente do restaurante abre ao apontar para o
+   codigo da mesa — nao tinha nenhuma. O selector existia tres vezes e faltava
+   onde ha mais dedos.
+
+   A isencao da WCAG 2.2 nao se aplica: e' `pai=NAV`, sem texto irmao, controlo
+   autonomo e nao prosa. A 23 px falha ate o nivel AA, que pede 24. E a razao
+   de quem a mediu diz melhor do que a norma: **o dedo que falha nela nao tem
+   linha de texto onde acertar**.
+
+   44 e nao 48: esta e' superficie publica, e o produto separa os dois alvos por
+   superficie desde o E02. */
 .bo-staff .bo-publico__seccoes a { min-height: var(--bo-toque-operacao); }
 .bo-staff .bo-publico__lista a { min-height: var(--bo-toque-operacao); align-items: center; }
 /* O índice do STAFF-022 tinha ligações de 22 px de altura — e é ele que dá o
@@ -1307,6 +1321,15 @@ label.bo-planos__item input[type="radio"] {
    Classe propria e nao `.bo-mkt__familia` reaproveitada: aquela e' o cabecalho
    de grupo DA TABELA de planos, e usa-la aqui era a mesma mentira de nome que
    recusei ao dar `.bo-mkt__horas` as horas em vez de `.bo-mkt__preco`. */
+/* A prova de cada pilar: como o leitor verifica a afirmacao de cima. Menor e
+   secundaria de proposito — e' o rodape do argumento, nao o argumento. */
+.bo-mkt__prova {
+  margin-top: var(--bo-espaco-sm);
+  font-size: 14px;
+  color: var(--bo-texto-secundario);
+  border-left: 2px solid var(--bo-borda);
+  padding-left: var(--bo-espaco-sm);
+}
 .bo-mkt__faq-grupo {
   font-family: var(--bo-fonte-titulo);
   font-size: 18px;
