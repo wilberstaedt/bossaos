@@ -3224,3 +3224,52 @@ então as datas foram reescritas por um checkout.
 
 **Um limite escrito na prosa protege quem lê a prosa. O runtime tem de o dizer
 sozinho, na altura, e com o valor certo dos três.**
+
+---
+
+## Uma recusa correcta por acaso, e reprodutível — 07/09, 21h45
+
+Ao rever o `a0ed8ad` do JR — que põe o canário na peça partilhada — contei os
+consumidores e são **três**, não dois. O terceiro era o meu
+`pagina-de-aprovacao.py`, que importava só o `mais_recente_do_produto` e nunca
+perguntava se as datas queriam dizer alguma coisa.
+
+Corri-o num worktree fresco **à espera de o apanhar a aprovar por engano**. Não
+foi isso. Ele **recusou**: «25 capturas anteriores à fonte mais recente do
+produto».
+
+E recusar parecia bem — até eu medir de onde vinha o número.
+
+| | |
+|---|---|
+| janela inteira do checkout | **0,067 s** |
+| dispersão das 33 capturas | 0,021 s |
+| dispersão das 26 fontes | 0,003 s |
+
+Num worktree o git escreve tudo no mesmo instante. **O «25» é ordem de escrita
+do git, não um facto sobre o produto.**
+
+### E é aqui que fica pior
+
+Corri um **segundo** worktree, independente. Deu **o mesmo 25** — porque o git
+escreve por ordem estável.
+
+**Ruído determinista é pior do que ruído.** Ruído a sério trai-se: corre-se
+outra vez e o número dança. Este reproduz-se, parece uma medição, e **sobrevive
+exactamente à verificação que uma pessoa desconfiada faria** — correr de novo e
+ver se dá o mesmo.
+
+E era uma recusa, não uma aprovação. Ou seja: **estava a acertar**, e a acertar
+é a maneira mais segura de nunca ser investigado. Deixa de acertar no dia em que
+a ordem de escrita mudar, e ninguém vai estar a olhar nesse dia.
+
+### O que fica
+
+**«Está a dar o resultado certo» não é prova de que está a medir.** As três
+perguntas são separadas: o instrumento mede o sujeito certo? A entrada quer
+dizer alguma coisa? A saída bate certo? Um resultado correcto responde só à
+terceira, e hoje enganou-me na primeira.
+
+E a resposta honesta onde as datas foram reescritas não é «recuso» nem «aprovo».
+**É `NÃO MEDI`** — que existia nos três desde sempre e nenhum usava para o único
+caso em que não podia medir.
