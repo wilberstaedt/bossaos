@@ -92,3 +92,36 @@ o hero inglês e a linguagem de equipamentos avançam assim. Dois avançam só a
 onde podem, e não por formalismo: o piloto sai sem nome de terceiro (consentimento
 de outra pessoa não é pendência dele) e a privacidade sai como estrutura sem texto
 dado por revisto.
+
+---
+
+## §7.1 — condição de paragem cumprida, 07/09 às 11h55
+
+| passo | estado |
+| --- | --- |
+| 1 · testes e acessibilidade aplicáveis | feito — acessibilidade estática e dinâmica medidas, guardas verdes contra o commit |
+| 2 · **preview verificável** | **publicado**: https://claude.ai/code/artifact/8f11a092-444c-4e33-bff1-3b4b772a1e4e |
+| 3 · `02_MASTER_SCREENS_REVIEW.md` | existe, e traz a retractação das duas «avarias» que eram medição |
+| 4 · indexar as evidências | feito — 25 capturas, 6 mestres, 3 línguas, 25/25 frescas |
+| 5 · emitir | **PRONTO PARA APROVAÇÃO VISUAL HUMANA** |
+| 6 · parar | é aqui |
+
+**Emito `PRONTO PARA APROVAÇÃO VISUAL HUMANA` e mais nada.** Só o Matheus regista
+a `APROVAÇÃO VISUAL HUMANA`. Silêncio, ausência de comentário ou aprovação minha
+não libertam o rollout — e se houver reprovação, ajusto os mestres e reapresento
+**o conjunto afectado inteiro**, não a peça isolada.
+
+### O que vai declarado dentro do preview, e não escondido
+
+- **O KDS não se julga num telemóvel.** É tela de parede a 1920×1080; ali vê-se
+  composição e hierarquia, não legibilidade à distância. Fica em aberto sem custo.
+- **«Clara» não se mede por contagem.** Três saltos da sala à comanda está medido;
+  se isso é claro é juízo dele, e é para isso que este portão existe.
+- **Duas telas não têm cor de marca nenhuma** — backoffice e carta pública, zero
+  acento nos píxeis e também sem wordmark.
+
+### O que fica de fora por desenho
+
+As **792 composições da §8 continuam a zero**, e isso não bloqueia: o plano
+põe-nas depois da aprovação, porque capturá-las antes é fotografar telas que
+ainda podem mudar.
