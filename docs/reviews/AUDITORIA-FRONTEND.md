@@ -387,3 +387,40 @@ nenhum**. Medido: o KDS tem **zero** píxeis de lima.
 decisão protege-a da revisão: ninguém volta a olhar para o *porquê* de uma coisa
 que ficou bem. E aquela frase está num commit, onde vai ser lida por quem vier
 decidir o próximo uso do lima — e vai decidir com um facto que não existe.
+
+---
+
+## O `CabecalhoDePagina` e o número honesto do que falta — 16h35
+
+Ele consolidou o cabeçalho e o commit diz o essencial: **«ele já existia, e
+existia três vezes»** — as re-implementações parciais que o diagnóstico de
+sistema tinha contado.
+
+**A reconciliação, porque os nossos números não batiam.** Ele: 55 no componente,
+273 à mão. Eu: **58** que chegam ao componente (37 directos + 56 por invólucro,
+com 1 em ambos) e **267** ainda a escrever o bloco à mão. **Soma: 325**, contra
+os 324 ecrãs com cabeçalho que o diagnóstico tinha medido. **A partição fecha**;
+a diferença é o padrão de contagem, não a população.
+
+**E o número que interessa é o que ele declarou em vez de esconder: 267 ecrãs
+continuam a escrever o cabeçalho à mão.** Essa é a dívida a sério e fica por
+fazer — dito por ele, com número, sem arredondar para um «quase todo feito».
+
+**Uma inferência minha que travei a tempo.** Vi que só o `PecasDoStaff` referencia
+o `CabecalhoDePagina` (2 vezes) e os outros três dão **zero** — ia reportar que
+três invólucros continuam a duplicar. **Fui verificar e nenhum dos quatro escreve
+`bo-estado__cabecalho`.** Portanto não duplicam; o que fazem agora **não medi**,
+e isso é NÃO MEDI e não achado. **Zero num sítio não diz o que se passa no
+outro.**
+
+## E fica uma decisão para o Matheus, que é a queixa dele de há três horas
+
+O bloco **«Sin enviar: 0»** do Staff — o mesmo que ele viu na foto e que eu
+descrevi como «lê-se como painel de depuração». O JR diagnosticou-o bem: **a fila
+offline é funcionalidade real; o defeito é ocupar meio ecrã para dizer que não há
+nada.**
+
+**Esconder um painel é decisão de produto e não conserto**, por isso fica
+levantado com a proposta escrita em `docs/reviews/STAFF-E-KDS-ACHADOS.md`. É a
+terceira coisa que lhe devolvo em vez de decidir por ele — com o A2 e o verde-lima
+— e as três têm a mesma natureza: **medi o facto, o juízo é dele.**
