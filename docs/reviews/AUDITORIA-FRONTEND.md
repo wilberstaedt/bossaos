@@ -488,3 +488,38 @@ superfície escura redefina, exactamente como fez com a acção.
 publiquei à mesma porque o Matheus tinha autorizado e o defeito não bloqueia um
 teste. **Mas disse-lho na mesma mensagem** — não quero que ele o descubra sozinho
 e conclua que ninguém tinha visto.
+
+---
+
+## A instalação está no ar e não tem porta de entrada — 17h25
+
+O Matheus pediu **todas as telas para testar**, com credenciais. Fui prepará-lo e
+encontrei duas coisas que mudam a resposta.
+
+**1 · O guião da demonstração não vai na imagem.** Listei os `.ts` do Prisma
+dentro do contentor de produção: estão lá o `fixtures`, o `inspeccao-comum`, o
+`limpar-inspeccao` e o `semente-inspeccao` — **e não o `semente-demonstracao`**.
+Eu tinha-lhe prometido que semeava o «Bossa Demo» em produção. **Não posso, e
+disse-lho antes de ele descobrir sozinho.**
+
+**2 · E é maior do que isso: não há caminho para a primeira conta.** As rotas de
+autenticação são `login`, `invite/[token]`, `forgot-password` e
+`reset-password`. **Não existe registo.** `/auth/sign-up` dá **404** no domínio,
+e isso não é defeito — é coerente com o que a própria landing promete: *«no hay
+un botón de contratar en esta página, y no es un olvido: el alta se hace
+acompañada»*.
+
+**Mas numa base de produção vazia isso fecha o círculo:** sem utilizadores, sem
+registo, e com o convite a exigir alguém de dentro para o emitir, **a instalação
+está no ar e ninguém consegue entrar.** As superfícies públicas — landing, carta,
+formulário de demonstração — testam-se todas. As autenticadas, nenhuma.
+
+**E as duas coisas têm a mesma cura, que já está com ele:** o **A2**, que eu
+escalei às 15h59 — *manter um inquilino de demonstração persistente e ligá-lo à
+landing*. Deixa de ser só um achado comercial: **é também o que abre a porta a
+quem quer ver o produto por dentro**, incluindo o dono.
+
+**O que NÃO vou fazer:** inventar uma conta com senha minha e mandá-la por
+Telegram. Se ele quiser entrar hoje, o caminho limpo é enviar-lhe o produto a
+pedir a senha **no ecrã**, definida por ele — e não uma constante do repositório
+num domínio público.
