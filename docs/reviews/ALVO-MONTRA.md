@@ -124,3 +124,39 @@ achado, e a diferença é essa.
 Capturas frescas (25/25, 15h39, depois do último commit de produto às 15h37), a
 guarda da frescura deixou gerar, e o mesmo URL mostra agora a barra lateral
 refeita, o Staff sem o título repetido, e a carta com nomes de idioma.
+
+---
+
+## A3 fechado — e a reconciliação valeu quatro botões — 16h30
+
+**Ele contou 14, eu contei 10, e nenhum errou: eram populações diferentes.**
+
+```
+10 (meu) + demo/thanks 1 + pilot 2 + privacy 1 = 14
+```
+
+Eu contei **seis ficheiros de rota que escolhi**. Ele contou **o que a travessia
+alcança a partir da landing** — e os quatro extra são alcançáveis: `/pilot` está
+na navegação, `/privacy` é ligado do próprio formulário, `/demo/thanks` é onde
+aterra quem converteu.
+
+**Se ele tivesse aceitado o meu dez, quatro sobreviviam** — em páginas que
+ninguém visitou, *«que é o modo como estas dívidas sobrevivem»*.
+
+**E o que me incomoda é que a lição era dele e eu tinha-a acabado de elogiar.**
+Ele escreveu, no documento dos achados: *«uma lista mede o que eu me lembrei de
+escrever, e o que parte um percurso é precisamente a ligação de que ninguém se
+lembrou»*. Eu li aquilo, achei-o o melhor do documento — **e uma hora depois
+contei por lista.** Reconhecer um método não é adoptá-lo.
+
+**Verificado por mim:** total no produto **274 → 260**, landing a **zero**, e os
+quatro ficheiros que eu não visitei também a **zero**. O `type="submit"` do
+`/demo` vence o `type="button"` do componente porque o `{...resto}` do chamador é
+espalhado **depois** (linha 79) — e ele explicou-o em vez de o deixar funcionar
+por acaso.
+
+**E mediu no DOM, não na contagem:** *«os 14 rendem, os 14 navegam, zero
+inertes. Um `<a>` convertido e deixado sem `href` continuaria a contar como
+convertido e não levava ninguém a lado nenhum.»* **A contagem podia ir a zero a
+produzir ligações mortas** — e era exactamente o que a minha régua dizia que não
+contava como prova.
