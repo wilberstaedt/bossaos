@@ -1404,3 +1404,47 @@ Portanto, antes de escrever qualquer resultado:
 4. **perguntar «estão todos?»**, e não «há algum?».
 
 Nenhuma destas quatro lê a saída do instrumento. **É de propósito.**
+
+---
+
+## Um falso rasto que morreu antes de chegar a quem o ia perseguir — 07/09
+
+O implementador reportou a **terceira escrita perdida** no mesmo `estilos.css` e
+foi honesto sobre o que tinha: *«não tenho explicação para o padrão além de as
+escritas não sobreviverem; o que tenho é o hábito que o torna sobrevivível —
+`grep` ao ficheiro depois de cada escrita, e nunca confiar na minha própria
+mensagem de sucesso»*.
+
+Fui procurar-lhe a causa. E encontrei uma que parecia óbvia: **o commit da
+acessibilidade, do JR, aparecia na minha lista de commits que tocam no
+`estilos.css`.** Dois agentes a escrever a mesma folha explicaria tudo.
+
+**Era falso, e a forma do erro é a minha número quatro.** O meu laço fazia
+`git show --stat $c | grep -q "estilos.css"` — e o `--stat` imprime **a mensagem
+do commit** antes da lista de ficheiros. A mensagem do JR menciona o ficheiro
+sem lhe tocar. **Contei o texto da saída em vez da coisa.**
+
+Pela via correcta — `git log -- <caminho>` e `git show --numstat` — o commit dele
+altera **zero** linhas do `estilos.css`, e as sete alterações ao ficheiro são
+todas dos lotes L1a a L1h, do mesmo implementador.
+
+### Porque é que registo isto
+
+**Não é o erro que importa — é onde ele parou.**
+
+Há seis horas dei-lhe um facto errado («cinco acções exigem servidor») que ele
+teve de me corrigir, e a guarda que ele construiu tê-lo-ia desmentido na primeira
+corrida. Desta vez o erro morreu na minha mão.
+
+**Uma causa errada é pior do que nenhuma causa**, e a assimetria é grande: sem
+causa, ele mantém o hábito que já o protege — `grep` depois de escrever. Com uma
+causa errada, vai investigar coordenação entre agentes, encontrar nada, e o
+hábito perde-se pelo caminho enquanto ele persegue um fantasma que eu inventei.
+
+**O padrão continua sem explicação, e é assim que lho digo.**
+
+### Nota lateral que vale para todo este registo
+
+Os agentes commitam com a identidade git do Matheus. **Não dá para atribuir
+trabalho por autor** — só por mensagem e por conteúdo. Foi o que me obrigou a
+grepar a saída em vez de filtrar, e foi daí que veio o erro.
