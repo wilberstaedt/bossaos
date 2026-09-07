@@ -2183,3 +2183,32 @@ entusiasmada e ainda não conhece as suas excepções.
 
 No que ficou podre, a correcção não foi actualizar o número — foi **tirá-lo**: o
 cabeçalho passa a dizer o invariante, e quem quiser o número corre a guarda.
+
+---
+
+## Corrigi uma linha PARA a fonte em prosa, contra a medição viva — 07/09
+
+Há dois ticks apanhei que o resumo do portão dava `120 + 202 + 16 = 338` em 396 e
+corrigi-o. **Corrigi-o para o lado errado.**
+
+O que estava ali era uma **mistura de duas partições diferentes** — o 120 vinha
+do `06_O_PORTAO_DE_COBERTURA.md`, e o 202 e o 16 vinham da guarda
+`validar-alcance-das-composicoes.sh`. Por isso não somava: eu tinha juntado
+metade de um mapa com metade de outro. Até aí, bem visto.
+
+**O erro foi a seguir.** Alinhei tudo pelo `06` — prosa escrita a 06/09 — quando
+existe uma guarda que **remede e escreve um CSV com uma linha por ID**:
+`178 só-URL + 202 estado-partilhado + 16 a provocar = 396`. As duas partições
+fecham e ambas são coerentes; são **definições diferentes** do mesmo território.
+Mas uma é um texto de ontem e a outra corre hoje.
+
+**E isto contradiz de frente a regra que eu próprio escrevi esta manhã** — «no
+mesmo ficheiro, a parte que MEDE está viva e a parte que AFIRMA apodreceu». Sabia
+a regra, tinha-a acabado de escrever, e mesmo assim, ao arbitrar entre duas
+fontes, escolhi a que estava mais bem escrita em vez da que se verifica sozinha.
+
+**A regra ganha uma segunda metade: entre duas fontes que discordam, a que se
+remede ganha — e não a mais articulada.** Prosa boa é convincente, e convincente
+não é o critério. Quando as duas têm de ficar, cita-se a viva e deixa-se a outra
+nomeada como definição alternativa, que foi o que a linha do portão passa a
+fazer.

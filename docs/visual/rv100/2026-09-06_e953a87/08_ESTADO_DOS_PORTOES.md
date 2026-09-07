@@ -48,7 +48,7 @@
 | --- | --- |
 | telas-mestre aprovadas propagadas | **bloqueado por desenho** — é a secção 8, depois da aprovação |
 | 396 IDs rastreados | **conforme** |
-| 792 composições capturadas ou justificadas | **não conforme — 0 de 792**, e por desenho (a §8 põe-nas depois da aprovação). Mapa, e a partição fecha: **396 IDs = 120 com endereço único + 276 que exigem estado**, e dos 276 há **16 sem URL nenhum**, que se provocam. Em composições: **792 = 240 mecânicas + 552 por estado**, das quais 32 provocadas |
+| 792 composições capturadas ou justificadas | **não conforme — 0 de 792**, e por desenho (a §8 põe-nas depois da aprovação). Mapa da MEDIÇÃO VIVA, `validar-alcance-das-composicoes.sh` às 13h02 de 07/09, uma linha por ID em `docs/progress/alcance-das-composicoes.csv`: **396 = 178 só-URL + 202 estado-partilhado + 16 a provocar**, e a partição fecha. Por porta: **343 abrem hoje, 37 bloqueadas por parâmetro, 16 sem endereço**. PRONTAS A CAPTURAR JÁ: **143**. (O `06_O_PORTAO_DE_COBERTURA.md` parte os mesmos 396 noutra definição — 120 + 276, com os 16 por dentro. As duas fecham; esta é a que se remede sozinha.) |
 | não há P1/P2 visual aberto | **conforme** — zero abertos nos 22 achados |
 | P3 aceite com decisão, responsável e prazo | **satisfeito por ausência, com a população provada** |
 | testes e build passam no commit final | **conforme** — `validar-no-commit.sh` verde contra o commit |
