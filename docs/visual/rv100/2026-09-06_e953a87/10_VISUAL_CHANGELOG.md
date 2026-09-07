@@ -1836,3 +1836,36 @@ fictícios, portas mortas. `pnpm lint` limpo.
   recapturar à largura certa, e isso depende do inquilino de demonstração.
 - **Expansão de texto: NÃO MEDI**, mesma razão de sempre.
 - **Não medi a aparência.** Secção 7, e é do Matheus.
+
+---
+
+## RV100-023 — medido com o selector, e NÃO reproduzido
+
+Evidência: `evidence/rv100-023/medicao-do-alvo.json`.
+
+Com o selector em mãos (`menu/page.tsx:129`, estado **MENU-018**, o QR expirado)
+medi a regra no navegador, nas cinco larguras:
+
+| | com a folha actual | sem folha nenhuma (controlo) |
+| --- | --- | --- |
+| caixa | **94 × 44** nas cinco | 150 × 18 |
+| `display` | `flex` | `inline` |
+| `min-height` | **44px** | `0px` |
+
+**A regra base não está limitada ao `.bo-staff` e ao `.bo-kds`.** A
+`packages/ui/src/estilos.css:1179` é `.bo-publico__seccoes a`, **sem âmbito
+nenhum**, e nasceu em `c8723c5` (E10) — muito antes desta noite. O layout da
+carta carrega a folha (`layout.tsx:5`). As regras das linhas 587 e 632 são
+reforços para 48 px na operação, não a única fonte dos 44.
+
+**E o controlo negativo diz o que 115×23 é.** Um `<a>` em linha aceita o
+preenchimento horizontal e **ignora** `min-height` — dá uma largura com folga e
+uma altura de linha de texto. É a assinatura de um elemento **sem folha de
+estilos aplicada**, não de uma regra em falta.
+
+Se isso se confirmar, **o defeito é outro e é maior**: uma tela que renderiza sem
+estilos. E não se corrige com CSS de alvo — foi por isso que a regra que eu
+quase escrevi não teria movido um pixel.
+
+**Fica NÃO REPRODUZIDO**, e o que falta é o `display` computado do elemento
+medido. Se vier `inline`, é a folha que falta naquela tela.

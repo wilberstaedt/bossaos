@@ -1,0 +1,25 @@
+{
+  "achado": "RV100-023 — ligacao de navegacao a 115x23 px na carta publica",
+  "selector": "apps/web/app/r/[publicLocationSlug]/[locale]/menu/page.tsx:129 — nav.bo-publico__seccoes > a",
+  "estado_da_tela": "MENU-018 (qrJaNaoActivo) — o QR expirado, nao a carta normal",
+  "com_a_folha_de_estilos_actual": [
+    { "largura": 360, "caixa": "94x44", "display": "flex", "minHeight": "44px" },
+    { "largura": 390, "caixa": "94x44", "display": "flex", "minHeight": "44px" },
+    { "largura": 768, "caixa": "94x44", "display": "flex", "minHeight": "44px" },
+    { "largura": 1280, "caixa": "94x44", "display": "flex", "minHeight": "44px" },
+    { "largura": 1440, "caixa": "94x44", "display": "flex", "minHeight": "44px" }
+  ],
+  "controlo_negativo_sem_folha_de_estilos": {
+    "largura": 390, "caixa": "150x18", "display": "inline", "minHeight": "0px",
+    "porque_importa": "e' a assinatura de 115x23: elemento em linha, sem min-height. Um <a> inline aceita padding horizontal e IGNORA min-height, o que explica uma largura com folga e uma altura de linha de texto."
+  },
+  "a_regra_base": {
+    "ficheiro": "packages/ui/src/estilos.css:1179",
+    "selector": ".bo-publico__seccoes a",
+    "ambito": "NENHUM — regra de topo, aplica-se a qualquer superficie",
+    "nasceu_em": "c8723c5 (E10), muito antes desta noite",
+    "o_layout_da_carta_carrega_a_folha": "sim — app/r/[publicLocationSlug]/[locale]/layout.tsx:5"
+  },
+  "conclusao": "Nao reproduzido. A regra existe, nao esta limitada a .bo-staff/.bo-kds, e da 44 px nas cinco larguras. Acrescentar uma regra nova nao mudaria nada.",
+  "o_que_falta_para_fechar": "o contexto da medicao original: o endereco/estado exacto e o `display` computado do elemento medido. Se ele vier `inline`, a folha de estilos nao estava aplicada nessa tela — e o defeito e' outro, maior, e nao se corrige com CSS de alvo."
+}
