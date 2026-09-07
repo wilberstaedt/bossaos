@@ -1448,3 +1448,39 @@ hábito perde-se pelo caminho enquanto ele persegue um fantasma que eu inventei.
 Os agentes commitam com a identidade git do Matheus. **Não dá para atribuir
 trabalho por autor** — só por mensagem e por conteúdo. Foi o que me obrigou a
 grepar a saída em vez de filtrar, e foi daí que veio o erro.
+
+---
+
+## O alfabeto que eu presumi, na lista onde a completude é o ponto — 07/09
+
+Levantei o RV100-022 escrevendo que o `ALERGENIOS_UE` tem **13** entradas. **Tem
+14.** O JR contou-as e corrigiu-me.
+
+A causa não foi uma janela truncada — foi o **alfabeto**:
+
+```
+o meu padrão:  '([a-zA-Z_]+)'
+o que caiu:    'frutos-de-casca'      ← tem hífen
+```
+
+**Letras e underscore. Sem hífen.** E o que o padrão deixou cair foi **os frutos
+de casca rija** — uma das alergias graves mais comuns — **numa lista onde a
+completude é o ponto todo**.
+
+É a segunda vez esta noite que presumo o alfabeto de um identificador. A primeira
+foi `^[A-Z]+-[0-9]+` a dar 17 onde havia 46, porque os `RES-B-001` têm **dois
+segmentos**. Nessa, o desacordo com a guarda salvou-me. **Nesta, escrevi o número
+errado num achado e foi preciso outro agente para o apanhar.**
+
+### E a defesa que ele usou, que é melhor do que qualquer padrão meu
+
+> «14 alérgenos declarados num prato — a lista inteira do `ALERGENIOS_UE`,
+> **contada do domínio e não fixada aqui**.»
+
+**Um teste que conta a lista da fonte não pode discordar da fonte.** O meu erro
+só foi possível porque eu extraí o número para o meu lado; o dele é imune por
+construção — se a UE acrescentar um alergénio amanhã, a prova dele passa a exigir
+15 sozinha, e a minha continuaria a dizer 13.
+
+**A regra: quando a completude de uma lista é o que está em causa, não se conta a
+lista — pede-se-lhe o tamanho.**

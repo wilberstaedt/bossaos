@@ -314,11 +314,11 @@ screen_or_route: carta pública · /r/[publicLocationSlug]/[locale]/menu/produto
 summary: o caso extremo do §9.2 — «alérgenos extensos» — nunca foi renderizado; o máximo que alguma prova de interface usa são 4 dos 13
 impact: usabilidade na superfície que o cliente do restaurante lê
 expected: §9.2 manda testar «alérgenos e modificadores extensos». O domínio já o faz: `revisaoDaFicha(ALERGENIOS_UE.map(CONTEM))` dá `completa: true` e `porDeclarar: 0`
-observed: o `ALERGENIOS_UE` tem **13**. Nenhuma prova de `inspeccao/` ou `provas/` o importa. O máximo nomeado em qualquer teste acima do domínio são **4 dos 13**, em `provas/catalogo.test.ts`; as três specs que mencionam alergénios nomeiam **zero** — testam o texto do aviso, não a lista
+observed: o `ALERGENIOS_UE` tem **14** (eu escrevi 13: o meu padrão `[a-zA-Z_]+` não admite hífen e deixou cair `frutos-de-casca`). Nenhuma prova de `inspeccao/` ou `provas/` o importa. O máximo nomeado em qualquer teste acima do domínio são **4 dos 13**, em `provas/catalogo.test.ts`; as três specs que mencionam alergénios nomeiam **zero** — testam o texto do aviso, não a lista
 evidence: `packages/domain/src/alergenios.ts` · `packages/domain/src/alergenios.test.ts:138` · `provas/catalogo.test.ts`
 fix_criteria: renderizar um prato com os 13 na CARTA PÚBLICA e medir transbordo, alvos e legibilidade — não no catálogo interno, porque o ecrã que decide se alguém come é o que o cliente lê. Um prato com 4 alergénios não prova nada sobre 13
 decisao: nao-precisa-de-autorizacao
-status: open — encontrado pelo revisor a 07/09
+status: MEDIDO pelo JR a 07/09 e CONFORME — os 14 aparecem, cabem, lêem-se, e a nota pública continua inteira, nas cinco larguras. Ele contou a lista DO DOMÍNIO em vez de a fixar no teste, e foi por isso que apanhou os 14 onde eu tinha escrito 13
 ```
 
 ```yaml
