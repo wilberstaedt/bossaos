@@ -36,13 +36,28 @@
 # Se algum controlo não bater, o veredicto é NÃO MEDI: sem uma rota viva ao lado,
 # a recusa do registo podia ser de qualquer outra coisa.
 #
-# ── E a sonda nunca cria conta ────────────────────────────────────────────
+# ── E a sonda não cria conta: agora por MECANISMO e não por convenção ────
 #
-# O corpo leva uma senha de UM carácter. Medido: com a cura ligada o
-# `disableSignUp` responde ANTES da política de senha, e com ela desligada é a
-# política que recusa — nos dois casos **nada é criado**. Uma prova de segurança
-# que precisasse de criar a conta para saber se podia criá-la seria o próprio
-# defeito a correr.
+# O corpo leva uma senha de UM carácter. Com a cura ligada o `disableSignUp`
+# responde ANTES da política de senha; com ela desligada é a política que recusa.
+# Nos dois casos nada é criado — **mas isso era uma convenção**, e o revisor
+# apanhou-lhe o buraco: o controlo negativo corre com a cura DESLIGADA, e quem um
+# dia alongar essa senha «para o teste ser mais realista» passa a criar uma conta
+# a sério. Quem alonga a senha não está a ler o comentário: está a resolver outro
+# problema.
+#
+# Por isso a guarda **conta os utilizadores antes e depois, na própria corrida**.
+# Se o número mexer, ela reprova — e o 131 deixa de ser um número num documento
+# para passar a ser um invariante que se re-corre.
+#
+# ── E conta pelo papel CERTO, que não é o do produto ─────────────────────
+#
+# A tabela `users` tem RLS activa. Medido: o `bossaos_app` vê **0** (só tem a
+# política `identidade_propria`, e sem identidade não vê nada) enquanto o
+# `bossaos_migrate` vê **131**. Contar pelo papel do produto daria `0 == 0`
+# sempre — uma guarda incapaz de ver aquilo que guarda, que passaria mesmo que o
+# registo criasse mil contas. Foi assim que duas contagens correctas deste mesmo
+# achado, feitas por duas pessoas, deram 0 e 131.
 #
 # O `GET` não serve para perguntar isto: o `better-auth` responde 404 a método
 # errado, e o `sign-in/email` também dá 404 em `GET`. O primeiro instrumento foi
@@ -94,9 +109,23 @@ codigo() {
     "http://127.0.0.1:$PORTA$1"
 }
 
+# Conta pelo papel de migração: ver a nota do RLS acima.
+contar_utilizadores() {
+  [ -n "${MIGRATION_DATABASE_URL:-}" ] || return 0
+  psql "$MIGRATION_DATABASE_URL" -tAc 'SELECT count(*) FROM users' 2>/dev/null | tr -d '[:space:]'
+}
+
 corpo() {
   curl -s -X POST -H 'Content-Type: application/json' -d "$2" "http://127.0.0.1:$PORTA$1"
 }
+
+ANTES=$(contar_utilizadores)
+if [ -z "$ANTES" ]; then
+  naomedi "não consigo contar os utilizadores (sem \`MIGRATION_DATABASE_URL\` ou sem \`psql\`)."
+  echo "           Sem contagem, esta prova não pode garantir que não cria contas —"
+  echo "           e uma prova de segurança que não sabe o que deixou atrás não serve."
+  exit "$NAO_MEDI"
+fi
 
 INVENTADA=$(codigo /api/auth/rota-inventada-xyz)
 ENTRADA=$(codigo /api/auth/sign-in/email '{}')
@@ -109,6 +138,8 @@ REGISTO_CORPO=$(corpo /api/auth/sign-up/email "$SONDA")
 CONVITE=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$PORTA/api/convites/token-que-nao-existe")
 ACEITAR=$(codigo /api/convites/aceitar '{"token":"x"}')
 
+DEPOIS=$(contar_utilizadores)
+
 echo "  medido:  inventada=$INVENTADA  sign-in=$ENTRADA  sign-up=$REGISTO  convite=$CONVITE  aceitar=$ACEITAR"
 echo "           sign-up diz: $(printf '%s' "$REGISTO_CORPO" | head -c 120)"
 
@@ -116,9 +147,12 @@ ambito() {
   echo "  âmbito:  três pedidos na mesma corrida contra o build de PRODUÇÃO."
   echo "           Mede a RESPOSTA do servidor e nunca a configuração — ler o"
   echo "           ficheiro foi o que fez alguém afirmar que a rota não existia."
+  echo "           Utilizadores: $ANTES antes, ${DEPOIS:-?} depois — contados pelo papel"
+  echo "           de MIGRAÇÃO, porque o do produto vê 0 sob RLS e o invariante"
+  echo "           ficaria \`0 == 0\` para sempre."
   echo "           FORA, e declarado: isto não mede o que uma conta criada assim"
-  echo "           alcançaria. A exposição prova-se; a consequência não se mediu,"
-  echo "           e medi-la exigia criar contas."
+  echo "           alcançaria na camada HTTP. Sob RLS, pelo \`comIdentidade\`, um"
+  echo "           utilizador sem pertença alcança zero em tudo."
 }
 
 # ── Os controlos primeiro: sem eles o 404 do registo não vale nada ────────
@@ -133,6 +167,23 @@ if [ "$ENTRADA" != "400" ]; then
   ambito; exit "$NAO_MEDI"
 fi
 verde "os controlos batem: inventada 404, sign-in 400"
+
+# ── A contagem, e vem ANTES do veredicto do registo ──────────────────────
+#
+# Se a prova criou uma conta, o que ela diz sobre o registo deixa de importar:
+# ela própria fez o que veio impedir. Por isso esta verificação está aqui e não
+# no fim.
+if [ -z "$DEPOIS" ]; then
+  naomedi "perdi a contagem a meio — não sei o que esta corrida deixou atrás."
+  ambito; exit "$NAO_MEDI"
+fi
+if [ "$ANTES" != "$DEPOIS" ]; then
+  vermelho "a PRÓPRIA prova mexeu na população: $ANTES → $DEPOIS utilizadores."
+  echo "           Uma prova de segurança que cria o que veio impedir é o defeito"
+  echo "           a correr. Verifica a sonda antes de olhar para o veredicto."
+  ambito; exit "$FALHOU"
+fi
+verde "a população não mexeu: $ANTES → $DEPOIS utilizadores"
 
 if [ "$CONVITE" = "000" ] || [ "$ACEITAR" = "000" ]; then
   naomedi "as rotas do convite não responderam — não se mede a cura sem elas."
