@@ -2359,6 +2359,12 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
   border-radius: 16px; border: 1px solid var(--bo-borda); background: #FFFFFF;
   padding: var(--bo-espaco-md); min-height: 112px;
   display: flex; flex-direction: column; justify-content: space-between;
+  /* `min-width: 0` num item de grelha não é arrumação: por omissão ele é
+     `auto` e CRESCE até caber o conteúdo em vez de o conter. Sem isto, o
+     rótulo de estado — «Ocupada · 21:30 · Marta (sala)» — empurrava o cartão
+     para fora da faixa e a sala rolava 25 px a 390. É a mesma linha que o
+     `.bo-publico__conteudo` já tinha, e pela mesma razão. */
+  min-width: 0; overflow-wrap: anywhere;
 }
 .ns-mesa__nome { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 20px; }
 .ns-mesa__capacidade { font-size: 14px; color: var(--bo-texto-secundario); }
