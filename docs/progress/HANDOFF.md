@@ -28,6 +28,47 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## O `next-env.d.ts` — um defeito latente, e a defesa era vigilância
+
+O sénior provou a hipótese que tinha deixado em aberto: um build com
+`NEXT_DIST_DIR` **reescreve** o `apps/web/next-env.d.ts`, que é **versionado** —
+ele contém `import "./.next/types/…"`, um caminho que segue o directório de
+build. Seis guiões da casa usam a variável (`provar-mestres` e os cinco
+`provar-*-mkt`) e **nenhum o repunha**. Commit `b1cf62b`.
+
+**Nunca disparou, e é isso que o tornava perigoso.** O ficheiro mudou uma vez em
+toda a história, quando nasceu. Não disparou por **vigilância** e não por
+mecanismo — foi apanhado a olhar para a árvore suja antes de comitar. Uma defesa
+que depende de alguém reparar funciona até ao dia em que a pessoa tem pressa.
+
+**Duas decisões de desenho.** A mecânica vive numa peça só,
+`scripts/next-env-intacto.sh`, porque seis cópias do mesmo trap eram a
+duplicação que fechei hoje no `CabecalhoDePagina`. **Mas a peça não põe o
+trap:** expõe `guardar`/`repor` e cada guião arma o seu, porque um `trap … EXIT`
+posto lá dentro **substituiria** o de quem a lê — e o `provar-mestres.sh` já tem
+um, que mata o servidor. Um trap silencioso a apagar outro seria cura pior do que
+a doença. Nele, as duas coisas ficam no mesmo trap, e o guardar acontece cedo,
+logo a seguir ao `export`, com um trap interino: morrer entre o `export` e o
+arranque do servidor repunha na mesma.
+
+| controlo | resultado |
+| --- | --- |
+| A · com o trap, `NEXT_DIST_DIR=.next-controlo` | ficheiro **limpo**, aponta `.next` |
+| B · o mesmo guião com o trap **desligado** | **sujo**, aponta `.next-controlo` |
+
+> **A primeira tentativa do A não valia nada e não a contei:** deu limpo com o
+> guião a morrer em `command not found` — o `timeout` não existe no macOS, erro
+> do meu instrumento. Verde sobre população zero. Só depois de o `.next-controlo`
+> nascer é que o limpo passou a significar alguma coisa — e mesmo assim é o **B**
+> que prova que foi o trap, e não o build a não lhe tocar.
+
+**E o comentário que apontava para a causa errada** ficou corrigido no
+`provar-mestres.sh`: ele dizia que o `next-env.d.ts` a oscilar era sintoma do
+`.next` partilhado por duas corridas. Não era — acontece com **um processo só**,
+e é efeito determinista da variável. Um comentário que aponta para a causa errada
+é pior do que nenhum: manda a próxima pessoa procurar concorrência onde há uma
+variável de ambiente.
+
 ## Superfícies: a guarda media quatro de onze, e o buraco era a população
 
 O sénior encontrou porque é que o CTA da landing escapou: a
