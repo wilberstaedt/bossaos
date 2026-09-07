@@ -1026,3 +1026,54 @@ prova é visual, olhar é medir.
 A cura não foi encolher o alvo de toque para arrumar a lista: catorze itens a
 44 px dão 616 px só de itens e não cabem em 900. Encolher trocava um problema de
 arrumação por um de acessibilidade. A lateral ficou presa e o que rola é a lista.
+
+---
+
+## Auditoria de frontend — as sete tarefas (07/09)
+
+`9258acf` `e97d217` `f9e87dd` `3334af1` `3f52711` `a107140` `bfe3613` `502d1f3`
+
+Duas linhas de CSS · o botão invisível do KDS · o coral na navegação · o acento
+com quatro provas e zero consumidores · o staff a vestir a folha pública · a área
+de conteúdo · a quarta instância do menu.
+
+### A cura que REMOVE código
+
+Na (2) o sénior notou o que eu não tinha visto no meu próprio trabalho: as 39
+linhas de CSS defensivo do KDS foram a zero. **Não escrevi a quadragésima —
+apaguei as trinta e nove.** Uma correcção que remove código é a assinatura de se
+ter apanhado a doença; uma que acrescenta é quase sempre o sintoma.
+
+O mecanismo: **a superfície declara, o componente pergunta.** Em vez de o
+componente adivinhar onde está, `--bo-accao`, `--bo-sobre-accao` e
+`--bo-navegacao-activa` são o que a superfície promete a quem for desenhado nela.
+Serviu para o botão (2), para o coral (3) e para a navegação do staff (5) — três
+tarefas com uma peça.
+
+### Uma resposta escrita envelhece; uma pergunta feita não
+
+Na (1) escrevi `max-width: 1200px` à mão quando `--bo-largura-maxima` já existia
+com esse valor. O valor estava certo **hoje**, e o mecanismo era o mesmo que
+produziu o 1100 que eu estava a corrigir. Caí no padrão que tinha acabado de
+curar, na mesma tarefa.
+
+### A porta de fuga é onde o defeito se esconde
+
+A (7) era a quarta instância do menu, e sobreviveu porque a minha cura só actua
+**quando o chamador se cala** — e eu deixei a porta aberta para o catálogo de
+desenho. As três que corrigi calaram-se; a que ficou continuou a gritar,
+protegida pela mesma linha que curou as outras. **Uma excepção legítima precisa
+de guarda, senão é um esconderijo.**
+
+### Cinco erros meus, todos apanhados por controlo
+
+1. Contei ocorrências numa árvore e apanhei ancestrais — «4» quando eram 2.
+2. Contei pixéis e dei-os por pintados: o filete estava `transparent`.
+3. Deixei `border: 1px solid transparent` contar como delimitação — e foi essa
+   linha que engoliu o defeito exacto para que a prova foi escrita.
+4. Medi elementos fora do ecrã (`.bo-saltar` a `top: -100px`).
+5. No `grep`, o `[idioma]` de um caminho é uma **classe de caracteres**.
+
+**O que os une: em todos, o instrumento decidiu o que existe.** E o que os
+apanhou foi sempre a mesma coisa — plantar o defeito e exigir ver o vermelho,
+antes de acreditar em qualquer zero.
