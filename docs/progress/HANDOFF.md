@@ -2564,3 +2564,51 @@ desmentirem.
 
 **A afirmação aguenta**, e agora aguenta sobre três eixos independentes em vez
 de uma busca. **Limpar continua a ser decisão dele**, e continua a ser segura.
+
+## 07/09 22h55 — o registo fechado, revisto e ASSINADO, com duas notas
+
+Verifiquei **eu**, e com a forma **mais dura** do teste — corpo **válido**,
+senha longa e email bem formado, para eliminar a hipótese de ser a validação a
+travar:
+
+| pedido | resposta |
+|---|---|
+| rota inventada | **404** — o controlo é válido |
+| `sign-in/email` | erro de validação — **vivo** |
+| **`sign-up/email`, corpo válido** | **`EMAIL_PASSWORD_SIGN_UP_DISABLED`** |
+| `/api/convites/token-falso` | 404 — **o convite não partiu** |
+
+Recusa **pela razão certa**, e nenhuma conta criada — confirmei na base que não
+existe utilizador com o email da minha sonda. **Assinado.**
+
+**E ele tinha razão contra a minha régua.** Eu exigi 404; `disableSignUp` não
+desregista a rota, **recusa a operação**. Cumprir a régua à letra daria uma
+guarda vermelha para sempre sobre uma cura que funciona.
+
+### Nota 1 — o «131 → 131» não se consegue voltar a correr
+
+Foi a prova dele de que nada foi criado. **Não a consegui verificar:** a base de
+desenvolvimento está **inteiramente vazia** — `users`, `organizations`,
+`locations`, `memberships`, `invitations`, tudo a zero — e nenhuma outra base
+tem essa população.
+
+**A conclusão aguenta** (confirmei-a por outro caminho), mas o número é um
+**instantâneo**, e um instantâneo de segurança que ninguém pode re-correr decai
+em confiança. Era a mesma frase de hoje: *um número que era verdade quando foi
+escrito.*
+
+### Nota 2 — a sonda é segura por CONVENÇÃO, não por mecanismo
+
+O corpo leva **senha de um carácter**: com a cura ligada o `disableSignUp`
+responde primeiro, com ela desligada é a política de senha que recusa. Está
+documentado e bem raciocinado.
+
+Mas o controlo negativo corre com a cura **desligada**. Se alguém um dia
+alongar essa senha para tornar o teste «mais realista», **o controlo negativo
+passa a criar uma conta a sério**, e nada no guião o impede.
+
+### As duas notas fecham-se com a MESMA linha
+
+**A guarda contar os utilizadores antes e depois** torna o «131 → 131» um
+invariante que corre sempre (nota 1) **e** transforma a segurança da sonda de
+convenção em mecanismo (nota 2). Nenhuma delas bloqueia: a cura está provada.
