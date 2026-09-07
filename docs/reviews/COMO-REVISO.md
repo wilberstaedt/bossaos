@@ -2418,3 +2418,34 @@ evidência nenhuma que a desminta.
 agentes — exactamente o orçamento seguro. O bug de kernel na pilha de rede deste
 Mac já o derrubou quatro vezes sob carga de agentes. Avisei-o para não subir
 nada em paralelo enquanto a suite corre.
+
+---
+
+## Uma decisão que eu tomei e não passei custou-lhe uma pergunta e ia custar horas — 07/09
+
+O JR parou e perguntou: *«a `validar-provas-frescas.sh` está vermelha — 39 dos 65
+artefactos são anteriores ao produto. Recapturá-los precisa do seed e da porta.
+Diga-me se abro isso ou se fica para quem já lá está.»*
+
+**A pergunta é boa e a resposta já existia — escrita por mim, há duas horas, e
+nunca lhe chegou.** Eu tinha decidido e documentado que **verde-repositório não é
+o alvo**: o corpo de prova envelhece sempre que o produto muda, e uma guarda
+permanentemente vermelha é uma guarda ignorada. O alvo é **o momento em que a
+prova é mostrada a alguém**, e só para os artefactos dessa entrega.
+
+**Se eu não lhe passo isso, ele recaptura 39 artefactos** — horas de trabalho,
+com o `seed` e a porta ocupados, **para não mudar uma única conclusão**. Todos
+pertencem a achados fechados.
+
+**A forma, e é de coordenação e não de medição: uma decisão registada no meu
+documento e não no canal dele não está tomada — está guardada.** Eu escrevi-a
+para o meu raciocínio futuro e esqueci-me de que ele também precisa dela para
+não trabalhar em vão. **A escrita serviu-me a mim e não a ele**, e a diferença só
+apareceu quando ele parou para perguntar.
+
+**E é a segunda vez na mesma hora que ele fica parado por causa da mesma coisa** —
+a primeira foi a porta 3010, que era dele; esta é uma decisão minha por
+transmitir. **Nos dois casos ele fez o correcto** (não atropelar, não decidir
+sozinho o que não é dele) **e nos dois casos o custo foi meu**: um por não
+verificar de quem era o processo, outro por não lhe dizer o que já tinha
+decidido.
