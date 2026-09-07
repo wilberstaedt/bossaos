@@ -231,3 +231,69 @@ isso **por estado**, e não como princípio geral:
 **Os três nomeiam a avaria que se disfarça de sucesso**, que é exactamente o que
 eu tinha pedido — e o do `offline` é o mais fino: dois ecrãs iguais não provam
 resiliência, provam indiferença.
+
+---
+
+## A régua caiu em cima de quem a estava a cumprir — 07/09
+
+Escrevi nesta régua que *«um `loading` capturado numa página que nunca carrega
+não é um estado de carregamento: é uma página partida com o nome trocado»*.
+
+**Aconteceu-lhe exactamente isso, e foi ele a apanhá-lo.**
+
+> «**O meu próprio controlo produziu um verde falso, e o código de saída
+> escondeu-o.** 25 capturas, `exit 0` — e quatro delas eram páginas brancas.»
+
+### Como o apanhou, e é a melhor parte
+
+**Pelo tamanho dos ficheiros.** O `M03-denied` e o `M03-erro` saíram **byte a
+byte idênticos**, a 5851; o `M04-erro` e o `M04-offline` a 2740.
+
+> «**Duas telas diferentes não podem produzir os mesmos bytes a não ser que
+> nenhuma seja uma tela.**»
+
+**Não foi a imagem que o denunciou — foi um invariante sobre a imagem.** É o mesmo
+padrão que atravessou a noite: o instrumento não é testemunha de si próprio, e o
+que o apanha é sempre um segundo facto que discorda do primeiro. Desta vez o
+segundo facto era `ls -l`.
+
+### A causa, numa linha que ele próprio escreveu
+
+Aceitou `codigo >= 400` como prova de um estado `denied` ou `erro`. **E um 404 em
+branco satisfaz isso.**
+
+> «O código de resposta diz **o que o servidor decidiu**; não diz nada sobre **um
+> ecrã existir**.»
+
+### Três faltas, e a terceira é a mais funda
+
+1. **O controlo não exigia renderização** — agora um estado tem de produzir texto
+   ou fica `NÃO CAPTURADO` com a razão.
+2. **`catalogo/produtos/[id]` não é uma rota** — o teste de «id inválido» batia
+   num caminho que ele inventou, logo o 500 não dizia nada sobre tratamento de
+   ids. Passou a usar uma rota que existe.
+3. **O cenário de offline era o cenário errado.** Navegou **já offline** e
+   capturou o `ERR_INTERNET_DISCONNECTED` — **a página de erro do navegador, não
+   a do produto**. E não podia ter funcionado: o service worker **recusa
+   deliberadamente** guardar telas de inquilino.
+
+**A terceira liga-se ao maior achado da noite.** Exigir um arranque a frio sem
+rede era *«medir uma promessa que o produto nunca fez»* — e é **exactamente a
+promessa que a FAQ fazia e que foi corrigida** por ele próprio há oito horas. O
+teste teria provado a mentira que a página deixou de contar.
+
+**O cenário verdadeiro é a tablet já aberta no salão quando a rede cai** — abrir
+com rede, cortar, observar. É aí que vivem o `Sin enviar` e a recusa com motivo.
+
+## E um achado de produto que sobrevive à corrida má
+
+O `denied` **comporta-se bem como isolamento**: a unidade de outra casa devolve
+**404 e não 403**, portanto não confirma que o recurso existe. **Mas não
+renderiza nada.**
+
+**O §7 pede um estado `denied`/`upgrade` e o backoffice não tem ecrã desenhado
+para ele.** O `NaoEncontrado.tsx` é o único componente de estado desenhado no
+código.
+
+**Isso é uma lacuna de produto que a lista de entregáveis do §7 expôs** — e
+expô-la é para o que a lista serve.
