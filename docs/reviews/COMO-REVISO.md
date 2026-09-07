@@ -2248,3 +2248,38 @@ que a sustenta continuar de pé, e esta caiu com uma frase do dono do produto.
 
 **Diagnostiquei e passei — não implemento o que vou rever.** É a razão de haver
 dois, e vale mais nesta altura da noite do que valia ao princípio.
+
+---
+
+## O ficheiro que a construção escreve faz toda a prova parecer velha — 07/09
+
+A correcção da barra lateral entrou, e a página que o Matheus tem no telemóvel
+continuou a mostrar **o defeito de que ele se tinha queixado**. A regra da
+frescura apanhou-me na minha própria entrega, que é onde ela devia doer.
+
+Fui verificar quais capturas estavam velhas e a resposta foi **25 de 25** — o que
+não podia ser: três tinham sido recapturadas minutos antes. **Duas coisas
+estavam erradas, e nenhuma era do produto.**
+
+**A primeira: comparar o `mtime` de uma captura com a HORA DO COMMIT que a
+contém.** Uma captura tirada da árvore de trabalho é sempre alguns segundos mais
+velha do que o commit que a inclui — são **dois relógios do mesmo
+acontecimento**, e a diferença é o tempo que alguém demorou a escrever a
+mensagem. Comparar assim marca como velha exactamente a prova de quem fez a
+coisa certa: recapturar e commitar junto.
+
+**A segunda, e é a melhor: `apps/web/next-env.d.ts` tinha o carimbo mais
+recente de todo o produto — e é o Next que o escreve em cada construção.** O meu
+próprio build tinha acabado de o tocar. Ou seja: **o acto de construir para medir
+invalidava tudo o que eu ia medir.** Uma guarda assim fica vermelha para sempre a
+partir da primeira corrida, e uma guarda permanentemente vermelha é uma guarda
+ignorada — que é como ela morre sem ninguém a matar.
+
+Excluindo o que a construção gera, a fonte real mais recente é das 13h20:33 e as
+capturas das 13h20:51. **25 frescas, zero velhas.**
+
+**A regra: ao definir «o produto» para efeitos de frescura, exclui-se o que a
+própria construção escreve — senão o instrumento invalida a sua própria prova
+sempre que corre.** E a página de aprovação passou a ser gerada por um guião que
+**se recusa a produzir** se alguma captura for anterior à fonte mais recente: a
+verificação deixa de depender de eu me lembrar dela.
