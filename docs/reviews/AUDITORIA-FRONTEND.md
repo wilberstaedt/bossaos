@@ -160,3 +160,36 @@ pergunta que nenhuma delas fazia.
 A última é a que tem a forma certa: **uma partição que fecha com a excepção
 declarada**, e não um piso. O que sobra sobra por uma razão escrita — não é
 texto, é um símbolo — e o crachá discutível e o CSS morto saíram os dois.
+
+---
+
+## As sete fechadas — verificação minha, 15h20
+
+| # | o que era | verificado |
+| --- | --- | --- |
+| 1 | sobrancelha 12 px · página 1100 px | 14/20 · `var(--bo-largura-maxima)`; população do «nunca abaixo de 14» de **4 → 1**, e o que resta é o glifo `▾` |
+| 2 | botão do KDS invisível | **1,00:1 → 13,05:1**; cores acima de 2 % na região: **1 → 2**; **−39 linhas** de CSS defensivo |
+| 3 | coral na navegação do KDS | **276 px → 0**, e o mais saturado do ecrã passou a ser `#8A5100`, a etiqueta do pedido |
+| 4 | token com 4 provas, 0 consumidores | consumidores **0 → 1**; acento na carta **0 → 188 px** |
+| 5 | Staff a vestir a folha do site público | `bo-publico__seccoes` → **`bo-seccoes`**, raio de **controlo** e `--bo-toque-operacao` por token |
+| 6 | conteúdo do backoffice sem componentes | `.bo-tabela` + 5 `.bo-estado__numero` onde eram zero; migalha derivada |
+| 7 | 4.ª instância do `activa: true` | **saiu** das duas rotas reais; o catálogo de desenho mantém os 2 usos legítimos |
+
+## E um erro meu no fim, que é o que eu tinha avisado
+
+**Quase reportei a migalha como por corrigir.** O `grep` no chamador ainda mostra
+`migalha={m.pessoas.titulo}`, e eu ia dá-la como aberta. **Está curada, e no
+componente:**
+
+```
+const migalhaDaRota = navegacao.find(…)?.rotulo ?? migalha;
+```
+
+**A derivação vence e o valor passado é o RECURSO** — o inverso exacto da porta
+de fuga do `activa`, onde o passado vencia e por onde o defeito sobreviveu quatro
+vezes. **A mesma forma de código com a precedência trocada é uma cura num sentido
+e um buraco no outro**, e ler o chamador não distingue as duas: só a ordem do
+`??` o faz.
+
+Eu tinha escrito essa lição há duas horas e ia cair nela pelo outro lado. **Ver o
+chamador nunca chega — a pergunta é sempre qual dos dois ganha.**
