@@ -2163,3 +2163,47 @@ linha está em 1610 debaixo de «O que cada plano inclui». A cura é copy, e a 
 é dele.
 
 Entregue ao JR com régua escrita antes: `docs/reviews/ALVO-CAPTURAS-DE-MARKETING.md`.
+
+## 07/09 21h35 — as capturas por idioma, revistas e assinadas
+
+Verifiquei **eu** as duas exigências da régua, em vez de ficar pela palavra dele:
+
+- **Somas distintas:** as cinco capturas têm três somas por idioma, nenhuma
+  coincide. E não fiquei pela soma — que só prova que os bytes mudaram, não que
+  o idioma está certo. **Abri a `pt-BR/carta-movel` a olho:** interface em
+  português, «Português» aceso, «O que você quer?», «Buscar», «Todo o cardápio»,
+  e o campo de busca já não corta.
+- **Controlo negativo:** toquei em `packages/ui/src/estilos.css` e a guarda
+  passou de **saída 0** a **saída 1** com «há capturas anteriores à fonte mais
+  recente»; voltou a passar depois de repor. **Recusa mesmo.**
+
+**Um ponto de revisão que veio do meu próprio trabalho:** a guarda dele compara
+`mtime` dos **dois** lados, e num checkout fresco o git reescreve tudo — os dois
+lados ficam iguais e ela diz verde onde não consegue medir. É o mesmo cegamento
+que curei em `932487b`. O canário pertence dentro do `frescura_do_produto.py`
+partilhado, **não copiado nas duas guardas**.
+
+### Novo para a lista do Matheus — e é escolha, não defeito
+
+**Os pratos na captura `pt-BR` continuam em espanhol.** Isso está **certo**: são
+dados do inquilino, não texto de interface, e um restaurante real teria os seus.
+A escolha é dele: manter a demonstração de um restaurante espanhol com interface
+portuguesa, ou semear um inquilino de demonstração português só para estas
+capturas — o que custa um segundo inquilino para manter.
+
+### Terceiro achado das fotografias, medido
+
+Quatro das cinco capturas são de **secretária** e aparecem no telemóvel a um
+quarto do tamanho:
+
+| captura | original | mostrada | escala | texto de 14 px fica a |
+|---|---|---|---|---|
+| `catalogo-1440` | 1440 px | 342 px | 0,24 | **3,3 px** |
+| `sala-servico-1440` | 1440 px | 342 px | 0,24 | **3,3 px** |
+| `kds-cozinha-1280` | 1280 px | 342 px | 0,27 | **3,7 px** |
+| `sala-tablet-834` | 834 px | 342 px | 0,41 | **5,7 px** |
+| `carta-movel-390` | 390 px | 342 px | 0,88 | 12,3 px |
+
+**A página diz «olha o produto» e mostra-o num tamanho em que não se lê nada.**
+Mesma família da medição do KDS de hoje: o que conta é o tamanho no ecrã de quem
+olha, nunca o do ficheiro.
