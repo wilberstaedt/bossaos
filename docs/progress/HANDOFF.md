@@ -2823,3 +2823,43 @@ publicar por falta de autorização**. E não fiquei pelo intervalo de commits:
 
 **Ler o intervalo de commits diria a mesma coisa e não seria a mesma prova.**
 O que vai no ar é o que está no ficheiro dentro do pacote.
+
+## 08/09 00h00 — assinado, e o aviso da minha régua apanhou-me a mim
+
+**Verifiquei correndo**, não lendo: `validar-coral-da-arte` e `validar-precos`
+dão saída 0 e **a linha que ele citou está mesmo na saída** — «o coral da arte
+não entra em interface», «3 planos, valores em cêntimos inteiros». E os dois
+trazem auto-controlo próprio. **Assinado.**
+
+Resultado dele nos 17: **5 por guião, 11 juízo humano, 1 bloqueado por desenho.**
+E declarou uma ressalva que ninguém lhe pediu: o `validar-seo` cobre os
+metadados por rota e **não** cobre a pendência do `NEXT_PUBLIC_SITE_URL` que o
+próprio veredito nomeia. **Um guião que passa não é um critério coberto.**
+
+### A régua avisava contra o meu próprio método, e tinha razão
+
+Eu escrevi na régua que casar palavras com nomes de ficheiro é o instrumento
+mais fraco que há — e a seguir apresentei uma amostra feita exactamente assim,
+dizendo **«quatro em seis já têm por onde ser re-medidos»**.
+
+Dos meus quatro:
+
+| eu propus | o certo | |
+|---|---|---|
+| `validar-cobertura` (396 IDs) | igual | **acertei** |
+| `validar-seo` (SEO) | igual, com ressalva | **acertei** |
+| `provar-planos` (preços) | `validar-precos` | **quase** |
+| `provar-identidades` (identidade antiga) | `validar-coral-da-arte` | **errado no sujeito** |
+
+**Metade das minhas correspondências confiantes não resistiu**, e eu tinha-as
+dado como «óbvias». O `provar-identidades` é o caso puro: **o nome acertava na
+palavra e errava no sujeito** — trata de identidades de **utilizador**, não de
+marca.
+
+Ao todo, cinco nomes mentiram-lhe pelo caminho: `validar-assinaturas` (é o
+estado `validado` de uma tela, não assinatura visual), `juncao-identidade`,
+`dados-ficticios`, `portas-mortas`, `registo-coerente`.
+
+**Escrever o aviso não me imunizou contra o erro que ele descreve.** Escrevi-o
+e cometi-o na mesma página. O que valeu não foi o aviso — foi haver **outra
+pessoa a correr os guiões**.
