@@ -1166,3 +1166,32 @@ As seis capturas obrigatórias (LP e Mesas, 1440×900 e 390×844, primeira
 viewport e página completa), testes em ES/PT/EN, contraste, foco, teclado, zoom
 e conteúdo longo, **um preview verificável publicado**, e a resposta com os sete
 pontos do §9. **Depois páras.**
+
+### Actualização 01h30 — o que entrou DEPOIS deste bloco ser escrito
+
+**O JR chegou a 100 % de contexto às 01h27.** Antes disso entregou mais duas
+coisas, e a segunda é a melhor da noite:
+
+- `609a600` — as **onze** condições de reprovação que se medem, todas a verde.
+- `3096b78` — **o CTA do herói estava verde sobre verde, 1,00:1**, e quem o
+  disse foi **a imagem**, não o número.
+
+**A frase que é preciso levar daqui:** *«não havia contradição entre medições —
+eu é que nunca tinha medido a landing.»* O teste do CTA media a **página
+interna**, onde a regra que estraga isto não existe.
+
+**A causa:** `.bo-publico .bo-botao--primario`, (0,2,0), pinta a acção com o
+**tema público** — o canal que o restaurante configura na sua carta. Está certo
+lá; na landing sequestra o botão e o `--bo-accao` da superfície nunca lhe chega.
+**Mesma família do anel de foco do KDS: uma regra de uma superfície a aplicar-se
+noutra.**
+
+**E a guarda das superfícies aplicava 4,5 a TODO o texto.** Verificado por mim:
+sobre o coral, o melhor que existe é **3,84** (branco) e o verde-escuro dá
+**3,73** — **nenhuma cor de texto passa 4,5 sobre coral**. A 1.4.3 pede 3 para
+texto grande, e o CTA é 19 px/700. **Um limiar que nenhuma escolha satisfaz não
+mede: proíbe.**
+
+**Falta para o portão:** as duas capturas das Mesas, os testes ES/PT/EN,
+contraste, foco, teclado, zoom e conteúdo longo, o preview publicado e a
+resposta dos sete pontos. **Depois pára.**
