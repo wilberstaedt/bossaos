@@ -100,6 +100,40 @@ const COMPOSICOES = [
     rota: (l) => `/${l}/app/bossa-demo/sala/floor`,
     largura: 834, altura: 1112, sessao: true,
   },
+  /**
+   * ── AS ESTREITAS, e a razão é aritmética ────────────────────────────────
+   *
+   * Quatro das cinco composições eram de secretária e apareciam no telemóvel a
+   * um quarto do tamanho. Medido a 07/09 na terceira fotografia do dono do
+   * produto: o catálogo e a sala têm 1440 px e são mostrados a **342**, escala
+   * **0,24** — texto que no produto tem 14 px chega ao ecrã dele a **3,3 px**.
+   * O KDS a 3,7 e o tablet a 5,7. Só a carta, capturada a 390, chegava legível
+   * a 12,3.
+   *
+   * A página dizia «olha o produto» e mostrava-o num tamanho em que não se lê
+   * nada. Encolher uma captura de secretária não é a versão móvel dela: é a
+   * mesma imagem ilegível. Por isso o telemóvel recebe capturas TIRADAS
+   * estreitas — o produto na largura em que ele é usado nessa mão.
+   */
+  {
+    nome: 'catalogo-estreito',
+    porque: 'O catálogo na largura do telemóvel: a 1440 encolhido para 342 o '
+      + 'texto chegava a 3,3 px.',
+    rota: (l) => `/${l}/app/bossa-demo/catalogo/produtos`,
+    largura: 390, altura: 844, sessao: true,
+  },
+  {
+    nome: 'sala-estreita',
+    porque: 'A sala na largura do telemóvel, pela mesma razão do catálogo.',
+    rota: (l) => `/${l}/app/bossa-demo/sala/floor`,
+    largura: 390, altura: 844, sessao: true,
+  },
+  {
+    nome: 'kds-estreito',
+    porque: 'O KDS na largura do telemóvel: a 1280 encolhido chegava a 3,7 px.',
+    rota: (l) => `/${l}/kds/${DEMO.unidade}/${DEMO.estacaoQuente}`,
+    largura: 390, altura: 844, sessao: true,
+  },
   {
     nome: 'carta-movel',
     porque: 'O que o cliente vê ao apontar para o código da mesa. Sem sessão, '

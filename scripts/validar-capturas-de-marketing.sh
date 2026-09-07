@@ -41,7 +41,10 @@ naomedi()  { echo "  NÃO MEDI $1"; }
 
 RAIZ_CAPTURAS="apps/web/src/demonstracao"
 IDIOMAS=(es-ES pt-BR en)
-COMPOSICOES=(kds-cozinha-1280 sala-servico-1440 catalogo-1440 sala-tablet-834 carta-movel-390)
+# As cinco de secretária mais as três estreitas do telemóvel. Uma composição
+# que entre no guião de captura e não entre aqui fica sem guarda nenhuma.
+COMPOSICOES=(kds-cozinha-1280 sala-servico-1440 catalogo-1440 sala-tablet-834 carta-movel-390
+             catalogo-estreito-390 sala-estreita-390 kds-estreito-390)
 
 echo "As cinco imagens que um comprador vê estão frescas e na língua dele?"
 

@@ -15,6 +15,15 @@ import kdsCozinhaEn from '../demonstracao/en/kds-cozinha-1280.png';
 import catalogoEn from '../demonstracao/en/catalogo-1440.png';
 import salaTabletEn from '../demonstracao/en/sala-tablet-834.png';
 import cartaMovelEn from '../demonstracao/en/carta-movel-390.png';
+import catalogoEstreitoEs from '../demonstracao/es-ES/catalogo-estreito-390.png';
+import salaEstreitaEs from '../demonstracao/es-ES/sala-estreita-390.png';
+import kdsEstreitoEs from '../demonstracao/es-ES/kds-estreito-390.png';
+import catalogoEstreitoPt from '../demonstracao/pt-BR/catalogo-estreito-390.png';
+import salaEstreitaPt from '../demonstracao/pt-BR/sala-estreita-390.png';
+import kdsEstreitoPt from '../demonstracao/pt-BR/kds-estreito-390.png';
+import catalogoEstreitoEn from '../demonstracao/en/catalogo-estreito-390.png';
+import salaEstreitaEn from '../demonstracao/en/sala-estreita-390.png';
+import kdsEstreitoEn from '../demonstracao/en/kds-estreito-390.png';
 
 /**
  * As composições do produto — as capturas reais, num sítio só.
@@ -73,6 +82,42 @@ const FONTES: Record<Idioma, Record<NomeDaComposicao, StaticImageData>> = {
   },
 };
 
+/**
+ * ── AS ESTREITAS: no telemóvel não se encolhe, tira-se outra ─────────────
+ *
+ * Quatro destas cinco eram de secretária e chegavam ao telemóvel a um quarto do
+ * tamanho. Medido na terceira fotografia do dono do produto: o catálogo e a sala
+ * têm 1440 px e são mostrados a **342** — escala 0,24, e texto que no produto
+ * tem 14 px chega a **3,3 px**. O KDS a 3,7, o tablet a 5,7. Só a carta, tirada
+ * a 390, chegava legível a 12,3.
+ *
+ * A página dizia «olha o produto» e mostrava-o num tamanho em que não se lê
+ * nada. Encolher uma captura de secretária não é a versão móvel dela.
+ *
+ * ── A `tablet` partilha a estreita da `sala`, e isso é uma decisão ────────
+ *
+ * Num telemóvel **não há layout de tablet para mostrar**: a composição existe
+ * para mostrar os 834 px na mão de quem serve, e essa largura não cabe. Entre
+ * mostrar o mesmo ecrã legível e um layout de tablet ilegível, escolhi o
+ * primeiro — mas em `/product` as duas aparecem, e no telemóvel passam a ser a
+ * mesma imagem duas vezes. **Escolher outro ecrã para ali é editorial**, e o
+ * texto de marketing não é meu para mexer. Fica levantado.
+ */
+const ESTREITAS: Record<Idioma, Partial<Record<NomeDaComposicao, StaticImageData>>> = {
+  'es-ES': {
+    sala: salaEstreitaEs, kds: kdsEstreitoEs, catalogo: catalogoEstreitoEs,
+    tablet: salaEstreitaEs,
+  },
+  'pt-BR': {
+    sala: salaEstreitaPt, kds: kdsEstreitoPt, catalogo: catalogoEstreitoPt,
+    tablet: salaEstreitaPt,
+  },
+  en: {
+    sala: salaEstreitaEn, kds: kdsEstreitoEn, catalogo: catalogoEstreitoEn,
+    tablet: salaEstreitaEn,
+  },
+};
+
 /** A chave do texto que descreve cada composição — não varia com a língua: o
  *  que varia é o texto, e disso trata o `mensagensDe`. Um facto, um sítio. */
 const ALT: Record<NomeDaComposicao, string> = {
@@ -95,7 +140,8 @@ export function Composicao({
   tamanhos?: string;
 }) {
   const k = mensagensDe(idioma).mktE10 as unknown as Record<string, string>;
-  return (
+  const estreita = ESTREITAS[idioma][qual];
+  const larga = (
     <Image
       className="bo-mkt__composicao"
       src={FONTES[idioma][qual]}
@@ -104,6 +150,28 @@ export function Composicao({
       priority={prioritaria}
       placeholder="blur"
     />
+  );
+  if (!estreita) return larga;
+  /**
+   * `<picture>` e não duas `<Image>` escondidas por CSS: o navegador **descarrega
+   * as duas** mesmo com `display:none`, e pagar dois ficheiros para mostrar um é
+   * um defeito de desempenho a curar outro de legibilidade.
+   *
+   * A estreita entra por `<source>` — é a original de 390 px, e a 390 px isso
+   * são dezenas de KB, não os centenas que uma de 1440 custaria sem optimizador.
+   * A larga continua a passar pelo `next/image` com o `srcset` dele, que é onde
+   * o peso realmente importa.
+   */
+  return (
+    <picture>
+      <source
+        media="(max-width: 767px)"
+        srcSet={estreita.src}
+        width={estreita.width}
+        height={estreita.height}
+      />
+      {larga}
+    </picture>
   );
 }
 
