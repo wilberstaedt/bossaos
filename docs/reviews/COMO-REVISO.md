@@ -1853,3 +1853,39 @@ O que muda é a redacção dos vistos, não os vistos: nos dois casos eu tinha
 medido bem e **descrito mal** — creditei a presença do mecanismo quando o que me
 tinha convencido foi o resultado. Um `status` que descreve a prova errada ensina
 a forma errada a quem o ler, mesmo quando o veredicto está certo.
+
+---
+
+## Um controlo negativo que só cobre metade da população — 07/09
+
+A guarda nova do RV100-024 mede o código HTTP que sai, e o JR correu-lhe um
+controlo negativo: desligou a tradução no `sessao.ts` e viu-a ficar vermelha.
+**Correu-o num lado só, e a guarda mede dois.**
+
+Apliquei o **mesmo** plante aos dois — `ehIdentificadorMalFormado(null)`, que
+torna a tradução inerte **sem deixar nenhum símbolo por usar**, condição para o
+build sobreviver e o arnês arrancar:
+
+| plante idêntico | veredicto |
+| --- | --- |
+| via de **sessão** | **FALHOU** — `organization/unidades/…` e `puerto/orders/…` a 500 |
+| via de **ecrã** | **verde**, `ecra=2 falhas=0`, com a tradução desligada |
+
+**O vermelho da sessão é o que dá valor ao verde do ecrã — e destrói-o.** Prova
+que o build está vivo e que a medição HTTP é real; e por isso o verde do outro
+lado não se pode desculpar com «não chegou lá». **Aqueles dois 404 não vêm da
+tradução.** São o «não encontrado» próprio das rotas — a mesma armadilha que o
+JR tinha diagnosticado horas antes, escrita por ele: *«esses 404 nunca foram do
+meu mecanismo»*. A guarda nova herdou-a em metade da população.
+
+**A regra: um controlo negativo cobre a população que exercita, e não a que a
+guarda mede.** Se a guarda tem duas vias, o controlo tem de plantar nas duas —
+um único plante a acender prova que o instrumento *pode* falhar, não que falha
+**onde é preciso**. É a irmã do piso `> 0`: ali a população era metade contada,
+aqui é metade controlada.
+
+**E o subproduto que quase me enganou três vezes: um plante que parte a
+compilação não testa a guarda, testa o compilador.** Os meus primeiros três
+deixavam um símbolo por usar, o build caía, o arnês não arrancava e a guarda
+dizia **NÃO MEDI** — que é o comportamento certo dela e um controlo inválido meu.
+**Só a terceira resposta me impediu de ler aquilo como vermelho.**
