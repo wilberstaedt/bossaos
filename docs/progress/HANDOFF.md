@@ -2704,3 +2704,51 @@ tudo no fim.
 
 **O invariante da contagem não é decorativo.** Dispara, e diz a coisa certa: não
 acusa o produto, acusa **a própria prova** de ter mexido no que estava a medir.
+
+## 07/09 23h25 — a última afirmação por auditar: o isolamento aguenta
+
+Terceira ronda do mesmo método — **quais das minhas afirmações assentam numa
+medição só**. A que faltava era a mais consequente depois do registo: eu disse
+ao Matheus que a instalação de demonstração tem **senha pública** e que **«não
+há lá nada real»**. Isso é, no fundo, uma afirmação sobre **isolamento entre
+inquilinos**: se falhar, uma senha pública alcança dados alheios.
+
+**Primeiro fui ver se já estava provado, em vez de construir.** Estava —
+`validar-rls.sh`, `provar-isolamento.sh` e `provar-isolamento-no-produto.sh`.
+Corri as três:
+
+| guarda | saída | o que mediu |
+|---|---|---|
+| `validar-rls` | **0** | RLS ligado onde é preciso, e o detector é apanhado a ver uma tabela sem RLS |
+| `provar-isolamento` | **0** | 7 grupos, **28 asserções**, sobre dois inquilinos de **nomes parecidos** |
+| `provar-isolamento-no-produto` | **0** | **7 casos no navegador, com duas sessões reais** |
+
+**O que as torna boas não é o verde — é o que fazem para o merecer.**
+
+- O controlo negativo da camada da base **desliga as políticas e exige
+  vermelho**, e **nomeia quais dos casos medem o RLS** — um vermelho global
+  passaria por controlo sem o ser.
+- E leva uma asserção de população **dentro** do controlo negativo: *«sem
+  política e sem contexto, o runtime vê 2 marcas — a base está viva e cheia»*.
+- O da camada do produto planta uma pertença: as **duas recusas por endereço
+  caem** (provando que medem pertença) e a **recusa por escopo aguenta**
+  (provando que mede outra coisa). Depois repõe, e verifica que **nada ficou
+  para trás**.
+
+### E uma coisa que quase me escapou
+
+O `provar-isolamento` devolveu **`NÃO MEDI`, saída 2**, à primeira: versão de
+Node errada. **Recusou-se a correr** em vez de ler um relatório que não conhece
+e contar zero — e o comentário di-lo: *«uma contagem que não encontra o formato
+que espera conta zero, e zero lia-se como tudo bem»*.
+
+**Um `NÃO MEDI` não é uma resposta**, é um adiamento. Corri-o com o Node do
+`.nvmrc` e só então tive o verde. Aceitar o 2 como «correu» seria o mesmo erro
+que a guarda existe para impedir.
+
+### O balanço das três rondas
+
+Auditar as minhas próprias afirmações deu **um defeito real** — o registo
+aberto, que estava no ar — e **duas confirmações**, esta e a das fixtures. A
+afirmação aguenta, e agora sei **o que a sustenta** em vez de me lembrar de a
+ter feito.
