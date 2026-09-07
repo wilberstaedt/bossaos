@@ -827,3 +827,40 @@ Zero controlos autónomos confirmaria o que se espera, e um zero que confirma o
 que se espera não mediu nada. Planta-se um botão pequeno sozinho (tem de sair
 «controlo») **e** uma ligação numa frase (tem de sair «prosa»). Só o primeiro
 lado deixaria passar um classificador que dissesse «controlo» a tudo.
+
+---
+
+## RV100-024 — id de rota mal formado é 404, curado na classe (07/09, `4d63b80`)
+
+Um segmento que não seja UUID entrava directo numa coluna `@db.Uuid`; o Prisma
+levantava `P2023` e a página dava 500 **antes** do `notFound()` que ela já tem
+escrito. 128 páginas debaixo de um segmento `[…Id]`, nenhuma validava.
+
+**A cura não valida em 128 sítios.** A camada de dados dá um NOME à falha
+(`IdentificadorMalFormado`, no `comEscopo` e no `comIdentidade`) e a web traduz
+o nome em `notFound()`. Dois invólucros porque as superfícies são duas: com
+sessão pelo `comEscopoDoPedido`, sem sessão pelo `obterBaseDeEcra` — que não é o
+`obterBase` porque esse também serve `api/`, onde um 404 seria a resposta errada
+a quem espera JSON.
+
+Guarda em `scripts/validar-id-de-rota-validado.sh`: **128 de 128**, e a partição
+tem de fechar. Análise estática — o arnês estava com o outro implementador.
+
+### O analisador mentia para o lado bom
+
+Dava por PROTEGIDA qualquer página que importasse o `servidor.ts`, porque seguia
+os imports e encontrava lá o **nome** do invólucro — que é onde ele está
+**definido**. Dizia 119 de 128. **Foi a sonda que o apanhou:** plantei uma página
+que escapa e ela saiu protegida. Agora exige a forma de uma CHAMADA, e a
+definição não conta; o número honesto era 123.
+
+**A regra:** um detector que segue referências tem de distinguir quem CHAMA de
+quem DEFINE. É a mesma família do `[a-zA-Z_]+` que perdeu `frutos-de-casca` e do
+`git grep -E '\b'` que devolve zero em silêncio — o instrumento a decidir o que
+existe.
+
+### E uma coisa sobre o que uma sonda vale
+
+Esta foi a terceira vez hoje que a sonda apanhou o detector, e não o produto.
+Sem ela, o commit dizia «119 de 128 protegidas» com um número inventado por um
+bug meu, e ninguém teria por onde duvidar.
