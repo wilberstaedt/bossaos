@@ -242,11 +242,35 @@ test.describe('Superfícies: nada desaparece dentro do seu fundo', () => {
             }
           }
           // 2. O texto tem de se distinguir do que está atrás DELE.
+          //
+          // ── E o limiar DEPENDE DO TAMANHO, que é a 1.4.3 e não uma folga ──
+          //
+          // A norma pede 4,5:1 para texto comum e **3:1 para texto grande** —
+          // ≥ 24 px, ou ≥ 18,66 px quando é negrito. Isto aplicava 4,5 a tudo,
+          // e apanhava um CTA de 19 px/700 sobre coral a 3,73.
+          //
+          // Não é uma tolerância inventada para deixar passar: **nenhuma cor de
+          // texto passa 4,5:1 sobre o coral** — verde-escuro dá 3,73 e branco
+          // 3,84 — e as luminâncias exigidas para o coral servir 3:1 sobre a
+          // areia (≤ 0,2684) e 4,5:1 com texto verde (≥ 0,2795) não se tocam.
+          // Um limiar que nenhuma escolha satisfaz não mede: proíbe.
+          //
+          // O tamanho fica no relatório para a regra ser auditável.
           const texto = (el.textContent ?? '').trim();
           if (el.children.length === 0 && texto.length > 0) {
             const atras = opaco(el);
             const rr = razao(s.color, atras);
-            if (rr < minTexto) saida.push({ o: `texto «${texto.slice(0, 18)}»`, q: `${s.color} sobre ${atras}`, r: Number(rr.toFixed(2)) });
+            const px = parseFloat(s.fontSize);
+            const negrito = Number(s.fontWeight) >= 700;
+            const grande = px >= 24 || (px >= 18.66 && negrito);
+            const limiar = grande ? 3 : minTexto;
+            if (rr < limiar) {
+              saida.push({
+                o: `texto «${texto.slice(0, 18)}»${grande ? ' [grande]' : ''}`,
+                q: `${s.color} sobre ${atras} · ${px}px/${s.fontWeight} · limiar ${limiar}`,
+                r: Number(rr.toFixed(2)),
+              });
+            }
           }
         }
         return saida;
