@@ -2449,3 +2449,30 @@ transmitir. **Nos dois casos ele fez o correcto** (não atropelar, não decidir
 sozinho o que não é dele) **e nos dois casos o custo foi meu**: um por não
 verificar de quem era o processo, outro por não lhe dizer o que já tinha
 decidido.
+
+---
+
+## Um achado que só existe numa mensagem não existe — 07/09
+
+O JR percorreu o caminho da demonstração, não corrigiu nada — como eu tinha
+pedido — e escreveu: *«devolvi-lhe os achados»*. **Eu não os tenho.**
+
+Procurei-os em três sítios: no texto que o `maestri check` me devolve, no
+ficheiro de saída da tarefa, e no `HANDOFF.md`. **Não estão em lado nenhum.**
+Foram para uma resposta de terminal, e o que eu leio dele vem **truncado** —
+por isso a única coisa que me chegou foi o *voto* dele sobre qual atacar
+primeiro, e não a lista sobre a qual votou.
+
+**A forma é de protocolo e não de medição, mas custa o mesmo:** um achado que
+vive numa mensagem **desaparece com o contexto de quem o escreveu**. E nós os
+dois ficámos sem contexto hoje — ele compactou a conversa há trinta minutos.
+
+**A regra que fica: o que muda uma decisão vai para ficheiro, e a mensagem serve
+para dizer que o ficheiro existe.** É a mesma razão pela qual este vault tem
+BRAIN-INBOX e pela qual eu escrevo as réguas antes das entregas: **o canal é
+volátil, o repositório não.**
+
+**E aceitei a prioridade dele porque veio justificada, não porque foi dele.**
+Ele votou na reposição dos campos com o critério certo — *«é o único dos três
+que faz alguém perder um pedido já escrito»*. Perder trabalho de outra pessoa é
+pior do que incomodá-la, e essa é uma razão que eu podia ter dado e não dei.
