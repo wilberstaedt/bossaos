@@ -1484,3 +1484,51 @@ construção — se a UE acrescentar um alergénio amanhã, a prova dele passa a
 
 **A regra: quando a completude de uma lista é o que está em causa, não se conta a
 lista — pede-se-lhe o tamanho.**
+
+---
+
+## Contar medições em vez de coisas — 07/09
+
+O JR reportou **cinco** alvos de toque abaixo do mínimo na carta pública. Pedi-lhe
+que os classificasse **por natureza e não por tamanho**, porque a WCAG isenta a
+ligação que vive dentro de uma frase.
+
+Ele voltou com uma coisa que eu não tinha pedido e que valia mais:
+
+> «**UM elemento, não cinco.** Os "5 alvos" que eu reportei são **cinco medições
+> do mesmo elemento**, uma por largura — o mesmo `115×23` em todas. **Contar
+> medições em vez de coisas é inflar um achado sem o querer, e a inflação era
+> minha.**»
+
+### É a mesma forma que me apanha a mim, do outro lado
+
+Eu tenho contado **ocorrências no código-fonte** e chamado-lhes coisas no ecrã:
+`line-height` contado como altura de contentor, três ramos de um ternário
+contados como três botões, ocorrências de classe contadas como elementos.
+
+Ele contou **linhas de saída do instrumento** e chamou-lhes elementos.
+
+**A forma é uma só: a unidade da contagem não era a unidade da afirmação.** E o
+sintoma é o mesmo — um número verdadeiro que responde a outra pergunta.
+
+**A defesa também é uma só:** antes de escrever «N», dizer em voz alta **N o
+quê** — e verificar que o instrumento conta essa coisa e não o rasto dela.
+
+## E a classificação que ele fez vale por si
+
+```
+disp=inline   pai=NAV   textoIrmao=false   nav=true
+```
+
+**Não há texto solto no pai** — a ligação não vive dentro de uma frase. É um item
+de navegação isolado. E a razão que ele dá para a isenção não se aplicar é melhor
+do que a que a norma escreve:
+
+> «**O dedo que falha nele não tem linha de texto onde acertar.**»
+
+É *por isso* que uma ligação em prosa é isenta — a linha à volta dá ao dedo onde
+aterrar. Um item de `<nav>` sozinho não dá.
+
+**Veredicto: 1 controlo autónomo, 0 em prosa.** Um achado a sério em vez de cinco
+falsos — e a 23 px **falha até o nível AA da 2.5.8**, que pede 24, quanto mais os
+44 que o produto cumpre nos outros controlos.
