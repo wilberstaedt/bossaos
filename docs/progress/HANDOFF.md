@@ -2964,3 +2964,53 @@ tratado disso primeiro se soubesse.
 2. justificar (ou trocar) o acento em `estilos.css:1714`;
 3. **ressuscitar os seis plantes** — são controlos negativos mortos, e um plante
    morto *«não prova nada e ACUSA o produto»*.
+
+## 08/09 00h45 — o portão verificado: três de quatro fechados, e o quarto é o mais fino
+
+Verifiquei **correndo**, e a aritmética **refazendo**:
+
+| | antes | agora |
+|---|---|---|
+| testes de UI | 41 passam, **2 falham** | **43 passam, 0 falham** |
+| `validar-plantes` | saída 1, seis plantes mortos | **saída 0** — `319 plantes ainda pegam`, 0 em letra morta |
+| `validar-silenciadores` | saída 1 | **saída 0** — 149 guiões lidos |
+| `validar-suites-com-guiao` | saída 1 | **saída 1** — duas suites |
+
+### A decisão do acento é dele e está certa — refiz as contas
+
+Ele **não trocou** para o `--bo-acento-sinal`, e a razão é medida: no
+`.bo-mkt__fecho`, que é **verde**,
+
+| | sobre verde |
+|---|---:|
+| acento da marca `#F5664D` | **4,71** — passa os 4,5 |
+| token de sinal `#D85A44` | **3,73** — falha |
+
+**Trocar teria partido exactamente o que a guarda quer proteger.** O token de
+sinal existe para ganhar sobre a **areia**; sobre o verde perde. E ele escreveu
+no comentário o que a guarda não sabe distinguir: **a superfície** — ela pergunta
+pelo token, não por cima de que fundo ele assenta.
+
+### E ele diz que cinco dos sete plantes eram dele
+
+Rastreou-os a duas alterações próprias — o `h1 data-tela` que mudou de casa com a
+consolidação do `CabecalhoDePagina`, e o `icone`/`grupo` que a barra lateral
+acrescentou às entradas de navegação — e escreveu *«eu não corri esta guarda»*.
+**Isso é o que faz uma revisão valer alguma coisa.**
+
+### O quarto, que fica, e é o mais fino de todos
+
+`validar-suites-com-guiao` acusa **duas suites que ninguém nomeia**:
+`caminho-da-demo.spec.ts` e **`ns2-visual.spec.ts`**.
+
+A frase da guarda é a melhor do dia: *«uma suite assim não dá verde nem
+vermelho: **desaparece**.»*
+
+E a segunda é **a guarda da Fase 1 dele próprio** — a que prova o sistema visual
+do norte. **A prova da direcção artística está ela mesma sem prova**: podia
+deixar de correr amanhã e nada o diria. É a mesma família da armadilha do
+Playwright que ele apanhou há uma hora, em que um ficheiro de teste era ignorado
+em silêncio por um padrão não ancorado.
+
+Ele já está a escrever os dois guiões — `validar-caminho-da-demo.sh` e
+`validar-sistema-ns2.sh` estão na árvore por comitar. **Não interrompo.**
