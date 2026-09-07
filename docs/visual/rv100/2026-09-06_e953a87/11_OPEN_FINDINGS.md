@@ -130,7 +130,7 @@ expected: respiro de 80-128 px entre secções no desktop; uma landing não pode
 observed: `.bo-mkt__seccao { padding: var(--bo-espaco-xl) 0 }` = 24 px, 48 px entre secções; cinco páginas não rolam
 evidence: evidence/baseline/medidas-1440.json
 fix_criteria: `--bo-espaco-gigante` (64) nas secções — dois paddings adjacentes dão 128 px, dentro do §4.4 e sem token novo
-status: open
+status: corrigido — VERIFICADO PELO REVISOR na evidência do fecho: `respiroMin` 48 e `respiroMax` 128 nas oito páginas a 1440. O ritmo de 24 desapareceu, e o 48 é o padding do próprio herói e não um intervalo (correcção do implementador)
 ```
 
 ```yaml
@@ -144,7 +144,7 @@ expected: composição equilibrada entre mensagem e produto; espaço vazio com f
 observed: seis páginas acabam em x=728 de 1440, a FAQ em 652, a home em 1256 (número por explicar)
 evidence: evidence/baseline/medidas-1440.json
 fix_criteria: CORRIGIDO PELO REVISOR a 07/09 — o meu critério dizia «herói em duas colunas com mídia do produto à direita», e isso é mais prescritivo do que a regra que serve. O §10 proíbe «metade do herói vazia **por falta de mídia OU COMPOSIÇÃO**»: o defeito é o vazio POR AUSÊNCIA, não a ausência de imagem. A mídia é uma saída; uma composição que use a largura é outra, e numa FAQ é provavelmente a certa — pôr uma captura de produto ao lado de perguntas seria mídia decorativa, que o §6.4 reprova. O teste é a frase do §10, não o número: a metade direita está vazia porque ninguém a compôs, ou porque a composição decidiu assim?
-status: parcial — a home foi reconstruída e VERIFICADO PELO REVISOR na evidência: 728 -> 1256 a 1440 e 648 -> 1176 a 1280, com `ocupaDireita` a virar de false para true. As outras páginas comerciais NÃO foram medidas de novo e ficam abertas
+status: corrigido — VERIFICADO PELO REVISOR lendo a evidência crua: às 1440, cinco páginas a **1212** e três a **1256**. **Zero a 728.** E a explicação fecha ao pixel: contentor centrado começa em 184 e o lead tem `max-width: 68ch` = 544; 184+544=728. Não era molde repetido como eu escrevi — era aritmética que ninguém escolheu
 ```
 
 ```yaml
@@ -187,7 +187,7 @@ expected: uso deliberado de coral e verde-lima; coral cria foco e conversão (§
 observed: `#F5664D` 4 ocorrências e `#DDEA91` 3, contra 20 de `#102E35`; na família MKT o coral aparece só como cor do estado activo, via `--bo-acento-sinal`
 evidence: 01_BASELINE.md hipótese 5
 fix_criteria: coral no CTA e no foco editorial COM rótulo verde-escuro (branco sobre coral dá 3,05:1 e o manual proíbe-o em texto comum); cítrico como acento pontual, nunca como sucesso operacional
-status: open
+status: corrigido — VERIFICADO PELO REVISOR: `usaCoral` verdadeiro em cinco páginas, onde antes era zero. E numa secção escura, que é a única composição onde o coral sobrevive às duas obrigações de contraste
 ```
 
 ```yaml
@@ -246,7 +246,7 @@ expected: objecções comerciais, técnicas e de equipamento (§6.3.12); FAQ de 
 observed: quatro perguntas — duas comerciais, duas técnicas, zero de equipamento, zero de cobrança
 evidence: apps/web/app/[idioma]/faq/page.tsx
 fix_criteria: perguntas novas nos três catálogos, com respostas verificáveis contra o produto e contra a PRECIFICACAO
-status: open
+status: corrigido no lote L1j — a FAQ passou de 4 para 10 perguntas em três grupos, sem reutilizar as chaves de cobrança que já vivem na /plans
 ```
 
 ```yaml
