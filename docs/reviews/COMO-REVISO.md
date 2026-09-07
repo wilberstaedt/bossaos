@@ -1535,7 +1535,57 @@ falsos — e a 23 px **falha até o nível AA da 2.5.8**, que pede 24, quanto ma
 
 ---
 
-## A correcção que ficou presa à superfície onde foi encontrada — 07/09
+## RETIRADA — «a correcção que ficou presa à superfície» era falsa — 07/09
+
+> **Esta entrada está errada e fica com a correcção por cima, não apagada.** O
+> que escrevi a seguir assentava numa leitura truncada minha, e o implementador
+> desmontou-a com um controlo negativo. Deixo o texto original abaixo porque
+> apagar um erro tira a lição dele.
+
+**O que eu disse:** que a regra de `min-height` sobre o `<a>` existia só sob
+`.bo-staff` e `.bo-kds`, e que a carta pública partilhava a classe sem regra —
+«removeu a instância e não impediu a classe».
+
+**O que é verdade:** a linha **1179** é `.bo-publico__seccoes a` **sem âmbito
+nenhum**, com `min-height: var(--bo-toque-publico)`, e nasceu no `c8723c5`, na
+E10, muito antes desta noite. As linhas 587 e 632 são **reforços** para 48 px nas
+superfícies de operação — não a única fonte do 44.
+
+**Como errei:** o meu grep tinha **40 resultados e eu li os primeiros 8**. A regra
+que desmentia tudo estava na posição 20-e-tal.
+
+**É a terceira truncagem da noite** — a `-A20` que me escondeu o décimo quarto
+alergénio, o extractor de pendências que guardava a primeira linha, e este
+`head -8`. E é a pior das três, **porque desta escrevi uma entrada de doutrina**.
+Um número errado morre no relatório seguinte; uma lição errada fica a orientar
+quem vier.
+
+**E o que o implementador encontrou é maior do que o que eu tinha inventado.** Ele
+mediu com e sem folha de estilos:
+
+| | com a folha | sem folha (controlo) |
+| --- | --- | --- |
+| caixa | **94 × 44** | 150 × 18 |
+| `display` | `flex` | `inline` |
+| `min-height` | 44px | 0px |
+
+**Um `<a>` `inline` aceita `padding` horizontal e ignora `min-height`** — largura
+com folga e altura de linha de texto. **É a assinatura de um elemento a
+renderizar sem estilos**, e o `115×23` do JR tem exactamente essa forma.
+
+Se se confirmar, o defeito não é uma regra em falta: **é um ecrã a renderizar sem
+folha de estilos** — e o elemento está no **MENU-018**, o ecrã do QR expirado,
+que é precisamente o tipo de estado raramente renderizado onde uma superfície sem
+estilos se esconderia.
+
+**A regra que eu quase o fiz escrever não teria movido um pixel** — e agora tem
+duas razões: era redundante **e** apontava ao mecanismo errado.
+
+---
+
+### O texto original, mantido para não se perder o que o erro ensina
+
+#### A correcção que ficou presa à superfície onde foi encontrada — 07/09
 
 O JR mediu uma ligação de navegação a **115×23 px** na carta pública. O
 implementador foi corrigi-la, não conseguiu reproduzir, e reportou que *«os
