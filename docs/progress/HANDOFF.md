@@ -2490,3 +2490,34 @@ quatro pontos e **a hora a que foram medidos**.
 que já lá está, aplicada a artefactos que eu entrego em vez de a capturas.
 Aplicar uma regra existente não precisa de uma entrada nova — e há uma hora
 medi que este ficheiro cresce muito mais depressa do que é consultado.
+
+## 07/09 23h25 — a afirmação de maior risco do dia, verificada por três eixos
+
+Às 17h39 disse ao Matheus que **limpar as fixtures de produção era seguro,
+porque «nada que eu tenha encontrado as volta a criar»**. Isso era **uma busca**,
+e a lição do dia inteiro é que uma busca encontra o que alguém se lembrou de
+procurar. Se estivesse errada, alguma coisa escreve na base de produção sem eu
+saber — e ele apagaria dados que voltariam sozinhos.
+
+Refi-la a tentar **partir** a afirmação, e não a confirmá-la:
+
+| eixo | como | resultado |
+|---|---|---|
+| **mecanismo** | quem cria `Organization`, em todo o repositório | `fixtures.ts`, `semente-demonstracao.ts`, e **uma migração** |
+| **dados** | quem menciona `insp-`, em qualquer extensão | só `inspeccao/*.spec.ts` e dois auxiliares de `packages/db` |
+| **execução** | o que corre de facto em produção | servidor + `db:migrate:deploy`; **sem bloco `prisma.seed`**, e o `compose.prod.yml` não corre mais nada |
+
+### O eixo dos dados deu um contra-exemplo, e fui atrás dele
+
+Uma **migração** menciona `insp-marina-oropesa` — e migrações correm em
+produção. Eu tinha dito «nem migrações», portanto isto valia a afirmação toda.
+
+É um **comentário**, na linha 8. E a migração **não tem um único `INSERT`,
+`UPDATE` ou `DELETE`**.
+
+**`grep` encontra texto, não comportamento** — a mesma lição de hoje de manhã,
+mas desta vez aplicada **antes** de eu reportar, e não depois de me
+desmentirem.
+
+**A afirmação aguenta**, e agora aguenta sobre três eixos independentes em vez
+de uma busca. **Limpar continua a ser decisão dele**, e continua a ser segura.
