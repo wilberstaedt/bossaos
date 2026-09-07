@@ -2922,3 +2922,36 @@ melhor resultado do que a alteração que eu ia mandar fazer.
 *(A explicação do `NEXT_DIST_DIR` é a que encaixa em tudo o que observei — o
 ficheiro sujo logo a seguir aos meus builds isolados, limpo depois de um normal.
 **Não a provei correndo o experimento**, e digo-o em vez de a dar por assente.)*
+
+### Provei a hipótese que tinha deixado por provar, e ela trouxe um defeito latente — 20h15
+
+Ontem escrevi que a explicação do `NEXT_DIST_DIR` «encaixa em tudo o que observei
+mas **não a provei**». Provei-a agora, e é barata: arranquei um build com
+`NEXT_DIST_DIR=.next-prova` e ao fim de **nove segundos** o ficheiro versionado
+mudou —
+
+```
+-import "./.next/types/routes.d.ts";
++import "./.next-prova/types/routes.d.ts";
+```
+
+**E a prova trouxe consigo um defeito que eu não procurava.** Seis guiões da casa
+usam `NEXT_DIST_DIR` — `provar-mestres`, e os cinco `provar-*-mkt` — e **nenhum
+repõe o ficheiro**. Quem correr um deles e commitar a seguir leva para o
+repositório um `next-env.d.ts` a apontar para um directório que **não existe em
+mais lado nenhum**, e parte a verificação de tipos de quem clonar.
+
+**O sintoma já estava escrito, e ninguém o tinha ligado à causa.** O
+`provar-mestres.sh:19` diz, à letra: *«um `next-env.d.ts` a oscilar»* — anotado
+como sinal do `.next` partilhado. **Era sinal disto.**
+
+**Fui ver se já tinha acontecido: não.** O ficheiro mudou **uma vez** em toda a
+história, quando nasceu, e nenhum commit levou um caminho isolado. **O defeito é
+real, está provado, e nunca disparou** — e a razão de não ter disparado é
+vigilância, não mecanismo: eu próprio o apanhei hoje ao ver a árvore suja antes
+de commitar.
+
+**A cura é curta e a casa já a tem noutro sítio:** os seis guiões repõem o
+ficheiro no fim, com o mesmo `trap` que o JR usou hoje para repor plantes. **Um
+defeito latente com cura de três linhas não se deixa à espera de disparar** — e o
+único aviso que teríamos era o próximo a clonar o repositório.
