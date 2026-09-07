@@ -523,3 +523,42 @@ quem quer ver o produto por dentro**, incluindo o dono.
 Telegram. Se ele quiser entrar hoje, o caminho limpo é enviar-lhe o produto a
 pedir a senha **no ecrã**, definida por ele — e não uma constante do repositório
 num domínio público.
+
+---
+
+## As fixtures do arnês estão em produção e são públicas — 17h40
+
+Fui confirmar que a conta de demonstração existia em produção e encontrei mais do
+que procurava. A base tem **três** organizações, não uma:
+
+| organização | `public_slug` | responde em público? |
+| --- | --- | --- |
+| `bossa-demo` | `bossa-demo` | 200 — é a demonstração, e anuncia-se como tal |
+| `marina-oropesa` | **`insp-marina-oropesa`** | **200** |
+| `marina-barcelona` | **`insp-marina-barcelona`** | **200** |
+
+O prefixo `insp-` é o do **arnês de inspecção**. E `/r/insp-marina-oropesa/es-ES/menu`
+serve uma carta com o título **«Marina Puerto»** — um restaurante inventado dos
+testes, **sem nenhuma indicação de que é dado de teste**.
+
+**É exactamente o defeito que o RV100-017 corrigiu — e corrigiu só metade.** O
+achado dizia: *«dados demonstrativos claramente artificiais, que nunca
+representem cliente real sem autorização (§6.4)»*. A cura foi criar o «Bossa
+Demo» com o aviso `mktE10.demoAviso` renderizado. **O arnês de inspecção ficou
+como estava**, e ninguém lhe pediu aviso nenhum porque ninguém contava que ele
+saísse do laboratório.
+
+**E saiu.** Está num domínio público, com um nome plausível, e uma pessoa que dê
+com o endereço lê uma carta de restaurante que parece real. **Não são dados de
+ninguém e não há credenciais expostas** — mas é ficção não anunciada a servir-se
+como produto, que é a coisa que o §6.4 existe para impedir.
+
+**Não removo por minha conta.** Existe `limpar-inspeccao.ts` na imagem, feito
+para isto, e apagar é reversível porque se volta a semear. **Mas é apagar em
+produção, e a decisão é dele** — pode até estar a contar com aqueles inquilinos
+para ver telas com dados. Fica proposto e pronto a correr.
+
+**E há uma pergunta que fica em aberto e que interessa mais do que a limpeza:
+como é que o arnês foi lá parar?** O `semente-inspeccao.ts` vai na imagem — o
+mesmo `COPY . .` que leva tudo — e alguma coisa o correu. Enquanto não souber o
+quê, a limpeza não impede a repetição.
