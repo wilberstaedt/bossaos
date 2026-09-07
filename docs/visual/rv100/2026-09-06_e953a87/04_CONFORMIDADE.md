@@ -857,3 +857,40 @@ função recebe `({ montanteMenor, moeda }, idioma)`.
 **Nove erros seguidos e uniformes deviam ter-me feito desconfiar de mim antes do
 produto**, e fizeram: fui ler a assinatura em vez de escrever o achado. É o mesmo
 reflexo que hoje já me salvou do «zero chamadores» e do «zero hex».
+
+---
+
+## §9.2, «nomes de produto, restaurante e utilizador longos» — coberto, e já produziu um defeito
+
+O caso extremo **está semeado**, e não por acaso:
+
+| | mais longo | onde |
+| --- | ---: | --- |
+| nome de prato | **67 chars** — *«Pulpo a la gallega sobre parmentier de patata y pimentón de la Vera»* | nas **duas** sementes |
+| descrição de prato | 74 chars | demonstração |
+| texto de casa | **163 chars**, com quebras de linha | inspecção |
+
+**E já produziu um defeito a sério, que foi encontrado e corrigido esta noite.**
+Foi exactamente esse nome de 67 caracteres que, na captura do KDS, apareceu
+**encostado à etiqueta de estado sem espaço nenhum**. Eu vi-o a olhar para a
+imagem; o implementador mediu no DOM (`0 px`), diagnosticou a causa — a regra de
+`gap` aponta a `.bo-publico__produto > a` e o bilhete do KDS não tem `<a>` — e
+corrigiu para 12 px.
+
+**O caso extremo não estava só semeado: estava a produzir a falha que devia
+produzir**, e ninguém tinha olhado.
+
+### Nota de método — duas medições minhas partidas, e o que as apanhou
+
+A primeira disse-me que o nome mais longo tinha **27 caracteres**. A segunda deu
+«literais» de **1975 caracteres**, porque o meu `[^'"]` casa quebras de linha e
+apanhava blocos inteiros do ficheiro.
+
+**O que as matou não foi nenhum controlo que eu tenha corrido: foi eu ter visto
+a coisa.** Sabia que existia um prato de sessenta e tal caracteres **porque o li
+na captura do KDS há três horas**. A imagem era a segunda fonte, e contradizia o
+número.
+
+É a mesma família da regra que fecha a doutrina — o instrumento não é testemunha
+de si próprio — com uma variante que vale a pena nomear: **uma captura de ecrã é
+uma medição independente**, e das mais difíceis de enganar. Não tem regex.
