@@ -67,3 +67,78 @@ estão **não as encontra**, e o §12.5 vai pedir 792 capturas indexadas.
 
 **E depois parar.** O §7.1 acaba com «pare», e o §12.4 diz que só o Matheus pode
 registar `APROVAÇÃO VISUAL HUMANA`.
+
+---
+
+## A metade estática da acessibilidade — medida, e conforme
+
+A pasta `accessibility` era a única vazia que **nada bloqueava**. Fiz a metade
+que se mede sem navegador, para que o que resta fique nomeado em vez de ser «a
+acessibilidade».
+
+### Rótulos de campo — conforme
+
+**A minha primeira contagem teria sido 90% ruído.** Havia 162 ficheiros com
+`<input>` cru, e muitos sem rótulo à vista. Contei por **tipo** em vez de por
+tag:
+
+| tipo | quantos |
+| --- | ---: |
+| `hidden` | **671** |
+| visíveis (checkbox, text, email, time, search, radio, password, date) | **37** |
+
+**Este produto posta formulários pelo servidor**, e 671 campos escondidos não
+levam rótulo nenhum. A população a verificar eram 37, não 162.
+
+E os 37 usam **dois padrões, ambos correctos**:
+
+```tsx
+<label className="bo-campo">            <label htmlFor="nome">{s.nome}</label>
+  <input type="checkbox" … />           <input id="nome" name="nome" required />
+  <span>{t.activar}</span>
+</label>
+```
+
+O primeiro associa por **envolvimento** e não precisa de `htmlFor`; o segundo é a
+associação explícita. **A minha comparação por ficheiro somava totais que não se
+comparam** — um `grep -c '<label'` contra um `grep -c '<input>'` num ficheiro com
+nove campos escondidos.
+
+E o componente `Campo`, em 90 ficheiros, faz o completo: `<label htmlFor>`,
+`aria-invalid` no erro, `id` na ajuda e **`role="alert"`** na mensagem de erro.
+
+### Língua, títulos e anel de foco — conformes
+
+**`<html lang={idioma}>`**, dinâmico por língua e não fixo.
+
+**Três páginas de 374 têm mais de um `<h1>` na fonte** — e as três são
+`return` separados: na carta pública, o QR inactivo (`MENU-018`), a sessão
+terminada (`STATE-009`) e a carta normal. **Um renderiza de cada vez**, e cada
+`<h1>` leva um `data-tela` com o ID do atlas. É a mesma armadilha de ramos que me
+apanhou na página de fechar contas, e desta vez verifiquei antes de a escrever.
+
+**O anel de foco é uma regra abrangente**, e não por componente:
+
+```css
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible
+.bo-inverso :where(a, button, input, select, textarea, [tabindex]):focus-visible
+```
+
+**A segunda linha é a que mostra cuidado:** um anel desenhado para superfície
+clara é invisível numa escura, e o KDS e a moldura comercial são escuros.
+
+### O que resta, e agora tem nome
+
+Tudo o que falta exige **um navegador**, e é isto:
+
+1. o anel de foco **ser visível** contra cada fundo — a regra existe; que ela
+   renda contraste suficiente em todas as superfícies é outra pergunta;
+2. **alcance por teclado** de cada acção — que a ordem de tabulação chegue lá;
+3. **o que um leitor de ecrã anuncia**, sobretudo nos estados;
+4. **zoom a 200%**;
+5. **o menu móvel** — `Escape` e devolução de foco ao botão. É o **único caso
+   real de foco no produto**, porque o JR provou que não há modais, e foi
+   declarado por medir por quem o escreveu.
+
+**Nenhum destes está bloqueado por aprovação nenhuma.** É trabalho por fazer, com
+população conhecida.
