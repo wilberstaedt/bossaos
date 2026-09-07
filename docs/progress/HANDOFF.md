@@ -28,6 +28,40 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## Cada portão diz por onde se re-mede — e cinco nomes mentiam
+
+Dos 17 critérios que não citavam nada: **cinco** re-medem-se por guião, **onze**
+são juízo humano e **um** está bloqueado por desenho. Nenhum foi re-medido — o
+alvo era dizer por onde. Régua em `docs/reviews/ALVO-PORTOES-CITAM-GUARDA.md`,
+commit `d30676e`, tabela em `08_ESTADO_DOS_PORTOES.md`.
+
+| critério | guião | a linha que o diz |
+| --- | --- | --- |
+| identidade antiga ou paralela | `validar-coral-da-arte.sh` | `o coral da arte não entra em interface` |
+| preços da fonte aprovada | `validar-precos.sh` | `3 planos, valores em cêntimos inteiros` |
+| SEO e partilha | `validar-seo.sh` | `Metadados por rota: 0 falhas.` |
+| tema Starter e limites | `provar-tema.sh` | `caiu a recusa por plano ao guardar` |
+| 396 IDs rastreados | `validar-cobertura.sh` | `nenhum ID perdido (396 de 396)` |
+
+**Ressalva declarada:** o `validar-seo.sh` cobre os metadados por rota e **não**
+cobre a pendência do `NEXT_PUBLIC_SITE_URL` que o próprio veredicto nomeia.
+
+> **O aviso da régua rendeu cinco armadilhas**, e é a parte que dá valor a isto —
+> casar palavras com nomes de ficheiro apanhou cinco candidatos errados:
+> `validar-assinaturas` não é assinatura visual (é o estado `validado` de uma
+> tela); `juncao-identidade` é identidade de **utilizador**, não de marca;
+> `dados-ficticios` é sobre dados fabricados, não promessas na copy;
+> `portas-mortas` passa a zero mas **nada na saída fala do rodapé**; e
+> `registo-coerente` é sobre etapas, não sobre P1/P2/P3.
+>
+> **A do coral é a que mais interessa:** a amostra da régua propunha
+> `provar-identidades` para «não existe identidade antiga ou paralela», e o certo
+> é `validar-coral-da-arte`. O nome acertava na palavra e errava no sujeito.
+
+**Aviso de máquina no início desta entrega:** `mac-health` deu **ATENÇÃO** (4562
+MB disponíveis, 109 livres, swap 1,4 GB). Os guiões correram **um de cada vez**,
+sem nada em paralelo, e preferiram-se os que não pedem navegador nem build.
+
 ## Registo por email fechado — segurança, num domínio público
 
 `emailAndPassword: { enabled: true }` sem `disableSignUp` faz o `better-auth`
