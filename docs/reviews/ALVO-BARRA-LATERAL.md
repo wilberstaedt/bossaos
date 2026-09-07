@@ -92,3 +92,27 @@ não é indicação suficiente; tem de haver peso, forma ou marca a acompanhar.
   isto: uma captura sozinha mostra o que ficou, não o que mudou.
 - **A minha palavra.** Recapturo eu e meço eu, e o que o Matheus aprova é a
   imagem, não a minha descrição dela.
+
+---
+
+## Previsão registada ANTES de medir — 07/09 às 13h35
+
+A sonda `scripts/validar-icones-da-navegacao.mjs` está escrita e o **controlo do
+contador já acendeu**: dado um conjunto de 4 formas com um duplicado plantado,
+ele conta 3. Isso prova que sabe ver duplicados — e provou-o **antes** de alguma
+vez olhar para o produto.
+
+Não a corri contra o produto porque o JR está a construir, e duas construções
+escrevem o mesmo `.next`. A sonda sai a **NÃO MEDI** em vez de disputar o build,
+que é o comportamento certo.
+
+**Registo então o que ela TEM de dizer sobre o estado de hoje, antes de o poder
+ver:**
+
+> Contra o produto **antes** da correcção: `FALHOU`, com **1 forma distinta em
+> 14 itens**.
+
+Se, quando houver servidor, ela disser outra coisa sobre o código não corrigido,
+**o defeito é da sonda e não do produto** — e quero sabê-lo antes de a usar para
+aprovar o trabalho de outra pessoa. Uma previsão escrita antes da medição é a
+única forma de um instrumento novo poder falhar à minha frente.
