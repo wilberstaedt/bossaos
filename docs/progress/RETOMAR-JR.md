@@ -672,3 +672,45 @@ Prefixei um ponto de API com a língua e li o 404 como porta fechada; e o
 `page.goto` rebentou com «Download is starting» no `qr.svg` — um recurso não se
 navega, pede-se. **Uma porta fechada por culpa do medidor conta-se como defeito
 do medido**, que é a mesma família das quatro da guarda de expansão.
+
+---
+
+## Alvos com casa (07/09, `d198f71`)
+
+A `validar-alvos-com-casa` ficou vermelha quando a semente de demonstração criou
+a segunda casa. Cada consulta do `alvos.ts` passa a dizer `organization_id`, e as
+três do KDS dizem também a **unidade** — a `puerto` que aparece no `/kds/…`.
+
+### O denominador mexe-se, e por isso passou a ser impresso
+
+Recebi «três consultas». Eram três à hora da medição; depois do `arnes-pronto`
+(que hoje semeia a demonstração) eram **oito**, com as tabelas de duas casas a
+subir de 11 para 31. Numa corrida seguinte, com as suites já a terem limpo o que
+semeiam, o mesmo comando deu **15 e 14**. Um verde aqui não diz «o arnês está
+isolado» — diz «das tabelas que HOJE têm duas casas, as consultas dizem de qual».
+
+### Ancorar no que o plante quer mudar, não no texto que o rodeia
+
+A `provar-alvos-e-matriz` reprovou: a âncora do plante era o texto INTEIRO da
+consulta do `orderId`, que eu reescrevi. Passou a pegar no número do pedido
+(`'insp-A001'`), com `count == 1`. **Uma âncora que se parte com qualquer
+reescrita da consulta mede a grafia.** É a mesma família dos plantes mortos da
+correcção 7.
+
+### Atribuir vermelhos: A/B, não intuição
+
+Das oito suites, seis verdes e duas vermelhas. Provei que nenhuma das duas é
+minha em vez de o supor: corri a do staff com o `alvos.ts` **de HEAD** e falha
+igual (a âncora do crachá já não existe no `inspeccao-comum.ts`); e o `kds` está
+modificado e por commitar na árvore, com 14 entradas onde HEAD tem 15.
+
+### Duas ratoeiras de método, e a segunda é a que dói
+
+Corri as oito sem carregar o `.env` e li quatro vermelhos falsos — o mesmo
+tropeção que o sénior tinha acabado de descrever na revisão do foco.
+
+E o A/B esgotou o tecto de dez minutos **antes da linha que repunha o ficheiro**,
+deixando o `alvos.ts` de HEAD na árvore partilhada. Reparei e repus logo, e refiz
+o A/B com `trap ... EXIT`. **Um controlo que repõe no fim só repõe se chegar ao
+fim** — e numa árvore partilhada, o que não repõe não é um controlo, é um
+estrago com temporizador.
