@@ -81,18 +81,15 @@ verde "$N_ARTEFACTOS artefactos de prova a comparar"
 # alterações locais e mesmo assim o seu `mtime` é muito posterior ao seu próprio
 # commit, então os tempos foram reescritos por um checkout — e aí a resposta
 # honesta é NÃO MEDI, nunca verde.
-CANARIO="docs/bossaos/CONTRATO_TECNICO.md"
-if [ -f "$CANARIO" ] && git diff --quiet -- "$CANARIO" 2>/dev/null; then
-  CAN_COMMIT=$(git log -1 --format='%ct' -- "$CANARIO" 2>/dev/null)
-  CAN_MTIME=$(stat -f '%m' "$CANARIO" 2>/dev/null || echo 0)
-  if [ -n "$CAN_COMMIT" ] && [ "${CAN_MTIME:-0}" -gt "$((CAN_COMMIT + 120))" ]; then
-    naomedi "os \`mtime\` desta cópia não são de produção: o canário \`$CANARIO\`"
-    echo "           não tem alterações locais e mesmo assim está $(( (CAN_MTIME - CAN_COMMIT) / 3600 ))h"
-    echo "           mais recente que o seu próprio commit. Isso é um checkout a"
-    echo "           reescrever datas, e num checkout esta guarda NÃO MEDE NADA."
-    echo "           Corre-a onde as capturas são produzidas."
-    exit "$NAO_MEDI"
-  fi
+# A mecanica do canario saiu daqui para `frescura_do_produto.py`: a guarda das
+# capturas de marketing precisava da MESMA pergunta, e duas copias dela — uma em
+# bash e outra em python — era a duplicacao que este repositorio passou o dia a
+# fechar. Uma implementacao, dois leitores.
+if ! CANARIO_SAIDA=$(python3 scripts/frescura_do_produto.py --canario 2>&1); then
+  naomedi "$(printf '%s' "$CANARIO_SAIDA" | sed -n 's/^REESCRITOS //p')"
+  echo "           Num checkout esta guarda NAO MEDE NADA. Corre-a onde a prova"
+  echo "           e produzida."
+  exit "$NAO_MEDI"
 fi
 verde "os \`mtime\` desta cópia são de produção (o canário confere com o seu commit)"
 

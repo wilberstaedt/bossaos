@@ -62,6 +62,20 @@ verde "$PRESENTES de $ESPERADAS capturas presentes"
 # ── 1 · FRESCURA, pela peça partilhada ────────────────────────────────────
 SAIDA_FRESCURA=$(python3 scripts/frescura_do_produto.py "${FICHEIROS[@]}" 2>&1)
 ESTADO_FRESCURA=$?
+# ── O canário, e a diferença entre «não sei» e «falhou» ───────────────────
+#
+# A peça partilhada devolve 2 quando as datas desta cópia foram reescritas por
+# um checkout — e aí esta guarda **não consegue medir**, porque os dois lados da
+# comparação ficam iguais e o verde não significa nada. Tratar esse 2 como
+# FALHOU seria trocar um cego por um alarmista; tratá-lo como 0 era o cegamento
+# que a guarda irmã tinha e que já custou um verde falso num worktree.
+if [ "$ESTADO_FRESCURA" -eq 2 ]; then
+  naomedi "$(printf '%s' "$SAIDA_FRESCURA" | sed -n 's/^REESCRITOS //p')"
+  echo "           Num checkout esta guarda NÃO MEDE NADA. Corre-a onde as"
+  echo "           capturas são produzidas."
+  exit "$NAO_MEDI"
+fi
+verde "os \`mtime\` desta cópia são de produção (o canário confere com o seu commit)"
 
 # ── 2 · IDIOMA: a mesma composição, somas diferentes ─────────────────────
 repetidas() {
@@ -129,7 +143,7 @@ if [ "$PRESENTES" -lt "$ESPERADAS" ]; then
   for f in "${FICHEIROS[@]}"; do [ -f "$f" ] || echo "           $f"; done
   ambito; exit "$FALHOU"
 fi
-if [ "$ESTADO_FRESCURA" -ne 0 ]; then
+if [ "$ESTADO_FRESCURA" -eq 1 ]; then
   vermelho "há capturas anteriores à fonte mais recente do produto:"
   printf '%s\n' "$SAIDA_FRESCURA" | grep '^VELHA' | sed 's/^VELHA /           /' | head -8
   echo "           A página que vende o produto mostraria o que ele já não é."
