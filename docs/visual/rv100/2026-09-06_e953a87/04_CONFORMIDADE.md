@@ -590,3 +590,56 @@ Não é «acrescentar tags». É:
 plano põe os metadados no fim do trabalho da landing — interromper agora
 trocava uma correcção barata por uma cara. Fica registado para o fecho da
 secção 6.
+
+---
+
+## §9.1, mais duas regras: uma CONFORME e outra que o meu método não sabe medir
+
+### «acções destrutivas separadas de acções frequentes» — CONFORME, e pela forma mais forte
+
+Há uma classe própria para o perigo, `bo-botao--perigo`, e ela aparece em quatro
+telas. **As quatro estão em rotas próprias:**
+
+```
+channels/qr/mesa/[tableId]/renovar/   →  revogar
+channels/qr/sessoes/[guestId]/        →  revogar
+kds/[locationId]/[stationId]/bilhete/[taskId]/
+staff/[locationId]/cancelar/          →  cancelar
+```
+
+**A separação não é de pixels, é de rota.** Para destruir alguma coisa é preciso
+navegar até um sítio que só serve para isso — o que é uma ordem de grandeza mais
+forte do que afastar o botão dentro do mesmo ecrã. E a do KDS acrescenta
+`motivoObrigatorio`: não deixa avançar sem razão escrita.
+
+### «uma acção principal por contexto» — NÃO MEDI, e digo porque falhei a medi-la
+
+Contei `bo-botao--primario` por ficheiro: **67 com um, 6 com dois, 2 com três**.
+Fui ao pior caso — `floor/sessoes/[sessionId]/encerrar`, que é onde se fecha uma
+conta — e vi três primários idênticos em três formulários dentro de um cartão:
+pedir a conta, **limpar**, fechar. Num telemóvel ao serviço, três botões iguais
+com o que limpa a mesa no meio. **Ia escrever um P2.**
+
+Fui ler o código à volta antes, e o achado colapsou: os três formulários são um
+encadeado ternário sobre `activa.estado` — `ABERTA` / `A_ENCERRAR` / o resto.
+**Só um renderiza de cada vez.** São três ramos, não três botões.
+
+E o comentário por cima descreve uma máquina de estados pensada:
+
+> «pedir a conta → mandar limpar → fechar. A mesa fica ocupada nos dois
+> primeiros: **uma mesa vazia por limpar não é uma mesa livre**, e é só ao fechar
+> que ela sai do índice único e volta a poder abrir.»
+
+**O meu método está errado para esta regra, e não é um detalhe de contagem.**
+Contar ocorrências de uma classe num ficheiro conta o **código-fonte**; a regra
+fala de **botões num ecrã**. Um ficheiro com dez ramos de estado tem dez
+ocorrências e um botão. É a mesma família do `line-height` contado como altura de
+contentor: **medi o texto do programa e chamei-lhe a coisa que o programa
+desenha.**
+
+Verifiquei os outros sete e o método também não os resolve — alguns têm
+condicionais, outros não, e «sem condicional» também não prova dois botões
+simultâneos. **A regra responde-se no DOM**, contando primários visíveis por
+ecrã renderizado, que é exactamente o que o arnês da landing já faz para a
+moldura. Fica NÃO MEDI com o método nomeado, e não fica «conforme» por o
+contador ter dado bem em 67 de 75.
