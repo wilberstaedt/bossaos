@@ -1241,3 +1241,66 @@ Os plantes em código de ecrã esperam; os que mexem no estado partilhado
 Por isso este teve de ir para o implementador em vez de esperar: **a decisão de
 o repor pertence a quem tem a medição a correr**, mas o facto de ele existir não
 pode esperar pelo fim dela.
+
+---
+
+## A hipótese que passou a medição, e a forma do argumento — 07/09
+
+Passei-lhe o plante da limpeza como **hipótese**: *«não digo que é a causa, digo
+que agora há um candidato com mecanismo»*. Ele devolveu-a medida.
+
+```
+órfãos que o plante NÃO apaga ........... 64
+pedidos de inspecção COM prefixo ......... 0
+order_lines presas a esses órfãos ....... 64
+production_tasks presas ................. 64
+```
+
+**O zero é a peça que fecha o raciocínio**, e é dele: zero pedidos com prefixo
+significa que a última limpeza **correu** e apagou tudo o que ainda conseguia
+ver. Os 64 são exactamente o que o predicado em falta a impedia de alcançar.
+
+E ligou-o ao meu instrumento: **`production_tasks` é precisamente uma das tabelas
+que a `validar-alvos-com-casa` conta.** Logo o número que eu vi oscilar depende
+de quantas corridas se acumularam desde a última limpeza completa.
+
+**E tornou-a falsificável**, que é o que separa uma hipótese de uma história
+plausível:
+
+> «Bate a "instabilidade da base" porque **prevê a direcção**: monotonicamente a
+> subir entre limpezas completas, e a repor quando uma corre.»
+
+**A previsão cumpriu-se à minha frente.** Depois de ele repor o ficheiro, fui
+contar: **zero órfãos**. Subiram até 64 e caíram para 0 quando a limpeza voltou a
+alcançá-los.
+
+### A forma do argumento sobre a linha de base dele
+
+Eu tinha-lhe pedido *«se concluíres que não afecta o que mediste, quero a razão,
+não a conclusão»*. A razão que ele deu não é «verifiquei e parece bem» — são
+**dois factos estruturais independentes**:
+
+1. **A corrida dele nunca executou o código plantado.** O config do scratchpad
+   não tem `globalSetup` nem `globalTeardown` — *«o único acerto do grep está
+   dentro de um comentário na linha 13, não é uma definição»*. **É a distinção
+   entre a definição e a chamada, aplicada a um ficheiro de configuração.** E o
+   registo da corrida não menciona semeadura nem limpeza, onde a oficial imprime
+   uma linha própria.
+2. **As páginas dele não vêem a base.** Zero `@bossaos/db`, `obterBase` ou
+   `prisma` nas oito rotas medidas. Sete são `force-static`.
+
+> «**Não vou recolher o antes outra vez — não porque confio nele, mas porque a
+> entrada de que ele depende é disjunta da entrada que o plante corrompe.**»
+
+**É a diferença entre «verifiquei e está bem» e «a corrupção não tem caminho até
+à minha medição».** A segunda não precisa de confiança.
+
+### E o que ele recusou fazer
+
+Não apagou os 64 órfãos. *«São inequivocamente resíduo de inspecção, mas apagar é
+uma escrita destrutiva numa base partilhada com o JR, e com o ficheiro reposto a
+limpeza da corrida seguinte remove-os por definição. **Limpar à mão seria eu a
+fazer o trabalho do teardown no estado de outra pessoa.**»*
+
+É a mesma regra pela qual eu guardei o trabalho em voo dele com `stash create` em
+vez de commitar por ele.
