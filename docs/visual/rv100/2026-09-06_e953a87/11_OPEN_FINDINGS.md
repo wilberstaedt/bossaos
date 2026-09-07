@@ -360,3 +360,27 @@ dar — e forçá-las seria usar a confiança que ele me deu para uma coisa que 
 não me deu.
 
 O §12.5 exige zero P1 e P2 abertos para a RV100 fechar.
+
+---
+
+```yaml
+id: RV100-023
+severity: P2
+surface: carta pública
+screen_or_route: /r/[publicLocationSlug]/[locale]/menu/produto/[produtoId]
+summary: a ligação de navegação para a unidade tem 23 px de altura, metade do mínimo de alvo de toque
+impact: acessibilidade — WCAG 2.2, 2.5.8 (Target Size, Minimum)
+expected: >= 24 px em qualquer eixo pela 2.5.8 nível AA, e 44 px pela 2.5.5 nível AAA que o produto segue nos restantes controlos; a isenção de prosa da 2.5.5 NÃO se aplica
+observed: A«Marina Puerto» a 115 x 23 px, igual nas cinco larguras (360, 390, 768, 1280, 1440). Classificado como CONTROLO AUTÓNOMO e não prosa, no DOM e não a olho — `disp=inline`, `pai=NAV`, `textoIrmao=false`, `nav=true`. Não há texto solto no pai: a ligação não vive dentro de uma frase, é um item de navegação isolado num `<nav>`, e o dedo que falha nele não tem linha de texto onde acertar
+evidence: scripts/validar-alergenios-na-carta.sh (linha ALVO-DA-PAGINA no âmbito) · inspeccao/alergenios-na-carta.spec.ts
+fix_criteria: altura efectiva >= 44 px por `padding` ou `min-height` no item do `<nav>` — medida no navegador nas cinco larguras, não no CSS. Não mexer na regra `:focus-visible`, que já foi medida e está conforme
+decisao: nao-decidida
+status: open — MEDIDO E POR CORRIGIR. É a superfície que o cliente do restaurante toca com o dedo, não um ecrã de operação
+```
+
+> **Como este achado apareceu, e porque é que a contagem inicial estava inflada.**
+> A guarda dos alérgenos reportava «5 alvos abaixo de 44 px». São **cinco
+> medições do mesmo elemento**, uma por largura — um elemento, não cinco. E a
+> lista era feita por TAMANHO, que mistura o controlo autónomo com a ligação em
+> prosa que a 2.5.5 isenta. Classificados por natureza no DOM: **1 controlo
+> autónomo, 0 em prosa**. O achado é real e é um, e a inflação era minha.

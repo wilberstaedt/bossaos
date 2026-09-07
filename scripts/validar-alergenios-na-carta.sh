@@ -128,12 +128,23 @@ ambito() {
   echo "           prato «$(texto prato)» na carta pública «$(texto slug)», $(campo larguras) larguras."
   echo "           FORA: o catálogo interno (outra superfície, outro utilizador) e os"
   echo "           modificadores extensos, que o §9.2 pede e ficam por medir."
-  local n; n=$(campo alvosDaPagina)
+  # ── Alvos de toque, classificados por NATUREZA e não por tamanho ───────
+  #
+  # A WCAG 2.5.5 isenta a ligação que vive dentro de uma frase: o alvo é a linha
+  # de texto. O que tem de ter 44 px é o controlo AUTÓNOMO. Listar por tamanho
+  # misturava as duas coisas e chamava dívida ao que a norma isenta.
+  local n c pr; n=$(campo alvosDaPagina); c=$(campo controlos); pr=$(campo prosa)
   if [ "${n:-0}" -gt 0 ]; then
-    echo "           DECLARADO, e não reprovado: $n alvo(s) de toque abaixo de 44 px FORA do"
-    echo "           cartão — achado verdadeiro, de outra dona. Reprovar por ele fazia esta"
-    echo "           guarda nascer vermelha por uma razão que não é a dela."
-    grep -o 'ALVO-DA-PAGINA .*' "$SAIDA" | sort -u | head -3 | sed 's/^/             /'
+    echo "           alvos abaixo de 44 px FORA do cartão: $n elemento(s) distinto(s)"
+    echo "           — $c controlo(s) autónomo(s), $pr em prosa (isenta pela 2.5.5)."
+    grep -o 'ALVO-DA-PAGINA .*' "$SAIDA" | sed 's/ALVO-DA-PAGINA //' | sort -u | head -3 | sed 's/^/             /'
+    if [ "${c:-0}" -gt 0 ]; then
+      echo "           Os autónomos são achado a sério — RV100-023 no 11_OPEN_FINDINGS."
+      echo "           Ficam DECLARADOS e não reprovados aqui: uma guarda que nasce vermelha"
+      echo "           por razão que não é a dela ensina as pessoas a ignorá-la."
+    else
+      echo "           Nenhum é controlo autónomo: não há dívida de alvo nesta superfície."
+    fi
   fi
 }
 

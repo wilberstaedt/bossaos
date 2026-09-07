@@ -261,7 +261,32 @@ async function lerCartao(page: Page, alvoDeToque: number, textoMinimo: number): 
       if (escondido(el)) continue;
       const c = el.getBoundingClientRect();
       if (c.width >= toque && c.height >= toque) continue;
-      const etiqueta = `${el.tagName}«${(el.textContent ?? '').trim().slice(0, 20)}» ${Math.round(c.width)}×${Math.round(c.height)}`;
+      // ── Classificar por NATUREZA, e não por tamanho ────────────────────
+      //
+      // A WCAG 2.5.5/2.5.8 isenta a ligação que vive dentro de uma frase: o
+      // alvo é a linha de texto, não um botão, e exigir-lhe 44 px seria exigir
+      // que a prosa engordasse. O que tem de ter alvo é o controlo AUTÓNOMO —
+      // um item de navegação, um botão, uma linha de lista tocável.
+      //
+      // Os sinais, todos lidos no DOM e não a olho:
+      //   `disp`        `inline` é a forma de quem corre dentro de uma linha
+      //   `textoIrmao`  há texto solto no pai, ou seja a ligação está numa frase
+      //   `dentroDeNav` `nav`, `header` ou `<li>` de lista: é navegação
+      //   BUTTON        um botão nunca é prosa
+      const estilo = getComputedStyle(el);
+      const pai = el.parentElement;
+      const textoIrmao = pai
+        ? Array.from(pai.childNodes).some((x) => x.nodeType === 3 && (x.textContent ?? '').trim().length > 0)
+        : false;
+      const dentroDeNav = Boolean(el.closest('nav, header, li'));
+      const ehProsa = el.tagName !== 'BUTTON'
+        && /^inline/.test(estilo.display)
+        && textoIrmao
+        && !dentroDeNav;
+      const natureza = ehProsa ? 'prosa' : 'controlo';
+      const etiqueta = `${natureza} · ${el.tagName}«${(el.textContent ?? '').trim().slice(0, 20)}»`
+        + ` ${Math.round(c.width)}×${Math.round(c.height)}`
+        + ` disp=${estilo.display} pai=${pai?.tagName ?? '?'} textoIrmao=${textoIrmao} nav=${dentroDeNav}`;
       if (seccao?.contains(el)) alvosPequenos.push(etiqueta);
       else alvosDaPagina.push(etiqueta);
     }
@@ -320,7 +345,10 @@ test.describe('Alérgenos: o caso extremo, na carta que o cliente lê', () => {
           for (const t of l.transbordos.slice(0, 4)) falhas.push(`${largura}px · cortado: ${t}`);
           for (const t of l.textoMiudo.slice(0, 3)) falhas.push(`${largura}px · miúdo: ${t}`);
           for (const a of l.alvosPequenos.slice(0, 3)) falhas.push(`${largura}px · alvo pequeno no cartão: ${a}`);
-          for (const a of l.alvosDaPagina) daPagina.add(`${largura}px · ${a}`);
+          // Guardado SEM a largura: cinco medições do mesmo elemento são um
+          // elemento, e o meu âmbito dizia «5 alvos» quando é um. Contar
+          // medições em vez de coisas é inflar um achado sem o querer.
+          for (const a of l.alvosDaPagina) daPagina.add(a);
 
           // ── E a distinção que se perde em silêncio ───────────────────────
           if (!l.temNota) falhas.push(`${largura}px · a nota «pergunte à equipa» desapareceu`);
@@ -329,7 +357,10 @@ test.describe('Alérgenos: o caso extremo, na carta que o cliente lê', () => {
 
         console.log(
           `AMBITO alergenios=${ALERGENIOS_UE.length} larguras=${medidas} falhas=${falhas.length} declarados=${ultimoDeclarados}`
-          + ` alvosDaPagina=${daPagina.size} prato="${produtoNome}" slug="${alvo.slug}"`,
+          + ` alvosDaPagina=${daPagina.size}`
+          + ` controlos=${[...daPagina].filter((x) => x.startsWith('controlo')).length}`
+          + ` prosa=${[...daPagina].filter((x) => x.startsWith('prosa')).length}`
+          + ` prato="${produtoNome}" slug="${alvo.slug}"`,
         );
         for (const a of daPagina) console.log(`ALVO-DA-PAGINA ${a}`);
         expect(medidas, 'POPULACAO-ZERO: nenhuma largura foi medida').toBe(LARGURAS.length);
@@ -373,6 +404,60 @@ test.describe('Alérgenos: o caso extremo, na carta que o cliente lê', () => {
       .toBe(4);
 
     console.log('SONDA-ACENDEU contador-de-alergenios');
+  });
+
+  test('SONDA: o classificador distingue prosa de controlo autónomo', async ({ page }) => {
+    // ── A armadilha do sénior, na forma dela ────────────────────────────────
+    //
+    // Se a medição der ZERO controlos autónomos, isso confirma o que se espera
+    // — e um zero que confirma o que se espera não mediu nada. Por isso
+    // plantam-se os dois casos e exige-se que o classificador os separe: um
+    // botão pequeno sozinho numa caixa TEM de sair «controlo», e uma ligação
+    // pequena dentro de uma frase TEM de sair «prosa».
+    //
+    // E são os dois lados de propósito: um classificador que dissesse «controlo»
+    // a tudo apanhava o primeiro e reprovava a prosa que a 2.5.5 isenta.
+    await page.setViewportSize({ width: 390, height: 900 });
+    await page.goto('/en');
+    await page.waitForLoadState('domcontentloaded');
+
+    await page.evaluate(() => {
+      document.querySelector('ul.bo-publico__alergenos')?.remove();
+      const fora = document.createElement('div');
+      fora.id = 'sonda-alvos';
+
+      // Controlo autónomo: botão, sem texto irmão, 30x20.
+      const caixa = document.createElement('div');
+      const b = document.createElement('button');
+      b.textContent = 'sonda-controlo';
+      b.style.cssText = 'width:30px;height:20px;padding:0;font-size:6px';
+      caixa.append(b);
+
+      // Prosa: ligação inline dentro de uma frase, com texto de cada lado.
+      const par = document.createElement('p');
+      par.append(document.createTextNode('Antes do link há texto, '));
+      const a = document.createElement('a');
+      a.href = '#sonda';
+      a.textContent = 'sonda-prosa';
+      a.style.cssText = 'display:inline;font-size:10px';
+      par.append(a, document.createTextNode(', e depois há mais texto.'));
+
+      fora.append(caixa, par);
+      document.body.append(fora);
+    });
+
+    const l = await lerCartao(page, ALVO_DE_TOQUE, TEXTO_MINIMO);
+    const plantados = l.alvosDaPagina.filter((x) => /sonda-(controlo|prosa)/.test(x));
+    expect(plantados.length, `SONDA: os dois plantados não chegaram ao classificador: ${l.alvosDaPagina.join(' | ')}`)
+      .toBe(2);
+    expect(plantados.some((x) => x.startsWith('controlo') && x.includes('sonda-controlo')),
+      `SONDA: um botão de 30×20 sozinho não foi classificado como controlo: ${plantados.join(' | ')}`)
+      .toBe(true);
+    expect(plantados.some((x) => x.startsWith('prosa') && x.includes('sonda-prosa')),
+      `SONDA: uma ligação dentro de uma frase não foi classificada como prosa: ${plantados.join(' | ')}`)
+      .toBe(true);
+
+    console.log('SONDA-ACENDEU classificador-de-natureza');
   });
 
   test('SONDA: o detector vê um cartão cortado e a nota em falta', async ({ page }) => {
