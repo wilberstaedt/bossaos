@@ -65,8 +65,11 @@ export function criarAutenticacao(opcoes: OpcoesDeAutenticacao) {
       // ── O REGISTO FECHA-SE, e ninguém o tinha aberto de propósito ────────
       //
       // `enabled: true` sem `disableSignUp` faz o `better-auth` 1.7.2 registar
-      // `POST /api/auth/sign-up/email` **exista ou não uma página**. Medido no
-      // domínio público a 07/09 com controlos: uma rota inventada dá 404, o
+      // `POST /api/auth/sign-up/email` **exista ou não uma página**. Medido a
+      // 07/09 **localmente, sobre o build de produção** — e NÃO no domínio
+      // público: ninguém sondou a autenticação ao vivo, de propósito. (Esta
+      // linha dizia «no domínio público»; corrigida por quem tirou a medida.)
+      // Com controlos: uma rota inventada dá 404, o
       // `sign-in/email` dá 400 porque existe, e o `sign-up/email` dava **400 a
       // validar `name`, `email` e `password`** — a rota existia e aceitava um
       // registo. Ninguém a quis: o produto é POR CONVITE, e está escrito duas
