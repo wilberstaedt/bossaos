@@ -1,9 +1,9 @@
 import { notFound, redirect } from 'next/navigation';
 import { Cartao } from '@bossaos/ui';
 import { formatarData, formatarNumero, mensagensDe, type Idioma } from '@bossaos/i18n';
-import { comIdentidade, obterPrisma, organizacaoDaPlataforma } from '@bossaos/db';
+import { comIdentidade, organizacaoDaPlataforma } from '@bossaos/db';
 import { actorDoPedido } from '../../../../src/sessao.ts';
-import { obterEnv } from '../../../../src/servidor.ts';
+import { obterBaseDeEcra } from '../../../../src/servidor.ts';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,7 +30,7 @@ export default async function DetalheDoTenant({
   const actor = await actorDoPedido();
   if (!actor) redirect(`/${idioma}/auth/login`);
 
-  const prisma = obterPrisma(obterEnv().DATABASE_URL);
+  const prisma = obterBaseDeEcra();
   const org = await comIdentidade(prisma, actor.id, (db) => organizacaoDaPlataforma(db, orgId));
   if (!org) notFound();
 

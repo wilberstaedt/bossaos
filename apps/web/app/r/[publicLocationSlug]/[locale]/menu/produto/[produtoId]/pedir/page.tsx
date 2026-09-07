@@ -2,7 +2,7 @@ import { notFound, redirect } from 'next/navigation';
 import { formatarDinheiro, type Idioma } from '@bossaos/i18n';
 import { cartaPublica } from '@bossaos/db';
 import { IDIOMAS_DE_CONTEUDO, produtoDaCarta, type IdiomaDeConteudo } from '@bossaos/domain';
-import { obterBase } from '../../../../../../../../src/servidor.ts';
+import { obterBaseDeEcra } from '../../../../../../../../src/servidor.ts';
 import {
   CabecalhoDaVisita, NavegacaoDaVisita, textosDoVisitante,
 } from '../../../../../../../../src/visitante/PecasDoVisitante.tsx';
@@ -42,7 +42,7 @@ export default async function AoTeuGosto({
   const visitante = await visitanteDaRequisicao();
   if (!visitante) redirect(`${base}/menu?sessao=terminou`);
 
-  const servida = await cartaPublica(obterBase(), publicLocationSlug, 'CARTA', idiomaConteudo);
+  const servida = await cartaPublica(obterBaseDeEcra(), publicLocationSlug, 'CARTA', idiomaConteudo);
   if (!servida) notFound();
   const produto = produtoDaCarta(servida.carta, produtoId);
   if (!produto) notFound();

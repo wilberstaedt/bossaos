@@ -5,7 +5,7 @@ import { cartaPublica, temaPublico } from '@bossaos/db';
 import {
   IDIOMAS_DE_CONTEUDO, avisosPorAlergenio, produtoDaCarta, type IdiomaDeConteudo,
 } from '@bossaos/domain';
-import { obterBase } from '../../../../../../../src/servidor.ts';
+import { obterBaseDeEcra } from '../../../../../../../src/servidor.ts';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +40,7 @@ export default async function ProdutoPublico({
   const m = mensagensDe(idioma as Idioma);
   const c = m.publicoE09;
 
-  const prisma = obterBase();
+  const prisma = obterBaseDeEcra();
   const servida = await cartaPublica(prisma, publicLocationSlug, 'CARTA', idioma);
   // O tema tem de chegar à página. Ver `publico_tema` e a régua do E12: o ataque
   // é ler a cor que o NAVEGADOR calcula, e não a que o CSS declara.

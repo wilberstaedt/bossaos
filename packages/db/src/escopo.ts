@@ -67,6 +67,47 @@ export interface Escopo {
  * seguinte do pool. Sem ele, uma ligação reciclada levava o inquilino anterior —
  * a maneira mais silenciosa de mostrar a facturação de um restaurante a outro.
  */
+/**
+ * O identificador que vem de fora e não tem forma de identificador.
+ *
+ * ── RV100-024, e é uma CLASSE e não uma rota ──────────────────────────────
+ *
+ * Um segmento de URL que não seja UUID entra directo num `where` sobre uma
+ * coluna `@db.Uuid`, o Postgres levanta `22P02`, o Prisma traduz para `P2023`,
+ * e a página rebenta com 500 **antes** de chegar ao `notFound()` que ela já
+ * tem escrito duas linhas abaixo. Medidas 128 páginas debaixo de um segmento
+ * `[…Id]`; nenhuma valida a forma antes de consultar.
+ *
+ * A cura não é validar em 128 sítios — é reconhecer a falha no único sítio por
+ * onde todas passam, e dar-lhe um NOME. Quem sabe traduzir um nome em resposta
+ * HTTP é a camada web, e é lá que ele vira 404; aqui só se deixa de o confundir
+ * com um erro de servidor.
+ *
+ * O `exigirUuid` acima faz o mesmo para os ids do ESCOPO, e há anos. O que
+ * faltava era o mesmo cuidado para os ids que vêm da rota.
+ */
+export class IdentificadorMalFormado extends Error {
+  // Campo declarado à mão, e não propriedade de parâmetro: o `--experimental-
+  // strip-types` do Node não a suporta, e a casa corre as provas com ele.
+  readonly causa: unknown;
+
+  constructor(causa: unknown) {
+    super('identificador com forma inválida');
+    this.name = 'IdentificadorMalFormado';
+    this.causa = causa;
+  }
+}
+
+/**
+ * `P2023` é o que o Prisma devolve para `InconsistentColumnData`, e é o que um
+ * UUID mal formado produz. Verificado no runtime do cliente e não presumido:
+ * `"InconsistentColumnData": return "P2023"`.
+ */
+export function ehIdentificadorMalFormado(erro: unknown): boolean {
+  return typeof erro === 'object' && erro !== null
+    && (erro as { code?: unknown }).code === 'P2023';
+}
+
 export async function comEscopo<T>(
   prisma: PrismaClient,
   escopo: Escopo,
@@ -75,13 +116,21 @@ export async function comEscopo<T>(
   exigirUuid('organizationId', escopo.organizationId);
   if (escopo.userId !== undefined) exigirUuid('userId', escopo.userId);
 
-  return prisma.$transaction(async (tx) => {
-    await tx.$executeRaw`SELECT set_config('app.organization_id', ${escopo.organizationId}, true)`;
-    if (escopo.userId !== undefined) {
-      await tx.$executeRaw`SELECT set_config('app.user_id', ${escopo.userId}, true)`;
-    }
-    return fn(tx as unknown as ClienteComEscopo);
-  });
+  try {
+    return await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT set_config('app.organization_id', ${escopo.organizationId}, true)`;
+      if (escopo.userId !== undefined) {
+        await tx.$executeRaw`SELECT set_config('app.user_id', ${escopo.userId}, true)`;
+      }
+      return fn(tx as unknown as ClienteComEscopo);
+    });
+  } catch (erro) {
+    // Só o `P2023`. Um erro de base continua a ser um erro de base: converter
+    // tudo em «não existe» esconderia uma falha real por trás de um 404, que é
+    // o oposto do que isto serve.
+    if (ehIdentificadorMalFormado(erro)) throw new IdentificadorMalFormado(erro);
+    throw erro;
+  }
 }
 
 /**
@@ -143,10 +192,17 @@ export async function comIdentidade<T>(
   fn: (db: ClienteComIdentidade) => Promise<T>,
 ): Promise<T> {
   exigirUuid('userId', userId);
-  return prisma.$transaction(async (tx) => {
-    await tx.$executeRaw`SELECT set_config('app.user_id', ${userId}, true)`;
-    return fn(tx as unknown as ClienteComIdentidade);
-  });
+  // O mesmo que no `comEscopo`, e pelo mesmo motivo: é o segundo funil por onde
+  // ids de rota chegam à base, e uma rede com um buraco não é uma rede.
+  try {
+    return await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT set_config('app.user_id', ${userId}, true)`;
+      return fn(tx as unknown as ClienteComIdentidade);
+    });
+  } catch (erro) {
+    if (ehIdentificadorMalFormado(erro)) throw new IdentificadorMalFormado(erro);
+    throw erro;
+  }
 }
 
 /**

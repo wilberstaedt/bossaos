@@ -55,6 +55,12 @@ TECTO=8
 # existe `provar-reserva-publica-no-navegador.sh`, que corre o SPEC, e ninguem
 # corre o `provas/reserva-publica.test.ts`. Um ficheiro de prova sem guiao nao da
 # verde nem vermelho - desaparece, tal e qual as suites de navegador.
+# POR_DESENHO_PROVAS: tem corredor, e o corredor nao e um provar-*.sh. Mesma
+# forma do POR_DESENHO das suites, e pela mesma razao: a descoberta so varre
+# provar-*.sh, e alarga-la a validar-*.sh punha esta guarda a ver-se a si mesma
+# como corredor de tudo o que lista. Declara-se, com motivo escrito.
+POR_DESENHO_PROVAS="identificador-mal-formado.test.ts:corre dentro da scripts/validar-id-de-rota-validado.sh, que a usa como prova da traducao do P2023 e reprova se ela cair"
+
 EM_DIVIDA_PROVAS="reserva-publica.test.ts"
 TECTO_PROVAS=1
 
@@ -140,11 +146,13 @@ if [ "$n_divida" -gt "$TECTO" ]; then
 fi
 
 # ── A mesma pergunta, na pasta das provas de no ─────────────────────────────
-p_cobertas=0; p_divida=0; p_sem=""
+p_cobertas=0; p_divida=0; p_desenho=0; p_sem=""
 for f in provas/*.test.ts; do
   [ -e "$f" ] || continue
   nome=$(basename "$f")
   if coberto_por_algum "$nome"; then p_cobertas=$((p_cobertas+1)); continue; fi
+  case "$POR_DESENHO_PROVAS" in "$nome:"*|*"
+$nome:"*) p_desenho=$((p_desenho+1)); continue ;; esac
   case "$EM_DIVIDA_PROVAS" in
     "$nome"|*"
 $nome"|"$nome
@@ -165,6 +173,7 @@ if [ -s /tmp/bossaos-provas-obsoletas.txt ]; then
   falhas=$((falhas+$(wc -l < /tmp/bossaos-provas-obsoletas.txt | tr -d ' ')))
 fi
 rm -f /tmp/bossaos-provas-obsoletas.txt
+[ "$p_desenho" -gt 0 ] && echo "  ok    $p_desenho prova(s) de no sem guiao POR DESENHO"
 if [ "$p_divida" -gt "$TECTO_PROVAS" ]; then
   erro "a divida das provas subiu: $p_divida sem guiao, e o tecto e $TECTO_PROVAS."
 fi

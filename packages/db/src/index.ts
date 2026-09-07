@@ -74,6 +74,7 @@ export async function verificarBase(prisma: PrismaClient): Promise<EstadoBase> {
 
 export {
   comEscopo, comEscopoSerializavel, comIdentidade, identidadePorEmail,
+  IdentificadorMalFormado, ehIdentificadorMalFormado,
   type ClienteComEscopo, type ClienteComIdentidade, type Escopo,
 } from './escopo.ts';
 

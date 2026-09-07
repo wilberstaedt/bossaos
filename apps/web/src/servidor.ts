@@ -1,6 +1,9 @@
 import 'server-only';
 import { criarLogger, loadEnv, type Env, type Logger } from '@bossaos/config';
-import { obterPrisma, verificarBase, type EstadoBase, type PrismaClient } from '@bossaos/db';
+import { notFound } from 'next/navigation';
+import {
+  ehIdentificadorMalFormado, obterPrisma, verificarBase, type EstadoBase, type PrismaClient,
+} from '@bossaos/db';
 import { ArmazenamentoLocal } from '@bossaos/storage';
 import type { PortaDeMedia } from '@bossaos/domain';
 
@@ -30,6 +33,38 @@ export function obterLogger(): Logger {
 
 export function obterBase(): PrismaClient {
   return obterPrisma(obterEnv().DATABASE_URL);
+}
+
+/**
+ * A base para quem desenha um ECRÃ sem sessão — kiosk e carta pública.
+ *
+ * ── RV100-024, a metade que o invólucro do pedido não alcança ─────────────
+ *
+ * As páginas com sessão passam pelo `comEscopoDoPedido`, e é lá que um
+ * `IdentificadorMalFormado` vira 404. O kiosk e a carta pública não têm sessão
+ * por desenho — não podem usar esse invólucro — e ficavam com o defeito todo:
+ * um `[deviceId]` ou um `[produtoId]` mal formado no URL dava 500.
+ *
+ * Isto é o mesmo mecanismo para essa família: uma base que traduz. Não é o
+ * `obterBase` porque esse também serve rotas de `api/`, e lá um 404 do Next
+ * seria uma resposta errada a uma chamada que espera JSON — converter tudo era
+ * trocar um defeito por outro mais calado.
+ */
+export function obterBaseDeEcra(): PrismaClient {
+  return obterPrisma(obterEnv().DATABASE_URL).$extends({
+    query: {
+      $allModels: {
+        async $allOperations({ args, query }) {
+          try {
+            return await query(args);
+          } catch (erro) {
+            if (ehIdentificadorMalFormado(erro)) notFound();
+            throw erro;
+          }
+        },
+      },
+    },
+  }) as unknown as PrismaClient;
 }
 
 let media: PortaDeMedia | undefined;

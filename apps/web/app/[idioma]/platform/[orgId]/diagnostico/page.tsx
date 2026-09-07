@@ -1,10 +1,10 @@
 import { notFound, redirect } from 'next/navigation';
 import { Etiqueta } from '@bossaos/ui';
 import { formatarDataHora, mensagensDe, type Idioma } from '@bossaos/i18n';
-import { comIdentidade, obterPrisma } from '@bossaos/db';
+import { comIdentidade } from '@bossaos/db';
 import { estadoDaSessao } from '@bossaos/domain';
 import { actorDoPedido } from '../../../../../src/sessao.ts';
-import { obterEnv } from '../../../../../src/servidor.ts';
+import { obterBaseDeEcra } from '../../../../../src/servidor.ts';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +33,7 @@ export default async function DiagnosticoDoInquilino({
   const actor = await actorDoPedido();
   if (!actor) redirect(`/${idioma}/auth/login`);
 
-  const prisma = obterPrisma(obterEnv().DATABASE_URL);
+  const prisma = obterBaseDeEcra();
   const dados = await comIdentidade(prisma, actor.id, async (db) => {
     const org = await db.organization.findFirst({
       where: { id: orgId }, select: { id: true, slug: true, nome: true },

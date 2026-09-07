@@ -2,11 +2,11 @@ import { notFound, redirect } from 'next/navigation';
 import { Aviso, Cartao, Etiqueta } from '@bossaos/ui';
 import { formatarData, mensagensDe, type Idioma } from '@bossaos/i18n';
 import {
-  comIdentidade, concessoesDaPlataforma, obterPrisma, organizacaoDaPlataforma,
+  comIdentidade, concessoesDaPlataforma, organizacaoDaPlataforma,
 } from '@bossaos/db';
 import { CAPACIDADES } from '@bossaos/domain';
 import { actorDoPedido } from '../../../../../src/sessao.ts';
-import { obterEnv } from '../../../../../src/servidor.ts';
+import { obterBaseDeEcra } from '../../../../../src/servidor.ts';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +39,7 @@ export default async function ConcessoesDoTenant({
   const actor = await actorDoPedido();
   if (!actor) redirect(`/${idioma}/auth/login`);
 
-  const prisma = obterPrisma(obterEnv().DATABASE_URL);
+  const prisma = obterBaseDeEcra();
   const { org, concessoes } = await comIdentidade(prisma, actor.id, async (db) => ({
     org: await organizacaoDaPlataforma(db, orgId),
     concessoes: await concessoesDaPlataforma(db, orgId),

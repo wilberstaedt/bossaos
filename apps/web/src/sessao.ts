@@ -1,7 +1,8 @@
 import 'server-only';
 import { headers } from 'next/headers';
+import { notFound } from 'next/navigation';
 import {
-  comEscopo, comIdentidade, concessoesDoActor, obterPrisma,
+  comEscopo, comIdentidade, concessoesDoActor, obterPrisma, IdentificadorMalFormado,
   type ClienteComEscopo,
 } from '@bossaos/db';
 import {
@@ -68,7 +69,7 @@ export async function actorDoPedido(): Promise<Actor | null> {
 /** As organizações onde este actor é membro. Caminho de identidade do E03. */
 export async function organizacoesDoActor(actorId: string) {
   const prisma = obterPrisma(obterEnv().DATABASE_URL);
-  return comIdentidade(prisma, actorId, async (db) => {
+  return semIdentificadorMalFormado(() => comIdentidade(prisma, actorId, async (db) => {
     const orgs = await db.organization.findMany({
       where: { archivedAt: null },
       select: { id: true, slug: true, nome: true },
@@ -81,7 +82,7 @@ export async function organizacoesDoActor(actorId: string) {
       ...o,
       estado: filiacoes.find((f) => f.organizationId === o.id)?.estado ?? 'REVOGADO',
     }));
-  });
+  }));
 }
 
 /**
@@ -136,9 +137,37 @@ export async function comEscopoDoPedido<T>(
   fn: (db: ClienteComEscopo) => Promise<T>,
 ): Promise<T> {
   const prisma = obterPrisma(obterEnv().DATABASE_URL);
-  return comEscopo(
+  return semIdentificadorMalFormado(() => comEscopo(
     prisma,
     { organizationId: pedido.contexto.organizationId, userId: pedido.actor.id },
     fn,
-  );
+  ));
+}
+
+/**
+ * Um identificador com forma inválida é «não existe», e não «rebentou».
+ *
+ * ── RV100-024 ─────────────────────────────────────────────────────────────
+ *
+ * Um segmento de URL que não é UUID chegava directo a uma coluna `@db.Uuid` e
+ * levantava 500 **antes** do `notFound()` que a página já tem escrito. Medi 128
+ * páginas debaixo de um segmento `[…Id]` e nenhuma validava a forma.
+ *
+ * A cura vive aqui e não em 128 sítios: a camada de dados dá um NOME à falha
+ * (`IdentificadorMalFormado`) e esta função — por onde as páginas passam para
+ * falar com a base — traduz o nome na resposta que a web tem para «isso não
+ * existe». Uma página nova ganha a protecção por usar o invólucro, que é o que
+ * já tem de fazer para ter escopo.
+ *
+ * E é uma tradução ESTREITA de propósito: só o identificador mal formado. Um
+ * erro de base continua a subir como erro de base, porque um 404 sobre uma
+ * falha real esconde-a de quem a tem de arranjar.
+ */
+async function semIdentificadorMalFormado<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (erro) {
+    if (erro instanceof IdentificadorMalFormado) notFound();
+    throw erro;
+  }
 }

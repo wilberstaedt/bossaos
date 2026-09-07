@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { estadoParaOEcra } from '@bossaos/db';
-import { obterBase } from '../servidor.ts';
+import { obterBaseDeEcra } from '../servidor.ts';
 
 /**
  * O que a casca do kiosk precisa, e precisa igual em todas as telas.
@@ -20,7 +20,7 @@ import { obterBase } from '../servidor.ts';
  * é um oráculo de existência — regra do E04, e vale igual aqui.
  */
 export async function carregarKiosk(deviceId: string) {
-  const estado = await estadoParaOEcra(obterBase(), deviceId);
+  const estado = await estadoParaOEcra(obterBaseDeEcra(), deviceId);
   if (!estado) notFound();
   return estado;
 }
