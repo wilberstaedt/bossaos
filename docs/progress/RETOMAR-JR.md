@@ -519,3 +519,48 @@ relação), e **a definição confundida com a chamada** (`import X` não é cha
 
 E a que vale por todas: **um `git grep -E '\b…'` devolve zero em silêncio** — o
 `git grep` não suporta `\b`. Usa `-w`.
+
+---
+
+## RV100 — a guarda de expansão de texto (07/09, commit `14adb5c`)
+
+`scripts/validar-expansao-de-texto.sh` + `inspeccao/expansao.spec.ts`. Mede a
+razão de comprimento por chave entre `en` e as outras duas línguas, e vai ao DOM
+ver se o que cabia em inglês ainda cabe. **337 cadeias crescem 30% ou mais** e
+nenhuma transborda por si: o transbordo depende da caixa onde a puseram, e é por
+isso que se mede com `getBoundingClientRect` e não com contagem de letras.
+
+Três respostas, as três exercitadas com este guião: **OK (0)**, **FALHOU (1)**
+com o limiar baixado, **NÃO MEDI (2)** com o detector cegado *e* com a população
+esvaziada. A saída 2 sai antes da camada de relatório, nunca por `tail`.
+
+### Duas coisas que aprendi a pagar aqui
+
+**O que não é lido com os olhos não transborda aos olhos.** O primeiro vermelho
+foi um falso positivo meu: `Abrir el menú de navegación`, +223 px, é um
+`bo-so-leitor` — 1 px e `clip-path: inset(50%)`. A exclusão é **pela propriedade**
+(a caixa renderizada não é visível) e não pelo nome da classe. Excluir por nome
+era medir a grafia outra vez, e mentia no dia em que a classe mudasse de nome.
+
+**Um veredicto lido no relatório é um veredicto emprestado.** A minha primeira
+verificação da sonda procurava um `✘` que o `--reporter=line` nunca escreve: um
+detector que não podia disparar, e que teria reportado uma sonda falhada como
+«o texto não cabe» — o diagnóstico errado, que é pior do que nenhum. O veredicto
+passa a ser o **código de saída** de uma invocação própria.
+
+E o corolário: como o filtro do invisível pode ele próprio esvaziar a população,
+o detector conta o que mediu. Um ecrã sem um único elemento medido é NÃO MEDI.
+
+### Achado por fora do encargo, para quem lá for
+
+**A pasta `inspeccao/` está fora do typechecker.** Plantei `let medidos: number =
+"isto não é um número"` e o `pnpm typecheck` passou com saída 0. Não há
+`tsconfig` que a nomeie. O ESLint cobre-a (apanha erros de análise); os tipos não.
+São 30+ ficheiros de prova de navegador sem verificação de tipos — não lhe toquei
+porque não é o meu encargo, mas dizer «tipos ok» sobre `inspeccao/` é verde oco.
+
+### E a armadilha, na sexta forma
+
+À lista das cinco junta-se esta: **o instrumento que lê a saída de outro
+instrumento herda a forma como esse a escreve.** O `✘` era a grafia do relatório,
+não o facto. O facto era o código de saída.
