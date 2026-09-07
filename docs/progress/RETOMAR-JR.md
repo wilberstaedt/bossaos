@@ -988,3 +988,41 @@ falsos**: recapturei as mestre, 23 saíram byte a byte iguais, o git não vê
 alteração e o commit fica o antigo — e elas descrevem o produto actual. **Uma
 segunda medida que acusa quem está certo é pior do que uma medida só.** Ficou o
 `mtime`, com o que ele não sabe escrito: num clone fresco não mede nada.
+
+---
+
+## A barra lateral do backoffice (07/09, `c0fc957`)
+
+Pedido do dono do produto. Cinco pontos, três deles defeitos.
+
+O item aceso saía da **posição no array** (`activa: i === navegacao.length - 1`):
+o último acendia em qualquer rota e o `aria-current="page"` ia com ele — quem
+usa leitor de ecrã era informado, em todas as páginas, de que estava nos
+Relatórios. Havia a mesma linha na barra inferior e **uma terceira** no layout da
+plataforma. Por isso a cura foi no componente, que sabe a rota: quem o usa deixa
+de ter de saber, logo deixa de se poder enganar.
+
+O trocador de **unidade** mostrava o email de quem entrou. Fui ver o que devia lá
+estar e a resposta é que **não há unidade resolvida naquele nível** — disse-o em
+vez de inventar um nome.
+
+Catorze ícones com catorze formas, o activo a indicar por barra + peso + fundo a
+10% (contraste medido, 14,34:1), e quatro grupos com a ajuda descida para as
+utilidades.
+
+### O que vale registar
+
+**Uma camada que não conhece outra, não conhece mesmo.** Importei `usePathname`
+para o `packages/ui` e o typecheck recusou: aquele pacote não conhece o Next de
+propósito. A rota passou a entrar por propriedade, com o invólucro do lado da
+aplicação. O erro foi meu por não ler o comentário que estava três linhas acima.
+
+**E o que só se vê olhando.** A minha correcção introduziu uma regressão — os
+títulos de grupo somaram altura e o último grupo ficou cortado pelo fundo. Não
+havia teste que a apanhasse e o build estava verde. **Vi-a na captura**, porque
+desta vez abri a imagem em vez de confiar no número de bytes. Numa tarefa cuja
+prova é visual, olhar é medir.
+
+A cura não foi encolher o alvo de toque para arrumar a lista: catorze itens a
+44 px dão 616 px só de itens e não cabem em 900. Encolher trocava um problema de
+arrumação por um de acessibilidade. A lateral ficou presa e o que rola é a lista.
