@@ -66,9 +66,16 @@ export default async function Piloto({ params }: { params: Promise<{ idioma: Idi
 
   return (
     <MolduraMkt idioma={idioma} actual="/pilot">
-      <section className="bo-mkt__heroi">
+      {/* Divisão editorial: o título à esquerda, o corpo à direita.
+          O vazio à direita não era composição — era o `max-width: 68ch`
+          do lead a decidir sozinho o desenho (184 + 544 = 728, o mesmo
+          número em cinco páginas). As duas medidas de leitura ficam
+          intactas; o que muda é elas ocuparem o contentor. */}
+      <section className="bo-mkt__heroi bo-mkt__heroi--editorial">
         <h1>{k.pilotoPagina}</h1>
-        <p className="bo-publico__texto">{k.pilotoPaginaTexto}</p>
+        <div>
+          <p className="bo-publico__texto">{k.pilotoPaginaTexto}</p>
+        </div>
       </section>
 
       <section className="bo-mkt__seccao" aria-labelledby="t-piloto">

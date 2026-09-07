@@ -47,10 +47,17 @@ export default async function Produto({ params }: { params: Promise<{ idioma: Id
 
   return (
     <MolduraMkt idioma={idioma} actual="/product">
-      <section className="bo-mkt__heroi">
+      {/* Divisão editorial: o título à esquerda, o corpo à direita.
+          O vazio à direita não era composição — era o `max-width: 68ch`
+          do lead a decidir sozinho o desenho (184 + 544 = 728, o mesmo
+          número em cinco páginas). As duas medidas de leitura ficam
+          intactas; o que muda é elas ocuparem o contentor. */}
+      <section className="bo-mkt__heroi bo-mkt__heroi--editorial">
         <h1>{k.produtoPagina}</h1>
-        <p className="bo-publico__texto">{k.produtoPaginaTexto}</p>
-        <AvisoDeDemonstracao idioma={idioma} />
+        <div>
+          <p className="bo-publico__texto">{k.produtoPaginaTexto}</p>
+          <AvisoDeDemonstracao idioma={idioma} />
+        </div>
       </section>
 
       {/* ── A acção e o seu resultado (§6.4) ─────────────────────────────

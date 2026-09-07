@@ -1235,6 +1235,42 @@ label.bo-planos__item input[type="radio"] {
    próprios. Não há paleta nova — o E02 já decidiu as cores. */
 .bo-mkt__heroi { display: grid; gap: var(--bo-espaco-lg); padding: var(--bo-espaco-xl) 0; }
 .bo-mkt__heroi h1 { font-size: 34px; line-height: 1.1; overflow-wrap: anywhere; }
+
+/* O herói EDITORIAL: duas colunas de TEXTO, e não uma coluna com vazio à direita.
+   ───────────────────────────────────────────────────────────────────────────
+   Cinco páginas davam o mesmo `x = 728` de 1440 — o mesmo número exacto, o que
+   já dizia que era molde e não decisão. A aritmética confirma-o: o contentor
+   centrado começa em x=184 e mede 1072; o lead tem `max-width: 68ch`, que a
+   16 px dá 544 px. **184 + 544 = 728.**
+
+   Ou seja: o vazio à direita não era uma escolha de composição, era a medida de
+   leitura do parágrafo a decidir sozinha o desenho da secção. Ninguém compôs
+   estes heróis — escreveram `h1` + lead e o `max-width` fez o resto.
+
+   ── E por isso a correcção NÃO é pôr uma imagem lá ────────────────────────
+
+   O §10 proíbe «metade do herói vazia por falta de mídia **ou composição**». O
+   defeito é o vazio POR AUSÊNCIA. Encher a metade direita da FAQ com uma captura
+   do produto seria mídia decorativa, que o §6.4 reprova pelo nome — e usar as
+   capturas de 1440 numa meia coluna repetiria os 38-41% que ficaram medidos e
+   por resolver no herói da home, em mais cinco sítios.
+
+   A composição que usa a largura sem inventar conteúdo é a divisão editorial:
+   o título à esquerda, o corpo à direita. As duas medidas de leitura ficam
+   intactas — o `h1` nos seus 18ch, o lead nos seus 68ch — e juntas ocupam o
+   contentor em vez de deixarem metade morta. 468 + 544 + intervalo cabem nos
+   1072 disponíveis.
+
+   Abaixo de 1024 px continua uma coluna: a 768 as duas colunas dariam 34ch cada,
+   e uma medida de 34 caracteres não é leitura, é uma tira. */
+@media (min-width: 1024px) {
+  .bo-mkt__heroi--editorial {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: var(--bo-espaco-gigante);
+    align-items: start;
+  }
+  .bo-mkt__heroi--editorial > h1 { margin: 0; }
+}
 @media (min-width: 768px) { .bo-mkt__heroi h1 { font-size: 52px; max-width: 18ch; } }
 .bo-mkt__chamada { display: flex; flex-wrap: wrap; gap: var(--bo-espaco-md); }
 /* O ritmo vertical da landing, e o número saiu de uma medição.
@@ -1276,6 +1312,18 @@ label.bo-planos__item input[type="radio"] {
   font-size: 18px;
   color: var(--bo-texto-secundario);
   margin-bottom: var(--bo-espaco-md);
+}
+/* O indice da FAQ: caminho, nao conteudo. Marcadores fora, porque e' uma
+   navegacao e nao uma enumeracao de factos. */
+.bo-mkt__indice ul { list-style: none; display: grid; gap: var(--bo-espaco-sm); }
+/* 44 px de alvo, e nao 22. A guarda apanhou-os a 360 px: `76×22`, `67×22`,
+   `112×22`. Sao ligacoes numa LISTA, e a isencao da WCAG 2.2 e' para ligacoes
+   dentro de um paragrafo de texto corrido — um indice nao e' texto corrido, e
+   num telemovel e' precisamente onde ele serve para nao rolar dez perguntas.
+   Altura no proprio `a`, para a area clicavel crescer com ela. */
+.bo-mkt__indice a {
+  color: var(--bo-texto-primario);
+  display: flex; align-items: center; min-block-size: 44px;
 }
 .bo-mkt__faq { display: grid; gap: var(--bo-espaco-lg); max-width: 68ch; }
 .bo-mkt__faq h3 { margin-bottom: var(--bo-espaco-xs); overflow-wrap: anywhere; }

@@ -203,7 +203,24 @@ test.describe('RV100 · fecho da secção 6', () => {
          * era um pedido. Com 45 s, a navegação que pendura di-lo pelo nome e
          * sobra tempo para as outras quatro larguras.
          */
-        const r = await page.goto(`/es-ES${rota}`, { waitUntil: 'load', timeout: 45_000 });
+        /**
+         * `domcontentloaded`, e o motivo é o `next/image`.
+         *
+         * Com `load` a `/product` esgotava 45 s: tem cinco composições, e `load`
+         * espera pelos PÍXEIS de todas — com o optimizador de imagem frio, a
+         * gerar variantes de `srcset`, isso não acaba a tempo.
+         *
+         * Mas o que este instrumento mede é GEOMETRIA: alturas, o fim do herói,
+         * o respiro. E o `next/image` com `import` estático **reserva a caixa**
+         * a partir da largura e altura reais do ficheiro — está escrito no
+         * `Demonstracao.tsx`, e é o que impede a landing de saltar enquanto
+         * carrega. Logo o esquema está final antes de o primeiro píxel chegar.
+         *
+         * Isto não fica em palavra: o último teste mede uma página com as duas
+         * condições e exige que os números batam certo. Se um dia deixarem de
+         * bater, a suposição deixou de ser verdade e o vermelho di-lo.
+         */
+        const r = await page.goto(`/es-ES${rota}`, { waitUntil: 'domcontentloaded', timeout: 45_000 });
         expect(r?.status(), `${rota} a ${largura}`).toBeLessThan(400);
         const m = await medir(page);
         expect(m.seccoes, `${rota} a ${largura} sem secções`).toBeGreaterThan(0);
@@ -262,6 +279,23 @@ test.describe('RV100 · fecho da secção 6', () => {
      * `> 0` e 20 é maior do que zero. **A pergunta certa é se estão TODAS**, e
      * é a que se faz agora.
      */
+    /**
+     * CONTROLO da condição de espera: `domcontentloaded` contra `load`.
+     *
+     * Mede a mesma página das duas maneiras e exige o mesmo resultado. Sem
+     * isto, «o `next/image` reserva a caixa» seria uma suposição minha a
+     * sustentar todas as medições de geometria deste ficheiro.
+     */
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/es-ES/product', { waitUntil: 'domcontentloaded', timeout: 45_000 });
+    const cedo = await medir(page);
+    await page.waitForLoadState('load', { timeout: 120_000 }).catch(() => {});
+    const tarde = await medir(page);
+    expect(
+      { altura: cedo.alturaRolavel, heroi: cedo.heroFimX },
+      'a geometria mudou entre domcontentloaded e load — a caixa não estava reservada',
+    ).toEqual({ altura: tarde.alturaRolavel, heroi: tarde.heroFimX });
+
     const ficheiros = readdirSync(PARCIAIS).filter((f) => f.endsWith('.json'));
     const recolha = ficheiros.flatMap(
       (f) => JSON.parse(readFileSync(`${PARCIAIS}/${f}`, 'utf8')) as unknown[]);

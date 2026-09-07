@@ -40,9 +40,9 @@ export async function generateMetadata(
  * a comparar planos; esta responde a quem ainda está a decidir se avança.
  */
 const GRUPOS = [
-  { titulo: null, perguntas: ['faq1', 'faq2', 'faq3', 'faq4'] },
-  { titulo: 'faqGrupoEquipamento', perguntas: ['faq5', 'faq6', 'faq7'] },
-  { titulo: 'faqGrupoCobranca', perguntas: ['faq8', 'faq9', 'faq10'] },
+  { id: 'g-geral', titulo: null, rotulo: 'faqGrupoGeral', perguntas: ['faq1', 'faq2', 'faq3', 'faq4'] },
+  { id: 'g-equipamento', titulo: 'faqGrupoEquipamento', rotulo: 'faqGrupoEquipamento', perguntas: ['faq5', 'faq6', 'faq7'] },
+  { id: 'g-cobranca', titulo: 'faqGrupoCobranca', rotulo: 'faqGrupoCobranca', perguntas: ['faq8', 'faq9', 'faq10'] },
 ] as const;
 
 export default async function Faq({ params }: { params: Promise<{ idioma: Idioma }> }) {
@@ -51,14 +51,32 @@ export default async function Faq({ params }: { params: Promise<{ idioma: Idioma
 
   return (
     <MolduraMkt idioma={idioma} actual="/faq">
-      <section className="bo-mkt__heroi">
+      {/* ── O herói da FAQ era um `h1` sozinho, e acabava em x = 652 ──────
+          É o caso mais claro do RV100-009: não havia sequer um lead, quanto
+          mais composição. E é também o caso onde a resposta NÃO pode ser mídia
+          — uma captura do produto ao lado das perguntas é mídia decorativa, que
+          o §6.4 reprova pelo nome.
+
+          O que usa a largura com função aqui é ORIENTAÇÃO: a página passou de
+          quatro perguntas para dez em três grupos, e dez perguntas sem índice
+          obrigam a rolar para saber o que lá está. O índice não repete conteúdo
+          — é o caminho para ele. */}
+      <section className="bo-mkt__heroi bo-mkt__heroi--editorial">
         <h1>{k.faqTitulo}</h1>
+        <nav className="bo-mkt__indice" aria-labelledby="t-indice">
+          <p className="bo-mkt__faq-grupo" id="t-indice">{k.faqIndice}</p>
+          <ul>
+            {GRUPOS.map((g) => (
+              <li key={g.id}><a href={`#${g.id}`}>{k[g.rotulo]}</a></li>
+            ))}
+          </ul>
+        </nav>
       </section>
 
       <section className="bo-mkt__seccao" aria-labelledby="duvidas">
         <h2 id="duvidas">{k.faqTitulo}</h2>
         {GRUPOS.map((grupo, i) => (
-          <div key={grupo.titulo ?? 'geral'}>
+          <div key={grupo.id} id={grupo.id}>
             {/* O primeiro grupo não leva cabeçalho: são as perguntas gerais, e
                 um título «Geral» acima delas não acrescenta nada a quem lê. */}
             {grupo.titulo ? (

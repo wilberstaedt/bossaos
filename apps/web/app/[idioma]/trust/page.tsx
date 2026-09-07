@@ -77,9 +77,16 @@ export default async function Confianca({ params }: { params: Promise<{ idioma: 
 
   return (
     <MolduraMkt idioma={idioma} actual="/trust">
-      <section className="bo-mkt__heroi">
+      {/* Divisão editorial: o título à esquerda, o corpo à direita.
+          O vazio à direita não era composição — era o `max-width: 68ch`
+          do lead a decidir sozinho o desenho (184 + 544 = 728, o mesmo
+          número em cinco páginas). As duas medidas de leitura ficam
+          intactas; o que muda é elas ocuparem o contentor. */}
+      <section className="bo-mkt__heroi bo-mkt__heroi--editorial">
         <h1>{k.confiancaTitulo}</h1>
-        <p className="bo-publico__texto">{k.confiancaTexto}</p>
+        <div>
+          <p className="bo-publico__texto">{k.confiancaTexto}</p>
+        </div>
       </section>
 
       <section className="bo-mkt__seccao" aria-labelledby="pilares">

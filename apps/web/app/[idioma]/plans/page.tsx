@@ -106,9 +106,16 @@ export default async function Planos({ params }: { params: Promise<{ idioma: Idi
 
   return (
     <MolduraMkt idioma={idioma} actual="/plans">
-      <section className="bo-mkt__heroi">
+      {/* Divisão editorial: o título à esquerda, o corpo à direita.
+          O vazio à direita não era composição — era o `max-width: 68ch`
+          do lead a decidir sozinho o desenho (184 + 544 = 728, o mesmo
+          número em cinco páginas). As duas medidas de leitura ficam
+          intactas; o que muda é elas ocuparem o contentor. */}
+      <section className="bo-mkt__heroi bo-mkt__heroi--editorial">
         <h1>{k.planosPagina}</h1>
-        <p className="bo-publico__texto">{k.planosPaginaTexto}</p>
+        <div>
+          <p className="bo-publico__texto">{k.planosPaginaTexto}</p>
+        </div>
       </section>
 
       {/* ── Cards de decisão rápidos, com recomendação JUSTIFICADA ────────

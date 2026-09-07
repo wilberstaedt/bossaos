@@ -1627,3 +1627,103 @@ e a única falha nomeia só aquele ficheiro. Não lhe toquei.
   dela além do quarto pilar.
 - **Expansão de texto: continua NÃO MEDI**, mesma razão de sempre.
 - **Não medi a aparência.** Secção 7, e é do Matheus.
+
+---
+
+## L1k — o herói nas seis páginas (RV100-009)
+
+Evidência em `evidence/fecho/`: `antes-fecho-l1k.json` e `depois-fecho.json`.
+
+### O 728 não era uma composição repetida seis vezes. Era uma que ninguém fez.
+
+O mesmo número exacto em cinco páginas já dizia que era molde. A aritmética
+fecha-o:
+
+```
+contentor centrado a 1440: começa em x = 184, mede 1072
+lead com `max-width: 68ch`, a 16 px  = 544
+184 + 544 = 728          ← o número, nas cinco
+/faq: sem lead nenhum, só o h1 a 18ch = 652
+```
+
+**O vazio à direita não era uma decisão de composição: era a medida de leitura do
+parágrafo a decidir sozinha o desenho da secção.** As cinco páginas escreveram
+`h1` + lead e o `max-width` fez o resto. Ninguém compôs estes heróis.
+
+Isso responde à pergunta do §10 — *vazia por falta de mídia **ou composição**?* —
+com **composição**, e não com mídia.
+
+### E por isso a correcção não foi pôr imagens lá
+
+Duas razões, e as duas estão medidas noutro lado deste ficheiro:
+
+1. **Mídia decorativa é proibida pelo nome.** Uma captura do produto ao lado das
+   perguntas da FAQ não informa nada — o §6.4 reprova-a.
+2. **As capturas disponíveis são de 1440**, e numa meia coluna rendem 38–41%, que
+   é o defeito que ficou medido e por resolver no herói da home na L1e. Pô-las em
+   cinco sítios seria multiplicar um defeito conhecido por cinco.
+
+A composição que usa a largura sem inventar conteúdo é a **divisão editorial**:
+título à esquerda, corpo à direita. As duas medidas de leitura ficam intactas —
+o `h1` nos seus 18ch, o lead nos seus 68ch — e juntas ocupam o contentor em vez
+de deixarem metade morta. Abaixo de 1024 px continua uma coluna: a 768, duas
+colunas dariam 34ch cada, e 34 caracteres não são uma medida de leitura, são uma
+tira.
+
+| rota | antes (360→1440) | depois | ocupação a 1440 |
+| --- | --- | --- | ---: |
+| `/product` | 336 · 366 · 568 · 648 · **728** | 336 · 366 · 568 · 1132 · **1212** | 96% |
+| `/plans` | idem **728** | idem **1212** | 96% |
+| `/pilot` | idem **728** | idem **1212** | 96% |
+| `/trust` | idem **728** | idem **1212** | 96% |
+| `/demo` | idem **728** | idem **1212** | 96% |
+| `/faq` | 336 · 366 · 492 · 572 · **652** | 336 · 366 · 744 · 1176 · **1256** | **100%** |
+
+### A FAQ é o caso onde a resposta tinha de ser outra
+
+Era um `h1` sozinho — nem lead havia. E é onde a mídia seria mais claramente
+decoração.
+
+O que usa a largura **com função** ali é orientação: a página passou de quatro
+perguntas para dez em três grupos, e dez perguntas sem índice obrigam a rolar
+para saber o que lá está. **O índice não repete conteúdo — é o caminho para
+ele.** Por isso a `/faq` chega a 1256 e as outras a 1212: o índice vai até ao
+bordo do contentor, o lead pára nos seus 68ch.
+
+### Uma suposição minha que passou a ter guarda
+
+Trocar `load` por `domcontentloaded` foi preciso — a `/product` esgotava 45 s
+porque `load` espera pelos píxeis das cinco composições, com o optimizador de
+imagem a gerar variantes. Mas a troca assenta numa suposição: **que o
+`next/image` com `import` estático reserva a caixa**, e portanto a geometria
+está final antes do primeiro píxel.
+
+Isso é verdade e está escrito no `Demonstracao.tsx` — mas era uma suposição minha
+a sustentar todas as medições de geometria do ficheiro. Agora mede a mesma página
+das duas maneiras e exige o mesmo resultado. Se um dia deixar de bater, o
+vermelho di-lo em vez de eu descobrir números errados.
+
+### O defeito que a guarda apanhou no que eu acabara de escrever
+
+`MKT-009`, alvos de toque a 360 px: `76×22`, `67×22`, `112×22` — as três
+ligações do índice novo.
+
+A isenção da WCAG 2.2 é para ligações **dentro de um parágrafo de texto
+corrido**. Um índice não é texto corrido — e num telemóvel é precisamente onde
+ele serve, que é para não rolar dez perguntas. Altura no próprio `a`, e o alvo
+passa a 44.
+
+### Regressão
+
+`marketing.spec.ts` **65/65**, população inteira. Guardas verdes: classes, três
+línguas, preços, cobertura, SEO, pilar offline, portas mortas. `pnpm lint` limpo.
+
+### O que fica da secção 6
+
+- **RV100-010** — dois blocos do §6.3 por fazer: *produto em movimento* e
+  *módulos principais*. Os outros doze existem.
+- **`/trust` ↔ home** — cinco das doze chaves da `/trust` são o bloco 10 da home.
+- **O herói da home a 38–41%** continua medido e por resolver, e agora com uma
+  razão a mais para não se resolver com as capturas actuais: são de 1440.
+- **Expansão de texto: NÃO MEDI.**
+- **Não medi a aparência.** Secção 7, e é do Matheus.
