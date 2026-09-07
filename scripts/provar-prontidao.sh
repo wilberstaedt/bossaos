@@ -37,7 +37,16 @@ verificacoes=0
 # mensagem dizer "esperadas 8" enquanto a comparação usava outro número: tinha o
 # valor escrito duas vezes. Uma régua que se descreve a si própria de forma
 # diferente da que aplica é uma régua que ninguém pode acreditar.
-MINIMO_VERIFICACOES=10
+#
+# Estava em 10 e uma corrida verde emite 11 — medido a 07/09, contadas as linhas
+# da saída com os códigos de cor tirados. O piso estava solto por uma: podia
+# desaparecer uma verificação e isto continuava a dizer «Prontidão provada».
+#
+# Fica piso e não igualdade de propósito. Com a aplicação em baixo, as secções
+# tomam o ramo do `else` e emitem MENOS verificações; uma igualdade trocava a
+# mensagem certa («a aplicação não arrancou») pela errada («a prova não correu
+# inteira»). O piso perde-se com o tempo, mas perde-se para o lado seguro.
+MINIMO_VERIFICACOES=11
 
 PID=""
 

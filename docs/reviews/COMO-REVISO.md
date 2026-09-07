@@ -3065,3 +3065,74 @@ apontada a nada.** A segunda é pior, porque quem a lê conta com ela. E note-se
 por onde as três apareceram: **nenhuma foi encontrada a olhar para o código.**
 Apareceram quando o arnês falhou, quando o interpretador mudou, e quando outra
 pessoa leu. Ler com mais atenção teria devolvido as três como correctas.
+
+---
+
+## Varri o repositório à procura de guardas cegas e a cega era a varredura — 07/09, 21h10
+
+Hoje encontrei **duas vezes, no mesmo ficheiro**, uma protecção armada a apontar
+para nada. Duas vezes no mesmo sítio é um gerador, não um acidente, por isso fui
+procurar os irmãos. A pergunta: **algum dos 129 instrumentos do repositório
+consegue dizer OK enquanto mede zero coisas?**
+
+A resposta é **nenhum**. O que interessa é como cheguei lá.
+
+| tentativa | o que o detector procurava | «sem defesa» |
+|---|---|---|
+| 1.ª | a palavra `naomedi` | **76** |
+| 2.ª | + plante, âmbito, população | **7** |
+| 3.ª | + `NAO MEDI` **sem til** | **1** |
+| 4.ª | li o que sobrou | **0** |
+
+**Nenhum desses números era uma medição do repositório. Eram medições do meu
+vocabulário.** O `validar-tres-linguas.sh` escreve `NAO MEDI` sem til e eu
+procurava com til. O `provar-prontidao.sh` — que sobreviveu até ao fim da lista —
+é o **melhor guarda da casa**: conta as verificações que correram, tem um mínimo,
+e emite uma falha chamada literalmente `VERDE COM ZERO MEDIDO`. Estava na minha
+lista de suspeitos por não usar nenhuma das minhas palavras.
+
+### O que o repositório já fazia e a minha varredura não
+
+O `validar-concorrencia.sh` aponta o seu detector a **dois alvos conhecidos**
+antes de o usar — um que tem de casar, outro que não pode casar — e recusa-se a
+concluir se falhar qualquer um:
+
+    "o proprio detector esta cego: nao ve 'CONCORRENTES' ou acusa quem passa ao lado"
+
+Eu construí um detector e apontei-o directamente ao problema. **Só na terceira
+tentativa fiz o que aquele guião faz sempre.** Quando finalmente o auto-testei
+contra um alvo que eu sabia ter a defesa, o número caiu de 7 para 1 na mesma
+corrida — sem eu ter olhado para um único guião.
+
+### O que fica
+
+**Uma varredura é um instrumento, e um instrumento nunca é testemunha de si
+próprio.** Se eu tivesse parado na primeira, tinha escrito «76 guardas do
+repositório podem ficar verdes sobre nada» — um número com quatro vezes o
+tamanho da verdade, sobre uma população que não existe, e a acusar os melhores
+guiões da casa.
+
+E o teste é barato ao ponto de não haver desculpa: **três linhas**, um alvo que
+tem de casar e um que não pode. Custa menos do que ler o primeiro ficheiro da
+lista errada.
+
+### E a varredura, ao falhar, deu uma coisa a sério
+
+O único guião que sobreviveu à lista — o melhor de todos — tinha o **piso solto
+por uma**. `MINIMO_VERIFICACOES=10`, e uma corrida verde emite **11**: podia
+desaparecer uma verificação e ele continuava a dizer «Prontidão provada».
+
+Medi-o ao vivo em vez de o deduzir, porque hoje já tinha errado cinco contagens
+estáticas — e a sexta foi essa mesma: o meu `grep` de contagem não casou nada
+porque a saída tem códigos de cor e eu esperava `ok` no início da linha. **A
+prova tinha passado e o meu contador dizia zero.**
+
+Correr era barato por uma razão que vale a pena reter: **o `vermelho` também
+incrementa o contador**, portanto a corrida dava-me o número mesmo que a prova
+falhasse. Quando o que se quer medir é *quanto correu* e não *se passou*, uma
+corrida vermelha serve tão bem como uma verde.
+
+E o piso fica piso, não igualdade. Com a aplicação em baixo as secções emitem
+**menos** verificações; uma igualdade trocaria a mensagem certa — «a aplicação
+não arrancou» — pela errada — «a prova não correu inteira». **Um piso perde-se
+com o tempo, mas perde-se para o lado seguro.**
