@@ -116,7 +116,12 @@ export default async function Demo({
           </div>
           <div className="bo-campo">
             <label className="bo-campo__rotulo" htmlFor="mensagem">{k.demoMensagem}</label>
-            <textarea id="mensagem" name="mensagem" maxLength={4000}
+            {/* Os quatro campos acima levam `bo-campo__controlo`; este não
+                levava, e sem ela é branco sobre creme — 1,1:1, um controlo sem
+                fronteira nenhuma no ecrã. Foi o que a guarda das superfícies
+                encontrou assim que a landing e as páginas comerciais entraram
+                na população dela. */}
+            <textarea className="bo-campo__controlo" id="mensagem" name="mensagem" maxLength={4000}
                       defaultValue={repor.mensagem ?? ''} />
           </div>
           {/* ── O consentimento para MARKETING, separado e por marcar ───────

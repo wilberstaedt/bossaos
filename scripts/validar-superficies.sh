@@ -64,12 +64,18 @@ fi
 AMBITO=$(grep -o 'AMBITO .*' "$SAIDA" | tail -1)
 campo() { sed -n "s/.*$1=\([0-9]*\).*/\1/p" <<<"$AMBITO"; }
 ambito() {
-  echo "  âmbito:  $(campo medidas) superfícies de $(campo superficies) — duas escuras do KDS, o login"
-  echo "           (a única \`.bo-inverso\` do produto) e uma do painel claro."
+  # A lista vem da MEDIÇÃO e não escrita aqui. A versão anterior dizia à mão
+  # «duas escuras do KDS, o login e uma do painel claro» — e era verdade, e foi
+  # essa frase que deixou a landing de fora à vista de todos durante um dia.
+  # Uma resposta escrita envelhece sozinha; uma pergunta feita, não.
+  echo "  âmbito:  $(campo medidas) superfícies de $(campo superficies):"
+  echo "           $(grep -o 'SUPERFICIES-LISTA .*' "$SAIDA" | tail -1 | sed 's/SUPERFICIES-LISTA //')"
   echo "           Mede texto a 4,5:1 e controlo SEM CONTORNO a 3:1 contra o"
   echo "           primeiro fundo OPACO — um fundo com alfa é uma camada, não um"
   echo "           fundo, e mede-se uma cor contra si própria."
   echo "           FORA: o que está fora do ecrã e o que leva \`aria-hidden\`."
+  echo "           Contornos fracos (RV100-025), medidos por superfície e não por total:"
+  grep -o 'TECTO .*' "$SAIDA" | sed 's/TECTO /           /'
   echo "           E mede o CORAL nas $(sed -n 's/.*CORAL escuras=\([0-9]*\).*/\1/p' "$SAIDA" | tail -1) superfícies escuras:"
   echo "           $(grep -o 'CORAL .*' "$SAIDA" | tail -1). O manual diz que o coral não"
   echo "           disputa atenção com o estado dos pedidos, e mede-se a cor RESOLVIDA"

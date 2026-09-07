@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { resolverAlvos } from './alvos.ts';
+import { SLUG_DE_INSPECCAO } from '../packages/db/prisma/inspeccao-comum.ts';
 
 /**
  * Um componente claro dentro de uma superfície escura desaparece.
@@ -40,7 +41,31 @@ const MINIMO_CAIXA = 3;   // WCAG 1.4.11, componentes
  * o botão do KDS. Fica contado, com o número certo, para não passar por
  * ausência. Se aparecer um quinto, o tecto acende.
  */
-const TECTO_CONTORNOS_FRACOS = 9;
+/**
+ * ── O tecto passa a ser POR SUPERFÍCIE, e a razão é aritmética ────────────
+ *
+ * Era um número só: **9**. E 9 era exactamente a população antiga — 4 no login
+ * mais 5 no painel. Ao entrarem as sete superfícies públicas subiu para 17, e um
+ * tecto global só dá duas saídas, as duas más: ficar vermelho para sempre por
+ * dívida catalogada, ou ser levantado para 17 e passar a tolerar **oito novos
+ * em qualquer sítio** — incluindo uma regressão no login, que ninguém veria.
+ *
+ * Por superfície não tem esse buraco. Acrescentar uma superfície acrescenta uma
+ * linha com o número dela; uma regressão numa superfície existente acende mesmo
+ * que outra tenha melhorado. É a mesma forma do inventário do cabeçalho: um
+ * CONJUNTO, e não um total — um total deixa somar de um lado o que se tirou do
+ * outro.
+ *
+ * Os números abaixo são medição de 07/09, não escolha. Uma superfície ausente
+ * desta tabela vale zero: quem acrescenta superfície declara o que ela traz.
+ */
+const TECTO_POR_SUPERFICIE: Record<string, number> = {
+  'AUTH-login': 4,
+  'PAINEL-catalogo': 5,
+  'MKT-demo': 5,
+  'MKT-landing': 1,
+  'CARTA-publica': 2,
+};
 
 /** Os controlos cujo contorno já se sabe fraco: campos e botão secundário. */
 const CONTORNO_JA_CONHECIDO = /bo-campo__controlo|bo-botao--secundario|bo-botao bo-botao--s/;
@@ -103,11 +128,37 @@ test.describe('Superfícies: nada desaparece dentro do seu fundo', () => {
     const a = await resolverAlvos();
     await page.setViewportSize({ width: 1440, height: 900 });
 
+    /**
+     * ── A população, e foi ela que falhou e não o detector ─────────────────
+     *
+     * Esta lista tinha QUATRO superfícies — duas do KDS, o login e uma do
+     * painel. A landing não era nenhuma delas, **e era lá que o defeito estava
+     * no ar**: o CTA primário do herói com o anel a 1,00:1, encontrado por
+     * acidente quando a cura das superfícies escuras o destapou.
+     *
+     * O detector nunca falhou. A população dele não incluía o sítio onde o
+     * defeito vivia — e essa é a forma que se repetiu o dia inteiro.
+     *
+     * As superfícies **são enumeráveis**, ao contrário dos pares de tokens que
+     * geram estes 1,00:1: esses nascem da cascata — o anel no elemento, o fundo
+     * num antepassado — e nenhuma das linhas sabe da outra, portanto só uma
+     * medição renderizada os vê. O que se podia ter enumerado, e ninguém
+     * enumerou, era isto: as superfícies são poucas e fechadas.
+     *
+     * Entram agora as públicas, que são as que um comprador vê primeiro.
+     */
     const superficies = [
       { id: 'KDS-estacao', url: `/es-ES/kds/${a.unidadeDoStaff}/${a.estacaoDeProducao}`, escura: true },
       { id: 'KDS-unidade', url: `/es-ES/kds/${a.unidadeDoStaff}`, escura: true },
       { id: 'AUTH-login', url: '/es-ES/auth/login', escura: true },
       { id: 'PAINEL-catalogo', url: '/es-ES/app/marina-oropesa/catalogo', escura: false },
+      { id: 'MKT-landing', url: '/es-ES', escura: false },
+      { id: 'MKT-demo', url: '/es-ES/demo', escura: false },
+      { id: 'MKT-faq', url: '/es-ES/faq', escura: false },
+      { id: 'MKT-plans', url: '/es-ES/plans', escura: false },
+      { id: 'MKT-product', url: '/es-ES/product', escura: false },
+      { id: 'MKT-trust', url: '/es-ES/trust', escura: false },
+      { id: 'CARTA-publica', url: `/r/${SLUG_DE_INSPECCAO}/es-ES/menu`, escura: false },
     ];
 
     const maus: string[] = [];
@@ -237,13 +288,40 @@ test.describe('Superfícies: nada desaparece dentro do seu fundo', () => {
     expect(coral, `o coral está nas superfícies do serviço, a disputar atenção com o estado dos pedidos:\n${coral.slice(0, 6).join('\n')}`)
       .toEqual([]);
 
+    // A lista vai no relatório em vez de ficar escrita à mão na guarda: uma
+    // resposta escrita envelhece sozinha, e foi uma frase desactualizada a
+    // dizer «quatro superfícies» que deixou a landing de fora sem ninguém ver.
+    console.log(`SUPERFICIES-LISTA ${superficies.map((x) => x.id).join(' ')}`);
+    // Conta por superfície: o id é o começo de cada entrada.
+    const porSuperficie = new Map<string, number>();
+    for (const c of contornos) {
+      const id = (c.split(' ·')[0] ?? '').trim();
+      porSuperficie.set(id, (porSuperficie.get(id) ?? 0) + 1);
+    }
+    const acimaDoTecto = [...porSuperficie.entries()]
+      .filter(([id, n]) => n > (TECTO_POR_SUPERFICIE[id] ?? 0))
+      .map(([id, n]) => `${id}: ${n} contornos fracos, tecto ${TECTO_POR_SUPERFICIE[id] ?? 0}`);
     console.log(`AMBITO superficies=${superficies.length} medidas=${medidos} maus=${outros.length}`
-      + ` contornosFracos=${contornos.length} tecto=${TECTO_CONTORNOS_FRACOS}`);
-    for (const c of contornos.slice(0, 4)) console.log(`CONTORNO-FRACO ${c}`);
+      + ` contornosFracos=${contornos.length} acimaDoTecto=${acimaDoTecto.length}`);
+    for (const [id, n] of [...porSuperficie.entries()].sort()) {
+      console.log(`TECTO ${id} ${n}/${TECTO_POR_SUPERFICIE[id] ?? 0}`);
+    }
+    // ── Tudo o que foi encontrado sai ANTES de qualquer asserção ──────────
+    //
+    // O primeiro `expect` a falhar termina o teste, e ao alargar a população o
+    // tecto dos contornos rebentou e **tapou o defeito a sério**: o relatório
+    // dizia `maus=1` e não dizia qual, porque a linha que o imprimia vinha
+    // depois. Um vermelho a esconder outro vermelho é pior do que um verde
+    // errado — dá a sensação de se estar a olhar para o problema.
+    for (const c of contornos) console.log(`CONTORNO-FRACO ${c}`);
+    for (const o of outros) console.log(`DESAPARECE ${o}`);
 
-    expect(contornos.length, `contornos fracos subiram para ${contornos.length} (tecto ${TECTO_CONTORNOS_FRACOS}) — RV100-025`)
-      .toBeLessThanOrEqual(TECTO_CONTORNOS_FRACOS);
+    // A ordem também muda: o defeito primeiro, o tecto depois. O tecto é dívida
+    // conhecida e catalogada (RV100-025); o `outros` é coisa que desaparece
+    // dentro do fundo, e é essa que alguém tem de ver primeiro.
     expect(medidos, 'POPULACAO-ZERO: nenhuma superfície foi medida').toBe(superficies.length);
     expect(outros, `há coisas a desaparecer dentro do seu fundo:\n${outros.slice(0, 12).join('\n')}`).toEqual([]);
+    expect(acimaDoTecto, `contornos fracos acima do tecto da superfície — RV100-025:\n${acimaDoTecto.join('\n')}`)
+      .toEqual([]);
   });
 });
