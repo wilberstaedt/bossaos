@@ -313,3 +313,64 @@ Nota sobre o `PRECIFICACAO.md`: **não tem um único valor** — zero linhas com
 número e moeda. Quem for buscar os preços ao ficheiro de texto encontra o
 modelo, não os montantes. A fonte é o `.json`, e o `.ts` que o lê já tem teste,
 incluindo o caso nulo para um código de plano inventado.
+
+---
+
+## §12.1, «não existe identidade antiga ou paralela em uso» — CONFORME, com uma guarda em falta
+
+**E cheguei aqui por dois falsos consecutivos, ambos meus.**
+
+**O primeiro falso: zero.** Procurei literais de cor fora do ficheiro de tokens e
+deu **zero**, com zero fontes declaradas por fora. Ia escrever «nenhuma
+identidade paralela». O controlo positivo — correr o mesmo padrão **incluindo**
+o ficheiro que eu sabia ter 26 — deu **zero também**, o que é impossível. A
+causa é a de sempre: **`#[0-9a-fA-F]{6}\b` com `\b`, que o `git grep` não
+suporta.** Já me tinha dado um «zero chamadores» falso há poucas horas.
+
+Sem o `\b`, o número real é **79 literais** fora do ficheiro de tokens. O zero
+teria ido para o documento sem o controlo.
+
+**O segundo falso: três corais.** Nos 79 apareceram `#F5664D`, `#D85A44` e
+`#FB4C39` — e três corais é o cheiro exacto de identidade paralela. Fui ver onde
+vivem antes de o escrever, e a resposta desmonta a suspeita em dois passos:
+
+1. **Dois deles são os tokens aprovados:** `--bo-acento: #F5664D` e
+   `--bo-acento-sinal: #D85A44`, ambos no `estilos.css`.
+2. **O terceiro é deliberado, medido e nomeado.** É o coral **da arte da logo**,
+   e o `fichas.ts` explica porquê, com os números do ADR 0001: sobre o verde, o
+   do manual dá **4,71** e o da arte **4,23**; sobre a areia é ao contrário.
+   *«Ficam os dois, cada um no sítio onde ganha. Não use esta constante em
+   interface.»*
+
+Isto não é deriva de marca. É **um sistema de dois corais com a fronteira
+escrita e a razão medida** — que é o oposto de uma identidade paralela, onde
+duas cores coexistem porque ninguém decidiu.
+
+**E a promessa do comentário cumpre-se**, o que verifiquei porque hoje já
+aprovei um comentário meu que prometia o que o código não fazia. Com `-w`,
+`coralDaLogo` aparece em **três** sítios: a definição e duas linhas de
+re-exportação. **Zero usos em interface.** O controlo positivo é o irmão dele,
+`acentoSinal`, que aparece em ficheiros de teste, no CSS e em dois documentos de
+progresso — o detector vê o que existe.
+
+Quanto aos 79 literais: vivem no `fichas.ts` (o componente que **mostra** a
+paleta), nos testes de contraste e de tema, e na página interna do catálogo de
+desenho. **É exactamente onde os literais têm de estar** — uma amostra de cor que
+pinta `var(--bo-acento)` não consegue dizer ao leitor qual é o valor. Os
+`#aabbcc` e `#123456` da lista são aparelhos de teste, e a presença deles
+confirma que o detector alcança os testes.
+
+**O que falta, e é barato: a proibição não tem guarda.** O `regras.ts` importa
+`coralDaLogo` mas é só um barril de re-exportações; não impõe nada. Hoje a
+fronteira entre os dois corais é mantida por um comentário e por quem o lê. Um
+`coralDaLogo` que apareça numa interface daqui a três meses passa em todo o
+corredor — e o corredor tem 34 guardas.
+
+**Achado (P2): a lista de permissão de cor não cobre `coralDaLogo`.** O critério
+de correcção é o de sempre — a guarda tem de conseguir ficar vermelha: pôr o
+literal numa interface a título de prova, ver a guarda reprovar, tirar.
+
+E as peças de marca são **duas**, `brand/logoname.png` e `brand/logoicon.png`,
+que é o par que o §12.1 nomeia. Nota de método: a minha busca por ficheiros de
+marca trouxe `provar-catalogo.sh` e mais quatro, porque **«logo» está dentro de
+«catálogo»**. Terceira vez hoje que uma substring se faz passar por facto.
