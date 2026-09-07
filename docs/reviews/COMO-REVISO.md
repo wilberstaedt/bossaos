@@ -2384,3 +2384,37 @@ quero, porque o meu reparo entra em cima do que já foi entregue e não antes.
 Passei-lhe isso por escrito: «não esperes por mim entre tarefas». O silêncio de
 quem revê não é uma instrução, e quem espera por ele não está a ser prudente —
 está bloqueado.
+
+---
+
+## Esperar por um fantasma que era ele próprio — 07/09
+
+O JR ficou parado e escreveu: *«a porta 3010 continua ocupada e há 17 processos
+de prova a correr — o arnês é do outro implementador neste momento, e não corro
+em paralelo na mesma base.»*
+
+**A disciplina estava certa: não correr em paralelo na mesma base é exactamente a
+lição do `.next` partilhado, que custou três sintomas separados hoje.** Ele
+aplicou-a bem.
+
+**Só que o outro implementador era ele.** Fui ver com `lsof` e `ps`: o PID que
+tem a porta desce de um `provar-staff-no-navegador.sh` **lançado por ele**, a
+correr há doze minutos, e o lote de Playwright que o acompanha arrancou há 55
+segundos — **vivo e a progredir, não encravado**. Estava à espera de si próprio.
+
+**A forma: um processo próprio de longa duração lê-se exactamente como contenção
+de outro agente.** Do lado de fora não há diferença nenhuma — uma porta ocupada é
+uma porta ocupada, e a cortesia de não atropelar transforma-se em bloqueio.
+**A diferença só aparece se alguém for perguntar de quem é o PID**, e isso custa
+um segundo.
+
+E é a irmã de um erro meu de hoje: eu procurei a causa das escritas perdidas
+numa colisão entre dois agentes e a causa era o meu próprio `grep` a ler a
+mensagem do commit. **Duas vezes hoje, a explicação foi «outro agente» e a
+resposta era «tu».** É uma hipótese cara: manda esperar, e esperar não produz
+evidência nenhuma que a desminta.
+
+**Nota de máquina, e esta não é doutrina:** 318 MB livres, swap a 1,4 GB, cinco
+agentes — exactamente o orçamento seguro. O bug de kernel na pilha de rede deste
+Mac já o derrubou quatro vezes sob carga de agentes. Avisei-o para não subir
+nada em paralelo enquanto a suite corre.
