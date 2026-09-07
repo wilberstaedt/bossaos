@@ -1985,3 +1985,36 @@ artefacto de prova com a data do último commit que toca em `apps/` ou
 desde que ela foi recolhida.** E a pergunta gémea, a que quase falhei: quando uma
 correcção entra, perguntar **que provas é que ela acabou de envelhecer** — irmã
 directa da lição de hoje sobre as sondas que passam a medir outra coisa.
+
+---
+
+## Fechei a guarda da frescura, e primeiro medi-a mal — 07/09
+
+`validar-provas-frescas.sh` existe e funciona: compara o `mtime` de cada
+artefacto com o último commit que toca em `apps/` ou `packages/`, tem sonda
+(um ficheiro datado de 2000 tem de ser visto como velho, e sai da árvore a
+seguir), e declara o que não sabe — num clone fresco não mede nada, e o conteúdo
+da prova está fora do seu alcance.
+
+**E o M03-erro deixou de ser a fotografia de um 500:** `500 → 404`,
+`95 → 414` caracteres, `ecraDesenhado false → true`. Verificado no índice.
+
+**Mas eu li a guarda como se ela não reprovasse.** Corri
+`bash guarda | tail; echo $?` e reportei **saída 0** — e aquilo era o código de
+saída do `tail`. Sem cano, dá **1**, que é o correcto. **É a terceira vez esta
+noite que o `| tail` me engole o código de saída, e a regra já estava escrita
+por mim neste ficheiro.** Uma regra escrita não protege quem a escreveu: só um
+hábito na mão o faz, e o hábito é nunca pôr um cano entre o comando e o `$?`.
+
+**Onde esta guarda tem de estar verde — e é decisão minha, do lado do portão.**
+Ela está vermelha agora, com 39 artefactos anteriores ao produto, e isso está
+CERTO. A tentação é enfraquecê-la para deixar de incomodar; a resposta é o
+contrário: **verde repo-inteiro não é o alvo, porque o corpo de prova do RV100
+envelhece sempre que o produto muda, e uma guarda permanentemente vermelha passa
+a ser ignorada — que é como ela morre.**
+
+O alvo é **o momento em que a prova é mostrada a alguém**: antes de eu emitir o
+`PRONTO PARA APROVAÇÃO VISUAL HUMANA`, esta guarda tem de estar verde **para os
+artefactos que vão nessa entrega**. Fora desse momento, ela é um relatório
+honesto de dívida. **A frescura não é uma propriedade do repositório; é uma
+condição de quem apresenta.**
