@@ -21,38 +21,31 @@ import type { ReactNode } from 'react';
  * que é a mesma escolha do resto do projecto — garantir na FORMA em vez de
  * confiar em quem escreve.
  */
-export type LigacaoDeNavegacao =
-  | {
-      href: string;
-      rotulo: string;
-      activa?: boolean;
-      /** Nome do ícone da família. Sem ele, o item leva o losango neutro. */
-      icone?: string;
-      /** Rótulo do grupo a que o item pertence. Sem ele, fica no primeiro. */
-      grupo?: string;
-      porConstruir?: never;
-    }
-  | {
-      href?: never;
-      rotulo: string;
-      activa?: boolean;
-      /** Nome do ícone da família. Sem ele, o item leva o losango neutro. */
-      icone?: string;
-      /** Rótulo do grupo a que o item pertence. Sem ele, fica no primeiro. */
-      grupo?: string;
-      /**
-       * A etapa que vai construir este módulo — e a marca de que ele **ainda
-       * não existe**.
-       *
-       * «Um item que parece uma ligação e não faz nada ensina a pessoa a
-       * desconfiar do menu inteiro, e a partir daí ela deixa de tentar os que
-       * funcionam.»
-       *
-       * O item deixa de ser uma ligação: não tem `href`, não responde a
-       * `getByRole('link')`, e diz ao lado quem o vai construir.
-       */
-      porConstruir: string;
-    };
+/**
+ * Um item da navegação.
+ *
+ * ── Aqui esteve uma união de dois braços, e o segundo estava morto ────────
+ *
+ * O outro braço era o `porConstruir`: um item sem `href` que dizia qual a etapa
+ * que o ia construir. Existiu por uma razão boa — «um item que parece uma
+ * ligação e não faz nada ensina a pessoa a desconfiar do menu inteiro» — e
+ * deixou de ter quem o alimentasse quando o E30 fechou. Ficou o tipo, ficou o
+ * ramo que o desenhava, e ficou a folha de estilo dele.
+ *
+ * Foi encontrado a medir outra coisa: a regra dos 14 px apanhou o
+ * `.bo-admin__etapa` a 11. **Corrigir código morto é pior do que deixá-lo**, e
+ * apagar só a folha de estilo era pior ainda: se alguém reavivasse o ramo, o
+ * marcador saía sem estilo nenhum. Sai o caminho inteiro — tipo, ramo e regra.
+ */
+export type LigacaoDeNavegacao = {
+  href: string;
+  rotulo: string;
+  activa?: boolean;
+  /** Nome do ícone da família. Sem ele, o item leva o losango neutro. */
+  icone?: string;
+  /** Rótulo do grupo a que o item pertence. Sem ele, fica no primeiro. */
+  grupo?: string;
+};
 
 /**
  * A família de ícones da navegação.
@@ -270,21 +263,7 @@ export function EstruturaAdmin({
           {itensComGrupo.map(({ grupo, itens }, iG) => (
           <div key={grupo || `g${iG}`} className="bo-admin__grupo">
             {grupo ? <p className="bo-admin__grupo-titulo">{grupo}</p> : null}
-          {itens.map((l) => (l.porConstruir ? (
-            // Não é uma ligação, e por isso não se comporta como uma: sem
-            // `href`, fora do alcance de `getByRole('link')`, e a dizer quem o
-            // vai construir. É a diferença entre um marcador honesto e uma porta
-            // que não abre.
-            <span
-              key={l.rotulo}
-              className="bo-admin__ligacao bo-admin__ligacao--inerte"
-              data-por-construir={l.porConstruir}
-            >
-              <MarcaDeNavegacao icone={l.icone} />
-              {l.rotulo}
-              <small className="bo-admin__etapa">{l.porConstruir}</small>
-            </span>
-          ) : (
+          {itens.map((l) => (
             <a
               key={l.href}
               href={l.href}
@@ -294,7 +273,7 @@ export function EstruturaAdmin({
               <MarcaDeNavegacao icone={l.icone} />
               {l.rotulo}
             </a>
-          )))}
+          ))}
           </div>
           ))}
         </nav>

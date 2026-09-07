@@ -537,14 +537,6 @@ p { margin: 0; }
   text-transform: uppercase; opacity: 0.55;
 }
 
-/* ── O marcador de um módulo por construir ───────────────────────────────────
- *
- * NÃO parece clicável, de propósito: sem cursor de mão, sem realce ao passar, e
- * esbatido. «Um item que parece uma ligação e não faz nada ensina a pessoa a
- * desconfiar do menu inteiro.» A etapa que o vai construir aparece ao lado. */
-.bo-admin__ligacao--inerte { opacity: 0.55; cursor: default; }
-.bo-admin__ligacao--inerte:hover { background: none; }
-.bo-admin__etapa { margin-left: auto; font-size: 11px; opacity: 0.8; letter-spacing: 0.04em; }
 .bo-admin__rodape { display: flex; flex-direction: column; gap: var(--bo-espaco-md); font-size: 14px; }
 .bo-admin__principal { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .bo-admin__topo {
@@ -828,7 +820,7 @@ p { margin: 0; }
 .bo-admin__iniciais {
   display: inline-flex; align-items: center; justify-content: center;
   width: 28px; height: 28px; border-radius: var(--bo-raio-capsula);
-  background: rgba(255,255,255,0.14); font-size: 12px; font-weight: 700;
+  background: rgba(255,255,255,0.14); font-size: 14px; font-weight: 700;
 }
 
 /* O cabeçalho móvel mostra marca e unidade; em ecrã largo isso já está na
@@ -1752,6 +1744,8 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
   font: inherit; font-weight: 600; cursor: pointer; text-align: left;
 }
 .bo-mkt__grupo-botao--activo { font-weight: 700; border-bottom-color: var(--bo-acento-sinal); }
+/* 12 px com isenção escrita, para não voltar a ser discutido: é um GLIFO de
+   seta com `aria-hidden`, não texto. A régua dos 14 px é sobre o que se lê. */
 .bo-mkt__seta { font-size: 12px; }
 .bo-mkt__grupo-painel { display: none; }
 .bo-mkt__grupo--aberto .bo-mkt__grupo-painel {
@@ -1954,7 +1948,7 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
   text-decoration: none;
 }
 .bo-plano__codigo { font-weight: 700; }
-.bo-plano__capacidade { font-size: 12px; color: var(--bo-texto-secundario); }
+.bo-plano__capacidade { font-size: 14px; line-height: 20px; color: var(--bo-texto-secundario); }
 
 /* ── E19 · a lista de horas da reserva pública ──────────────────────────────
    Quem reserva está na rua, num telemóvel, e escolhe uma hora entre muitas
