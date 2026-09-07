@@ -1,0 +1,58 @@
+{
+  "sem-parametro": {
+    "url": "/es-ES",
+    "seccoes": 11,
+    "ids": [
+      null,
+      "problema",
+      "product",
+      "papeis",
+      "plans",
+      "equipamentos",
+      "implantacion",
+      "confianza",
+      "piloto",
+      "preguntas",
+      "empezar"
+    ],
+    "impressao": 45288
+  },
+  "product": {
+    "url": "/es-ES?section=product",
+    "seccoes": 11,
+    "ids": [
+      null,
+      "problema",
+      "product",
+      "papeis",
+      "plans",
+      "equipamentos",
+      "implantacion",
+      "confianza",
+      "piloto",
+      "preguntas",
+      "empezar"
+    ],
+    "impressao": 45288
+  },
+  "plans": {
+    "url": "/es-ES?section=plans",
+    "seccoes": 11,
+    "ids": [
+      null,
+      "problema",
+      "product",
+      "papeis",
+      "plans",
+      "equipamentos",
+      "implantacion",
+      "confianza",
+      "piloto",
+      "preguntas",
+      "empezar"
+    ],
+    "impressao": 45288
+  },
+  "isola": false,
+  "servem_a_mesma_pagina": true
+}

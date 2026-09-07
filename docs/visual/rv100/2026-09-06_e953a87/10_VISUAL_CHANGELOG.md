@@ -268,3 +268,174 @@ para medir estão acima:
 
 Continuam intocados e abertos: **RV100-003, 004, 007 a 019.** O RV100-012 (coral
 ausente) foi **decidido contra** neste lote, com os números na secção ⑨.
+
+---
+
+## L1b · a home (MKT-001/002/003)
+
+**Instrumento:** `inspeccao/rv100-home.spec.ts`, corrido por
+`scripts/provar-home-mkt.sh <antes|depois>`. Mede as **cinco larguras nas três
+línguas**. Evidência em `evidence/home/`.
+
+### A régua do herói teve de mudar, e não por conveniência
+
+A régua deste lote era «o `x` onde o conteúdo do herói acaba»: **728 de 1440 em
+seis das oito páginas**, e se 728 voltar não houve reconstrução. A régua está
+certa. **Na home ela não media nada**, e isso é verificável:
+
+O `rv100-baseline.spec.ts` toma o máximo `right` de **todos** os descendentes do
+herói. O `.bo-mkt__chamada` é um `<p>` com `display: flex` — bloco, logo largura
+toda — e por isso a home já dava **1256** antes de eu tocar em nada. É o «número
+por explicar» que o `05_MARKETING_AND_CONVERSION.md` registou. **A explicação é
+essa.** Um herói vazio à direita e um cheio dão o mesmo 1256.
+
+A métrica nova (`heroFolhaAteX`) conta só **folhas com conteúdo** — sem filhos
+elemento e com texto, mais as mídias. Reproduz o número da régua:
+
+| largura | métrica nova | a métrica antiga, lado a lado |
+| ---: | ---: | ---: |
+| 1440 | **728** | 1256 |
+| 1280 | 648 | 1176 |
+| 768 | 568 | 744 |
+| 390 | 366 | 366 |
+| 360 | 336 | 336 |
+
+As duas ficam gravadas em cada corrida, para se poder ver que discordam em vez
+de eu afirmar que sim.
+
+### O herói NÃO mudou, e é uma decisão declarada
+
+| | antes | depois |
+| --- | ---: | ---: |
+| `heroFolhaAteX` a 1440 | 728 | **728** |
+| conteúdo depois do meio | não | **não** |
+| mídia no herói | 0 | **0** |
+
+**728 voltou.** Pela régua que me foi dada, isto não é reconstrução do herói — e
+é exactamente o que eu quero que fique escrito, porque a causa é o motor de
+prova, que **não está feito**. Reservar aqui metade da largura para mídia que não
+existe era construir de propósito «metade do herói vazia por falta de mídia»
+(§10). Fica de uma coluna até haver telas.
+
+### O resto da página, esse mudou
+
+| | antes | depois | o que se pede |
+| --- | ---: | ---: | --- |
+| secções | **3** | **11** | 14 no §6.3 |
+| altura rolável a 1440 | 1316 | **5511** | — |
+| respiro entre secções, desktop | **48** | **88–128** | 80–128 (§4.4) |
+| respiro entre secções, móvel | **48** | **56–64** | 56–80 (§4.4) |
+| preços na página | **0** | **12 valores da fonte** | §6.5 |
+
+Blocos presentes: 1 herói · 2 problema · 3 uma base (MKT-002) · 6 papéis ·
+7 planos (MKT-003) · 8 equipamentos · 9 implantação · 10 confiança · 11 piloto ·
+12 FAQ · 13 CTA final. Mais o 14, o rodapé, feito na L1a. **Onze mais o rodapé.**
+
+**Faltam o 4 (produto em movimento) e o 5 (módulos com telas reais)** — os dois
+que são mídia. Escrevê-los como texto acrescentava «página comercial que apenas
+enumera títulos e parágrafos sem prova do produto», que o §10 reprova pelo nome.
+
+### Os preços vêm da fonte, e o desconto vê-se
+
+`precoDoPlano()` lê a `PRECIFICACAO.json`. Zero números escritos à mão — a
+`validar-precos.sh` reprovaria. Servido e verificado no build:
+
+| plano | mês | ano | equivalente | implantação |
+| --- | ---: | ---: | ---: | ---: |
+| Starter | 19,00 € | 190,00 € | 15,83 € | 99,00 € · autogerida 0,00 € |
+| Restaurant | 79,00 € | 790,00 € | 65,83 € | 299,00 € |
+| Pro | 149,00 € | 1490,00 € | 124,17 € | 499,00 € |
+
+O equivalente aparece **nomeado como equivalente**, que é o que o §6.5 exige para
+ninguém o confundir com a cobrança. E a regra do ano deixou de ser uma divisão
+que o leitor faz de cabeça: *«El año cuesta diez mensualidades: dos no se
+pagan.»* O `10` sai de `MENSALIDADES_NUM_ANO`, não de uma constante minha.
+
+### Dois achados que não estavam na lista
+
+**① O `?section=` não isola nada.** O código diz, em comentário, que esconde tudo
+o resto e que é assim que o MKT-002 e o MKT-003 se medem um a um. Medido:
+
+```
+/es-ES                  e703360c9ffb6d5947b32a13be389b7d
+/es-ES?section=product  e703360c9ffb6d5947b32a13be389b7d
+/es-ES?section=plans    e703360c9ffb6d5947b32a13be389b7d
+```
+
+HTML **byte a byte igual**. Causa: `dynamic = 'force-static'` — numa página
+forçada a estática o Next entrega `searchParams` vazio na pré-renderização.
+
+**Consequência: MKT-001, 002 e 003 não são três medições, são a mesma página
+medida três vezes** — o defeito que o comentário da `marketing.spec.ts` diz que
+o mecanismo existe para impedir. As duas saídas custam mais do que o defeito
+(tirar o `force-static` torna a landing dinâmica a cada pedido; dar endereço
+próprio aos blocos parte os 396 IDs), por isso **não decidi sozinho**: corrigi o
+comentário que mentia, o instrumento grava o comportamento real em cada corrida,
+e a escolha fica para quem revê.
+
+**② A FAQ afirmava uma coisa que o código não faz.** O `faq4` dizia, nas três
+línguas, «a sala continua a trabalhar e sincroniza quando a ligação volta».
+Medido contra o código, é falso nas duas metades:
+
+- **não continua a trabalhar** — o service worker recusa guardar telas com dados
+  de inquilino (`sw.js/route.ts:20-32`); recarregar ou navegar sem rede dá a
+  casca «Estamos sin conexión», e as restantes telas de Staff são formulários
+  clássicos que offline perdem o que foi escrito;
+- **não sincroniza sozinha** — o ouvinte do evento `online` só troca o rótulo
+  (`PainelDaFila.tsx:83`); os únicos gatilhos de envio são compor um item e
+  carregar no botão «Reintentar ahora». A própria prova diz por escrito «nada
+  sincroniza sozinho ao voltar a ligação» (`staff.spec.ts:80-82`).
+
+Corrigido nas três línguas para o que a evidência sustenta: o que está escrito
+não se perde, fica no aparelho, nunca se diz «enviado» sobre o que está no
+telemóvel, e ao voltar a ligação **um toque** envia — perguntando ao servidor
+antes de repetir. É por isso que o bloco 10 tem **três** pilares e não quatro: o
+quarto do §6.3.10 é «operação degradada realmente implementada», e mover uma
+afirmação de sítio não é verificá-la.
+
+### O motor de prova: NÃO BLOQUEADO, e NÃO FEITO
+
+Distinção que interessa. **Provei que capturar funciona**: sete telas reais do
+produto — catálogo, sala, KDS, Staff, carta, TPV, relatórios — a HTTP 200, com
+sessão real e viewports fixos.
+
+**O que falta é o conjunto de dados.** As capturas do arnês não servem para
+marketing, e isso confirma o RV100-017 com imagem em vez de leitura: prefixo
+`insp-` em mesas, zonas, estações e pratos («insp-07 · insp-Terraza»,
+«insp-Plato de cocina 1»); `painel@inspeccao.example` e
+`inspeccao@exemplo.example` à vista; «Alérgenos sin declarar: 94»; dois cartões a
+dizer «Aún no medido». A carta pública é a excepção — nomes e preços reais, sem
+prefixo —, mas mostra «Horario sin configurar».
+
+O caminho está levantado e não precisa de ser redescoberto: uma
+`semente-demonstracao.ts` com organização, marca e unidade próprias (UUIDs
+novos), subscrição `PRO`, catálogo, carta publicada com `reservar_endereco_publico`,
+zona, mesas, sessão, pedido com linhas, estações e tarefas `POR_INICIAR`, mais
+pertença `OWNER` **sem `brand_id`** — com `brand_id` o dono leva 404. Prefixo
+próprio (`demo-`), fora de `@inspeccao.example` e sem reutilizar as organizações
+de `fixtures.ts`, para o teardown do arnês não lhe tocar e ela não sujar as
+medições. Credencial de migração.
+
+**Não a construí.** Não cabia neste lote com verificação a sério, e uma semeadura
+a meio dá capturas partidas — pior do que nenhuma.
+
+### Regressão
+
+`marketing.spec.ts`: **68 casos, 68 verdes, ficheiro não tocado, nenhuma asserção
+alterada**, com a home a passar de 3 para 11 secções. `pnpm verificar` verde,
+**396 IDs intactos**. Guardas verdes: preços, três línguas, dados fictícios,
+coral da arte, classes, suites com guião. A moldura da L1a remedida: **83 px de
+cabeçalho, sem excepção**.
+
+**Zero anomalias em 15 combinações** (3 línguas × 5 larguras): sem rolagem
+horizontal, sem alvos abaixo de 44 px, sem elementos fora do ecrã, sem textos
+abaixo do limiar WCAG.
+
+### O que NÃO foi medido neste lote
+
+- **A aparência.** Continua a ser da secção 7 e do Matheus.
+- **As outras sete páginas comerciais** não foram tocadas nem remedidas.
+- **Os metadados** ficam para o §6.8, como o plano manda.
+- **A afirmação corrigida do `faq4`** foi verificada por leitura de código e
+  pelas provas existentes — **não corri eu uma prova nova de rede cortada**.
+- **Nada de teclado nem leitor de ecrã** nos blocos novos.

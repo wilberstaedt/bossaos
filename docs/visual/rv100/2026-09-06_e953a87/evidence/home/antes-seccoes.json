@@ -1,0 +1,34 @@
+{
+  "sem-parametro": {
+    "url": "/es-ES",
+    "seccoes": 3,
+    "ids": [
+      null,
+      "product",
+      "plans"
+    ],
+    "impressao": 23431
+  },
+  "product": {
+    "url": "/es-ES?section=product",
+    "seccoes": 3,
+    "ids": [
+      null,
+      "product",
+      "plans"
+    ],
+    "impressao": 23431
+  },
+  "plans": {
+    "url": "/es-ES?section=plans",
+    "seccoes": 3,
+    "ids": [
+      null,
+      "product",
+      "plans"
+    ],
+    "impressao": 23431
+  },
+  "isola": false,
+  "servem_a_mesma_pagina": true
+}

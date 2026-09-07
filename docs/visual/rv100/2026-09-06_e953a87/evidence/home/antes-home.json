@@ -1,0 +1,482 @@
+[
+  {
+    "idioma": "es-ES",
+    "largura": 360,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 3,
+    "seccoesComId": [
+      null,
+      "product",
+      "plans"
+    ],
+    "midiaNaPagina": 1,
+    "alturaRolavel": 2336,
+    "rola": true,
+    "heroi": {
+      "caixa": {
+        "largura": 312,
+        "altura": 388.2
+      },
+      "folhaAteX": 336,
+      "ocupaDireita": false,
+      "media": 0,
+      "metricaAntiga": 336
+    },
+    "contentorMeio": 180,
+    "respiros": [
+      48,
+      48
+    ]
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 3,
+    "seccoesComId": [
+      null,
+      "product",
+      "plans"
+    ],
+    "midiaNaPagina": 1,
+    "alturaRolavel": 2240,
+    "rola": true,
+    "heroi": {
+      "caixa": {
+        "largura": 342,
+        "altura": 364.2
+      },
+      "folhaAteX": 366,
+      "ocupaDireita": false,
+      "media": 0,
+      "metricaAntiga": 366
+    },
+    "contentorMeio": 195,
+    "respiros": [
+      48,
+      48
+    ]
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 768,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 3,
+    "seccoesComId": [
+      null,
+      "product",
+      "plans"
+    ],
+    "midiaNaPagina": 1,
+    "alturaRolavel": 1662,
+    "rola": true,
+    "heroi": {
+      "caixa": {
+        "largura": 720,
+        "altura": 343.6
+      },
+      "folhaAteX": 568,
+      "ocupaDireita": false,
+      "media": 0,
+      "metricaAntiga": 744
+    },
+    "contentorMeio": 384,
+    "respiros": [
+      48,
+      48
+    ]
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 3,
+    "seccoesComId": [
+      null,
+      "product",
+      "plans"
+    ],
+    "midiaNaPagina": 1,
+    "alturaRolavel": 1316,
+    "rola": true,
+    "heroi": {
+      "caixa": {
+        "largura": 1072,
+        "altura": 343.6
+      },
+      "folhaAteX": 648,
+      "ocupaDireita": false,
+      "media": 0,
+      "metricaAntiga": 1176
+    },
+    "contentorMeio": 640,
+    "respiros": [
+      48,
+      48
+    ]
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 1440,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 3,
+    "seccoesComId": [
+      null,
+      "product",
+      "plans"
+    ],
+    "midiaNaPagina": 1,
+    "alturaRolavel": 1316,
+    "rola": true,
+    "heroi": {
+      "caixa": {
+        "largura": 1072,
+        "altura": 343.6
+      },
+      "folhaAteX": 728,
+      "ocupaDireita": false,
+      "media": 0,
+      "metricaAntiga": 1256
+    },
+    "contentorMeio": 720,
+    "respiros": [
+      48,
+      48
+    ]
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 360,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 3,
+    "seccoesComId": [
+      null,
+      "product",
+      "plans"
+    ],
+    "midiaNaPagina": 1,
+    "alturaRolavel": 2288,
+    "rola": true,
+    "heroi": {
+      "caixa": {
+        "largura": 312,
+        "altura": 388.2
+      },
+      "folhaAteX": 336,
+      "ocupaDireita": false,
+      "media": 0,
+      "metricaAntiga": 336
+    },
+    "contentorMeio": 180,
+    "respiros": [
+      48,
+      48
+    ]
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 3,
+    "seccoesComId": [
+      null,
+      "product",
+      "plans"
+    ],
+    "midiaNaPagina": 1,
+    "alturaRolavel": 2240,
+    "rola": true,
+    "heroi": {
+      "caixa": {
+        "largura": 342,
+        "altura": 364.2
+      },
+      "folhaAteX": 366,
+      "ocupaDireita": false,
+      "media": 0,
+      "metricaAntiga": 366
+    },
+    "contentorMeio": 195,
+    "respiros": [
+      48,
+      48
+    ]
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 768,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 3,
+    "seccoesComId": [
+      null,
+      "product",
+      "plans"
+    ],
+    "midiaNaPagina": 1,
+    "alturaRolavel": 1662,
+    "rola": true,
+    "heroi": {
+      "caixa": {
+        "largura": 720,
+        "altura": 343.6
+      },
+      "folhaAteX": 568,
+      "ocupaDireita": false,
+      "media": 0,
+      "metricaAntiga": 744
+    },
+    "contentorMeio": 384,
+    "respiros": [
+      48,
+      48
+    ]
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 3,
+    "seccoesComId": [
+      null,
+      "product",
+      "plans"
+    ],
+    "midiaNaPagina": 1,
+    "alturaRolavel": 1316,
+    "rola": true,
+    "heroi": {
+      "caixa": {
+        "largura": 1072,
+        "altura": 343.6
+      },
+      "folhaAteX": 648,
+      "ocupaDireita": false,
+      "media": 0,
+      "metricaAntiga": 1176
+    },
+    "contentorMeio": 640,
+    "respiros": [
+      48,
+      48
+    ]
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 1440,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 3,
+    "seccoesComId": [
+      null,
+      "product",
+      "plans"
+    ],
+    "midiaNaPagina": 1,
+    "alturaRolavel": 1316,
+    "rola": true,
+    "heroi": {
+      "caixa": {
+        "largura": 1072,
+        "altura": 343.6
+      },
+      "folhaAteX": 728,
+      "ocupaDireita": false,
+      "media": 0,
+      "metricaAntiga": 1256
+    },
+    "contentorMeio": 720,
+    "respiros": [
+      48,
+      48
+    ]
+  },
+  {
+    "idioma": "en",
+    "largura": 360,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 3,
+    "seccoesComId": [
+      null,
+      "product",
+      "plans"
+    ],
+    "midiaNaPagina": 1,
+    "alturaRolavel": 2364,
+    "rola": true,
+    "heroi": {
+      "caixa": {
+        "largura": 312,
+        "altura": 388.2
+      },
+      "folhaAteX": 336,
+      "ocupaDireita": false,
+      "media": 0,
+      "metricaAntiga": 336
+    },
+    "contentorMeio": 180,
+    "respiros": [
+      48,
+      48
+    ]
+  },
+  {
+    "idioma": "en",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 3,
+    "seccoesComId": [
+      null,
+      "product",
+      "plans"
+    ],
+    "midiaNaPagina": 1,
+    "alturaRolavel": 2230,
+    "rola": true,
+    "heroi": {
+      "caixa": {
+        "largura": 342,
+        "altura": 308.2
+      },
+      "folhaAteX": 366,
+      "ocupaDireita": false,
+      "media": 0,
+      "metricaAntiga": 366
+    },
+    "contentorMeio": 195,
+    "respiros": [
+      48,
+      48
+    ]
+  },
+  {
+    "idioma": "en",
+    "largura": 768,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 3,
+    "seccoesComId": [
+      null,
+      "product",
+      "plans"
+    ],
+    "midiaNaPagina": 1,
+    "alturaRolavel": 1714,
+    "rola": true,
+    "heroi": {
+      "caixa": {
+        "largura": 720,
+        "altura": 343.6
+      },
+      "folhaAteX": 568,
+      "ocupaDireita": false,
+      "media": 0,
+      "metricaAntiga": 744
+    },
+    "contentorMeio": 384,
+    "respiros": [
+      48,
+      48
+    ]
+  },
+  {
+    "idioma": "en",
+    "largura": 1280,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 3,
+    "seccoesComId": [
+      null,
+      "product",
+      "plans"
+    ],
+    "midiaNaPagina": 1,
+    "alturaRolavel": 1344,
+    "rola": true,
+    "heroi": {
+      "caixa": {
+        "largura": 1072,
+        "altura": 343.6
+      },
+      "folhaAteX": 648,
+      "ocupaDireita": false,
+      "media": 0,
+      "metricaAntiga": 1176
+    },
+    "contentorMeio": 640,
+    "respiros": [
+      48,
+      48
+    ]
+  },
+  {
+    "idioma": "en",
+    "largura": 1440,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "seccoes": 3,
+    "seccoesComId": [
+      null,
+      "product",
+      "plans"
+    ],
+    "midiaNaPagina": 1,
+    "alturaRolavel": 1344,
+    "rola": true,
+    "heroi": {
+      "caixa": {
+        "largura": 1072,
+        "altura": 343.6
+      },
+      "folhaAteX": 728,
+      "ocupaDireita": false,
+      "media": 0,
+      "metricaAntiga": 1256
+    },
+    "contentorMeio": 720,
+    "respiros": [
+      48,
+      48
+    ]
+  }
+]

@@ -1212,7 +1212,24 @@ label.bo-planos__item input[type="radio"] {
 .bo-mkt__heroi h1 { font-size: 34px; line-height: 1.1; overflow-wrap: anywhere; }
 @media (min-width: 768px) { .bo-mkt__heroi h1 { font-size: 52px; max-width: 18ch; } }
 .bo-mkt__chamada { display: flex; flex-wrap: wrap; gap: var(--bo-espaco-md); }
-.bo-mkt__seccao { padding: var(--bo-espaco-xl) 0; border-top: 1px solid var(--bo-borda); }
+/* O ritmo vertical da landing, e o número saiu de uma medição.
+   ───────────────────────────────────────────────────────────────────────────
+   Isto era `--bo-espaco-xl`, 24 px em cima e em baixo: 48 px entre secções,
+   medidos no navegador. O §4.4 pede «respiro vertical deliberado, normalmente
+   80-128 px no desktop» e proíbe pelo nome uma landing que «pareça uma tabela
+   de documentação» — a 48 px era isso.
+
+   `--bo-espaco-gigante` são 64. Dois preenchimentos adjacentes dão **128 px
+   entre secções**, que aterra no topo do intervalo do §4.4 sem inventar token
+   nenhum: a escala do manual acaba nos 64, e o D-4 do
+   `05_MARKETING_AND_CONVERSION.md` mostrou que a soma resolve a diferença.
+
+   No telemóvel fica em `--bo-espaco-xxl` (32), que dá 64 entre secções — o §4.4
+   pede 56-80 aí, e 128 num ecrã de 360 px seria uma landing feita de espaço. */
+.bo-mkt__seccao { padding: var(--bo-espaco-xxl) 0; border-top: 1px solid var(--bo-borda); }
+@media (min-width: 768px) {
+  .bo-mkt__seccao { padding: var(--bo-espaco-gigante) 0; }
+}
 .bo-mkt__seccao h2 { font-size: 26px; margin-bottom: var(--bo-espaco-md); overflow-wrap: anywhere; }
 .bo-mkt__grelha { display: grid; gap: var(--bo-espaco-lg); }
 @media (min-width: 768px) { .bo-mkt__grelha { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -1236,6 +1253,53 @@ label.bo-planos__item input[type="radio"] {
   padding: var(--bo-espaco-sm) var(--bo-espaco-md);
   border-bottom: 1px solid var(--bo-borda); text-align: left; vertical-align: top;
 }
+
+/* ── RV100 · os blocos novos da home (§6.3) ────────────────────────────────
+   Nenhuma classe nova inventa cor, raio ou espaçamento: tudo sai da escala que
+   já existe. */
+
+/* Os cartões de plano. O preço é o que se lê primeiro — é para isso que a
+   pessoa está aqui — e o equivalente mensal vem a seguir, mais pequeno e
+   **nomeado como equivalente**, que é o que o §6.5 exige para ninguém o
+   confundir com a cobrança. */
+.bo-mkt__plano { display: grid; gap: var(--bo-espaco-xs); align-content: start; }
+.bo-mkt__plano-quem { color: var(--bo-texto-secundario); margin-bottom: var(--bo-espaco-sm); }
+.bo-mkt__preco { font-size: 20px; margin: 0; }
+.bo-mkt__preco strong { font-family: var(--bo-fonte-titulo); font-size: 32px; line-height: 1.1; }
+.bo-mkt__preco-ano { margin: 0; font-size: 15px; }
+.bo-mkt__preco-nota { margin: 0; font-size: 14px; color: var(--bo-texto-secundario); }
+
+/* A regra do ano — dez mensalidades — dita numa linha que se vê.
+   Fundo suave e não coral: sobre a areia o coral da marca dá 2,77:1 e não chega
+   a 3, e este bloco é um destaque com texto lá dentro. */
+.bo-mkt__destaque {
+  margin: var(--bo-espaco-lg) 0 0;
+  padding: var(--bo-espaco-lg);
+  background: var(--bo-superficie-suave);
+  border-radius: var(--bo-raio-cartao);
+  border-left: 4px solid var(--bo-acento-sinal);
+  font-weight: 600;
+}
+
+/* Os passos da implantação são uma lista ORDENADA: a ordem é a informação.
+   Um `<ol>` diz isso a quem ouve; quatro `<div>` não dizem. */
+ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
+.bo-mkt__passo h3 { margin-bottom: var(--bo-espaco-xs); }
+.bo-mkt__passo p { margin: 0; }
+
+/* O fecho: a última coisa da página antes do rodapé, e a única secção com
+   superfície própria — é o que a separa das onze anteriores sem lhe dar cor
+   nova. */
+.bo-mkt__fecho {
+  background: var(--bo-superficie-suave);
+  border-radius: var(--bo-raio-cartao);
+  padding-left: var(--bo-espaco-xl);
+  padding-right: var(--bo-espaco-xl);
+}
+/* Sem `margin-top` própria, e isso foi medido e corrigido: com ela, o respiro
+   antes do fecho dava **192 px** no desktop e 128 no telemóvel — acima dos
+   80-128 e dos 56-80 que o §4.4 fixa. A superfície própria já o separa das onze
+   secções anteriores; a margem a mais só o empurrava para fora da régua. */
 
 /* ── RV100 · a MOLDURA comercial ───────────────────────────────────────────
    Cabeçalho e rodapé partilhados pelas DEZ rotas da família MKT — as oito
