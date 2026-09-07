@@ -3015,3 +3015,53 @@ E a consequência prática é a que eu não teria formulado assim: **«olhar mel
 não é um método.** Olhar melhor para o sujeito errado dá o mesmo resultado, com
 mais confiança. O que funciona é **trocar o sujeito** — e isso é uma acção, não
 uma virtude.
+
+---
+
+## A protecção armada a não fazer nada — 07/09, 20h50
+
+Corri eu o controlo que a mensagem do JR dava por feito, porque **a palavra dele
+não é prova**. E fiz a versão que uma corrida bem-sucedida nunca exercita:
+interromper o build a meio com `TERM`.
+
+| | trap | sinal | ficheiro no fim |
+|---|---|---|---|
+| positivo | ligado | TERM a meio | **`.next`** — limpo |
+| negativo | **desligado** | TERM a meio | `.next-controlo` — sujo |
+
+**O trap passa.** Mas o caminho até lá deu três lições, e nenhuma era sobre o trap.
+
+**Primeira: o meu arnês não era o sujeito.** Ele fazia `cd apps/web` antes do
+build; o ajudante usava um caminho relativo; o `cp` do trap morreu com «No such
+file or directory» e o ficheiro ficou sujo. Ia a caminho de reportar que a cura
+dele estava partida. **Verifiquei os seis guiões: nenhum muda de directório
+depois de armar.** Não era defeito vivo — era uma condição a viver na cabeça de
+quem escrevesse o sétimo. Passei o caminho a absoluto e provei a cura **com o
+mesmo arnês que a partiu**, que é o único "antes" que vale.
+
+**Segunda: caí na doença do dia uma hora depois de a escrever.** Testei o caminho
+no `zsh` da ferramenta em vez do `bash` dos guiões. `BASH_SOURCE` vinha vazio, o
+resultado era plausível, e dizia-me que a minha própria cura estava partida.
+**Instrumento certo, sujeito errado — outra vez.** Ficou daí uma guarda: lido por
+um shell sem `BASH_SOURCE`, o ajudante recusa-se a arrancar em vez de devolver um
+caminho errado e calado.
+
+**Terceira, e é dele.** Revi o meu código com o JR porque **não assino o meu**, e
+ele encontrou o que eu não vira: eu fechei a porta do caminho errado calado e
+**deixei a outra aberta ao lado**. O `guardar_next_env` fazia `[ -f … ] || return
+0` — com o ficheiro ausente a cópia ficava vazia, o `repor` desistia também, e a
+protecção ficava **armada a não fazer nada, sem uma palavra**. Exactamente a
+forma que a guarda existia para impedir.
+
+E ao aplicar a emenda dela saiu uma correcção à emenda: os seis correm com
+`set -uo pipefail` e **sem `-e`**, portanto um `return 1` seria ruidoso e deixava
+a protecção desligada à mesma. **Um defeito calado trocado por um defeito com
+legenda não é uma cura.** Tem de ser `exit`.
+
+### O que fica
+
+**Uma protecção pode falhar de duas maneiras: não existir, ou existir e não estar
+apontada a nada.** A segunda é pior, porque quem a lê conta com ela. E note-se
+por onde as três apareceram: **nenhuma foi encontrada a olhar para o código.**
+Apareceram quando o arnês falhou, quando o interpretador mudou, e quando outra
+pessoa leu. Ler com mais atenção teria devolvido as três como correctas.

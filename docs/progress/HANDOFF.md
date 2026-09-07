@@ -2069,3 +2069,24 @@ mesmo motivo.
 **Regra que fica:** ao assinar uma etapa, verificar também as pendências que
 etapas anteriores lhe entregaram. Uma dívida passada de etapa em etapa sem
 ninguém a marcar é uma dívida que desaparece do radar sem ser paga.
+
+## 07/09 20h50 — o trap assinado, e duas notas por fazer
+
+O controlo duro do `next-env.d.ts` está feito **por mim** e não pela palavra de
+quem escreveu a cura: trap ligado com `TERM` a meio deixa `.next` limpo, trap
+desligado deixa `.next-controlo` sujo. Mesmo arnês, mesmo sinal. **Assinado.**
+
+A caminho disso fecharam-se duas portas para o mesmo defeito — um caminho errado
+em silêncio: o ajudante passou a resolver o caminho **em absoluto** (`a2da008`),
+e o ficheiro ausente passou a **abortar** em vez de seguir com a protecção
+desligada (`a166152`, emenda do JR na revisão do meu código).
+
+**Por fazer, do JR, menores e não bloqueantes** — ficam aqui para não se perderem
+num commit:
+- `mktemp -t next-env` é a forma antiga no GNU; funciona no macOS, que é onde
+  isto corre hoje.
+- Ler o ajudante duas vezes na mesma corrida deixa a primeira cópia temporária
+  órfã.
+
+Nada disto abre etapa: a matriz continua em `36/36` e `396/396`, e o que trava é
+a aprovação visual do Matheus e as treze decisões que estão com ele.
