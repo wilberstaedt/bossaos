@@ -187,6 +187,87 @@ test.describe('KDS a 360 px — o tablet da cozinha', () => {
   });
 });
 
+/**
+ * A BARRA NÃO REPETE O TÍTULO, e não nomeia a estação errada.
+ *
+ * ── Dois defeitos que só se viam na imagem ────────────────────────────────
+ *
+ * A tela-mestre M05 mostrava «Cocina caliente» no `h1` **e** na primeira
+ * pastilha. Duas causas somadas, e nenhuma delas se via a ler o código:
+ *
+ * 1. `kdsE16.bilhetes` era **um nome de estação** — «Cocina caliente», «Cozinha
+ *    quente», «Hot kitchen» nas três línguas. Não era erro de tradução: era um
+ *    rótulo de navegação com o nome de UMA estação, e a captura do estado vazio
+ *    prova-o — na estação **Pase**, a pastilha continuava a dizer «Cocina
+ *    caliente». **Estava errado em todas as estações menos uma.**
+ * 2. A barra mostrava a secção onde já se está, como a do Staff mostrava — foi
+ *    a primeira queixa do dono do produto, e a cura ali foi a mesma.
+ *
+ * Esta guarda mede as duas por PROPRIEDADE e não por texto: nenhuma ligação da
+ * barra pode apontar para o caminho actual, e nenhuma pode dizer o mesmo que o
+ * `h1`. Um rótulo novo com o nome de outra estação volta a acender isto.
+ */
+test.describe('a barra do KDS não diz o que o título já diz', () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+
+  test('nenhuma pastilha repete o título nem aponta para onde já se está', async ({ page }) => {
+    const falhas: string[] = [];
+    let medidas = 0;
+
+    for (const tela of telas(alvos)) {
+      await visitar(page, tela, 'es-ES', alvos);
+      const aqui = new URL(page.url()).pathname;
+      const titulo = (await page.locator('h1').first().innerText()).trim();
+      const pastilhas = await page.locator('nav[data-teste="navegacao"] a').evaluateAll(
+        (as) => as.map((a) => ({
+          texto: (a.textContent ?? '').trim(),
+          destino: new URL((a as HTMLAnchorElement).href).pathname,
+        })));
+      if (pastilhas.length === 0) continue;
+      medidas += 1;
+
+      for (const x of pastilhas) {
+        if (x.destino === aqui) {
+          falhas.push(`${tela.id} · a barra aponta para onde já se está: «${x.texto}»`);
+        }
+        if (x.texto === titulo) {
+          falhas.push(`${tela.id} · a pastilha «${x.texto}» repete o título`);
+        }
+      }
+    }
+
+    // ── A SONDA: esta guarda sabe ver um duplicado? ────────────────────────
+    //
+    // Um zero que confirma o que se espera não mediu nada. Planta-se uma
+    // pastilha com o texto do título e exige-se que ela apareça.
+    //
+    // E planta-se numa tela que TEM barra: à primeira, a sonda correu onde o
+    // ciclo tinha parado — uma tela sem navegação — e devolveu «sem barra».
+    // Uma sonda que não encontra onde plantar não diz que a guarda é cega;
+    // diz que a sonda não mediu, e são coisas diferentes.
+    await visitar(page, telas(alvos).find((t) => t.id === 'KDS-005') as Tela, 'es-ES', alvos);
+    const sonda = await page.evaluate(() => {
+      const barra = document.querySelector('nav[data-teste="navegacao"]');
+      const h1 = document.querySelector('h1');
+      if (!barra || !h1) return 'sem barra';
+      const a = document.createElement('a');
+      a.href = window.location.pathname;
+      a.textContent = (h1.textContent ?? '').trim();
+      barra.appendChild(a);
+      const vista = [...barra.querySelectorAll('a')].some(
+        (x) => (x.textContent ?? '').trim() === (h1.textContent ?? '').trim());
+      a.remove();
+      return vista ? 'acendeu' : 'CEGA';
+    });
+    console.log(`SONDA-BARRA ${sonda}`);
+    console.log(`AMBITO-BARRA telas=${medidas} falhas=${falhas.length}`);
+
+    expect(sonda, 'SONDA-CEGA: a guarda não viu um duplicado plantado').toBe('acendeu');
+    expect(medidas, 'POPULACAO-ZERO: nenhuma tela do KDS tinha barra').toBeGreaterThan(5);
+    expect(falhas, `a barra do KDS repete-se:\n${falhas.join('\n')}`).toEqual([]);
+  });
+});
+
 test.describe('KDS nos três idiomas', () => {
   test.use({ viewport: { width: 360, height: 780 } });
 

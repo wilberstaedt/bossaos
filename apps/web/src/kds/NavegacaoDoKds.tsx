@@ -54,9 +54,17 @@ export function NavegacaoDoKds({
   const base = `/${idioma}/kds/${locationId}/${stationId}`;
   return (
     <nav className="bo-publico__seccoes" aria-label={s.estacao} data-teste="navegacao">
-      {SECCOES_DO_KDS.filter((x) => x.principal).map((x) => (
-        <a key={x.rota} href={`${base}${x.rota}`} data-seccao={x.id}
-           aria-current={actual === x.rota ? 'page' : undefined}>
+      {/* A secção actual sai da barra, como já saiu na do Staff.
+
+          Uma entrada que navega para onde já se está não é navegação. E aqui
+          custava o mesmo que lá: o `h1` dizia «Cocina caliente» e a primeira
+          pastilha dizia «Cocina caliente» — o mesmo texto duas vezes no ecrã
+          que a cozinha olha de longe.
+
+          O `aria-current` sai com ela: existia para dizer «a página é esta», e
+          quem o diz agora é o `h1`. */}
+      {SECCOES_DO_KDS.filter((x) => x.principal && x.rota !== actual).map((x) => (
+        <a key={x.rota} href={`${base}${x.rota}`} data-seccao={x.id}>
           {s[x.chave] ?? x.id}
         </a>
       ))}

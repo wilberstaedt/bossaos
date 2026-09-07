@@ -47,7 +47,10 @@ export default async function ProntosNoKds({
       <NavegacaoDoKds idioma={idioma} locationId={locationId} stationId={stationId}
                       actual="/prontos" />
 
-      <p data-teste="quantos">{prontas.length}</p>
+      {/* Um número sozinho não diz nada. As duas telas irmãs escrevem
+          `{s.noEcra}: <strong>…</strong>`; esta imprimia «0» e mais nada, e no
+          estado vazio era literalmente um zero a meio de um ecrã escuro. */}
+      <p><span>{s.noEcra}: <strong data-teste="quantos">{prontas.length}</strong></span></p>
       {prontas.length === 0 ? (
         <p className="bo-campo__ajuda" data-teste="nada">{s.semBilhetes}</p>
       ) : (
