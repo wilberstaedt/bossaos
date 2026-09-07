@@ -1,0 +1,397 @@
+id,etapa,natureza,como,endereco,abre_hoje,falta,irmaos
+MKT-001,E10,"página/painel a compor",so-url,/,sim,"",0
+MKT-002,E10,"seção da landing page",so-url,?section=product,sim,"",0
+MKT-003,E10,"seção da landing page",so-url,?section=plans,sim,"",0
+MKT-004,E10,"página/painel a compor",so-url,/product,sim,"",0
+MKT-005,E10,"página/painel a compor",so-url,/plans,sim,"",0
+MKT-006,E10,"página/painel a compor",estado-partilhado,/onboarding,sim,"",2
+MKT-007,E10,"página/painel a compor",so-url,/demo,sim,"",0
+MKT-008,E10,"página/painel a compor",so-url,/trust,sim,"",0
+MKT-009,E10,"página/painel a compor",so-url,/faq,sim,"",0
+MKT-010,E10,"página/painel a compor",so-url,/pilot,sim,"",0
+MKT-011,E10,"estado de rota",so-url,/demo/thanks,sim,"",0
+MKT-012,E10,"estado de rota",so-url,/404,sim,"",0
+AUTH-001,E04,"página",so-url,/auth/login,sim,"",0
+AUTH-002,E13,"diálogo/painel ou etapa do fluxo",so-url,/auth/operator-pin,sim,"",0
+AUTH-003,E04,"página",so-url,/auth/forgot-password,sim,"",0
+AUTH-004,E04,"página",so-url,/auth/reset-password,sim,"",0
+AUTH-005,E04,"página",so-url,/auth/mfa,sim,"",0
+AUTH-006,E04,"página",so-url,/auth/invite/[token],sim,"",0
+AUTH-007,E04,"página",so-url,/auth/organizations,sim,"",0
+AUTH-008,E04,"página",so-url,/auth/locations,sim,"",0
+AUTH-009,E04,"estado de rota (componente Estado)",so-url,/auth/session-expired,sim,"",0
+ONB-001,E06,"página/painel a compor",so-url,/onboarding/organizacao,sim,"",0
+ONB-002,E06,"página/painel a compor",so-url,/onboarding/marca,sim,"",0
+ONB-003,E06,"página/painel a compor",so-url,/onboarding/unidade,sim,"",0
+ONB-004,E05,"página/painel a compor",so-url,/onboarding/plano,sim,"",0
+ONB-005,E08,"página/painel a compor",so-url,/onboarding/importar,sim,"",0
+ONB-006,E08,"página/painel a compor",so-url,/onboarding/menu,sim,"",0
+ONB-007,E13,"página/painel a compor",so-url,/onboarding/sala,sim,"",0
+ONB-008,E16,"página/painel a compor",estado-partilhado,/onboarding,sim,"",2
+ONB-009,E04,"página",estado-partilhado,/onboarding,sim,"",2
+ONB-010,E06,"página/painel a compor",so-url,/onboarding/pronto,sim,"",0
+ORG-001,E06,"página/painel a compor",so-url,/app/[orgSlug]/organization/perfil,sim,"",0
+ORG-002,E06,"página/painel a compor",so-url,/app/[orgSlug]/organization/marcas,sim,"",0
+ORG-003,E06,"página/painel a compor",so-url,/app/[orgSlug]/organization/marcas/[brandId],sim,"",0
+ORG-004,E06,"página/painel a compor",so-url,/app/[orgSlug]/organization/unidades,sim,"",0
+ORG-005,E06,"página/painel a compor",so-url,/app/[orgSlug]/organization/unidades/[locationId],sim,"",0
+ORG-006,E06,"página/painel a compor",so-url,/app/[orgSlug]/organization/unidades/[locationId]/horarios,sim,"",0
+ORG-007,E04,"página",estado-partilhado,/app/[orgSlug]/organization,sim,"",3
+ORG-008,E04,"página",so-url,/app/[orgSlug]/organization/[membershipId],sim,"",0
+ORG-009,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/organization,sim,"",3
+ORG-010,E05,"página/painel a compor",so-url,/app/[orgSlug]/organization/plano,sim,"",0
+ORG-011,E32,"página/painel a compor",estado-partilhado,/app/[orgSlug]/organization,sim,"",3
+ORG-012,E32,"página/painel a compor",estado-partilhado,/app/[orgSlug]/organization,sim,"",3
+ORG-013,E05,"página/painel a compor",so-url,/app/[orgSlug]/organization/uso,sim,"",0
+ORG-014,E05,"página/painel a compor",so-url,/app/[orgSlug]/organization/plano/cambiar,sim,"",0
+ORG-015,E06,"diálogo/painel ou etapa do fluxo",so-url,/app/[orgSlug]/organization/plano/cancelar,sim,"",0
+CAT-001,E07,"página/painel a compor",so-url,/app/[orgSlug]/catalogo,sim,"",0
+CAT-002,E07,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/menus,sim,"",0
+CAT-003,E07,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/menus/[menuId],sim,"",0
+CAT-004,E07,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/menus/[menuId]/ordem,sim,"",0
+CAT-005,E07,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/categorias,sim,"",0
+CAT-006,E07,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/categorias/[categoryId],sim,"",0
+CAT-007,E07,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/produtos,sim,"",0
+CAT-008,E07,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/produtos/novo,sim,"",0
+CAT-009,E07,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/produtos/[productId],sim,"",0
+CAT-010,E07,"aba",so-url,/app/[orgSlug]/catalogo/produtos/[productId]/precos,sim,"",0
+CAT-011,E07,"aba",so-url,/app/[orgSlug]/catalogo/produtos/[productId]/variantes,sim,"",0
+CAT-012,E07,"aba",so-url,/app/[orgSlug]/catalogo/produtos/[productId]/opcoes,sim,"",0
+CAT-013,E07,"aba",so-url,/app/[orgSlug]/catalogo/produtos/[productId]/alergenos,sim,"",0
+CAT-014,E08,"aba",so-url,/app/[orgSlug]/catalogo/produtos/[productId]/fotos,sim,"",0
+CAT-015,E08,"aba",so-url,/app/[orgSlug]/catalogo/produtos/[productId]/traducoes,sim,"",0
+CAT-016,E07,"aba",so-url,/app/[orgSlug]/catalogo/produtos/[productId]/canais,sim,"",0
+CAT-017,E07,"aba",so-url,/app/[orgSlug]/catalogo/produtos/[productId]/disponibilidade,sim,"",0
+CAT-018,E07,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/opcoes,sim,"",0
+CAT-019,E07,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/opcoes/[groupId],sim,"",0
+CAT-020,E14,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/combos,sim,"",0
+CAT-021,E24,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/impostos,sim,"",0
+CAT-022,E07,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/alergenos,sim,"",0
+CAT-023,E08,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/media,sim,"",0
+CAT-024,E08,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/traducoes,sim,"",0
+CAT-025,E08,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/menus/[menuId]/publicar,sim,"",0
+CAT-026,E08,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/menus/[menuId]/historico,sim,"",0
+CAT-027,E08,"página/painel a compor",so-url,/app/[orgSlug]/catalogo/importar,sim,"",0
+CAT-028,E30,"página/painel a compor",so-url,/app/[orgSlug]/brands/[brandSlug]/catalog/duplicate,nao(404),"",0
+MENU-001,E09,"página/painel a compor",estado-partilhado,/r/[publicLocationSlug]/[locale]/menu,bloqueado,"publicLocationSlug locale",1
+MENU-002,E09,"variação de rota",so-url,/r/[publicLocationSlug]/[locale]/menu (ligações de idioma),bloqueado,"publicLocationSlug locale",0
+MENU-003,E09,"variação de rota",so-url,/r/[publicLocationSlug]/[locale]/menu?categoria=,bloqueado,"publicLocationSlug locale",0
+MENU-004,E09,"variação de rota",so-url,/r/[publicLocationSlug]/[locale]/menu?q=,bloqueado,"publicLocationSlug locale",0
+MENU-005,E09,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/menu/produto/[produtoId],bloqueado,"publicLocationSlug locale produtoId",0
+MENU-006,E17,"variação de rota",so-url,/r/[publicLocationSlug]/[locale]/menu/products/[productId]?view=options,bloqueado,"publicLocationSlug locale",0
+MENU-007,E17,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/menu/cart,bloqueado,"publicLocationSlug locale",0
+MENU-008,E17,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/menu/checkout,bloqueado,"publicLocationSlug locale",0
+MENU-009,E17,"estado de rota",so-url,/r/[publicLocationSlug]/[locale]/menu/orders/[publicOrderId]?view=sent,bloqueado,"publicLocationSlug locale publicOrderId",0
+MENU-010,E17,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/menu/orders/[publicOrderId],bloqueado,"publicLocationSlug locale publicOrderId",0
+MENU-011,E17,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/menu/session,bloqueado,"publicLocationSlug locale",0
+MENU-012,E17,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/menu/service-request,bloqueado,"publicLocationSlug locale",0
+MENU-013,E17,"diálogo/painel ou etapa do fluxo",so-url,/r/[publicLocationSlug]/[locale]/menu/bill-request,bloqueado,"publicLocationSlug locale",0
+MENU-014,E23,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/mesa/pagar,bloqueado,"publicLocationSlug locale",0
+MENU-015,E23,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/mesa/dividir,bloqueado,"publicLocationSlug locale",0
+MENU-016,E23,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/mesa/comprovativo/[recibo],bloqueado,"publicLocationSlug locale recibo",0
+MENU-017,E27,"diálogo/painel ou etapa do fluxo",so-url,/r/[publicLocationSlug]/[locale]/menu/feedback,bloqueado,"publicLocationSlug locale",0
+MENU-018,E17,"estado de rota",so-url,/r/[publicLocationSlug]/[locale]/menu?state=invalid-qr,bloqueado,"publicLocationSlug locale",0
+MENU-019,E09,"estado de rota",so-url,/r/[publicLocationSlug]/[locale]/menu (estado fechado),bloqueado,"publicLocationSlug locale",0
+MENU-020,E17,"diálogo/painel ou etapa do fluxo",so-url,/r/[publicLocationSlug]/[locale]/menu/cart?state=unavailable,bloqueado,"publicLocationSlug locale",0
+QR-001,E09,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/channels/qr,sim,"",5
+QR-002,E17,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/channels/qr,sim,"",5
+QR-003,E09,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/channels/qr,sim,"",5
+QR-004,E09,"página/painel a compor",so-url,/api/org/[orgSlug]/unidades/[locationId]/qr.svg,sim,"",0
+QR-005,E17,"diálogo/painel ou etapa do fluxo",estado-partilhado,/app/[orgSlug]/[locationSlug]/channels/qr,sim,"",5
+QR-006,E17,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/channels/qr,sim,"",5
+QR-007,E17,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/channels/qr,sim,"",5
+CHAN-001,E09,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/channels,sim,"",0
+CHAN-002,E14,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/channels/[canal],bloqueado,"canal",0
+WEB-001,E10,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/website,sim,"",10
+WEB-002,E10,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/website,sim,"",10
+WEB-003,E10,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/website,sim,"",10
+WEB-004,E10,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/website,sim,"",10
+WEB-005,E10,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/website,sim,"",10
+WEB-006,E10,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/website,sim,"",10
+WEB-007,E10,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/website,sim,"",10
+WEB-008,E10,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/website,sim,"",10
+WEB-009,E10,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/website,sim,"",10
+WEB-010,E10,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/website,sim,"",10
+WEB-011,E10,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/website,sim,"",10
+PUB-001,E10,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale],bloqueado,"publicLocationSlug locale",0
+PUB-002,E10,"página/painel a compor",estado-partilhado,/r/[publicLocationSlug]/[locale]/menu,bloqueado,"publicLocationSlug locale",1
+PUB-003,E19,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/reserve,bloqueado,"publicLocationSlug locale",0
+PUB-004,E10,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/about,bloqueado,"publicLocationSlug locale",0
+PUB-005,E10,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/contact,bloqueado,"publicLocationSlug locale",0
+PUB-006,E10,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/news/[postSlug],bloqueado,"publicLocationSlug locale postSlug",0
+RES-C-001,E19,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/reserve/inicio,bloqueado,"publicLocationSlug locale",0
+RES-C-002,E19,"diálogo/painel ou etapa do fluxo",so-url,/r/[publicLocationSlug]/[locale]/reserve/horarios,bloqueado,"publicLocationSlug locale",0
+RES-C-003,E19,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/reserve/dados,bloqueado,"publicLocationSlug locale",0
+RES-C-004,E19,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/reserve/preferencias,bloqueado,"publicLocationSlug locale",0
+RES-C-005,E19,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/reserve/rever,bloqueado,"publicLocationSlug locale",0
+RES-C-006,E19,"estado de rota",so-url,/r/[publicLocationSlug]/[locale]/reserve/confirmada,bloqueado,"publicLocationSlug locale",0
+RES-C-007,E19,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/reserve/gerir,bloqueado,"publicLocationSlug locale",0
+RES-C-008,E19,"estado de rota",so-url,/r/[publicLocationSlug]/[locale]/reserve/sem-mesa,bloqueado,"publicLocationSlug locale",0
+RES-C-009,E19,"página/painel a compor",so-url,/r/[publicLocationSlug]/[locale]/reserve/espera,bloqueado,"publicLocationSlug locale",0
+RES-C-010,E19,"estado de rota",so-url,/r/[publicLocationSlug]/[locale]/reserve/espera/estado,bloqueado,"publicLocationSlug locale",0
+RES-B-001,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations,sim,"",0
+RES-B-002,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/calendario,sim,"",0
+RES-B-003,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/timeline,sim,"",0
+RES-B-004,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/[reservaId],sim,"",0
+RES-B-005,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/nova,sim,"",0
+RES-B-006,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/[reservaId]/mover,sim,"",0
+RES-B-007,E19,"diálogo/painel ou etapa do fluxo",so-url,/app/[orgSlug]/[locationSlug]/reservations/[reservaId]/chegada,sim,"",0
+RES-B-008,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/espera,sim,"",0
+RES-B-009,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/walk-in,sim,"",0
+RES-B-010,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/mapa,sim,"",0
+RES-B-011,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/[reservaId]/mesa,sim,"",0
+RES-B-012,E18,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/regras,sim,"",0
+RES-B-013,E18,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/capacidade,sim,"",0
+RES-B-014,E18,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/turnos,sim,"",0
+RES-B-015,E18,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/bloqueios,sim,"",0
+RES-B-016,E18,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/politicas,sim,"",0
+RES-B-017,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/mensagens,sim,"",0
+RES-B-018,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/mensagens/historico,sim,"",0
+RES-B-019,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reservations/relatorio,sim,"",0
+FLOOR-001,E13,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/floor/zonas,sim,"",0
+FLOOR-002,E13,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/floor/mesas,sim,"",0
+FLOOR-003,E13,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/floor/mesas/[tableId],sim,"",0
+FLOOR-004,E13,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/floor/plano,sim,"",0
+FLOOR-005,E13,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/floor/combinacoes,sim,"",0
+FLOOR-006,E13,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/floor,sim,"",1
+FLOOR-007,E13,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/floor/abrir,sim,"",0
+FLOOR-008,E13,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/floor/sessoes/[sessionId],sim,"",0
+FLOOR-009,E13,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/floor/sessoes/[sessionId]/transferir,sim,"",0
+FLOOR-010,E22,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/floor,sim,"",1
+FLOOR-011,E13,"diálogo/painel ou etapa do fluxo",so-url,/app/[orgSlug]/[locationSlug]/floor/sessoes/[sessionId]/encerrar,sim,"",0
+STAFF-001,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-002,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-003,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-004,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-005,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-006,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-007,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-008,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-009,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-010,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-011,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-012,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-013,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-014,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-015,E22,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-016,E22,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-017,E15,"diálogo/painel ou etapa do fluxo",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-018,E15,"diálogo/painel ou etapa do fluxo",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-019,E23,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-020,E22,"estado de rota",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-021,E20,"página/painel a compor",so-url,/staff/[locationId]/levar,sim,"",0
+STAFF-022,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-023,E15,"página/painel a compor",estado-partilhado,/staff/[locationId],sim,"",22
+STAFF-024,E15,"estado de rota",estado-partilhado,/staff/[locationId],sim,"",22
+ORD-001,E14,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/orders,sim,"",2
+ORD-002,E14,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/orders/[orderId],sim,"",0
+ORD-003,E14,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/orders/novo,sim,"",0
+ORD-004,E14,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/orders/[orderId]/editar,sim,"",0
+ORD-005,E14,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/orders/[orderId]/ronda,sim,"",0
+ORD-006,E14,"diálogo/painel ou etapa do fluxo",so-url,/app/[orgSlug]/[locationSlug]/orders/[orderId]/cancelar,sim,"",0
+ORD-007,E22,"diálogo/painel ou etapa do fluxo",estado-partilhado,/app/[orgSlug]/[locationSlug]/orders,sim,"",2
+ORD-008,E14,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/orders/[orderId]/mover,sim,"",0
+ORD-009,E14,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/orders/[orderId]/historia,sim,"",0
+ORD-010,E14,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/orders/atencao,sim,"",0
+ORD-011,E32,"diálogo/painel ou etapa do fluxo",estado-partilhado,/app/[orgSlug]/[locationSlug]/orders,sim,"",2
+KDS-001,E16,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+KDS-002,E16,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+KDS-003,E16,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+KDS-004,E16,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+KDS-005,E16,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+KDS-006,E16,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+KDS-007,E16,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+KDS-008,E16,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+KDS-009,E16,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+KDS-010,E16,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+KDS-011,E16,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+KDS-012,E16,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+KDS-013,E16,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+KDS-014,E16,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+KDS-015,E16,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+KDS-016,E31,"página/painel a compor",estado-partilhado,/kds/[locationId]/[stationId],sim,"",15
+POS-001,E22,"diálogo/painel ou etapa do fluxo",so-url,/pos,sim,"",0
+POS-002,E22,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-003,E22,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-004,E22,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-005,E23,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-006,E22,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-007,E23,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-008,E23,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-009,E22,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-010,E22,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-011,E22,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-012,E24,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-013,E23,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-014,E22,"diálogo/painel ou etapa do fluxo",estado-partilhado,/pos/[locationId],sim,"",21
+POS-015,E22,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-016,E22,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-017,E22,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-018,E22,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-019,E22,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-020,E24,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-021,E24,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-022,E23,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+POS-023,E23,"página/painel a compor",estado-partilhado,/pos/[locationId],sim,"",21
+TAKE-001,E20,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/takeaway/novo,sim,"",0
+TAKE-002,E20,"estado de rota",so-url,/app/[orgSlug]/[locationSlug]/takeaway/[orderId],sim,"",0
+TAKE-003,E20,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/takeaway,sim,"",0
+DEL-001,E20,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/delivery,sim,"",0
+DEL-002,E20,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/delivery/mapeamento,sim,"",0
+DEL-003,E20,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/delivery/fila,sim,"",0
+KIOSK-001,E31,"página/painel a compor",estado-partilhado,/kiosk/[deviceId],sim,"",7
+KIOSK-002,E31,"página/painel a compor",estado-partilhado,/kiosk/[deviceId],sim,"",7
+KIOSK-003,E31,"página/painel a compor",estado-partilhado,/kiosk/[deviceId],sim,"",7
+KIOSK-004,E31,"página/painel a compor",estado-partilhado,/kiosk/[deviceId],sim,"",7
+KIOSK-005,E31,"página/painel a compor",estado-partilhado,/kiosk/[deviceId],sim,"",7
+KIOSK-006,E31,"estado de rota",estado-partilhado,/kiosk/[deviceId],sim,"",7
+KIOSK-007,E31,"estado de rota",estado-partilhado,/kiosk/[deviceId],sim,"",7
+KIOSK-008,E31,"página/painel a compor",estado-partilhado,/kiosk/[deviceId],sim,"",7
+INV-001,E25,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/inventory,sim,"",11
+INV-002,E25,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/inventory,sim,"",11
+INV-003,E25,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/inventory,sim,"",11
+INV-004,E25,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/inventory,sim,"",11
+INV-005,E25,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/inventory,sim,"",11
+INV-006,E25,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/inventory,sim,"",11
+INV-007,E25,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/inventory,sim,"",11
+INV-008,E25,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/inventory,sim,"",11
+INV-009,E25,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/inventory,sim,"",11
+INV-010,E25,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/inventory,sim,"",11
+INV-011,E25,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/inventory,sim,"",11
+INV-012,E25,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/inventory,sim,"",11
+SUP-001,E26,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/suppliers,sim,"",1
+SUP-002,E26,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/suppliers,sim,"",1
+PUR-001,E26,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/purchases,sim,"",3
+PUR-002,E26,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/purchases,sim,"",3
+PUR-003,E26,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/purchases,sim,"",3
+PUR-004,E26,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/purchases,sim,"",3
+CRM-001,E27,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/customers,sim,"",12
+CRM-002,E27,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/customers,sim,"",12
+CRM-003,E27,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/customers,sim,"",12
+CRM-004,E27,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/customers,sim,"",12
+CRM-005,E27,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/customers,sim,"",12
+CRM-006,E27,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/customers,sim,"",12
+CRM-007,E27,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/customers,sim,"",12
+CRM-008,E27,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/customers,sim,"",12
+CRM-009,E27,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/customers,sim,"",12
+CRM-010,E27,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/customers,sim,"",12
+CRM-011,E27,"diálogo/painel ou etapa do fluxo",estado-partilhado,/app/[orgSlug]/[locationSlug]/customers,sim,"",12
+CRM-012,E27,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/customers,sim,"",12
+CRM-013,E27,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/customers,sim,"",12
+HR-001,E28,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/team,sim,"",10
+HR-002,E28,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/team,sim,"",10
+HR-003,E28,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/team,sim,"",10
+HR-004,E28,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/team,sim,"",10
+HR-005,E28,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/team,sim,"",10
+HR-006,E28,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/team,sim,"",10
+HR-007,E28,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/team,sim,"",10
+HR-008,E28,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/team,sim,"",10
+HR-009,E28,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/team,sim,"",10
+HR-010,E28,"diálogo/painel ou etapa do fluxo",estado-partilhado,/app/[orgSlug]/[locationSlug]/team,sim,"",10
+HR-011,E28,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/team,sim,"",10
+FIN-001,E29,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/finance,sim,"",10
+FIN-002,E29,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/finance,sim,"",10
+FIN-003,E29,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/finance,sim,"",10
+FIN-004,E29,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/finance,sim,"",10
+FIN-005,E29,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/finance,sim,"",10
+FIN-006,E29,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/finance,sim,"",10
+FIN-007,E29,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/finance,sim,"",10
+FIN-008,E29,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/finance,sim,"",10
+FIN-009,E29,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/finance,sim,"",10
+FIN-010,E29,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/finance,sim,"",10
+FIN-011,E29,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/finance,sim,"",10
+REP-001,E09,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/reports,sim,"",9
+REP-002,E14,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reports/servico,sim,"",0
+REP-003,E14,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reports/canais,sim,"",0
+REP-004,E14,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reports/produtos,sim,"",0
+REP-005,E14,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reports/categorias,sim,"",0
+REP-006,E14,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reports/franjas,sim,"",0
+REP-007,E14,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reports/mesas,sim,"",0
+REP-008,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/reports/reservas,sim,"",0
+REP-009,E16,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/reports,sim,"",9
+REP-010,E30,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/reports,sim,"",9
+REP-011,E30,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/reports,sim,"",9
+REP-012,E30,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/reports,sim,"",9
+REP-013,E30,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/reports,sim,"",9
+REP-014,E30,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/reports,sim,"",9
+REP-015,E30,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/reports,sim,"",9
+REP-016,E30,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/reports,sim,"",9
+REP-017,E30,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/reports,sim,"",9
+INT-001,E32,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/integrations,sim,"",8
+INT-002,E32,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/integrations,sim,"",8
+INT-003,E10,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/integrations,sim,"",8
+INT-004,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/integrations/mensageria,sim,"",0
+INT-005,E23,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/integrations,sim,"",8
+INT-006,E24,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/integrations,sim,"",8
+INT-007,E32,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/integrations,sim,"",8
+INT-008,E32,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/integrations,sim,"",8
+INT-009,E32,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/integrations,sim,"",8
+INT-010,E32,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/integrations,sim,"",8
+DEV-001,E13,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/devices,sim,"",2
+DEV-002,E13,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/devices/parear,sim,"",0
+DEV-003,E13,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/devices/[deviceId],sim,"",0
+DEV-004,E13,"diálogo/painel ou etapa do fluxo",so-url,/app/[orgSlug]/[locationSlug]/devices/[deviceId]/revogar,sim,"",0
+DEV-005,E31,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/devices,sim,"",2
+DEV-006,E31,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/devices,sim,"",2
+SET-001,E06,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/settings,sim,"",7
+SET-002,E06,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/settings/idiomas,sim,"",0
+SET-003,E13,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/settings/servicos,sim,"",0
+SET-004,E14,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/settings/pedidos,sim,"",0
+SET-005,E16,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/settings,sim,"",7
+SET-006,E16,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/settings,sim,"",7
+SET-007,E18,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/settings/reservas,sim,"",0
+SET-008,E15,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/settings,sim,"",7
+SET-009,E19,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/settings/mensagens,sim,"",0
+SET-010,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/settings,sim,"",7
+SET-011,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/settings,sim,"",7
+SET-012,E08,"página/painel a compor",so-url,/app/[orgSlug]/organization/exportar,sim,"",0
+SET-013,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/settings,sim,"",7
+SET-014,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/[locationSlug]/settings,sim,"",7
+HELP-001,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/help,nao(404),"",3
+HELP-002,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/help,nao(404),"",3
+HELP-003,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/help,nao(404),"",3
+HELP-004,E33,"página/painel a compor",estado-partilhado,/app/[orgSlug]/help,nao(404),"",3
+PLAT-001,E33,"página/painel a compor",estado-partilhado,/platform,sim,"",14
+PLAT-002,E05,"página/painel a compor",estado-partilhado,/platform,sim,"",14
+PLAT-003,E05,"página/painel a compor",so-url,/platform/[orgId],sim,"",0
+PLAT-004,E05,"página/painel a compor",so-url,/platform/[orgId]/entitlements,sim,"",0
+PLAT-005,E32,"página/painel a compor",estado-partilhado,/platform,sim,"",14
+PLAT-006,E05,"página/painel a compor",so-url,/platform/implantacoes,sim,"",0
+PLAT-007,E33,"página/painel a compor",estado-partilhado,/platform,sim,"",14
+PLAT-008,E33,"diálogo/painel ou etapa do fluxo",estado-partilhado,/platform,sim,"",14
+PLAT-009,E33,"página/painel a compor",estado-partilhado,/platform,sim,"",14
+PLAT-010,E05,"página/painel a compor",so-url,/platform/flags,sim,"",0
+PLAT-011,E05,"página/painel a compor",so-url,/platform/planos,sim,"",0
+PLAT-012,E32,"página/painel a compor",estado-partilhado,/platform,sim,"",14
+PLAT-013,E33,"página/painel a compor",estado-partilhado,/platform,sim,"",14
+PLAT-014,E33,"página/painel a compor",estado-partilhado,/platform,sim,"",14
+PLAT-015,E32,"página/painel a compor",estado-partilhado,/platform,sim,"",14
+PLAT-016,E33,"página/painel a compor",estado-partilhado,/platform,sim,"",14
+PLAT-017,E33,"página/painel a compor",estado-partilhado,/platform,sim,"",14
+PLAT-018,E33,"página/painel a compor",estado-partilhado,/platform,sim,"",14
+PLAT-019,E33,"página/painel a compor",estado-partilhado,/platform,sim,"",14
+PLAT-020,E32,"página/painel a compor",estado-partilhado,/platform,sim,"",14
+THEME-001,E05,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/website/theme,sim,"",0
+THEME-002,E12,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/website/theme/editar,sim,"",0
+THEME-003,E12,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/website/theme/previa,sim,"",0
+THEME-004,E12,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/website/theme/editar?erro=contraste,sim,"",0
+THEME-005,E12,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/website/theme/publicar,sim,"",0
+THEME-006,E12,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/website/theme/exemplos/brasa-norte,sim,"",0
+THEME-007,E12,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/website/theme/exemplos/oliva-bistro,sim,"",0
+THEME-008,E12,"página/painel a compor",so-url,/app/[orgSlug]/[locationSlug]/website/theme/plano,sim,"",0
+STATE-001,E02,"estado transversal (nao e rota propria)",provocar,,nao-tem-endereco,"(na rota que executa a ação)",0
+STATE-002,E02,"estado transversal (nao e rota propria)",provocar,,nao-tem-endereco,"(na rota que executa a ação)",0
+STATE-003,E02,"estado transversal (nao e rota propria)",provocar,,nao-tem-endereco,"(na rota que executa a ação)",0
+STATE-004,E15,"estado transversal",provocar,,nao-tem-endereco,"(na rota que executa a ação)",0
+STATE-005,E02,"estado transversal (nao e rota propria)",provocar,,nao-tem-endereco,"(na rota que executa a ação)",0
+STATE-006,E05,"estado transversal",provocar,,nao-tem-endereco,"(componente BloqueioDePlano, na rota que executa a acção)",0
+STATE-007,E02,"estado transversal (nao e rota propria)",provocar,,nao-tem-endereco,"(na rota que executa a ação)",0
+STATE-008,E15,"estado transversal",provocar,,nao-tem-endereco,"(na rota que executa a ação)",0
+STATE-009,E17,"estado transversal",provocar,,nao-tem-endereco,"(na rota que executa a ação)",0
+STATE-010,E17,"estado transversal",provocar,,nao-tem-endereco,"(na rota que executa a ação)",0
+STATE-011,E23,"estado transversal",provocar,,nao-tem-endereco,"(na rota que executa a ação)",0
+STATE-012,E16,"estado transversal",provocar,,nao-tem-endereco,"(na rota que executa a ação)",0
+STATE-013,E06,"estado transversal",provocar,,nao-tem-endereco,"(componente UnidadeArquivada, na rota que executa a acção)",0
+STATE-014,E04,"estado transversal (componente Estado)",provocar,,nao-tem-endereco,"(na rota que executa a ação)",0
+STATE-015,E15,"estado transversal",provocar,,nao-tem-endereco,"(na rota que executa a ação)",0
+STATE-016,E02,"estado transversal (nao e rota propria)",provocar,,nao-tem-endereco,"(na rota que executa a ação)",0
