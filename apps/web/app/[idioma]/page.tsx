@@ -1,3 +1,4 @@
+import { Botao } from '@bossaos/ui';
 import { MENSALIDADES_NUM_ANO, MOEDA_COMERCIAL, precoDoPlano } from '@bossaos/domain';
 import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../src/componentes/Marketing.tsx';
@@ -110,8 +111,8 @@ export default async function Landing({
             <h1>{k.heroiTitulo}</h1>
             <p className="bo-publico__texto">{k.heroiTexto}</p>
             <p className="bo-mkt__chamada">
-              <a className="bo-botao bo-botao--primario" href={`/${idioma}/demo`}>{k.pedirDemo}</a>
-              <a className="bo-botao bo-botao--secundario" href={`/${idioma}/product`}>{k.verProduto}</a>
+              <Botao tom="primario" href={`/${idioma}/demo`}>{k.pedirDemo}</Botao>
+              <Botao tom="secundario" href={`/${idioma}/product`}>{k.verProduto}</Botao>
             </p>
           </div>
           <figure className="bo-mkt__heroi-media">
@@ -154,7 +155,7 @@ export default async function Landing({
           </div>
           <AvisoDeDemonstracao idioma={idioma} />
           <p className="bo-mkt__chamada">
-            <a className="bo-botao bo-botao--secundario" href={`/${idioma}/product`}>{k.saberMais}</a>
+            <Botao tom="secundario" href={`/${idioma}/product`}>{k.saberMais}</Botao>
           </p>
         </section>
       ) : null}
@@ -235,7 +236,7 @@ export default async function Landing({
           <p className="bo-publico__texto">{k.precoImplantacaoAparte}</p>
 
           <p className="bo-mkt__chamada">
-            <a className="bo-botao bo-botao--primario" href={`/${idioma}/plans`}>{k.verPlanos}</a>
+            <Botao tom="primario" href={`/${idioma}/plans`}>{k.verPlanos}</Botao>
           </p>
         </section>
       ) : null}
@@ -287,9 +288,9 @@ export default async function Landing({
             ))}
           </div>
           <p className="bo-mkt__chamada">
-            <a className="bo-botao bo-botao--secundario" href={`/${idioma}/product`}>
+            <Botao tom="secundario" href={`/${idioma}/product`}>
               {k.modulosVerProduto}
-            </a>
+            </Botao>
           </p>
         </section>
       ) : null}
@@ -342,7 +343,7 @@ export default async function Landing({
             <article className="bo-mkt__cartao"><h3>{k.confianca3}</h3><p>{k.confianca3Texto}</p></article>
           </div>
           <p className="bo-mkt__chamada">
-            <a className="bo-botao bo-botao--secundario" href={`/${idioma}/trust`}>{k.saberMais}</a>
+            <Botao tom="secundario" href={`/${idioma}/trust`}>{k.saberMais}</Botao>
           </p>
         </section>
       ) : null}
@@ -367,7 +368,7 @@ export default async function Landing({
             <article><h3>{k.faq4}</h3><p>{k.faq4Texto}</p></article>
           </div>
           <p className="bo-mkt__chamada">
-            <a className="bo-botao bo-botao--secundario" href={`/${idioma}/faq`}>{k.saberMais}</a>
+            <Botao tom="secundario" href={`/${idioma}/faq`}>{k.saberMais}</Botao>
           </p>
         </section>
       ) : null}
@@ -378,8 +379,8 @@ export default async function Landing({
           <h2 id="t-empezar">{k.ctaFinalTitulo}</h2>
           <p className="bo-publico__texto">{k.ctaFinalTexto}</p>
           <p className="bo-mkt__chamada">
-            <a className="bo-botao bo-botao--primario" href={`/${idioma}/demo`}>{k.pedirDemo}</a>
-            <a className="bo-botao bo-botao--secundario" href={`/${idioma}/plans`}>{k.verPlanos}</a>
+            <Botao tom="primario" href={`/${idioma}/demo`}>{k.pedirDemo}</Botao>
+            <Botao tom="secundario" href={`/${idioma}/plans`}>{k.verPlanos}</Botao>
           </p>
         </section>
       ) : null}
