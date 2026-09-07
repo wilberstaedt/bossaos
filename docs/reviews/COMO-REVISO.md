@@ -1639,3 +1639,49 @@ O mesmo implementador tinha escrito uma regra nova para fechar este achado
 Removeu-a. **Escrever a correcção antes de reproduzir o defeito produz sempre
 alguma coisa** — e essa coisa parece trabalho, passa em revisão, e fecha a linha
 no registo. Só não move nada.
+
+---
+
+## Três achados, uma causa: o build que dois agentes partilham — 07/09
+
+O `115×23` que o JR mediu na carta pública **não se reproduz**. O implementador
+mediu com e sem folha de estilos e a diferença é decisiva:
+
+| | com a folha | sem folha |
+| --- | --- | --- |
+| caixa | **94 × 44** | 150 × 18 |
+| `display` | `flex` | **`inline`** |
+
+**Um `<a>` inline ignora `min-height`.** O `115×23` tem essa assinatura — não é
+uma regra em falta, é um elemento **servido sem os seus estilos**.
+
+**E a causa está na linha 118 do `playwright.config.ts`:**
+
+```js
+command: `pnpm build && … next start -p ${PORTA}`
+```
+
+**A porta é parametrizada. O build não é.** Dois agentes a correr provas escrevem
+o mesmo `.next` — e uma página servida a meio de uma reconstrução sai sem o CSS.
+
+### O que isto une
+
+É **o mesmo defeito** que no lote L1f deu *«`/es-ES/getting-started` a 200 e
+depois a 500 com o mesmo código»*. E o mesmo que fez o `next-env.d.ts` — ficheiro
+versionado — oscilar entre duas sessões.
+
+**Três sintomas em superfícies diferentes, uma causa.** E a correcção foi
+recusada, com razão, a meio de um lote: mexer no `tsconfig` para isolar tipos
+sujava a árvore do outro agente, e a resposta certa é uma **árvore de trabalho
+separada** — maior do que qualquer dos lotes onde o sintoma apareceu.
+
+### E a lição sobre o que uma guarda consegue guardar
+
+A guarda do JR **verifica que a porta 3018 está livre** e dá `NÃO MEDI` se não
+estiver. Fez o que podia: **guardou o recurso que via**.
+
+O `.next` partilhado não aparece em `lsof`, não tem porta, não tem dono visível.
+**Um recurso partilhado que não se anuncia não é guardável pela guarda que o
+usa** — tem de ser isolado por quem monta o arnês.
+
+**Foi a única vez esta noite em que a resposta certa não era uma guarda melhor.**

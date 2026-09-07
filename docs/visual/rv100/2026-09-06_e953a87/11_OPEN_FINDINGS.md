@@ -375,7 +375,7 @@ observed: A«Marina Puerto» a 115 x 23 px, igual nas cinco larguras (360, 390, 
 evidence: scripts/validar-alergenios-na-carta.sh (linha ALVO-DA-PAGINA no âmbito) · inspeccao/alergenios-na-carta.spec.ts
 fix_criteria: altura efectiva >= 44 px por `padding` ou `min-height` no item do `<nav>` — medida no navegador nas cinco larguras, não no CSS. Não mexer na regra `:focus-visible`, que já foi medida e está conforme
 decisao: nao-decidida
-status: open — MEDIDO E POR CORRIGIR. É a superfície que o cliente do restaurante toca com o dedo, não um ecrã de operação
+status: NAO REPRODUZIDO, com causa identificada pelo revisor a 07/09 — o elemento **está estilado**: `estilos.css:1179` é `.bo-publico__seccoes a` **sem âmbito**, com `min-height: var(--bo-toque-publico)`, nascida na E10. Medido pelo implementador com e sem folha: **94x44** com, **150x18** sem, e sem folha o `display` cai para `inline` — um `<a>` inline ignora `min-height`. O `115x23` tem essa assinatura. A CAUSA: o `playwright.config.ts:118` corre `pnpm build && next start -p ${PORTA}` — **a porta é parametrizada e o build não**, logo dois agentes escrevem o mesmo `.next`. É o mesmo defeito que deu «200 e depois 500 com o mesmo código» no lote L1f. A guarda do JR verifica que a PORTA está livre e não podia ver o build partilhado: guardou o recurso visível. FICA ABERTO O QUE É REAL: o isolamento de build do arnês, cuja correcção foi recusada com razão a meio de um lote porque toca num ficheiro versionado
 ```
 
 > **Como este achado apareceu, e porque é que a contagem inicial estava inflada.**
