@@ -125,8 +125,39 @@ const ALT: Record<NomeDaComposicao, string> = {
   tablet: 'altTablet', carta: 'altCarta',
 };
 
+/**
+ * ── As ranhuras REAIS, medidas no navegador ──────────────────────────────
+ *
+ * O `sizes` é uma promessa ao navegador: «esta imagem vai ocupar tanto». Ele
+ * escolhe o ficheiro por essa promessa **antes** de saber o tamanho real, e se
+ * a promessa for pequena de mais busca um ficheiro pequeno e depois estica-o.
+ *
+ * A promessa era `(min-width: 1024px) 50vw, 100vw` para todas — e em `/product`
+ * a ranhura é **74vw**. Medido a 07/09 no `currentSrc`, a 1440 px:
+ *
+ *   /product  sala e kds   ranhura 1072, ficheiro de 720   escala **1,49**
+ *   /product  a 1024 px    ranhura  976, ficheiro de 512   escala **1,91**
+ *   /product  catálogo     0,99 a 1440, mas **1,27** a 1024
+ *   /product  carta        **1,65** — e **1,44 até no telemóvel**
+ *   landing   sala e kds   0,82 a 1440, mas **1,04** a 1024
+ *
+ * Ampliar uma captura é o mesmo defeito que encolhê-la, do outro lado: molha o
+ * texto em vez de o apequenar. E não nasceu com as estreitas — o revisor foi
+ * medir a versão no ar e é idêntica.
+ *
+ * Os números abaixo são a ranhura medida, com folga para o degrau seguinte do
+ * `srcset`. Ficam como constantes e não como cadeias soltas em cada chamador:
+ * a ranhura é um facto da COMPOSIÇÃO da página, e um facto vive num sítio.
+ */
+
+/** Duas colunas: 588 px a partir de 1280, 532 a 1024, quase toda a largura abaixo. */
+export const RANHURA_METADE = '(min-width: 1200px) 600px, (min-width: 1024px) 60vw, 95vw';
+
+/** Uma coluna larga: 74vw a partir de 1200, e praticamente tudo abaixo disso. */
+export const RANHURA_LARGA = '(min-width: 1200px) 75vw, 100vw';
+
 export function Composicao({
-  qual, idioma, prioritaria = false, tamanhos = '(min-width: 1024px) 50vw, 100vw',
+  qual, idioma, prioritaria = false, tamanhos = RANHURA_METADE,
 }: {
   qual: NomeDaComposicao;
   idioma: Idioma;

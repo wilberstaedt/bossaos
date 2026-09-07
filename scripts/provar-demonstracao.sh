@@ -98,10 +98,23 @@ $SEMENTE >/dev/null 2>&1
 # ── 2. O servidor, e as capturas ────────────────────────────────────────────
 echo
 echo "2. As capturas do produto a correr"
-if [ ! -d .next ]; then
-  echo "   (a construir — nao havia build)"
-  pnpm build >/tmp/demo-build.log 2>&1 || naomedi "o build falhou; ver /tmp/demo-build.log"
-fi
+# ── Reconstroi-se SEMPRE, e agora e' de proposito ──────────────────────────
+#
+# Isto era `if [ ! -d .next ]`, a olhar para a RAIZ — e o build vive em
+# `apps/web/.next`. A condicao nunca encontrava nada e reconstruia sempre: um
+# defeito, e por acaso o comportamento certo.
+#
+# Deixar um acidente protector como esta' e' uma armadilha para quem o ler a
+# seguir: parece um caminho errado trivial, alguem arruma-o com a melhor das
+# intencoes, e a partir dai o guiao passa a aceitar um build velho e a fotografar
+# dele. Capturar de um build velho E' O DEFEITO que este trabalho veio fechar —
+# as cinco imagens do marketing estiveram sete horas atrasadas.
+#
+# Por isso a condicao morta sai e fica escrita a decisao. O custo e' um build a
+# cada corrida; o que ele compra e' a certeza de que a fotografia e' do produto
+# que esta' aqui agora.
+echo "   (a construir — sempre, para nao fotografar um build velho)"
+pnpm build >/tmp/demo-build.log 2>&1 || naomedi "o build falhou; ver /tmp/demo-build.log"
 # BETTER_AUTH_URL TEM de bater certo com a porta. O `.env` aponta ao 3000; sem
 # isto a biblioteca recusa a origem e devolve **403 ao inscrever**, sem dizer uma
 # palavra sobre portas. Esta' escrito no `playwright.config.ts` e apanhou-me na
