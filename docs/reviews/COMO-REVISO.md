@@ -2056,3 +2056,29 @@ sujeito, troca-se o instrumento e não a conclusão.**
 mecanismo é âncora + `:target`, sem JavaScript nenhum — tirei o JS precisamente
 para não haver um ponto único de falha — e está provado a funcionar no ficheiro
 idêntico. Mas provado ali, não lá. É NÃO MEDI, e escreve-se assim.
+
+---
+
+## Um resumo pode partir uma partição que a fonte tinha inteira — 07/09
+
+Fui pôr em causa o mapa das 792 composições porque as parcelas que eu tinha
+escrito no documento do portão não somavam: **120 + 202 + 16 = 338**, e a
+população é 396. Uma partição que não fecha é o sinal que eu venho a usar a noite
+toda, e apontei-o à fonte.
+
+**A fonte estava certa e o meu resumo é que estava errado.** O
+`06_O_PORTAO_DE_COBERTURA.md` diz **120 com endereço único + 276 que exigem
+estado = 396**, e diz que os **16 são um subconjunto dos 276** — «destes, sem URL
+nenhum». O meu resumo escreveu 202 onde a fonte diz 276, e promoveu um
+subconjunto a **terceira categoria**, o que é o erro mais feio dos dois: sugere
+três bolsos disjuntos onde há dois e um recorte.
+
+**A forma, e é nova: uma partição sobrevive à análise e morre no resumo.** Todo
+o cuidado tinha sido posto onde a contagem foi feita; a linha de sumário — a
+única que alguém lê ao correr o olho pelo portão — desfez-a. **Quem lesse o
+portão levava um mapa que cobre 338 de 396 e não saberia que lhe faltavam 58.**
+
+**A defesa é a mesma e é barata: um resumo com números tem de somar ao total, e
+verifica-se onde ele está escrito, não onde ele foi calculado.** Se o resumo não
+repete o total, não se pode verificar — por isso o total passa a fazer parte da
+frase.

@@ -48,7 +48,7 @@
 | --- | --- |
 | telas-mestre aprovadas propagadas | **bloqueado por desenho** — é a secção 8, depois da aprovação |
 | 396 IDs rastreados | **conforme** |
-| 792 composições capturadas ou justificadas | **não conforme — 0 de 792.** Mapeado: 120 alcançáveis por URL, 202 exigem estado, 16 provocam-se |
+| 792 composições capturadas ou justificadas | **não conforme — 0 de 792**, e por desenho (a §8 põe-nas depois da aprovação). Mapa, e a partição fecha: **396 IDs = 120 com endereço único + 276 que exigem estado**, e dos 276 há **16 sem URL nenhum**, que se provocam. Em composições: **792 = 240 mecânicas + 552 por estado**, das quais 32 provocadas |
 | não há P1/P2 visual aberto | **conforme** — zero abertos nos 22 achados |
 | P3 aceite com decisão, responsável e prazo | **satisfeito por ausência, com a população provada** |
 | testes e build passam no commit final | **conforme** — `validar-no-commit.sh` verde contra o commit |
