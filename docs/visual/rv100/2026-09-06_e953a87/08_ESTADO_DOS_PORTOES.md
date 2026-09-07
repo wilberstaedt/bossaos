@@ -12,7 +12,7 @@
 | critério | estado |
 | --- | --- |
 | logo e ícone aprovados usados correctamente | **conforme** — assinatura `145×50` ligada (era `81×28` solta); `app/icon.png` vem do ícone aprovado |
-| identidade reconhecível sem depender só do wordmark | **NÃO MEDI** |
+| identidade reconhecível sem depender só do wordmark | **MEDIDO EM PARTE** |
 | coral, verde-lima, verde-escuro e superfícies com funções consistentes | **parcial** — o coral ganhou função em 5 páginas, numa secção escura onde cumpre as três obrigações. **O verde-lima não o medi** |
 | tipografia, espaço, raios, bordas e movimento tokenizados | **conforme** — verificado número a número contra o manual na secção 3 |
 | não existe identidade antiga ou paralela | **conforme** — os dois corais são um sistema com fronteira medida no ADR 0001, e escrevi a guarda que a mantém |
@@ -72,3 +72,29 @@ evidência indexada.
 
 **Este documento é parte dessa indexação, e existe para que o que falta esteja
 escrito antes de eu emitir seja o que for.**
+
+
+## A identidade sem o wordmark — o que foi medido a 07/09
+
+**Medi o canal que é mensurável: o acento.** Contagem de píxeis nas 25 capturas
+dos mestres, à resolução nativa, com **controlo positivo** (uma mancha de
+`#F5664D` dá 100%) e negativo (branco dá 0%).
+
+| superfície | usa `Wordmark`? | acento nos píxeis |
+| --- | --- | --- |
+| M01/M02 marketing | **sim** | 586 px — compatível com o próprio ficheiro do wordmark |
+| M03 backoffice, principal | **não** | **0** — e continua 0 às tolerâncias 90 e 150 |
+| M04 Staff · M05 KDS | **não** | 214–408 px, sinal que cresce suavemente com a tolerância |
+| M06 carta pública | **não** | **0** — idem |
+
+**O que isto prova a favor do critério:** no Staff e no KDS o acento está lá
+**sem haver wordmark nenhum** — nessas superfícies a identidade não depende dele.
+
+**O que isto deixa por responder:** no backoffice e na carta pública não há
+**nem uma coisa nem outra**. O que essas telas carreguem de identidade não é o
+acento, e eu não o medi — tipografia, espaçamento e forma também a carregam.
+
+**Fica assim, e é deliberado: eu não fecho este critério.** «Reconhecível» é um
+juízo humano e é do Matheus, na aprovação visual. O que eu entrego é o facto que
+ele não tinha: **duas das seis telas-mestre não têm acento nenhum.** Se isso é a
+calma que um backoffice quer, ou identidade a faltar, decide ele a olhar.

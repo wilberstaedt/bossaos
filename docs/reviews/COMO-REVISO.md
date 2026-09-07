@@ -1889,3 +1889,34 @@ compilação não testa a guarda, testa o compilador.** Os meus primeiros três
 deixavam um símbolo por usar, o build caía, o arnês não arrancava e a guarda
 dizia **NÃO MEDI** — que é o comportamento certo dela e um controlo inválido meu.
 **Só a terceira resposta me impediu de ler aquilo como vermelho.**
+
+---
+
+## O `thumbnail` apagou o sinal, e foi o controlo POSITIVO que o denunciou — 07/09
+
+Para medir a identidade sem o wordmark contei píxeis do acento nas capturas. A
+primeira versão reduzia cada imagem a 400 px antes de contar — e deu **0,000% em
+todas as telas sem wordmark**. Ia daí concluir que o produto não tem cor de
+identidade fora do logótipo.
+
+**O meu controlo negativo passou e não serviu de nada.** A mesma captura em
+cinzento dava 0,000%… **e os sujeitos davam 0,000% também.** Um controlo que
+devolve o mesmo valor que o sujeito não distingue coisa nenhuma: eu não sabia se
+não havia acento ou se o detector estava cego.
+
+**Foi o controlo POSITIVO que resolveu** — uma mancha sintética do próprio
+`#F5664D`, que tem de dar 100%. Deu, e sem redimensionar as capturas o retrato
+mudou **em todas as linhas**: o Staff e o KDS passaram de 0 a 214–408 px. **O
+`thumbnail` mistura píxeis e apaga exactamente o que eu procurava** — acentos
+finos, bordas, botões pequenos. O instrumento destruía o sinal antes de o medir.
+
+**A regra: um controlo negativo sozinho não valida um detector que reporta
+zero.** Zero é o valor que um detector avariado também produz. Quando o resultado
+esperado é «não há», é o controlo **positivo** que carrega a prova — e ele tem de
+apontar a um alvo que o detector *tem* de ver.
+
+E o remate, que é o mesmo de sempre por outro caminho: **confirmei depois que os
+zeros do backoffice e da carta eram reais**, subindo a tolerância a 90 e 150 —
+continuam zero, e só a 240 acendem, que é largura a apanhar ruído. Um zero
+verdadeiro aguenta a tolerância a crescer; um zero de instrumento não se
+distingue sem lhe mexer.
