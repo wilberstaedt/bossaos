@@ -2212,3 +2212,39 @@ remede ganha — e não a mais articulada.** Prosa boa é convincente, e convinc
 não é o critério. Quando as duas têm de ficar, cita-se a viva e deixa-se a outra
 nomeada como definição alternativa, que foi o que a linha do portão passa a
 fazer.
+
+---
+
+## O «feio» do Matheus tinha três defeitos funcionais por baixo — 07/09
+
+Ele olhou para a barra lateral do backoffice no telemóvel e disse: *«esses menus
+laterais estão feios e etc, tem algumas coisas que precisa de um toque de
+frontend»*. Fui ver a captura em resolução nativa em vez de julgar pela
+fotografia, e **por baixo do juízo estético estavam três coisas que não são
+gosto**:
+
+| onde | o que lá está | o que devia estar |
+| --- | --- | --- |
+| `layout.tsx:105` | `activa: i === navegacao.length - 1` | o item da rota actual — hoje **«Reports» acende sempre** |
+| `layout.tsx:116` | `activa: true` fixo no 1.º item móvel | idem |
+| `layout.tsx:100` | `unidade={sessao.actor.email}` | o **nome da unidade** — o trocador mostra um email |
+
+E dois que são mesmo de desenho: os **catorze itens têm o mesmo glifo** (quatro
+quadrados, um marcador de lugar **declarado** no componente), e o item activo é
+uma **pastilha verde-lima cheia** — a única coisa saturada no ecrã, que grita em
+vez de indicar.
+
+**O que isto ensina sobre ouvir um juízo estético: «está feio» é um SINTOMA, e
+tratá-lo como gosto é perder o que ele está a apontar.** Ninguém olha para uma
+barra lateral e diz «o item activo está preso ao último índice do array» — diz
+que está feia. **A pessoa vê a consequência; o defeito fica para quem for medir.**
+Se eu tivesse respondido só com paleta e espaçamento, os três ficavam lá.
+
+**E o ícone tem uma lição própria.** O autor deixou-o declarado como pendência,
+com um argumento correcto: *«inventá-la aqui daria um conjunto que teria de ser
+deitado fora»*. Era verdade — **até a pessoa que o deitaria fora pedir que se
+fizesse.** Uma deferência bem fundamentada continua válida só enquanto a razão
+que a sustenta continuar de pé, e esta caiu com uma frase do dono do produto.
+
+**Diagnostiquei e passei — não implemento o que vou rever.** É a razão de haver
+dois, e vale mais nesta altura da noite do que valia ao princípio.
