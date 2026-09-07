@@ -193,3 +193,32 @@ e um buraco no outro**, e ler o chamador não distingue as duas: só a ordem do
 
 Eu tinha escrito essa lição há duas horas e ia cair nela pelo outro lado. **Ver o
 chamador nunca chega — a pergunta é sempre qual dos dois ganha.**
+
+---
+
+## Olhei para a captura antes de republicar, e sobrava a queixa nº 1 — 15h30
+
+As sete estão verificadas e o Staff melhorou a sério: as pastilhas passaram de
+cápsula a **rectângulo de controlo**, o `demo@bossaos.invalid` deu lugar a
+**«Bossa Demo»**, a sobrancelha cresceu para 14 px, e os itens passam a caber
+dois por linha.
+
+**Mas o título «Tu turno, a la vista» continua a aparecer DUAS vezes** — como
+cabeçalho e outra vez como primeira pastilha. É **a primeira coisa que o Matheus
+nomeou** quando abriu esta conversa sobre o Staff.
+
+O que aconteceu tem uma forma que vale a pena: ele corrigiu o rótulo
+**acessível** da barra (`aria-label={s.seccoes ?? s.turno}`), que era metade do
+achado, e o **visível** ficou. `SECCOES_DO_STAFF:30` continua com
+`{ rota: '', chave: 'turno' }`, a pastilha rende `s[x.chave]` e a página põe
+`titulo={s.turno}`. **A mesma cadeia i18n, duas vezes, no mesmo ecrã.**
+
+**E o que me fez apanhá-lo foi olhar para a imagem e não para o diff.** Os sete
+commits estavam todos certos no que diziam; nenhum dizia «o título deixou de
+aparecer duas vezes», e eu podia ter fechado tudo sem dar por isso. **Um diff
+mostra o que mudou; só a captura mostra o que ficou.**
+
+**Segurei a republicação.** Já lhe mandei uma vez uma página que continha o
+defeito de que ele se tinha queixado — a lição da frescura veio daí. **Mandar-lha
+outra vez com a queixa de abertura ainda lá dentro seria a mesma falha por outro
+caminho**, e desta vez sem a desculpa de não ter olhado.
