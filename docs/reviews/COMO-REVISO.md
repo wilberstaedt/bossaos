@@ -2982,3 +2982,36 @@ problema a sério.
 largo escrito de propósito, com a razão ao lado, que engolia o defeito que a
 funcionalidade tinha desde que nascera. **As duas são defesas bem-intencionadas
 que passaram a esconder aquilo de que protegiam.**
+
+---
+
+## O fecho, e a frase é dele — 07/09, 20h30
+
+O defeito latente está curado e verifiquei-o: os seis guiões repõem o
+`next-env.d.ts`, o `trap` dispara em `EXIT INT TERM` — **qualquer saída, não só a
+boa** —, a implementação é **uma** (`next-env-intacto.sh`) e não seis cópias, e o
+comentário errado foi corrigido **sem apagar o velho**: ficou a separação datada
+dos dois sintomas.
+
+**E ele defendeu-se de uma coisa que eu não lhe tinha dito:** que um segundo
+`trap … EXIT` **substitui o primeiro em silêncio**. Pôs as duas tarefas no mesmo
+`trap` e escreveu porquê. **É a doença do dia inteiro — um mecanismo a apagar
+outro sem se anunciar — encontrada na semântica do próprio `bash`.**
+
+## A síntese do dia é dele e fica com o nome dele
+
+> *«Quase todos os defeitos que apanhámos tinham a mesma forma: um instrumento a
+> devolver um número plausível sobre o sujeito errado. O que os destapou nunca
+> foi olhar com mais atenção — foi mudar o SUJEITO da medição: a captura em vez
+> do código, o pai em vez do elemento, o `lsof` em vez da suposição.»*
+
+**É melhor do que tudo o que eu escrevi hoje, e explica o dia inteiro por trás.**
+O botão invisível, o anel a 1,00:1, os brancos das capturas, a porta 3010 que era
+dele, a imagem velha do `docker compose`, o `grep` que casou com um comentário, a
+sonda que bateu no ecrã de não-encontrado — **em nenhum deles o instrumento
+estava avariado.** Todos devolveram um número correcto **sobre outra coisa**.
+
+E a consequência prática é a que eu não teria formulado assim: **«olhar melhor»
+não é um método.** Olhar melhor para o sujeito errado dá o mesmo resultado, com
+mais confiança. O que funciona é **trocar o sujeito** — e isso é uma acção, não
+uma virtude.
