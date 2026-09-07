@@ -33,7 +33,8 @@ POR_DESENHO="rv100-baseline.spec.ts:medicao de base do RV100, escrita a 06/09 no
 expansao.spec.ts:TEM corredor - o scripts/validar-expansao-de-texto.sh - mas a descoberta aqui so varre provar-*.sh. Alargar o glob a validar-*.sh seria errado e nao e esquecimento: esta guarda LISTA os nove nomes de EM_DIVIDA dentro dela propria, e o grep passaria a ver-se a si mesma como corredor deles. A divida toda ficava verde por auto-referencia. Fica declarado ate a descoberta saber distinguir quem CORRE um ficheiro de quem apenas o NOMEIA
 alcance.spec.ts:mesma razao que o expansao.spec.ts acima - o corredor e o scripts/validar-alcance-das-composicoes.sh, uma guarda validar-* que a descoberta daqui nao varre
 foco.spec.ts:pago a 07/09 - passou a ter corredor, o scripts/validar-foco-nos-momentos.sh. Mesma razao dos dois acima para nao ser descoberto: a descoberta so varre provar-*.sh
-acessibilidade-dinamica.spec.ts:mesma razao das tres acima - o corredor e o scripts/validar-acessibilidade-dinamica.sh, uma guarda validar-* que a descoberta daqui nao varre"
+acessibilidade-dinamica.spec.ts:mesma razao das tres acima - o corredor e o scripts/validar-acessibilidade-dinamica.sh, uma guarda validar-* que a descoberta daqui nao varre
+alergenios-na-carta.spec.ts:mesma razao das anteriores - o corredor e o scripts/validar-alergenios-na-carta.sh, uma guarda validar-* que a descoberta daqui nao varre"
 
 EM_DIVIDA="capturas.spec.ts
 divida-movel-auth.spec.ts
