@@ -2691,3 +2691,31 @@ gerador é tirar-lhe a matéria-prima, não apagar o que ele já produziu.**
 **O que isto me dá que a caça não dava: previsão.** Qualquer sítio novo onde dois
 destes quatro se encontrem vai ser invisível, e isso é enumerável antes de
 alguém dar por ela.
+
+### Correcção ao que escrevi há uma hora: não é enumerável — 18h10
+
+Escrevi que o gerador dava **previsão**, e que os sítios onde dois dos quatro
+tokens se encontram eram «enumeráveis antes de alguém dar por eles». **Fui
+enumerá-los e a medição desmente-me.**
+
+Varri as regras do `estilos.css` à procura de pares dos quatro na mesma regra:
+**encontrei um**, e é a própria regra do foco, que define `outline` e por isso
+conta duas vezes. **Os pares não se encontram numa regra — encontram-se na
+CASCATA:** o anel é posto no elemento, o fundo vem de um antepassado, e nenhuma
+das duas linhas sabe da outra.
+
+**Por isso não são enumeráveis a partir da folha de estilos.** Só uma medição
+**renderizada** os vê — que é, aliás, o que aconteceu a cada uma das quatro
+instâncias de hoje.
+
+**E enumerando o que É enumerável, encontrei o buraco a sério.** A guarda que
+existe para isto — `validar-superficies.sh` — mede **quatro superfícies**, e o
+próprio âmbito dela lista quais: *«duas escuras do KDS, o login (a única
+`.bo-inverso` do produto) e uma do painel claro»*.
+
+**A landing não é nenhuma delas.** E é exactamente onde o defeito está no ar.
+
+**A forma, e já é a enésima vez hoje: o detector não falhou — a população dele
+não incluía o sítio onde o defeito vivia.** O que não é enumerável são os pares;
+o que É enumerável, e ninguém enumerou, são **as superfícies**. Elas são poucas e
+fechadas, e a guarda cobre quatro de um conjunto maior.
