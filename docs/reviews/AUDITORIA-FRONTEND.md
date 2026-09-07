@@ -222,3 +222,40 @@ mostra o que mudou; só a captura mostra o que ficou.**
 defeito de que ele se tinha queixado — a lição da frescura veio daí. **Mandar-lha
 outra vez com a queixa de abertura ainda lá dentro seria a mesma falha por outro
 caminho**, e desta vez sem a desculpa de não ter olhado.
+
+---
+
+## A mesma chave em duas fendas vizinhas — é classe, não acaso — 15h45
+
+Fui olhar para a **carta pública** com o mesmo olho que apanhou o duplicado do
+Staff, e encontrei o mesmo defeito outra vez, noutro ecrã e noutra equipa de
+código:
+
+| ecrã | a chave | as duas fendas |
+| --- | --- | --- |
+| Staff | `s.turno` | `<h1>` da página **e** primeira pastilha da barra |
+| Carta pública | `c.buscar` | `placeholder` do campo **e** rótulo do botão ao lado |
+
+```
+213:  placeholder={c.buscar} className="bo-campo__controlo" />
+214:  <button type="submit" …>{c.buscar}</button>
+```
+
+**Duas instâncias independentes fazem disto uma classe.** E o mecanismo é
+compreensível: quando há **um rótulo e duas fendas**, reutilizar a chave é o
+caminho de menor resistência — o campo precisa de dizer o que se procura, o botão
+precisa de dizer o que faz, e a mesma palavra serve mal aos dois.
+
+**E nenhum diff a mostra**, porque **as duas linhas estão certas cada uma por
+si**. Só a imagem mostra que estão lado a lado. É a mesma razão pela qual segurei
+a republicação: um diff mostra o que mudou, a captura mostra o que ficou.
+
+**Mais duas coisas na mesma tela, medidas e não impressões:**
+
+- O *placeholder* está **cortado** — lê-se «¿Qué te apetece» sem o `?`. O campo é
+  mais estreito do que o seu próprio texto de sugestão.
+- As pastilhas de idioma mostram **`es-ES`, `pt-BR`, `en`** a um cliente sentado
+  à mesa. Um código de localização não é uma língua — quem janta lê «Español».
+
+**O que a carta ganhou** fica dito também: o acento está lá, **188 px** de coral
+num filete sob «Abierto ahora» — editorial, discreto, e sem disputar com nada.
