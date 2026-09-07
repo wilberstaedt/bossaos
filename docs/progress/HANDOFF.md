@@ -2915,3 +2915,52 @@ estado `validado` de uma tela, não assinatura visual), `juncao-identidade`,
 **Escrever o aviso não me imunizou contra o erro que ele descreve.** Escrevi-o
 e cometi-o na mesma página. O que valeu não foi o aviso — foi haver **outra
 pessoa a correr os guiões**.
+
+## 08/09 00h30 — Fase 1 revista: assinada no mérito, NÃO fechada, e a culpa do que falta é minha
+
+### O que verifiquei correndo, e não lendo
+
+**A aritmética do coral reproduz-se ao número.** Ele encontrou uma contradição
+**no próprio norte** — que manda `#F5664D` quando o código tem `#D85A44` — e
+mostrou que **nenhum dos dois serve as duas exigências**:
+
+| | L | sobre areia | texto verde por cima |
+|---|---:|---:|---:|
+| `#F5664D` (o do norte) | 0,2945 | 2,77 | 4,71 |
+| `#D85A44` (o do código) | 0,2233 | **3,50** | 3,73 |
+
+Refiz as contas: para 3:1 sobre areia é preciso **L ≤ 0,2684**; para 4,5:1 com
+texto verde é preciso **L ≥ 0,2795**. **Os intervalos não se tocam.** Não existe
+coral que sirva os dois — e a saída dele não foi inventar um terceiro, foi o
+**tamanho do texto**: com texto grande basta 3:1, a janela abre para ≥ 0,1696, e
+o `#D85A44` cabe. **O rótulo do CTA é 19 px/700 por uma razão medida, não
+estética.**
+
+### O que verifiquei no ficheiro, e declaro que NÃO corri
+
+A sonda existe e é a certa: **repinta todas as secções de areia, reconta os
+fundos distintos e exige que a contagem caia a 1** — se o detector não cegar, é
+`SONDA-CEGA`. E há `AMBITO` com a população.
+
+**Não a corri ao vivo:** exige `build` e o `mac-health` está em `ATENÇÃO`. Fica
+dito, não assumido.
+
+### Fase 1 NÃO fecha, e a razão é minha
+
+**A linha de base continua vermelha, exactamente como estava:** os mesmos 2
+testes de UI e o `validar-plantes` a sair 1 com os seis plantes mortos.
+
+Eu escrevi que «a Fase 1 não pode começar por desenhar». **Só que nunca lho
+disse.** Registei o vermelho às **00:15** e a entrega da Fase 1 saiu-me por volta
+das **00:10** — ele não podia saber, e o que li do trabalho dele mostra que teria
+tratado disso primeiro se soubesse.
+
+**A consequência mantém-se independentemente da culpa:** a Fase 2 vai afirmar
+«sem regressão», e não há verde de onde partir.
+
+### O portão antes da Fase 2
+
+1. registar os cinco tokens no `fichas.ts`;
+2. justificar (ou trocar) o acento em `estilos.css:1714`;
+3. **ressuscitar os seis plantes** — são controlos negativos mortos, e um plante
+   morto *«não prova nada e ACUSA o produto»*.
