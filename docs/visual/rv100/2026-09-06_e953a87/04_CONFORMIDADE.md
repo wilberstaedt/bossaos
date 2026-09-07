@@ -374,3 +374,67 @@ E as peças de marca são **duas**, `brand/logoname.png` e `brand/logoicon.png`,
 que é o par que o §12.1 nomeia. Nota de método: a minha busca por ficheiros de
 marca trouxe `provar-catalogo.sh` e mais quatro, porque **«logo» está dentro de
 «catálogo»**. Terceira vez hoje que uma substring se faz passar por facto.
+
+---
+
+## §9.1, «erros explicam o problema e a recuperação possível»
+
+Cheguei aqui por duas leituras erradas minhas, e a segunda quase virou um achado
+publicado.
+
+**Primeira: 8% dos erros dão recuperação.** Falso. O detector contou como
+mensagens as chaves `rotuloCausa` («Causa»), `rotuloProximoPasso» («Próximo
+passo») e `rotuloRascunho` («Rascunho») — que são **os campos de um componente**,
+não texto de erro. Contar rótulos como mensagens é o mesmo erro de forma que já
+me deu `line-height` a passar por altura de contentor.
+
+**Segunda: «o estado de erro estruturado só existe no catálogo de desenho».**
+Escrevi isto e ia a caminho de o publicar. É falso pelo motivo mais simples: o
+componente `Estado` está em **300 ficheiros de produto**. O que vive só no
+catálogo é aquele **conjunto de textos de demonstração**, não o padrão. Quase
+transformei os textos de exemplo do catálogo numa acusação ao produto.
+
+E do lado bom, o componente faz uma coisa que não é obrigatória e é certa:
+
+```tsx
+role={situacao.tom === 'perigo' ? 'alert' : 'status'}
+```
+
+**Papel ARIA por gravidade.** Um leitor de ecrã interrompe no perigo e não
+interrompe no resto. Quem escreveu isto sabia que um `alert` em cada aviso
+treina o utilizador a ignorar alertas.
+
+### O que a medição limpa diz
+
+Vinte e três mensagens de erro a sério (≥25 caracteres, sem rótulos). O meu
+detector de verbos encontrou recuperação em três, e **três está errado** — por
+inflexão: *«**Revise** as horas: o fim tem de vir depois do início»* não casa
+com `reveja|rever`. É o mesmo eixo que hoje já me tinha escondido `SIMULTÂNEAS`
+atrás de `simultan`. **Sempre que estreito num eixo, é nesse eixo que a resposta
+se esconde.**
+
+Lidas à mão, as vinte e três dividem-se em três grupos e só um é problema:
+
+1. **A recuperação está no enunciado do problema**, e essas estão bem: «Falta o
+   texto alternativo», «Falta o SKU para poder atualizar», «Só minúsculas,
+   números e hífens». Não precisam de imperativo — dizem o que falta.
+2. **Recuperação explícita**: «Muitas tentativas. Aguarde um momento antes de
+   tentar de novo.», «Nada foi salvo. Tente de novo daqui a pouco».
+3. **Os erros de concorrência do Staff, e é aqui que há buraco.** «Essa mesa já
+   está ocupada.» · «Essa mesa já foi fechada.» · «Esse pedido já não existe.» ·
+   «Esse artigo já não está no pedido.» Explicam o estado e **não oferecem passo
+   seguinte**. Ao sábado às nove da noite, o empregado fica com o telemóvel na
+   mão e sem acção — e estes são precisamente os erros que acontecem quando a
+   casa está cheia, porque nascem de duas pessoas a mexer ao mesmo tempo.
+
+**A excepção dentro do grupo 3 é a melhor mensagem das vinte e três:**
+
+> «A mesa de destino ficou ocupada entretanto. **A de origem ficou como está.**»
+
+Numa transferência falhada, a pergunta que o empregado tem é *«e agora, onde é
+que ficou a conta?»* — e esta responde-a antes de ele a fazer. Diz o que **não**
+aconteceu, que é a informação que falta a todas as outras.
+
+**Achado (P2): os erros de concorrência do Staff dizem o estado e não dizem o
+passo.** O critério de correcção existe e está escrito no próprio produto — é a
+mensagem da transferência. As outras seis medem-se contra ela.
