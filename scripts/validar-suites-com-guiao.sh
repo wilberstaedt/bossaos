@@ -37,7 +37,9 @@ acessibilidade-dinamica.spec.ts:mesma razao das tres acima - o corredor e o scri
 alergenios-na-carta.spec.ts:mesma razao das anteriores - o corredor e o scripts/validar-alergenios-na-carta.sh, uma guarda validar-* que a descoberta daqui nao varre
 id-de-rota.spec.ts:corre dentro da scripts/validar-id-de-rota-validado.sh, que a usa como a medicao de RESULTADO do RV100-024 e reprova se um id mal formado deixar de dar 404
 tipografia-minima.spec.ts:corre dentro da scripts/validar-tipografia-minima.sh, que mede a regra dos 14px sobre a populacao do mapa de alcance
-superficies.spec.ts:corre dentro da scripts/validar-superficies.sh, que mede se algum texto ou controlo desaparece dentro do fundo da superficie onde esta"
+superficies.spec.ts:corre dentro da scripts/validar-superficies.sh, que mede se algum texto ou controlo desaparece dentro do fundo da superficie onde esta
+ns2-visual.spec.ts:corre dentro da scripts/validar-sistema-ns2.sh, que mede o sistema visual da Fase 1 do North Star na PAGINA RENDERIZADA - ritmo de fundos, escala de display, o CTA coral sobre o verde, o bento assimetrico, o mapa de mesas e o shell. Mesma razao das anteriores: o corredor e uma guarda validar-*, que a descoberta daqui nao varre
+caminho-da-demo.spec.ts:corre dentro da scripts/validar-caminho-da-demo.sh, que percorre o caminho comercial por ligacao seguida e confirma na base que o pedido de demonstracao ficou registado. Mesma razao: o corredor e uma guarda validar-*"
 
 EM_DIVIDA="capturas.spec.ts
 divida-movel-auth.spec.ts

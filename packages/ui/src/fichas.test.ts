@@ -66,6 +66,7 @@ const CORRESPONDENCIA: Record<string, string> = {
   '--bo-movimento-lento': `${movimento.lento}ms`,
   '--bo-toque-publico': `${alvoDeToque.publico}px`,
   '--bo-toque-operacao': `${alvoDeToque.operacao}px`,
+  '--bo-foco-contraste': foco.contraste,
   '--bo-largura-maxima': `${grade.larguraMaxima}px`,
   '--bo-margem-movel': `${grade.margem.movel}px`,
   '--bo-margem-secretaria': `${grade.margem.secretaria}px`,
@@ -73,6 +74,21 @@ const CORRESPONDENCIA: Record<string, string> = {
 
 /** Derivadas (apontam a outras variáveis) ou substituídas pelo tema público. */
 const DERIVADAS = new Set([
+  // ── O contrato de superfície ─────────────────────────────────────────────
+  //
+  // Estes quatro não têm valor próprio: apontam a outro token, e cada superfície
+  // reaponta-os. `.bo-inverso` e `.bo-kds` põem a acção a creme; a
+  // `.ns-seccao--verde` põe-na a coral. Perguntar-lhes «que cor és» é a
+  // pergunta errada — a certa é «o que promete esta superfície».
+  //
+  // Entraram no CSS a 07/09 com a cura do anel de foco e ficaram sem ficha
+  // durante um dia: o `--bo-foco-contraste`, que TEM valor, está na
+  // correspondência acima; estes quatro estão aqui, que é onde os derivados
+  // vivem. Um token sem ficha é um valor solto com outro nome.
+  '--bo-sobre-superficie',
+  '--bo-accao',
+  '--bo-sobre-accao',
+  '--bo-navegacao-activa',
   '--bo-fonte-titulo',
   '--bo-fonte-corpo',
   '--bo-publico-primaria',

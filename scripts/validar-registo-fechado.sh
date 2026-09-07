@@ -94,6 +94,9 @@ pnpm build >/tmp/registo-build.log 2>&1 || { repor_next_env; naomedi "o build fa
 BETTER_AUTH_URL="http://127.0.0.1:$PORTA" \
   pnpm --filter @bossaos/web exec next start -p "$PORTA" >/tmp/registo-servidor.log 2>&1 &
 SERVIDOR=$!
+# silenciador-ok: o `kill` corre num trap de limpeza e o servidor pode ja ter
+# morrido — «No such process» e' ruido e nao falha. O que NAO pode falhar
+# calado e' o `repor_next_env` a seguir, e esse nao leva silenciador nenhum.
 trap 'kill "$SERVIDOR" 2>/dev/null; repor_next_env' EXIT INT TERM
 
 pronto=0

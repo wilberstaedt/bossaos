@@ -145,6 +145,9 @@ BETTER_AUTH_URL="http://127.0.0.1:$PORTA" \
 SERVIDOR=$!
 # As DUAS coisas no mesmo trap, e nao dois traps: um segundo `trap ... EXIT`
 # substitui o primeiro em silencio, e o que se perdia aqui era matar o servidor.
+# silenciador-ok: o `kill` corre num trap de limpeza e o servidor pode ja ter
+# morrido — «No such process» e' ruido e nao falha. O que NAO pode falhar
+# calado e' o `repor_next_env` a seguir, e esse nao leva silenciador nenhum.
 trap 'kill "$SERVIDOR" 2>/dev/null; repor_next_env' EXIT INT TERM
 pronto=0
 for _ in $(seq 1 60); do
