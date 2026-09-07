@@ -1956,3 +1956,32 @@ mensageiro e não pelo facto.
 na sessão dá vermelho; o plante no ecrã dá **agora** vermelho nas duas rotas de
 `/platform` — o mesmo experimento que uma hora antes dava verde. É isso, e só
 isso, que autoriza a assinatura.
+
+---
+
+## A prova tem prazo de validade, e o prazo é o último commit que toca no produto — 07/09
+
+Fechado o P1, ia tratar de pôr as telas-mestre à frente do Matheus. Fui ver as
+horas antes: **as 25 capturas são das 10h54, e a cura entrou às 11h32** — e o
+commit dela mexe em `apps/web/src/servidor.ts` e `packages/db/src/escopo.ts`,
+ou seja **no produto**, não só em provas.
+
+**O `M03-erro` é a fotografia de um 500 que já não existe.** Ia mandá-la para
+aprovação humana como retrato do produto.
+
+**A forma é nova e é geral: uma prova não é verdadeira ou falsa, é verdadeira ATÉ
+uma data.** Todas as outras armadilhas desta noite eram sobre o instrumento medir
+mal; esta é sobre uma medição **correcta no momento em que foi feita** e que
+deixou de descrever o produto sem que nada nela mudasse. Nenhum controlo interno
+a apanha — a captura continua nítida, o ficheiro continua lá, o teste que a gerou
+continua verde.
+
+**E é mecanizável, que é o que a torna útil:** comparar o `mtime` de cada
+artefacto de prova com a data do último commit que toca em `apps/` ou
+`packages/`. Prova mais velha do que a última alteração ao produto é prova
+**suspeita por construção**, sem ninguém ter de se lembrar.
+
+**A regra: antes de mostrar evidência a alguém, perguntar o que mudou no produto
+desde que ela foi recolhida.** E a pergunta gémea, a que quase falhei: quando uma
+correcção entra, perguntar **que provas é que ela acabou de envelhecer** — irmã
+directa da lição de hoje sobre as sondas que passam a medir outra coisa.
