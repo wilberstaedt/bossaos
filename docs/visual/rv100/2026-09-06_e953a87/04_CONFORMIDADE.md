@@ -108,3 +108,126 @@ evidência da secção 2.
 O que falha aqui é o que já medi na secção 4: a assinatura a 81 px e a marca sem
 ligação ao início. **São as duas únicas não-conformidades do sistema visual em
 cinco secções verificadas.**
+
+---
+
+## Secção 9 — Usabilidade diária
+
+Doze regras transversais (§9.1) e dez casos de conteúdo extremo (§9.2). Medi as
+que decidem dinheiro e as que decidem se o ecrã cabe. Não medi as dez todas do
+§9.2 e digo quais abaixo — **NÃO MEDI é uma das três respostas**, não é a
+ausência de uma delas.
+
+### §9.1 — «nenhuma confirmação otimista para pedido, reserva ou pagamento sem
+### estado autoritativo» — CONFORME, e pela razão certa
+
+Esta é a regra do §9.1 que custa dinheiro num restaurante, por isso foi a
+primeira. A fronteira está escrita numa lista de quatro:
+
+```
+ACCOES_QUE_EXIGEM_REDE = ['pagamento', 'reserva.confirmar',
+                          'conta.fechar', 'desconto.autorizar']
+```
+
+As três que o manual nomeia estão lá — pagamento e reserva directamente, o
+pedido por outra via — e **duas que ele não pediu**: fechar a conta e autorizar
+um desconto. Quem escreveu isto percebeu que a regra é sobre *quem tem a
+verdade*, e não sobre a lista de palavras do manual.
+
+**O pedido é o caso interessante, e é o que eu fui verificar com desconfiança.**
+`pedido.enviar` **passa** offline, e à letra isso lê-se como confirmação otimista
+de um pedido. Não é, por duas razões que tive de medir separadamente:
+
+1. Um Staff PWA que não deixa compor um pedido sem rede não serve num restaurante
+   — e o teste da fila tem esse par escrito lá dentro como controlo positivo:
+   *«sem isto, o bloqueio acima passava num sistema que bloqueasse tudo»*. Um
+   teste que só prova que se bloqueia não distingue prudência de paralisia.
+2. **O ecrã não mente sobre o que fez.** O `PainelDaFila` tem um comentário a
+   prometer que «nunca diz enviado sobre o que só está gravado aqui» — e eu hoje
+   já aprovei um comentário meu que prometia o que o código não fazia, por isso
+   fui ao texto real, nas três línguas: `Not sent` / `Sin enviar` /
+   `Não enviados`. A promessa do comentário está cumprida no ficheiro de
+   tradução, que é onde ela se cumpre ou não.
+
+Há ainda um segundo grau que ninguém pediu: `porEnviarNoAparelho` distingue *não
+enviado neste telemóvel* de não enviado noutro. Num turno com quatro aparelhos,
+essa distinção é a diferença entre procurar o pedido e voltar a lançá-lo.
+
+**E a `RecusaFinanceira` é o oposto exacto de uma confirmação otimista:** com
+rede, o ecrã diz que quem cobra é o servidor e que *aquele ecrã não cobra*.
+Declarar a lacuna em vez de a esconder. O comentário dela regista um defeito que
+o implementador encontrou na própria prova — uma prova que não conseguia ficar
+vermelha, porque apagar a lógica toda de offline deixava-a igual. É a mesma
+classe de defeito que me apanhou três vezes hoje, encontrada por ele em código
+dele.
+
+### §9.2 — expansão de texto — MEDIDO, e o pior caso é a língua do piloto
+
+O manual manda testar traduções 30–50% maiores. Fui ver se o caso é hipotético
+neste produto. **Não é**, e a medida é sobre as 1319 cadeias de 12 caracteres ou
+mais, contra o inglês:
+
+| língua | média | cadeias que crescem ≥30% |
+| --- | ---: | ---: |
+| pt-BR | 1,05× | 148 (11%) |
+| **es-ES** | **1,09×** | **188 (14%)** |
+
+**A pior é o es-ES, que é a língua do piloto** (La Societat, Castellón). E a
+cadeia que mais cresce em ambas é operacional, não decorativa:
+`integracoesE32.reprocessar` vai de `Retry safely` a `Reintenta de forma segura`
+— **2,08×**. Logo a seguir, `kdsE16.estacao`: `Your station` → `A tua estação de
+trabalho`, **2,08×**, e o KDS é a superfície que corre a 18 px por ser lida ao
+longe. É lá que a duplicação do comprimento tem menos folga para onde ir.
+
+**Não existe guarda de expansão de texto no corredor.** E aqui apanhei-me a mim
+próprio: a minha primeira busca deu dois ficheiros e os dois eram substring —
+um casava em «a expansão da *combinação*» e o outro num comentário meu antigo
+sobre ter reportado 30% de telas. Fui ler os dois e ambos caíram. **Oitava vez
+hoje que um instrumento me entrega um facto falso**, e a única razão de não ter
+ficado no relatório é a pergunta de seguimento.
+
+Do mesmo modo, `scripts/provar-acesso.sh` não é uma guarda de acessibilidade: é
+sobre **autorização**. Não tem uma única palavra de aria, foco, contraste ou
+teclado. «Acesso» e «acessibilidade» partilham o prefixo e não partilham o
+assunto.
+
+### Um achado que não é do §9 e apareceu ao ler as traduções
+
+**O pt-BR mistura duas variantes de português na mesma língua.** Não é um
+ficheiro mal etiquetado — é mistura interna, e os dois controlos dizem-no:
+
+- **Controlo negativo:** o es-ES tem **zero** ocorrências de `telem*`. O
+  detector não está a apanhar ruído que atravessa ficheiros.
+- **Controlo positivo:** o pt-BR **usa mesmo** o vocabulário brasileiro noutros
+  sítios — `endereço` 18×, `arquivo` 8×, `celular` 5×, `usuário` 2×.
+
+O mesmo conceito tem dois nomes dentro da mesma língua: `celular` 5 e
+`telemóvel` 7; `arquivo` 8 e `ficheiro` 3; `endereço` 18 e `morada` 4; `usuário`
+2 e `utilizador`/`utilizadores` 3. Mais `ecrã`/`ecrãs` 11 e `gerir` 2. **Trinta
+ocorrências em oito termos.** Um utilizador vê «celular» num ecrã e «telemóvel»
+no seguinte.
+
+**E isto diz algo sobre uma guarda que eu escrevi.** A `validar-tres-linguas.sh`
+valida 2343 chaves × 3, com sonda que remove uma chave e exige exactamente uma
+em falta. Ela prova **presença**, e presença não é correcção: uma chave presente
+com o dialecto errado — ou com a língua errada — passa-lhe à frente sem tocar em
+nada. Verifiquei o caso vizinho para saber a dimensão do buraco: só **1%** dos
+valores é idêntico ao inglês, e quase todos são nomes próprios (`Starter`,
+`Tenants`, `Rubik / Noto Sans`). A tradução está mesmo feita — o buraco da
+guarda existe, mas não está a esconder conteúdo por traduzir. É dialecto, e é
+menor. Registo-o pelo que é.
+
+### O que NÃO medi na secção 9
+
+Das doze regras do §9.1 medi uma a fundo (a otimista) e toquei noutra (nome
+acessível: 86 `<button>`, 77 `aria-label`, 53 `aria-labelledby` — números que
+não decidem nada sozinhos, porque um botão com texto visível não precisa de
+`aria-label` e eu não cruzei botão a botão). **Não medi** as restantes dez.
+
+Dos dez casos do §9.2 medi um (expansão). **Não medi** os outros nove: cem
+itens, tabelas vazias e largas, alérgenos extensos, erros simultâneos, rede
+lenta, teclado virtual, zoom a 200%, preços grandes, nomes longos.
+
+Nove por medir num total de dez não é «conforme com ressalvas»: é a secção 9
+**por medir**, com dois pontos verificados dentro dela. Digo o número para que
+ninguém leia o que está acima como um veredicto sobre a secção inteira.
