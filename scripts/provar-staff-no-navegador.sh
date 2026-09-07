@@ -235,13 +235,24 @@ plantar <<'PYTOQUE' || true
 import io
 p = 'packages/ui/src/estilos.css'
 s = io.open(p, encoding='utf-8').read()
-antigo = """.bo-staff .bo-lista a {
-  display: flex; align-items: center;
-  min-height: var(--bo-toque-operacao);
-  overflow-wrap: anywhere;
-}"""
-assert antigo in s, 'a regra dos alvos do indice nao esta onde se esperava'
-io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, ''))
+# A ancora e a LINHA que da o alvo de toque, e nao o bloco inteiro.
+#
+# Era o bloco: as cinco linhas exactas da regra. A 07/09 a regra ganhou `color` e
+# `text-decoration` — faltavam-lhe e as ligacoes saiam azuis sublinhadas — e o
+# plante deixou de aplicar. A guarda ficou VERDE a dizer que tinha plantado um
+# defeito que nao plantou.
+#
+# O que este plante quer tirar e o `min-height` que faz do item um alvo tocavel.
+# E nisso que passa a pegar, dentro do bloco certo, e por isso sobrevive a
+# qualquer propriedade que a regra ganhe amanha.
+import re
+inicio = s.index('.bo-staff .bo-lista a {')
+fim = s.index('}', inicio)
+bloco = s[inicio:fim]
+assert 'min-height' in bloco, 'a regra dos alvos do indice nao tem min-height'
+sem = re.sub(r'\n\s*min-height:[^;]*;', '', bloco)
+assert sem != bloco, 'o min-height nao saiu'
+io.open(p, 'w', encoding='utf-8').write(s[:inicio] + sem + s[fim:])
 PYTOQUE
 exigir_vermelho "caiu a medição de toque: o índice voltou a ter alvos pequenos" \
   'alvos de toque' /tmp/bossaos-staff-nav-toque.txt

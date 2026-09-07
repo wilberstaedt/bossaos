@@ -80,9 +80,21 @@ export function NavegacaoDoStaff({
   const base = `/${idioma}/staff/${locationId}`;
   return (
     <nav className="bo-seccoes" aria-label={s.seccoes ?? s.turno} data-teste="navegacao">
-      {SECCOES_DO_STAFF.filter((x) => x.principal).map((x) => (
-        <a key={x.rota} href={`${base}${x.rota}`} data-seccao={x.id}
-           aria-current={actual === x.rota ? 'page' : undefined}>
+      {/* ── A secção actual sai da barra ────────────────────────────────────
+          Uma entrada que navega para onde já se está não é navegação. E o custo
+          de a manter não era teórico: o título da página e a primeira pastilha
+          usavam a MESMA cadeia (`staffE15.turno`), e o ecrã dizia «Tu turno, a
+          la vista» duas vezes — foi a primeira queixa do dono do produto.
+
+          Podia ter dado um rótulo curto próprio ao item do turno, e resolvia
+          esta instância. Isto resolve a CLASSE: a tela principal seguinte que
+          alguém acrescentar não repete o defeito, porque a barra deixa de poder
+          mostrar aquilo onde já se está.
+
+          O `aria-current` sai com ela, e é coerente: ele existia para dizer «a
+          página é esta», e quem o diz agora é o `h1`. */}
+      {SECCOES_DO_STAFF.filter((x) => x.principal && x.rota !== actual).map((x) => (
+        <a key={x.rota} href={`${base}${x.rota}`} data-seccao={x.id}>
           {s[x.chave] ?? x.id}
         </a>
       ))}
