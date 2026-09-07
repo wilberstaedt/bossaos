@@ -564,3 +564,56 @@ porque não é o meu encargo, mas dizer «tipos ok» sobre `inspeccao/` é verde
 À lista das cinco junta-se esta: **o instrumento que lê a saída de outro
 instrumento herda a forma como esse a escreve.** O `✘` era a grafia do relatório,
 não o facto. O facto era o código de saída.
+
+---
+
+## RV100 — a guarda de expansão passa a derivar os ecrãs (07/09)
+
+O código ficou em `fe3f165`, e não num commit meu: o sénior commitou a árvore
+partilhada enquanto eu tinha os ficheiros no índice, e levou-os dentro do lote
+L1b. **O índice do git é recurso partilhado como a árvore, a base, a porta e o
+`.next`.** Verifiquei que o que ficou em `main` é a versão boa — `md5
+c8d5c49…`, a mesma que deu o verde — e não uma das versões adulteradas que os
+controlos negativos produzem. Foi por pouco: um commit varrido durante uma
+corrida de controlo teria posto em `main` um detector cego.
+
+### O que mudou
+
+De **3 ecrãs à mão para 276 medidos**. Os namespaces do i18n trazem o código da
+etapa no nome (`kdsE16`) e o atlas tem a etapa por ID, portanto o mapa deriva-se.
+A lista à mão fica só para o que a derivação não alcança, com tecto.
+
+Emenda à medição que recebi: os 29 namespaces com código colapsam em **25
+códigos**, e o atlas tem **29 etapas**. Dois conjuntos diferentes com o mesmo
+cardinal — é assim que uma confirmação falsa se disfarça de confirmação. O que
+aguenta é a direcção em que uso o mapa: nenhum dos 25 códigos falha o atlas.
+
+O fecho passa a imprimir o denominador, nas três saídas e não só no verde.
+
+### Quatro erros meus no mesmo dia, e o que os une
+
+1. **333 das 380 rotas do atlas não têm prefixo de língua.** Pedidas assim
+   devolvem 200 e **redirigem para `/es-ES`**. Medi 12 ecrãs «em inglês» e eram
+   espanhol nos doze.
+2. **O desconto do «já transbordava em inglês» comparava textos** entre línguas.
+   «Postal code» nunca é igual a «Código postal»: letra morta.
+3. **`caixa.right - pai.right`** com um `<tr>` de 32 px por pai.
+4. **Um `<thead>` de 1 px com `overflow:hidden`** a esconder um `<th>` de 80 px.
+
+O que os une: **usei um número que existe para responder a uma pergunta que ele
+não responde.** O 200 existe e não diz que a língua pegou; o texto existe e não
+identifica o elemento; a caixa do `<tr>` existe e não é um contentor; o
+`clientWidth` do `<thead>` existe e não é uma largura útil. Em nenhum dos quatro
+o instrumento estava avariado — estava a ser lido para além do que sabe dizer.
+
+**E a cura foi sempre a mesma:** pôr a prova dentro do achado. Enquanto julguei
+acusações com sondas por fora, gastei três corridas e a página mudou entre a
+acusação e a verificação. Quando a falha passou a dizer que regra disparou, qual
+a caixa e **quem corta**, o `<thead>` de 1 px apareceu à primeira.
+
+### Porta nova, aprendida ao vivo
+
+O `.next` foi reconstruído por outro processo a meio da minha corrida e a guarda
+disse «a sonda não acendeu» — falso, e a acusar o instrumento errado. Um
+arranque falhado tem agora diagnóstico próprio. A `provar-staff-no-navegador.sh`
+já tinha aprendido isto a 04/09: **um vermelho de arranque não é uma medição.**
