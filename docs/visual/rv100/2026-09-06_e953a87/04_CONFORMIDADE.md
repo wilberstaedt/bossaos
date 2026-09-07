@@ -438,3 +438,80 @@ aconteceu, que é a informação que falta a todas as outras.
 **Achado (P2): os erros de concorrência do Staff dizem o estado e não dizem o
 passo.** O critério de correcção existe e está escrito no próprio produto — é a
 mensagem da transferência. As outras seis medem-se contra ela.
+
+---
+
+## §12.3, «loading, empty, error, offline, denied e upgrade são coerentes»
+
+Comecei a medir isto com as **minhas** palavras e obtive zeros em offline,
+negado e upgrade — que eu sabia serem falsos, porque tinha lido o subsistema de
+offline uma hora antes. O produto é escrito em português e chama-lhe `semRede`,
+não `offline`. **Procurar o meu vocabulário em vez do vocabulário do produto** é
+a mesma armadilha que hoje me escondeu `SIMULTÂNEAS` atrás de `simultan`.
+
+Perguntei então ao **catálogo de desenho**, que é o produto a enumerar-se a si
+próprio. Seis estados: `carga`, `vazio`, `erroAoGuardar`, `semAcesso`,
+`porGuardar` e `arquivar`.
+
+| §12.3 pede | o produto tem | onde |
+| --- | --- | --- |
+| loading | `carga` | catálogo |
+| empty | `vazio` | catálogo |
+| error | `erroAoGuardar` | catálogo |
+| denied | `semAcesso` | catálogo |
+| offline | `semRede` + rota `staff/offline` | **só no Staff** |
+| upgrade | `tema.bloqueada` + ligação ao plano | disperso |
+
+E dois que o plano não pediu: **`porGuardar`** — que é o «formulários preservam
+trabalho» do §9.1 com estado próprio — e `arquivar`.
+
+**O offline não estar no catálogo não é incoerência.** Ele existe em 22
+ficheiros e tem rota própria, e vive na superfície onde faz sentido: quem está a
+uma secretária no backoffice não precisa de um estado de rede. Um estado
+partilhado que só uma superfície usa seria pior.
+
+### O upgrade está resolvido, e melhor do que eu esperava
+
+Fui ver o caso concreto — o Starter a tentar mudar as cores — e a tela do tema
+mostra `bloqueada` **e liga à página do plano**. O caminho existe. Mas o que
+vale mais é o comentário ao lado, que resolve a tensão em vez de a esconder:
+
+> «O editor tem endereço para toda a gente, e é o SERVIDOR que recusa quem não
+> tem plano. Esconder a ligação ao Starter tornaria o ecrã a guarda — e o
+> `planos-e-limites.md` diz o contrário por escrito: *«o ecrã esconde para não
+> frustrar; o servidor recusa para proteger»*. **O que se esconde é o BOTÃO
+> PRIMÁRIO, não o caminho.**»
+
+Isto é a distinção certa. Um ecrã que esconde o caminho passa a ser ele o
+mecanismo de segurança — e um ecrã nunca é mecanismo de segurança, porque o URL
+continua lá. O que muda é a **hierarquia**: o botão desce de primário a
+secundário. A permissão é do servidor; a frustração é do desenho.
+
+### Um achado, e é o único do género no produto (P3)
+
+Linha 139 da tela do tema:
+
+```tsx
+<a className="bo-botao bo-botao--primario" href="#">{m.tema.verCarta}</a>
+```
+
+**Um botão primário que não vai a lado nenhum.** Está dentro do cartão de
+pré-visualização, que simula a carta pública — portanto não é um CTA a sério, é
+a maqueta de outro ecrã. Mas está no pior dos dois mundos: é focável pelo
+teclado, parece uma acção, e não faz nada. O §12.2 pede «CTAs com destinos
+funcionais».
+
+Duas saídas honestas: ou liga à carta pública verdadeira, e a pré-visualização
+passa a servir para alguma coisa; ou deixa de ser `<a>` e passa a elemento não
+focável dentro da maqueta. **A que não serve é a de agora.**
+
+**E vale registar a dimensão:** é o **único** `href="#"` em todo o produto, em
+419 ficheiros `.tsx`. Isso não é sorte — é convenção cumprida.
+
+**Porque é que o corredor não o apanha, e não é defeito da guarda.** A
+`validar-portas-mortas.sh` exige que uma porta a `#` declare quem a constrói
+(`porConstruir: 'E30'`), e nasceu da dívida 1 do E34, quando três entradas do
+menu da plataforma estavam a `#` sem declaração. **O âmbito dela são as
+definições de menu, não as ligações em JSX.** A guarda está certa dentro do seu
+âmbito; o que se aprende é que o âmbito tem uma fronteira, e esta ligação cai do
+lado de fora dela.
