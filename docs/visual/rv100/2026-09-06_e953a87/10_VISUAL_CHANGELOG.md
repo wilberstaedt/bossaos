@@ -560,3 +560,125 @@ guião. **Zero anomalias em 15 combinações** de língua × largura.
   É a mesma disciplina do quarto pilar da confiança: escrevi o que o produto
   parece fazer, e digo que não o medi.
 - **Nada de teclado nem leitor de ecrã** na tabela nova.
+
+---
+
+## L1d · o motor de prova (semente de demonstração + capturas)
+
+**O desbloqueio que a L1b declarou.** Ficheiros:
+`packages/db/prisma/semente-demonstracao.ts`,
+`packages/db/prisma/demonstracao-comum.ts`,
+`scripts/capturar-demonstracao.mjs`, `scripts/provar-demonstracao.sh`.
+Evidência em `evidence/demonstracao/`.
+
+### O inquilino, e porque não é o cenário do arnês com outro nome
+
+«Bossa Demo», IDs próprios (`d0…`), zero prefixos. Seis pratos com preço, quatro
+mesas, uma sessão aberta, um pedido (A128) com três linhas **todas aceites**,
+duas estações e três tarefas, carta publicada em `/r/bossa-demo`.
+
+O cenário do arnês existe para medir casos difíceis — uma linha rejeitada por
+esgotado, outra por divergência de preço, um prato sem encaminhamento, um limite
+visível baixo para o «em espera» encher. Numa fotografia do produto, cada um
+desses lê-se como **produto avariado**. Este cenário é o caminho feliz, curado.
+
+**O nome carrega o do próprio produto**, e é a única forma de ser plausível numa
+captura e impossível de confundir com o restaurante de alguém: qualquer nome
+espanhol bonito que eu inventasse provavelmente existe algures. E não há um único
+endereço de correio inventado — onde o produto mostra quem fez uma coisa, fica um
+**nome** («Marta (sala)»). A conta que entra usa `.invalid`, o TLD que a RFC 2606
+reserva exactamente para isto: não resolve, não é de ninguém, e não é `example`.
+
+### As quatro composições, e porque existem
+
+| composição | largura | porquê |
+| --- | ---: | --- |
+| `kds-cozinha` | 1280 | a superfície que o §6.4 nomeia, e a de menos folga |
+| `sala-servico` | 1440 | o outro lado da mesma acção: a mesa de onde saiu o A128 |
+| `catalogo` | 1440 | a base única do §6.3.3, de onde a carta e a cozinha leem |
+| `carta-movel` | 390 | o que o cliente vê ao apontar para o código, sem sessão |
+
+Uma acção e o seu resultado, como o §6.4 pede: **o mesmo pedido A128** aparece
+na sala como sessão aberta e na cozinha como as tarefas dele.
+
+### O controlo que torna a captura prova, e não fotografia
+
+O capturador reprova sozinho se o texto renderizado contiver `insp-`, um domínio
+de fantasia, «Aún no medido» ou «sin configurar». **Apanhou-me duas vezes**, e
+as duas correcções são o valor deste lote:
+
+1. **`carta-movel` dizia «Horario sin configurar».** A semente não criava
+   horário. Corrigido — e o horário levou a segunda correcção consigo.
+2. **`catalogo` dizia «Aún no medido», duas vezes.** Não era coisa que a semente
+   pudesse resolver: é o painel do catálogo a ser **honesto** sobre indicadores
+   que o produto ainda não construiu. Honesto no produto, péssimo numa peça
+   comercial — anuncia o que não existe. A composição mudou de rota, para a
+   lista de produtos.
+
+Sem o controlo, as duas iam para a landing.
+
+### O horário aberto sempre, e o que isso custa
+
+A primeira versão semeou uma semana plausível: almoço, jantar, segunda de
+descanso. A captura saiu com **«Cerrado ahora»** e um aviso a ocupar o terço de
+cima — porque correu às cinco da manhã.
+
+O defeito não era o horário, era a dependência: **o §6.4 exige capturas
+determinísticas**, e uma composição cujo conteúdo muda com a hora a que o guião
+corre não é determinística. Passou a aberto todos os dias.
+
+**O que custa, dito por extenso:** nenhum restaurante abre vinte e quatro horas,
+e quem for ver os dados vê um horário implausível. Aceito a troca porque o
+horário não aparece na composição — o que aparece é a carta.
+
+### As quatro verificações, e nenhuma por fé
+
+`scripts/provar-demonstracao.sh`:
+
+| | como se mede | resultado |
+| --- | --- | --- |
+| determinismo | semeia **duas vezes** e compara a impressão do cenário | `b06bec96…` nas duas |
+| — controlo negativo | muda um prato à mão: a impressão **tem** de mudar | muda |
+| capturas limpas | o controlo de sujidade nas quatro | 4/4 |
+| o KDS existe | ficheiro presente e não vazio | 89 485 bytes |
+| a limpeza devolve | conta o que **não** é da demonstração, à volta da limpeza | igual |
+| — e o par | e a demonstração desapareceu mesmo | org a 0 |
+
+A impressão hasheia o que a captura MOSTRA — nomes, preços, códigos de mesa,
+estados, quantidades — e **exclui carimbos de tempo**, que mudam por construção.
+Um detector que acusa sempre não distingue nada. **Consequência dita:** os dados
+são determinísticos; os **pixels** não são exactamente, porque «Hace 0 min» e a
+hora de abertura da mesa são carimbos.
+
+### Três defeitos meus que a medição apanhou
+
+1. **A contagem da base dava vermelho com a limpeza certa.** Eu contava a base no
+   início e no fim do guião, com um build e uma passagem de navegador pelo meio —
+   e o arnês de inspecção correu noutro processo entretanto e levou o cenário
+   *dele*, que entrava nas mesmas contagens. **Media actividade concorrente e
+   chamava-lhe defeito meu.** Agora conta-se o que não é da demonstração numa
+   janela apertada à volta da limpeza.
+2. **O guião acusava «a limpeza deixou linhas para trás» com a limpeza
+   perfeita.** Era `node … | grep -v ruído || erro`: o estado de uma pipeline é o
+   do último comando, e um `grep` que não encontra nada devolve 1. Um guarda que
+   reprova quando tudo corre bem ensina a ignorá-lo.
+3. **403 ao inscrever a conta.** O `BETTER_AUTH_URL` do `.env` aponta ao 3000 e o
+   guião corre noutra porta; a biblioteca recusa a origem e não diz uma palavra
+   sobre portas. Está escrito no `playwright.config.ts` há dias — **e apanhou-me
+   na mesma, no mesmo sítio e pela mesma razão.**
+
+E uma armadilha do produto que a semeadura respeita desde o início, porque estava
+mapeada na L1b: o papel do dono vai **sem `brand_id`**. Com marca, o dono leva
+404 nas rotas da organização — um 404 que se parece com «a rota não existe».
+
+### O que este lote NÃO fez
+
+- **Não pôs nenhuma captura na landing.** O motor produz as composições; ligá-las
+  ao herói da MKT-001 e à `/product` é o lote seguinte. Não quis fechar as duas
+  coisas na mesma passagem sem medir a segunda.
+- **Não gerou versões responsivas nem formatos optimizados.** O §6.4 pede
+  «formatos e tamanhos optimizados sem degradar leitura»: são PNG directos, 384 KB
+  ao todo. Optimizar sem medir o que se perde é adivinhar.
+- **Nada de tablet.** O §6.4 nomeia quatro superfícies e há três larguras
+  (390, 1280, 1440). Falta a de tablet, e digo-o em vez de chamar 1280 de tablet.
+- **Não medi a aparência.** Secção 7, e é do Matheus.

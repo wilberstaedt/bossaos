@@ -1,0 +1,50 @@
+[
+  {
+    "nome": "kds-cozinha",
+    "porque": "A superfície que o §6.4 nomeia, e a que tem menos folga: o quadro da cozinha com o pedido A128 em preparação.",
+    "rota": "/es-ES/kds/d0000000-0000-4000-8000-000000000003/d0000000-0000-4000-8000-000000000016",
+    "largura": 1280,
+    "altura": 800,
+    "estado": 200,
+    "caminhoFinal": "/es-ES/kds/d0000000-0000-4000-8000-000000000003/d0000000-0000-4000-8000-000000000016",
+    "desviou": false,
+    "sujidade": [],
+    "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao/kds-cozinha-1280.png"
+  },
+  {
+    "nome": "sala-servico",
+    "porque": "O outro lado da mesma acção: a mesa 07 aberta, de onde saiu o A128.",
+    "rota": "/es-ES/app/bossa-demo/sala/floor",
+    "largura": 1440,
+    "altura": 900,
+    "estado": 200,
+    "caminhoFinal": "/es-ES/app/bossa-demo/sala/floor",
+    "desviou": false,
+    "sujidade": [],
+    "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao/sala-servico-1440.png"
+  },
+  {
+    "nome": "catalogo",
+    "porque": "A base única do §6.3.3 — o catálogo de onde a carta e a cozinha leem. É a LISTA de produtos e não o painel do catálogo: o painel mostra dois indicadores a dizer «Aún no medido», que é o produto a ser honesto sobre o que ainda não construiu — e honesto no produto é péssimo numa peça comercial, porque anuncia o que não existe. O controlo de sujidade apanhou-o e por isso a composição mudou de rota.",
+    "rota": "/es-ES/app/bossa-demo/catalogo/produtos",
+    "largura": 1440,
+    "altura": 900,
+    "estado": 200,
+    "caminhoFinal": "/es-ES/app/bossa-demo/catalogo/produtos",
+    "desviou": false,
+    "sujidade": [],
+    "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao/catalogo-1440.png"
+  },
+  {
+    "nome": "carta-movel",
+    "porque": "O que o cliente vê ao apontar para o código da mesa. Sem sessão, porque é assim que ela se usa.",
+    "rota": "/r/bossa-demo/es-ES/menu",
+    "largura": 390,
+    "altura": 844,
+    "estado": 200,
+    "caminhoFinal": "/r/bossa-demo/es-ES/menu",
+    "desviou": false,
+    "sujidade": [],
+    "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao/carta-movel-390.png"
+  }
+]
