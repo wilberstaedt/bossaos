@@ -38,39 +38,76 @@ export default async function InicioDaOrganizacao({
       <p data-teste="denominador">{t.denominador}</p>
       <p data-teste="nao-consolida">{t.naoConsolida}</p>
 
-      <p data-teste="quantas-unidades">{b.unidades.length}</p>
-      <p data-teste="quantas-sem-dados">{semDados.length}</p>
+      {/* ── Os números com o nome do que são ────────────────────────────
+          Aqui estavam nove `<p>` e `<span>` sem rótulo: a tela mostrava «1»,
+          «1» e «Sala principal Europe/Madrid Sin datos» em texto corrido. Os
+          rótulos existiam no dicionário — `fuso`, `linhas`, `media`, `moeda` —
+          e ninguém os chamava, e a `.bo-tabela` e o `.bo-estado__numero` já são
+          usados noutros ecrãs. Nada disto é novo: o que faltava era usar. */}
+      <dl className="bo-estado__factos">
+        <div>
+          <dt className="bo-estado__rotulo">{t.unidade}</dt>
+          <dd className="bo-estado__numero" data-teste="quantas-unidades">{b.unidades.length}</dd>
+        </div>
+        <div>
+          <dt className="bo-estado__rotulo">{t.semDados}</dt>
+          <dd className="bo-estado__numero" data-teste="quantas-sem-dados">{semDados.length}</dd>
+        </div>
+      </dl>
 
-      <ul className="bo-lista bo-lista--colunas" data-teste="unidades">
-        {b.unidades.map((u) => (
-          <li key={u.locationId}>
-            <span data-teste="unidade">{u.nome}</span>
-            <span data-teste="fuso">{u.fuso}</span>
-            {/* ── Ausência e zero medido escrevem-se DIFERENTE ───────────
-                É o aceite que a régua põe em primeiro lugar: quem lê «0 €»
-                fecha o turno de almoço; se o que lá estava era «sem dados»,
-                fechou-o por engano. */}
-            {u.agregado.medido ? (
-              <>
-                <span data-teste="medido">{String(u.agregado.valor.somaMenor)}</span>
-                <span data-teste="linhas">{u.agregado.valor.contagem}</span>
-                <span data-teste="moeda">{u.agregado.valor.moeda}</span>
-                <span data-teste="media">{String(porLinhaMenor(u.agregado.valor))}</span>
-              </>
-            ) : (
-              <span data-teste="sem-dados">{t.semDados}</span>
-            )}
-          </li>
-        ))}
-      </ul>
+      <table className="bo-tabela" data-teste="unidades">
+        <thead>
+          <tr>
+            <th scope="col">{t.unidade}</th>
+            <th scope="col">{t.fuso}</th>
+            <th scope="col">{t.montante}</th>
+            <th scope="col">{t.linhas}</th>
+            <th scope="col">{t.moeda}</th>
+            <th scope="col">{t.media}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {b.unidades.map((u) => (
+            <tr key={u.locationId}>
+              <th scope="row" data-teste="unidade">{u.nome}</th>
+              <td data-teste="fuso">{u.fuso}</td>
+              {/* ── Ausência e zero medido escrevem-se DIFERENTE ───────────
+                  É o aceite que a régua põe em primeiro lugar: quem lê «0 €»
+                  fecha o turno de almoço; se o que lá estava era «sem dados»,
+                  fechou-o por engano. A tabela não apaga a distinção: a linha
+                  sem dados atravessa as quatro colunas com a frase inteira, em
+                  vez de as encher de trações que se leem como zeros. */}
+              {u.agregado.medido ? (
+                <>
+                  <td data-teste="medido">{String(u.agregado.valor.somaMenor)}</td>
+                  <td data-teste="linhas">{u.agregado.valor.contagem}</td>
+                  <td data-teste="moeda">{u.agregado.valor.moeda}</td>
+                  <td data-teste="media">{String(porLinhaMenor(u.agregado.valor))}</td>
+                </>
+              ) : (
+                <td colSpan={4} data-teste="sem-dados">{t.semDados}</td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       <h2>{t.total}</h2>
       {b.total.medido ? (
-        <>
-          <p data-teste="total-medido">{String(b.total.valor.somaMenor)}</p>
-          <p data-teste="total-linhas">{b.total.valor.contagem}</p>
-          <p data-teste="total-media">{String(porLinhaMenor(b.total.valor))}</p>
-        </>
+        <dl className="bo-estado__factos">
+          <div>
+            <dt className="bo-estado__rotulo">{t.montante}</dt>
+            <dd className="bo-estado__numero" data-teste="total-medido">{String(b.total.valor.somaMenor)}</dd>
+          </div>
+          <div>
+            <dt className="bo-estado__rotulo">{t.linhas}</dt>
+            <dd className="bo-estado__numero" data-teste="total-linhas">{b.total.valor.contagem}</dd>
+          </div>
+          <div>
+            <dt className="bo-estado__rotulo">{t.media}</dt>
+            <dd className="bo-estado__numero" data-teste="total-media">{String(porLinhaMenor(b.total.valor))}</dd>
+          </div>
+        </dl>
       ) : <p data-teste="total-sem-dados">{t.semDados}</p>}
       <p data-teste="sem-dados-explica">{t.semDadosExplica}</p>
       <p data-teste="zero-explica">{t.zeroExplica}</p>

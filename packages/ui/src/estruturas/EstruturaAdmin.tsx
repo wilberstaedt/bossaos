@@ -224,6 +224,20 @@ export function EstruturaAdmin({
   const estaActivaInferior = (l: { href?: string; activa?: boolean }) =>
     (l.activa !== undefined ? l.activa : l.href === alvoInferior);
 
+  /**
+   * A migalha é a SECÇÃO em que se está, e não um rótulo fixo.
+   *
+   * Estava `migalha={m.pessoas.titulo}` no layout: dizia «Pessoas e acessos» em
+   * todas as rotas da organização, incluindo naquelas onde não há pessoa
+   * nenhuma. Um rótulo fixo num sítio que existe para dizer onde se está é pior
+   * do que não haver rótulo — o vazio não engana ninguém.
+   *
+   * Sai do mesmo sítio de onde sai o item aceso: a rota. Quando nenhum item
+   * casa, cai no que o chamador passou, porque uma migalha em branco também não
+   * serve.
+   */
+  const migalhaDaRota = navegacao.find((l) => 'href' in l && l.href === alvoActivo)?.rotulo ?? migalha;
+
   const estaActiva = (l: LigacaoDeNavegacao) => {
     if (l.activa !== undefined) return l.activa; // o catálogo de desenho força
     return 'href' in l && l.href === alvoActivo;
@@ -259,7 +273,7 @@ export function EstruturaAdmin({
           <span className="bo-so-leitor">{rotuloTrocarUnidade}</span>
         </button>
 
-        <nav className="bo-admin__navegacao" aria-label={migalha}>
+        <nav className="bo-admin__navegacao" aria-label={migalhaDaRota}>
           {itensComGrupo.map(({ grupo, itens }, iG) => (
           <div key={grupo || `g${iG}`} className="bo-admin__grupo">
             {grupo ? <p className="bo-admin__grupo-titulo">{grupo}</p> : null}
@@ -309,7 +323,7 @@ export function EstruturaAdmin({
               <strong>{marca}</strong>
               <span className="bo-campo__ajuda">{unidade}</span>
             </span>
-            <span className="bo-campo__ajuda bo-admin__larga">{migalha}</span>
+            <span className="bo-campo__ajuda bo-admin__larga">{migalhaDaRota}</span>
           </div>
           {topoDireita ? <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>{topoDireita}</div> : null}
         </header>
