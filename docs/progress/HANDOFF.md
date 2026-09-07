@@ -2463,3 +2463,30 @@ população que já se mediu.
 o ficheiro, não é o formato, não é o `srcset`, não é o carregamento. Sem cura,
 porque não há defeito: **uma guarda construída sobre `naturalWidth` daria
 vermelho para sempre num sítio onde não há nada para consertar.**
+
+## 07/09 23h15 — o guia de teste dele também tinha apodrecido
+
+Segunda coisa minha, em circulação, a ficar para trás no mesmo dia — a primeira
+foi a referência de publicação. **O guia das 18h15 avisava do anel de foco e não
+avisava das imagens de marketing**, que é justamente o que lhe custou quatro
+fotografias.
+
+Medi o domínio **antes** de o corrigir, para o aviso não ser de cor:
+
+| | ao vivo às 23h15 |
+|---|---|
+| imagens de `/pt-BR/product` e `/es-ES/product` | **os mesmos cinco ficheiros** — ainda espanholas |
+| campo de busca da carta | `corta=false` — **essa cura já está no ar** |
+| anel de foco do CTA da landing | `rgb(16,46,53)` sobre `rgb(16,46,53)` — **1,00:1 confirmado** |
+
+Note-se o do meio: **eu podia ter escrito que o campo cortado ainda estava por
+publicar, e estaria errado.** Está corrigido em produção; o que mostra o defeito
+é a *imagem* velha, não o produto. Medir separou as duas coisas.
+
+O guia ganhou uma secção — «Já corrigido, e ainda NÃO está no ar» — com os
+quatro pontos e **a hora a que foram medidos**.
+
+**Não abro secção nova na doutrina para isto.** É a regra da validade da prova,
+que já lá está, aplicada a artefactos que eu entrego em vez de a capturas.
+Aplicar uma regra existente não precisa de uma entrada nova — e há uma hora
+medi que este ficheiro cresce muito mais depressa do que é consultado.
