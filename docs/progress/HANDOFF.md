@@ -2090,3 +2090,34 @@ num commit:
 
 Nada disto abre etapa: a matriz continua em `36/36` e `396/396`, e o que trava é
 a aprovação visual do Matheus e as treze decisões que estão com ele.
+
+## 07/09 21h20 — duas fotografias valeram mais que a guarda de 11 superfícies
+
+O Matheus mandou duas fotos do domínio a dizer que ainda está feio. **Tinha
+razão, e nenhuma guarda nossa via nada disto** — porque medem contraste e alvos,
+não composição nem conteúdo.
+
+**Medido e confirmado:**
+- As telas do produto na página de marketing estão **em espanhol em todos os
+  idiomas**: cinco PNG fixos, e `pt-BR` e `es-ES` servem os **mesmos ficheiros**.
+- As capturas são das **10:15**; **16 commits** tocaram no produto desde então, o
+  último às 17:40. A `carta-movel` mostra o campo de busca **cortado** — o
+  defeito corrigido hoje. **A página que vende o produto anuncia os defeitos que
+  passámos o dia a tirar.**
+- Na página de planos: **387 px de preâmbulo** antes do primeiro preço, e a
+  página tem 6225 px para três preços.
+
+**Retirado, e a retirada é medição e não recuo:** eu disse que o logótipo por
+baixo do relógio era defeito nosso. **Não é.** O `viewport` que sai ao vivo é
+`width=device-width, initial-scale=1`, sem `viewport-fit=cover` — logo
+`env(safe-area-inset-top)` daria zero, e o cabeçalho é `static` e rola como em
+qualquer sítio no Safari. Fui verificar antes de construir a cura e a cura não
+existia. Corrigido ao Matheus em três minutos.
+
+**Nova decisão para a lista dele** (não é trabalho por fazer): na página de
+planos os dois títulos estão **trocados de sentido** — «O que muda, linha a
+linha» encabeça os **cartões** (387–1134 px) e a tabela que compara linha a
+linha está em 1610 debaixo de «O que cada plano inclui». A cura é copy, e a copy
+é dele.
+
+Entregue ao JR com régua escrita antes: `docs/reviews/ALVO-CAPTURAS-DE-MARKETING.md`.
