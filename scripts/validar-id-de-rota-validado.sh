@@ -12,9 +12,14 @@
 # `comEscopoDoPedido` traduz o nome em `notFound()`. Uma página nova fica
 # protegida por usar o invólucro — que já tem de usar para ter escopo.
 #
-# ESTA GUARDA é a outra metade: impede a classe de voltar. Uma página que
-# alcance a base por FORA dos invólucros que traduzem volta a poder devolver
-# 500 num id mal formado, e é isso que aqui fica vermelho.
+# ESTA GUARDA mede o RESULTADO: o código HTTP que sai de rotas reais com um id
+# mal formado. A primeira versão media ADOPÇÃO — contava páginas que chamam o
+# invólucro — e deu **128 de 128 verde enquanto duas rotas devolviam 500**. Um
+# número de cobertura não é um resultado, e foi assim que o achado se fechou com
+# o defeito lá dentro.
+#
+# A adopção continua medida, e continua a valer: é ela que diz que uma página
+# NOVA fica coberta. Mas é âmbito, não veredicto.
 #
 # Três respostas:
 #   OK (0)        todas as páginas com segmento de id passam por um invólucro
@@ -31,20 +36,22 @@ naomedi()  { echo "  NÃO MEDI $1"; }
 
 echo "Um id de rota mal formado dá 404 e não 500?"
 
-# ── 1. A TRADUÇÃO tem de existir, nos dois lados ───────────────────────────
+# O ambiente, porque a medição passou a ir a uma rota real. Enquanto isto era
+# só análise estática não fazia falta — e a falta apareceu como «não consegui
+# preparar o arnês», que é o sintoma e não a causa.
+if [ -f .env ]; then set -a; . ./.env; set +a; fi
+
+# ── 1. Nada de verificar a GRAFIA do mecanismo ────────────────────────────
 #
-# Sem isto a guarda mediria a cobertura de um mecanismo que já não lá está — e
-# «todas as páginas passam pelo invólucro» seria verdade e não valeria nada.
-falta=''
-grep -q 'class IdentificadorMalFormado' packages/db/src/escopo.ts || falta="$falta o-nome"
-grep -q "code === 'P2023'" packages/db/src/escopo.ts || falta="$falta o-reconhecedor"
-grep -qE 'ehIdentificadorMalFormado\(erro\)' packages/db/src/escopo.ts || falta="$falta a-captura"
-grep -q 'IdentificadorMalFormado) notFound()' apps/web/src/sessao.ts || falta="$falta a-traducao-web"
-if [ -n "$falta" ]; then
-  naomedi "o mecanismo não está no sítio ($falta) — sem ele não há cobertura que meça."
-  exit "$NAO_MEDI"
-fi
-verde "o mecanismo está nos dois lados: o nome na base, o 404 na web"
+# Aqui esteve um portão que procurava `IdentificadorMalFormado) notFound()` no
+# `sessao.ts`. Quando a cura passou a perguntar pela estrutura em vez da classe,
+# a linha mudou e o portão deu NÃO MEDI sobre um mecanismo que estava lá e a
+# funcionar. Um guarda que verifica como uma coisa está escrita reprova a
+# reescrita e não reprova o defeito.
+#
+# O que vem a seguir mede o que o mecanismo FAZ: primeiro a tradução, com um
+# erro da forma medida; depois o código HTTP numa rota real. Se alguém apagar a
+# cura, isso sai VERMELHO no resultado — que é onde deve sair.
 
 # ── 1.1 E a tradução tem de FUNCIONAR, e não só estar escrita ─────────────
 #
@@ -64,7 +71,45 @@ fi
 # número em branco — foi o que aconteceu, e um número em branco num relatório é
 # pior do que nenhum, porque parece medido.
 CASOS=$(sed -nE 's/^[#ℹ] pass ([0-9]+)$/\1/p' /tmp/bossaos-id-traducao.txt | head -1)
-verde "${CASOS:-?} casos: o P2023 vira nome, e um erro de base não vira"
+verde "${CASOS:-?} casos: o P2007 do uuid vira nome, e um erro de base não vira"
+
+# ── 1.2 O RESULTADO: que código sai de uma rota real ──────────────────────
+#
+# Um id mal formado numa rota que EXISTE. Cada uma leva o seu par de controlo
+# com um UUID válido que não existe: se esse não der 404 também, o que se mede
+# não é a forma do id — é a ausência da rota. As duas vias são medidas, porque
+# foi a diferença entre elas que escondeu o defeito.
+PORTA_DA_PROVA="${PORTA_INSPECCAO:-3018}"
+if lsof -nP -iTCP:"$PORTA_DA_PROVA" -sTCP:LISTEN >/dev/null 2>&1; then
+  naomedi "a porta $PORTA_DA_PROVA já está ocupada — outra inspecção a correr?"
+  exit "$NAO_MEDI"
+fi
+if ! bash scripts/arnes-pronto.sh >/tmp/bossaos-id-arnes.txt 2>&1; then
+  naomedi "não consegui preparar o arnês — sem ele não há rota real a que bater."
+  exit "$NAO_MEDI"
+fi
+SAIDA_HTTP=/tmp/bossaos-id-http.txt
+PORTA_INSPECCAO="$PORTA_DA_PROVA" BETTER_AUTH_URL="http://127.0.0.1:$PORTA_DA_PROVA" \
+  pnpm exec playwright test --project=preparar --project=painel id-de-rota.spec.ts \
+  --reporter=line >"$SAIDA_HTTP" 2>&1
+ESTADO_HTTP=$?
+if grep -qE 'config.webServer was not able to start|Could not find a production build' "$SAIDA_HTTP"; then
+  naomedi "o servidor da inspecção não arrancou — o \`.next\` em reconstrução noutro processo?"
+  exit "$NAO_MEDI"
+fi
+if grep -q 'Error: POPULACAO-ZERO' "$SAIDA_HTTP"; then
+  naomedi "as rotas de controlo não responderam 404 — não se mediu a forma do id:"
+  grep -o 'Error: POPULACAO-ZERO:[^"]*' "$SAIDA_HTTP" | head -2 | sed 's/^/           /'
+  exit "$NAO_MEDI"
+fi
+AMB_HTTP=$(grep -o 'AMBITO .*' "$SAIDA_HTTP" | tail -1)
+if [ "$ESTADO_HTTP" -ne 0 ]; then
+  vermelho "um id mal formado NÃO sai como 404 nas rotas medidas:"
+  sed 's/\x1b\[[0-9;]*m//g' "$SAIDA_HTTP" | grep -E 'deu [0-9]+ e não' | head -6 | sed 's/^ */           /'
+  echo "           $AMB_HTTP"
+  exit "$FALHOU"
+fi
+verde "o código que sai é 404 nas rotas medidas — $(sed -n 's/.*medidas=\([0-9]*\).*/\1/p' <<<"$AMB_HTTP") rotas, as duas vias"
 
 # ── 2. A população, e a pergunta é «TODAS?» e não «alguma?» ────────────────
 #
@@ -209,9 +254,11 @@ ambito() {
   echo "  âmbito:  $TOTAL páginas debaixo de um segmento \`[…Id]\`."
   echo "           $PROT alcançam um invólucro que traduz o id mal formado em 404."
   echo "           $CRU vão à base por fora dele; $MUDAS não tocam na base."
+  echo "           RESULTADO medido: $AMB_HTTP"
   echo "           FORA: as rotas de \`api/\`, que devolvem JSON e já validam à mão;"
-  echo "           e a ponta do navegador — que o 404 CHEGA ao cliente atravessa o"
-  echo "           Next e uma consulta verdadeira, e essa está por medir no arnês."
+  echo "           e as rotas com id que não estão na lista das quatro medidas — a"
+  echo "           adopção diz que passam pelo invólucro, o resultado só está"
+  echo "           medido nestas."
 }
 
 if [ "${CRU:-0}" -gt 0 ]; then

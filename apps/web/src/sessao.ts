@@ -2,7 +2,7 @@ import 'server-only';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import {
-  comEscopo, comIdentidade, concessoesDoActor, obterPrisma, IdentificadorMalFormado,
+  comEscopo, comIdentidade, concessoesDoActor, obterPrisma, ehIdentificadorMalFormado,
   type ClienteComEscopo,
 } from '@bossaos/db';
 import {
@@ -167,7 +167,10 @@ async function semIdentificadorMalFormado<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
   } catch (erro) {
-    if (erro instanceof IdentificadorMalFormado) notFound();
+    // Estrutura, e não identidade de classe. O `instanceof` dava 500 nesta
+    // rota enquanto o caminho de ecrã — que testa a estrutura — dava 404 no
+    // mesmo build; medido nas duas rotas de sessão e nas duas de ecrã.
+    if (ehIdentificadorMalFormado(erro)) notFound();
     throw erro;
   }
 }

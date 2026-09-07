@@ -1,7 +1,8 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  comEscopo, comIdentidade, ehIdentificadorMalFormado, IdentificadorMalFormado,
+  comEscopo, comEscopoSerializavel, comIdentidade,
+  ehIdentificadorMalFormado, IdentificadorMalFormado,
 } from '../packages/db/src/escopo.ts';
 
 /**
@@ -41,18 +42,34 @@ function clienteQueLevanta(erro: unknown) {
   } as never;
 }
 
-const P2023 = Object.assign(new Error('Inconsistent column data: Error creating UUID'), { code: 'P2023' });
+/**
+ * A forma REAL, medida no erro que chega ao apanhador numa rota do produto.
+ *
+ * A primeira versão desta prova usava um `P2023` inventado a partir do runtime
+ * do Prisma. O `P2023` existe — e não é o que um UUID mal formado produz. Uma
+ * prova construída sobre a forma suposta passa e não protege nada: passou, e o
+ * produto continuou a dar 500. Agora o erro desta prova é o que foi observado.
+ */
+const P2007 = Object.assign(
+  new Error('\nInvalid `prisma.location.findFirst()` invocation:\n\n\n'
+    + 'Invalid input value: invalid input syntax for type uuid: "nao-e-um-uuid"'),
+  { code: 'P2007', name: 'PrismaClientKnownRequestError' },
+);
+/** A outra forma, que o Prisma também sabe produzir. Reconhecer as duas. */
+const P2023 = Object.assign(
+  new Error('Inconsistent column data: Error creating UUID'), { code: 'P2023' },
+);
 const ORG = '11111111-1111-4111-8111-111111111111';
 
 describe('RV100-024: o identificador mal formado ganha nome', () => {
   it('o `comEscopo` traduz o P2023 num IdentificadorMalFormado', async () => {
     await assert.rejects(
-      () => comEscopo(clienteQueLevanta(P2023), { organizationId: ORG },
+      () => comEscopo(clienteQueLevanta(P2007), { organizationId: ORG },
         (db) => (db as unknown as { qualquerModelo: { findFirst: () => Promise<unknown> } })
           .qualquerModelo.findFirst()),
       (e: unknown) => {
         assert.ok(e instanceof IdentificadorMalFormado, `veio ${(e as Error)?.name}`);
-        assert.equal((e as IdentificadorMalFormado).causa, P2023, 'a causa original perde-se');
+        assert.equal((e as IdentificadorMalFormado).causa, P2007, 'a causa original perde-se');
         return true;
       },
     );
@@ -86,8 +103,40 @@ describe('RV100-024: o identificador mal formado ganha nome', () => {
     );
   });
 
+  it('o `comEscopoSerializavel` também traduz — era o terceiro funil', async () => {
+    // Estava sem tradutor. O `exigirUuid` lá dentro guarda UM campo, o da
+    // organização, e deixa cru qualquer outro id tocado na transacção. É o
+    // invólucro usado onde se reserva uma mesa.
+    await assert.rejects(
+      () => comEscopoSerializavel(clienteQueLevanta(P2023), { organizationId: ORG }, 'chave',
+        (db) => (db as unknown as { qualquerModelo: { findFirst: () => Promise<unknown> } })
+          .qualquerModelo.findFirst()),
+      (e: unknown) => e instanceof IdentificadorMalFormado,
+    );
+  });
+
+  // ── O defeito que reabriu o RV100-024 ───────────────────────────────────
+  //
+  // Havia duas verificações para a mesma coisa e não eram equivalentes: o
+  // `sessao.ts` perguntava `instanceof` e o `servidor.ts` perguntava `code`, e
+  // a classe não copiava o `code`. Para um dado erro, no máximo uma acertava —
+  // e foi por isso que a mesma rota dava 500 por um caminho e 404 pelo outro,
+  // no MESMO build.
+  it('o reconhecedor reconhece a instância que o próprio sistema cria', () => {
+    const convertido = new IdentificadorMalFormado(P2023);
+    assert.equal(ehIdentificadorMalFormado(convertido), true,
+      'o sistema criou um erro que o seu próprio reconhecedor não reconhece');
+  });
+
   it('o reconhecedor distingue, e não diz que sim a tudo', () => {
+    assert.equal(ehIdentificadorMalFormado(P2007), true, 'a forma MEDIDA não é reconhecida');
     assert.equal(ehIdentificadorMalFormado(P2023), true);
+    // O `P2007` é «erro de validação de dados» em geral. Só o que fala de uuid
+    // é isto — converter os outros em «não existe» escondia falhas alheias.
+    assert.equal(
+      ehIdentificadorMalFormado(Object.assign(new Error('Invalid input value: too long'), { code: 'P2007' })),
+      false, 'um P2007 que não fala de uuid foi convertido em «não existe»',
+    );
     assert.equal(ehIdentificadorMalFormado(new Error('qualquer coisa')), false);
     assert.equal(ehIdentificadorMalFormado({ code: 'P2002' }), false, 'P2002 é chave duplicada');
     assert.equal(ehIdentificadorMalFormado(null), false);

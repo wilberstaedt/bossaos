@@ -34,7 +34,8 @@ expansao.spec.ts:TEM corredor - o scripts/validar-expansao-de-texto.sh - mas a d
 alcance.spec.ts:mesma razao que o expansao.spec.ts acima - o corredor e o scripts/validar-alcance-das-composicoes.sh, uma guarda validar-* que a descoberta daqui nao varre
 foco.spec.ts:pago a 07/09 - passou a ter corredor, o scripts/validar-foco-nos-momentos.sh. Mesma razao dos dois acima para nao ser descoberto: a descoberta so varre provar-*.sh
 acessibilidade-dinamica.spec.ts:mesma razao das tres acima - o corredor e o scripts/validar-acessibilidade-dinamica.sh, uma guarda validar-* que a descoberta daqui nao varre
-alergenios-na-carta.spec.ts:mesma razao das anteriores - o corredor e o scripts/validar-alergenios-na-carta.sh, uma guarda validar-* que a descoberta daqui nao varre"
+alergenios-na-carta.spec.ts:mesma razao das anteriores - o corredor e o scripts/validar-alergenios-na-carta.sh, uma guarda validar-* que a descoberta daqui nao varre
+id-de-rota.spec.ts:corre dentro da scripts/validar-id-de-rota-validado.sh, que a usa como a medicao de RESULTADO do RV100-024 e reprova se um id mal formado deixar de dar 404"
 
 EM_DIVIDA="capturas.spec.ts
 divida-movel-auth.spec.ts

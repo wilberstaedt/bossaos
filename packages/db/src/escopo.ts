@@ -91,6 +91,17 @@ export class IdentificadorMalFormado extends Error {
   // strip-types` do Node não a suporta, e a casa corre as provas com ele.
   readonly causa: unknown;
 
+  /**
+   * O `code` do erro original, copiado.
+   *
+   * Sem isto a classe não se reconhecia a si própria: o `ehIdentificadorMalFormado`
+   * testa `code === 'P2023'` e a instância não tinha `code` nenhum. Ficavam duas
+   * verificações para a mesma coisa e não equivalentes — para um dado erro, no
+   * máximo uma acertava. Foi assim que o `sessao.ts` deu 500 e o `servidor.ts`
+   * deu 404 no MESMO build, e é o defeito que reabriu o RV100-024.
+   */
+  readonly code = 'P2007';
+
   constructor(causa: unknown) {
     super('identificador com forma inválida');
     this.name = 'IdentificadorMalFormado';
@@ -104,8 +115,35 @@ export class IdentificadorMalFormado extends Error {
  * `"InconsistentColumnData": return "P2023"`.
  */
 export function ehIdentificadorMalFormado(erro: unknown): boolean {
-  return typeof erro === 'object' && erro !== null
-    && (erro as { code?: unknown }).code === 'P2023';
+  if (typeof erro !== 'object' || erro === null) return false;
+  const e = erro as { code?: unknown; name?: unknown; message?: unknown };
+
+  // ── O código é o P2007, e não o P2023 ────────────────────────────────────
+  //
+  // A primeira versão disto escutava só o `P2023`. Eu tinha ido ao runtime do
+  // cliente confirmar que `InconsistentColumnData` mapeia para `P2023` — e
+  // confirmei uma coisa verdadeira que não era a pergunta. O que um UUID mal
+  // formado produz nesta versão é:
+  //
+  //   code    P2007
+  //   name    PrismaClientKnownRequestError
+  //   message Invalid input value: invalid input syntax for type uuid: "…"
+  //
+  // Medido no erro que chega ao apanhador, numa rota real. Enquanto escutou o
+  // código errado, o mecanismo esteve INERTE em todos os caminhos — e duas
+  // rotas pareciam curadas porque tinham «não encontrado» próprio.
+  //
+  // Por isso a condição pede o código E a forma da mensagem: o `P2007` é
+  // «erro de validação de dados» em geral, e converter todos em «não existe»
+  // esconderia falhas que não são esta.
+  const codigo = e.code === 'P2007' || e.code === 'P2023';
+  const fala_de_uuid = typeof e.message === 'string'
+    && /invalid input syntax for type uuid|Error creating UUID/i.test(e.message);
+  if (codigo && fala_de_uuid) return true;
+
+  // E a forma já convertida, que traz o nome. Reconhecer as duas é o que
+  // permite ao resto do sistema não perguntar «de que classe és».
+  return e.name === 'IdentificadorMalFormado';
 }
 
 export async function comEscopo<T>(
@@ -166,16 +204,25 @@ export async function comEscopoSerializavel<T>(
   exigirUuid('organizationId', escopo.organizationId);
   const comLock = opcoes.comLock !== false;
 
-  return prisma.$transaction(async (tx) => {
-    await tx.$executeRaw`SELECT set_config('app.organization_id', ${escopo.organizationId}, true)`;
-    if (escopo.userId !== undefined) {
-      await tx.$executeRaw`SELECT set_config('app.user_id', ${escopo.userId}, true)`;
-    }
-    if (comLock) {
-      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${chaveDeSerializacao}))`;
-    }
-    return fn(tx as unknown as ClienteComEscopo);
-  }, { isolationLevel: 'Serializable' });
+  // O terceiro funil, e faltava. O `exigirUuid` acima guarda UM campo — o da
+  // organização — e deixa cru qualquer outro id tocado lá dentro. Uma rede com
+  // dois nós fechados e um aberto não é uma rede, e este é usado onde se reserva
+  // uma mesa: `reservas.ts:348` e `:588`.
+  try {
+    return await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT set_config('app.organization_id', ${escopo.organizationId}, true)`;
+      if (escopo.userId !== undefined) {
+        await tx.$executeRaw`SELECT set_config('app.user_id', ${escopo.userId}, true)`;
+      }
+      if (comLock) {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${chaveDeSerializacao}))`;
+      }
+      return fn(tx as unknown as ClienteComEscopo);
+    }, { isolationLevel: 'Serializable' });
+  } catch (erro) {
+    if (ehIdentificadorMalFormado(erro)) throw new IdentificadorMalFormado(erro);
+    throw erro;
+  }
 }
 
 /**
