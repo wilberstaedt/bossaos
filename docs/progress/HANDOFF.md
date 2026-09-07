@@ -2250,3 +2250,45 @@ quarto do tamanho:
 **A página diz «olha o produto» e mostra-o num tamanho em que não se lê nada.**
 Mesma família da medição do KDS de hoje: o que conta é o tamanho no ecrã de quem
 olha, nunca o do ficheiro.
+
+## 07/09 21h55 — as capturas de telemóvel, revistas e assinadas
+
+Verifiquei no **`currentSrc`**, que é o ficheiro que o navegador escolhe, e não
+na marcação `<source>` que o commit mostrava:
+
+| composição | telemóvel (390) | secretária (1440) |
+|---|---|---|
+| sala | `sala-estreita-390` — escala **0,88** | `sala-servico-1440` |
+| kds | `kds-estreito-390` — escala **0,88** | `kds-cozinha-1280` |
+| catálogo | `catalogo-estreito-390` — escala **0,88** | `catalogo-1440` |
+
+Era **0,24**. **Assinado.** E a escolha do `<picture>` em vez de duas `<Image>`
+escondidas está certa: o navegador descarrega as duas mesmo com `display:none`.
+
+**A decisão que ele levantou confirma-se por medição:** no telemóvel o
+`sala-estreita-390` aparece **duas vezes** — a composição `tablet` cai na mesma
+imagem. Vai para a lista do Matheus, porque escolher outro ecrã ali é editorial.
+
+### Um alarme falso que apanhei antes de o reportar
+
+O `sala-tablet-834` media `naturalWidth: 0` e uma escala absurda. **Não era
+defeito — era carregamento preguiçoso.** Depois de rolar a página: 640 → 640,
+escala 1,00. Se eu o tivesse reportado, mandava alguém procurar uma avaria que
+não existe.
+
+### E um defeito real, que NÃO é dele
+
+`sala-servico-1440` e `kds-cozinha-1280` são servidos a **720 px** para uma
+ranhura de **1072** — ampliados **1,49×**, visivelmente moles na secretária. O
+`catalogo-1440`, na mesma ranhura, recebe 1080 e fica a 0,99.
+
+Medi a versão **ao vivo**, anterior à mudança dele: **idêntica**. Não nasceu
+agora. E a causa está no `sizes`:
+
+| | `sizes` declarado | ranhura real |
+|---|---|---|
+| sala, kds | `(min-width: 1024px) 50vw` | 1072/1440 = **74vw** |
+| catálogo | `100vw` | 74vw — pede a mais, e acerta |
+
+**A dica mente ao navegador**, ele vai buscar o ficheiro certo para 50vw, e
+depois estica-o. Uma declaração que discorda da realidade — a família do dia.
