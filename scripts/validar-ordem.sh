@@ -37,7 +37,26 @@ ok "$total etapas na matriz"
 atual=$(grep -E '^\| E[0-9]{2} \| ' "$MATRIZ" | grep -v '^| E00 ' | grep -v '| validado |' \
   | head -1 | awk -F'|' '{print $2}' | tr -d ' ')
 if [ -z "${atual:-}" ]; then
-  erro "nao consegui derivar a etapa autorizada"
+  # ── O PROJECTO PODE TER ACABADO, E ISSO NAO E UM DEFEITO DO LEITOR ──────────
+  #
+  # A 07/09, minutos depois de o E34 ser assinado, esta guarda ficou vermelha com
+  # «nao consegui derivar a etapa autorizada». Nao havia etapa por validar porque
+  # nao havia trabalho por rever: 36 de 36. A guarda lia o fim do projecto como
+  # cegueira do leitor.
+  #
+  # Corrigi o mesmo defeito no scripts/estado.sh horas antes e PAREI AI. Consertei
+  # o instrumento que me estava a incomodar e deixei a mesma avaria em mais tres —
+  # esta, a validar-handoff.sh e, por arrasto, a validar-no-commit.sh. Uma
+  # correccao que nao se propaga a classe e meio conserto.
+  #
+  # E o vazio nao PROVA que esta tudo validado: um filtro partido produz o mesmo
+  # vazio. Por isso conta-se, em vez de se inferir.
+  validadas=$(grep -E '^\| E[0-9]{2} \| ' "$MATRIZ" | grep -c '| validado |' || true)
+  if [ "${validadas:-0}" -eq "$total" ]; then
+    ok "as $total etapas estao validadas - nao ha etapa autorizada porque nao ha trabalho por rever"
+    echo; echo "  0 FALHA(S)."; exit 0
+  fi
+  erro "nao consegui derivar a etapa autorizada (contei $validadas validadas de $total - o filtro nao esta a ler a matriz)"
   echo; echo "  $falhas FALHA(S)."; exit "$falhas"
 fi
 n_atual=$(echo "$atual" | tr -dc '0-9')
