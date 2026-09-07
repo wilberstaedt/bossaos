@@ -322,3 +322,57 @@ recuperável. Três saídas nomeadas, nenhuma escolhida — é decisão de produ
 
 ### Próximo passo
 - O JR fecha o E30. Faltam seis etapas.
+
+---
+
+## [2026-09-07] — RV100 secção 6: groundwork da landing, medido e não construído
+
+### Decisões técnicas
+- **Os catorze blocos do §6.3 entram como secções da MKT-001, não como rotas
+  novas.** O §12.5 rastreia 396 IDs; uma rota nova muda o total e o gate de
+  cobertura passa a medir outra coisa.
+- **O ritmo de 80–128 px que o §4.4 pede sai da escala do manual sem token
+  novo:** `--bo-espaco-gigante` (64) em cima e em baixo de cada secção soma 128
+  entre secções. Não se acrescentam tokens de 80/96/128.
+- **Ordem de reconstrução em oito lotes, home primeiro** — e dentro do primeiro,
+  moldura → motor de prova do produto → composição. A moldura corrige seis
+  defeitos em dez rotas de uma vez; o motor de prova tem de existir antes da
+  composição, senão o hero fica com o lado direito vazio, que é o defeito que o
+  §10 reprova pelo nome.
+- **Os preços saem de `precoDoPlano()`**, nunca escritos numa tela — a
+  `validar-precos.sh` reprova `€ 19` num `.tsx`.
+
+### Learnings
+- **Uma decisão que se apoia em «X ainda não existe» não tem gatilho para o dia
+  em que X passa a existir.** A página de planos ficou sem preços porque a 04/09
+  às 02:38 eles não existiam; às 04:01 do mesmo dia passaram a existir e ninguém
+  voltou lá. Cinco dias sem preços numa página comercial.
+- **Reler evidência que já existe vale mais do que gerar evidência nova.** A
+  medição de 1440 px já estava feita; recontá-la apanhou um erro pequeno no
+  baseline («728 em sete páginas» são seis, mais a FAQ a 652).
+- **Um enunciado detalhado não é infalível.** Cinco divergências novas entre a
+  RV100 e as fontes, além das três que a secção 3 já tinha apanhado — incluindo
+  uma que manda usar linguagem de um ficheiro que não a tem.
+- **Contradição entre duas regras do mesmo documento resolve-se pela que
+  protege quem lê**: o §10 exige rotas institucionais no footer, o §6.3.14 diz
+  «conforme disponibilidade real». Ganha o §6.3.14 — um link para 404 é pior do
+  que a falta dele.
+
+### O que foi feito
+- `docs/visual/rv100/2026-09-06_e953a87/05_MARKETING_AND_CONVERSION.md`: as oito
+  páginas comerciais medidas uma a uma contra o §6, composição separada de
+  conteúdo, ordem de reconstrução com a razão, e as cinco divergências.
+- `.../11_OPEN_FINDINGS.md`: 20 achados no formato do §11.4 — 8 P1, 6 P2, 5 P3,
+  1 aceite.
+- `00_STATUS.md` actualizado sem apagar o registo antigo que ficou superado.
+- **Zero linhas de produto alteradas. Zero tokens tocados.**
+
+### Mudança de status do projeto
+- RV100 na secção 6. As secções 2 e 3 estavam feitas; esta é a preparação da
+  reconstrução, não a reconstrução.
+
+### Próximo passo
+- Lote L1 (home): moldura → motor de prova → composição. Cinco achados esperam
+  decisão do Matheus e nenhum bloqueia o L1: privacidade/consentimento no
+  formulário de demo, factos do piloto, o hero inglês, a política de
+  equipamentos e as rotas legais do footer.

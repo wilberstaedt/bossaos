@@ -64,3 +64,28 @@ que dava jeito.
 
 **É contra isto que qualquer regressão visual será medida.** Um frontend mais
 bonito com comportamento perdido é reprovação — está no §1.4.
+
+---
+
+## 07/09 — secção 6 aberta: groundwork entregue, código intocado
+
+`RV100 EM RECONSTRUÇÃO`. O bloco lá em cima que diz «`RV100 EM RECONSTRUÇÃO` —
+**não**» é de ontem de manhã, quando a condição de entrada ainda não estava
+cumprida. **Fica escrito e fica superado** — apagá-lo era esconder que o estado
+mudou por uma razão datada, e é a razão que interessa.
+
+| entregue | onde |
+| --- | --- |
+| as oito páginas comerciais medidas contra o enunciado do §6, uma a uma | `05_MARKETING_AND_CONVERSION.md` |
+| composição separada de conteúdo, e o conteúdo que não é meu separado do que é | idem, secção 3 |
+| ordem de reconstrução em oito lotes, home primeiro, com a razão | idem, secção 4 |
+| cinco divergências novas entre o enunciado e as fontes | idem, secção 5 |
+| 20 achados no formato do §11.4 — 8 P1, 6 P2, 5 P3, 1 aceite | `11_OPEN_FINDINGS.md` |
+
+**Nenhuma página comercial foi alterada neste lote, e nenhum token foi tocado.**
+A evidência usada é a que já existia em `evidence/baseline/`; não gerei capturas
+novas, porque gerar evidência que já existe é trabalho a fingir.
+
+O que fica em pé antes do primeiro lote de código: cinco achados esperam decisão
+do Matheus (RV100-011, 013, 014, 015 e a metade legal do 005) e nenhum deles
+bloqueia o lote L1.
