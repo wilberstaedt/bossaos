@@ -28,6 +28,59 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## Anel de foco — o defeito não era só o do KDS, e está no ar
+
+O sénior mediu na instalação publicada: **anel do KDS a 1,00:1**, a cor do anel
+igual à cor do fundo. Peguei nele porque a cura que ele nomeou é o contrato de
+superfície. Commit `3b186e4`.
+
+**A causa era estrutural e não cromática.** O anel vivia numa regra
+`.bo-inverso :where(…):focus-visible` e o `.bo-kds` tinha entrado só na lista de
+**tokens**. Duas listas para a mesma pergunta — *«esta superfície é escura?»* — e
+quem acrescenta a terceira não recebe erro nenhum ao esquecer uma.
+
+**Passar o token para o contrato não chegou, e foi a medição que o disse.** Com
+`--bo-foco-cor` a creme: conforme sobre a página escura (13,05:1) e **invisível**
+sobre os botões de acção, que no KDS são creme, e sobre dois remendos claros
+(1,06:1 e 1,10:1). Trocar a cor só mudava quais dos fundos ficavam cegos — uma
+cor só assume que sabe o que está por trás dela.
+
+**A cura são duas faixas encostadas, de tom oposto:** `outline` mais uma sombra
+logo a seguir. As duas contrastam **entre si** 13,05:1, portanto seja qual for o
+fundo uma delas destaca-se. Troca uma suposição por uma garantia.
+
+> **E destapou um defeito vivo na landing.** A guarda pública já estava vermelha
+> **no CSS publicado**: os dois CTA do herói levam anel `#102E35` sobre faixa
+> `#102E35` — **1,00:1 na página que o comprador vê primeiro**. Confirmei que não
+> fui eu, correndo-a contra o CSS do `HEAD`.
+
+**A/B nos dois sentidos, porque ensinei as duas guardas a ler a segunda faixa e a
+pergunta passou a ser se consertei o produto ou ceguei a medida:**
+
+| | |
+| --- | ---: |
+| CSS publicado, prova nova do KDS | **48 falhas** a 1,00:1 em 171 focáveis |
+| com a correcção | **0** |
+| guarda pública nova + CSS publicado | **vermelha**, exit 1, nomeia «faixa única» |
+| guarda pública nova + correcção | verde, exit 0 |
+
+A prova do KDS vive no `kds.spec.ts` **porque corre com sessão** — a
+`validar-acessibilidade-dinamica.sh` põe o KDS fora do âmbito de propósito, e era
+essa a dívida declarada que cobrou no ar. Suite do KDS **21/21**.
+
+> **Um erro meu no caminho, e é o mesmo de sempre:** medi o anel contra o
+> preenchimento do próprio botão. Com `outline-offset` positivo o anel desenha-se
+> **fora** da caixa, logo quem está atrás dele é o **pai** — acusei 1,00:1 num
+> anel que assenta no fundo escuro e dá 13,05:1. A guarda pública já tinha isto
+> certo, com o comentário escrito. O instrumento apontado ao sujeito errado, a
+> devolver um número plausível.
+
+**Continua por decidir e não é meu:** o `apps/web/next-env.d.ts` está sujo na
+árvore partilhada — é versionado e o Next reescreve-o conforme o `distDir` de
+cada corrida (já foi `.next-mao` e `.next-acess`). O próximo `git add -A` comita
+um ponteiro que só resolve numa máquina. O conserto normal é ignorá-lo, que é o
+que o modelo do Next faz por omissão.
+
 ## A guarda do cabeçalho — prevenção, e não propagação
 
 **O sénior travou-me a caminho dos 267 e a razão não é prudência:** converter
