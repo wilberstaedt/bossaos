@@ -31,3 +31,8 @@ test-results/
 # A sessão do arnês do navegador. Fora do `outputDir`, que o Playwright limpa
 # quando cada projecto arranca — e é um cookie de sessão, que não se versiona.
 inspeccao/.sessao/
+
+# Bytecode do Python. Apareceu quando o `pagina-de-aprovacao.py` passou a
+# importar o `frescura_do_produto.py`: um artefacto gerado que ninguem deve
+# commitar. Ao contrario do `next-env.d.ts`, aqui nao ha deriva util para ver.
+__pycache__/
