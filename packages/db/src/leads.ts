@@ -189,6 +189,15 @@ export async function registarPedidoDeDemo(
     nome: string; email: string; restaurante: string;
     telefone?: string | null; mensagem?: string | null;
     idioma: string; agora?: Date;
+    /**
+     * O consentimento para MARKETING, e não para o contacto que a pessoa pediu.
+     *
+     * Obrigatório de propósito, sem valor por omissão: quem chama esta função
+     * tem de dizer o que a pessoa respondeu. Um `?` aqui deixava um caminho
+     * gravar em silêncio o que ninguém perguntou, e o §6.7 pede exactamente a
+     * separação que esse silêncio apagava.
+     */
+    consentimentoMarketing: boolean;
   },
 ): Promise<ResultadoDoPedidoDeDemo> {
   const recusas = validarLead({
@@ -212,7 +221,8 @@ export async function registarPedidoDeDemo(
   const linhas = await prisma.$queryRaw<{ registar_pedido_de_demo: string }[]>`
     SELECT registar_pedido_de_demo(
       ${dados.nome}, ${dados.email}, ${dados.restaurante},
-      ${dados.telefone ?? null}, ${dados.mensagem ?? null}, ${dados.idioma}, ${chave})`;
+      ${dados.telefone ?? null}, ${dados.mensagem ?? null}, ${dados.idioma}, ${chave},
+      ${dados.consentimentoMarketing})`;
   const r = linhas[0]?.registar_pedido_de_demo;
   // Uma resposta que não é nenhuma das duas conhecidas **não** é sucesso. Sem
   // isto, uma porta alterada que devolvesse outra coisa passava por gravação.

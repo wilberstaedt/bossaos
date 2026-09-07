@@ -1,0 +1,371 @@
+{
+  "paginas": [
+    {
+      "idioma": "es-ES",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": false
+      },
+      "aviso": {
+        "existe": false,
+        "avisoAntesDoBotao": null,
+        "avisoOrdemDom": null
+      },
+      "ligacaoPrivacidade": null,
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1858
+    },
+    {
+      "idioma": "es-ES",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": false
+      },
+      "aviso": {
+        "existe": false,
+        "avisoAntesDoBotao": null,
+        "avisoOrdemDom": null
+      },
+      "ligacaoPrivacidade": null,
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1858
+    },
+    {
+      "idioma": "es-ES",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": false
+      },
+      "aviso": {
+        "existe": false,
+        "avisoAntesDoBotao": null,
+        "avisoOrdemDom": null
+      },
+      "ligacaoPrivacidade": null,
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1609
+    },
+    {
+      "idioma": "es-ES",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": false
+      },
+      "aviso": {
+        "existe": false,
+        "avisoAntesDoBotao": null,
+        "avisoOrdemDom": null
+      },
+      "ligacaoPrivacidade": null,
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1417
+    },
+    {
+      "idioma": "es-ES",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": false
+      },
+      "aviso": {
+        "existe": false,
+        "avisoAntesDoBotao": null,
+        "avisoOrdemDom": null
+      },
+      "ligacaoPrivacidade": null,
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1417
+    },
+    {
+      "idioma": "pt-BR",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": false
+      },
+      "aviso": {
+        "existe": false,
+        "avisoAntesDoBotao": null,
+        "avisoOrdemDom": null
+      },
+      "ligacaoPrivacidade": null,
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1858
+    },
+    {
+      "idioma": "pt-BR",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": false
+      },
+      "aviso": {
+        "existe": false,
+        "avisoAntesDoBotao": null,
+        "avisoOrdemDom": null
+      },
+      "ligacaoPrivacidade": null,
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1858
+    },
+    {
+      "idioma": "pt-BR",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": false
+      },
+      "aviso": {
+        "existe": false,
+        "avisoAntesDoBotao": null,
+        "avisoOrdemDom": null
+      },
+      "ligacaoPrivacidade": null,
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1609
+    },
+    {
+      "idioma": "pt-BR",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": false
+      },
+      "aviso": {
+        "existe": false,
+        "avisoAntesDoBotao": null,
+        "avisoOrdemDom": null
+      },
+      "ligacaoPrivacidade": null,
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1417
+    },
+    {
+      "idioma": "pt-BR",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": false
+      },
+      "aviso": {
+        "existe": false,
+        "avisoAntesDoBotao": null,
+        "avisoOrdemDom": null
+      },
+      "ligacaoPrivacidade": null,
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1417
+    },
+    {
+      "idioma": "en",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": false
+      },
+      "aviso": {
+        "existe": false,
+        "avisoAntesDoBotao": null,
+        "avisoOrdemDom": null
+      },
+      "ligacaoPrivacidade": null,
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1858
+    },
+    {
+      "idioma": "en",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": false
+      },
+      "aviso": {
+        "existe": false,
+        "avisoAntesDoBotao": null,
+        "avisoOrdemDom": null
+      },
+      "ligacaoPrivacidade": null,
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1858
+    },
+    {
+      "idioma": "en",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": false
+      },
+      "aviso": {
+        "existe": false,
+        "avisoAntesDoBotao": null,
+        "avisoOrdemDom": null
+      },
+      "ligacaoPrivacidade": null,
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1609
+    },
+    {
+      "idioma": "en",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": false
+      },
+      "aviso": {
+        "existe": false,
+        "avisoAntesDoBotao": null,
+        "avisoOrdemDom": null
+      },
+      "ligacaoPrivacidade": null,
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1417
+    },
+    {
+      "idioma": "en",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": false
+      },
+      "aviso": {
+        "existe": false,
+        "avisoAntesDoBotao": null,
+        "avisoOrdemDom": null
+      },
+      "ligacaoPrivacidade": null,
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1417
+    }
+  ],
+  "erros": {
+    "es-ES": {
+      "campos": "No hemos podido guardar tu solicitudNo se ha guardado nada. Vuelve a intentarlo en un momento, por favor.",
+      "gravacao": "No hemos podido guardar tu solicitudNo se ha guardado nada. Vuelve a intentarlo en un momento, por favor.",
+      "distintos": false
+    },
+    "pt-BR": {
+      "campos": "Não conseguimos salvar seu pedidoNada foi salvo. Tente de novo daqui a pouco, por favor.",
+      "gravacao": "Não conseguimos salvar seu pedidoNada foi salvo. Tente de novo daqui a pouco, por favor.",
+      "distintos": false
+    },
+    "en": {
+      "campos": "We could not save your requestNothing was saved. Please try again in a moment.",
+      "gravacao": "We could not save your requestNothing was saved. Please try again in a moment.",
+      "distintos": false
+    }
+  },
+  "privacidade": {
+    "es-ES": 404,
+    "pt-BR": 404,
+    "en": 404
+  }
+}

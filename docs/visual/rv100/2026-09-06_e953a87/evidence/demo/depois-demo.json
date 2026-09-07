@@ -1,0 +1,512 @@
+{
+  "paginas": [
+    {
+      "idioma": "es-ES",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": true,
+        "nome": "consentimentoMarketing",
+        "preMarcada": false,
+        "obrigatoria": false,
+        "temRotulo": true,
+        "alvo": {
+          "largura": 312,
+          "altura": 44
+        }
+      },
+      "aviso": {
+        "existe": true,
+        "fonte": 16,
+        "avisoAntesDoBotao": true,
+        "avisoOrdemDom": true
+      },
+      "ligacaoPrivacidade": "/es-ES/privacy",
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 2310
+    },
+    {
+      "idioma": "es-ES",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": true,
+        "nome": "consentimentoMarketing",
+        "preMarcada": false,
+        "obrigatoria": false,
+        "temRotulo": true,
+        "alvo": {
+          "largura": 342,
+          "altura": 44
+        }
+      },
+      "aviso": {
+        "existe": true,
+        "fonte": 16,
+        "avisoAntesDoBotao": true,
+        "avisoOrdemDom": true
+      },
+      "ligacaoPrivacidade": "/es-ES/privacy",
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 2286
+    },
+    {
+      "idioma": "es-ES",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": true,
+        "nome": "consentimentoMarketing",
+        "preMarcada": false,
+        "obrigatoria": false,
+        "temRotulo": true,
+        "alvo": {
+          "largura": 720,
+          "altura": 44
+        }
+      },
+      "aviso": {
+        "existe": true,
+        "fonte": 16,
+        "avisoAntesDoBotao": true,
+        "avisoOrdemDom": true
+      },
+      "ligacaoPrivacidade": "/es-ES/privacy",
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1901
+    },
+    {
+      "idioma": "es-ES",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": true,
+        "nome": "consentimentoMarketing",
+        "preMarcada": false,
+        "obrigatoria": false,
+        "temRotulo": true,
+        "alvo": {
+          "largura": 736,
+          "altura": 44
+        }
+      },
+      "aviso": {
+        "existe": true,
+        "fonte": 16,
+        "avisoAntesDoBotao": true,
+        "avisoOrdemDom": true
+      },
+      "ligacaoPrivacidade": "/es-ES/privacy",
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1709
+    },
+    {
+      "idioma": "es-ES",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": true,
+        "nome": "consentimentoMarketing",
+        "preMarcada": false,
+        "obrigatoria": false,
+        "temRotulo": true,
+        "alvo": {
+          "largura": 736,
+          "altura": 44
+        }
+      },
+      "aviso": {
+        "existe": true,
+        "fonte": 16,
+        "avisoAntesDoBotao": true,
+        "avisoOrdemDom": true
+      },
+      "ligacaoPrivacidade": "/es-ES/privacy",
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1709
+    },
+    {
+      "idioma": "pt-BR",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": true,
+        "nome": "consentimentoMarketing",
+        "preMarcada": false,
+        "obrigatoria": false,
+        "temRotulo": true,
+        "alvo": {
+          "largura": 312,
+          "altura": 44
+        }
+      },
+      "aviso": {
+        "existe": true,
+        "fonte": 16,
+        "avisoAntesDoBotao": true,
+        "avisoOrdemDom": true
+      },
+      "ligacaoPrivacidade": "/pt-BR/privacy",
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 2334
+    },
+    {
+      "idioma": "pt-BR",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": true,
+        "nome": "consentimentoMarketing",
+        "preMarcada": false,
+        "obrigatoria": false,
+        "temRotulo": true,
+        "alvo": {
+          "largura": 342,
+          "altura": 44
+        }
+      },
+      "aviso": {
+        "existe": true,
+        "fonte": 16,
+        "avisoAntesDoBotao": true,
+        "avisoOrdemDom": true
+      },
+      "ligacaoPrivacidade": "/pt-BR/privacy",
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 2310
+    },
+    {
+      "idioma": "pt-BR",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": true,
+        "nome": "consentimentoMarketing",
+        "preMarcada": false,
+        "obrigatoria": false,
+        "temRotulo": true,
+        "alvo": {
+          "largura": 720,
+          "altura": 44
+        }
+      },
+      "aviso": {
+        "existe": true,
+        "fonte": 16,
+        "avisoAntesDoBotao": true,
+        "avisoOrdemDom": true
+      },
+      "ligacaoPrivacidade": "/pt-BR/privacy",
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1901
+    },
+    {
+      "idioma": "pt-BR",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": true,
+        "nome": "consentimentoMarketing",
+        "preMarcada": false,
+        "obrigatoria": false,
+        "temRotulo": true,
+        "alvo": {
+          "largura": 736,
+          "altura": 44
+        }
+      },
+      "aviso": {
+        "existe": true,
+        "fonte": 16,
+        "avisoAntesDoBotao": true,
+        "avisoOrdemDom": true
+      },
+      "ligacaoPrivacidade": "/pt-BR/privacy",
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1709
+    },
+    {
+      "idioma": "pt-BR",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": true,
+        "nome": "consentimentoMarketing",
+        "preMarcada": false,
+        "obrigatoria": false,
+        "temRotulo": true,
+        "alvo": {
+          "largura": 736,
+          "altura": 44
+        }
+      },
+      "aviso": {
+        "existe": true,
+        "fonte": 16,
+        "avisoAntesDoBotao": true,
+        "avisoOrdemDom": true
+      },
+      "ligacaoPrivacidade": "/pt-BR/privacy",
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1709
+    },
+    {
+      "idioma": "en",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": true,
+        "nome": "consentimentoMarketing",
+        "preMarcada": false,
+        "obrigatoria": false,
+        "temRotulo": true,
+        "alvo": {
+          "largura": 312,
+          "altura": 44
+        }
+      },
+      "aviso": {
+        "existe": true,
+        "fonte": 16,
+        "avisoAntesDoBotao": true,
+        "avisoOrdemDom": true
+      },
+      "ligacaoPrivacidade": "/en/privacy",
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 2286
+    },
+    {
+      "idioma": "en",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": true,
+        "nome": "consentimentoMarketing",
+        "preMarcada": false,
+        "obrigatoria": false,
+        "temRotulo": true,
+        "alvo": {
+          "largura": 342,
+          "altura": 44
+        }
+      },
+      "aviso": {
+        "existe": true,
+        "fonte": 16,
+        "avisoAntesDoBotao": true,
+        "avisoOrdemDom": true
+      },
+      "ligacaoPrivacidade": "/en/privacy",
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 2262
+    },
+    {
+      "idioma": "en",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": true,
+        "nome": "consentimentoMarketing",
+        "preMarcada": false,
+        "obrigatoria": false,
+        "temRotulo": true,
+        "alvo": {
+          "largura": 720,
+          "altura": 44
+        }
+      },
+      "aviso": {
+        "existe": true,
+        "fonte": 16,
+        "avisoAntesDoBotao": true,
+        "avisoOrdemDom": true
+      },
+      "ligacaoPrivacidade": "/en/privacy",
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1901
+    },
+    {
+      "idioma": "en",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": true,
+        "nome": "consentimentoMarketing",
+        "preMarcada": false,
+        "obrigatoria": false,
+        "temRotulo": true,
+        "alvo": {
+          "largura": 736,
+          "altura": 44
+        }
+      },
+      "aviso": {
+        "existe": true,
+        "fonte": 16,
+        "avisoAntesDoBotao": true,
+        "avisoOrdemDom": true
+      },
+      "ligacaoPrivacidade": "/en/privacy",
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1709
+    },
+    {
+      "idioma": "en",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "formulario": true,
+      "camposDeTexto": 5,
+      "consentimento": {
+        "existe": true,
+        "nome": "consentimentoMarketing",
+        "preMarcada": false,
+        "obrigatoria": false,
+        "temRotulo": true,
+        "alvo": {
+          "largura": 736,
+          "altura": 44
+        }
+      },
+      "aviso": {
+        "existe": true,
+        "fonte": 16,
+        "avisoAntesDoBotao": true,
+        "avisoOrdemDom": true
+      },
+      "ligacaoPrivacidade": "/en/privacy",
+      "cookies": 0,
+      "terceiros": [],
+      "seccoes": 2,
+      "alturaRolavel": 1709
+    }
+  ],
+  "erros": {
+    "es-ES": {
+      "campos": "Revisa estos datos antes de enviarNo se ha guardado nada. Falta el nombre o el restaurante, o el correo no tiene forma de correo. Corrígelo y vuelve a enviar: e",
+      "gravacao": "No hemos podido guardar tu solicitudNo se ha guardado nada. Vuelve a intentarlo en un momento, por favor.",
+      "distintos": true
+    },
+    "pt-BR": {
+      "campos": "Revise estes dados antes de enviarNada foi salvo. Falta o nome ou o restaurante, ou o e-mail não tem forma de e-mail. Corrija e envie de novo: esperar não resol",
+      "gravacao": "Não conseguimos salvar seu pedidoNada foi salvo. Tente de novo daqui a pouco, por favor.",
+      "distintos": true
+    },
+    "en": {
+      "campos": "Check these details before sendingNothing was saved. The name or the restaurant is missing, or the email is not shaped like an email. Fix it and send again: wai",
+      "gravacao": "We could not save your requestNothing was saved. Please try again in a moment.",
+      "distintos": true
+    }
+  },
+  "privacidade": {
+    "es-ES": 200,
+    "pt-BR": 200,
+    "en": 200
+  },
+  "controloDeCookies": {
+    "antesDoControlo": 0,
+    "comOControlo": 1,
+    "depoisDeLimpar": 0,
+    "acendeu": true
+  }
+}

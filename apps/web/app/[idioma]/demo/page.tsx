@@ -40,11 +40,21 @@ export default async function Demo({
       <section className="bo-mkt__seccao" aria-labelledby="pedir">
         <h2 id="pedir">{k.demoEnviar}</h2>
 
+        {/* ── Os dois erros deixam de dizer a mesma coisa ──────────────────
+            A rota já distinguia validação de falha de escrita — `erro=campos` e
+            `erro=gravacao` são redireccionamentos diferentes. **O ecrã desfazia
+            a distinção**: as duas mostravam `demoErro`/`demoErroTexto`, que diz
+            «volta a tentar daqui a um momento».
+
+            Para uma base em baixo isso é o conselho certo. Para um email sem
+            arroba é o conselho ERRADO — esperar não corrige um campo, e mandar
+            alguém esperar por causa do que ele escreveu é fazê-lo perder o
+            pedido. A distinção existia no caminho e morria na mensagem. */}
         {erro === 'gravacao' ? (
           <Aviso tom="perigo" titulo={k.demoErro}>{k.demoErroTexto}</Aviso>
         ) : null}
         {erro === 'campos' ? (
-          <Aviso tom="aviso" titulo={k.demoErro}>{k.demoErroTexto}</Aviso>
+          <Aviso tom="aviso" titulo={k.demoErroCampos}>{k.demoErroCamposTexto}</Aviso>
         ) : null}
 
         <form method="post" action="/api/publico/demo" className="bo-publico__formulario">
@@ -73,6 +83,59 @@ export default async function Demo({
             <label className="bo-campo__rotulo" htmlFor="mensagem">{k.demoMensagem}</label>
             <textarea id="mensagem" name="mensagem" maxLength={4000} />
           </div>
+          {/* ── O consentimento para MARKETING, separado e por marcar ───────
+              O §6.7 manda «diferenciar contacto transaccional de consentimento
+              para marketing». Quem preenche isto está a pedir uma demonstração:
+              **responder-lhe é o objecto do pedido** e não precisa de caixa.
+              Receber outra coisa depois é uma decisão diferente, e é esta.
+
+              `defaultChecked` NÃO existe aqui, e é a linha que interessa: uma
+              caixa pré-marcada recolhe o consentimento de quem não reparou, o
+              que é o contrário de consentir. Uma caixa não marcada nem sequer é
+              enviada pelo navegador — a ausência é a resposta, e a resposta é
+              não.
+
+              E o campo é `consentimentoMarketing`, separado de tudo o resto: a
+              coluna existe na base com a data ao lado, porque um consentimento
+              sem data não se prova. */}
+          <div className="bo-campo bo-campo--caixa">
+            {/* A caixa vive DENTRO do rótulo, e isso não é arrumação de estilo.
+                Tocar em qualquer ponto do texto marca a caixa — que é o alvo de
+                44 px que a régua pede, sem inchar a caixa para 44, o que daria
+                uma tela pior. O `htmlFor`/`id` fica na mesma: a associação
+                explícita é a que os leitores de ecrã anunciam melhor. */}
+            <label className="bo-campo__rotulo" htmlFor="consentimentoMarketing">
+              <input
+                className="bo-campo__caixa"
+                id="consentimentoMarketing"
+                name="consentimentoMarketing"
+                type="checkbox"
+                value="sim"
+              />
+              <span>{k.demoConsentimento}</span>
+            </label>
+            <p className="bo-campo__ajuda">{k.demoConsentimentoNota}</p>
+          </div>
+
+          {/* ── O aviso vem ANTES do botão, e não na página de obrigado ──────
+              Depois de enviar já não é aviso, é notícia: a pessoa entregou os
+              dados antes de saber o que lhes acontece. Fica no fluxo de leitura
+              imediatamente acima da acção, que é o último sítio onde ainda dá
+              para mudar de ideias.
+
+              O que ele afirma é verificável: a migração `20260904150000` faz
+              `REVOKE ALL ON demo_requests FROM bossaos_app`, portanto o runtime
+              escreve e **não lê**. E a ausência de cookies de análise não fica
+              só escrita — a `rv100-demo.spec.ts` mede-a, pela mesma regra que a
+              página de confiança já segue: uma afirmação nova precisa de
+              guarda. */}
+          <p className="bo-mkt__tratamento">
+            {k.demoTratamento}{' '}
+            <a href={`/${idioma}/privacy`}>{k.demoTratamentoLigacao}</a>
+          </p>
+
+          <p className="bo-publico__texto">{k.demoPassoSeguinte}</p>
+
           <p><button type="submit" className="bo-botao bo-botao--primario">{k.demoEnviar}</button></p>
         </form>
       </section>

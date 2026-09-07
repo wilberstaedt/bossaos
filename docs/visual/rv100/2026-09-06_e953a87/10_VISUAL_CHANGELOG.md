@@ -981,3 +981,168 @@ medido: 100% dos erros vinham de lá.
 - **`11_OPEN_FINDINGS.md` não foi tocado.** Mudar o `status` do RV100-015 seria eu
   a assinar a minha própria revisão.
 - **Não medi a aparência.** Secção 7, e é do Matheus.
+
+---
+
+## L1g — a demo e a conversão (MKT-007)
+
+Instrumento: `inspeccao/rv100-demo.spec.ts`, guião `scripts/provar-demo-mkt.sh`.
+Evidência em `evidence/demo/`, cinco larguras × três línguas.
+
+### Porque é que esta página pesa mais do que as outras
+
+Não há registo público, checkout nem criação de assinatura em lado nenhum: **o
+funil comercial inteiro acaba neste formulário**. E é o único sítio da superfície
+comercial que recolhe dados pessoais.
+
+### O que estava cumprido, e não parti
+
+*«Não mostre sucesso se a persistência falhar»* já estava certo, e continua: há
+**um** caminho para `/demo/thanks` e ele passa por a porta da base ter devolvido.
+`erro=campos` e `erro=gravacao` são redireccionamentos distintos, e o `catch` não
+tem para onde ir senão o erro.
+
+### O buraco, medido
+
+| | antes | depois |
+| --- | --- | --- |
+| caixa de consentimento de marketing | **não existe** | existe, `consentimentoMarketing` |
+| pré-marcada | — | **`false`** |
+| obrigatória para enviar | — | **`false`** |
+| alvo de toque do consentimento | — | **44 px de altura nas cinco larguras** |
+| aviso de tratamento antes do botão | **não existe** | **sim, em píxeis e em ordem de DOM**, a 16 px |
+| ligação para tratamento de dados | nenhuma | `/{idioma}/privacy` |
+| rota de tratamento de dados | **404 nas três línguas** | **200 nas três línguas** |
+| os dois erros dizem coisas diferentes | **não, nas três línguas** | **sim, nas três línguas** |
+| anomalias em 15 combinações | 0 | 0 |
+
+### O defeito que encontrei e que não estava na lista
+
+A rota distinguia validação de falha de escrita. **O ecrã desfazia a
+distinção:** os dois ramos mostravam `demoErro`/`demoErroTexto`, ou seja
+*«não se guardou nada, volta a tentar daqui a um momento»*.
+
+Para uma base em baixo esse é o conselho certo. Para um email sem arroba é o
+conselho **errado** — esperar não corrige um campo, e mandar a pessoa esperar por
+causa do que ela escreveu é fazê-la perder o pedido. **A distinção existia no
+caminho e morria na mensagem**, que é a razão pela qual isto se mede no texto
+lido e não no redireccionamento.
+
+### A separação existe onde os dados vivem, e não só no ecrã
+
+Migração `20260918020000_l1g_consentimento_de_marketing`:
+
+- `consentimento_marketing BOOLEAN NOT NULL DEFAULT false`;
+- `consentimento_em TIMESTAMPTZ` — **um consentimento sem data não se prova**, e
+  a data vem do `now()` do servidor e nunca do formulário;
+- `CHECK demo_consentimento_datado` — recusa consentimento sem data **e** data
+  sem consentimento;
+- a porta passa a ter **oito** argumentos, e a de sete é **removida**: em
+  Postgres uma assinatura nova não substitui a antiga, convive com ela, e deixar
+  a antiga viva era manter uma porta que grava sem dizer nada sobre marketing.
+
+Controlos corridos contra a base: `false` grava sem data; `true` grava com data;
+a chave de idempotência continua a devolver `repetido`. E o **controlo negativo**:
+um `INSERT` com consentimento marcado e data nula é recusado pela restrição.
+
+Uma caixa não marcada **não é enviada pelo navegador** — chega ausente, não
+chega `false`. Por isso a rota lê presença (`formulario.get(campo) !== null`) e
+não compara com uma cadeia: `texto('x') === 'false'` daria o mesmo resultado nos
+dois casos, e o consentimento nunca se registava.
+
+### A afirmação nova tem guarda, como a página de confiança exige
+
+O aviso diz que esta página não põe cookies de análise nem de rastreio. Os três
+pilares da `/trust` têm guarda cada um, e uma afirmação nova sem guarda seria a
+mesma classe de promessa que o `faq4` fazia sobre a rede.
+
+Medido: **0 cookies e 0 recursos de terceiros** em 15 combinações. E com
+**controlo negativo**, porque quinze zeros podem significar «não há cookies» ou
+«o detector não sabe ver cookies», e as duas escrevem-se `0`:
+
+```
+antesDoControlo 0 → comOControlo 1 → depoisDeLimpar 0   acendeu: true
+```
+
+### A rota de tratamento de dados NÃO é uma política de privacidade
+
+E o nome dela diz isso. Uma política nomeia um responsável pelo tratamento, fixa
+prazos de conservação e descreve o procedimento de direitos — **nenhuma das três
+está decidida neste repositório**, e inventá-las seria pôr texto com efeito legal
+por cima de decisões que ninguém tomou, na página que existe para dizer a verdade
+sobre dados pessoais.
+
+O que a página tem é o que se pode conferir no código, com onde:
+
+| afirmação | onde se verifica |
+| --- | --- |
+| recolhe-se isto | campos em `demo/page.tsx` e colunas em `schema.prisma` |
+| não conseguimos ler | `REVOKE ALL ON demo_requests FROM bossaos_app` (migração `20260904150000`) |
+| marcaste e ficou com data | restrição `demo_consentimento_datado` |
+| sem cookies de análise | `rv100-demo.spec.ts`, com controlo negativo |
+
+E o último bloco diz o que falta com essas palavras, em destaque e não em
+rodapé. **O texto legal NÃO fica dado por revisto** — o RV100-011 continua
+`fora-do-alcance-da-autorizacao`, e o que avançou foi a estrutura.
+
+### Confiança contextual sem prova social inventada
+
+Não acrescentei um quarto pilar nem um único número. A confiança que esta página
+podia dar é sobre **ela própria**: o que acontece ao que a pessoa escreve. Isso é
+contextual ao momento da conversão, é verificável, e não repete a `/trust`.
+
+### As chaves cruzadas
+
+| | chaves | partilhadas |
+| --- | ---: | --- |
+| `/demo` ∩ home | 17 | **0** |
+| `/demo` ∩ `/plans` | 17 | **0** |
+| `/demo` ∩ `/getting-started` | 17 | **0** |
+| `/privacy` ∩ qualquer das três | 13 | **1** — `pedirDemo`, que é um rótulo de CTA |
+
+### O rodapé, e o que continua sem ligação
+
+`/privacy` passou a existir, e o rodapé liga-lhe — o comentário da `MolduraMkt`
+que dizia «não há rota de privacidade» deixou de ser verdade e foi corrigido.
+**Termos, cookies e contas de rede social continuam sem rota e continuam sem
+ligação.**
+
+### Regressão
+
+`marketing.spec.ts` **65 verdes, `git diff` de 0 linhas** — a âncora
+`form[action="/api/publico/demo"]` não se mexeu. Provas de nó do `@bossaos/db`
+7/7. **396 IDs intactos** — a cobertura conta IDs da `COBERTURA_TELAS.csv` e não
+ficheiros de rota, por isso `/privacy` não lhe toca. Guardas verdes: classes,
+três línguas (2508 chaves), preços, dados fictícios, suites com guião. `pnpm
+lint` limpo.
+
+### Um defeito da MINHA correcção da L1f
+
+O `NEXT_DIST_DIR` isola o build **servido** e **não isola o tipo**: o
+`apps/web/tsconfig.json` inclui `.next/types/**/*.ts` com o caminho fixo. Com
+duas sessões a construir, o meu build isolado foi buscar o validador de rotas da
+pasta partilhada e falhou com
+
+```
+.next/types/validator.ts: Cannot find module '../../app/[idioma]/privacy/page.js'
+```
+
+— uma rota que **eu** tinha acabado de remover da minha árvore para medir o
+antes, e que o build da outra sessão tinha visto enquanto existia. **O erro não
+pertencia a nenhuma das duas árvores.**
+
+Fica **declarado e não corrigido**: o `tsconfig.json` não lê variáveis de
+ambiente, e as saídas que vi — incluir também `.next-*/types` — resolvem o meu
+lado sujando o do outro. O arranjo certo é uma árvore de trabalho separada, e
+isso é maior do que este lote.
+
+### O que NÃO foi feito, e porquê
+
+- **Expansão de texto: continua NÃO MEDI**, e agora com mais razão para
+  interessar: a cópia nova é longa, sobretudo a nota do consentimento. Precisa de
+  semear a base partilhada, e a outra sessão continua a correr suites nela.
+- **O texto legal não está revisto**, e está marcado como tal na própria página.
+- **Termos e cookies** continuam sem rota.
+- **Nada de teclado nem leitor de ecrã** sobre a caixa nova — o alvo de 44 px
+  está medido, a navegação por teclado não.
+- **Não medi a aparência.** Secção 7, e é do Matheus.

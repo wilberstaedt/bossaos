@@ -2115,6 +2115,27 @@ model DemoRequest {
   mensagem    String?
   idioma      String
 
+  /// O consentimento para MARKETING, separado do contacto que a pessoa pediu.
+  ///
+  /// O §6.7 manda «diferenciar contacto transaccional de consentimento para
+  /// marketing», e a separação tem de existir onde os dados vivem — não só no
+  /// ecrã. Quem preenche este formulário está a pedir uma demonstração: esse
+  /// contacto é o objecto do pedido e não precisa de casa separada. Receber
+  /// **outra coisa** depois é uma decisão diferente, e é esta coluna.
+  ///
+  /// `false` por omissão, e a omissão é a resposta segura: uma caixa que chega
+  /// vazia significa não. Nenhum caminho escreve `true` sem a pessoa ter
+  /// marcado a caixa.
+  consentimentoMarketing Boolean @default(false) @map("consentimento_marketing")
+
+  /// QUANDO o consentimento foi dado, e `null` quando não foi.
+  ///
+  /// Um booleano sozinho diz que alguém consentiu e não diz quando — e um
+  /// consentimento sem data não se prova. É a mesma razão pela qual o carimbo
+  /// de tempo do KDS vem do servidor: o registo do facto tem de trazer o
+  /// momento, senão o facto não é verificável mais tarde.
+  consentimentoEm DateTime? @map("consentimento_em") @db.Timestamptz(6)
+
   /// Do conteúdo e do dia, como a dos leads. O duplo clique e o recarregar
   /// colapsam; um pedido genuíno noutro dia não é engolido.
   chaveIdempotencia String @unique @map("chave_idempotencia")

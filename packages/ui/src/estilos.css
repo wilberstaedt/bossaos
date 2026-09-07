@@ -1304,6 +1304,41 @@ label.bo-planos__item input[type="radio"] {
    custa». Na implantação é o tempo, porque a pergunta é «quanto tempo estão
    comigo». Mesma escala tipográfica, significados diferentes, nomes
    diferentes. */
+/* A caixa de verificação do consentimento, e o alvo de toque que ela obriga.
+   ───────────────────────────────────────────────────────────────────────────
+   Uma `<input type=checkbox>` nativa desenha-se a 13 px, e 13 px não é um alvo
+   de toque: a régua do §9 pede 44. Quem falha isto num telemóvel marca a caixa
+   sem querer — e numa caixa de CONSENTIMENTO um toque acidental é a pior classe
+   de defeito, porque produz um registo de que a pessoa disse sim.
+
+   Por isso o alvo são 44 px e o rótulo entra nele: a área clicável é a caixa
+   MAIS o texto, que é o que uma pessoa espera poder tocar. */
+.bo-campo--caixa { display: grid; gap: var(--bo-espaco-xs); }
+/* O rótulo É o alvo: envolve a caixa e o texto, e chega aos 44 px de altura.
+   A caixa fica com o seu tamanho nativo — inchá-la para 44 px daria uma tela
+   pior para calar um instrumento. */
+.bo-campo--caixa .bo-campo__rotulo {
+  margin: 0;
+  min-block-size: 44px;
+  display: flex; align-items: center; gap: var(--bo-espaco-sm);
+  cursor: pointer;
+}
+.bo-campo--caixa .bo-campo__caixa {
+  inline-size: 24px; block-size: 24px; flex: none; margin: 0;
+  accent-color: var(--bo-primaria);
+}
+.bo-campo--caixa .bo-campo__ajuda { margin: 0; }
+
+/* O aviso de tratamento de dados, imediatamente acima do botão.
+   Discreto e legível: é a última coisa que se lê antes de entregar dados
+   pessoais, e uma nota a 12 px ali seria a mesma letra pequena que o §6.6
+   proíbe do outro lado do site. Fica em corpo. */
+.bo-mkt__tratamento {
+  max-width: 68ch;
+  margin: var(--bo-espaco-lg) 0 var(--bo-espaco-sm);
+  color: var(--bo-texto-secundario);
+}
+
 .bo-mkt__horas { font-size: 20px; margin: 0; }
 .bo-mkt__horas strong { font-family: var(--bo-fonte-titulo); font-size: 32px; line-height: 1.1; }
 

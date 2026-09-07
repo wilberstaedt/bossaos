@@ -25,6 +25,18 @@ export async function POST(pedido: Request): Promise<Response> {
     return typeof v === 'string' ? v : '';
   };
 
+  /**
+   * Uma caixa de verificação NÃO MARCADA não é enviada pelo navegador.
+   *
+   * Chega **ausente**, e não `false` — que é a razão pela qual isto lê presença
+   * e não compara com uma cadeia. `texto('x') === 'false'` daria sempre `false`
+   * para o valor ausente e `false` para o marcado, ou seja o mesmo resultado nos
+   * dois casos: um consentimento que nunca se registava.
+   *
+   * E a ausência é a resposta segura. Quem não marca, não consentiu.
+   */
+  const marcada = (campo: string) => formulario.get(campo) !== null;
+
   const pedidoIdioma = texto('idioma');
   const idioma = (IDIOMAS as readonly string[]).includes(pedidoIdioma) ? pedidoIdioma : 'es-ES';
 
@@ -45,6 +57,7 @@ export async function POST(pedido: Request): Promise<Response> {
       telefone: texto('telefone') || null,
       mensagem: texto('mensagem') || null,
       idioma,
+      consentimentoMarketing: marcada('consentimentoMarketing'),
     });
     if (!r.ok) return destino('/demo', 'erro=campos');
     return destino('/demo/thanks', r.duplicado ? 'repetido=1' : '');

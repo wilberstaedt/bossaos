@@ -42,11 +42,15 @@ import { GrupoMkt, MenuMkt } from './MenuMkt.tsx';
  * ── O rodapé só liga ao que existe ────────────────────────────────────────
  *
  * O §6.3.14 lista «produto, planos, recursos, idiomas, contacto, redes, login,
- * privacidade, termos e cookies **conforme disponibilidade real**». Neste
- * repositório não há rota de privacidade, de termos, de cookies, nem conta de
- * rede social. **Não as invento.** Uma ligação que dá 404 é pior do que a
- * ausência dela, e o §6.3.14 ganha ao §10 exactamente por dizer «conforme
- * disponibilidade real». A falta fica registada no `11_OPEN_FINDINGS.md`.
+ * privacidade, termos e cookies **conforme disponibilidade real**». **Não
+ * invento nenhuma:** uma ligação que dá 404 é pior do que a ausência dela, e o
+ * §6.3.14 ganha ao §10 exactamente por dizer «conforme disponibilidade real».
+ *
+ * **Actualizado na L1g:** `/privacy` passou a existir — o formulário de demo
+ * recolhe dados pessoais e precisava de dizer o que lhes acontece antes de os
+ * pedir. O rodapé liga-lhe. **Termos, cookies e contas de rede social continuam
+ * sem rota e continuam sem ligação**, e a falta segue registada no
+ * `11_OPEN_FINDINGS.md`.
  */
 
 /** As três que ficam à vista na barra. */
@@ -189,6 +193,9 @@ export function MolduraMkt({
             <p className="bo-mkt__rodape-titulo" id="rod-comecar">{mkt.rodapeComecar}</p>
             <a href={`/${idioma}/demo`}>{mkt.pedirDemo}</a>
             <a href={`/${idioma}/auth/login`}>{m.entrar.accao}</a>
+            {/* A única das rotas legais do §6.3.14 que passou a existir. Termos
+                e cookies continuam sem rota e continuam sem ligação. */}
+            <a href={`/${idioma}/privacy`}>{mkt.navPrivacidade}</a>
           </nav>
 
           <nav className="bo-mkt__rodape-grupo" aria-labelledby="rod-idiomas">
