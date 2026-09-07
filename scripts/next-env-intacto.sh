@@ -30,7 +30,26 @@
 # lê — o `provar-mestres.sh` já tem um, que mata o servidor. Um trap silencioso
 # a apagar outro seria uma cura pior do que a doença. Por isso a mecânica vive
 # aqui e a decisão de quando repor fica com cada guião, à vista.
-NEXT_ENV_FICHEIRO="apps/web/next-env.d.ts"
+# ── Caminho ABSOLUTO, e a razão foi medida ────────────────────────────────
+#
+# Isto foi `apps/web/next-env.d.ts`, relativo, e funcionava porque nenhum dos
+# seis guiões muda de directório depois de armar o trap — verifiquei os seis.
+# Só que essa é uma condição que vive na cabeça de quem escrever o sétimo.
+#
+# Medido a 07/09 com um arnês que fazia `cd apps/web` antes do build: o trap
+# disparou, o `cp` falhou com «No such file or directory», e **o ficheiro ficou
+# sujo à mesma**. O trap correu e não repôs nada. Resolver a partir da posição
+# deste ficheiro, e não do directório de quem o lê, fecha isso de vez.
+# Guarda: `BASH_SOURCE` é do bash. Lido por zsh devolvia
+# `/Users/mw/Developer/projects/apps/web/next-env.d.ts` — **errado e calado**,
+# medido a 07/09. Um caminho errado em silêncio é o defeito do dia inteiro; mais
+# vale recusar-se a arrancar. Os seis guiões são bash, portanto isto nunca
+# dispara para eles: dispara para o sétimo, que é quem precisa de ser avisado.
+if [ -z "${BASH_SOURCE[0]:-}" ]; then
+  echo "next-env-intacto.sh: tem de ser lido por bash (BASH_SOURCE vazio) — abortado" >&2
+  return 1 2>/dev/null || exit 1
+fi
+NEXT_ENV_FICHEIRO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/apps/web/next-env.d.ts"
 NEXT_ENV_COPIA=""
 
 guardar_next_env() {
