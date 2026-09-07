@@ -562,3 +562,34 @@ para ver telas com dados. Fica proposto e pronto a correr.
 como é que o arnês foi lá parar?** O `semente-inspeccao.ts` vai na imagem — o
 mesmo `COPY . .` que leva tudo — e alguma coisa o correu. Enquanto não souber o
 quê, a limpeza não impede a repetição.
+
+## Como o arnês foi parar a produção — o que provei e o que não — 17h50
+
+Persegui a pergunta que me interessava mais do que a limpeza: **existe um caminho
+que volta a pôr as fixtures lá?**
+
+**O que EXCLUÍ, com medição:**
+
+- **Não vem do guião de publicação.** O `db:migrate:deploy` é literalmente
+  `prisma migrate deploy`, sem mais nada.
+- **Não vem de uma semente configurada.** O `prisma.config.ts` não declara
+  `seed`.
+- **Não vem das migrações.** E este quase me enganou: o `grep` acusou
+  `20260915920000_e31_porta_do_kiosk_slug_publico`, e fui ver — **o slug aparece
+  num COMENTÁRIO**, linha 8, não num `INSERT`. **Procurar texto encontra texto, e
+  não comportamento** — é a mesma armadilha que me apanhou de manhã, quando um
+  `grep` casou com a mensagem de um commit em vez da lista de ficheiros dele.
+
+**O que isto deixa como explicação mais provável, e não é prova:** a base de
+produção **é anterior a hoje**. Na primeira publicação que corri, o Prisma disse
+**«50 migrations found. No pending migrations to apply»** — ou seja, ela já
+estava migrada antes de eu tocar nela. Alguém a semeou numa sessão anterior.
+
+**Escrevo isto como provável e não como certo, e a diferença importa:** eu provei
+que os três caminhos automáticos não a repõem; **não provei que não exista um
+quarto**. Uma ausência de caminho encontrado não é a ausência de caminho.
+
+**O que muda na recomendação:** limpar passa a ser seguro no sentido que
+interessa — **nada que eu tenha encontrado a volta a criar sozinha**. Se depois
+de limpar ela reaparecer, isso é a prova do quarto caminho, e vale mais do que a
+minha busca.
