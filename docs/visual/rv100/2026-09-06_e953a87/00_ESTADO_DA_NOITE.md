@@ -160,3 +160,32 @@ coral está ausente. **Um instrumento partido a concordar com a hipótese que de
 testar** — a forma de erro mais perigosa da noite, porque produz o número que se
 espera. O que o apanhou não foi o valor: foi **a derivada**, o número não se mexer
 depois de uma mudança que tinha de o mexer.
+
+---
+
+## Correcção a uma instrução minha: a paragem da secção 7 é DEPOIS, não antes
+
+Disse aos dois implementadores, várias vezes, que **«a secção 7 é onde os dois
+paramos»**. Os dois pararam — e pararam **antes** de fazer o que a secção 7 pede.
+
+O plano diz outra coisa, e é literal:
+
+> **«Implemente primeiro as telas abaixo.»**
+>
+> «### 7.1 Condição de parada — **Após implementar M01–M06:** … 6. **pare**.»
+
+**A paragem é depois da implementação, não em vez dela.** Eu li «o §7.1 acaba com
+"pare"» e comprimi-o em «a secção 7 é onde paramos» — **transformei um
+parar-depois num parar-antes**.
+
+É a mesma forma de vários erros meus desta noite: **comprimi uma instrução de
+duas partes numa só**, e a parte que caiu foi a que mandava trabalhar.
+
+**O que fica de pé da minha instrução, e continua a ser a linha que nenhuma ordem
+levanta:** o §12.4 diz que só o Matheus pode registar `APROVAÇÃO VISUAL HUMANA`,
+e que *«silêncio, ausência de comentário ou aprovação do próprio Claude não
+libera o rollout»*. **O que eu posso emitir é `PRONTO PARA APROVAÇÃO VISUAL
+HUMANA`, e mais nada.**
+
+**A secção 6 está fechada.** Os 22 achados: 20 corrigidos, 1 medido conforme, 1
+não reproduzido com causa, 1 aceite. Zero abertos.

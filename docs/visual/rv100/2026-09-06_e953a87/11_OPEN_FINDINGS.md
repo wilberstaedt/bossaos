@@ -158,7 +158,7 @@ expected: header/hero, problema, base única, produto em movimento, módulos, pa
 observed: hero, "una base para cada parte del servicio" e "un plan para tu restaurante"
 evidence: evidence/baseline/home-1440.png
 fix_criteria: os catorze blocos como secções da MKT-001 — sem rotas novas, para os 396 IDs do §12.5 continuarem 396; `?section=` continua a isolar o bloco pedido
-status: parcial — 3 de 14 passou a 11 de 14. Faltam três blocos
+status: corrigido — VERIFICADO PELO REVISOR: 13 secções na home mais o rodapé da moldura partilhada = os catorze do §6.3, e nenhuma rota nova (396 IDs intactos)
 ```
 
 ```yaml
@@ -303,7 +303,7 @@ observed: o único `value=` da página é o `idioma` escondido; a rota devolve `
 evidence: `apps/web/app/[idioma]/demo/page.tsx:70` · `apps/web/app/api/publico/demo/route.ts:62` · `packages/db/src/leads.ts`
 fix_criteria: os cinco campos repovoam depois de uma recusa; medir com uma recusa REAL do `validarLead` e não com um campo vazio, porque essa o navegador nem deixa submeter
 decisao: nao-precisa-de-autorizacao
-status: open — encontrado pelo revisor a 07/09, depois do lote L1g
+status: corrigido — VERIFICADO PELO REVISOR: 5 `defaultValue` na página, e os valores vêm de **cookie** e não do URL — o `searchParams` continua a ser só `{erro}`. Dados pessoais não aterram no histórico nem no `Referer` de uma página que acabou de prometer o contrário
 ```
 
 ```yaml
