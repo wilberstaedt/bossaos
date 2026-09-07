@@ -796,3 +796,34 @@ cortada no sítio errado, um grep largo de mais. Nenhum deles mentiu no código 
 saída: **mentiram na razão**. O código de saída certo pelo motivo errado é
 indistinguível do certo até se ler a mensagem — e ler a mensagem passou a ser
 parte de correr o controlo, não um extra.
+
+---
+
+## RV100-023 — alvos de toque por natureza (07/09, `6a6b92a`)
+
+Medir, classificar, devolver. Não corrigi nada.
+
+**Um elemento, não cinco.** Os «5 alvos abaixo de 44 px» que eu tinha reportado
+eram cinco medições do mesmo `A«Marina Puerto»`, uma por largura. **Contar
+medições em vez de coisas infla um achado sem se querer** — e a inflação era
+minha, no meu próprio âmbito.
+
+**E é controlo autónomo, não prosa:** `disp=inline`, `pai=NAV`,
+`textoIrmao=false`, `nav=true`. Não há texto solto no pai, logo a ligação não
+vive dentro de uma frase e a isenção da WCAG 2.5.5 não se aplica. Achado real,
+escrito como RV100-023 no `11_OPEN_FINDINGS`.
+
+### A regra que fica
+
+**Classificar por natureza, não por tamanho.** Uma lista feita por tamanho mistura
+o controlo autónomo com a ligação que a norma isenta, e chama dívida ao que não
+é. Os quatro sinais lêem-se no DOM — `display`, texto irmão, `nav`/`header`/`li`,
+e a tag — e vão na etiqueta de cada alvo, para a classificação poder ser
+contestada sem repetir a corrida.
+
+### E a sonda é dos DOIS lados
+
+Zero controlos autónomos confirmaria o que se espera, e um zero que confirma o
+que se espera não mediu nada. Planta-se um botão pequeno sozinho (tem de sair
+«controlo») **e** uma ligação numa frase (tem de sair «prosa»). Só o primeiro
+lado deixaria passar um classificador que dissesse «controlo» a tudo.
