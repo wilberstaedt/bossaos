@@ -2082,3 +2082,32 @@ portão levava um mapa que cobre 338 de 396 e não saberia que lhe faltavam 58.*
 verifica-se onde ele está escrito, não onde ele foi calculado.** Se o resumo não
 repete o total, não se pode verificar — por isso o total passa a fazer parte da
 frase.
+
+---
+
+## Um número num portão sem a hora a que foi medido apodrece em silêncio — 07/09
+
+Varri os números que publiquei esta noite à procura de outra partição partida.
+**A varredura foi má: casei com DÍGITOS e não com afirmações**, e apanhei o `24`
+de uma escala de espaçamento, o `120` da largura de um logótipo, o `164` de um
+número de linha. Ruído quase todo — o mesmo erro de procurar a forma em vez do
+significado que já me apanhou sete vezes hoje.
+
+**Mas uma discordância era real, e entre dois documentos meus:** o portão dizia
+`marketing.spec.ts` **65/65 conforme**; o changelog, mais abaixo, descrevia o
+mesmo ficheiro a cair para **58 com 7 vermelhos**.
+
+**A resolução não estava na prosa de nenhum dos dois. Corri o teste: 68.** Nem
+65 nem 58 — entretanto nasceram três provas, e o vermelho do changelog era um
+momento transitório já resolvido. **Os dois documentos descreviam verdades
+antigas, e nenhum estava errado no dia em que foi escrito.**
+
+**É a prova com prazo de validade outra vez, mas em prosa.** Ali era um `mtime`
+de captura, e a guarda `validar-provas-frescas.sh` apanha-o. Aqui é um **número
+citado num veredicto**, e não há `mtime` que o proteja: a frase continua a ler-se
+com a mesma confiança no dia em que deixa de ser verdade.
+
+**A regra, e é barata: um número que sustenta um veredicto leva a hora a que foi
+medido, dentro da própria frase.** Sem a hora, ninguém sabe se precisa de o
+remedir — e um portão relido daqui a uma semana é exactamente o sítio onde isso
+importa. **Não é rigor a mais: é a diferença entre um facto e a memória de um.**

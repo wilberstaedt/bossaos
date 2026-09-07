@@ -40,7 +40,7 @@
 | touch, teclado, foco, zoom e conteúdo extremo | **parcial** — acessibilidade dinâmica conforme em 3 superfícies **públicas**; as **com sessão ficam declaradas como dívida**. Expansão de texto conforme em 281 ecrãs; alergénios extensos conforme |
 | loading, empty, error, offline, denied, upgrade coerentes | **conforme** |
 | KDS legível à distância e Staff com uma mão | **parcial** — o KDS tem tipografia própria de 18 px e alvos de 48; **«uma mão» não medi** |
-| não há regressão de comportamento | **conforme** — `marketing.spec.ts` 65/65 com população inteira |
+| não há regressão de comportamento | **conforme** — `marketing.spec.ts` **68/68**, corrido às 12h18 de 07/09. Estava aqui «65/65», que era verdade quando foi escrito: entretanto nasceram três provas. Um número num portão sem a hora a que foi medido apodrece em silêncio |
 
 ## §12.5 — Portão de cobertura · 6 critérios
 
