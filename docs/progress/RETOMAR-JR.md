@@ -948,3 +948,43 @@ dar 404** — um que continue em 404 mede a rota, não a cura.
 `(null)` e não apagar a linha: um plante que deixa símbolo por usar parte o
 build, e aí a resposta é NÃO MEDI e não vermelho. Foi o sénior que mo avisou
 depois de três plantes assim.
+
+---
+
+## A prova que envelhece (07/09, `9a7b851`)
+
+As 25 capturas das telas-mestre eram das 10h54; a cura do RV100-024 entrou às
+11h32 e mexeu no produto. O `M03-erro` era a fotografia de um 500 que já não
+existia, e ia seguir para aprovação humana como retrato do produto.
+
+Recapturado: `500 → 404`, `ecraDesenhado: false → true`.
+
+E a regra ficou mecânica em `scripts/validar-provas-frescas.sh`: compara o
+`mtime` de cada artefacto com a data do último commit que toca em `apps/` ou
+`packages/`. Agora **26 posteriores ao produto, 39 anteriores**.
+
+### É uma família NOVA de armadilha, e vale nomeá-la
+
+Todas as outras desta noite foram o **instrumento a medir mal**: o alfabeto que
+perdia `frutos-de-casca`, o código de erro que mudava com o caminho, o detector
+que via a definição e julgava ser uma chamada, o contador que contava medições
+em vez de coisas.
+
+Esta não. Foi uma medição **correcta no momento em que foi feita**, que deixou
+de descrever o produto **sem que nada nela mudasse**. A captura continua nítida,
+o teste que a gerou continua verde, o número que mostra continua a ser o que foi
+medido. O que envelheceu foi a relação entre ela e o mundo — e **isso não se vê
+por dentro dela**. Nenhum controlo interno a apanha; só a comparação com o
+tempo do produto.
+
+### E dois erros meus dentro da guarda que os persegue
+
+O `mapfile` não existe no bash 3.2: a lista ficou por definir e a guarda **deu
+verde com população vazia**. O `set -u` avisou e não parou, porque não havia
+`-e`.
+
+Depois juntei a data do commit do artefacto para cobrir o clone, e deu **24
+falsos**: recapturei as mestre, 23 saíram byte a byte iguais, o git não vê
+alteração e o commit fica o antigo — e elas descrevem o produto actual. **Uma
+segunda medida que acusa quem está certo é pior do que uma medida só.** Ficou o
+`mtime`, com o que ele não sabe escrito: num clone fresco não mede nada.
