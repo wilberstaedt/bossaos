@@ -188,3 +188,46 @@ e vale; se foi o caminho mais curto para o verde, refaz-se.
 Isto é também um caso do §7 que serve à secção 7 inteira: quando uma guarda
 aponta um número, a correcção mais barata e a correcção certa raramente são a
 mesma, e é o revisor que tem de perguntar qual das duas foi feita.
+
+---
+
+## O M05 respondeu ao «documentado» melhor do que eu esperava — 07/09
+
+A minha régua dizia: *«reprova se o viewport-alvo não estiver **escrito**.
+"Documentado" é um aceite, não um adjectivo: sem o número, qualquer captura
+passa.»*
+
+Ele podia ter escolhido um número e escrito. **Foi buscar um que o produto já
+tinha comprometido.**
+
+O §6.6 da landing diz, **nas três línguas** e numa página pública, que
+*«uma TV pode precisar de um mini-PC»* — verifiquei o texto literal:
+
+> `equipamento2Texto` · *«Y una pantalla o un dispositivo para la cocina, según
+> cómo trabajéis. **Una TV puede necesitar un mini-PC.**»*
+
+**O televisor é uma superfície de KDS que o produto antecipa por escrito.** Logo
+`1920 × 1080` não é uma preferência: **é a consequência de uma promessa
+comercial já publicada.** E acrescentou um segundo, `1280 × 800`, que é o da
+composição existente — a cozinha apertada com um portátil.
+
+**É a melhor forma de cumprir um aceite de documentação:** não escrever um número,
+mas **derivá-lo de um compromisso que já existe**. Um número escolhido pode ser
+discutido; um número que sai do que a página promete ao cliente só se muda
+mudando a promessa.
+
+## E os estados declaram o que mais produziria a mesma imagem
+
+A régua exige que cada estado possa ficar vermelho **pela razão certa**, e que se
+pergunte *«o que mais produziria esta mesma imagem?»*. O arnês dele implementa
+isso **por estado**, e não como princípio geral:
+
+- **`offline`** só conta **se o ecrã mudar**. Idêntico ao `online` significa que
+  a página **não reparou na rede** — não que degrada bem;
+- **`denied`** falha se devolver 200 com o conteúdo de outra casa;
+- **`loading`** só conta onde a mesma rota também produziu um `principal` — sem
+  isso, a fotografia podia ser de uma página que **nunca carrega**.
+
+**Os três nomeiam a avaria que se disfarça de sucesso**, que é exactamente o que
+eu tinha pedido — e o do `offline` é o mais fino: dois ecrãs iguais não provam
+resiliência, provam indiferença.
