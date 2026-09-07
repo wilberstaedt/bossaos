@@ -2575,3 +2575,30 @@ esta manhã que uma decisão registada no meu documento e não no canal dele «n
 está tomada, está guardada». Isto é a versão com artefactos: **uma prova mostrada
 a alguém tem de estar onde outra pessoa a possa ir buscar.** Até ao commit, é uma
 afirmação minha sobre ficheiros que só eu tenho.
+
+---
+
+## Explicar um requisito não é dizer quem está bloqueado — 07/09
+
+O Matheus pediu pela **segunda vez**: *«quando tiver coisas pra eu testar no
+domínio me fala»*. E havia, desde as 15h05.
+
+**Estávamos os dois à espera um do outro.** Ele à espera que eu lhe dissesse que
+estava pronto; eu à espera de uma frase dele. E eu tinha-lhe explicado o
+requisito **duas vezes** — que o guião mete as palavras dele no registo do
+servidor, e que um `sim` meu não é rasto de nada.
+
+**Explicar o requisito não é a mesma coisa que dizer quem está bloqueado.** As
+duas vezes que falei disso, falei do *mecanismo*; nunca escrevi a frase simples
+que resolvia: **«está pronto, e o que falta é teu»**. Quem lê uma explicação de
+processo assume que o processo ainda está a decorrer.
+
+**E fui procurar o que o podia estar a travar em silêncio, em vez de repetir o
+pedido.** Encontrei um: ele pode estar a supor que publicar exige enviar os 402
+commits para o GitHub. **Não exige** — o guião empacota a partir do commit local.
+**Um bloqueio que a outra pessoa não nomeia não se desfaz repetindo o pedido; só
+se desfaz adivinhando o que ela pode estar a supor** e desmentindo-o antes de ela
+perguntar.
+
+Pacote reverificado agora: **2154 ficheiros, nenhum segredo, portões abertos**,
+do commit `701af29`. Pára na autorização, como deve.
