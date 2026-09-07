@@ -29,6 +29,29 @@
   --bo-texto-primario: #102E35;
   --bo-texto-secundario: #51666A;
   --bo-texto-inverso: #FFFFFF;
+
+  /* ── O CONTRATO DA SUPERFÍCIE ─────────────────────────────────────────────
+   *
+   * A doença, e é a terceira vez que aparece: um componente escrito para fundo
+   * claro pinta `--bo-primaria` e, dentro do `.bo-kds` — que é
+   * `--bo-superficie-inversa`, a MESMA cor #102E35 —, fica invisível. Deu
+   * 1.00:1 no E07 com um `var()` inexistente, 1.00:1 nas peças claras do KDS, e
+   * agora no botão primário, que é a acção mais repetida da cozinha.
+   *
+   * A cura até aqui foram 39 linhas de `.bo-kds .x { … }`: uma lista de pares
+   * componente×superfície que cresce com cada componente novo, e que só se
+   * escreve DEPOIS de alguém dar pelo defeito.
+   *
+   * Isto é a inversão. Em vez de o componente adivinhar onde está, a superfície
+   * DECLARA o que promete a quem for desenhado em cima dela. O componente pede
+   * o papel — «a cor de uma acção», «o que se lê sobre uma acção» — e recebe o
+   * valor certo por herança de CSS, sem saber de superfícies nenhumas.
+   *
+   * Uma superfície nova define os três e ganha os componentes todos. Um
+   * componente novo pede os três e ganha as superfícies todas. */
+  --bo-sobre-superficie: var(--bo-texto-primario);
+  --bo-accao: var(--bo-primaria);
+  --bo-sobre-accao: var(--bo-texto-inverso);
   --bo-borda: #D7DEDA;
 
   /* ── Estados operacionais — FIXOS, não seguem o tema do cliente ────────── */
@@ -130,6 +153,18 @@ p { margin: 0; }
   border-radius: var(--bo-raio-controlo);
 }
 
+/* ── As superfícies escuras cumprem o contrato ───────────────────────────────
+ *
+ * A acção passa a ser CLARA sobre o escuro, e não lima: o lima é o sinal de
+ * ESTADO do pedido, e um botão lima do tamanho de um botão disputava atenção
+ * com ele — que é textualmente o que o manual proíbe. Uma acção não precisa de
+ * cor de marca para se ver; precisa de contraste. */
+.bo-inverso, .bo-kds {
+  --bo-sobre-superficie: var(--bo-texto-inverso);
+  --bo-accao: var(--bo-superficie-base);
+  --bo-sobre-accao: var(--bo-primaria);
+}
+
 /* Sobre superfície escura o anel escuro desaparece. */
 .bo-inverso :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline-color: var(--bo-realce);
@@ -197,8 +232,11 @@ p { margin: 0; }
 .bo-botao--operacao { min-height: var(--bo-toque-operacao); min-width: var(--bo-toque-operacao); font-size: 18px; }
 .bo-botao--largo { width: 100%; }
 
-.bo-botao--primario { background: var(--bo-primaria); color: var(--bo-texto-inverso); }
-.bo-botao--primario:hover:not(:disabled) { background: #17414b; }
+/* Pede o PAPEL e não a cor: `--bo-accao` é o que a superfície actual diz ser
+   uma acção. Em fundo claro continua a ser o #102E35 de sempre; em fundo escuro
+   passa a ser claro, porque lá o #102E35 é o próprio fundo. */
+.bo-botao--primario { background: var(--bo-accao); color: var(--bo-sobre-accao); }
+.bo-botao--primario:hover:not(:disabled) { filter: brightness(1.12); }
 
 .bo-botao--secundario { background: var(--bo-superficie-suave); color: var(--bo-texto-primario); }
 .bo-botao--secundario:hover:not(:disabled) { background: #dbe5e0; }

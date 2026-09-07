@@ -36,7 +36,8 @@ foco.spec.ts:pago a 07/09 - passou a ter corredor, o scripts/validar-foco-nos-mo
 acessibilidade-dinamica.spec.ts:mesma razao das tres acima - o corredor e o scripts/validar-acessibilidade-dinamica.sh, uma guarda validar-* que a descoberta daqui nao varre
 alergenios-na-carta.spec.ts:mesma razao das anteriores - o corredor e o scripts/validar-alergenios-na-carta.sh, uma guarda validar-* que a descoberta daqui nao varre
 id-de-rota.spec.ts:corre dentro da scripts/validar-id-de-rota-validado.sh, que a usa como a medicao de RESULTADO do RV100-024 e reprova se um id mal formado deixar de dar 404
-tipografia-minima.spec.ts:corre dentro da scripts/validar-tipografia-minima.sh, que mede a regra dos 14px sobre a populacao do mapa de alcance"
+tipografia-minima.spec.ts:corre dentro da scripts/validar-tipografia-minima.sh, que mede a regra dos 14px sobre a populacao do mapa de alcance
+superficies.spec.ts:corre dentro da scripts/validar-superficies.sh, que mede se algum texto ou controlo desaparece dentro do fundo da superficie onde esta"
 
 EM_DIVIDA="capturas.spec.ts
 divida-movel-auth.spec.ts

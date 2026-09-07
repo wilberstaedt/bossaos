@@ -400,3 +400,33 @@ status: NAO REPRODUZIDO, com causa identificada pelo revisor a 07/09 — o eleme
 > lista era feita por TAMANHO, que mistura o controlo autónomo com a ligação em
 > prosa que a 2.5.5 isenta. Classificados por natureza no DOM: **1 controlo
 > autónomo, 0 em prosa**. O achado é real e é um, e a inflação era minha.
+
+---
+
+```yaml
+id: RV100-025
+severity: P2
+surface: transversal — painel, login e qualquer superfície com formulário
+screen_or_route: /[idioma]/auth/login e /[idioma]/app/[orgSlug]/catalogo (medidos); a classe é do produto
+summary: nove controlos têm contorno que não delimita — abaixo de 3:1 contra o que está por trás
+impact: acessibilidade — WCAG 2.2, 1.4.11 (Non-text Contrast)
+expected: o limite de um controlo distingue-se do que o rodeia a >= 3:1, por preenchimento OU por borda visível
+observed: >
+  Campos (`.bo-campo__controlo`): fundo branco sobre a página creme dá 1,10:1, e a
+  borda é `--bo-borda: #D7DEDA` = 1,29:1 contra a página. Botão secundário
+  (`.bo-botao--secundario`): preenchimento a 1,17:1 sobre branco, com
+  `border: 1px solid transparent` — uma borda transparente não delimita nada.
+  Nove ocorrências em duas superfícies medidas; a causa é de token e não de tela.
+evidence: scripts/validar-superficies.sh (linhas CONTORNO-FRACO no âmbito) · inspeccao/superficies.spec.ts
+fix_criteria: >
+  Subir `--bo-borda` até >= 3:1 contra `--bo-superficie-base`, ou dar borda
+  visível ao botão secundário. Medir no navegador nas duas superfícies, não no
+  token: o mesmo valor dá rácios diferentes sobre a página e sobre um cartão.
+decisao: nao-decidida
+status: open — MEDIDO E POR CORRIGIR, com tecto de 9 na guarda. Não o curei ao curar o botão do KDS por uma razão que fica escrita: mudar `--bo-borda` muda TODOS os campos do produto, e um token de desenho global não é do implementador
+```
+
+> **Como apareceu.** A guarda escrita para o botão invisível do KDS — o terceiro
+> caso de «uma coisa desaparece dentro do seu fundo» — encontrou a quarta
+> aparição sozinha, e maior do que a que me tinha sido apontada. É o que uma
+> guarda faz e uma lista de remendos não: a lista regista o que alguém já viu.
