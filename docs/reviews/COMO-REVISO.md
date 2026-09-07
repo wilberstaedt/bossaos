@@ -1532,3 +1532,60 @@ aterrar. Um item de `<nav>` sozinho não dá.
 **Veredicto: 1 controlo autónomo, 0 em prosa.** Um achado a sério em vez de cinco
 falsos — e a 23 px **falha até o nível AA da 2.5.8**, que pede 24, quanto mais os
 44 que o produto cumpre nos outros controlos.
+
+---
+
+## A correcção que ficou presa à superfície onde foi encontrada — 07/09
+
+O JR mediu uma ligação de navegação a **115×23 px** na carta pública. O
+implementador foi corrigi-la, não conseguiu reproduzir, e reportou que *«os
+quatro `<nav>` públicos já têm `min-height: 44px`»*.
+
+**Os dois tinham razão**, e a contradição resolve-se em duas linhas do
+`estilos.css`:
+
+```css
+.bo-staff .bo-publico__seccoes a { min-height: var(--bo-toque-operacao); }
+.bo-kds   .bo-publico__seccoes a { min-height: var(--bo-toque-operacao); }
+```
+
+**A regra sobre o alvo existe só sob `.bo-staff` e `.bo-kds`.** A carta pública
+usa **a mesma classe** e não tem regra. O `min-height` que o implementador
+encontrou está no **contentor**, e a WCAG mede **o alvo**.
+
+### E este defeito já tinha sido encontrado uma vez
+
+O comentário imediatamente a seguir, na linha 589, di-lo:
+
+> «O índice do STAFF-022 tinha ligações de **22 px** de altura — e é ele que dá o
+> único caminho a dez das telas. A prova de navegador apanhou-o; **nada mais
+> apanhava, porque uma ligação pequena não é um erro em lado nenhum**.»
+
+**Alguém encontrou isto no Staff, corrigiu no Staff, e a correcção ficou presa às
+duas superfícies onde foi encontrada.** A pública partilha o selector e ficou de
+fora.
+
+É «removeu a INSTÂNCIA e não impediu a CLASSE» — a frase que está no cabeçalho do
+`validar-no-commit.sh` — **e desta vez a instância e a classe partilham até o
+nome do selector**. Bastava o prefixo cair para a regra cobrir as três.
+
+### A lição, que é sobre onde se escreve uma correcção
+
+Quando uma guarda apanha um defeito **numa superfície**, a pergunta seguinte não
+é «como o corrijo aqui» — é **«que outras superfícies partilham o mecanismo que
+falhou?»**. Aqui o mecanismo tinha nome próprio (`.bo-publico__seccoes a`) e
+estava à vista.
+
+---
+
+## E o nome que ele deu à forma mais sedutora do verde vazio
+
+O mesmo implementador tinha escrito uma regra nova para fechar este achado
+**antes de verificar** — e era redundante:
+
+> «**Teria fechado o achado no papel sem mover um pixel.** É a forma mais sedutora
+> do verde vazio: **uma correcção que parece uma correcção.**»
+
+Removeu-a. **Escrever a correcção antes de reproduzir o defeito produz sempre
+alguma coisa** — e essa coisa parece trabalho, passa em revisão, e fecha a linha
+no registo. Só não move nada.
