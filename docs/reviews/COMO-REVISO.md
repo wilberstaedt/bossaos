@@ -2709,7 +2709,7 @@ das duas linhas sabe da outra.
 instâncias de hoje.
 
 **E enumerando o que É enumerável, encontrei o buraco a sério.** A guarda que
-existe para isto — `validar-superficies.sh` — mede **quatro superfícies**, e o
+existe para isto — `validar-superficies.sh` — **media, às 18h10, quatro superfícies**, e o
 próprio âmbito dela lista quais: *«duas escuras do KDS, o login (a única
 `.bo-inverso` do produto) e uma do painel claro»*.
 
@@ -2813,3 +2813,31 @@ tudo o que a citava.** Quando a guarda passou de 4 para 11 superfícies, ela
 melhorou — e ao melhorar, tornou falso um número que estava certo. **Um
 instrumento que fica melhor deixa registos velhos atrás de si**, e ninguém pensa
 nisso no momento em que está a melhorá-lo.
+
+### Varri a assimetria e a única coisa podre era minha, escrita há 40 minutos
+
+Depois de perceber que **alargar uma medição envelhece tudo o que a citava**, fui
+procurar quem citava o número velho. A guarda passou hoje de 4 para 11
+superfícies; **quatro sítios dizem «quatro superfícies»**.
+
+Julguei-os pela regra que eu próprio escrevi de manhã — um número apodrece quando
+descreve **o estado do mundo**, não quando descreve **o que aconteceu**:
+
+| onde | forma | veredicto |
+| --- | --- | --- |
+| changelog:682 | «o §6.4 nomeia quatro superfícies» | **outra coisa** — falso positivo do meu `grep` |
+| `superficies.spec.ts:134` | «esta lista **tinha** quatro» | passado: **registo** |
+| `superficies.spec.ts:293` | «dizer quatro, que deixou a landing de fora» | **registo do incidente** |
+| `COMO-REVISO.md` | «**mede** quatro superfícies» | **presente: apodreceu** |
+
+**A única podre era minha, e escrevi-a há quarenta minutos** — neste mesmo
+ficheiro, três secções depois de eu ter escrito a regra que a condena.
+
+**E a cura não foi actualizar o número: foi mudar o tempo do verbo.** «Mede
+quatro» passou a «**media, às 18h10, quatro**». O parágrafo continua a descrever
+o que quis descrever — o buraco que existia nesse momento — **e deixa de afirmar
+uma coisa sobre agora.** Um registo não precisa de ser mantido; uma afirmação
+precisa.
+
+**É a defesa mais barata que encontrei o dia todo:** entre um número que exige
+manutenção e um que não a exige, muitas vezes só está um verbo.
