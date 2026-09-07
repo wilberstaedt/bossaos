@@ -58,6 +58,36 @@ aceita registos e só a política de senha a parou; guarda **vermelha, exit 1**.
 **131 utilizadores antes e 131 depois.** Uma prova de segurança que precisasse de
 criar a conta para saber se podia criá-la seria o próprio defeito a correr.
 
+### A contagem entra na guarda, e destapou que contávamos sujeitos diferentes
+
+As duas notas do sénior — *o 131 é um instantâneo que ninguém re-corre* e *a
+sonda é segura por convenção e não por mecanismo* — fecham-se com a mesma linha:
+a guarda conta os utilizadores **na própria corrida**. Commit `4c9f488`.
+
+> **E o achado por baixo:** ele viu a base vazia, eu vi 131, e **nenhum dos dois
+> contou mal**. Medido: RLS activa em `users`, políticas
+> `autenticacao_ve_identidades` e `identidade_propria`, nenhum papel com
+> `bypassrls`.
+>
+> | papel | `users` | porquê |
+> | --- | ---: | --- |
+> | `bossaos_app` | **0** | só tem `identidade_propria`, e sem identidade não vê nada |
+> | `bossaos_migrate` | **131** | dono da tabela, com `relforcerowsecurity=false` |
+> | `bossaos_auth` | **131** | tem política própria |
+>
+> **Isto decidiu o desenho e quase me apanhou:** contar pelo papel do produto
+> daria `0 == 0` para sempre — uma guarda incapaz de ver aquilo que guarda,
+> verde mesmo que o registo criasse mil contas.
+
+| controlo | resultado |
+| --- | --- |
+| A · a contagem vê a base | 131 → **132** com uma linha plantada → 131 após apagar |
+| B · a guarda recusa | planta entre as duas contagens: **exit 1**, «a PRÓPRIA prova mexeu na população» |
+
+A verificação da contagem vem **antes** do veredicto do registo: se a prova criou
+uma conta, o que ela diz sobre o registo deixa de importar, porque ela própria
+fez o que veio impedir.
+
 ### A consequência: medida, e já não presumida
 
 O sénior escreveu que sem `Membership` era *provável* cair num vazio, e não o
