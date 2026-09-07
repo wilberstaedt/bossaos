@@ -28,6 +28,56 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## Superfícies: a guarda media quatro de onze, e o buraco era a população
+
+O sénior encontrou porque é que o CTA da landing escapou: a
+`validar-superficies.sh` media **quatro** superfícies e o âmbito dizia quais —
+duas do KDS, o login, uma do painel. **A landing não era nenhuma delas.** O
+detector nunca falhou; a população dele não incluía o sítio onde o defeito
+vivia. Commit `e03e101`.
+
+Entram sete públicas: landing, `/demo`, `/faq`, `/plans`, `/product`, `/trust` e
+a carta pública. **Onze**, e o âmbito deixa de ser uma frase escrita à mão — a
+lista vem agora da medição, porque foi uma frase verdadeira quando foi escrita
+que deixou a landing de fora à vista de todos durante um dia.
+
+**O que a extensão encontrou não foi o que se previa.** O `<textarea>` do
+formulário de demonstração não tinha classe nenhuma: branco sobre creme, **1,1:1**
+— um controlo sem fronteira visível, no campo que a própria rota descreve como o
+único que a pessoa teve de pensar. Os quatro campos ao lado levam
+`bo-campo__controlo`.
+
+> **E o CTA da landing NÃO acendeu aqui, que é preciso dizer porque era o
+> previsto.** Esta guarda mede texto e controlos contra o fundo; **não mede anéis
+> de foco**. O anel do CTA é medido pela `validar-acessibilidade-dinamica.sh` e já
+> está curado em `3b186e4` — vermelha contra o CSS publicado, verde com a
+> correcção.
+
+**Um vermelho tapava o outro.** Ao alargar, o tecto dos contornos rebentou e
+terminou o teste **antes** de imprimir o defeito: o relatório dizia `maus=1` e
+não dizia qual. Agora tudo o que se encontra sai antes de qualquer asserção, e a
+ordem inverte-se — o defeito primeiro, o tecto depois, que é dívida catalogada.
+
+**O tecto passa a ser por superfície.** O `9` era exactamente a população antiga
+(4 no login + 5 no painel). Com onze superfícies, um tecto global só dava duas
+saídas más: vermelho para sempre, ou levantado para 17 e a tolerar oito novos
+**em qualquer sítio**, incluindo uma regressão no login que ninguém veria. Por
+superfície é a forma do inventário do cabeçalho: um **conjunto** e não um total,
+porque um total deixa somar de um lado o que se tirou do outro.
+
+| controlo | resultado |
+| --- | --- |
+| A · desfeita a classe do `<textarea>` | **exit 1**, `DESAPARECE MKT-demo` — a extensão serve |
+| B · tecto do `MKT-demo` de 5 para 4 | **exit 1**, `MKT-demo 5/4`, com o total inalterado |
+
+## Deploy PREPARADO e não publicado
+
+`bash scripts/publicar.sh` sem `--autorizado-por` — *preparar não é publicar*.
+Pacote de **`7b94eff`**, **2155 ficheiros, nenhum segredo**, portões locais
+abertos, e pára na autorização como deve. **A landing continua no ar com o anel
+a 1,00:1**: a correcção está comitada e não foi ao ar, e a autorização anterior
+do Matheus era para aquele momento e aquele commit.
+
 ## Anel de foco — o defeito não era só o do KDS, e está no ar
 
 O sénior mediu na instalação publicada: **anel do KDS a 1,00:1**, a cor do anel
