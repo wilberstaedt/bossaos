@@ -46,7 +46,7 @@ expected: no máximo quatro agrupamentos, CTA de demo prioritário, estado activ
 observed: PAGINAS_MKT tem 6 rotas + demo = 7 `<a>` na mesma `<nav>`, todos com `border-radius: var(--bo-raio-capsula)`
 evidence: evidence/baseline/home-1440.png
 fix_criteria: <= 4 agrupamentos visíveis; o CTA distinto dos links; `marketing.spec.ts` continua a provar que as sete rotas se alcançam da landing
-status: open
+status: corrigido — VERIFICADO PELO REVISOR na evidência da moldura: cápsulas na navegação 7 -> 0
 ```
 
 ```yaml
@@ -74,7 +74,7 @@ expected: preços da fonte aprovada, mensal e anual, IVA à parte, implantação
 observed: zero preços na página e zero nos três catálogos de mensagens; a decisão que os proibia caducou a 04/09 às 04:01, 83 minutos depois de ser tomada
 evidence: 01_BASELINE.md secção "O caso 7" · docs/bossaos/PRECIFICACAO.json
 fix_criteria: os valores vêm de `precoDoPlano()` em `packages/domain/src/precificacao.ts`; `validar-precos.sh` passa; o equivalente mensal aparece como apresentação e nunca como cobrança
-status: open
+status: corrigido — VERIFICADO PELO REVISOR: `precoDoPlano()` é chamado em dois ficheiros de `apps/web` e a home serve 12 valores; a fonte é o `PRECIFICACAO.json` e nenhum valor está escrito à mão
 ```
 
 ```yaml
@@ -88,7 +88,7 @@ expected: produto, planos, recursos, idiomas, contacto, redes, login, privacidad
 observed: `<footer>` com `{assinatura}` = "Hecho con BossaOS"; o `EstruturaPublica` aceita um `rodape` opcional que a `MolduraMkt` não passa
 evidence: 01_BASELINE.md hipótese 10
 fix_criteria: footer com as rotas que existem — as 7 da família, /auth/login e os três idiomas. Rotas legais só depois de RV100-011
-status: open
+status: corrigido — VERIFICADO PELO REVISOR ao aceitar a troca sem JavaScript: o rodapé leva os oito destinos comerciais mais a entrada na conta, e o `Marketing.tsx` renderiza no servidor
 ```
 
 ```yaml
@@ -116,7 +116,7 @@ expected: title por página, description útil, canonical/hreflang/robots/sitema
 observed: `title: 'BossaOS'` e uma description no layout raiz; nenhuma página de marketing define a sua; `apps/web/app/` não tem icon/favicon/apple-*; o padrão de `generateMetadata` já existe em `app/r/[publicLocationSlug]/[locale]/layout.tsx`
 evidence: 01_BASELINE.md hipótese 12
 fix_criteria: metadata por rota nos três idiomas, favicon do `Icone` aprovado testado em 16 px, sitemap e robots servidos
-status: open
+status: corrigido — VERIFICADO PELO REVISOR: títulos e descrições DISTINTOS nas 9 rotas (a medição é de distintos, não de presentes), 27 canonical/hreflang/og:image, sitemap e robots a 200. Fica UMA pendência de produção: o `NEXT_PUBLIC_SITE_URL` não está definido em lado nenhum, e sem ele os canónicos apontam para localhost — deliberado, porque o domínio é nome pretendido sem posse presumida. Registado no `.env.example`
 ```
 
 ```yaml
@@ -173,7 +173,7 @@ observed: cinco campos (nome, email, restaurante, telefone, mensagem) gravados e
 evidence: apps/web/app/[idioma]/demo/page.tsx · apps/web/app/api/publico/demo/route.ts
 fix_criteria: rota de privacidade e ligação a partir do formulário; distinção entre o contacto pedido e autorização para marketing
 decisao: fora-do-alcance-da-autorizacao — a estrutura avança por antecipação; o TEXTO legal fica por rever por quem responde por ele, e isso não é uma pendência que o Matheus tenha destravado escrevendo que confia em mim
-status: open
+status: corrigido na estrutura — VERIFICADO PELO REVISOR: a caixa de consentimento existe, não é pré-marcada e não bloqueia o envio; e os dois erros deixaram de dizer o mesmo nas três línguas. O TEXTO LEGAL continua por rever e a `/privacy` diz por extenso que responsável, prazos e direitos não estão fixados
 ```
 
 ```yaml
@@ -202,7 +202,7 @@ observed: os dois "passos" da página são as chaves `passo3` e `passo4`, as mes
 evidence: apps/web/app/[idioma]/pilot/page.tsx
 fix_criteria: factos de piloto autorizados e identificados como piloto. O único piloto referido no repositório é um acordo separado com um restaurante identificável
 decisao: fora-do-alcance-da-autorizacao — o Matheus destravou as decisões DELE; o nome de um terceiro em copy pública é consentimento de outra pessoa e não dele. A página avança sem nome e sem depoimento
-status: open
+status: corrigido — VERIFICADO PELO REVISOR por caminho independente: as 21 chaves do piloto têm ZERO dígitos, e o único número da página é calculado de `precoDoPlano()` em execução. Saíram as chaves que o achado nomeia
 ```
 
 ```yaml
@@ -274,7 +274,7 @@ expected: ícone e logo aprovados usados correctamente (§12.1); favicon testado
 observed: `git grep '<Icone'` devolve zero; não há icon/favicon/apple-* em apps/web/app
 evidence: 01_BASELINE.md
 fix_criteria: favicon derivado do ícone aprovado, revisto a 16 px como o manual manda (p. 14)
-status: open
+status: corrigido — VERIFICADO PELO REVISOR: `apps/web/app/icon.png` existe, do ícone aprovado. O implementador mediu-o a tamanho real: o glifo ocupa 91,3% da tela, ~14,6 px efectivos a 16, sem margem para recuperar. Uma variante simplificada para tamanho pequeno é secção 7
 ```
 
 ```yaml
@@ -288,7 +288,7 @@ expected: propriedade dos dados, isolamento, estados honestos e operação degra
 observed: três pilares, todos verificáveis no código; a afirmação de operação degradada vive na FAQ como `faq4`
 evidence: apps/web/app/[idioma]/trust/page.tsx
 fix_criteria: medir a operação degradada contra o código ANTES de a subir para a página de confiança — mover uma afirmação de sítio não é verificá-la
-status: open
+status: corrigido — VERIFICADO PELO REVISOR: o `validar-pilar-offline.sh` existe e corre a zero, com dois controlos negativos e o par positivo (compor um pedido continua a NÃO exigir rede, sem o qual o pilar podia mentir na outra direcção)
 ```
 
 ```yaml
