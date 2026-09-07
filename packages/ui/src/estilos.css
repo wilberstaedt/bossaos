@@ -2262,7 +2262,9 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* ── 1 · Fundos e secções: o ritmo que a landing não tinha ─────────────── */
-.ns-seccao { padding-block: clamp(56px, 7vw, 112px); }
+/* Era 7vw (200 px por seccao a 1440, 1400 px so em respiro). O norte pede
+   4500–5500 e a pagina estava a 6520: o corte comeca aqui. */
+.ns-seccao { padding-block: clamp(32px, 2.6vw, 48px); }
 .ns-seccao > * { max-width: var(--bo-largura-maxima); margin-inline: auto; padding-inline: var(--bo-espaco-lg); }
 
 .ns-seccao--areia  { background: var(--bo-superficie-base); color: var(--bo-texto-primario); }
@@ -2322,7 +2324,7 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
 .ns-bento { display: grid; gap: var(--bo-espaco-lg); grid-template-columns: 1fr; }
 .ns-bento__area { border-radius: 20px; overflow: hidden; padding: var(--bo-espaco-lg); background: rgba(255, 255, 255, 0.06); }
 @media (min-width: 1024px) {
-  .ns-bento { grid-template-columns: repeat(6, 1fr); grid-auto-rows: minmax(180px, auto); }
+  .ns-bento { grid-template-columns: repeat(6, 1fr); grid-auto-rows: minmax(150px, auto); }
   .ns-bento__area--principal { grid-column: span 4; grid-row: span 2; }
   .ns-bento__area--media     { grid-column: span 2; }
   .ns-bento__area--larga     { grid-column: span 6; }
@@ -2366,3 +2368,124 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
 .ns-mesa--atencao   { border-color: var(--bo-acento-sinal); background: var(--bo-superficie-suave); border-width: 2px; }
 .ns-mesa__estado { font-size: 14px; font-weight: 600; }
 .ns-resumo { display: flex; flex-wrap: wrap; gap: var(--bo-espaco-md); font-size: 14px; }
+
+/* ── NS2 · Fase 2: as peças da landing ─────────────────────────────────────
+   Nascem com a reescrita da página e vivem ao lado das `bo-`, que continuam a
+   servir as 396 telas. A Fase 3 — só depois da aprovação — é que funde. */
+
+/* O herói: 5/7, e a captura principal na coluna larga. Eram 588 px; o norte
+   pede ≥ 650. E a altura mínima é 760, que estava a 759 por não haver teste. */
+/* 792 e não 760: o mínimo do norte é 760 e um mínimo à justa foi o que
+   deixou a página anterior a 759 — um pixel abaixo, sem ninguém ver. */
+.ns-heroi { min-height: 776px; display: flex; align-items: center; }
+.ns-heroi__grelha { display: grid; gap: var(--bo-espaco-xl); align-items: center; }
+@media (min-width: 1024px) {
+  .ns-heroi__grelha { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--bo-espaco-xl); }
+}
+.ns-heroi__media { margin: 0; position: relative; display: grid; gap: var(--bo-espaco-md); }
+.ns-heroi__segunda { width: 62%; margin-left: auto; margin-top: calc(var(--bo-espaco-xl) * -1); }
+.ns-chamada { display: flex; flex-wrap: wrap; gap: var(--bo-espaco-md); margin: var(--bo-espaco-lg) 0 0; }
+/* O sinal em lima: continuidade, nunca perigo nem dinheiro. */
+.ns-sinal { color: var(--bo-realce); font-weight: 600; font-size: 15px; margin-top: var(--bo-espaco-md); }
+
+/* O fluxo da comanda: uma linha de ritmo liga os quatro passos. Não são quatro
+   cartões iguais — não têm caixa, têm número e ligação. */
+.ns-fluxo { list-style: none; margin: var(--bo-espaco-xl) 0 0; padding: 0; display: grid; gap: var(--bo-espaco-lg); }
+@media (min-width: 900px) { .ns-fluxo { grid-template-columns: repeat(4, 1fr); } }
+.ns-fluxo__passo { position: relative; padding-top: var(--bo-espaco-lg); }
+.ns-fluxo__passo::before {
+  content: ''; position: absolute; inset-inline: 0; top: 14px; height: 2px;
+  background: var(--bo-acento-sinal);
+}
+.ns-fluxo__passo:last-child::before { inset-inline-end: 50%; }
+.ns-fluxo__passo:first-child::before { inset-inline-start: 50%; }
+.ns-fluxo__marca {
+  position: absolute; top: 0; inset-inline-start: 50%; transform: translateX(-50%);
+  width: 30px; height: 30px; border-radius: 999px;
+  background: var(--bo-acento-sinal); color: var(--bo-primaria);
+  display: grid; place-items: center; font-weight: 700; font-size: 15px;
+}
+.ns-fluxo__nome { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 20px; margin: var(--bo-espaco-md) 0 4px; }
+
+.ns-bento__nome { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 22px; margin: var(--bo-espaco-md) 0 4px; }
+.ns-bento__lado { display: grid; gap: var(--bo-espaco-lg); align-items: center; }
+@media (min-width: 1024px) { .ns-bento__lado { grid-template-columns: 1fr 420px; } }
+
+.ns-papeis { display: grid; gap: var(--bo-espaco-xl); margin-top: var(--bo-espaco-xl); }
+@media (min-width: 1024px) { .ns-papeis { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: center; } }
+.ns-papeis__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--bo-espaco-lg); }
+.ns-papeis__nome { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 22px; margin: 0 0 4px; }
+
+.ns-preco__nome { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 24px; margin: 0 0 var(--bo-espaco-sm); }
+
+.ns-comecar { display: grid; gap: var(--bo-espaco-xl); margin-top: var(--bo-espaco-xl); }
+@media (min-width: 1024px) { .ns-comecar { grid-template-columns: minmax(0, 4fr) minmax(0, 6fr); } }
+.ns-linha-do-tempo { list-style: none; margin: 0; padding: 0 0 0 var(--bo-espaco-lg); display: grid; gap: var(--bo-espaco-lg); border-inline-start: 2px solid var(--bo-borda); }
+.ns-linha-do-tempo__nome { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 19px; margin: 0 0 4px; }
+.ns-transparencia { background: #FFFFFF; border-radius: 20px; padding: var(--bo-espaco-lg); }
+.ns-titulo-pequeno { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 19px; margin: var(--bo-espaco-lg) 0 4px; }
+.ns-transparencia > .ns-titulo-pequeno:first-child { margin-top: 0; }
+
+.ns-faq { display: grid; gap: var(--bo-espaco-md); margin-top: var(--bo-espaco-xl); }
+.ns-faq__item { border-bottom: 1px solid rgba(255, 255, 255, 0.18); padding-bottom: var(--bo-espaco-md); }
+.ns-faq__pergunta { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 19px; cursor: pointer; }
+.ns-fecho { margin-top: var(--bo-espaco-gigante); }
+
+
+/* ── NS2 · o que a cascata da casa tapava ──────────────────────────────────
+ *
+ * O `.ns-titulo` saía a **20 px** e não a 48. Não era o valor: era a
+ * ESPECIFICIDADE. O `.bo-publico h2` da linha 1269 é (0,1,1) e o `.ns-titulo`
+ * é (0,1,0) — perde por construção, esteja onde estiver no ficheiro. É a mesma
+ * causa dos 26 px que a régua dos catorze números mediu no `.bo-mkt__seccao h2`.
+ *
+ * A cura é empatar em especificidade e ganhar por ordem, que é o que o elemento
+ * mais a classe faz. **Sem `!important`**: um `!important` aqui ganhava a
+ * discussão e escondia que a folha tem duas famílias a disputar o mesmo `h2`.
+ */
+h2.ns-titulo { font-size: 32px; }
+h3.ns-bento__nome, h3.ns-papeis__nome, h3.ns-fluxo__nome,
+h3.ns-linha-do-tempo__nome, h3.ns-titulo-pequeno, h3.ns-preco__nome { line-height: 1.2; }
+@media (min-width: 1024px) { h2.ns-titulo { font-size: 48px; } }
+
+/* O contentor do norte é 1240–1280, e o da casa é 1200. Não se mexe no token
+   global — as 396 telas vivem nele. A largura nova é só das secções NS2, e é o
+   que faz a captura principal passar de 588 para ≥ 650. */
+.ns-seccao > * { max-width: 1280px; }
+
+/* O cabeçalho comercial: 102 px contra os 72–80 do §4.1. Escopado a
+   `--comercial` DE PROPÓSITO — a mesma classe serve a carta pública do
+   restaurante, e encolher o cabeçalho dela não foi pedido nem medido. */
+.bo-publico--comercial .bo-publico__cabecalho { padding-block: 4px; }
+
+/* ── A landing NS2 sai do contentor da moldura, e só ela ───────────────────
+ *
+ * O `.bo-publico__conteudo` limita a 1200 e tira 64 de cada lado: o que sobra
+ * são **1072**, e foi por isso que a captura do herói deu 569 contra os ≥ 650
+ * do norte — e por isso as faixas de cor não podiam ser full-bleed.
+ *
+ * O escopo é `:has(> .ns-seccao)`: aplica-se à área de conteúdo QUE CONTÉM
+ * secções NS2, ou seja só a esta página. Não mexe na API da `EstruturaPublica`
+ * nem nas outras sete rotas comerciais, e num navegador sem `:has()` a landing
+ * degrada para o contentor de sempre em vez de partir.
+ *
+ * O contentor de 1280 é o do §4.2 do norte (1240–1280), e vive nas secções —
+ * o token global de 1200 fica intacto, porque é dele que as 396 telas vivem. */
+.bo-publico__conteudo:has(> .ns-seccao) {
+  max-width: none; padding-inline: 0; padding-block: 0;
+}
+
+/* ── As capturas de RETRATO esticavam duas secções ─────────────────────────
+ *
+ * A carta é 390×844 e o tablet 834×1112: à largura da coluna davam 844 px e
+ * 560 px de altura, e sozinhas punham `papeis` a 1273 e `bento` a 1420. A
+ * página ficava a 6013 contra os 4500–5500 do norte.
+ *
+ * O corte é pelo TOPO e é isso que o torna honesto: numa carta o topo é a
+ * marca, a busca e os primeiros pratos — o que o §6 do norte chama «zoom/crop
+ * em detalhes úteis». Cortar o rodapé de uma lista não esconde nada de quem
+ * está a decidir comprar. */
+.ns-papeis .ns-moldura { max-height: 520px; }
+.ns-papeis .ns-moldura img { object-fit: cover; object-position: top; height: 520px; }
+.ns-bento__lado .ns-moldura { max-height: 380px; }
+.ns-bento__lado .ns-moldura img { object-fit: cover; object-position: top; height: 380px; }
