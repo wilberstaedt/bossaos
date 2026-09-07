@@ -2,24 +2,38 @@
 # ── O ecrã NOVO não volta a escrever o cabeçalho à mão ──────────────────────
 #
 # O `CabecalhoDePagina` existia três vezes — `CabecalhoDoKds`, `CabecalhoDaVisita`
-# e `CabecalhoDoKiosk` eram cópias byte a byte — e além delas há **267 ecrãs** que
-# escrevem o bloco directamente. Converter esses 267 é PROPAGAÇÃO, e a propagação
-# está no §8.3 do RV100, explicitamente **depois** da aprovação visual humana:
-# *«arruma antes de replicar»*. Não é esta guarda que a faz.
+# e `CabecalhoDoKiosk` eram cópias byte a byte — e além delas ficou um corpo de
+# ecrãs que escreve o bloco directamente. Convertê-los é PROPAGAÇÃO, e a
+# propagação está no §8.3 do RV100, explicitamente **depois** da aprovação visual
+# humana: *«arruma antes de replicar»*. Não é esta guarda que a faz.
+#
+# ── O INVARIANTE, que é o que não apodrece ────────────────────────────────
+#
+# **Nenhum ecrã fora do inventário escreve o cabeçalho à mão.** É isso que aqui
+# se afirma, e continua verdade com 267 ecrãs na lista ou com dois.
+#
+# O tamanho da dívida NÃO está escrito nesta prosa de propósito: ele é medido a
+# cada corrida e sai no âmbito. Um número em presente sobre o estado do mundo
+# apodrece sozinho — foi o que aconteceu hoje ao RV100-025, que dizia nove
+# controlos e passou a dezassete quando a guarda das superfícies foi alargada,
+# sem ninguém errar. Entre um número que exige manutenção e um que não a exige
+# está muitas vezes só um verbo.
 #
 # ── Por isso isto é uma CATRACA e não um portão ────────────────────────────
 #
-# Uma guarda que ficasse vermelha nos 267 seria vermelha desde o primeiro dia, e
+# Uma guarda que nascesse vermelha em toda a dívida existente seria vermelha
+# desde o primeiro dia, e
 # **uma guarda permanentemente vermelha é uma guarda ignorada** — foi a razão
 # escrita para a `validar-provas-frescas.sh` não medir o repositório inteiro.
 #
 # Aqui a dívida existente está escrita num inventário e é aceite tal como está. O
-# que a guarda recusa é o **ecrã 268**: um ficheiro que não está na lista e que
-# escreve o bloco. A dívida pode descer; não pode crescer.
+# que a guarda recusa é o **ecrã seguinte**: um ficheiro que não está na lista e
+# que escreve o bloco. A dívida pode descer; não pode crescer.
 #
 # ── O critério, e porque é o contentor e não a sobrancelha ─────────────────
 #
-# Medido a 07/09: 269 ficheiros escrevem `bo-estado__cabecalho` e **todos** eles
+# Retrato datado de 07/09, e fica com a data porque é registo e não afirmação
+# sobre agora: 269 ficheiros escreviam `bo-estado__cabecalho` e **todos** eles
 # escrevem também `bo-estado__sobrancelha`; outros 6 usam só a sobrancelha dentro
 # de outra composição — o site público, a prévia do tema, o índice interno. Esses
 # **não duplicam o cabeçalho**, e o revisor chegou à mesma conclusão pelo mesmo
