@@ -28,6 +28,60 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## A lista A1/A2/A3 e os três degraus seguintes — fechados numa passagem
+
+**Regra nova, e o sénior fixou-a por escrito:** *uma lista numerada é
+autorização até ao fim dela.* O reparo dele entra em cima do que foi entregue,
+nunca antes. Deixei de esperar luz verde entre itens.
+
+**A3 — a reconciliação veio antes da correcção, e era esse o ponto.** Ele contou
+**10** botões escritos à mão no caminho comercial, eu contei **14**, e nenhum dos
+dois errou: eram populações diferentes. Ele contou em seis ficheiros de rota; eu
+nos que a travessia alcança a partir da landing. `10 + demo/thanks 1 + pilot 2 +
+privacy 1 = 14`. **Corrigir dez deixava quatro vivos** em páginas que ninguém
+tinha visitado, que é como estas dívidas sobrevivem. Os 14 passaram a `Botao`
+(274 → 260 no produto), a landing continua a **zero**, e medi no DOM e não na
+contagem: os 14 rendem, os 14 navegam, **zero inertes**.
+
+**Staff e KDS — o instrumento foram as telas-mestre, não o código.** Dois
+achados da auditoria já não existiam quando fui verificar, e não os contei como
+abertos. Ficheiro: `docs/reviews/STAFF-E-KDS-ACHADOS.md`.
+
+> **O achado da ronda: não era um duplicado, era um rótulo que mentia.** A M05
+> mostrava «Cocina caliente» no `h1` e na primeira pastilha, e eu ia tratá-lo
+> como o duplicado do Staff. **A captura do estado vazio é tirada na estação
+> Pase — e a pastilha continuava a dizer «Cocina caliente».** `kdsE16.bilhetes`
+> estava traduzido como um nome de estação nas três línguas: **errado em todas
+> as estações menos uma.** Numa cozinha com quatro, três liam o nome do vizinho.
+
+Corrigidos: o rótulo (`Tickets`/`Bilhetes`/`Tickets`), a barra a mostrar a
+secção onde já se está (a classe que o Staff curou), e um `<p>{n}</p>` que no
+vazio era literalmente um «0» a meio de um ecrã escuro. Guarda nova dentro do
+`kds.spec.ts`, a medir **por propriedade e não por texto**; sonda acende;
+controlo negativo repõe o defeito e dá **25 falhas em 14 telas**; suite 20/20.
+
+**Levantado e não corrigido:** o bloco «Sin enviar: 0» do Staff. A fila offline é
+funcionalidade real — o defeito é ocupar meio ecrã para dizer que não há nada. É
+decisão de produto, com proposta escrita no ficheiro.
+
+**`CabecalhoDePagina` — o diagnóstico dizia 324 ecrãs sem componente; o código
+dizia outra coisa.** Ele não existia, mas existiam `CabecalhoDoKds`,
+`CabecalhoDaVisita` e `CabecalhoDoKiosk` — **uma forma, três cópias byte a
+byte**. Não era «podia haver um componente partilhado»: era **três sítios para
+uma decisão**. Nasceu em `packages/ui`, os 36 ecrãs passaram a usá-lo, as três
+cópias foram **apagadas** (não ficaram como aliases), e o do Staff mantém nome
+porque faz mais — agora compõe.
+
+| | |
+| --- | ---: |
+| ecrãs no componente | **55** |
+| ecrãs que ainda escrevem o bloco à mão | **273** |
+
+Os 273 são a dívida a sério e ficam por fazer. O que se fechou foi a duplicação
+**entre componentes**, que era pior por ser invisível: um ecrã escrito à mão
+vê-se; três componentes iguais parecem três decisões. Suites das quatro
+superfícies: **72/72**. Commits `3474bf6`, `af4c37c`, `d1cb7e9`.
+
 ## Caminho da demonstração — A1 corrigido, A2 e A3 levantados
 
 Terceira etapa da ordem por venda. **Os três achados estão em ficheiro**, e a
