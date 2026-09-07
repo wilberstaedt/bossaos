@@ -2787,3 +2787,29 @@ como identidade seria fingir que medi o que não medi.
 conformes, e **dos sete que faltam, quatro estão naquela lista à espera dele.**
 Nenhum deles é trabalho por fazer. É a diferença entre «falta-nos 27%» e
 «falta-te decidir quatro coisas» — e a segunda é accionável.
+
+### O número do achado apodreceu enquanto a guarda crescia — 18h50
+
+O `RV100-025` estava bem registado — e dizia **«nove controlos em duas
+superfícies»**. A guarda, entretanto alargada a onze, mede **17 em cinco**.
+
+**Ninguém errou.** O nove era verdade quando a guarda media duas superfícies. **O
+alargamento encontrou mais oito, e o número do achado não acompanhou** — porque
+quem alarga uma guarda está a olhar para a guarda, não para o registo que a
+citava.
+
+**É a terceira vez hoje que apanho a mesma coisa**, e as três em sítios
+diferentes: o portão que dizia 65 testes quando eram 68; o cabeçalho da guarda
+das línguas que dizia 2343 chaves quando ela própria media 2595; e agora um
+achado que conta uma população que cresceu debaixo dele.
+
+**Reescrevi-o com a forma que já sei ser a certa: invariante primeiro, retrato
+datado depois.** O invariante — *«nenhum controlo novo abaixo de 3:1 em
+superfície nenhuma»* — não apodrece. O 17 leva a hora e a população ao lado, para
+quem o ler saber contra o que foi contado.
+
+**E há uma assimetria aqui que vale a pena notar: alargar uma medição envelhece
+tudo o que a citava.** Quando a guarda passou de 4 para 11 superfícies, ela
+melhorou — e ao melhorar, tornou falso um número que estava certo. **Um
+instrumento que fica melhor deixa registos velhos atrás de si**, e ninguém pensa
+nisso no momento em que está a melhorá-lo.

@@ -408,7 +408,7 @@ id: RV100-025
 severity: P2
 surface: transversal — painel, login e qualquer superfície com formulário
 screen_or_route: /[idioma]/auth/login e /[idioma]/app/[orgSlug]/catalogo (medidos); a classe é do produto
-summary: nove controlos têm contorno que não delimita — abaixo de 3:1 contra o que está por trás
+summary: controlos cujo limite não se distingue do que os rodeia — abaixo de 3:1. O INVARIANTE é «nenhum controlo novo abaixo de 3:1 em superfície nenhuma»; a contagem é retrato e envelhece. Retrato às 18h25 de 07/09, com a guarda já em 11 superfícies: **17 em 5** — AUTH-login 4, PAINEL-catalogo 5, MKT-demo 5, CARTA-publica 2, MKT-landing 1. Estava aqui «nove em duas», que era verdade quando a guarda media duas superfícies: o alargamento encontrou mais oito, e o número não acompanhou
 impact: acessibilidade — WCAG 2.2, 1.4.11 (Non-text Contrast)
 expected: o limite de um controlo distingue-se do que o rodeia a >= 3:1, por preenchimento OU por borda visível
 observed: >
