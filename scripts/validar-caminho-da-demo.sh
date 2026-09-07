@@ -36,6 +36,14 @@ PORTA_INSPECCAO="$PORTA" BETTER_AUTH_URL="http://127.0.0.1:$PORTA" \
   pnpm exec playwright test --project=chromium "caminho-da-demo" --reporter=line >"$SAIDA" 2>&1
 ESTADO=$?
 
+if grep -qE 'config.webServer was not able to start|Could not find a production build|ERR_MODULE_NOT_FOUND|Cannot find module|Executable doesn.t exist' "$SAIDA"; then
+  # NAO MEDI e nao FALHOU, e a diferenca importa: aqui o servidor nao arrancou
+  # ou o arnes nao estava montado. Chamar falha a isto seria acusar o produto de
+  # um defeito que ninguem mediu — e foi assim que esta guarda ficou vermelha
+  # contra o HEAD, num checkout sem build.
+  naomedi "o servidor da inspeccao nao arrancou — sem build ou sem arnes montado."
+  exit "$NAO_MEDI"
+fi
 if grep -q 'No tests found' "$SAIDA"; then
   naomedi "o Playwright nao encontrou a suite — nada foi medido."
   exit "$NAO_MEDI"
