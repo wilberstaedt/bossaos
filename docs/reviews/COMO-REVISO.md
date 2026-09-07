@@ -2641,3 +2641,53 @@ foi um número errado num documento — foi uma frase ao dono do produto sobre o
 que a instalação dele leva. Corrigi-a no minuto seguinte, mas a lição é anterior:
 **a confiança com que eu disse aquilo não vinha da medição, vinha de ela ser
 coerente.**
+
+---
+
+## Não eram seis defeitos: era um gerador — 07/09, 18h00
+
+Medi ao vivo, contra a instalação publicada, os dois CTA do herói da landing:
+
+| CTA | fundo | texto | anel de foco |
+| --- | --- | ---: | ---: |
+| «Pedir una demo» (primário) | `#102E35` | 14,34:1 | **1,00:1** |
+| «Ver el producto» | `#E9EFEC` | 12,31:1 | 12,31:1 |
+
+**Um utilizador de teclado que chegue ao botão principal da landing não vê
+nada.** E foi encontrado por acidente: o JR corrigiu o anel nas superfícies
+escuras e a correcção **destapou** este.
+
+**Depois parei de contar instâncias e fui contar a causa.** O `#102E35` é
+declarado **quatro vezes**, com quatro nomes:
+
+| token | papel | consumos |
+| --- | --- | ---: |
+| `--bo-primaria` | preenchimento da acção primária | 13 |
+| `--bo-superficie-inversa` | a superfície escura | 7 |
+| `--bo-texto-primario` | a cor do texto | 31 |
+| `--bo-foco-cor` | o anel de foco | 1 |
+
+**Qualquer par destes quatro é 1,00:1 por construção.** Isto não é uma lista de
+defeitos — **é o gerador deles**. E dos seis pares possíveis, **quatro já
+dispararam esta noite**:
+
+- `primária` × `superfície-inversa` → o botão invisível do KDS
+- `foco` × `superfície-inversa` → o anel invisível nas telas escuras
+- `foco` × `primária` → **este**, o CTA da landing, ao vivo
+- `texto-primário` × `superfície-inversa` → as duas 1,00:1 que estavam
+  documentadas nas 39 linhas de CSS defensivo, escritas meses antes por alguém
+  que as apanhou uma a uma
+
+**Passei o dia a apanhar isto instância a instância, e cada uma parecia um caso
+novo.** A quarta é que mostrou o que era: quando o mesmo valor tem quatro nomes,
+**os nomes deixam de proteger** — dois deles encontram-se num ecrã e o resultado
+é uma coisa a desaparecer dentro de outra.
+
+**E explica porque é que o contrato de superfície foi a cura certa.** Ele não
+corrige um par: **quebra a coincidência**, porque a superfície passa a declarar
+o que promete em vez de toda a gente ir buscar a mesma constante. **A cura de um
+gerador é tirar-lhe a matéria-prima, não apagar o que ele já produziu.**
+
+**O que isto me dá que a caça não dava: previsão.** Qualquer sítio novo onde dois
+destes quatro se encontrem vai ser invisível, e isso é enumerável antes de
+alguém dar por ela.
