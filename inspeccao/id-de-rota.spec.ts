@@ -43,17 +43,27 @@ const ALVOS: Alvo[] = [
     caminho: `/es-ES/app/marina-oropesa/puerto/orders/${MAL_FORMADO}`,
     controlo: `/es-ES/app/marina-oropesa/puerto/orders/${UUID_INEXISTENTE}`,
   },
+  // ── Os alvos de ECRÃ mudaram, e a razão é a que interessa ───────────────
+  //
+  // Eu media aqui o kiosk e a ficha da carta. Nenhum dos dois pode exibir o
+  // defeito: o kiosk VALIDA o uuid há muito — com um comentário a descrever
+  // exactamente esta falha — e a ficha procura o produto no instantâneo em
+  // memória, sem tocar em coluna nenhuma. Os 404 deles eram o «não encontrado»
+  // próprio das rotas, e ficavam verdes com a tradução DESLIGADA.
+  //
+  // As de `/platform` exibem-no: davam 500 com `22P02`, por consulta CRUA — que
+  // a extensão nem via, porque só estendia as operações de modelo.
   {
-    id: 'KIOSK',
+    id: 'PLAT-org',
     via: 'ecra',
-    caminho: `/es-ES/kiosk/${MAL_FORMADO}`,
-    controlo: `/es-ES/kiosk/${UUID_INEXISTENTE}`,
+    caminho: `/es-ES/platform/${MAL_FORMADO}`,
+    controlo: `/es-ES/platform/${UUID_INEXISTENTE}`,
   },
   {
-    id: 'CARTA-produto',
+    id: 'PLAT-entitlements',
     via: 'ecra',
-    caminho: `/r/insp-marina-oropesa/es-ES/menu/produto/${MAL_FORMADO}`,
-    controlo: `/r/insp-marina-oropesa/es-ES/menu/produto/${UUID_INEXISTENTE}`,
+    caminho: `/es-ES/platform/${MAL_FORMADO}/entitlements`,
+    controlo: `/es-ES/platform/${UUID_INEXISTENTE}/entitlements`,
   },
 ];
 
@@ -80,6 +90,10 @@ test.describe('RV100-024: um id mal formado sai como 404', () => {
 
       const r = await page.request.get(a.caminho);
       medidas += 1;
+      // Em linha própria, para o guião poder comparar a corrida normal com a
+      // corrida com o plante. É a comparação que separa o 404 que vem da
+      // tradução do 404 que a rota já dava sozinha.
+      console.log(`CODIGO ${a.id} ${a.via} ${r.status()}`);
       porVia[a.via] = (porVia[a.via] ?? 0) + 1;
       if (r.status() !== 404) {
         falhas.push(`${a.id} (${a.via}) · id mal formado deu ${r.status()} e não 404 · ${a.caminho}`);

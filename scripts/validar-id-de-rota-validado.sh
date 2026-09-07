@@ -111,6 +111,76 @@ if [ "$ESTADO_HTTP" -ne 0 ]; then
 fi
 verde "o código que sai é 404 nas rotas medidas — $(sed -n 's/.*medidas=\([0-9]*\).*/\1/p' <<<"$AMB_HTTP") rotas, as duas vias"
 
+# ── 1.3 O CONTROLO NEGATIVO, em TODAS as vias e não numa ──────────────────
+#
+# O meu controlo anterior desligava a tradução num sítio — o da sessão — e por
+# isso provava metade. O revisor aplicou o mesmo plante ao outro lado e ficou
+# VERDE com a tradução desligada: aqueles 404 vinham do «não encontrado» próprio
+# das rotas, não da cura.
+#
+# Agora o plante é encontrado, e não escrito à mão: substitui `(erro)` por
+# `(null)` em TODAS as chamadas ao reconhecedor do lado web. Se amanhã houver
+# uma terceira via, ela é apanhada por existir, sem ninguém se lembrar dela.
+#
+# E a exigência é a que separa as duas origens: com a tradução inerte, cada alvo
+# TEM de deixar de dar 404. Um alvo que continue em 404 não está a medir a
+# tradução — está a medir a rota, e isso di-lo aqui em vez de passar por prova.
+FICHEIROS_DA_TRADUCAO=$(grep -rl 'ehIdentificadorMalFormado(erro)' apps/web/src packages/db/src 2>/dev/null)
+if [ -z "$FICHEIROS_DA_TRADUCAO" ]; then
+  naomedi "não encontrei uma única chamada ao reconhecedor — não há o que desligar."
+  exit "$NAO_MEDI"
+fi
+GUARDADOS=/tmp/bossaos-id-plante; rm -rf "$GUARDADOS"; mkdir -p "$GUARDADOS"
+repor_traducao() {
+  for f in $FICHEIROS_DA_TRADUCAO; do
+    cp "$GUARDADOS/$(echo "$f" | tr / _)" "$f" 2>/dev/null || true
+  done
+}
+trap repor_traducao EXIT INT TERM
+N_PLANTES=0
+for f in $FICHEIROS_DA_TRADUCAO; do
+  cp "$f" "$GUARDADOS/$(echo "$f" | tr / _)"
+  # `(null)` e não apagar a linha: apagar deixa um símbolo por usar, o build
+  # cai, e a guarda diz NÃO MEDI em vez de vermelho — um plante que não compila
+  # não é um controlo, é uma ausência de medição disfarçada.
+  perl -pi -e 's/ehIdentificadorMalFormado\(erro\)/ehIdentificadorMalFormado(null)/g' "$f"
+  N_PLANTES=$((N_PLANTES + 1))
+done
+
+SAIDA_PLANTE=/tmp/bossaos-id-http-plante.txt
+PORTA_INSPECCAO="$PORTA_DA_PROVA" BETTER_AUTH_URL="http://127.0.0.1:$PORTA_DA_PROVA" \
+  pnpm exec playwright test --project=preparar --project=painel id-de-rota.spec.ts \
+  --reporter=line >"$SAIDA_PLANTE" 2>&1
+repor_traducao; trap - EXIT INT TERM
+
+if grep -qE 'config.webServer was not able to start|Could not find a production build' "$SAIDA_PLANTE"; then
+  naomedi "com o plante, o servidor não arrancou — o plante partiu o build e isto não é vermelho, é falta de medição."
+  exit "$NAO_MEDI"
+fi
+TEIMOSOS=$(grep -o 'CODIGO [^ ]* [^ ]* 404' "$SAIDA_PLANTE" | awk '{print $2" ("$3")"}' | sort -u)
+MEDIDOS_PLANTE=$(grep -c '^CODIGO ' "$SAIDA_PLANTE" || true)
+if [ "${MEDIDOS_PLANTE:-0}" -eq 0 ]; then
+  naomedi "com o plante não saiu um único código — a corrida do controlo não mediu nada."
+  exit "$NAO_MEDI"
+fi
+if [ -n "$TEIMOSOS" ]; then
+  vermelho "com a tradução desligada em $N_PLANTES ficheiro(s), estas rotas continuam a dar 404:"
+  printf '%s\n' "$TEIMOSOS" | sed 's/^/           /'
+  echo "           O 404 delas não vem da tradução — vem da própria rota. Enquanto"
+  echo "           estiverem na lista, o verde que dão é emprestado."
+  exit "$FALHOU"
+fi
+verde "controlo negativo em $N_PLANTES ficheiro(s): com a tradução inerte, os $MEDIDOS_PLANTE alvos deixam de dar 404"
+
+# E os ficheiros voltaram ao que eram.
+for f in $FICHEIROS_DA_TRADUCAO; do
+  if ! cmp -s "$f" "$GUARDADOS/$(echo "$f" | tr / _)"; then
+    vermelho "o plante não foi reposto em $f — a árvore ficou adulterada."
+    exit "$FALHOU"
+  fi
+done
+verde "os $N_PLANTES ficheiros do plante voltaram ao byte"
+
 # ── 2. A população, e a pergunta é «TODAS?» e não «alguma?» ────────────────
 #
 # A lição de hoje, na frase que a nomeou: um controlo que pergunta «maior que

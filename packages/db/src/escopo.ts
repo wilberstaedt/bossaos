@@ -118,33 +118,29 @@ export function ehIdentificadorMalFormado(erro: unknown): boolean {
   if (typeof erro !== 'object' || erro === null) return false;
   const e = erro as { code?: unknown; name?: unknown; message?: unknown };
 
-  // ── O código é o P2007, e não o P2023 ────────────────────────────────────
+  // ── A MENSAGEM é o facto; o código muda com o caminho ────────────────────
   //
-  // A primeira versão disto escutava só o `P2023`. Eu tinha ido ao runtime do
-  // cliente confirmar que `InconsistentColumnData` mapeia para `P2023` — e
-  // confirmei uma coisa verdadeira que não era a pergunta. O que um UUID mal
-  // formado produz nesta versão é:
+  // Andei atrás do número e ele fugiu quatro vezes. O mesmo UUID mal formado,
+  // as quatro formas, todas lidas no erro que chega numa rota real:
   //
-  //   code    P2007
-  //   name    PrismaClientKnownRequestError
-  //   message Invalid input value: invalid input syntax for type uuid: "…"
+  //   P2007   operação de modelo, «Invalid input value: invalid input syntax…»
+  //   P2010   consulta CRUA: «Raw query failed. Code: `22P02`…»
+  //   22P02   o código do Postgres, quando passa em cru
+  //   P2023   `InconsistentColumnData`, que era o único que eu escutava
   //
-  // Medido no erro que chega ao apanhador, numa rota real. Enquanto escutou o
-  // código errado, o mecanismo esteve INERTE em todos os caminhos — e duas
-  // rotas pareciam curadas porque tinham «não encontrado» próprio.
-  //
-  // Por isso a condição pede o código E a forma da mensagem: o `P2007` é
-  // «erro de validação de dados» em geral, e converter todos em «não existe»
-  // esconderia falhas que não são esta.
-  const codigo = e.code === 'P2007' || e.code === 'P2023';
-  const fala_de_uuid = typeof e.message === 'string'
-    && /invalid input syntax for type uuid|Error creating UUID/i.test(e.message);
-  if (codigo && fala_de_uuid) return true;
+  // Enquanto a condição pediu um número da lista, houve sempre um caminho por
+  // onde o defeito saía. A frase do Postgres é a mesma nos quatro, porque é ela
+  // que descreve o que aconteceu — e é por ela que se pergunta.
+  if (typeof e.message === 'string'
+    && /invalid input syntax for type uuid|Error creating UUID/i.test(e.message)) {
+    return true;
+  }
 
   // E a forma já convertida, que traz o nome. Reconhecer as duas é o que
   // permite ao resto do sistema não perguntar «de que classe és».
   return e.name === 'IdentificadorMalFormado';
 }
+
 
 export async function comEscopo<T>(
   prisma: PrismaClient,

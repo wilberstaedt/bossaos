@@ -51,18 +51,30 @@ export function obterBase(): PrismaClient {
  * trocar um defeito por outro mais calado.
  */
 export function obterBaseDeEcra(): PrismaClient {
+  // ── E as consultas CRUAS, que o `$allModels` não vê ────────────────────
+  //
+  // A primeira versão estendia só `$allModels`. As rotas de `/platform` falam
+  // com a base por `$queryRaw`, e por lá o erro passa com o código do Postgres
+  // (`22P02`) sem sequer chegar a uma operação de modelo: davam 500 com a
+  // extensão instalada e ninguém dava por isso, porque as duas rotas de ecrã
+  // que eu media não tocam em coluna nenhuma.
+  const apanhar = async <T>(correr: () => Promise<T>): Promise<T> => {
+    try {
+      return await correr();
+    } catch (erro) {
+      if (ehIdentificadorMalFormado(erro)) notFound();
+      throw erro;
+    }
+  };
   return obterPrisma(obterEnv().DATABASE_URL).$extends({
     query: {
       $allModels: {
-        async $allOperations({ args, query }) {
-          try {
-            return await query(args);
-          } catch (erro) {
-            if (ehIdentificadorMalFormado(erro)) notFound();
-            throw erro;
-          }
-        },
+        async $allOperations({ args, query }) { return apanhar(() => query(args)); },
       },
+      async $queryRaw({ args, query }) { return apanhar(() => query(args)); },
+      async $queryRawUnsafe({ args, query }) { return apanhar(() => query(args)); },
+      async $executeRaw({ args, query }) { return apanhar(() => query(args)); },
+      async $executeRawUnsafe({ args, query }) { return apanhar(() => query(args)); },
     },
   }) as unknown as PrismaClient;
 }
