@@ -616,6 +616,31 @@ p { margin: 0; }
    mãos ocupadas e de pé. Os alvos são de OPERAÇÃO, e a barra de secções também —
    no Staff foi a barra que ficou por medir e deu ligações de 22 px. */
 .bo-kds .bo-publico__seccoes a { min-height: var(--bo-toque-operacao); }
+
+/* O bilhete do KDS: espaço entre o nome do prato e a etiqueta de estado.
+   ───────────────────────────────────────────────────────────────────────────
+   MEDIDO no DOM, e não deduzido do desenho: nos três bilhetes a folga entre o
+   fim do nome e o início da etiqueta era **0 px** — `…bechamel especiada` colado
+   a `En preparación`.
+
+   E não é truncagem, que era a primeira suspeita: `text-overflow` está em
+   `clip`, `white-space` em `normal` e `line-clamp` em `none`. Não há regra de
+   corte nenhuma no KDS.
+
+   A causa é estrutural. A regra que dá `display: flex` e `gap` a esta linha é
+   `.bo-publico__produto > a` — e o bilhete do KDS não tem `<a>`: põe os dois
+   `<span>` directamente no `<li>`. Resultado: `display: list-item`, o `gap`
+   inerte, e dois elementos `inline` encostados. A carta pública tem o `<a>` e
+   por isso nunca mostrou o defeito.
+
+   A correcção é a margem e não o `flex`: mudar o `<li>` para caixa flexível
+   reordenava a descrição e as acções que vivem no mesmo bilhete, e isso é uma
+   mudança de composição numa superfície que não é deste lote. A margem resolve
+   o que foi medido e não mexe em mais nada.
+
+   Importa porque esta é a tela lida a 18 px e ao longe, e o nome do prato e o
+   estado são as duas coisas que o cozinheiro lê ao mesmo tempo. */
+.bo-kds .bo-publico__produto > .bo-publico__preco { margin-left: var(--bo-espaco-md); }
 .bo-kds .bo-publico__lista a { min-height: var(--bo-toque-operacao); align-items: center; }
 .bo-kds .bo-lista a { display: flex; align-items: center; min-height: var(--bo-toque-operacao); }
 .bo-kds .bo-botao { min-height: var(--bo-toque-operacao); }
@@ -1704,4 +1729,82 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
   font-size: 14px;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+}
+
+/* ── RV100 · as composições do produto (§6.4) ──────────────────────────────
+   Sem moldura de aparelho, sem perspectiva e sem blur: o §6.4 proíbe esconder
+   interface dentro de efeitos, e uma composição que precise disso corrige-se em
+   vez de se disfarçar. Fica uma borda fina e um raio, que é o que separa a
+   captura da página sem lhe mexer no conteúdo. */
+.bo-mkt__composicao {
+  display: block; width: 100%; height: auto;
+  border: 1px solid var(--bo-borda);
+  border-radius: var(--bo-raio-cartao);
+}
+.bo-mkt__figura { margin: 0; min-width: 0; }
+.bo-mkt__figura--estreita { max-width: 390px; }
+.bo-mkt__figura--media { max-width: 640px; }
+.bo-mkt__legenda { color: var(--bo-texto-secundario); margin-top: var(--bo-espaco-md); }
+
+/* A acção e o seu resultado: EMPILHADAS, e a escolha foi medida.
+   ───────────────────────────────────────────────────────────────────────────
+   A primeira versão pô-las lado a lado acima de 900 px, que é o desenho óbvio
+   para «isto e aquilo». Medi o que isso fazia à legibilidade: cada captura
+   ficava a **37% da escala a que foi tirada** — a 528 px de largura para uma
+   tela de 1440. Os títulos aguentam; o corpo do texto, que é onde está o nome
+   do prato e o número da comanda, não.
+
+   O §6.4 diz «produto legível, não uma miniatura indecifrável», e 37% é a
+   miniatura. Empilhadas ocupam a largura toda do contentor e sobem para **74%**,
+   que é o dobro. Perde-se a comparação lado a lado; ganha-se poder ler o que se
+   está a comparar, e a legenda faz o trabalho de as ligar.
+
+   Uma coluna em todas as larguras, portanto — e a 360 px isso já era assim pela
+   mesma razão. */
+.bo-mkt__par { display: grid; gap: var(--bo-espaco-lg); min-width: 0; }
+
+/* O aviso de que os dados são inventados. Discreto e presente: o §10 reprova
+   dado de demonstração apresentado como real, e isto é o que o impede. */
+.bo-mkt__aviso-demo {
+  margin: var(--bo-espaco-lg) 0 0;
+  padding: var(--bo-espaco-md) var(--bo-espaco-lg);
+  background: var(--bo-superficie-suave);
+  border-radius: var(--bo-raio-controlo);
+  color: var(--bo-texto-secundario);
+  font-size: 14px;
+  max-width: 68ch;
+}
+
+/* ── O herói em duas colunas ───────────────────────────────────────────────
+   A mensagem à esquerda, o produto à direita. Uma coluna abaixo de 1024 px:
+   empilhar é a composição certa no telemóvel, e comprimir a captura para caber
+   ao lado do título dava a miniatura que o §6.4 proíbe.
+
+   O corte a 1024 é o mesmo da moldura, e não por simetria: é onde a barra passa
+   a caber numa linha, e o herói tem de acompanhar para o cabeçalho de 83 px não
+   ficar em cima de uma composição espremida. */
+.bo-mkt__heroi--duas { min-width: 0; }
+.bo-mkt__heroi-texto { min-width: 0; }
+.bo-mkt__heroi-media {
+  margin: 0; min-width: 0;
+  display: grid; gap: var(--bo-espaco-md);
+}
+.bo-mkt__heroi-media figcaption {
+  color: var(--bo-texto-secundario); font-size: 14px;
+}
+@media (min-width: 1024px) {
+  .bo-mkt__heroi--duas {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--bo-espaco-gigante);
+    align-items: center;
+  }
+  /* A do KDS entra recuada e por cima da de sala: são a mesma comanda, e a
+     sobreposição diz isso sem uma seta a explicá-lo. Recuo modesto de propósito
+     — perspectiva e rotação estão proibidas, e uma sobreposição grande esconde
+     metade da tela de baixo, que é a outra forma do mesmo defeito. */
+  .bo-mkt__heroi-media { grid-template-columns: minmax(0, 1fr); }
+  .bo-mkt__heroi-media .bo-mkt__composicao:nth-of-type(2) {
+    width: 82%; margin-left: auto; margin-top: calc(var(--bo-espaco-xxl) * -1);
+    box-shadow: 0 12px 32px rgba(16, 46, 53, 0.18);
+  }
 }

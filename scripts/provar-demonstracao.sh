@@ -124,7 +124,8 @@ else
   erro "o capturador reprovou — ver as linhas acima"
 fi
 
-DESTINO="docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao"
+# As composicoes vivem DENTRO da aplicacao, que e' quem as importa.
+DESTINO="apps/web/src/demonstracao"
 # ── 3. O KDS existe, e nao e' um ficheiro vazio ────────────────────────────
 if [ -s "$DESTINO/kds-cozinha-1280.png" ]; then
   verde "a composicao do KDS existe ($(wc -c < "$DESTINO/kds-cozinha-1280.png" | tr -d ' ') bytes)"

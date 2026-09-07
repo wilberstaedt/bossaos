@@ -20,17 +20,17 @@
       "preguntas",
       "empezar"
     ],
-    "midiaNaPagina": 1,
-    "alturaRolavel": 8634,
+    "midiaNaPagina": 3,
+    "alturaRolavel": 9265,
     "rola": true,
     "heroi": {
       "caixa": {
         "largura": 312,
-        "altura": 388.2
+        "altura": 859.7
       },
       "folhaAteX": 336,
       "ocupaDireita": false,
-      "media": 0,
+      "media": 2,
       "metricaAntiga": 336
     },
     "contentorMeio": 180,
@@ -68,17 +68,17 @@
       "preguntas",
       "empezar"
     ],
-    "midiaNaPagina": 1,
-    "alturaRolavel": 8332,
+    "midiaNaPagina": 3,
+    "alturaRolavel": 9001,
     "rola": true,
     "heroi": {
       "caixa": {
         "largura": 342,
-        "altura": 364.2
+        "altura": 873.2
       },
       "folhaAteX": 366,
       "ocupaDireita": false,
-      "media": 0,
+      "media": 2,
       "metricaAntiga": 366
     },
     "contentorMeio": 195,
@@ -116,17 +116,17 @@
       "preguntas",
       "empezar"
     ],
-    "midiaNaPagina": 1,
-    "alturaRolavel": 6184,
+    "midiaNaPagina": 3,
+    "alturaRolavel": 7254,
     "rola": true,
     "heroi": {
       "caixa": {
         "largura": 720,
-        "altura": 343.6
+        "altura": 1301.9
       },
-      "folhaAteX": 568,
+      "folhaAteX": 744,
       "ocupaDireita": false,
-      "media": 0,
+      "media": 2,
       "metricaAntiga": 744
     },
     "contentorMeio": 384,
@@ -164,17 +164,17 @@
       "preguntas",
       "empezar"
     ],
-    "midiaNaPagina": 1,
-    "alturaRolavel": 5447,
+    "midiaNaPagina": 3,
+    "alturaRolavel": 5974,
     "rola": true,
     "heroi": {
       "caixa": {
         "largura": 1072,
-        "altura": 343.6
+        "altura": 759
       },
-      "folhaAteX": 648,
-      "ocupaDireita": false,
-      "media": 0,
+      "folhaAteX": 1176,
+      "ocupaDireita": true,
+      "media": 2,
       "metricaAntiga": 1176
     },
     "contentorMeio": 640,
@@ -212,17 +212,17 @@
       "preguntas",
       "empezar"
     ],
-    "midiaNaPagina": 1,
-    "alturaRolavel": 5447,
+    "midiaNaPagina": 3,
+    "alturaRolavel": 5974,
     "rola": true,
     "heroi": {
       "caixa": {
         "largura": 1072,
-        "altura": 343.6
+        "altura": 759
       },
-      "folhaAteX": 728,
-      "ocupaDireita": false,
-      "media": 0,
+      "folhaAteX": 1256,
+      "ocupaDireita": true,
+      "media": 2,
       "metricaAntiga": 1256
     },
     "contentorMeio": 720,
@@ -260,17 +260,17 @@
       "preguntas",
       "empezar"
     ],
-    "midiaNaPagina": 1,
-    "alturaRolavel": 8772,
+    "midiaNaPagina": 3,
+    "alturaRolavel": 9404,
     "rola": true,
     "heroi": {
       "caixa": {
         "largura": 312,
-        "altura": 388.2
+        "altura": 860
       },
       "folhaAteX": 336,
       "ocupaDireita": false,
-      "media": 0,
+      "media": 2,
       "metricaAntiga": 336
     },
     "contentorMeio": 180,
@@ -308,17 +308,17 @@
       "preguntas",
       "empezar"
     ],
-    "midiaNaPagina": 1,
-    "alturaRolavel": 8434,
+    "midiaNaPagina": 3,
+    "alturaRolavel": 9079,
     "rola": true,
     "heroi": {
       "caixa": {
         "largura": 342,
-        "altura": 364.2
+        "altura": 873.6
       },
       "folhaAteX": 366,
       "ocupaDireita": false,
-      "media": 0,
+      "media": 2,
       "metricaAntiga": 366
     },
     "contentorMeio": 195,
@@ -356,17 +356,17 @@
       "preguntas",
       "empezar"
     ],
-    "midiaNaPagina": 1,
-    "alturaRolavel": 6260,
+    "midiaNaPagina": 3,
+    "alturaRolavel": 7306,
     "rola": true,
     "heroi": {
       "caixa": {
         "largura": 720,
-        "altura": 343.6
+        "altura": 1277.9
       },
-      "folhaAteX": 568,
+      "folhaAteX": 744,
       "ocupaDireita": false,
-      "media": 0,
+      "media": 2,
       "metricaAntiga": 744
     },
     "contentorMeio": 384,
@@ -404,17 +404,17 @@
       "preguntas",
       "empezar"
     ],
-    "midiaNaPagina": 1,
-    "alturaRolavel": 5443,
+    "midiaNaPagina": 3,
+    "alturaRolavel": 5970,
     "rola": true,
     "heroi": {
       "caixa": {
         "largura": 1072,
-        "altura": 343.6
+        "altura": 759
       },
-      "folhaAteX": 648,
-      "ocupaDireita": false,
-      "media": 0,
+      "folhaAteX": 1176,
+      "ocupaDireita": true,
+      "media": 2,
       "metricaAntiga": 1176
     },
     "contentorMeio": 640,
@@ -452,17 +452,17 @@
       "preguntas",
       "empezar"
     ],
-    "midiaNaPagina": 1,
-    "alturaRolavel": 5443,
+    "midiaNaPagina": 3,
+    "alturaRolavel": 5970,
     "rola": true,
     "heroi": {
       "caixa": {
         "largura": 1072,
-        "altura": 343.6
+        "altura": 759
       },
-      "folhaAteX": 728,
-      "ocupaDireita": false,
-      "media": 0,
+      "folhaAteX": 1256,
+      "ocupaDireita": true,
+      "media": 2,
       "metricaAntiga": 1256
     },
     "contentorMeio": 720,
@@ -500,17 +500,17 @@
       "preguntas",
       "empezar"
     ],
-    "midiaNaPagina": 1,
-    "alturaRolavel": 8846,
+    "midiaNaPagina": 3,
+    "alturaRolavel": 9478,
     "rola": true,
     "heroi": {
       "caixa": {
         "largura": 312,
-        "altura": 350.8
+        "altura": 822.6
       },
       "folhaAteX": 336,
       "ocupaDireita": false,
-      "media": 0,
+      "media": 2,
       "metricaAntiga": 336
     },
     "contentorMeio": 180,
@@ -548,17 +548,17 @@
       "preguntas",
       "empezar"
     ],
-    "midiaNaPagina": 1,
-    "alturaRolavel": 8354,
+    "midiaNaPagina": 3,
+    "alturaRolavel": 9000,
     "rola": true,
     "heroi": {
       "caixa": {
         "largura": 342,
-        "altura": 270.8
+        "altura": 780.2
       },
       "folhaAteX": 366,
       "ocupaDireita": false,
-      "media": 0,
+      "media": 2,
       "metricaAntiga": 366
     },
     "contentorMeio": 195,
@@ -596,17 +596,17 @@
       "preguntas",
       "empezar"
     ],
-    "midiaNaPagina": 1,
-    "alturaRolavel": 6173,
+    "midiaNaPagina": 3,
+    "alturaRolavel": 7219,
     "rola": true,
     "heroi": {
       "caixa": {
         "largura": 720,
-        "altura": 286.4
+        "altura": 1220.7
       },
-      "folhaAteX": 568,
+      "folhaAteX": 744,
       "ocupaDireita": false,
-      "media": 0,
+      "media": 2,
       "metricaAntiga": 744
     },
     "contentorMeio": 384,
@@ -644,17 +644,17 @@
       "preguntas",
       "empezar"
     ],
-    "midiaNaPagina": 1,
-    "alturaRolavel": 5418,
+    "midiaNaPagina": 3,
+    "alturaRolavel": 6002,
     "rola": true,
     "heroi": {
       "caixa": {
         "largura": 1072,
-        "altura": 286.4
+        "altura": 759
       },
-      "folhaAteX": 648,
-      "ocupaDireita": false,
-      "media": 0,
+      "folhaAteX": 1176,
+      "ocupaDireita": true,
+      "media": 2,
       "metricaAntiga": 1176
     },
     "contentorMeio": 640,
@@ -692,17 +692,17 @@
       "preguntas",
       "empezar"
     ],
-    "midiaNaPagina": 1,
-    "alturaRolavel": 5418,
+    "midiaNaPagina": 3,
+    "alturaRolavel": 6002,
     "rola": true,
     "heroi": {
       "caixa": {
         "largura": 1072,
-        "altura": 286.4
+        "altura": 759
       },
-      "folhaAteX": 728,
-      "ocupaDireita": false,
-      "media": 0,
+      "folhaAteX": 1256,
+      "ocupaDireita": true,
+      "media": 2,
       "metricaAntiga": 1256
     },
     "contentorMeio": 720,

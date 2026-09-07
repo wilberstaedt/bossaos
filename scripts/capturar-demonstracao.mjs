@@ -36,8 +36,17 @@ import {
 
 const PORTA = process.env.PORTA_DEMO ?? '3018';
 const BASE = `http://127.0.0.1:${PORTA}`;
-const DESTINO = process.env.DESTINO_CAPTURAS
-  ?? 'docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao';
+/**
+ * Onde as composições ficam: **dentro da aplicação**, e não no `evidence/`.
+ *
+ * Elas deixaram de ser só prova e passaram a ser peças que a landing importa —
+ * o `next/image` gera daqui as versões responsivas. Tê-las em dois sítios era
+ * ter duas cópias de 380 KB no repositório e a certeza de que uma envelhecia.
+ * O `evidence/` guarda o MANIFESTO, que é o que diz o que cada uma prova e que
+ * passou o controlo de sujidade.
+ */
+const DESTINO = process.env.DESTINO_CAPTURAS ?? 'apps/web/src/demonstracao';
+const MANIFESTO = 'docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao';
 
 /**
  * As composições. Cada uma diz **porque existe** — uma captura sem razão é uma
@@ -67,6 +76,14 @@ const COMPOSICOES = [
       + 'apanhou-o e por isso a composição mudou de rota.',
     rota: '/es-ES/app/bossa-demo/catalogo/produtos',
     largura: 1440, altura: 900, sessao: true,
+  },
+  {
+    nome: 'sala-tablet',
+    porque: 'A largura de TABLET, que o §6.4 nomeia e que faltava — 834 px é o '
+      + 'retrato do iPad, que é o aparelho que anda na mão de quem serve. '
+      + 'Não se chama 1280 de tablet.',
+    rota: '/es-ES/app/bossa-demo/sala/floor',
+    largura: 834, altura: 1112, sessao: true,
   },
   {
     nome: 'carta-movel',
@@ -208,7 +225,8 @@ for (const c of COMPOSICOES) {
   await pagina.close();
 }
 
-writeFileSync(`${DESTINO}/composicoes.json`, JSON.stringify(registo, null, 2) + '\n');
+mkdirSync(MANIFESTO, { recursive: true });
+writeFileSync(`${MANIFESTO}/composicoes.json`, JSON.stringify(registo, null, 2) + '\n');
 await navegador.close();
 
 if (reprovadas > 0) {

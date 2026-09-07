@@ -682,3 +682,153 @@ mapeada na L1b: o papel do dono vai **sem `brand_id`**. Com marca, o dono leva
 - **Nada de tablet.** O §6.4 nomeia quatro superfícies e há três larguras
   (390, 1280, 1440). Falta a de tablet, e digo-o em vez de chamar 1280 de tablet.
 - **Não medi a aparência.** Secção 7, e é do Matheus.
+
+---
+
+## L1e · ligar as capturas (herói da MKT-001 e a `/product`)
+
+### A régua dos 728, com a cláusula de saída já caída
+
+| largura | antes | depois | conteúdo depois do meio |
+| ---: | ---: | ---: | --- |
+| 1440 | **728** | **1256** | sim |
+| 1280 | 648 | **1176** | sim |
+| 768 | 568 | **744** | — (empilha) |
+| 390 | 366 | 366 | — (empilha) |
+| 360 | 336 | 336 | — (empilha) |
+
+**1256 é o bordo direito do contentor** a 1440 (184 + 1072): o conteúdo do herói
+deixou de acabar a meio e passa a ir até ao fim. `ocupaDireita` passa a verdadeiro
+a 1280 e 1440, com o meio do contentor em 720. Mídia no herói: **0 → 2**. Igual
+nas **três línguas**. Zero anomalias em 15 combinações.
+
+Abaixo de 1024 empilha, e por isso o número é o do bordo do contentor em vez do
+meio — comprimir duas capturas lado a lado num telemóvel dá as miniaturas que o
+§6.4 proíbe.
+
+### As duas capturas do herói não são decorativas
+
+São a **mesma comanda A128**: a sala onde foi aberta e a cozinha onde apareceu. É
+a «acção e o seu resultado» que o §6.4 pede, já resolvida pelo cenário da L1d — e
+a legenda di-lo por palavras, em vez de deixar a ligação por adivinhar.
+
+### A `/product` deixou de ser a home
+
+Medido com o mesmo cruzamento de chaves que inventei para os planos:
+
+| | antes | depois |
+| --- | ---: | ---: |
+| chaves da `/product` | 11 | **21** |
+| partilhadas com a home | **10** | **6** |
+| só suas | 1 | **13** |
+
+E as seis partilhadas não são conteúdo repetido: `altSala` e `altKds` descrevem
+**as mesmas duas imagens**, que aparecem nos dois sítios; `heroiLegenda` é a
+legenda que as liga; `demoAviso` é o aviso de demonstração, deliberadamente
+idêntico em toda a parte; `pedirDemo` e `verPlanos` são rótulos de acção.
+
+O fecho da página é **próprio** e não o da landing: quem chega ali já viu as
+telas, e o convite muda com isso — «viste um restaurante inventado, a demo é com
+o teu». Partilhar o fecho era repetir o momento errado.
+
+### O alt diz o que se vê, e o carregamento é responsivo
+
+Cinco composições, cada uma com alt contextual nos três catálogos — não «captura
+do KDS», mas *«a mesma comanda A128 na pantalla de cocina: dos croquetas en
+preparación y otros dos platos por empezar, con el tiempo contado desde el
+servidor»*.
+
+Medido no HTML servido: **8 a 11 larguras de `srcSet` por composição**, a
+primeira do herói `priority` (ansiosa, é ela que decide o LCP) e as restantes
+`lazy`. O `import` estático dá largura e altura reais, e com elas a reserva de
+espaço — sem isso a landing salta enquanto carrega.
+
+O `placeholder="blur"` é o **marcador de carregamento**, não um efeito: some
+quando a imagem chega. Nenhuma composição leva blur, moldura de aparelho ou
+perspectiva no estado final — o §6.4 proíbe esconder interface dentro de
+efeitos, e uma composição que precise disso corrige-se em vez de se disfarçar.
+
+### A legibilidade, medida — e uma decisão que mudou por causa da medição
+
+O §6.4 exige «produto legível, não uma miniatura indecifrável». Medi a largura
+renderizada contra a largura **a que a tela foi capturada**:
+
+| composição | onde | escala |
+| --- | --- | ---: |
+| sala | `/product` | **74%** |
+| KDS | `/product` | **84%** |
+| catálogo | `/product` | **74%** |
+| tablet | `/product` | **77%** |
+| carta | `/product` | **100%** |
+| sala | herói | **41%** |
+| KDS | herói | **38%** |
+
+**A primeira versão da `/product` punha a sala e o KDS lado a lado** acima de
+900 px, que é o desenho óbvio para «isto e aquilo». A medição deu **37%** a cada
+uma: os títulos aguentam, o corpo — onde estão o nome do prato e o número da
+comanda — não. Empilhadas sobem para 74% e 84%. Perde-se a comparação lado a
+lado, ganha-se poder ler o que se compara, e a legenda liga-as na mesma.
+
+**No herói ficam a 41% e 38%, e não escondo o número.** Num herói de duas colunas
+a 1440 px qualquer captura de ecrã inteiro cai nessa ordem de grandeza. Ali os
+títulos e a forma do produto lêem-se; o corpo não. Subir isso exige **recortar**
+a captura para uma região, ou capturar num viewport mais estreito — as duas são
+decisões de composição, e a composição é da secção 7. Fica medido, não resolvido.
+
+### O achado do KDS, confirmado no DOM e corrigido
+
+A etiqueta de estado encostava ao nome do prato. **Medido nos três bilhetes:
+folga de `0 px`** entre o bordo direito do nome e o esquerdo da etiqueta, na
+mesma linha.
+
+E **não era truncagem**, que era a primeira suspeita: `text-overflow: clip`,
+`white-space: normal`, `line-clamp: none`. Não há regra de corte nenhuma no KDS.
+
+A causa é estrutural: a regra que dá `display: flex` e `gap` a essa linha é
+`.bo-publico__produto > a`, e o bilhete do KDS **não tem `<a>`** — põe os dois
+`<span>` directamente no `<li>`. Resultado: `display: list-item`, `gap` inerte, e
+dois elementos `inline` encostados. A carta pública tem o `<a>` e por isso nunca
+mostrou o defeito.
+
+Corrigido com margem e não com `flex`: mudar o `<li>` para caixa flexível
+reordenava a descrição e as acções que vivem no mesmo bilhete, e isso é uma
+mudança de composição numa superfície que não é deste lote. **Medido depois:
+0 px → 12 px, mesma linha.** As capturas foram refeitas com a correcção.
+
+Toquei numa superfície fora do lote e digo porquê: a imagem do KDS vai para a
+landing, e um defeito visível na peça comercial passa a ser meu.
+
+### A largura de tablet, que eu tinha declarado em falta
+
+Fechada: **`sala-tablet-834`**, 834 × 1112, que é o retrato do iPad — o aparelho
+que anda na mão de quem serve. São agora **cinco** composições e quatro larguras
+(390, 834, 1280, 1440). Não chamei 1280 de tablet.
+
+### Onde as composições passaram a viver
+
+Saíram do `evidence/` para **`apps/web/src/demonstracao/`**, que é de onde o
+`next/image` as importa. Deixaram de ser só prova e passaram a ser peças que a
+aplicação embarca; tê-las nos dois sítios era ter duas cópias de 380 KB e a
+certeza de que uma envelhecia. O `evidence/` guarda o **manifesto**
+(`composicoes.json`), que é o que diz o que cada uma prova e que passou o
+controlo de sujidade.
+
+### Regressão
+
+`marketing.spec.ts`: **68 verdes, ficheiro não tocado, nenhuma asserção
+alterada**. `pnpm verificar` verde, **396 IDs intactos**. `provar-demonstracao.sh`
+verde nas cinco composições, com determinismo e controlo negativo. Guardas
+verdes: classes, três línguas, preços, dados fictícios, coral, portas mortas,
+suites com guião.
+
+### O que NÃO foi feito
+
+- **Formatos não optimizados.** Continuam PNG. O `next/image` serve WebP/AVIF por
+  negociação a partir deles, o que resolve metade do §6.4 — o que falta é
+  optimizar a **origem**, e continuo sem querer fazê-lo às cegas.
+- **O herói a 38–41%** fica medido e por resolver, e a saída passa por recortar
+  ou recapturar mais estreito. É composição.
+- **As outras cinco páginas comerciais** não receberam composições. `/plans`,
+  `/getting-started`, `/pilot`, `/trust`, `/faq` e `/demo` continuam sem mídia.
+- **Nada de teclado nem leitor de ecrã** sobre as figuras novas.
+- **Não medi a aparência.** Secção 7, e é do Matheus.

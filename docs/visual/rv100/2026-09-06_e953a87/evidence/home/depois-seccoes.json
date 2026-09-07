@@ -15,7 +15,7 @@
       "preguntas",
       "empezar"
     ],
-    "impressao": 45288
+    "impressao": 50476
   },
   "product": {
     "url": "/es-ES?section=product",
@@ -33,7 +33,7 @@
       "preguntas",
       "empezar"
     ],
-    "impressao": 45288
+    "impressao": 50476
   },
   "plans": {
     "url": "/es-ES?section=plans",
@@ -51,7 +51,7 @@
       "preguntas",
       "empezar"
     ],
-    "impressao": 45288
+    "impressao": 50476
   },
   "isola": false,
   "servem_a_mesma_pagina": true

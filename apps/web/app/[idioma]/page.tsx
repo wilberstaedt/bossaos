@@ -1,6 +1,7 @@
 import { MENSALIDADES_NUM_ANO, MOEDA_COMERCIAL, precoDoPlano } from '@bossaos/domain';
 import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../src/componentes/Marketing.tsx';
+import { AvisoDeDemonstracao, Composicao } from '../../src/componentes/Demonstracao.tsx';
 
 /**
  * MKT-001 · «Todo tu restaurante. Un solo ritmo.» (atlas p. 1)
@@ -81,20 +82,34 @@ export default async function Landing({
   return (
     <MolduraMkt idioma={idioma} actual="">
       {/* ── 1 · herói ─────────────────────────────────────────────────────
-          Uma coluna, e é uma decisão declarada e não um esquecimento: o §6.2
-          pede «imagem criada com telas reais do produto» e essa imagem ainda
-          não existe. Reservar aqui metade da largura para mídia que não existe
-          seria construir de propósito o defeito que o §10 reprova — «metade do
-          herói vazia por falta de mídia». Fica de uma coluna até o motor de
-          prova dar as telas. */}
+          DUAS colunas: a mensagem à esquerda, o produto à direita.
+
+          Na L1b isto era uma coluna, e era uma decisão declarada: o §6.2 pede
+          «imagem criada com telas reais do produto» e essa imagem não existia.
+          Reservar meia largura para mídia inexistente era construir de propósito
+          «metade do herói vazia», que o §10 reprova. **O motor de prova mudou
+          isso**, e por isso a régua dos 728 volta a valer inteira.
+
+          E as duas capturas não são decorativas: são a MESMA comanda A128 — na
+          sala onde foi aberta e na cozinha onde apareceu. É a «acção e o seu
+          resultado» que o §6.4 pede, já resolvida pelo cenário, e desperdiçá-la
+          com uma imagem bonita seria deitar fora a única coisa que uma landing
+          de software consegue provar numa imagem. */}
       {inteira ? (
-        <section className="bo-mkt__heroi">
-          <h1>{k.heroiTitulo}</h1>
-          <p className="bo-publico__texto">{k.heroiTexto}</p>
-          <p className="bo-mkt__chamada">
-            <a className="bo-botao bo-botao--primario" href={`/${idioma}/demo`}>{k.pedirDemo}</a>
-            <a className="bo-botao bo-botao--secundario" href={`/${idioma}/product`}>{k.verProduto}</a>
-          </p>
+        <section className="bo-mkt__heroi bo-mkt__heroi--duas">
+          <div className="bo-mkt__heroi-texto">
+            <h1>{k.heroiTitulo}</h1>
+            <p className="bo-publico__texto">{k.heroiTexto}</p>
+            <p className="bo-mkt__chamada">
+              <a className="bo-botao bo-botao--primario" href={`/${idioma}/demo`}>{k.pedirDemo}</a>
+              <a className="bo-botao bo-botao--secundario" href={`/${idioma}/product`}>{k.verProduto}</a>
+            </p>
+          </div>
+          <figure className="bo-mkt__heroi-media">
+            <Composicao qual="sala" idioma={idioma} prioritaria />
+            <Composicao qual="kds" idioma={idioma} />
+            <figcaption>{k.heroiLegenda}</figcaption>
+          </figure>
         </section>
       ) : null}
 
@@ -128,6 +143,7 @@ export default async function Landing({
               <h3>{k.cartaoWeb}</h3><p>{k.cartaoWebTexto}</p>
             </article>
           </div>
+          <AvisoDeDemonstracao idioma={idioma} />
           <p className="bo-mkt__chamada">
             <a className="bo-botao bo-botao--secundario" href={`/${idioma}/product`}>{k.saberMais}</a>
           </p>

@@ -9,7 +9,7 @@
     "caminhoFinal": "/es-ES/kds/d0000000-0000-4000-8000-000000000003/d0000000-0000-4000-8000-000000000016",
     "desviou": false,
     "sujidade": [],
-    "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao/kds-cozinha-1280.png"
+    "ficheiro": "apps/web/src/demonstracao/kds-cozinha-1280.png"
   },
   {
     "nome": "sala-servico",
@@ -21,7 +21,7 @@
     "caminhoFinal": "/es-ES/app/bossa-demo/sala/floor",
     "desviou": false,
     "sujidade": [],
-    "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao/sala-servico-1440.png"
+    "ficheiro": "apps/web/src/demonstracao/sala-servico-1440.png"
   },
   {
     "nome": "catalogo",
@@ -33,7 +33,19 @@
     "caminhoFinal": "/es-ES/app/bossa-demo/catalogo/produtos",
     "desviou": false,
     "sujidade": [],
-    "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao/catalogo-1440.png"
+    "ficheiro": "apps/web/src/demonstracao/catalogo-1440.png"
+  },
+  {
+    "nome": "sala-tablet",
+    "porque": "A largura de TABLET, que o §6.4 nomeia e que faltava — 834 px é o retrato do iPad, que é o aparelho que anda na mão de quem serve. Não se chama 1280 de tablet.",
+    "rota": "/es-ES/app/bossa-demo/sala/floor",
+    "largura": 834,
+    "altura": 1112,
+    "estado": 200,
+    "caminhoFinal": "/es-ES/app/bossa-demo/sala/floor",
+    "desviou": false,
+    "sujidade": [],
+    "ficheiro": "apps/web/src/demonstracao/sala-tablet-834.png"
   },
   {
     "nome": "carta-movel",
@@ -45,6 +57,6 @@
     "caminhoFinal": "/r/bossa-demo/es-ES/menu",
     "desviou": false,
     "sujidade": [],
-    "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao/carta-movel-390.png"
+    "ficheiro": "apps/web/src/demonstracao/carta-movel-390.png"
   }
 ]
