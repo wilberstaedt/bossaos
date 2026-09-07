@@ -29,7 +29,8 @@ cd "$(dirname "$0")/.."
 # POR_DESENHO: nao ha guiao e esta certo assim. Tem de ter motivo escrito.
 # EM_DIVIDA:   devia ter guiao e nao tem. E divida, conta-se, e o tecto nao sobe
 #              sem alguem levantar o numero a mao - o que aparece num diff.
-POR_DESENHO="rv100-baseline.spec.ts:medicao de base do RV100, escrita a 06/09 no diagnostico da seccao 2; o guiao vem com a etapa do RV100 e nao antes"
+POR_DESENHO="rv100-baseline.spec.ts:medicao de base do RV100, escrita a 06/09 no diagnostico da seccao 2; o guiao vem com a etapa do RV100 e nao antes
+expansao.spec.ts:TEM corredor - o scripts/validar-expansao-de-texto.sh - mas a descoberta aqui so varre provar-*.sh. Alargar o glob a validar-*.sh seria errado e nao e esquecimento: esta guarda LISTA os nove nomes de EM_DIVIDA dentro dela propria, e o grep passaria a ver-se a si mesma como corredor deles. A divida toda ficava verde por auto-referencia. Fica declarado ate a descoberta saber distinguir quem CORRE um ficheiro de quem apenas o NOMEIA"
 
 EM_DIVIDA="capturas.spec.ts
 divida-movel-auth.spec.ts
