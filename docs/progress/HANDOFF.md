@@ -55,12 +55,37 @@ concordou em não corrigir o caminho e discordou de deixar como estava — *um
 acidente protector é uma armadilha para quem o ler a seguir e o arrumar com a
 melhor das intenções*. A condição morta saiu e a decisão ficou escrita.
 
-> **Uma pendência declarada, que não sei explicar.** A `carta-movel` mede
-> **1,65** em secretária e 1,44 no telemóvel, e não é do `sizes` nem nasceu
-> agora — media o mesmo antes. O ficheiro tem **390×844**, o optimizador serve
-> **390×844 em PNG e em webp**, e o Chrome descodifica **237×514**. Não consigo
-> explicar a diferença e não a mascaro. E a minha primeira leitura atribuiu-a à
-> imagem por carregar: com `complete` verdadeiro e a imagem no ecrã, lê o mesmo.
+### A `carta-movel` a 1,65 — FECHADA, e o defeito era a medição
+
+Seguindo a direcção do sénior — *parar de olhar para o `srcset` e medir os bytes
+que saem do optimizador* — o alvo caiu do lado do instrumento e não do produto.
+
+| o que se mediu | resultado |
+| --- | --- |
+| o ficheiro no disco | **390×844** |
+| os bytes que o navegador recebeu, chunk `VP8` | **390×844** |
+| esses mesmos bytes no decodificador do navegador, sem página | **390×844** |
+| o mesmo `currentSrc` recarregado **dentro da própria página** | **390×844** |
+| os píxeis renderizados, olhados | **nítidos**, 390 de largura |
+| `naturalWidth` do elemento | **237×514** |
+
+**Cinco medições contra uma.** O visitante vê a carta nítida; o `237×514` é uma
+leitura do `naturalWidth` naquele elemento que contradiz tudo o que está a
+montante, **incluindo um carregamento novo do mesmo URL na mesma página**.
+
+**NÃO se cura, e é decisão tomada com a regra do sénior:** *se o custo da cura
+for maior do que o defeito, diz e não cures*. Aqui não há sequer defeito a
+curar — há uma métrica a mentir sobre uma imagem que está bem.
+
+**O que fica como aviso, e é o que interessa para a próxima:** qualquer medição
+futura de escala **não pode assentar só no `naturalWidth`**. Foi ele que produziu
+1,65 e 1,44 sobre uma imagem correcta, e uma guarda construída em cima dele daria
+vermelho para sempre num sítio onde não há nada para consertar.
+
+**O porquê do 237 continua sem explicação, e digo-o em vez de inventar uma.**
+Não é escolha de `srcset` (237 não está em nenhuma das escadas do `next/image`),
+não é o ficheiro, não é o formato e não é o carregamento — a imagem está
+`complete` e no ecrã. Fica por explicar e sem custo associado.
 
 **Aviso operacional do sénior, registado:** o trap do `next-env.d.ts` vive nos
 seis guiões, portanto **qualquer build manual continua exposto**. Quem construir
