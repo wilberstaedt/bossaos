@@ -22,7 +22,7 @@
 
 | critério | estado |
 | --- | --- |
-| LP mostra o produto real e a proposta **numa viewport** | **parcial** — cinco composições ligadas e o herói a 1256, mas «numa viewport» é um limite de altura que **não medi** |
+| LP mostra o produto real e a proposta **numa viewport** | **MEDIDO a 07/09 17h00 e CONFORME** — a 1440×900: `h1` em **370–541**, e os dois CTA do herói («Pedir una demo», «Ver el producto») em **613–657**, todos **dentro da dobra de 900**. A página inteira tem 7103 px e os outros 7 CTA vivem nas secções abaixo, que é o que se espera |
 | as seis páginas têm conteúdo suficiente | **conforme** — todas reconstruídas com revisão escrita |
 | preços vêm da fonte aprovada | **conforme** — `precoDoPlano()`, nada à mão |
 | CTAs com hierarquia e destinos funcionais | **parcial** — resta **exactamente um** `href="#"` em todo o código, na maqueta da pré-visualização de tema (P3), medido às 12h30 de 07/09. O «em 419 ficheiros» que aqui estava já era falso: são 739. O número que sustenta o veredicto é o **um**, e esse mantém-se |
@@ -158,3 +158,22 @@ por isso o momento 2 custa zero passos a quem está na sala.
 e isso não está aqui. E **«clara» não é mensurável por contagem nenhuma**: é
 juízo, e é do Matheus na aprovação visual. Entrego-lhe o número e a fronteira
 dele, não uma conformidade que eu não posso assinar.
+
+## «Staff com uma mão» continua NÃO MEDI — e a medição falhada foi minha — 17h00
+
+Corri a sonda contra `/es-ES/staff/x` e ela devolveu **2 alvos visíveis** numa
+página de **exactamente 844 px** — a altura da viewport.
+
+**Isso não é o Staff: é o ecrã de não-encontrado.** O `x` não é um identificador
+de unidade, a rota exige sessão, e eu bati numa porta que não é a que queria
+medir. **Dois alvos e uma altura igual à da janela são a assinatura de uma página
+vazia**, e foi por aí que dei por ela — não por um erro, porque erro nenhum houve:
+o pedido devolveu 200 e a sonda mediu com toda a confiança o que lá estava.
+
+**Fica NÃO MEDI, e a razão é minha e não do produto.** Medir isto a sério exige a
+sessão e o inquilino de demonstração semeado — o mesmo arnês das telas-mestre — e
+não vou dá-lo por medido com um número tirado da página errada.
+
+**É a mesma família do que apanhei hoje três vezes:** um instrumento que devolve
+um número plausível sobre o sujeito errado. A diferença é que desta vez o número
+era pequeno de mais para ser verdade, e foi isso que o denunciou.
