@@ -66,3 +66,58 @@ classe própria para a navegação do Staff, depois o resto por severidade.
 Os achados marcados como **gosto sem regra** ficam para o Matheus. Eu só mando
 corrigir o que viola a régua — a diferença entre as duas colunas foi exigida a
 cada agente, e é o que impede uma auditoria de virar preferência.
+
+---
+
+## Os quatro entregaram. O que eu verifiquei, e o que muda o plano
+
+**Três dos quatro agentes, em superfícies diferentes, caíram no MESMO token** —
+`.bo-estado__sobrancelha` a 12 px contra os 14 da régua. Convergência de lentes
+independentes é o sinal mais forte que uma auditoria pode dar: deixa de ser
+achado de ecrã e passa a ser defeito de classe.
+
+### Os dois achados que eu não esperava, e verifiquei um a um
+
+**1 · O botão primário do KDS é invisível.**
+
+```
+--bo-primaria:            #102E35   ← .bo-botao--primario enche-se com esta
+--bo-superficie-inversa:  #102E35   ← .bo-kds pinta-se com esta
+```
+
+**São a mesma cor.** A acção mais repetida da cozinha — «Empezar», «Marcar
+lista» — é texto branco a flutuar sem caixa. O agente mediu por píxel na região
+do botão: só existem duas cores, o fundo a 86 % e o texto a 14 %. **Zero
+preenchimento.**
+
+E não é um acaso isolado: é a **terceira** vez que a mesma família de defeito
+aparece. O próprio `estilos.css` tem o recibo das duas primeiras, em 39 linhas de
+CSS defensivo escritas para as reparar — *«isso dava 1.00:1: texto da cor do
+fundo, ou seja, invisível»* (linha 761) e *«dava 1.00:1 outra vez — o mesmo
+defeito ao contrário»* (linha 790). **Um componente claro colocado numa
+superfície escura, três vezes, porque não há quem lhe pergunte em que superfície
+está.**
+
+**2 · Um token com quatro suítes de prova e zero consumidores.**
+
+```
+--bo-publico-acento:  1 definição · 0 regras que o consomem · 4 ficheiros de prova
+```
+
+É o único canal de cor de marca que um restaurante pode configurar na carta.
+É **calculado** por restaurante, **injectado** no DOM, e **coberto por quatro
+suítes** — e **nenhuma regra CSS o usa**. As provas passam todas: testam o
+cálculo, nunca a renderização.
+
+**Isto fecha uma medição minha de há duas horas.** Contei os píxeis de acento nas
+25 capturas e a carta pública deu **zero**. Registei o facto e deixei o juízo ao
+Matheus — «calma deliberada ou identidade em falta?». **Era identidade em falta,
+e a peça existe, testada, desligada.** Eu tinha o sintoma; faltava-me a causa.
+
+### O que isto ensina, e é a forma mais pura da noite
+
+**Quatro provas verdes sobre um token que não pinta nada.** Nenhuma delas mente:
+o cálculo está certo, a injecção está certa, a cobertura é real. **Elas provam
+tudo excepto que alguém vê o resultado** — e é exactamente por isso que o
+`grep -c 'var(--bo-publico-acento'` a devolver **0** vale mais do que as quatro
+juntas. Um token é motor; sem uma regra que o consuma, não tem carroçaria.
