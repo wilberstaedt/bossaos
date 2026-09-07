@@ -2147,3 +2147,39 @@ argumento para preferir uma guarda a uma frase.
 os nomes dos dias), e eu contava a lista como folha. Duas medições a discordar
 por **um** quase sempre são duas definições, não uma avaria; mas isso só se sabe
 depois de ir ver, e «quase sempre» não é uma verificação.
+
+---
+
+## Nem todo o número datado apodrece — e a versão ingénua da minha regra fazia estrago — 07/09
+
+Apanhado o cabeçalho podre da guarda das línguas, fui varrer os outros. **Cinco
+guiões afirmam números com data. Só UM tinha apodrecido.** E perceber porquê vale
+mais do que a correcção.
+
+| guião | o que o número diz | apodrece? |
+| --- | --- | --- |
+| `validar-tres-linguas` | «2343 chaves em cada um dos três» | **sim** — hoje 2595 |
+| `validar-concorrencia` | «com 22 casos no repositório, esta guarda saía a ZERO» | **não** |
+| `validar-rls` | «apontei-a a uma base inexistente e a primeira linha mentia» | **não** |
+| `validar-ordem` | «no commit do E28, dos 17 ficheiros exactamente UM era…» | **não** |
+
+**O discriminador é gramatical, e é limpo:** um número apodrece quando descreve
+**o estado do mundo** — «há N coisas». Não apodrece quando descreve **o que
+aconteceu num momento** — «quando havia N coisas, a guarda saiu a zero». O
+primeiro é uma afirmação sobre hoje que ninguém volta a verificar. O segundo é um
+**registo de incidente**, e um acontecimento não muda de ideias.
+
+**E os quatro que não apodrecem são o comentário mais valioso que uma guarda
+pode ter:** explicam **porque é que ela tem a forma que tem** — que defeito a
+obrigou a existir, e que controlo o apanhou. Sem isso, a guarda seguinte é
+reescrita por alguém que não sabe o que ela já pagou.
+
+**A parte que me interessa: a versão ingénua da minha própria regra de ontem
+fazia estrago aqui.** «Um número datado num documento apodrece, remede-o» — e ao
+remedir os quatro, eu **apagava o registo** e ficava com quatro contagens
+actuais e inúteis no lugar de quatro histórias que explicam o desenho. **Uma
+regra nova é mais perigosa no tick a seguir a ser escrita**, quando ainda está
+entusiasmada e ainda não conhece as suas excepções.
+
+No que ficou podre, a correcção não foi actualizar o número — foi **tirá-lo**: o
+cabeçalho passa a dizer o invariante, e quem quiser o número corre a guarda.

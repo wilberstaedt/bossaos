@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # As tres linguas tem de ter as MESMAS chaves, e o silencio nao pode escondê-lo.
 #
-# Aceite 4 do E34 pede ES/PT/EN. Medido a 06/09: 2343 chaves em cada um dos tres
+# Aceite 4 do E34 pede ES/PT/EN. O que esta guarda garante e um INVARIANTE e nao
+# um numero: as tres tem EXACTAMENTE as mesmas chaves, seja quantas forem. Aqui
+# esteve escrito "medido a 06/09: 2343 chaves" e a 07/09 ja eram 2595 - no mesmo
+# ficheiro, a parte que MEDE continuava viva e a parte que AFIRMAVA tinha apodrecido.
+# Por isso o numero sai do cabecalho: quem o quiser, corre a guarda
 # catalogos, zero em falta, zero a mais.
 #
 # PORQUE E' QUE ISTO PRECISA DE GUARDA E NAO CHEGA A MEDICAO: o `tradutor()` cai
