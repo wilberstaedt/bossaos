@@ -126,11 +126,21 @@ fi
 
 # As composicoes vivem DENTRO da aplicacao, que e' quem as importa.
 DESTINO="apps/web/src/demonstracao"
-# ── 3. O KDS existe, e nao e' um ficheiro vazio ────────────────────────────
-if [ -s "$DESTINO/kds-cozinha-1280.png" ]; then
-  verde "a composicao do KDS existe ($(wc -c < "$DESTINO/kds-cozinha-1280.png" | tr -d ' ') bytes)"
+# ── 3. O KDS existe EM CADA IDIOMA, e nao e' um ficheiro vazio ─────────────
+#
+# Isto olhava para "$DESTINO/kds-cozinha-1280.png", o caminho plano de quando
+# havia um conjunto so. Com um conjunto por idioma esse ficheiro deixou de
+# existir e a assercao passou a reprovar — apanhou a mudanca, que e' para o que
+# serve. Agora pergunta pelos TRES: um KDS em espanhol e nenhum em portugues
+# seria exactamente o defeito que este trabalho veio fechar.
+faltam_kds=""
+for l in es-ES pt-BR en; do
+  [ -s "$DESTINO/$l/kds-cozinha-1280.png" ] || faltam_kds="$faltam_kds $l"
+done
+if [ -z "$faltam_kds" ]; then
+  verde "a composicao do KDS existe nos tres idiomas ($(wc -c < "$DESTINO/es-ES/kds-cozinha-1280.png" | tr -d ' ') bytes em es-ES)"
 else
-  erro "nao ha composicao de KDS — e' a superficie que o 6.4 nomeia"
+  erro "nao ha composicao de KDS em:$faltam_kds — e' a superficie que o 6.4 nomeia"
 fi
 
 kill "$SERVIDOR" 2>/dev/null; wait "$SERVIDOR" 2>/dev/null

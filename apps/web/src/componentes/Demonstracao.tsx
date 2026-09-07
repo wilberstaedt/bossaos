@@ -1,10 +1,20 @@
 import Image, { type StaticImageData } from 'next/image';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
-import salaServico from '../demonstracao/sala-servico-1440.png';
-import kdsCozinha from '../demonstracao/kds-cozinha-1280.png';
-import catalogo from '../demonstracao/catalogo-1440.png';
-import salaTablet from '../demonstracao/sala-tablet-834.png';
-import cartaMovel from '../demonstracao/carta-movel-390.png';
+import salaServicoEs from '../demonstracao/es-ES/sala-servico-1440.png';
+import kdsCozinhaEs from '../demonstracao/es-ES/kds-cozinha-1280.png';
+import catalogoEs from '../demonstracao/es-ES/catalogo-1440.png';
+import salaTabletEs from '../demonstracao/es-ES/sala-tablet-834.png';
+import cartaMovelEs from '../demonstracao/es-ES/carta-movel-390.png';
+import salaServicoPt from '../demonstracao/pt-BR/sala-servico-1440.png';
+import kdsCozinhaPt from '../demonstracao/pt-BR/kds-cozinha-1280.png';
+import catalogoPt from '../demonstracao/pt-BR/catalogo-1440.png';
+import salaTabletPt from '../demonstracao/pt-BR/sala-tablet-834.png';
+import cartaMovelPt from '../demonstracao/pt-BR/carta-movel-390.png';
+import salaServicoEn from '../demonstracao/en/sala-servico-1440.png';
+import kdsCozinhaEn from '../demonstracao/en/kds-cozinha-1280.png';
+import catalogoEn from '../demonstracao/en/catalogo-1440.png';
+import salaTabletEn from '../demonstracao/en/sala-tablet-834.png';
+import cartaMovelEn from '../demonstracao/en/carta-movel-390.png';
 
 /**
  * As composições do produto — as capturas reais, num sítio só.
@@ -32,13 +42,42 @@ import cartaMovel from '../demonstracao/carta-movel-390.png';
 
 export type NomeDaComposicao = 'sala' | 'kds' | 'catalogo' | 'tablet' | 'carta';
 
-/** Cada composição, com a sua fonte e a chave do texto que a descreve. */
-const COMPOSICOES: Record<NomeDaComposicao, { fonte: StaticImageData; alt: string }> = {
-  sala: { fonte: salaServico, alt: 'altSala' },
-  kds: { fonte: kdsCozinha, alt: 'altKds' },
-  catalogo: { fonte: catalogo, alt: 'altCatalogo' },
-  tablet: { fonte: salaTablet, alt: 'altTablet' },
-  carta: { fonte: cartaMovel, alt: 'altCarta' },
+/**
+ * ── A fonte segue o IDIOMA, e antes não seguia ────────────────────────────
+ *
+ * Isto era um conjunto só, de cinco ficheiros. O componente já recebia o
+ * `Idioma` e usava-o para o `alt` — mas a imagem era a mesma em todas as
+ * línguas, portanto `/pt-BR/product` e `/es-ES/product` serviam **exactamente
+ * os mesmos bytes**. Medido a 07/09: somas de verificação iguais.
+ *
+ * Um visitante brasileiro lia «com o seu cardápio» em português por cima de
+ * `Mesas en tiempo real`, `Servicios abiertos` e `Caja`. Não era o idioma a
+ * não propagar — **não existia mecanismo para propagar**.
+ *
+ * Agora há três conjuntos e o índice é o idioma. A prova não é esta linha: é a
+ * soma de verificação das imagens, que passou de igual a **3 distintas em 3**
+ * nas cinco composições. Nenhuma leitura deste ficheiro o diria.
+ */
+const FONTES: Record<Idioma, Record<NomeDaComposicao, StaticImageData>> = {
+  'es-ES': {
+    sala: salaServicoEs, kds: kdsCozinhaEs, catalogo: catalogoEs,
+    tablet: salaTabletEs, carta: cartaMovelEs,
+  },
+  'pt-BR': {
+    sala: salaServicoPt, kds: kdsCozinhaPt, catalogo: catalogoPt,
+    tablet: salaTabletPt, carta: cartaMovelPt,
+  },
+  en: {
+    sala: salaServicoEn, kds: kdsCozinhaEn, catalogo: catalogoEn,
+    tablet: salaTabletEn, carta: cartaMovelEn,
+  },
+};
+
+/** A chave do texto que descreve cada composição — não varia com a língua: o
+ *  que varia é o texto, e disso trata o `mensagensDe`. Um facto, um sítio. */
+const ALT: Record<NomeDaComposicao, string> = {
+  sala: 'altSala', kds: 'altKds', catalogo: 'altCatalogo',
+  tablet: 'altTablet', carta: 'altCarta',
 };
 
 export function Composicao({
@@ -56,12 +95,11 @@ export function Composicao({
   tamanhos?: string;
 }) {
   const k = mensagensDe(idioma).mktE10 as unknown as Record<string, string>;
-  const c = COMPOSICOES[qual];
   return (
     <Image
       className="bo-mkt__composicao"
-      src={c.fonte}
-      alt={k[c.alt] ?? ''}
+      src={FONTES[idioma][qual]}
+      alt={k[ALT[qual]] ?? ''}
       sizes={tamanhos}
       priority={prioritaria}
       placeholder="blur"

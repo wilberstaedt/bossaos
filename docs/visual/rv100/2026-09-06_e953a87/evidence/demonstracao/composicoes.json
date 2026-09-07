@@ -1,5 +1,6 @@
 [
   {
+    "idioma": "es-ES",
     "nome": "kds-cozinha",
     "porque": "A superfície que o §6.4 nomeia, e a que tem menos folga: o quadro da cozinha com o pedido A128 em preparação.",
     "rota": "/es-ES/kds/d0000000-0000-4000-8000-000000000003/d0000000-0000-4000-8000-000000000016",
@@ -9,9 +10,10 @@
     "caminhoFinal": "/es-ES/kds/d0000000-0000-4000-8000-000000000003/d0000000-0000-4000-8000-000000000016",
     "desviou": false,
     "sujidade": [],
-    "ficheiro": "apps/web/src/demonstracao/kds-cozinha-1280.png"
+    "ficheiro": "apps/web/src/demonstracao/es-ES/kds-cozinha-1280.png"
   },
   {
+    "idioma": "es-ES",
     "nome": "sala-servico",
     "porque": "O outro lado da mesma acção: a mesa 07 aberta, de onde saiu o A128.",
     "rota": "/es-ES/app/bossa-demo/sala/floor",
@@ -21,9 +23,10 @@
     "caminhoFinal": "/es-ES/app/bossa-demo/sala/floor",
     "desviou": false,
     "sujidade": [],
-    "ficheiro": "apps/web/src/demonstracao/sala-servico-1440.png"
+    "ficheiro": "apps/web/src/demonstracao/es-ES/sala-servico-1440.png"
   },
   {
+    "idioma": "es-ES",
     "nome": "catalogo",
     "porque": "A base única do §6.3.3 — o catálogo de onde a carta e a cozinha leem. É a LISTA de produtos e não o painel do catálogo: o painel mostra dois indicadores a dizer «Aún no medido», que é o produto a ser honesto sobre o que ainda não construiu — e honesto no produto é péssimo numa peça comercial, porque anuncia o que não existe. O controlo de sujidade apanhou-o e por isso a composição mudou de rota.",
     "rota": "/es-ES/app/bossa-demo/catalogo/produtos",
@@ -33,9 +36,10 @@
     "caminhoFinal": "/es-ES/app/bossa-demo/catalogo/produtos",
     "desviou": false,
     "sujidade": [],
-    "ficheiro": "apps/web/src/demonstracao/catalogo-1440.png"
+    "ficheiro": "apps/web/src/demonstracao/es-ES/catalogo-1440.png"
   },
   {
+    "idioma": "es-ES",
     "nome": "sala-tablet",
     "porque": "A largura de TABLET, que o §6.4 nomeia e que faltava — 834 px é o retrato do iPad, que é o aparelho que anda na mão de quem serve. Não se chama 1280 de tablet.",
     "rota": "/es-ES/app/bossa-demo/sala/floor",
@@ -45,9 +49,10 @@
     "caminhoFinal": "/es-ES/app/bossa-demo/sala/floor",
     "desviou": false,
     "sujidade": [],
-    "ficheiro": "apps/web/src/demonstracao/sala-tablet-834.png"
+    "ficheiro": "apps/web/src/demonstracao/es-ES/sala-tablet-834.png"
   },
   {
+    "idioma": "es-ES",
     "nome": "carta-movel",
     "porque": "O que o cliente vê ao apontar para o código da mesa. Sem sessão, porque é assim que ela se usa.",
     "rota": "/r/bossa-demo/es-ES/menu",
@@ -57,6 +62,136 @@
     "caminhoFinal": "/r/bossa-demo/es-ES/menu",
     "desviou": false,
     "sujidade": [],
-    "ficheiro": "apps/web/src/demonstracao/carta-movel-390.png"
+    "ficheiro": "apps/web/src/demonstracao/es-ES/carta-movel-390.png"
+  },
+  {
+    "idioma": "pt-BR",
+    "nome": "kds-cozinha",
+    "porque": "A superfície que o §6.4 nomeia, e a que tem menos folga: o quadro da cozinha com o pedido A128 em preparação.",
+    "rota": "/pt-BR/kds/d0000000-0000-4000-8000-000000000003/d0000000-0000-4000-8000-000000000016",
+    "largura": 1280,
+    "altura": 800,
+    "estado": 200,
+    "caminhoFinal": "/pt-BR/kds/d0000000-0000-4000-8000-000000000003/d0000000-0000-4000-8000-000000000016",
+    "desviou": false,
+    "sujidade": [],
+    "ficheiro": "apps/web/src/demonstracao/pt-BR/kds-cozinha-1280.png"
+  },
+  {
+    "idioma": "pt-BR",
+    "nome": "sala-servico",
+    "porque": "O outro lado da mesma acção: a mesa 07 aberta, de onde saiu o A128.",
+    "rota": "/pt-BR/app/bossa-demo/sala/floor",
+    "largura": 1440,
+    "altura": 900,
+    "estado": 200,
+    "caminhoFinal": "/pt-BR/app/bossa-demo/sala/floor",
+    "desviou": false,
+    "sujidade": [],
+    "ficheiro": "apps/web/src/demonstracao/pt-BR/sala-servico-1440.png"
+  },
+  {
+    "idioma": "pt-BR",
+    "nome": "catalogo",
+    "porque": "A base única do §6.3.3 — o catálogo de onde a carta e a cozinha leem. É a LISTA de produtos e não o painel do catálogo: o painel mostra dois indicadores a dizer «Aún no medido», que é o produto a ser honesto sobre o que ainda não construiu — e honesto no produto é péssimo numa peça comercial, porque anuncia o que não existe. O controlo de sujidade apanhou-o e por isso a composição mudou de rota.",
+    "rota": "/pt-BR/app/bossa-demo/catalogo/produtos",
+    "largura": 1440,
+    "altura": 900,
+    "estado": 200,
+    "caminhoFinal": "/pt-BR/app/bossa-demo/catalogo/produtos",
+    "desviou": false,
+    "sujidade": [],
+    "ficheiro": "apps/web/src/demonstracao/pt-BR/catalogo-1440.png"
+  },
+  {
+    "idioma": "pt-BR",
+    "nome": "sala-tablet",
+    "porque": "A largura de TABLET, que o §6.4 nomeia e que faltava — 834 px é o retrato do iPad, que é o aparelho que anda na mão de quem serve. Não se chama 1280 de tablet.",
+    "rota": "/pt-BR/app/bossa-demo/sala/floor",
+    "largura": 834,
+    "altura": 1112,
+    "estado": 200,
+    "caminhoFinal": "/pt-BR/app/bossa-demo/sala/floor",
+    "desviou": false,
+    "sujidade": [],
+    "ficheiro": "apps/web/src/demonstracao/pt-BR/sala-tablet-834.png"
+  },
+  {
+    "idioma": "pt-BR",
+    "nome": "carta-movel",
+    "porque": "O que o cliente vê ao apontar para o código da mesa. Sem sessão, porque é assim que ela se usa.",
+    "rota": "/r/bossa-demo/pt-BR/menu",
+    "largura": 390,
+    "altura": 844,
+    "estado": 200,
+    "caminhoFinal": "/r/bossa-demo/pt-BR/menu",
+    "desviou": false,
+    "sujidade": [],
+    "ficheiro": "apps/web/src/demonstracao/pt-BR/carta-movel-390.png"
+  },
+  {
+    "idioma": "en",
+    "nome": "kds-cozinha",
+    "porque": "A superfície que o §6.4 nomeia, e a que tem menos folga: o quadro da cozinha com o pedido A128 em preparação.",
+    "rota": "/en/kds/d0000000-0000-4000-8000-000000000003/d0000000-0000-4000-8000-000000000016",
+    "largura": 1280,
+    "altura": 800,
+    "estado": 200,
+    "caminhoFinal": "/en/kds/d0000000-0000-4000-8000-000000000003/d0000000-0000-4000-8000-000000000016",
+    "desviou": false,
+    "sujidade": [],
+    "ficheiro": "apps/web/src/demonstracao/en/kds-cozinha-1280.png"
+  },
+  {
+    "idioma": "en",
+    "nome": "sala-servico",
+    "porque": "O outro lado da mesma acção: a mesa 07 aberta, de onde saiu o A128.",
+    "rota": "/en/app/bossa-demo/sala/floor",
+    "largura": 1440,
+    "altura": 900,
+    "estado": 200,
+    "caminhoFinal": "/en/app/bossa-demo/sala/floor",
+    "desviou": false,
+    "sujidade": [],
+    "ficheiro": "apps/web/src/demonstracao/en/sala-servico-1440.png"
+  },
+  {
+    "idioma": "en",
+    "nome": "catalogo",
+    "porque": "A base única do §6.3.3 — o catálogo de onde a carta e a cozinha leem. É a LISTA de produtos e não o painel do catálogo: o painel mostra dois indicadores a dizer «Aún no medido», que é o produto a ser honesto sobre o que ainda não construiu — e honesto no produto é péssimo numa peça comercial, porque anuncia o que não existe. O controlo de sujidade apanhou-o e por isso a composição mudou de rota.",
+    "rota": "/en/app/bossa-demo/catalogo/produtos",
+    "largura": 1440,
+    "altura": 900,
+    "estado": 200,
+    "caminhoFinal": "/en/app/bossa-demo/catalogo/produtos",
+    "desviou": false,
+    "sujidade": [],
+    "ficheiro": "apps/web/src/demonstracao/en/catalogo-1440.png"
+  },
+  {
+    "idioma": "en",
+    "nome": "sala-tablet",
+    "porque": "A largura de TABLET, que o §6.4 nomeia e que faltava — 834 px é o retrato do iPad, que é o aparelho que anda na mão de quem serve. Não se chama 1280 de tablet.",
+    "rota": "/en/app/bossa-demo/sala/floor",
+    "largura": 834,
+    "altura": 1112,
+    "estado": 200,
+    "caminhoFinal": "/en/app/bossa-demo/sala/floor",
+    "desviou": false,
+    "sujidade": [],
+    "ficheiro": "apps/web/src/demonstracao/en/sala-tablet-834.png"
+  },
+  {
+    "idioma": "en",
+    "nome": "carta-movel",
+    "porque": "O que o cliente vê ao apontar para o código da mesa. Sem sessão, porque é assim que ela se usa.",
+    "rota": "/r/bossa-demo/en/menu",
+    "largura": 390,
+    "altura": 844,
+    "estado": 200,
+    "caminhoFinal": "/r/bossa-demo/en/menu",
+    "desviou": false,
+    "sujidade": [],
+    "ficheiro": "apps/web/src/demonstracao/en/carta-movel-390.png"
   }
 ]

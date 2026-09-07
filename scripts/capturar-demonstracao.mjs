@@ -44,6 +44,23 @@ const BASE = `http://127.0.0.1:${PORTA}`;
  * passou o controlo de sujidade.
  */
 const DESTINO = process.env.DESTINO_CAPTURAS ?? 'apps/web/src/demonstracao';
+
+/**
+ * ── UM CONJUNTO POR IDIOMA, e antes havia um só ───────────────────────────
+ *
+ * Este guião tinha `es-ES` cravado nas cinco rotas e no contexto do navegador, e
+ * a landing importava cinco PNG fixos. Resultado medido a 07/09: `/pt-BR/product`
+ * e `/es-ES/product` serviam **exactamente os mesmos ficheiros** — somas de
+ * verificação iguais. Um visitante brasileiro lia «com o seu cardápio» em
+ * português por cima de `Mesas en tiempo real` e `Caja`.
+ *
+ * Não era o idioma a não propagar: **não existia mecanismo para propagar**.
+ *
+ * A rota é agora função do idioma, e o contexto do navegador segue-a — o
+ * `locale` decide a formatação de datas e números, e uma captura em português
+ * com números espanhóis por baixo seria o mesmo defeito com outra cara.
+ */
+const IDIOMAS = ['es-ES', 'pt-BR', 'en'];
 const MANIFESTO = 'docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao';
 
 /**
@@ -55,13 +72,13 @@ const COMPOSICOES = [
     nome: 'kds-cozinha',
     porque: 'A superfície que o §6.4 nomeia, e a que tem menos folga: o quadro '
       + 'da cozinha com o pedido A128 em preparação.',
-    rota: `/es-ES/kds/${DEMO.unidade}/${DEMO.estacaoQuente}`,
+    rota: (l) => `/${l}/kds/${DEMO.unidade}/${DEMO.estacaoQuente}`,
     largura: 1280, altura: 800, sessao: true,
   },
   {
     nome: 'sala-servico',
     porque: 'O outro lado da mesma acção: a mesa 07 aberta, de onde saiu o A128.',
-    rota: '/es-ES/app/bossa-demo/sala/floor',
+    rota: (l) => `/${l}/app/bossa-demo/sala/floor`,
     largura: 1440, altura: 900, sessao: true,
   },
   {
@@ -72,7 +89,7 @@ const COMPOSICOES = [
       + 'o que ainda não construiu — e honesto no produto é péssimo numa peça '
       + 'comercial, porque anuncia o que não existe. O controlo de sujidade '
       + 'apanhou-o e por isso a composição mudou de rota.',
-    rota: '/es-ES/app/bossa-demo/catalogo/produtos',
+    rota: (l) => `/${l}/app/bossa-demo/catalogo/produtos`,
     largura: 1440, altura: 900, sessao: true,
   },
   {
@@ -80,14 +97,14 @@ const COMPOSICOES = [
     porque: 'A largura de TABLET, que o §6.4 nomeia e que faltava — 834 px é o '
       + 'retrato do iPad, que é o aparelho que anda na mão de quem serve. '
       + 'Não se chama 1280 de tablet.',
-    rota: '/es-ES/app/bossa-demo/sala/floor',
+    rota: (l) => `/${l}/app/bossa-demo/sala/floor`,
     largura: 834, altura: 1112, sessao: true,
   },
   {
     nome: 'carta-movel',
     porque: 'O que o cliente vê ao apontar para o código da mesa. Sem sessão, '
       + 'porque é assim que ela se usa.',
-    rota: `/r/${SLUG_DA_DEMO}/es-ES/menu`,
+    rota: (l) => `/r/${SLUG_DA_DEMO}/${l}/menu`,
     largura: 390, altura: 844, sessao: false,
   },
 ];
@@ -96,18 +113,39 @@ const COMPOSICOES = [
 const navegador = await chromium.launch();
 mkdirSync(DESTINO, { recursive: true });
 
-const comSessao = await abrirSessao(navegador, BASE);
-const semSessao = await navegador.newContext({
-  baseURL: BASE, locale: 'es-ES', timezoneId: 'Europe/Madrid',
-});
+/**
+ * Uma sessão SÓ, e três contextos que herdam o estado dela.
+ *
+ * Abrir três sessões seria bater no limitador de abuso de propósito: ele
+ * devolve 429 ao fim de três `sign-in` em dez segundos, e o `abrirSessao`
+ * responde-lhe com esperas de onze segundos — três entradas podiam custar
+ * minutos e falhar na mesma. O `storageState` leva os cookies para contextos
+ * novos sem repetir a entrada, e cada um deles leva o seu `locale`.
+ */
+const sessaoBase = await abrirSessao(navegador, BASE);
+const estado = await sessaoBase.storageState();
+const contextos = {};
+for (const l of IDIOMAS) {
+  contextos[l] = {
+    comSessao: await navegador.newContext({
+      baseURL: BASE, locale: l, timezoneId: 'Europe/Madrid', storageState: estado,
+    }),
+    semSessao: await navegador.newContext({
+      baseURL: BASE, locale: l, timezoneId: 'Europe/Madrid',
+    }),
+  };
+}
 
 const registo = [];
 let reprovadas = 0;
 
-for (const c of COMPOSICOES) {
-  const pagina = await (c.sessao ? comSessao : semSessao).newPage();
+for (const idioma of IDIOMAS) {
+ mkdirSync(`${DESTINO}/${idioma}`, { recursive: true });
+ for (const c of COMPOSICOES) {
+  const rota = c.rota(idioma);
+  const pagina = await (c.sessao ? contextos[idioma].comSessao : contextos[idioma].semSessao).newPage();
   await pagina.setViewportSize({ width: c.largura, height: c.altura });
-  const resposta = await pagina.goto(BASE + c.rota, { waitUntil: 'networkidle' });
+  const resposta = await pagina.goto(BASE + rota, { waitUntil: 'networkidle' });
   const estado = resposta?.status() ?? 0;
   const caminhoFinal = new URL(pagina.url()).pathname;
 
@@ -131,21 +169,22 @@ for (const c of COMPOSICOES) {
     ['sem configurar', /sin configurar|sem configurar|not configured/i],
   ].filter(([, padrao]) => padrao.test(texto)).map(([nome]) => nome);
 
-  const desviou = caminhoFinal !== c.rota;
+  const desviou = caminhoFinal !== rota;
   const mau = estado >= 400 || desviou || sujidade.length > 0;
   if (mau) reprovadas++;
 
-  const ficheiro = `${DESTINO}/${c.nome}-${c.largura}.png`;
+  const ficheiro = `${DESTINO}/${idioma}/${c.nome}-${c.largura}.png`;
   await pagina.screenshot({ path: ficheiro, animations: 'disabled' });
   registo.push({
-    nome: c.nome, porque: c.porque, rota: c.rota, largura: c.largura, altura: c.altura,
+    idioma, nome: c.nome, porque: c.porque, rota, largura: c.largura, altura: c.altura,
     estado, caminhoFinal, desviou, sujidade, ficheiro,
   });
   console.log(
-    `${mau ? 'FALHA' : 'ok   '} ${c.nome.padEnd(14)} ${String(estado).padEnd(4)} `
+    `${mau ? 'FALHA' : 'ok   '} ${idioma.padEnd(6)} ${c.nome.padEnd(14)} ${String(estado).padEnd(4)} `
     + `${sujidade.length ? 'sujidade: ' + sujidade.join(', ') : ''}${desviou ? ' DESVIOU para ' + caminhoFinal : ''}`,
   );
   await pagina.close();
+ }
 }
 
 mkdirSync(MANIFESTO, { recursive: true });

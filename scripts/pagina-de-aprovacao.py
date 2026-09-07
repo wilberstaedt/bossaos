@@ -16,16 +16,14 @@ RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 D = os.path.join(RAIZ, 'docs/visual/rv100/2026-09-06_e953a87/evidence/masters')
 SAIDA = sys.argv[1] if len(sys.argv) > 1 else '/tmp/telas-mestre.html'
 
-GERADOS = {'next-env.d.ts'}
+# A mecânica saiu daqui para `frescura_do_produto.py`, e não por arrumação: a
+# guarda das capturas de marketing precisava da MESMA pergunta, e uma segunda
+# cópia dela seria a duplicação que este repositório passou o dia a fechar.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from frescura_do_produto import mais_recente_do_produto as _mais_recente  # noqa: E402
+
 def mais_recente_do_produto():
-    t = 0
-    for base in ('apps', 'packages'):
-        for r, ds, fs in os.walk(os.path.join(RAIZ, base)):
-            if 'node_modules' in r or '/.next' in r: continue
-            for f in fs:
-                if f in GERADOS or not f.endswith(('.ts', '.tsx', '.css')): continue
-                t = max(t, os.stat(os.path.join(r, f)).st_mtime)
-    return t
+    return _mais_recente(RAIZ)
 
 L = []
 def anda(o):
