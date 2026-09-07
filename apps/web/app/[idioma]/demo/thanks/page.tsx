@@ -28,7 +28,7 @@ export default async function Obrigado({
   const k = mensagensDe(idioma).mktE10;
 
   return (
-    <MolduraMkt idioma={idioma} actual="/demo">
+    <MolduraMkt idioma={idioma} actual="/demo" sufixo="/demo/thanks">
       <section className="bo-mkt__heroi">
         <h1>{k.obrigadoTitulo}</h1>
         <p className="bo-publico__texto">{k.obrigadoTexto}</p>

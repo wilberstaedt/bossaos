@@ -1,0 +1,2162 @@
+[
+  {
+    "id": "MKT-001",
+    "pagina": "home",
+    "rota": "/es-ES",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 390,
+      "altura": 83,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 390,
+      "altura": 809,
+      "topo": 1431.2
+    },
+    "marca": {
+      "caixa": {
+        "largura": 145.5,
+        "altura": 50,
+        "topo": 16
+      },
+      "ligada": true,
+      "destino": "/es-ES",
+      "nomeAcessivel": "BossaOS, ir al inicio",
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": true,
+      "ligacoes": 7,
+      "visiveis": 0,
+      "agrupamentos": 0,
+      "linhas": 0,
+      "capsulas": 0,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 4,
+      "destinos": [
+        "/pt-BR",
+        "/en",
+        "/pt-BR",
+        "/en"
+      ]
+    },
+    "login": {
+      "quantos": 2,
+      "destinos": [
+        "/es-ES/auth/login",
+        "/es-ES/auth/login"
+      ]
+    },
+    "menu": [
+      {
+        "etiqueta": "button",
+        "nome": "☰Abrir el menú de navegación",
+        "visivel": true,
+        "caixa": {
+          "largura": 44,
+          "altura": 44,
+          "topo": 19
+        }
+      },
+      {
+        "etiqueta": "button",
+        "nome": "Recursos▾",
+        "visivel": false,
+        "caixa": {
+          "largura": 0,
+          "altura": 0,
+          "topo": 0
+        }
+      }
+    ],
+    "rodapeEstrutura": {
+      "ligacoes": 11,
+      "grupos": 4,
+      "texto": "Hecho con BossaOSPlataformaProductoPlanesImplantaciónRecursosPilotoConfianzaPreguntasEmpieza aquíPedir una demoEntrarIdiomaEspañolPortuguêsEnglish"
+    },
+    "cta": {
+      "texto": "rgb(255, 255, 255)",
+      "fundo": "rgb(16, 46, 53)",
+      "razao": 14.34
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "",
+        "destino": "/es-ES",
+        "visivel": true
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": false
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": false
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": false
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": false
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": false
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": false
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": false
+      },
+      {
+        "texto": "ES",
+        "destino": "/es-ES",
+        "visivel": false
+      },
+      {
+        "texto": "PT",
+        "destino": "/pt-BR",
+        "visivel": false
+      },
+      {
+        "texto": "EN",
+        "destino": "/en",
+        "visivel": false
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": false
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": true
+      },
+      {
+        "texto": "Español",
+        "destino": "/es-ES",
+        "visivel": true
+      },
+      {
+        "texto": "Português",
+        "destino": "/pt-BR",
+        "visivel": true
+      },
+      {
+        "texto": "English",
+        "destino": "/en",
+        "visivel": true
+      }
+    ],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "id": "MKT-004",
+    "pagina": "produto",
+    "rota": "/es-ES/product",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 390,
+      "altura": 83,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 390,
+      "altura": 809,
+      "topo": 1056.8
+    },
+    "marca": {
+      "caixa": {
+        "largura": 145.5,
+        "altura": 50,
+        "topo": 16
+      },
+      "ligada": true,
+      "destino": "/es-ES",
+      "nomeAcessivel": "BossaOS, ir al inicio",
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": true,
+      "ligacoes": 7,
+      "visiveis": 0,
+      "agrupamentos": 0,
+      "linhas": 0,
+      "capsulas": 0,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 4,
+      "destinos": [
+        "/pt-BR/product",
+        "/en/product",
+        "/pt-BR/product",
+        "/en/product"
+      ]
+    },
+    "login": {
+      "quantos": 2,
+      "destinos": [
+        "/es-ES/auth/login",
+        "/es-ES/auth/login"
+      ]
+    },
+    "menu": [
+      {
+        "etiqueta": "button",
+        "nome": "☰Abrir el menú de navegación",
+        "visivel": true,
+        "caixa": {
+          "largura": 44,
+          "altura": 44,
+          "topo": 19
+        }
+      },
+      {
+        "etiqueta": "button",
+        "nome": "Recursos▾",
+        "visivel": false,
+        "caixa": {
+          "largura": 0,
+          "altura": 0,
+          "topo": 0
+        }
+      }
+    ],
+    "rodapeEstrutura": {
+      "ligacoes": 11,
+      "grupos": 4,
+      "texto": "Hecho con BossaOSPlataformaProductoPlanesImplantaciónRecursosPilotoConfianzaPreguntasEmpieza aquíPedir una demoEntrarIdiomaEspañolPortuguêsEnglish"
+    },
+    "cta": {
+      "texto": "rgb(255, 255, 255)",
+      "fundo": "rgb(16, 46, 53)",
+      "razao": 14.34
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "",
+        "destino": "/es-ES",
+        "visivel": true
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": false
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": false
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": false
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": false
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": false
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": false
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": false
+      },
+      {
+        "texto": "ES",
+        "destino": "/es-ES/product",
+        "visivel": false
+      },
+      {
+        "texto": "PT",
+        "destino": "/pt-BR/product",
+        "visivel": false
+      },
+      {
+        "texto": "EN",
+        "destino": "/en/product",
+        "visivel": false
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": false
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": true
+      },
+      {
+        "texto": "Español",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Português",
+        "destino": "/pt-BR/product",
+        "visivel": true
+      },
+      {
+        "texto": "English",
+        "destino": "/en/product",
+        "visivel": true
+      }
+    ],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "id": "MKT-005",
+    "pagina": "planos",
+    "rota": "/es-ES/plans",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 390,
+      "altura": 83,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 390,
+      "altura": 809,
+      "topo": 651.4
+    },
+    "marca": {
+      "caixa": {
+        "largura": 145.5,
+        "altura": 50,
+        "topo": 16
+      },
+      "ligada": true,
+      "destino": "/es-ES",
+      "nomeAcessivel": "BossaOS, ir al inicio",
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": true,
+      "ligacoes": 7,
+      "visiveis": 0,
+      "agrupamentos": 0,
+      "linhas": 0,
+      "capsulas": 0,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 4,
+      "destinos": [
+        "/pt-BR/plans",
+        "/en/plans",
+        "/pt-BR/plans",
+        "/en/plans"
+      ]
+    },
+    "login": {
+      "quantos": 2,
+      "destinos": [
+        "/es-ES/auth/login",
+        "/es-ES/auth/login"
+      ]
+    },
+    "menu": [
+      {
+        "etiqueta": "button",
+        "nome": "☰Abrir el menú de navegación",
+        "visivel": true,
+        "caixa": {
+          "largura": 44,
+          "altura": 44,
+          "topo": 19
+        }
+      },
+      {
+        "etiqueta": "button",
+        "nome": "Recursos▾",
+        "visivel": false,
+        "caixa": {
+          "largura": 0,
+          "altura": 0,
+          "topo": 0
+        }
+      }
+    ],
+    "rodapeEstrutura": {
+      "ligacoes": 11,
+      "grupos": 4,
+      "texto": "Hecho con BossaOSPlataformaProductoPlanesImplantaciónRecursosPilotoConfianzaPreguntasEmpieza aquíPedir una demoEntrarIdiomaEspañolPortuguêsEnglish"
+    },
+    "cta": {
+      "texto": "rgb(255, 255, 255)",
+      "fundo": "rgb(16, 46, 53)",
+      "razao": 14.34
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "",
+        "destino": "/es-ES",
+        "visivel": true
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": false
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": false
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": false
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": false
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": false
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": false
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": false
+      },
+      {
+        "texto": "ES",
+        "destino": "/es-ES/plans",
+        "visivel": false
+      },
+      {
+        "texto": "PT",
+        "destino": "/pt-BR/plans",
+        "visivel": false
+      },
+      {
+        "texto": "EN",
+        "destino": "/en/plans",
+        "visivel": false
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": false
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": true
+      },
+      {
+        "texto": "Español",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Português",
+        "destino": "/pt-BR/plans",
+        "visivel": true
+      },
+      {
+        "texto": "English",
+        "destino": "/en/plans",
+        "visivel": true
+      }
+    ],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "id": "MKT-006",
+    "pagina": "implantacao",
+    "rota": "/es-ES/getting-started",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 390,
+      "altura": 83,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 390,
+      "altura": 809,
+      "topo": 928.8
+    },
+    "marca": {
+      "caixa": {
+        "largura": 145.5,
+        "altura": 50,
+        "topo": 16
+      },
+      "ligada": true,
+      "destino": "/es-ES",
+      "nomeAcessivel": "BossaOS, ir al inicio",
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": true,
+      "ligacoes": 7,
+      "visiveis": 0,
+      "agrupamentos": 0,
+      "linhas": 0,
+      "capsulas": 0,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 4,
+      "destinos": [
+        "/pt-BR/getting-started",
+        "/en/getting-started",
+        "/pt-BR/getting-started",
+        "/en/getting-started"
+      ]
+    },
+    "login": {
+      "quantos": 2,
+      "destinos": [
+        "/es-ES/auth/login",
+        "/es-ES/auth/login"
+      ]
+    },
+    "menu": [
+      {
+        "etiqueta": "button",
+        "nome": "☰Abrir el menú de navegación",
+        "visivel": true,
+        "caixa": {
+          "largura": 44,
+          "altura": 44,
+          "topo": 19
+        }
+      },
+      {
+        "etiqueta": "button",
+        "nome": "Recursos▾",
+        "visivel": false,
+        "caixa": {
+          "largura": 0,
+          "altura": 0,
+          "topo": 0
+        }
+      }
+    ],
+    "rodapeEstrutura": {
+      "ligacoes": 11,
+      "grupos": 4,
+      "texto": "Hecho con BossaOSPlataformaProductoPlanesImplantaciónRecursosPilotoConfianzaPreguntasEmpieza aquíPedir una demoEntrarIdiomaEspañolPortuguêsEnglish"
+    },
+    "cta": {
+      "texto": "rgb(255, 255, 255)",
+      "fundo": "rgb(16, 46, 53)",
+      "razao": 14.34
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "",
+        "destino": "/es-ES",
+        "visivel": true
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": false
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": false
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": false
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": false
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": false
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": false
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": false
+      },
+      {
+        "texto": "ES",
+        "destino": "/es-ES/getting-started",
+        "visivel": false
+      },
+      {
+        "texto": "PT",
+        "destino": "/pt-BR/getting-started",
+        "visivel": false
+      },
+      {
+        "texto": "EN",
+        "destino": "/en/getting-started",
+        "visivel": false
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": false
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": true
+      },
+      {
+        "texto": "Español",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Português",
+        "destino": "/pt-BR/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "English",
+        "destino": "/en/getting-started",
+        "visivel": true
+      }
+    ],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "id": "MKT-007",
+    "pagina": "demo",
+    "rota": "/es-ES/demo",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 390,
+      "altura": 83,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 390,
+      "altura": 809,
+      "topo": 1032.8
+    },
+    "marca": {
+      "caixa": {
+        "largura": 145.5,
+        "altura": 50,
+        "topo": 16
+      },
+      "ligada": true,
+      "destino": "/es-ES",
+      "nomeAcessivel": "BossaOS, ir al inicio",
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": true,
+      "ligacoes": 7,
+      "visiveis": 0,
+      "agrupamentos": 0,
+      "linhas": 0,
+      "capsulas": 0,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 4,
+      "destinos": [
+        "/pt-BR/demo",
+        "/en/demo",
+        "/pt-BR/demo",
+        "/en/demo"
+      ]
+    },
+    "login": {
+      "quantos": 2,
+      "destinos": [
+        "/es-ES/auth/login",
+        "/es-ES/auth/login"
+      ]
+    },
+    "menu": [
+      {
+        "etiqueta": "button",
+        "nome": "☰Abrir el menú de navegación",
+        "visivel": true,
+        "caixa": {
+          "largura": 44,
+          "altura": 44,
+          "topo": 19
+        }
+      },
+      {
+        "etiqueta": "button",
+        "nome": "Recursos▾",
+        "visivel": false,
+        "caixa": {
+          "largura": 0,
+          "altura": 0,
+          "topo": 0
+        }
+      }
+    ],
+    "rodapeEstrutura": {
+      "ligacoes": 11,
+      "grupos": 4,
+      "texto": "Hecho con BossaOSPlataformaProductoPlanesImplantaciónRecursosPilotoConfianzaPreguntasEmpieza aquíPedir una demoEntrarIdiomaEspañolPortuguêsEnglish"
+    },
+    "cta": {
+      "texto": "rgb(255, 255, 255)",
+      "fundo": "rgb(16, 46, 53)",
+      "razao": 14.34
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "",
+        "destino": "/es-ES",
+        "visivel": true
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": false
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": false
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": false
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": false
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": false
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": false
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": false
+      },
+      {
+        "texto": "ES",
+        "destino": "/es-ES/demo",
+        "visivel": false
+      },
+      {
+        "texto": "PT",
+        "destino": "/pt-BR/demo",
+        "visivel": false
+      },
+      {
+        "texto": "EN",
+        "destino": "/en/demo",
+        "visivel": false
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": false
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": true
+      },
+      {
+        "texto": "Español",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      },
+      {
+        "texto": "Português",
+        "destino": "/pt-BR/demo",
+        "visivel": true
+      },
+      {
+        "texto": "English",
+        "destino": "/en/demo",
+        "visivel": true
+      }
+    ],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "id": "MKT-008",
+    "pagina": "confianca",
+    "rota": "/es-ES/trust",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 390,
+      "altura": 83,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 390,
+      "altura": 809,
+      "topo": 974.2
+    },
+    "marca": {
+      "caixa": {
+        "largura": 145.5,
+        "altura": 50,
+        "topo": 16
+      },
+      "ligada": true,
+      "destino": "/es-ES",
+      "nomeAcessivel": "BossaOS, ir al inicio",
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": true,
+      "ligacoes": 7,
+      "visiveis": 0,
+      "agrupamentos": 0,
+      "linhas": 0,
+      "capsulas": 0,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 4,
+      "destinos": [
+        "/pt-BR/trust",
+        "/en/trust",
+        "/pt-BR/trust",
+        "/en/trust"
+      ]
+    },
+    "login": {
+      "quantos": 2,
+      "destinos": [
+        "/es-ES/auth/login",
+        "/es-ES/auth/login"
+      ]
+    },
+    "menu": [
+      {
+        "etiqueta": "button",
+        "nome": "☰Abrir el menú de navegación",
+        "visivel": true,
+        "caixa": {
+          "largura": 44,
+          "altura": 44,
+          "topo": 19
+        }
+      },
+      {
+        "etiqueta": "button",
+        "nome": "Recursos▾",
+        "visivel": false,
+        "caixa": {
+          "largura": 0,
+          "altura": 0,
+          "topo": 0
+        }
+      }
+    ],
+    "rodapeEstrutura": {
+      "ligacoes": 11,
+      "grupos": 4,
+      "texto": "Hecho con BossaOSPlataformaProductoPlanesImplantaciónRecursosPilotoConfianzaPreguntasEmpieza aquíPedir una demoEntrarIdiomaEspañolPortuguêsEnglish"
+    },
+    "cta": {
+      "texto": "rgb(255, 255, 255)",
+      "fundo": "rgb(16, 46, 53)",
+      "razao": 14.34
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "",
+        "destino": "/es-ES",
+        "visivel": true
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": false
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": false
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": false
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": false
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": false
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": false
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": false
+      },
+      {
+        "texto": "ES",
+        "destino": "/es-ES/trust",
+        "visivel": false
+      },
+      {
+        "texto": "PT",
+        "destino": "/pt-BR/trust",
+        "visivel": false
+      },
+      {
+        "texto": "EN",
+        "destino": "/en/trust",
+        "visivel": false
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": false
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": true
+      },
+      {
+        "texto": "Español",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Português",
+        "destino": "/pt-BR/trust",
+        "visivel": true
+      },
+      {
+        "texto": "English",
+        "destino": "/en/trust",
+        "visivel": true
+      }
+    ],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "id": "MKT-009",
+    "pagina": "faq",
+    "rota": "/es-ES/faq",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 390,
+      "altura": 83,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 390,
+      "altura": 809,
+      "topo": 828.8
+    },
+    "marca": {
+      "caixa": {
+        "largura": 145.5,
+        "altura": 50,
+        "topo": 16
+      },
+      "ligada": true,
+      "destino": "/es-ES",
+      "nomeAcessivel": "BossaOS, ir al inicio",
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": true,
+      "ligacoes": 7,
+      "visiveis": 0,
+      "agrupamentos": 0,
+      "linhas": 0,
+      "capsulas": 0,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 4,
+      "destinos": [
+        "/pt-BR/faq",
+        "/en/faq",
+        "/pt-BR/faq",
+        "/en/faq"
+      ]
+    },
+    "login": {
+      "quantos": 2,
+      "destinos": [
+        "/es-ES/auth/login",
+        "/es-ES/auth/login"
+      ]
+    },
+    "menu": [
+      {
+        "etiqueta": "button",
+        "nome": "☰Abrir el menú de navegación",
+        "visivel": true,
+        "caixa": {
+          "largura": 44,
+          "altura": 44,
+          "topo": 19
+        }
+      },
+      {
+        "etiqueta": "button",
+        "nome": "Recursos▾",
+        "visivel": false,
+        "caixa": {
+          "largura": 0,
+          "altura": 0,
+          "topo": 0
+        }
+      }
+    ],
+    "rodapeEstrutura": {
+      "ligacoes": 11,
+      "grupos": 4,
+      "texto": "Hecho con BossaOSPlataformaProductoPlanesImplantaciónRecursosPilotoConfianzaPreguntasEmpieza aquíPedir una demoEntrarIdiomaEspañolPortuguêsEnglish"
+    },
+    "cta": {
+      "texto": "rgb(255, 255, 255)",
+      "fundo": "rgb(16, 46, 53)",
+      "razao": 14.34
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "",
+        "destino": "/es-ES",
+        "visivel": true
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": false
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": false
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": false
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": false
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": false
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": false
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": false
+      },
+      {
+        "texto": "ES",
+        "destino": "/es-ES/faq",
+        "visivel": false
+      },
+      {
+        "texto": "PT",
+        "destino": "/pt-BR/faq",
+        "visivel": false
+      },
+      {
+        "texto": "EN",
+        "destino": "/en/faq",
+        "visivel": false
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": false
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": true
+      },
+      {
+        "texto": "Español",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Português",
+        "destino": "/pt-BR/faq",
+        "visivel": true
+      },
+      {
+        "texto": "English",
+        "destino": "/en/faq",
+        "visivel": true
+      }
+    ],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "id": "MKT-010",
+    "pagina": "piloto",
+    "rota": "/es-ES/pilot",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 390,
+      "altura": 83,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 390,
+      "altura": 809,
+      "topo": 720.8
+    },
+    "marca": {
+      "caixa": {
+        "largura": 145.5,
+        "altura": 50,
+        "topo": 16
+      },
+      "ligada": true,
+      "destino": "/es-ES",
+      "nomeAcessivel": "BossaOS, ir al inicio",
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": true,
+      "ligacoes": 7,
+      "visiveis": 0,
+      "agrupamentos": 0,
+      "linhas": 0,
+      "capsulas": 0,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 4,
+      "destinos": [
+        "/pt-BR/pilot",
+        "/en/pilot",
+        "/pt-BR/pilot",
+        "/en/pilot"
+      ]
+    },
+    "login": {
+      "quantos": 2,
+      "destinos": [
+        "/es-ES/auth/login",
+        "/es-ES/auth/login"
+      ]
+    },
+    "menu": [
+      {
+        "etiqueta": "button",
+        "nome": "☰Abrir el menú de navegación",
+        "visivel": true,
+        "caixa": {
+          "largura": 44,
+          "altura": 44,
+          "topo": 19
+        }
+      },
+      {
+        "etiqueta": "button",
+        "nome": "Recursos▾",
+        "visivel": false,
+        "caixa": {
+          "largura": 0,
+          "altura": 0,
+          "topo": 0
+        }
+      }
+    ],
+    "rodapeEstrutura": {
+      "ligacoes": 11,
+      "grupos": 4,
+      "texto": "Hecho con BossaOSPlataformaProductoPlanesImplantaciónRecursosPilotoConfianzaPreguntasEmpieza aquíPedir una demoEntrarIdiomaEspañolPortuguêsEnglish"
+    },
+    "cta": {
+      "texto": "rgb(255, 255, 255)",
+      "fundo": "rgb(16, 46, 53)",
+      "razao": 14.34
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "",
+        "destino": "/es-ES",
+        "visivel": true
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": false
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": false
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": false
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": false
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": false
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": false
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": false
+      },
+      {
+        "texto": "ES",
+        "destino": "/es-ES/pilot",
+        "visivel": false
+      },
+      {
+        "texto": "PT",
+        "destino": "/pt-BR/pilot",
+        "visivel": false
+      },
+      {
+        "texto": "EN",
+        "destino": "/en/pilot",
+        "visivel": false
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": false
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": true
+      },
+      {
+        "texto": "Español",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Português",
+        "destino": "/pt-BR/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "English",
+        "destino": "/en/pilot",
+        "visivel": true
+      }
+    ],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "id": "MKT-011",
+    "pagina": "obrigado",
+    "rota": "/es-ES/demo/thanks",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 390,
+      "altura": 83,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 390,
+      "altura": 809,
+      "topo": 425.8
+    },
+    "marca": {
+      "caixa": {
+        "largura": 145.5,
+        "altura": 50,
+        "topo": 16
+      },
+      "ligada": true,
+      "destino": "/es-ES",
+      "nomeAcessivel": "BossaOS, ir al inicio",
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": true,
+      "ligacoes": 7,
+      "visiveis": 0,
+      "agrupamentos": 0,
+      "linhas": 0,
+      "capsulas": 0,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 4,
+      "destinos": [
+        "/pt-BR/demo/thanks",
+        "/en/demo/thanks",
+        "/pt-BR/demo/thanks",
+        "/en/demo/thanks"
+      ]
+    },
+    "login": {
+      "quantos": 2,
+      "destinos": [
+        "/es-ES/auth/login",
+        "/es-ES/auth/login"
+      ]
+    },
+    "menu": [
+      {
+        "etiqueta": "button",
+        "nome": "☰Abrir el menú de navegación",
+        "visivel": true,
+        "caixa": {
+          "largura": 44,
+          "altura": 44,
+          "topo": 19
+        }
+      },
+      {
+        "etiqueta": "button",
+        "nome": "Recursos▾",
+        "visivel": false,
+        "caixa": {
+          "largura": 0,
+          "altura": 0,
+          "topo": 0
+        }
+      }
+    ],
+    "rodapeEstrutura": {
+      "ligacoes": 11,
+      "grupos": 4,
+      "texto": "Hecho con BossaOSPlataformaProductoPlanesImplantaciónRecursosPilotoConfianzaPreguntasEmpieza aquíPedir una demoEntrarIdiomaEspañolPortuguêsEnglish"
+    },
+    "cta": {
+      "texto": "rgb(255, 255, 255)",
+      "fundo": "rgb(16, 46, 53)",
+      "razao": 14.34
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "",
+        "destino": "/es-ES",
+        "visivel": true
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": false
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": false
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": false
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": false
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": false
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": false
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": false
+      },
+      {
+        "texto": "ES",
+        "destino": "/es-ES/demo/thanks",
+        "visivel": false
+      },
+      {
+        "texto": "PT",
+        "destino": "/pt-BR/demo/thanks",
+        "visivel": false
+      },
+      {
+        "texto": "EN",
+        "destino": "/en/demo/thanks",
+        "visivel": false
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": false
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": true
+      },
+      {
+        "texto": "Español",
+        "destino": "/es-ES/demo/thanks",
+        "visivel": true
+      },
+      {
+        "texto": "Português",
+        "destino": "/pt-BR/demo/thanks",
+        "visivel": true
+      },
+      {
+        "texto": "English",
+        "destino": "/en/demo/thanks",
+        "visivel": true
+      }
+    ],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "id": "MKT-012",
+    "pagina": "naoencontrado",
+    "rota": "/es-ES/404",
+    "largura": 390,
+    "transbordo": 0,
+    "alvosPequenos": 0,
+    "cabecalho": {
+      "largura": 390,
+      "altura": 83,
+      "topo": 0
+    },
+    "rodape": {
+      "largura": 390,
+      "altura": 809,
+      "topo": 481.8
+    },
+    "marca": {
+      "caixa": {
+        "largura": 145.5,
+        "altura": 50,
+        "topo": 16
+      },
+      "ligada": true,
+      "destino": "/es-ES",
+      "nomeAcessivel": "BossaOS, ir al inicio",
+      "alt": "BossaOS"
+    },
+    "navegacao": {
+      "existe": true,
+      "dentroDoCabecalho": true,
+      "ligacoes": 7,
+      "visiveis": 0,
+      "agrupamentos": 0,
+      "linhas": 0,
+      "capsulas": 0,
+      "comFundoProprio": []
+    },
+    "idiomas": {
+      "quantos": 4,
+      "destinos": [
+        "/pt-BR",
+        "/en",
+        "/pt-BR",
+        "/en"
+      ]
+    },
+    "login": {
+      "quantos": 2,
+      "destinos": [
+        "/es-ES/auth/login",
+        "/es-ES/auth/login"
+      ]
+    },
+    "menu": [
+      {
+        "etiqueta": "button",
+        "nome": "☰Abrir el menú de navegación",
+        "visivel": true,
+        "caixa": {
+          "largura": 44,
+          "altura": 44,
+          "topo": 19
+        }
+      },
+      {
+        "etiqueta": "button",
+        "nome": "Recursos▾",
+        "visivel": false,
+        "caixa": {
+          "largura": 0,
+          "altura": 0,
+          "topo": 0
+        }
+      }
+    ],
+    "rodapeEstrutura": {
+      "ligacoes": 11,
+      "grupos": 4,
+      "texto": "Hecho con BossaOSPlataformaProductoPlanesImplantaciónRecursosPilotoConfianzaPreguntasEmpieza aquíPedir una demoEntrarIdiomaEspañolPortuguêsEnglish"
+    },
+    "cta": {
+      "texto": "rgb(255, 255, 255)",
+      "fundo": "rgb(16, 46, 53)",
+      "razao": 14.34
+    },
+    "ligacoesDaModura": [
+      {
+        "texto": "",
+        "destino": "/es-ES",
+        "visivel": true
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": false
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": false
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": false
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": false
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": false
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": false
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": false
+      },
+      {
+        "texto": "ES",
+        "destino": "/es-ES",
+        "visivel": false
+      },
+      {
+        "texto": "PT",
+        "destino": "/pt-BR",
+        "visivel": false
+      },
+      {
+        "texto": "EN",
+        "destino": "/en",
+        "visivel": false
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": false
+      },
+      {
+        "texto": "Producto",
+        "destino": "/es-ES/product",
+        "visivel": true
+      },
+      {
+        "texto": "Planes",
+        "destino": "/es-ES/plans",
+        "visivel": true
+      },
+      {
+        "texto": "Implantación",
+        "destino": "/es-ES/getting-started",
+        "visivel": true
+      },
+      {
+        "texto": "Piloto",
+        "destino": "/es-ES/pilot",
+        "visivel": true
+      },
+      {
+        "texto": "Confianza",
+        "destino": "/es-ES/trust",
+        "visivel": true
+      },
+      {
+        "texto": "Preguntas",
+        "destino": "/es-ES/faq",
+        "visivel": true
+      },
+      {
+        "texto": "Pedir una demo",
+        "destino": "/es-ES/demo",
+        "visivel": true
+      },
+      {
+        "texto": "Entrar",
+        "destino": "/es-ES/auth/login",
+        "visivel": true
+      },
+      {
+        "texto": "Español",
+        "destino": "/es-ES",
+        "visivel": true
+      },
+      {
+        "texto": "Português",
+        "destino": "/pt-BR",
+        "visivel": true
+      },
+      {
+        "texto": "English",
+        "destino": "/en",
+        "visivel": true
+      }
+    ],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  }
+]

@@ -1,0 +1,416 @@
+[
+  {
+    "idioma": "es-ES",
+    "largura": 360,
+    "cabecalho": 83,
+    "marca": {
+      "largura": 145.5,
+      "altura": 50,
+      "topo": 16
+    },
+    "navLinhas": 0,
+    "navVisiveis": 0,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 390,
+    "cabecalho": 83,
+    "marca": {
+      "largura": 145.5,
+      "altura": 50,
+      "topo": 16
+    },
+    "navLinhas": 0,
+    "navVisiveis": 0,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 768,
+    "cabecalho": 83,
+    "marca": {
+      "largura": 145.5,
+      "altura": 50,
+      "topo": 16
+    },
+    "navLinhas": 0,
+    "navVisiveis": 0,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 1280,
+    "cabecalho": 83,
+    "marca": {
+      "largura": 145.5,
+      "altura": 50,
+      "topo": 16
+    },
+    "navLinhas": 1,
+    "navVisiveis": 4,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "idioma": "es-ES",
+    "largura": 1440,
+    "cabecalho": 83,
+    "marca": {
+      "largura": 145.5,
+      "altura": 50,
+      "topo": 16
+    },
+    "navLinhas": 1,
+    "navVisiveis": 4,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 360,
+    "cabecalho": 83,
+    "marca": {
+      "largura": 145.5,
+      "altura": 50,
+      "topo": 16
+    },
+    "navLinhas": 0,
+    "navVisiveis": 0,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 390,
+    "cabecalho": 83,
+    "marca": {
+      "largura": 145.5,
+      "altura": 50,
+      "topo": 16
+    },
+    "navLinhas": 0,
+    "navVisiveis": 0,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 768,
+    "cabecalho": 83,
+    "marca": {
+      "largura": 145.5,
+      "altura": 50,
+      "topo": 16
+    },
+    "navLinhas": 0,
+    "navVisiveis": 0,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 1280,
+    "cabecalho": 83,
+    "marca": {
+      "largura": 145.5,
+      "altura": 50,
+      "topo": 16
+    },
+    "navLinhas": 1,
+    "navVisiveis": 4,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "idioma": "pt-BR",
+    "largura": 1440,
+    "cabecalho": 83,
+    "marca": {
+      "largura": 145.5,
+      "altura": 50,
+      "topo": 16
+    },
+    "navLinhas": 1,
+    "navVisiveis": 4,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "idioma": "en",
+    "largura": 360,
+    "cabecalho": 83,
+    "marca": {
+      "largura": 145.5,
+      "altura": 50,
+      "topo": 16
+    },
+    "navLinhas": 0,
+    "navVisiveis": 0,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "idioma": "en",
+    "largura": 390,
+    "cabecalho": 83,
+    "marca": {
+      "largura": 145.5,
+      "altura": 50,
+      "topo": 16
+    },
+    "navLinhas": 0,
+    "navVisiveis": 0,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "idioma": "en",
+    "largura": 768,
+    "cabecalho": 83,
+    "marca": {
+      "largura": 145.5,
+      "altura": 50,
+      "topo": 16
+    },
+    "navLinhas": 0,
+    "navVisiveis": 0,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__abrir",
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "idioma": "en",
+    "largura": 1280,
+    "cabecalho": 83,
+    "marca": {
+      "largura": 145.5,
+      "altura": 50,
+      "topo": 16
+    },
+    "navLinhas": 1,
+    "navVisiveis": 4,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  },
+  {
+    "idioma": "en",
+    "largura": 1440,
+    "cabecalho": 83,
+    "marca": {
+      "largura": 145.5,
+      "altura": 50,
+      "topo": 16
+    },
+    "navLinhas": 1,
+    "navVisiveis": 4,
+    "transbordo": 0,
+    "alvosPequenos": [],
+    "foraDoEcra": [],
+    "contrastes": [],
+    "comMenusAbertos": {
+      "abertos": [
+        ".bo-mkt__grupo-botao"
+      ],
+      "navVisiveis": 7,
+      "ligacoesVisiveis": 23,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": []
+    }
+  }
+]

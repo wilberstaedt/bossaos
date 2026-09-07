@@ -1237,6 +1237,290 @@ label.bo-planos__item input[type="radio"] {
   border-bottom: 1px solid var(--bo-borda); text-align: left; vertical-align: top;
 }
 
+/* ── RV100 · a MOLDURA comercial ───────────────────────────────────────────
+   Cabeçalho e rodapé partilhados pelas DEZ rotas da família MKT — as oito
+   páginas comerciais mais a `/demo/thanks` e a `/404`, que os herdam.
+
+   ── Tudo aqui é do `--comercial`, e isso não é preciosismo ────────────────
+
+   `bo-publico__seccoes` é a mesma classe em VINTE sítios: a carta pública, o
+   site do restaurante, o Staff, o KDS, oito ecrãs de administração. Um estilo
+   novo sem âmbito mudava a navegação de todos eles de uma vez, e mudava-a sem
+   ninguém estar a medir aquele lado. A landing pede outra coisa que a carta;
+   dizê-lo com `.bo-publico--comercial` à frente é o que impede a landing de
+   arrastar consigo superfícies que não pediram nada.
+
+   ── Nenhum token novo ─────────────────────────────────────────────────────
+
+   O `03_DIRECAO_DE_MARCA.md` mediu o sistema contra o manual e concluiu que é
+   fiel número a número. Nada aqui inventa cor, raio ou espaçamento: tudo sai
+   da escala que já existe. */
+
+/* ── A altura do cabeçalho fica DECIDIDA aqui, e antes disto não estava ────
+   O `.bo-publico` é uma grelha com `min-height: 100vh` e três faixas
+   automáticas — cabeçalho, conteúdo e rodapé. Numa página curta a folga do
+   ecrã reparte-se pelas TRÊS, e o cabeçalho engorda com ela. Não era teoria:
+   medido a 1440 px antes deste lote, a mesma moldura dava **sete alturas
+   diferentes** conforme a página — 60 no início, 71,5 na confiança, 96,5 no
+   piloto e 166,9 no obrigado e no 404, que são as duas mais curtas.
+
+   Um cabeçalho que muda de altura consoante o comprimento da página faz o herói
+   começar noutro sítio em cada rota, e o §6.2 pede a promessa, o produto e a
+   acção «numa viewport» — não se compõe contra um número que se mexe.
+
+   `auto 1fr auto` põe a folga toda no meio: o cabeçalho fica na altura que o
+   conteúdo dele pede, o rodapé também, e é o conteúdo que estica. É o padrão de
+   rodapé colado, e resolve um defeito que já cá estava sem tocar na carta. */
+.bo-publico--comercial { grid-template-rows: auto 1fr auto; }
+
+/* O cabeçalho passa de grelha alinhada à esquerda para uma barra: marca de um
+   lado, navegação do outro. `flex-wrap` de propósito — em espanhol, português
+   e inglês os rótulos têm comprimentos diferentes, e uma barra que quebra para
+   a linha seguinte é sempre melhor do que uma que transborda. */
+.bo-publico--comercial .bo-publico__cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bo-espaco-lg);
+  /* A área livre de «pelo menos um quarto da altura visível» do §4.1: a
+     assinatura tem 50 px, um quarto são 12,5, e o preenchimento dá 16. */
+  padding-top: var(--bo-espaco-lg);
+  padding-bottom: var(--bo-espaco-lg);
+  border-bottom: 1px solid var(--bo-borda);
+}
+
+/* ① e ② — a assinatura, agora ligada ao início. */
+.bo-mkt__marca {
+  display: inline-flex; align-items: center;
+  text-decoration: none; color: inherit;
+  /* Uma ligação de 145 × 50 já passa o alvo de toque com folga; o que isto
+     garante é que a caixa é a da imagem e não uma linha de texto à volta. */
+  min-height: var(--bo-toque-publico);
+}
+.bo-mkt__marca img { display: block; }
+
+/* ⑥ — o menu de telemóvel.
+   `display: contents` faz do botão e do painel filhos directos do cabeçalho:
+   o botão fica à direita da marca e o painel, com `flex-basis: 100%`, cai para
+   a linha de baixo em vez de espremer os dois. Sem isto era preciso um segundo
+   contentor a fingir de linha. */
+.bo-mkt__menu { display: contents; }
+
+.bo-mkt__abrir {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: var(--bo-toque-publico); min-height: var(--bo-toque-publico);
+  padding: 0 var(--bo-espaco-md);
+  border: 1px solid var(--bo-borda); border-radius: var(--bo-raio-controlo);
+  background: var(--bo-superficie-elevada); color: var(--bo-texto-primario);
+  font: inherit; font-size: 20px; line-height: 1; cursor: pointer;
+}
+
+/* O painel entra no FLUXO e empurra o conteúdo: rola com a página, sem tranca
+   no corpo. Uma tranca esquecida deixa a página impossível de ler. */
+.bo-mkt__painel { display: none; flex-basis: 100%; }
+.bo-mkt__menu--aberto .bo-mkt__painel {
+  display: grid; gap: var(--bo-espaco-lg);
+  padding-top: var(--bo-espaco-lg);
+}
+
+/* ③ A navegação: três ligações, um grupo e o CTA — e nenhuma cápsula.
+   O §4.5 reserva o `999px` a chips e etiquetas, e nomeia «navegação desktop
+   inteira em pílulas equivalentes» como defeito. Aqui as ligações são texto;
+   quem carrega a página actual é o peso E o traço por baixo, dois sinais e não
+   só a cor, que é a regra do E02. */
+.bo-publico--comercial .bo-publico__seccoes {
+  display: grid; gap: var(--bo-espaco-xs);
+  padding: 0; margin: 0; max-width: none;
+}
+/* O `:not(.bo-mkt__cta)` não é enfeite: o CTA é um `<a>` filho desta mesma
+   `<nav>`, e sem a excepção esta regra — mais específica do que a classe dele —
+   apagava-lhe a borda e o raio e devolvia um botão coral rectangular. */
+.bo-publico--comercial .bo-publico__seccoes > a:not(.bo-mkt__cta) {
+  border: 0; border-radius: 0;
+  padding: 0 var(--bo-espaco-sm);
+  border-bottom: 2px solid transparent;
+  font-weight: 600;
+}
+.bo-publico--comercial .bo-publico__seccoes > a[aria-current='page']:not(.bo-mkt__cta) {
+  font-weight: 700;
+  /* `--bo-acento-sinal` e não o coral da marca: mede 3,50:1 sobre a areia e o
+     coral fica em 2,77:1, abaixo do 3:1 que a WCAG 1.4.11 pede a um indicador
+     de estado. O token existe exactamente por isto. */
+  border-bottom-color: var(--bo-acento-sinal);
+}
+
+/* O CTA — e a cor dele decidiu-se com a calculadora, não com o gosto.
+   ─────────────────────────────────────────────────────────────────────────
+
+   A primeira versão pintou-o com o coral da marca e rótulo verde-escuro, que é
+   o par que o §4.2 aponta: 4,71:1, contra os 3,05:1 do branco que o manual
+   veta. **O rótulo estava certo; o fundo não**, e a `acento.test.ts` acendeu.
+   Os números saem da `razaoDeContraste()` do próprio produto:
+
+     --bo-acento       #F5664D sobre a areia #F7F4EC ....  2,77:1  < 3    ✗
+     --bo-acento-sinal #D85A44 sobre a areia ............   3,50:1        ✓
+     --bo-primaria     #102E35 sobre a areia ............  13,05:1        ✓
+
+   A saída óbvia era trocar o fundo pelo `--bo-acento-sinal`, que nasceu no E02
+   exactamente para isto. **Só que aí cai o rótulo**, e nenhuma cor da paleta o
+   levanta:
+
+     rótulo verde-escuro sobre o sinal ..................  3,73:1  < 4,5  ✗
+     rótulo branco sobre o sinal ........................  3,84:1  < 4,5  ✗
+
+   Sobre o sinal só passariam duas coisas: preto puro (5,47:1), que é cor fora
+   do sistema documentado, ou um rótulo a 19 px negrito para cair no limiar de
+   texto grande — que é escolher o tamanho da letra para passar o medidor, e não
+   desenhar.
+
+   Fica `--bo-primaria`, que é o tratamento de acção primária que o produto já
+   tem: 14,34:1 no rótulo e 13,05:1 na fronteira. O CTA continua «claramente
+   prioritário» (§6.1) por ser o ÚNICO controlo cheio da moldura.
+
+   **Coral com função na superfície comercial continua por fazer, e é o
+   RV100-012** — um P2 que não é deste lote. O sítio dele é o herói, onde uma
+   mancha grande de coral com um título por cima usa o limiar de texto grande
+   por direito próprio, e não como desvio para safar um rótulo de 16 px.
+
+   E `--bo-primaria` directo, NÃO `--bo-publico-primaria`: o segundo segue o
+   tema do restaurante, e o §4.2 diz que a LP mantém identidade fixa. Um cliente
+   do plano Restaurant não pinta o CTA da BossaOS.
+
+   O prefixo `.bo-publico--comercial` é o que faz esta regra ganhar: o CTA é um
+   `<a>` dentro de `.bo-publico__seccoes`, cuja regra-base o arredondava a
+   `999px`. Com a classe sozinha o botão saía cápsula — medido, não suposto: a
+   primeira passagem devolveu `capsulas: 1` a 1280 e a 1440 px. */
+.bo-publico--comercial .bo-mkt__cta {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: var(--bo-toque-publico);
+  padding: 0 var(--bo-espaco-xl);
+  border: 1px solid var(--bo-primaria);
+  border-radius: var(--bo-raio-controlo);
+  background: var(--bo-primaria); color: var(--bo-texto-inverso);
+  font-weight: 700; text-decoration: none;
+}
+
+/* O grupo dos secundários. */
+.bo-mkt__grupo { position: relative; display: grid; }
+.bo-mkt__grupo-botao {
+  display: inline-flex; align-items: center; gap: var(--bo-espaco-xs);
+  min-height: var(--bo-toque-publico);
+  padding: 0 var(--bo-espaco-sm);
+  border: 0; border-bottom: 2px solid transparent; border-radius: 0;
+  background: none; color: var(--bo-texto-primario);
+  font: inherit; font-weight: 600; cursor: pointer; text-align: left;
+}
+.bo-mkt__grupo-botao--activo { font-weight: 700; border-bottom-color: var(--bo-acento-sinal); }
+.bo-mkt__seta { font-size: 12px; }
+.bo-mkt__grupo-painel { display: none; }
+.bo-mkt__grupo--aberto .bo-mkt__grupo-painel {
+  display: grid; gap: var(--bo-espaco-xs);
+  padding-left: var(--bo-espaco-lg);
+}
+/* As três de dentro também são `.bo-publico__seccoes a` para o navegador: sem
+   apagar aqui a borda e o raio da regra-base, saíam três cápsulas dentro do
+   grupo — o defeito do §4.5 mudado de sítio em vez de corrigido. */
+.bo-mkt__grupo-painel a {
+  display: inline-flex; align-items: center;
+  min-height: var(--bo-toque-publico);
+  padding: 0 var(--bo-espaco-sm);
+  color: var(--bo-texto-primario); text-decoration: none;
+  border: 0; border-radius: 0;
+  border-bottom: 2px solid transparent;
+}
+.bo-mkt__grupo-painel a[aria-current='page'] {
+  font-weight: 700; border-bottom-color: var(--bo-acento-sinal);
+}
+
+/* ④ Os idiomas. Códigos curtos à vista, nome da língua no rótulo acessível —
+   «ES» num botão de 44 px cabe onde «Español» não cabe, e quem ouve continua a
+   ouvir a língua e não duas letras. */
+.bo-mkt__idiomas { display: flex; gap: var(--bo-espaco-xs); }
+.bo-mkt__idiomas a {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: var(--bo-toque-publico); min-height: var(--bo-toque-publico);
+  padding: 0 var(--bo-espaco-sm);
+  border: 1px solid transparent; border-radius: var(--bo-raio-controlo);
+  color: var(--bo-texto-primario); text-decoration: none;
+  font-size: 14px; font-weight: 600;
+}
+.bo-mkt__idiomas a[aria-current='true'] {
+  border-color: var(--bo-texto-primario);
+  background: var(--bo-superficie-elevada);
+  font-weight: 700;
+}
+
+/* ⑤ A entrada na conta: presente e discreta. Não compete com o CTA — o §6.1
+   pede o «Pedir uma demo» claramente prioritário, e dois botões com o mesmo
+   peso é a maneira mais rápida de não ter nenhum. */
+.bo-mkt__entrar {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: var(--bo-toque-publico);
+  padding: 0 var(--bo-espaco-lg);
+  border: 1px solid var(--bo-borda); border-radius: var(--bo-raio-controlo);
+  color: var(--bo-texto-primario); text-decoration: none; font-weight: 600;
+}
+
+/* ── A partir de 1024 px a barra abre ─────────────────────────────────────
+   1024 e não 768: é o mesmo corte que a administração usa para trocar a gaveta
+   pela lateral fixa, e a 768 a barra com marca, três ligações, grupo, CTA, três
+   idiomas e entrada não cabe numa linha em nenhuma das três línguas. */
+@media (min-width: 1024px) {
+  .bo-mkt__abrir { display: none; }
+  .bo-mkt__painel,
+  .bo-mkt__menu--aberto .bo-mkt__painel {
+    display: flex; align-items: center; flex-wrap: wrap;
+    gap: var(--bo-espaco-lg);
+    flex-basis: auto; padding-top: 0;
+  }
+  .bo-publico--comercial .bo-publico__seccoes {
+    display: flex; flex-wrap: wrap; align-items: center; gap: var(--bo-espaco-md);
+  }
+  .bo-publico--comercial .bo-publico__seccoes > a,
+  .bo-mkt__grupo-botao { min-height: var(--bo-toque-publico); }
+  /* O painel do grupo passa a flutuar: em barra, empurrar os vizinhos fazia a
+     linha inteira saltar ao abrir — o §6.1 proíbe o salto no sticky pela mesma
+     razão. `right: 0` para crescer para dentro e nunca para fora do ecrã. */
+  .bo-mkt__grupo--aberto .bo-mkt__grupo-painel {
+    position: absolute; top: 100%; right: 0; z-index: 2;
+    min-width: 12rem; padding: var(--bo-espaco-sm);
+    background: var(--bo-superficie-elevada);
+    border: 1px solid var(--bo-borda); border-radius: var(--bo-raio-cartao);
+    box-shadow: 0 8px 24px rgba(16, 46, 53, 0.12);
+  }
+}
+
+/* O rodapé: grupos primeiro, assinatura por baixo. A assinatura é o `<span>`
+   que a `EstruturaPublica` desenha antes do resto — o `order` põe-na no fim sem
+   mexer na estrutura partilhada, que também serve a carta. */
+.bo-publico--comercial .bo-publico__rodape {
+  display: grid; gap: var(--bo-espaco-xl);
+  padding-top: var(--bo-espaco-xxl); padding-bottom: var(--bo-espaco-xxl);
+}
+.bo-publico--comercial .bo-publico__rodape > span { order: 2; }
+.bo-mkt__rodape {
+  display: grid; gap: var(--bo-espaco-xl);
+}
+@media (min-width: 768px) {
+  .bo-mkt__rodape { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .bo-mkt__rodape { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+.bo-mkt__rodape-grupo { display: grid; gap: var(--bo-espaco-xs); min-width: 0; }
+.bo-mkt__rodape-titulo {
+  margin: 0; font-family: var(--bo-fonte-titulo); font-weight: 700;
+  font-size: 14px; color: var(--bo-texto-primario);
+}
+.bo-mkt__rodape-grupo a {
+  display: inline-flex; align-items: center;
+  min-height: var(--bo-toque-publico);
+  color: var(--bo-texto-primario); text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.bo-mkt__rodape-grupo a[aria-current='true'] { font-weight: 700; }
+
 /* Uma ligação que está sozinha, e não dentro de um parágrafo, é um alvo de
    toque como qualquer outro — 44 px, o mesmo que os botões ao lado dela. A
    isenção da WCAG 2.2 é para ligações dentro de texto corrido. */

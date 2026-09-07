@@ -51,6 +51,7 @@
       "grupos": 0,
       "texto": "Hecho con BossaOS"
     },
+    "cta": null,
     "ligacoesDaModura": [
       {
         "texto": "El producto BossaOS",
@@ -87,7 +88,8 @@
         "destino": "/es-ES/demo",
         "visivel": true
       }
-    ]
+    ],
+    "comMenusAbertos": null
   },
   {
     "id": "MKT-004",
@@ -141,6 +143,7 @@
       "grupos": 0,
       "texto": "Hecho con BossaOS"
     },
+    "cta": null,
     "ligacoesDaModura": [
       {
         "texto": "El producto BossaOS",
@@ -177,7 +180,8 @@
         "destino": "/es-ES/demo",
         "visivel": true
       }
-    ]
+    ],
+    "comMenusAbertos": null
   },
   {
     "id": "MKT-005",
@@ -231,6 +235,7 @@
       "grupos": 0,
       "texto": "Hecho con BossaOS"
     },
+    "cta": null,
     "ligacoesDaModura": [
       {
         "texto": "El producto BossaOS",
@@ -267,7 +272,8 @@
         "destino": "/es-ES/demo",
         "visivel": true
       }
-    ]
+    ],
+    "comMenusAbertos": null
   },
   {
     "id": "MKT-006",
@@ -321,6 +327,7 @@
       "grupos": 0,
       "texto": "Hecho con BossaOS"
     },
+    "cta": null,
     "ligacoesDaModura": [
       {
         "texto": "El producto BossaOS",
@@ -357,7 +364,8 @@
         "destino": "/es-ES/demo",
         "visivel": true
       }
-    ]
+    ],
+    "comMenusAbertos": null
   },
   {
     "id": "MKT-007",
@@ -411,6 +419,7 @@
       "grupos": 0,
       "texto": "Hecho con BossaOS"
     },
+    "cta": null,
     "ligacoesDaModura": [
       {
         "texto": "El producto BossaOS",
@@ -447,7 +456,8 @@
         "destino": "/es-ES/demo",
         "visivel": true
       }
-    ]
+    ],
+    "comMenusAbertos": null
   },
   {
     "id": "MKT-008",
@@ -501,6 +511,7 @@
       "grupos": 0,
       "texto": "Hecho con BossaOS"
     },
+    "cta": null,
     "ligacoesDaModura": [
       {
         "texto": "El producto BossaOS",
@@ -537,7 +548,8 @@
         "destino": "/es-ES/demo",
         "visivel": true
       }
-    ]
+    ],
+    "comMenusAbertos": null
   },
   {
     "id": "MKT-009",
@@ -591,6 +603,7 @@
       "grupos": 0,
       "texto": "Hecho con BossaOS"
     },
+    "cta": null,
     "ligacoesDaModura": [
       {
         "texto": "El producto BossaOS",
@@ -627,7 +640,8 @@
         "destino": "/es-ES/demo",
         "visivel": true
       }
-    ]
+    ],
+    "comMenusAbertos": null
   },
   {
     "id": "MKT-010",
@@ -681,6 +695,7 @@
       "grupos": 0,
       "texto": "Hecho con BossaOS"
     },
+    "cta": null,
     "ligacoesDaModura": [
       {
         "texto": "El producto BossaOS",
@@ -717,7 +732,8 @@
         "destino": "/es-ES/demo",
         "visivel": true
       }
-    ]
+    ],
+    "comMenusAbertos": null
   },
   {
     "id": "MKT-011",
@@ -771,6 +787,7 @@
       "grupos": 0,
       "texto": "Hecho con BossaOS"
     },
+    "cta": null,
     "ligacoesDaModura": [
       {
         "texto": "El producto BossaOS",
@@ -807,7 +824,8 @@
         "destino": "/es-ES/demo",
         "visivel": true
       }
-    ]
+    ],
+    "comMenusAbertos": null
   },
   {
     "id": "MKT-012",
@@ -861,6 +879,7 @@
       "grupos": 0,
       "texto": "Hecho con BossaOS"
     },
+    "cta": null,
     "ligacoesDaModura": [
       {
         "texto": "El producto BossaOS",
@@ -897,6 +916,7 @@
         "destino": "/es-ES/demo",
         "visivel": true
       }
-    ]
+    ],
+    "comMenusAbertos": null
   }
 ]
