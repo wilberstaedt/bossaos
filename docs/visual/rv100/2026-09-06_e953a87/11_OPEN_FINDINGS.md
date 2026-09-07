@@ -292,6 +292,21 @@ status: corrigido — VERIFICADO PELO REVISOR: o `validar-pilar-offline.sh` exis
 ```
 
 ```yaml
+id: RV100-021
+severity: P2
+surface: marketing
+screen_or_route: MKT-012 · /[idioma]/demo
+summary: uma recusa do servidor devolve o formulário VAZIO, e é a única porta de conversão do produto
+impact: conversão
+expected: §9.1 — «formulários preservam trabalho»; o produto sabe fazê-lo em 76 ficheiros com `defaultValue`
+observed: o único `value=` da página é o `idioma` escondido; a rota devolve `destino('/demo', 'erro=campos')` e mais nada. O navegador apanha os casos fáceis (3 `required`, 1 `type="email"`), mas o `validarLead` do domínio tem recusas próprias — e quando uma dispara, nome, restaurante, email, telefone e a mensagem livre perdem-se todos
+evidence: `apps/web/app/[idioma]/demo/page.tsx:70` · `apps/web/app/api/publico/demo/route.ts:62` · `packages/db/src/leads.ts`
+fix_criteria: os cinco campos repovoam depois de uma recusa; medir com uma recusa REAL do `validarLead` e não com um campo vazio, porque essa o navegador nem deixa submeter
+decisao: nao-precisa-de-autorizacao
+status: open — encontrado pelo revisor a 07/09, depois do lote L1g
+```
+
+```yaml
 id: RV100-020
 severity: P4
 surface: marketing
