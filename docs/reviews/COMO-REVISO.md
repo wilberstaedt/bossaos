@@ -1741,3 +1741,40 @@ substancial sem marcador → renderiza-se outra coisa; HTML vazio → o branco �
 produto.
 
 **Uma medição que só sabe dizer «passa» ou «falha» não podia separar estes três.**
+
+---
+
+## A prova que me desmentia já estava escrita no ficheiro — 07/09
+
+Duas das três «avarias de produto» dos ecrãs mestres **não eram do produto**. O
+`M03 denied` e o `M04 erro` renderizam o ecrã desenhado — 414 e 373 caracteres
+visíveis, 20 929 e 17 852 de HTML. As capturas brancas eram o obturador do arnês.
+
+**E eu construí uma teoria em cima de uma delas.** Propus um mecanismo de
+resolução do `not-found` do Next para explicar um branco que não existia. **Uma
+explicação plausível de um artefacto de medição é uma explicação de nada** — e a
+plausibilidade não é sinal de que o fenómeno seja real. Construí o mecanismo
+todo antes de perguntar se havia o que explicar.
+
+**Mas o pior é isto: a prova que me desmentia já estava escrita, no mesmo
+ficheiro, e eu li por cima.** O `ALVO-RV100-MESTRES.md:249` diz, à letra:
+
+> «O `M03-denied` e o `M03-erro` saíram **byte a byte idênticos**, a 5851; o
+> `M04-erro` e o `M04-offline` a 2740.»
+
+**Duas condições diferentes não podem produzir ficheiros byte a byte iguais.**
+Isso não descreve dois defeitos diferentes do produto — descreve **uma máquina a
+fotografar o mesmo nada duas vezes**. Foi exactamente esse raciocínio que apanhou
+os primeiros quatro brancos da mesma corrida. **A regra estava escrita, tinha
+funcionado, e mesmo assim os brancos seguintes foram lidos como produto.**
+
+**A regra que fica: saídas idênticas byte a byte sob condições que deviam
+diferir acusam o instrumento, não o sujeito** — e uma regra que já apanhou uma
+avaria não fica a trabalhar sozinha; tem de ser aplicada outra vez ao caso
+seguinte, que é precisamente onde eu falhei.
+
+**E a forma de que isto é caso: herdei a medição de outro agente como facto.**
+Não me chegou como instrumento — chegou como *achado*, já com a forma de
+conclusão. Toda a doutrina aqui é sobre não acreditar nos meus instrumentos; o
+que me faltava é que **a saída de outro agente é um instrumento na mesma**, e o
+facto de vir escrita em prosa afirmativa esconde-o melhor do que qualquer código.
