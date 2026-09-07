@@ -50,7 +50,18 @@ if [ -z "${BASH_SOURCE[0]:-}" ]; then
   return 1 2>/dev/null || exit 1
 fi
 NEXT_ENV_FICHEIRO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/apps/web/next-env.d.ts"
-NEXT_ENV_COPIA=""
+# ── Ler o ajudante DUAS vezes não pode apagar o que a primeira guardou ────
+#
+# Isto era `NEXT_ENV_COPIA=""`, e a segunda leitura punha-o a vazio. Medido em
+# bash: depois de `guardar` e de um segundo `.` do ficheiro, a variável vinha
+# vazia, o `repor` devolvia **0 sem repor nada** e o temporário ficava órfão.
+#
+# O sintoma que se vê é o ficheiro esquecido; o que custa é o outro — a
+# protecção fica **desarmada em silêncio**, que é a terceira porta para a mesma
+# doença deste ficheiro. As outras duas já estão fechadas acima.
+#
+# `:-` em vez de vazio: quem lê primeiro define, quem lê a seguir não estraga.
+NEXT_ENV_COPIA="${NEXT_ENV_COPIA:-}"
 
 # ── Ausente é caminho errado, nunca «ainda não há» ────────────────────────
 #
@@ -71,7 +82,16 @@ guardar_next_env() {
     echo "next-env-intacto.sh: nao encontrei $NEXT_ENV_FICHEIRO — o caminho esta errado, abortado" >&2
     exit 1
   fi
-  NEXT_ENV_COPIA="$(mktemp -t next-env)"
+  # Uma cópia anterior desta corrida sai antes de nascer a nova, senão um
+  # segundo `guardar` deixa a primeira órfã — medido: os temporários subiam de
+  # oito para dez em duas chamadas.
+  [ -n "$NEXT_ENV_COPIA" ] && rm -f "$NEXT_ENV_COPIA"
+  # `mktemp -t next-env` é a forma ANTIGA: no BSD o argumento é um prefixo, no
+  # GNU é um template e sem `XXXXXX` recusa-se. Um template completo com o
+  # caminho é aceite pelos dois. O `%/` tira a barra final que o `TMPDIR` do
+  # macOS já traz, para não sair um caminho com `//` no meio.
+  NEXT_ENV_TMP="${TMPDIR:-/tmp}"
+  NEXT_ENV_COPIA="$(mktemp "${NEXT_ENV_TMP%/}/next-env.XXXXXX")"
   cp "$NEXT_ENV_FICHEIRO" "$NEXT_ENV_COPIA"
 }
 
