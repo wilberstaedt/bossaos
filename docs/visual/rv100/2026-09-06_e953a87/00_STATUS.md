@@ -1,5 +1,43 @@
 # RV100 — estado
 
+## ENTRADA AUTORIZADA — 07/09, 02h
+
+A condição que me travava está cumprida, e não fui eu que a interpretei a meu
+favor: **o número mudou.**
+
+| | ontem, 08h | agora |
+| --- | --- | --- |
+| etapas | 34/36 | **36/36** |
+| telas | 396/396 | 396/396 |
+| E34 | por fechar | **validado** com varredura no momento da assinatura |
+| E35 | por fechar | validado |
+
+O RV100 exige, no cabeçalho: *«após todas as etapas funcionais planejadas serem
+declaradas concluídas»*. **Estão.** Escrevi neste mesmo ficheiro, de manhã, que
+não resolvia a tensão sozinho — não a resolvi: esperei que ela deixasse de
+existir.
+
+**O que autoriza a entrada não é a ordem do Matheus** — ele mandou-me arrancar e
+eu teria arrancado na mesma. É o facto de a condição escrita estar cumprida e
+medida. As duas coisas coincidiram; se não coincidissem, dizia-lho.
+
+### O estado, dos seis que o documento obriga a escolher
+
+`RV100 EM RECONSTRUÇÃO`.
+
+Entro pela secção 3 — direcção de marca — porque a **secção 2 está feita**: o
+diagnóstico das oito páginas comerciais a 1440 px, com as 13 hipóteses medidas e a
+evidência em `evidence/baseline/`.
+
+### E o que fica travado por desenho
+
+A **secção 7** tem portão de aprovação humana. Faço as secções 3 a 6, produzo as
+telas-mestre e a evidência visual, e **paro**. O documento diz, no ponto 5, que
+*«o Claude não pode declarar sozinho que a estética foi aprovada»* — e essa é a
+única linha deste plano que nenhuma ordem levanta, porque é ela que protege quem
+manda de mim.
+
+
 `RV100 EM RECONSTRUÇÃO` — **não**. O estado real é o de baixo, e o documento
 obriga a usar exactamente um dos seis. Ainda não estou em nenhum deles, porque a
 condição de entrada não está cumprida. Fica escrito assim em vez de escolher o
@@ -14,21 +52,6 @@ que dava jeito.
 | data | 2026-09-06 |
 | etapas | 34/36 — **faltam o E34 e o E35** |
 | telas | **396/396 validadas** |
-
-## A tensão de ordem, e porque não a resolvo sozinho
-
-O RV100 diz, no cabeçalho: *«Momento de uso: após todas as etapas funcionais
-planejadas serem declaradas concluídas»*. **Não estão** — faltam duas.
-
-O `DEPOIS-DOS-100.md`, que escrevi a pedido do Matheus às 03h30, diz o
-contrário: RV100 primeiro, *«só depois o E34 e a fila»*.
-
-Os dois vêm dele. O §1.3 do próprio RV100 manda não escolher em silêncio a
-versão mais conveniente, por isso **está escrito aqui e foi-lhe perguntado**.
-
-**O que faço entretanto:** a secção 2 — o diagnóstico inicial obrigatório. Não
-altera código nenhum, o documento manda fazê-la antes de qualquer CSS, e é útil
-seja qual for a ordem que ele decidir.
 
 ## Base funcional guardada (§1.4.2)
 
