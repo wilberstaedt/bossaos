@@ -636,3 +636,35 @@ diferença que estas aproximações apaguem.**
 **A lição sobre mim: chamei «imedível por natureza» a uma coisa que era só
 inconveniente de medir.** A diferença entre as duas é que a segunda tem
 suposições que se podem escrever — e escrevê-las foi todo o trabalho.
+
+### Apliquei o mesmo instrumento ao telemóvel e ele disse-me que não serve — 19h30
+
+Depois de a geometria decidir o KDS, fui fazer o que a disciplina de hoje manda:
+**não parar na instância.** A hipótese era bonita — que o piso de **14 px** do
+manual fosse a mesma norma ergonómica vista à distância de um telemóvel, ou seja
+uma regra **derivada** e não escolhida.
+
+**Falso, e por larga margem.** A 390 css px num ecrã de 6,1", 1 css px são
+0,36 mm — e a essa escala:
+
+| | 30 cm | 35 cm | 45 cm |
+| --- | ---: | ---: | ---: |
+| 12 px | 34,7′ | 29,8′ | 23,1′ |
+| 14 px | 40,5′ | 34,7′ | 27,0′ |
+
+**Tudo passa, com folga de duas a três vezes o limiar** — incluindo os 12 px que
+passámos o dia a corrigir.
+
+**O que isto diz, e é útil:** o critério angular **decide o KDS e não decide o
+telemóvel**. Nos ecrãs de mão o texto é angularmente enorme, e o que torna 12 px
+mau não é a geometria — é outra coisa: vista cansada, brilho, e a convenção de
+plataforma. **O piso do manual protege algo que este instrumento não vê.**
+
+**E é por isso que registo isto em vez de o deitar fora.** Um instrumento novo
+que resolve um caso tenta logo resolver os outros, e **a tentação era usar o
+mesmo número para justificar as correcções de hoje** — que estariam certas na
+mesma, mas pela razão errada. **Uma correcção certa com fundamento errado é a
+coisa que eu já apanhei hoje no lima**, e não a ia repetir de tarde.
+
+**O 14 px do manual fica onde estava: uma regra escolhida, não derivada — e boa.**
+Não a explico com geometria porque a geometria não a explica.
