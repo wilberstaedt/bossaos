@@ -1138,3 +1138,58 @@ pela página, não o que se exige dela.**
 num teste. Proíbe mexer no que ele **exige**. Um marcador que aponta para o
 elemento que um achado mandou remover **tem** de mudar — e a prova de que a
 mudança é honesta é o conjunto de asserções ficar byte a byte.
+
+---
+
+## A décima forma, e é pior do que as nove — 07/09
+
+As nove formas que escrevi esta noite produzem todas um número **estranho**: um
+zero onde devia haver algo, um total que não bate, uma contagem que muda entre
+corridas. **Todas convidam a um segundo olhar.**
+
+O implementador da landing encontrou a décima, e essa produz **o número que se
+espera**.
+
+Ele construiu um detector para o RV100-012 — *«coral e cítrico estão praticamente
+ausentes da superfície comercial»* — e o detector comparava
+
+```
+--bo-acento  →  "#F5664D"          (o texto do token)
+getComputedStyle().color  →  "rgb(245, 102, 77)"   (o que o navegador devolve)
+```
+
+**Nunca iguais.** O `usaCoral` era **0 por construção**, nas duas fases.
+
+E a frase dele é a que interessa:
+
+> «E o zero era **plausível**, porque o RV100-012 diz exactamente que o coral está
+> ausente. **Um detector partido a concordar com o achado que devia medir.**»
+
+**Nenhuma das minhas nove regras o teria apanhado.** «Ler as linhas que o número
+contou» não ajuda quando o número é o esperado. «Controlo positivo» ajudaria — e
+ele não o tinha, porque quem espera zero não sente falta de um.
+
+**O que o apanhou foi outra coisa: o número não se mexeu depois de uma mudança
+que tinha de o mexer.** Não foi o valor que denunciou o instrumento — foi a
+**derivada**.
+
+### A regra que fica
+
+**Quando um instrumento confirma a hipótese que foi construído para testar, ele
+não mediu nada até provar que sabe discordar.** E a prova não é um controlo
+negativo qualquer: é plantar exactamente aquilo que se espera não encontrar, e
+exigir que o detector o veja.
+
+Foi o que ele fez: o detector normaliza agora através do navegador e **planta um
+elemento coral, exigindo vê-lo**.
+
+### E as outras duas do mesmo relatório
+
+**Duas escritas perdidas em silêncio.** As edições de CSS dele imprimiram
+«escrito» e não persistiram. *«O meu `print` não provava nada sobre o flush»* —
+passou a escrever com `with` e a **fazer `grep` ao ficheiro depois**. É a família
+do `HTTP 200 ≠ entrega`, dentro do próprio processo.
+
+**Um tempo-limite de 5 minutos** que fazia o instrumento falhar à primeira e
+passar à segunda, sempre. *«É a guarda que ensina as pessoas a ignorá-la.»*
+Subido para 15, com a razão escrita lá dentro.

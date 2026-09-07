@@ -217,7 +217,7 @@ observed: "Your whole restaurant. One rhythm." em packages/i18n/src/mensagens/en
 evidence: packages/i18n/src/mensagens/en.json
 fix_criteria: alinhar ao §6.2, que é o documento mais recente e chama àquele texto "aprovado"
 decisao: autorizada-por-antecipacao (00_AUTORIZACAO.md) — alinho ao §6.2 e fica escrito que ele vê depois
-status: open
+status: corrigido — VERIFICADO PELO REVISOR contra o texto aprovado: `mktE10.heroiTitulo` = `"Your restaurant. One rhythm."` e o §6.2, linha 416, diz exactamente isso. Fechado no lote L1b (`c33ad24`) e não neste; o registo é que estava atrasado
 ```
 
 ```yaml
