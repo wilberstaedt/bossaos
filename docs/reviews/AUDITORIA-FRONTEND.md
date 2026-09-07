@@ -342,3 +342,48 @@ Isso é conservador e podia ser afinado com um mapa de que fontes afectam que
 telas — **mas não o vou fazer.** A assimetria manda: ser conservador custa uma
 recaptura; estar errado custa mostrar prova velha ao dono do produto, e já lhe
 fiz isso uma vez hoje.
+
+---
+
+## «Activo» tem duas cores — o critério do verde-lima, medido — 15h25
+
+Estava por medir desde o princípio: *«coral, verde-lima, verde-escuro e
+superfícies com funções consistentes»*, com a nota **«o verde-lima não o medi»**.
+Medi.
+
+**Onde o lima está**, com controlo positivo (uma mancha sintética dá 400/400):
+
+| tela | lima |
+| --- | ---: |
+| M01 landing desktop | 1294 px |
+| M02 landing telemóvel | ~420 px |
+| M03 backoffice | 72 px |
+| M04 Staff · M05 KDS · M06 carta | **0** |
+
+**Que função tem**, pelos quatro sítios que o consomem: anel de foco
+(`outline-color`), etiqueta de realce, e o **item activo da barra do
+backoffice** — fundo e ícone. **O lima quer dizer «activo ou em foco».**
+
+**E aqui está a inconsistência, que é o que o critério pergunta:**
+
+| onde | token | resolve para |
+| --- | --- | --- |
+| barra do backoffice | `--bo-realce` | **lima** `#DDEA91` |
+| navegação pública e do Staff | `--bo-navegacao-activa` | `--bo-acento-sinal` = **coral** `#D85A44` |
+
+**Uma função, dois tokens, duas cores.** O critério pede funções consistentes e
+isto não é. Fica **medido e não conforme**, com a decisão de qual das duas fica a
+ser «activo» a pertencer ao desenho — não a mim.
+
+## E uma razão errada por baixo de uma decisão certa
+
+Ao curar o botão do KDS, o JR escreveu que escolheu claro e não lima porque **«o
+lima é o sinal de estado do pedido»**. **A decisão está certa** — o botão claro é
+o que resolve —, **mas a razão é falsa**: o estado do pedido usa
+`--bo-estado-sucesso`, `-aviso`, `-perigo` e `-info`, e o lima **não aparece em
+nenhum**. Medido: o KDS tem **zero** píxeis de lima.
+
+**Uma razão errada debaixo de uma decisão certa é pior do que parece**, porque a
+decisão protege-a da revisão: ninguém volta a olhar para o *porquê* de uma coisa
+que ficou bem. E aquela frase está num commit, onde vai ser lida por quem vier
+decidir o próximo uso do lima — e vai decidir com um facto que não existe.

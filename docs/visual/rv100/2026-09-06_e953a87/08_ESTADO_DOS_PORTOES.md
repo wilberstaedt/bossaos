@@ -13,7 +13,7 @@
 | --- | --- |
 | logo e ícone aprovados usados correctamente | **conforme** — assinatura `145×50` ligada (era `81×28` solta); `app/icon.png` vem do ícone aprovado |
 | identidade reconhecível sem depender só do wordmark | **MEDIDO EM PARTE** |
-| coral, verde-lima, verde-escuro e superfícies com funções consistentes | **parcial** — o coral ganhou função em 5 páginas, numa secção escura onde cumpre as três obrigações. **O verde-lima não o medi** |
+| coral, verde-lima, verde-escuro e superfícies com funções consistentes | **MEDIDO a 07/09 15h25, e NÃO É consistente** — «activo» tem **duas cores**: a barra do backoffice usa `--bo-realce` (lima `#DDEA91`) e a navegação pública e do Staff usa `--bo-navegacao-activa`, que resolve para `--bo-acento-sinal` (coral `#D85A44`). Uma função, dois tokens, duas cores. Píxeis: lima em M01 **1294**, M02 ~420, M03 **72**, e **zero** em Staff, KDS e carta |
 | tipografia, espaço, raios, bordas e movimento tokenizados | **conforme** — verificado número a número contra o manual na secção 3 |
 | não existe identidade antiga ou paralela | **conforme** — os dois corais são um sistema com fronteira medida no ADR 0001, e escrevi a guarda que a mantém |
 | tema Starter e personalização respeitam limites | **conforme** — o ecrã desce o botão a secundário e é o servidor que recusa |
