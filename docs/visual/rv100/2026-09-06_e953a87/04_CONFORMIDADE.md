@@ -894,3 +894,46 @@ número.
 É a mesma família da regra que fecha a doutrina — o instrumento não é testemunha
 de si próprio — com uma variante que vale a pena nomear: **uma captura de ecrã é
 uma medição independente**, e das mais difíceis de enganar. Não tem regex.
+
+---
+
+## A expansão de texto — MEDIDA, e fecha o `NÃO MEDI` mais antigo da secção 6
+
+Atravessou **quatro lotes** declarada por medir, sempre pela mesma razão: exigia
+semear a base partilhada e havia sempre uma corrida em cima. Com a base livre,
+corri-a:
+
+```
+ok   348 cadeias crescem 30% ou mais — há o que medir
+ok   a sonda acendeu com uma cadeia longa injectada
+ok   os três ficheiros de mensagens ficaram byte a byte
+âmbito: 281 ecrãs medidos de 282 candidatos, de 227 cadeias que crescem
+        fora: 63 com parâmetro por resolver, 6 sem endereço, 8 em dívida
+0 falhas.
+```
+
+**Mas verde não me chega sem saber verde sobre quê**, e a preocupação declarada
+era específica: o implementador escreveu três vezes que *«a minha copy nova em PT
+e EN é mais longa do que a que substituiu»*. **A pergunta é se os ecrãs dele estão
+dentro dos 281.**
+
+Estão, e verifiquei a cadeia toda:
+
+- o namespace comercial é `mktE10` e **tem código de etapa**, logo entra na
+  derivação;
+- a **E10 tem 29 IDs** no atlas, incluindo `MKT-001` a `MKT-006`;
+- e **287 cadeias do `mktE10`** ficam medidas.
+
+**E as que mais crescem são exactamente as que ele acrescentou nos últimos
+lotes:**
+
+| cadeia | cresce | de onde vem |
+| --- | ---: | --- |
+| `navPrivacidade` | **1,54×** | a ligação de privacidade do lote da demo |
+| `prodCartaTitulo` | 1,53× | a página de produto |
+| `demoErroTexto` | **1,44×** | a mensagem de erro que ele separou em duas |
+| `confianca1Texto` | 1,43× | o pilar de confiança |
+
+**As duas cadeias de que ele mais desconfiava são as duas que mais crescem — e
+cabem.** É o fecho que uma declaração de `NÃO MEDI` merece: não «passou», mas
+«passou sobre exactamente aquilo que estava em causa».
