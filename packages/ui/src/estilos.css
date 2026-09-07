@@ -2210,3 +2210,143 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
     box-shadow: 0 12px 32px rgba(16, 46, 53, 0.18);
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   NORTH STAR v2 — o sistema visual mínimo das duas telas-mestre (Fase 1)
+   ══════════════════════════════════════════════════════════════════════════
+
+   O §8 do norte reprova, entre outras coisas, «continuar com fundo areia em
+   todas as secções» e «mais de dez cartões de texto semelhantes». O inventário
+   da Fase 0 mediu a causa: a landing é UM ficheiro de 389 linhas com 19
+   `bo-mkt__cartao` à mão e 7 grelhas de três colunas — não há componente
+   partilhado a desfazer, portanto isto NASCE ao lado e não substitui nada.
+
+   Prefixo `ns-` de propósito: as 396 telas continuam a usar `bo-`, e a Fase 3
+   — que só existe depois de a Nathalia aprovar por escrito — é que decide o que
+   se funde. Nada aqui toca no que já está.
+
+   ── Os tokens NÃO mudam, e isso está medido ─────────────────────────────
+
+   O norte manda «manter os tokens aprovados» e lista coral `#F5664D`. O código
+   tem `#D85A44`, e a diferença não é descuido: o RV100 escureceu-o para passar
+   3:1 sobre a areia. Medi os dois e a escolha não é livre:
+
+     coral            sobre areia   texto verde-profundo por cima
+     #F5664D (norte)     2,77            4,71
+     #D85A44 (código)    3,50            3,73
+
+   **Nenhum serve as duas exigências, e isso é demonstrável:** para 3:1 sobre a
+   areia a luminância tem de ser ≤ 0,2684; para 4,5:1 com texto verde tem de ser
+   ≥ 0,2795. Os intervalos não se tocam — não é questão de escolher melhor.
+
+   A saída não é um terceiro coral: é o TAMANHO do texto. A 1.4.3 pede 3:1 para
+   texto grande (≥ 18,66 px negrito), e aí a janela abre para ≥ 0,1696 — onde o
+   `#D85A44` (0,2233) cabe. Por isso o rótulo do CTA aqui é grande, o que um CTA
+   de herói deve ser de qualquer modo.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1 · Fundos e secções: o ritmo que a landing não tinha ─────────────── */
+.ns-seccao { padding-block: clamp(56px, 7vw, 112px); }
+.ns-seccao > * { max-width: var(--bo-largura-maxima); margin-inline: auto; padding-inline: var(--bo-espaco-lg); }
+
+.ns-seccao--areia  { background: var(--bo-superficie-base); color: var(--bo-texto-primario); }
+.ns-seccao--branca { background: #FFFFFF; color: var(--bo-texto-primario); }
+.ns-seccao--suave  { background: var(--bo-superficie-suave); color: var(--bo-texto-primario); }
+
+/* A secção escura declara o CONTRATO da superfície: quem for desenhado aqui
+   pergunta pelo papel e não pela cor. É a mesma disciplina do `.bo-inverso`,
+   com uma diferença deliberada — aqui a acção é CORAL, porque o norte diz que
+   o coral é a energia da marca e o CTA principal. */
+.ns-seccao--verde {
+  background: var(--bo-primaria);
+  color: var(--bo-texto-inverso);
+  --bo-sobre-superficie: var(--bo-texto-inverso);
+  --bo-accao: var(--bo-acento-sinal);
+  --bo-sobre-accao: var(--bo-primaria);
+  --bo-foco-cor: var(--bo-superficie-base);
+  --bo-foco-contraste: var(--bo-primaria);
+}
+
+/* ── 2 · Tipografia de display ─────────────────────────────────────────── */
+/* Os números são os do §3.2 e são medidos na página, não aqui. */
+.ns-display { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 44px; line-height: 1.05; letter-spacing: -0.02em; margin: 0; }
+.ns-titulo  { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 32px; line-height: 1.1; margin: 0; }
+.ns-lead    { font-size: 19px; line-height: 1.5; max-width: 62ch; margin: 0; }
+.ns-corpo   { font-size: 17px; line-height: 1.6; max-width: 70ch; }
+
+@media (min-width: 1024px) {
+  .ns-display { font-size: 72px; }
+  .ns-titulo  { font-size: 48px; }
+  .ns-lead    { font-size: 21px; }
+}
+
+/* ── 3 · Cabeçalho e rodapé ────────────────────────────────────────────── */
+.ns-cabecalho {
+  min-height: 76px; display: flex; align-items: center; gap: var(--bo-espaco-lg);
+  padding-inline: var(--bo-espaco-lg);
+}
+.ns-rodape { background: var(--bo-primaria); color: var(--bo-texto-inverso); padding-block: var(--bo-espaco-xl); }
+
+/* ── 4 · O CTA do herói: grande por razão medida, não por gosto ────────── */
+/* 18,66 px negrito é a fronteira do «texto grande» da 1.4.3. A 19 px estamos
+   do lado certo dela com folga, e é isso que torna o coral utilizável como
+   fundo de botão sobre o verde. */
+.ns-accao-heroi { font-size: 19px; font-weight: 700; padding: 14px 28px; }
+
+/* ── 5 · Molduras de produto: o ecrã é o protagonista ──────────────────── */
+/* O norte reprova «capturas como anexos dentro de molduras vazias». A moldura
+   não desenha uma caixa à volta: eleva o próprio ecrã com sombra e raio. */
+.ns-moldura { display: block; border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px rgba(16, 46, 53, 0.28); }
+.ns-moldura img, .ns-moldura picture { display: block; width: 100%; height: auto; }
+.ns-moldura--sobreposta { box-shadow: 0 18px 44px rgba(16, 46, 53, 0.34); }
+
+/* ── 6 · Bento assimétrico ─────────────────────────────────────────────── */
+/* O norte proíbe «uma grade de quatro caixas idênticas»: um módulo grande,
+   dois médios e um horizontal. A assimetria é a regra, não o acaso. */
+.ns-bento { display: grid; gap: var(--bo-espaco-lg); grid-template-columns: 1fr; }
+.ns-bento__area { border-radius: 20px; overflow: hidden; padding: var(--bo-espaco-lg); background: rgba(255, 255, 255, 0.06); }
+@media (min-width: 1024px) {
+  .ns-bento { grid-template-columns: repeat(6, 1fr); grid-auto-rows: minmax(180px, auto); }
+  .ns-bento__area--principal { grid-column: span 4; grid-row: span 2; }
+  .ns-bento__area--media     { grid-column: span 2; }
+  .ns-bento__area--larga     { grid-column: span 6; }
+}
+
+/* ── 7 · Cartões de preço: o destaque é editorial, não um crachá ───────── */
+.ns-precos { display: grid; gap: var(--bo-espaco-lg); grid-template-columns: 1fr; }
+@media (min-width: 900px) { .ns-precos { grid-template-columns: repeat(3, 1fr); align-items: start; } }
+.ns-preco { border: 1px solid var(--bo-borda); border-radius: 20px; padding: var(--bo-espaco-lg); background: #FFFFFF; }
+.ns-preco--destaque { border-color: var(--bo-acento-sinal); border-width: 2px; transform: translateY(-8px); }
+.ns-preco__valor { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 40px; line-height: 1; }
+
+/* ── 8 · Shell autenticado ─────────────────────────────────────────────── */
+/* Barra lateral 232–264 px e o activo por BARRA CORAL mais contraste — o norte
+   é explícito em não ser «apenas bloco lima», que era o que a barra tinha. */
+.ns-shell { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+.ns-shell__lado { background: var(--bo-primaria); color: var(--bo-texto-inverso); padding: var(--bo-espaco-lg) 0; }
+.ns-shell__item { display: flex; align-items: center; gap: 10px; padding: 10px var(--bo-espaco-lg); position: relative; color: inherit; text-decoration: none; }
+.ns-shell__item[aria-current='page'] { background: rgba(255, 255, 255, 0.10); font-weight: 600; }
+.ns-shell__item[aria-current='page']::before {
+  content: ''; position: absolute; inset-block: 6px; inset-inline-start: 0;
+  width: 3px; background: var(--bo-acento-sinal);
+}
+.ns-shell__conteudo { background: var(--bo-superficie-base); padding: var(--bo-espaco-lg); }
+
+/* ── 9 · A mesa visual, e os estados ───────────────────────────────────── */
+/* «Não aceite uma lista de textos como mapa de mesas»: isto é uma GRELHA
+   espacial, cada mesa com forma, capacidade e estado. O estado não vive só na
+   cor — leva rótulo — porque cor sozinha não é informação acessível. */
+.ns-mesas { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: var(--bo-espaco-md); }
+.ns-mesa {
+  border-radius: 16px; border: 1px solid var(--bo-borda); background: #FFFFFF;
+  padding: var(--bo-espaco-md); min-height: 112px;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.ns-mesa__nome { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 20px; }
+.ns-mesa__capacidade { font-size: 14px; color: var(--bo-texto-secundario); }
+.ns-mesa--livre     { border-color: var(--bo-borda); }
+.ns-mesa--ocupada   { border-color: var(--bo-acento-sinal); border-width: 2px; }
+.ns-mesa--reservada { border-color: var(--bo-primaria); border-width: 2px; }
+.ns-mesa--atencao   { border-color: var(--bo-acento-sinal); background: var(--bo-superficie-suave); border-width: 2px; }
+.ns-mesa__estado { font-size: 14px; font-weight: 600; }
+.ns-resumo { display: flex; flex-wrap: wrap; gap: var(--bo-espaco-md); font-size: 14px; }
