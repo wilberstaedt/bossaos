@@ -30,7 +30,11 @@
     "configuracao": "Settings",
     "trabalho": "Work",
     "mais": "More",
-    "levar": "Takeaway and delivery"
+    "levar": "Takeaway and delivery",
+    "grupoOperacao": "Operations",
+    "grupoAbastecimento": "Supply",
+    "grupoNegocio": "Business",
+    "grupoUtilidades": "Utilities"
   },
   "estado": {
     "carga": {

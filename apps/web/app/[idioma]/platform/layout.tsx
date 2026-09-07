@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
-import { Etiqueta, EstruturaAdmin } from '@bossaos/ui';
+import { Etiqueta } from '@bossaos/ui';
+import { EstruturaAdminDaRota } from '../../../src/componentes/EstruturaAdminDaRota.tsx';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { comIdentidade, ePlataforma, obterPrisma } from '@bossaos/db';
 import { MarcaEscrita } from '../../../src/componentes/Marca.tsx';
@@ -47,7 +48,11 @@ export default async function LayoutDaPlataforma({
   const base = `/${idioma}/platform`;
   const navegacao = [
     { href: base, rotulo: m.plataforma.navResumo },
-    { href: base, rotulo: m.plataforma.navOrganizacoes, activa: true },
+    // Sem `activa: true`: era a TERCEIRA instância da mesma doença — o item
+    // aceso preso a uma posição do array em vez de sair da rota. As outras duas
+    // estavam no layout da organização. A cura vive no `EstruturaAdmin`, que
+    // sabe a rota; aqui só se deixa de a contradizer.
+    { href: base, rotulo: m.plataforma.navOrganizacoes },
     { href: `${base}/planos`, rotulo: m.plataforma.navPlanos },
     // ── As quatro do E32 ────────────────────────────────────────────────
     //
@@ -85,7 +90,7 @@ export default async function LayoutDaPlataforma({
   ];
 
   return (
-    <EstruturaAdmin
+    <EstruturaAdminDaRota
       marca={<MarcaEscrita />}
       organizacao={m.plataforma.marca}
       unidade={actor.email}
@@ -104,6 +109,6 @@ export default async function LayoutDaPlataforma({
       ]}
     >
       {children}
-    </EstruturaAdmin>
+    </EstruturaAdminDaRota>
   );
 }

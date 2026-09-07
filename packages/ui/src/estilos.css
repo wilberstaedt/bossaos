@@ -427,11 +427,22 @@ p { margin: 0; }
 
 /* ── Administração ──────────────────────────────────────────────────────── */
 .bo-admin { display: flex; min-height: 100vh; background: var(--bo-superficie-base); }
+/* A lateral fica presa ao ecrã, e o que rola é a LISTA.
+ *
+ * Sem isto o `aside` crescia com o conteúdo e quem rolava era a página inteira:
+ * a caixa da unidade e o rodapé fugiam para cima e a pessoa perdia de vista em
+ * que casa está — que é precisamente o que essa caixa existe para dizer.
+ *
+ * Catorze itens a 44 px de alvo de toque dão 616 px só de itens. Com os quatro
+ * títulos de grupo não cabem em 900 px de altura, e não é para caberem: encolher
+ * o alvo de toque para arrumar a lista trocava um problema de arrumação por um
+ * problema de acessibilidade. */
 .bo-admin__lateral {
   width: 260px; flex-shrink: 0;
   background: var(--bo-superficie-inversa); color: var(--bo-texto-inverso);
   padding: var(--bo-espaco-xl) var(--bo-espaco-lg);
   display: flex; flex-direction: column; gap: var(--bo-espaco-xl);
+  height: 100vh; position: sticky; top: 0;
 }
 .bo-admin__marca { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 24px; }
 .bo-admin__unidade {
@@ -445,7 +456,20 @@ p { margin: 0; }
 }
 .bo-admin__unidade strong { display: block; font-size: 16px; }
 .bo-admin__unidade span { font-size: 14px; opacity: 0.75; }
-.bo-admin__navegacao { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+/* ── A navegação rola, e é por causa dos grupos ──────────────────────────────
+ *
+ * Os catorze itens cabiam a 900 px de altura. Os quatro títulos de grupo somaram
+ * altura e o último grupo — as UTILIDADES, onde a ajuda foi parar — ficou
+ * cortado pelo fundo do ecrã. Vi-o na captura, não no código.
+ *
+ * `min-height: 0` e não só `overflow`: um filho de um contentor `flex` tem
+ * altura mínima automática igual ao conteúdo, e sem isto ele empurra em vez de
+ * rolar. É a linha que faz a diferença entre uma barra que rola e uma barra que
+ * transborda em silêncio. */
+.bo-admin__navegacao {
+  display: flex; flex-direction: column; gap: 2px;
+  flex: 1; min-height: 0; overflow-y: auto;
+}
 .bo-admin__ligacao {
   display: flex; align-items: center; gap: var(--bo-espaco-md);
   min-height: var(--bo-toque-publico);
@@ -454,7 +478,53 @@ p { margin: 0; }
   color: inherit; text-decoration: none; font-size: 16px;
 }
 .bo-admin__ligacao:hover { background: rgba(255,255,255,0.08); }
-.bo-admin__ligacao[aria-current='page'] { background: var(--bo-realce); color: var(--bo-primaria); font-weight: 600; }
+
+/* ── O item activo INDICA, e não berra ───────────────────────────────────────
+ *
+ * Era uma pastilha `--bo-realce` cheia: a única coisa saturada no ecrã, e por
+ * isso a coisa que se via primeiro numa barra onde nada mais pede atenção. O
+ * lima é o sinal do produto e um sinal que ocupa um bloco inteiro deixa de
+ * apontar — passa a ser fundo.
+ *
+ * Fica a fazer as três coisas que um estado activo tem de fazer, por três meios
+ * diferentes, para não depender de nenhum sozinho:
+ *   1. uma BARRA de lima à esquerda — o sinal, com a área de um sinal;
+ *   2. um fundo de branco a 10%, que separa do resto sem introduzir cor;
+ *   3. peso 600 no texto, que sobrevive a quem não distingue as cores.
+ *
+ * O `::before` e não uma borda: a borda mexia com a caixa e os catorze itens
+ * saltavam meio pixel ao mudar de página. */
+.bo-admin__ligacao[aria-current='page'] {
+  position: relative;
+  background: rgba(255,255,255,0.10);
+  /* O texto do activo é o texto da lateral, mais firme pelo peso e não pela
+     cor: a única cor que muda é a da barra e a do ícone, que são o sinal. */
+  color: var(--bo-texto-inverso);
+  font-weight: 600;
+}
+.bo-admin__ligacao[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 60%;
+  border-radius: 0 2px 2px 0;
+  background: var(--bo-realce);
+}
+/* O glifo do activo leva o lima: é o mesmo sinal, no sítio onde o olho já está. */
+.bo-admin__ligacao[aria-current='page'] .bo-admin__glifo { color: var(--bo-realce); }
+
+/* ── Os grupos ───────────────────────────────────────────────────────────────
+ *
+ * Catorze itens numa lista corrida obrigam a ler os catorze para achar um. O
+ * título é pequeno e esbatido de propósito: separa sem competir com os itens,
+ * que são o que a pessoa veio clicar. */
+.bo-admin__grupo { display: flex; flex-direction: column; gap: 2px; }
+.bo-admin__grupo + .bo-admin__grupo { margin-top: var(--bo-espaco-lg); }
+.bo-admin__grupo-titulo {
+  margin: 0 0 var(--bo-espaco-xs) var(--bo-espaco-lg);
+  font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; opacity: 0.55;
+}
 
 /* ── O marcador de um módulo por construir ───────────────────────────────────
  *
@@ -736,12 +806,12 @@ p { margin: 0; }
   color: var(--bo-primaria);
 }
 
-/* Glifo de navegação: os quatro quadrados que o atlas desenha. Não é a família
-   de ícones do produto — essa não existe ainda e está declarada como pendência. */
-.bo-admin__glifo {
-  display: grid; grid-template-columns: repeat(2, 5px); gap: 3px; flex-shrink: 0;
-}
-.bo-admin__glifo i { width: 5px; height: 5px; background: currentColor; border-radius: 1px; }
+/* Glifo de navegação: um ícone da família do produto — traço de 2 px em grelha
+   de 24, `currentColor`, SVG em linha. Aqui estavam os quatro quadrados do atlas
+   repetidos nos catorze itens, com a família declarada como pendência; a
+   pendência caiu quando o dono do produto a pediu. */
+.bo-admin__glifo { flex-shrink: 0; opacity: 0.85; }
+.bo-admin__ligacao:hover .bo-admin__glifo { opacity: 1; }
 
 .bo-admin__utilizador { display: flex; align-items: center; gap: var(--bo-espaco-sm); }
 .bo-admin__iniciais {

@@ -30,7 +30,11 @@
     "configuracao": "Configurações",
     "trabalho": "Trabalho",
     "mais": "Mais",
-    "levar": "Levar e entrega"
+    "levar": "Levar e entrega",
+    "grupoOperacao": "Operação",
+    "grupoAbastecimento": "Abastecimento",
+    "grupoNegocio": "Negócio",
+    "grupoUtilidades": "Utilidades"
   },
   "estado": {
     "carga": {

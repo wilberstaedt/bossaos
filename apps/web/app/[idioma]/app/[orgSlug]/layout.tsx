@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
-import { Etiqueta, EstruturaAdmin } from '@bossaos/ui';
+import { Etiqueta } from '@bossaos/ui';
+import { EstruturaAdminDaRota } from '../../../../src/componentes/EstruturaAdminDaRota.tsx';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MarcaEscrita } from '../../../../src/componentes/Marca.tsx';
 import { resolverPedido } from '../../../../src/sessao.ts';
@@ -30,6 +31,22 @@ export default async function LayoutDaOrganizacao({
   const sessao = await resolverPedido(orgSlug);
   if (!sessao.ok) redirect(`/${idioma}/auth/organizations`);
 
+  // ── Os catorze itens deixam de ser uma lista corrida ────────────────────
+  //
+  // Quatro grupos, e a ordem deles é a do dia de trabalho: o que se faz ao
+  // serviço, o que o abastece, o que o mede, e as utilidades. A `ajuda` estava
+  // no meio das secções de negócio — desce para as utilidades, que é onde quem
+  // a procura a espera.
+  const GRUPOS = {
+    Operacao: m.navegacao.grupoOperacao,
+    Abastecimento: m.navegacao.grupoAbastecimento,
+    Negocio: m.navegacao.grupoNegocio,
+    Utilidades: m.navegacao.grupoUtilidades,
+  };
+  const ORDEM_DOS_GRUPOS = [
+    GRUPOS.Operacao, GRUPOS.Abastecimento, GRUPOS.Negocio, GRUPOS.Utilidades,
+  ];
+
   const { accoesPermitidas } = await import('@bossaos/domain');
   const permitidas = new Set(accoesPermitidas(sessao.concessoes));
 
@@ -49,11 +66,11 @@ export default async function LayoutDaOrganizacao({
     // esta é a atribuição menos certa das quatro.
     // A última entrada morta do menu de gestão, fechada no E30: leva à
     // comparação entre unidades, que é onde um painel de gestão começa.
-    { href: `/${idioma}/app/${orgSlug}`, rotulo: m.navegacao.inicio, accao: null },
-    { href: `/${idioma}/app/${orgSlug}/catalogo`, rotulo: m.navegacao.catalogo, accao: 'catalogo.ler' },
-    { href: `/${idioma}/app/${orgSlug}/ir/reservas`, rotulo: m.navegacao.reservas, accao: 'reservas.ler' },
-    { href: `/${idioma}/app/${orgSlug}/ir/sala`, rotulo: m.navegacao.salaPedidos, accao: 'sala.ler' },
-    { href: `/${idioma}/app/${orgSlug}/ir/levar`, rotulo: m.navegacao.levar, accao: 'sala.ler' },
+    { href: `/${idioma}/app/${orgSlug}`, rotulo: m.navegacao.inicio, icone: 'inicio', grupo: GRUPOS.Operacao, accao: null },
+    { href: `/${idioma}/app/${orgSlug}/catalogo`, rotulo: m.navegacao.catalogo, icone: 'catalogo', grupo: GRUPOS.Operacao, accao: 'catalogo.ler' },
+    { href: `/${idioma}/app/${orgSlug}/ir/reservas`, rotulo: m.navegacao.reservas, icone: 'reservas', grupo: GRUPOS.Operacao, accao: 'reservas.ler' },
+    { href: `/${idioma}/app/${orgSlug}/ir/sala`, rotulo: m.navegacao.salaPedidos, icone: 'sala', grupo: GRUPOS.Operacao, accao: 'sala.ler' },
+    { href: `/${idioma}/app/${orgSlug}/ir/levar`, rotulo: m.navegacao.levar, icone: 'levar', grupo: GRUPOS.Operacao, accao: 'sala.ler' },
     // ── A porta do TPV ────────────────────────────────────────────────────
     //
     // «Um `#` num módulo entregue não é marcador: é uma porta que ninguém
@@ -65,20 +82,20 @@ export default async function LayoutDaOrganizacao({
     //
     // As outras entradas continuam em `#` de propósito — são módulos de etapas
     // que ainda não existem, e é esse o `#` legítimo do contrato.
-    { href: `/${idioma}/pos`, rotulo: m.navegacao.caixa, accao: 'caixa.ler' },
+    { href: `/${idioma}/pos`, rotulo: m.navegacao.caixa, icone: 'caixa', grupo: GRUPOS.Operacao, accao: 'caixa.ler' },
     // ── A porta do stock ──────────────────────────────────────────────────
     //
     // O módulo passou a existir no E25, e por isso esta linha deixou de poder
     // ser um `#`: «um `#` num módulo entregue não é marcador, é uma porta que
     // ninguém abriu».
-    { href: `/${idioma}/app/${orgSlug}/ir/stock`, rotulo: m.navegacao.inventario, accao: 'stock.ler' },
-    { href: `/${idioma}/app/${orgSlug}/ir/compras`, rotulo: m.comprasE26.compras, accao: 'stock.gerir' },
-    { href: `/${idioma}/app/${orgSlug}/ir/clientes`, rotulo: m.navegacao.clientes, accao: 'clientes.ler' },
-    { href: `/${idioma}/app/${orgSlug}/ir/equipa`, rotulo: m.navegacao.equipa, accao: 'equipa.ler' },
-    { href: `/${idioma}/app/${orgSlug}/ir/financeiro`, rotulo: m.financeiroE29.financeiro, accao: 'financeiro.ler' },
-    { href: `/${idioma}/app/${orgSlug}/ir/kiosks`, rotulo: m.kioskE31.kiosks, accao: 'organizacao.gerir' },
-    { href: `/${idioma}/app/${orgSlug}/ajuda`, rotulo: m.plataformaE33.ajuda, accao: null },
-    { href: `/${idioma}/app/${orgSlug}/ir/relatorios`, rotulo: m.navegacao.relatorios, accao: 'relatorios.ler' },
+    { href: `/${idioma}/app/${orgSlug}/ir/stock`, rotulo: m.navegacao.inventario, icone: 'inventario', grupo: GRUPOS.Abastecimento, accao: 'stock.ler' },
+    { href: `/${idioma}/app/${orgSlug}/ir/compras`, rotulo: m.comprasE26.compras, icone: 'compras', grupo: GRUPOS.Abastecimento, accao: 'stock.gerir' },
+    { href: `/${idioma}/app/${orgSlug}/ir/clientes`, rotulo: m.navegacao.clientes, icone: 'clientes', grupo: GRUPOS.Negocio, accao: 'clientes.ler' },
+    { href: `/${idioma}/app/${orgSlug}/ir/equipa`, rotulo: m.navegacao.equipa, icone: 'equipa', grupo: GRUPOS.Negocio, accao: 'equipa.ler' },
+    { href: `/${idioma}/app/${orgSlug}/ir/financeiro`, rotulo: m.financeiroE29.financeiro, icone: 'financeiro', grupo: GRUPOS.Negocio, accao: 'financeiro.ler' },
+    { href: `/${idioma}/app/${orgSlug}/ir/kiosks`, rotulo: m.kioskE31.kiosks, icone: 'kiosks', grupo: GRUPOS.Utilidades, accao: 'organizacao.gerir' },
+    { href: `/${idioma}/app/${orgSlug}/ajuda`, rotulo: m.plataformaE33.ajuda, icone: 'ajuda', grupo: GRUPOS.Utilidades, accao: null },
+    { href: `/${idioma}/app/${orgSlug}/ir/relatorios`, rotulo: m.navegacao.relatorios, icone: 'relatorios', grupo: GRUPOS.Negocio, accao: 'relatorios.ler' },
   ]
     .filter((l) => l.accao === null || permitidas.has(l.accao as never))
     // ── O ramo do `porConstruir` saiu daqui, e é o E30 a fechar-se ────────
@@ -91,18 +108,25 @@ export default async function LayoutDaOrganizacao({
     // porque já não há nenhum membro do array que o tenha. O tipo continua em
     // `EstruturaAdmin` para quem venha a precisar dele; o que sai é o ramo que
     // aqui não tem o que propagar.
-    .map(({ href, rotulo }) => ({ href, rotulo }));
+    .map(({ href, rotulo, icone, grupo }) => ({ href, rotulo, icone, grupo }))
+    // Ordenado pelo grupo e não pela ordem em que foram escritos: assim a
+    // `ajuda` cai nas utilidades esteja ela onde estiver no array acima.
+    .sort((a, b) => ORDEM_DOS_GRUPOS.indexOf(a.grupo) - ORDEM_DOS_GRUPOS.indexOf(b.grupo));
 
   return (
-    <EstruturaAdmin
+    <EstruturaAdminDaRota
       marca={<MarcaEscrita />}
       organizacao={sessao.contexto.organizationSlug}
-      unidade={sessao.actor.email}
+      // Sem `unidade`: ao nível da organização NÃO HÁ unidade resolvida — o
+      // `ContextoDeInquilino` traz `locationId` opcional e o `resolverPedido`
+      // não o preenche. Aqui estava o email de quem entrou, e a caixa dizia
+      // «bossa-demo / demo@bossaos.invalid»: um trocador de UNIDADE a mostrar
+      // uma PESSOA. Sem unidade, a caixa mostra a organização e a acção.
       rotuloTrocarUnidade={m.comum.trocarUnidade}
       rotuloAbrirMenu={m.comum.abrirMenu}
       rotuloSaltar={m.comum.saltarParaConteudo}
       migalha={m.pessoas.titulo}
-      navegacao={navegacao.map((l, i) => ({ ...l, activa: i === navegacao.length - 1 }))}
+      navegacao={navegacao}
       topoDireita={<Etiqueta tom="sucesso">{m.comum.enLinea}</Etiqueta>}
       rodapeLateral={<span>{m.comum.ayudaSoporte}</span>}
       utilizador={{ iniciais: sessao.actor.email.slice(0, 2).toUpperCase(), nome: sessao.actor.nome || sessao.actor.email }}
@@ -113,12 +137,12 @@ export default async function LayoutDaOrganizacao({
       // ela não é marcador — é um resto. Ficam os módulos entregues, que é o que
       // uma barra inferior serve para alcançar.
       navegacaoInferior={[
-        { href: `/${idioma}/app/${orgSlug}/ir/sala`, rotulo: m.navegacao.salaPedidos, activa: true },
+        { href: `/${idioma}/app/${orgSlug}/ir/sala`, rotulo: m.navegacao.salaPedidos },
         { href: `/${idioma}/pos`, rotulo: m.navegacao.caixa },
         { href: `/${idioma}/app/${orgSlug}/ir/reservas`, rotulo: m.navegacao.reservas },
       ]}
     >
       {children}
-    </EstruturaAdmin>
+    </EstruturaAdminDaRota>
   );
 }
