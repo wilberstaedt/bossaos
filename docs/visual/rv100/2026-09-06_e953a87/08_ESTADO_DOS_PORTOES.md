@@ -39,7 +39,7 @@
 | tarefas frequentes rápidas e claras | **MEDIDO EM PARTE** — «rápida» medida, «clara» é juízo humano |
 | touch, teclado, foco, zoom e conteúdo extremo | **parcial** — acessibilidade dinâmica conforme em 3 superfícies **públicas**; as **com sessão ficam declaradas como dívida**. Expansão de texto conforme em 281 ecrãs; alergénios extensos conforme |
 | loading, empty, error, offline, denied, upgrade coerentes | **conforme** |
-| KDS legível à distância e Staff com uma mão | **parcial** — o KDS tem tipografia própria de 18 px e alvos de 48; **«uma mão» não medi** |
+| KDS legível à distância e Staff com uma mão | **MEDIDO a 07/09 17h20, e o Staff é CONFORME COM RESSALVA** — na rota real com sessão, a 390×844: **10 alvos, página de 844 px (nada exige rolar), zero alvos abaixo de 48 px**. As ACÇÕES (`Añadir`, `Reintentar ahora`) estão a **y=704**, na zona do polegar; a NAVEGAÇÃO está a **y=128–408**, no terço superior, que é o mais difícil de alcançar com uma mão. Funciona para o que se FAZ; alcança-se pior o que se NAVEGA, e isso é juízo de desenho. O KDS a metros continua **NÃO MEDI** |
 | não há regressão de comportamento | **conforme** — `marketing.spec.ts` **68/68**, corrido às 12h18 de 07/09. Estava aqui «65/65», que era verdade quando foi escrito: entretanto nasceram três provas. Um número num portão sem a hora a que foi medido apodrece em silêncio |
 
 ## §12.5 — Portão de cobertura · 6 critérios
