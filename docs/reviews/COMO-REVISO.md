@@ -3273,3 +3273,39 @@ terceira, e hoje enganou-me na primeira.
 E a resposta honesta onde as datas foram reescritas não é «recuso» nem «aprovo».
 **É `NÃO MEDI`** — que existia nos três desde sempre e nenhum usava para o único
 caso em que não podia medir.
+
+---
+
+## A referência que eu lhe dei apodreceu, e é uma referência de DEPLOY — 07/09, 22h25
+
+Às 18h19 disse ao Matheus: **«há um pacote pronto em `7b94eff` que corrige o
+anel invisível da tua landing — diz-me e disparo.»** Era verdade quando o
+escrevi.
+
+Desde então entraram **quatro commits ao produto**, e são precisamente os que
+respondem às fotografias dele: as capturas por idioma, as de telemóvel, o
+`sizes`. **Se ele disser «publica o pacote», a leitura natural é `7b94eff` — e
+essa referência não leva nada disso.**
+
+Fui ver o que o guião faz de facto, em vez de assumir:
+
+    REF="${REF_ARG:-HEAD}"
+
+**Publica `HEAD` por omissão.** Portanto o perigo não estava no guião — estava
+na **minha frase**. Só quem for buscar a referência que eu nomeei é que publica
+a versão velha, e a única pessoa a quem eu dei essa referência foi ele.
+
+### O que isto tem de diferente das outras provas velhas de hoje
+
+As capturas velhas mostravam um produto desactualizado a quem olhasse. **Uma
+referência de deploy velha PÕE um produto desactualizado em produção** — e no
+momento exacto em que alguém confia o suficiente para dizer «sim». A prova velha
+engana; a referência velha executa.
+
+E tem a forma que já conheço de hoje: **um número que era verdade quando foi
+escrito.** Só que aqui a cura não é mudar o tempo do verbo — é **nunca nomear um
+commit numa promessa de publicação**. O que se promete é «o que estiver
+provado», e prova-se outra vez no momento de disparar.
+
+Reprovei o pacote em `HEAD` — preparar não é publicar, e sem `--autorizado-por`
+o guião corre os portões e pára.
