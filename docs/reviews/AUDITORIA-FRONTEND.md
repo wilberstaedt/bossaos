@@ -295,3 +295,50 @@ um que só diz o que fez.
 
 Fica em espera de duas decisões dele, ambas não-técnicas: a frase de autorização,
 e os **402 commits** por enviar para o GitHub.
+
+---
+
+## A queixa nº 1 fechada, e a guarda recusou-me a publicação — 16h00
+
+**O duplicado saiu, e pela classe.** «Tu turno, a la vista» aparece agora **uma
+vez**, no `h1`, e a primeira pastilha passou a ser «¿En qué zona estás?».
+Verificado **na captura**, que era como eu tinha pedido a prova.
+
+O mecanismo é o que eu preferia, e ele escreveu a razão:
+
+```
+SECCOES_DO_STAFF.filter((x) => x.principal && x.rota !== actual)
+```
+
+> *«Podia ter dado um rótulo curto próprio ao item do turno, e resolvia esta
+> instância. Isto resolve a CLASSE: a tela principal seguinte que alguém
+> acrescentar não repete o defeito.»*
+
+E uma consequência que ele apanhou e justificou em vez de deixar cair: o
+`aria-current` sai com o item — **não se pode marcar como «actual» algo que já
+não é renderizado**, e quem diz agora «a página é esta» é o `h1`. Fica registada
+como **divergência deliberada** face à barra do backoffice, onde o item actual
+continua visível e por isso continua marcado. **Dois padrões de navegação
+diferentes, cada um coerente consigo.**
+
+## E depois a guarda travou-me, que é o que ela existe para fazer
+
+Fui gerar a página para republicar e ela **recusou**:
+
+```
+RECUSO: 25 captura(s) anteriores a fonte mais recente do produto.
+Recaptura antes de mostrar isto a alguem.
+```
+
+A fonte mais recente é o `packages/ui/src/estilos.css` — **que o JR ainda está a
+editar**. Não é a guarda a ser difícil: é o produto ainda a mexer-se, e ela a
+recusar-se a deixar-me mostrar um alvo em movimento. **Escrevi-a há duas horas
+precisamente para não depender de eu me lembrar, e a primeira vez que ela me
+travou foi contra mim.**
+
+**O custo que ela tem, dito por inteiro:** trata «o produto» como uma coisa só,
+por isso uma alteração que só toca no Staff invalida também a captura da landing.
+Isso é conservador e podia ser afinado com um mapa de que fontes afectam que
+telas — **mas não o vou fazer.** A assimetria manda: ser conservador custa uma
+recaptura; estar errado custa mostrar prova velha ao dono do produto, e já lhe
+fiz isso uma vez hoje.
