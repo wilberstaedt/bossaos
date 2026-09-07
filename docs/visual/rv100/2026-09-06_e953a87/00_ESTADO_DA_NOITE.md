@@ -1,0 +1,98 @@
+# RV100 — onde isto está, medido às 06:00 de 07/09
+
+> Escrito para ser a **primeira coisa lida**, porque a noite produziu oito
+> documentos e ninguém acorda para ler oito. Os números aqui foram medidos ao
+> escrever, não recordados.
+
+---
+
+## O aviso que vem primeiro, porque muda o que vais ver
+
+**Se correres a varredura das guardas agora, vais ver vermelho — e não é o
+produto.**
+
+| momento | verdes | vermelhas | não-medi |
+| --- | ---: | ---: | ---: |
+| há uma hora, com os agentes parados | 36 | 1 | 1 |
+| agora, com dois agentes a meio de ficheiros | 32 | 4 | 2 |
+
+As quatro vermelhas de agora são: uma *suite* nova ainda sem guião
+(`rv100-implantacao.spec.ts`, a ser escrita neste momento), dois plantes por
+repor em ficheiros que o JR está a editar, e um ID que alega móvel medido.
+**Nenhuma é defeito de produto.**
+
+**A leitura honesta:** o corredor só se lê com os agentes parados. Um dia
+tentei provar que a base oscilava sob carga e não consegui reproduzir; hoje a
+prova apareceu sozinha noutra forma — não é a base que oscila, são **os
+ficheiros a meio**.
+
+**E uma coisa que corrigi ao escrever isto:** havia **um plante aplicado em
+código de produto** — a página que divide a conta no TPV, com a âncora de teste
+renomeada de `soma-das-partes` para `soma-escondida`. Resíduo de uma prova que
+morreu antes de repor. **Não estava commitado**, e repus. Não toquei nos outros
+dois porque estão debaixo das mãos do JR.
+
+---
+
+## O que está feito
+
+**As 36 etapas funcionais e as 396 telas continuam a 100%.** Isso não mudou
+esta noite e não é o que está em jogo.
+
+**A RV100 fechou cinco lotes da secção 6**, todos com revisão escrita:
+
+| lote | o que mudou | revisão |
+| --- | --- | --- |
+| L1a moldura | marca `81×28` não ligada → `145×50` ligada; menu móvel; idiomas; rodapé | `RV100-L1a-MOLDURA.md` |
+| L1b home | 3 → 11 secções; preços da fonte aprovada | `RV100-L1b-HOME.md` |
+| L1c planos | comparação derivada, não escrita à mão | `RV100-L1c-PLANOS.md` |
+| L1d motor de prova | inquilino de demonstração e 4 capturas reais | `RV100-L1d-MOTOR-DE-PROVA.md` |
+| L1e capturas ligadas | **herói de 728 → 1256**; `/product` deixa de ser a home | `RV100-L1e-CAPTURAS.md` |
+
+**As secções 2, 3, 4 e 5 estão verificadas** e a 9 está medida em três regras de
+doze. Os portões §12.1 (marca), §12.2 (comercial) e §12.3 (usabilidade) têm
+medição escrita em `04_CONFORMIDADE.md`.
+
+---
+
+## O que está bloqueado em ti, e não é negociável por mim
+
+**§12.4 — o portão visual humano.** O plano é literal: *«O Claude pode emitir
+`PRONTO PARA APROVAÇÃO VISUAL HUMANA`; não pode emitir `APROVAÇÃO VISUAL HUMANA`
+em nome do usuário»*, e o §7.1 acaba com **«pare»**.
+
+A tua autorização escrita destrava **pendências tuas** e usei-a a noite toda.
+**Não pode ser aprovação de telas que ainda não existiam quando a escreveste** —
+e é por isso que ela não levanta este portão.
+
+**Os 284 commits por empurrar.** A CI está escura desde 05/09. Tudo o que esta
+noite deu verde deu verde **nesta máquina**.
+
+---
+
+## Os números que decidem o que falta
+
+**O portão de cobertura (§12.5) é o maior corpo de trabalho que resta**, e
+ninguém o tinha medido antes desta noite:
+
+- as 792 são 396 IDs × {desktop, móvel};
+- **165 de 165 endereços abrem** (eram 163 — dois davam 404 por o atlas apontar
+  a caminhos em inglês onde o produto os tem em português; corrigidos e provados);
+- **143 composições estão prontas a capturar hoje**;
+- 202 exigem chegar a um **estado**, e 16 não têm endereço nenhum — provocam-se;
+- **a carta pública não tem porta**: nenhuma unidade tem `public_slug` semeado, e
+  isso são 36 rotas que falhariam todas no mesmo dia.
+
+---
+
+## Duas decisões minhas que quero que revejas
+
+**1. Não medi móvel nas reservas**, apesar de serem 29 das 46 dívidas. Razão de
+calendário: o §8 propaga o redesenho depois da tua aprovação, e a evidência de
+móvel exige afirmar que *aquela* tela foi medida. **Medir antes é medir duas
+vezes.**
+
+**2. O `?section=` da landing não é defeito de produto.** As três URLs servem o
+mesmo byte, e isso é o comportamento **correcto** para um endereço partilhável —
+o atlas já lhes chama «secção da landing page». O que mente é o `rota_sugerida`.
+Mudei o critério de verificação e não o produto.
