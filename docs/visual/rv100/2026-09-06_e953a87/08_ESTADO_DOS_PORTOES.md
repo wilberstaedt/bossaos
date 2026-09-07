@@ -36,7 +36,7 @@
 | critério | estado |
 | --- | --- |
 | shells diferenciam as cinco superfícies | **conforme** — alvos de toque por superfície, 44 no público e 48 na operação |
-| tarefas frequentes rápidas e claras | **NÃO MEDI** |
+| tarefas frequentes rápidas e claras | **MEDIDO EM PARTE** — «rápida» medida, «clara» é juízo humano |
 | touch, teclado, foco, zoom e conteúdo extremo | **parcial** — acessibilidade dinâmica conforme em 3 superfícies **públicas**; as **com sessão ficam declaradas como dívida**. Expansão de texto conforme em 281 ecrãs; alergénios extensos conforme |
 | loading, empty, error, offline, denied, upgrade coerentes | **conforme** |
 | KDS legível à distância e Staff com uma mão | **parcial** — o KDS tem tipografia própria de 18 px e alvos de 48; **«uma mão» não medi** |
@@ -121,3 +121,40 @@ que ele quer cobrir. **Não o resolvo sozinho por duas razões:** o dono é quem
 assina o atlas, e um prazo é um compromisso — nenhuma das duas coisas é minha
 para inventar. **Fica para o Matheus, nomeada, e não escondida atrás de um
 critério que tecnicamente passa.**
+
+
+## «Tarefas frequentes rápidas e claras» — 07/09
+
+**O §12.3 não diz quais são as tarefas frequentes.** Escolhê-las eu seria medir a
+minha opinião e chamar-lhe conformidade. Fui buscá-las onde elas já estão
+escritas e comprometidas: **à página que o cliente lê.** É o mesmo movimento com
+que o viewport do KDS se resolveu — um número escolhido discute-se, um número que
+sai do que a página promete só se muda mudando a promessa.
+
+O produto nomeia a sua tarefa frequente e repete-a: **«Una comanda, de la mesa a
+la cocina»** — «se abre la mesa, se toma el pedido, y la cocina lo ve» — e diz
+que ela atravessa **cinco momentos**, também nomeados.
+
+**Os cinco momentos contra o que existe:**
+
+| promessa | onde vive |
+| --- | --- |
+| 1 · «Se reserva o se pide» | `EstadoDePedido.RASCUNHO` → `ACEITE` |
+| 2 · «La cocina la ve» | `EM_PREPARO` |
+| 3 · «Sale al pase» | `PRONTO` → `ENTREGUE` |
+| 4 · «Se cobra» | fora do `EstadoDePedido` — contas |
+| 5 · «Queda en la gestión» | idem |
+
+Os momentos 4 e 5 **não** estão no estado do pedido, e isso não é defeito: cobrar
+e arquivar são outros modelos. Fica registado para ninguém procurar lá.
+
+**O «rápida», medido:** da sala à comanda existir são **três saltos de rota** —
+`floor/mesas` → `floor/mesas/[tableId]` → `orders/novo` (ou `…/ronda` para a
+seguinte) — e **a cozinha não navega**: o KDS é superfície própria e permanente,
+por isso o momento 2 custa zero passos a quem está na sala.
+
+**O que NÃO medi, e digo-o em vez de o arredondar:** saltos de rota contam
+**ecrãs, não toques** — dentro de `orders/novo` pode haver dois gestos ou quinze,
+e isso não está aqui. E **«clara» não é mensurável por contagem nenhuma**: é
+juízo, e é do Matheus na aprovação visual. Entrego-lhe o número e a fronteira
+dele, não uma conformidade que eu não posso assinar.
