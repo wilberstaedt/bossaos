@@ -430,3 +430,41 @@ status: open — MEDIDO E POR CORRIGIR, com tecto de 9 na guarda. Não o curei a
 > caso de «uma coisa desaparece dentro do seu fundo» — encontrou a quarta
 > aparição sozinha, e maior do que a que me tinha sido apontada. É o que uma
 > guarda faz e uma lista de remendos não: a lista regista o que alguém já viu.
+
+```yaml
+id: RV100-026
+severity: P2
+surface: kds
+screen_or_route: /[idioma]/kds/[locationId]/[stationId] — todas as telas da estação
+summary: o corpo de 18 px do KDS impõe uma TV que o produto nunca diz ser precisa
+impact: usabilidade — legibilidade à distância, que é o critério do §12.3 para esta superfície
+expected: >
+  «KDS legível à distância». A norma ergonómica pede que a altura de maiúscula
+  subtenda >= 16 minutos de arco para leitura confortável; 10 a 16 é marginal e
+  abaixo de 10 degrada.
+observed: >
+  Medido por GEOMETRIA — eu tinha declarado este critério «não medível por
+  natureza» e estava errado. A altura de maiúscula a 0,70 do corpo, e o ecrã que
+  o produto promete por escrito («una TV puede necesitar un mini-PC», a mesma
+  promessa de onde saiu o viewport de 1920x1080):
+
+    TV 43" a 2,0 m  ->  corpo 18 px = 10,7'  ·  numero 24 px = 14,3'   MARGINAL
+    TV 55" a 1,5 m  ->  18,3' e 24,4'                                  ok
+    TV 55" a 3,0 m  ->   9,2' e 12,2'                                  MAU
+    TV 65" a 2,0 m  ->  16,2' e 21,6'                                  ok
+
+  Para os 18 px chegarem aos 16' a 2 m e precisa uma TV de 65". Numa de 43" a
+  2 m — o caso provavel numa cozinha — seriam precisos 27 px.
+evidence: packages/ui/src/estilos.css (.bo-kds font-size 18px · .bo-kds__numero 24px) · mktE10.equipamento2Texto
+fix_criteria: >
+  Duas saidas e ambas sao decisao de produto, nao conserto: ou o corpo do KDS
+  cresce (e a densidade muda com ele, porque cabem menos bilhetes), ou o produto
+  passa a DIZER que ecra precisa, como ja diz que uma TV pode precisar de
+  mini-PC. Medir a escolhida contra a mesma tabela.
+  O QUE ESTA MEDICAO NAO COBRE, declarado: a altura angular e necessaria e nao
+  suficiente — contraste, brilho da cozinha e a face tipografica tambem decidem,
+  e nenhum esta aqui. O 0,70 da maiuscula e aproximacao, mas 10,7' contra 16' nao
+  e diferenca que ela apague.
+decisao: PRECISA DE DECISAO DO MATHEUS
+status: MEDIDO a 07/09 19h15, NAO CONFORME nos casos comuns
+```
