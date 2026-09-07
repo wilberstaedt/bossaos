@@ -593,3 +593,46 @@ quarto**. Uma ausência de caminho encontrado não é a ausência de caminho.
 interessa — **nada que eu tenha encontrado a volta a criar sozinha**. Se depois
 de limpar ela reaparecer, isso é a prova do quarto caminho, e vale mais do que a
 minha busca.
+
+---
+
+## «Legível à distância» não era imedível — era geometria — 19h15
+
+Eu tinha declarado este critério **NÃO MEDI «por natureza»**, com o argumento de
+que exigia alguém à frente da tela. **Estava errado, e a correcção veio de uma
+pergunta que não era minha.**
+
+**É geometria.** A altura angular de um glifo depende de três coisas: o tamanho em
+píxeis, o tamanho físico do ecrã, e a distância. **Duas delas eu tenho; a
+terceira o produto promete por escrito** — «una pantalla o un dispositivo para la
+cocina… **una TV** puede necesitar un mini-PC» —, e foi dessa promessa que já
+tinha saído o viewport de 1920×1080.
+
+**Medido**, com a norma ergonómica (≥16′ confortável, 10–16′ marginal, <10′
+degrada) e altura de maiúscula a 0,70 do corpo:
+
+| TV / distância | corpo 18 px | número 24 px |
+| --- | ---: | ---: |
+| 32" a 1,5 m | 10,7′ marginal | 14,2′ marginal |
+| **43" a 2 m** | **10,7′ marginal** | 14,3′ marginal |
+| 55" a 1,5 m | 18,3′ **ok** | 24,4′ **ok** |
+| 55" a 3 m | 9,2′ **mau** | 12,2′ marginal |
+| 65" a 2 m | 16,2′ **ok** | 21,6′ **ok** |
+
+**E o achado não é «o texto é pequeno»: é que o tamanho do texto IMPÕE um ecrã
+que o produto nunca diz que é preciso.** Para os 18 px chegarem ao confortável a
+2 m, é preciso uma TV de **65"**. Numa de 43" a 2 m — o caso provável numa cozinha
+— seriam precisos **27 px**, e o produto tem 18.
+
+**Duas saídas, e as duas são decisão de produto:** o texto cresce, e a densidade
+do ecrã muda com ele; ou o produto **passa a dizer que ecrã precisa**, como já diz
+que uma TV pode precisar de mini-PC.
+
+**O que esta medição NÃO é:** a altura angular é **necessária e não suficiente**.
+Contraste, brilho da cozinha, e a face tipográfica também decidem, e nenhum deles
+está aqui. E o 0,70 da maiúscula é aproximação. **Mas 10,7′ contra 16′ não é uma
+diferença que estas aproximações apaguem.**
+
+**A lição sobre mim: chamei «imedível por natureza» a uma coisa que era só
+inconveniente de medir.** A diferença entre as duas é que a segunda tem
+suposições que se podem escrever — e escrevê-las foi todo o trabalho.
