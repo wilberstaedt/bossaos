@@ -269,3 +269,47 @@ seguimento o apanhou.** O padrão já não é acidente: sempre que um número ch
 sozinho e conveniente, ele está a contar outra coisa. A regra que fica é a que
 já custou o dia todo — **antes de reportar um número, ler as linhas que ele
 contou.**
+
+---
+
+## §12.2, «preços vêm da fonte aprovada» — verificado, com uma correcção ao implementador
+
+O achado dele diz que `precoDoPlano()` **«existe e ninguém a chama»**. A segunda
+metade não se aguenta, e verifiquei com `-w` porque o `git grep` não suporta
+`\b` — coisa que já me deu um «zero chamadores» falso hoje.
+
+**É chamado**, uma vez, aqui:
+
+```
+apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/website/theme/plano/page.tsx:85
+  const preco = dados.estado.descerParaPlano ? precoDoPlano(...) : null;
+```
+
+É o **backoffice**, no fluxo de descida de plano. A afirmação correcta é mais
+estreita e continua a servir o mesmo fim: **a função é chamada no produto e não
+é chamada na superfície comercial.** A conclusão dele — a página de planos
+comercial não mostra preços — mantém-se de pé; a caracterização da função como
+morta é que não.
+
+Isto importa para além da picuinhice, porque muda o trabalho: não é ligar uma
+função órfã pela primeira vez, é **usar na landing um leitor que o produto já
+usa** — com o comportamento já provado do lado do backoffice.
+
+**A fonte aprovada existe e tem números.** `docs/bossaos/PRECIFICACAO.json`, em
+cêntimos, lida por `packages/domain/src/precificacao.ts`:
+
+| plano | mensal | anual | implantação assistida |
+| --- | ---: | ---: | ---: |
+| STARTER | €19 | €190 | €99 |
+| RESTAURANT | €79 | €790 | €299 |
+| PRO | €149 | €1490 | €499 |
+
+E `anual.mensalidades_cobradas = 10`: **o anual cobra dez mensalidades**, ou
+seja dois meses oferecidos. Isso é a proposta comercial e tem de aparecer como
+tal na página, não ficar escondida numa divisão que o leitor tem de fazer de
+cabeça.
+
+Nota sobre o `PRECIFICACAO.md`: **não tem um único valor** — zero linhas com
+número e moeda. Quem for buscar os preços ao ficheiro de texto encontra o
+modelo, não os montantes. A fonte é o `.json`, e o `.ts` que o lê já tem teste,
+incluindo o caso nulo para um código de plano inventado.
