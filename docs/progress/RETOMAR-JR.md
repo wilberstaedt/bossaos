@@ -904,3 +904,47 @@ A guarda verificava a **grafia** do mecanismo (`IdentificadorMalFormado) notFoun
 Quando a cura passou a perguntar pela estrutura, o portão deu NÃO MEDI sobre
 código que estava lá e a funcionar. Um guarda que verifica como uma coisa está
 escrita reprova quem a melhora e deixa passar quem a quebra.
+
+---
+
+## RV100-024, segunda reabertura — o número fugiu quatro vezes (07/09, `3be8c3c`)
+
+O sénior mediu o que eu não tinha medido: o meu controlo negativo desligava a
+tradução **num** sítio e provava metade. Do outro lado ficava verde com a cura
+desligada.
+
+### Os alvos que eu media não podiam falhar
+
+O kiosk **valida o UUID há muito**, com um comentário a descrever esta mesma
+falha; a ficha da carta procura no instantâneo em memória. Nenhum toca numa
+coluna uuid. Eu tinha diagnosticado isso de manhã e mesmo assim construí a
+guarda com eles lá dentro — **o diagnóstico não entrou no instrumento**.
+
+### Quatro formas do mesmo facto
+
+| forma | onde |
+| --- | --- |
+| `P2007` | operação de modelo |
+| `P2010` | consulta crua, «Raw query failed. Code: 22P02» |
+| `22P02` | o código do Postgres em cru |
+| `P2023` | `InconsistentColumnData` — o único que eu escutava |
+
+Cada vez que acrescentei um número à lista, apareceu outro caminho. **A frase do
+Postgres é a mesma nas quatro**, porque é ela que descreve o que aconteceu.
+
+**A regra:** quando um identificador de erro varia com o caminho, ele não é o
+facto — é uma etiqueta do caminho. Perguntar pelo facto.
+
+E a extensão do lado de ecrã só cobria `$allModels`: `$queryRaw` passava ao lado
+e as rotas de `/platform` nunca eram vistas.
+
+### O controlo tem de se aplicar a si próprio, em todo o lado
+
+Agora o plante é **encontrado e não escrito**: substitui `(erro)` por `(null)` em
+todas as chamadas ao reconhecedor. Uma via nova é apanhada por existir. E a
+exigência separa as origens: **com a tradução inerte, cada alvo tem de deixar de
+dar 404** — um que continue em 404 mede a rota, não a cura.
+
+`(null)` e não apagar a linha: um plante que deixa símbolo por usar parte o
+build, e aí a resposta é NÃO MEDI e não vermelho. Foi o sénior que mo avisou
+depois de três plantes assim.
