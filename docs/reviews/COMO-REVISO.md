@@ -2719,3 +2719,42 @@ próprio âmbito dela lista quais: *«duas escuras do KDS, o login (a única
 não incluía o sítio onde o defeito vivia.** O que não é enumerável são os pares;
 o que É enumerável, e ninguém enumerou, são **as superfícies**. Elas são poucas e
 fechadas, e a guarda cobre quatro de um conjunto maior.
+
+---
+
+## Um tecto por superfície, e não um total — 07/09, 18h25
+
+Mandei alargar a guarda das superfícies e avisei: *«vai ficar vermelha na landing
+pelo CTA primário — não a mascares.»* **Ele fez melhor do que as duas saídas que
+eu tinha imaginado.**
+
+A guarda passou de **4 para 11 superfícies**, todas nomeadas: `KDS-estacao`,
+`KDS-unidade`, `AUTH-login`, `PAINEL-catalogo`, `MKT-landing`, `MKT-demo`,
+`MKT-faq`, `MKT-plans`, `MKT-product`, `MKT-trust`, `CARTA-publica`. E o
+alargamento **encontrou uma classe nova** — contornos fracos, o RV100-025.
+
+**E aqui está a decisão que interessa.** Havia 17 ocorrências. Um tecto **global**
+dava duas saídas, ambas más, e ele escreveu-as:
+
+> *«Vermelho para sempre, ou levantado para 17 e a tolerar oito novos em qualquer
+> sítio — incluindo uma regressão no login que ninguém veria.»*
+
+**Pôs o tecto por superfície:** `AUTH-login 4/4`, `CARTA-publica 2/2`,
+`MKT-demo 5/5`, `MKT-landing 1/1`, `PAINEL-catalogo 5/5`.
+
+**É a lição do piso contra a completude, aplicada a um orçamento.** Um total é um
+piso: acomoda qualquer distribuição, e um defeito novo no login esconde-se atrás
+de um defeito resolvido na carta. **Por superfície é uma partição** — a dívida
+fica congelada *onde está*, e mexer-se num sítio acende, mesmo que a soma não
+mude.
+
+**E o controlo dele prova exactamente isso**, que é o que o torna bom: baixou o
+tecto do `MKT-demo` de 5 para 4 e a guarda ficou vermelha a dizer **`MKT-demo
+5/4` com o total inalterado**. **Um controlo que só mexesse no total não teria
+distinguido as duas formas de contar.**
+
+**O que fica por fazer, e não é meu:** o pacote está preparado e parado —
+`7b94eff`, 2155 ficheiros, nenhum segredo, portões abertos. **A landing continua
+no ar com o anel a 1,00:1**, e assim fica até o Matheus autorizar de novo. A
+autorização das 17h09 foi para aquele momento e aquele commit; **não a estico
+para um segundo disparo só porque seria conveniente.**
