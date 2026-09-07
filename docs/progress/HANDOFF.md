@@ -2370,3 +2370,27 @@ Medi os ficheiros, e **eliminam-se como causa**:
 **São idênticos aos que funcionam.** Se o ficheiro é o mesmo e o resultado
 difere, a diferença está em **como é renderizada** — não no que foi capturado.
 A carta é a única que já era estreita e por isso não passou pelo `<picture>`.
+
+## 07/09 22h30 — o pacote re-preparado em HEAD, e a referência velha retirada
+
+**Reprovei o pacote**, porque o que eu tinha nomeado ao Matheus (`7b94eff`, às
+18h19) ficou para trás de **quatro commits ao produto** — precisamente os que
+respondem às fotografias dele.
+
+`scripts/publicar.sh HEAD` sem `--autorizado-por`: **portões abertos, saída 0, e
+recusou publicar por falta de autorização.** Preparar não é publicar.
+
+Verifiquei o conteúdo em vez de aceitar a etiqueta:
+
+| | |
+|---|---|
+| pacote | `bossaos-ccef01b.tar`, 26 MB, **2181 ficheiros** |
+| capturas por idioma | **9 por idioma**, es-ES / pt-BR / en |
+| as três estreitas | `sala-estreita-390`, `kds-estreito-390`, `catalogo-estreito-390` — **presentes** |
+| ficheiros com forma de segredo | **1**, e abri-o: `.env.example`, sem um valor real |
+
+**Não disse «nenhum segredo» a partir de uma contagem que não inspeccionei** —
+foi assim que já lhe disse coisas que não tinha verificado.
+
+**A referência `7b94eff` fica retirada.** O que está pronto é `HEAD`, e prova-se
+outra vez no momento de disparar.
