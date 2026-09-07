@@ -62,3 +62,50 @@ o que está a queimar.
 - **Uma captura nova sem a antiga ao lado.** Os números do baseline estão nesta
   página exactamente para isso.
 - **A minha palavra, ou a dele.** Recapturo e meço eu, com o mesmo recorte.
+
+---
+
+## Veredicto — 14h50, medido por mim
+
+| critério | baseline | agora |
+| --- | --- | --- |
+| 1 · cores acima de 2 % na região | **1** (só o fundo, 93,4 %) | **2** — fundo 68,0 % + `#F7F4EC` **27,1 %** |
+| 2 · o par do botão | `#102E35` sobre `#102E35` = **1,00:1** | `#102E35` sobre `#F7F4EC` = **13,05:1** |
+| 4 · não ser a quadragésima linha defensiva | 39 linhas de `.bo-kds .x{}` | **restam ZERO** |
+| 5 · não passar a gritar | — | areia, não lima. **Não é saturado** |
+| 3 · alvo de 48 px | — | **NÃO MEDI** — não o exercitei |
+
+**A cura é uma inversão, e é a resposta certa à pergunta que a régua fazia.** Em
+vez de o componente adivinhar onde está, **a superfície declara o que promete**:
+`--bo-accao`, `--bo-sobre-accao`, `--bo-sobre-superficie`, definidos no `:root` e
+redefinidos pela superfície escura. O botão pede o **papel** —
+`background: var(--bo-accao)` — e nunca uma cor.
+
+> *«Uma superfície nova define os três e ganha os componentes todos; um
+> componente novo pede os três e ganha as superfícies todas.»*
+
+**Ele não escreveu a quadragésima linha: apagou as trinta e nove.** Uma correcção
+que remove código em vez de o acrescentar é a assinatura de ter apanhado a
+doença, e não o sintoma.
+
+E antecipou o critério 5 sem eu lho ter dito: escolheu **claro e não lima** para
+a acção em fundo escuro, **porque o lima é o sinal de estado do pedido** e um
+botão lima disputaria atenção com ele — que é exactamente o que o manual proíbe.
+
+## A transparência enganou-nos aos dois na mesma noite
+
+O controlo negativo dele **não acendeu à primeira**, e a razão é irmã de um erro
+meu de há duas horas:
+
+| quem | o predicado | o que a transparência fez |
+| --- | --- | --- |
+| **ele** | «tem borda, logo está delimitado» | `border: 1px solid transparent` — **uma borda transparente não delimita nada**, e engoliu o defeito |
+| **eu** | «este é o fundo do elemento» | `rgba(255,255,255,.1)` lido como opaco — deu **1,00:1**, branco sobre branco |
+
+**A forma: a transparência derrota qualquer predicado que pergunte «existe um
+X?» em vez de «o X faz alguma coisa?».** Uma borda existe e não separa; um fundo
+existe e não cobre. **Presença não é efeito** — e os dois instrumentos que
+falharam hoje falharam por confundir os dois.
+
+A guarda dele já leva a lição escrita no âmbito: *«um fundo com alfa é uma
+camada, não um fundo»*.
