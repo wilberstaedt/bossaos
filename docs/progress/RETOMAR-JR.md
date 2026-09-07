@@ -753,3 +753,46 @@ nada. Antes disso, um `.slice` depois do ponto-e-vírgula fez o exit 2 vir da
 sonda em vez da população. **O padrão: escrevi o controlo, vi o código de saída
 certo, e quase não fui ler PORQUE é que ele saiu assim.** O código de saída certo
 pelo motivo errado é indistinguível do certo, até se ler a mensagem.
+
+---
+
+## RV100-022 — o caso extremo dos alérgenos (07/09, `0e47fe3`)
+
+Catorze declarados num prato da carta pública, cinco larguras, zero falhas.
+`scripts/validar-alergenios-na-carta.sh`.
+
+### A carta pública serve um INSTANTÂNEO, e isso muda o método
+
+`publico_carta` devolve `conteudo` e `revision_id`: escrever em
+`product_allergens` não muda uma vírgula do que o cliente lê até alguém
+republicar. Escrevi os catorze, a carta mostrou catorze, e eu quase acreditei —
+**o controlo negativo (declarar só quatro) ficou VERDE** e foi aí que se viu.
+
+E por baixo: o instantâneo **já traz os catorze**, com `DESCONHECIDO` nos não
+declarados. É assim que o produto cumpre «não declarado não é não contém», e
+significa que contar LINHAS dá catorze sempre. O que distingue o caso extremo é
+quantas trazem estado **declarado** — no instantâneo semeado, uma.
+
+**A regra que fica:** antes de medir uma superfície, saber se ela lê o estado
+vivo ou uma cópia publicada. Um verde sobre uma cópia é um verde sobre o passado.
+
+São **catorze** e não treze, e a prova conta-os do domínio em vez de os fixar.
+
+### Quatro erros meus, e o padrão que os une
+
+Contei o estado por «filho que não é SPAN» e o `Etiqueta` é um `<span>` — 14
+falsos positivos. O `updated_at` é NOT NULL numa tabela e não existe na outra.
+A chave do produto no instantâneo é `productId` e não `id`. E o grep de
+`POPULACAO-ZERO` apanhava a linha de código no rastreio, fazendo uma falha de
+contagem sair como NÃO MEDI.
+
+**Todos são a mesma coisa: assumir a forma de um dado em vez de a ir ver.**
+
+### E o hábito que já dá para nomear
+
+Nesta volta, quatro controlos negativos meus não testaram o que eu disse que
+testavam — um `.slice` mal posto, um `cssText` reposto por um ouvinte, uma lista
+cortada no sítio errado, um grep largo de mais. Nenhum deles mentiu no código de
+saída: **mentiram na razão**. O código de saída certo pelo motivo errado é
+indistinguível do certo até se ler a mensagem — e ler a mensagem passou a ser
+parte de correr o controlo, não um extra.
