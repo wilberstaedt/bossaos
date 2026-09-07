@@ -62,6 +62,25 @@ export function criarAutenticacao(opcoes: OpcoesDeAutenticacao) {
 
     emailAndPassword: {
       enabled: true,
+      // ── O REGISTO FECHA-SE, e ninguém o tinha aberto de propósito ────────
+      //
+      // `enabled: true` sem `disableSignUp` faz o `better-auth` 1.7.2 registar
+      // `POST /api/auth/sign-up/email` **exista ou não uma página**. Medido no
+      // domínio público a 07/09 com controlos: uma rota inventada dá 404, o
+      // `sign-in/email` dá 400 porque existe, e o `sign-up/email` dava **400 a
+      // validar `name`, `email` e `password`** — a rota existia e aceitava um
+      // registo. Ninguém a quis: o produto é POR CONVITE, e está escrito duas
+      // linhas abaixo, na razão de não se exigir verificação de email.
+      //
+      // Isto não acrescenta uma regra nova. Faz o código dizer o que o
+      // ficheiro já declarava — e foi a distância entre as duas coisas que
+      // deixou a porta aberta sem ninguém a abrir.
+      //
+      // **Não parte o convite:** quem aceita chama `/api/convites/aceitar`, que
+      // exige sessão e nunca passa por aqui. E a prova mede a RESPOSTA do
+      // servidor, não esta linha — ler a configuração foi o que fez alguém
+      // afirmar hoje que o registo não existia.
+      disableSignUp: true,
       // A verificação de email não bloqueia a entrada de quem aceitou um
       // convite: o convite JÁ prova o endereço — foi para lá que ele foi.
       requireEmailVerification: false,
