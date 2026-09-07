@@ -144,10 +144,27 @@ async function tirar(ctx, { id, estado, rota, largura, altura, lingua, offline }
   let resposta = null;
   let erroDeRede = null;
   try {
-    resposta = await pagina.goto(BASE + rota, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+    /**
+     * `load` e não `domcontentloaded`, e a razão é uma dúvida sobre a MINHA
+     * medição antes de ser sobre o produto.
+     *
+     * Uma captura em `domcontentloaded` pode fotografar antes de o ecrã de erro
+     * renderizar — e o resultado seria uma página branca que eu leria como «o
+     * produto não tem ecrã». Antes de acusar o produto, tiro a minha hipótese
+     * do caminho: espera-se o `load` e ainda se dá tempo ao corpo para ter
+     * texto. Se continuar em branco, o branco é dele.
+     */
+    resposta = await pagina.goto(BASE + rota, { waitUntil: 'load', timeout: 30_000 });
+    await pagina.waitForFunction(() => document.body && document.body.innerText.trim().length > 0,
+      null, { timeout: 4000 }).catch(() => {});
   } catch (e) { erroDeRede = String(e.message ?? e).slice(0, 120); }
   const codigo = resposta?.status() ?? 0;
   const texto = erroDeRede ? '' : await pagina.evaluate(() => document.body.innerText).catch(() => '');
+  // O HTML separa «não renderizou» de «renderizou sem texto visível».
+  const html = erroDeRede ? 0
+    : await pagina.evaluate(() => document.documentElement.outerHTML.length).catch(() => 0);
+  // O ecrã DESENHADO de não-encontrado tem um marcador próprio.
+  const ecraDesenhado = /No encontramos esta p|N[ãa]o encontr|We could not find/i.test(texto);
   const ficheiro = `${DESTINO}/${id}-${estado}-${lingua}-${largura}x${altura}.png`;
   await pagina.screenshot({ path: ficheiro, animations: 'disabled' }).catch(() => {});
   if (offline) await ctx.setOffline(false);
@@ -155,7 +172,7 @@ async function tirar(ctx, { id, estado, rota, largura, altura, lingua, offline }
   return {
     id, estado, lingua, rota, viewport: `${largura}x${altura}`,
     codigo, erroDeRede, ficheiro,
-    caracteres: texto.trim().length,
+    caracteres: texto.trim().length, html, ecraDesenhado,
     // A sujidade do arnês não pode aparecer numa tela-mestre, pela mesma razão
     // que não pode aparecer numa composição comercial.
     sujidade: [

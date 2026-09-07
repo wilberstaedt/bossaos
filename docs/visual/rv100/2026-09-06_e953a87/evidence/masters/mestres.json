@@ -20,6 +20,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M01-principal-es-ES-1440x900.png",
       "caracteres": 7462,
+      "html": 64356,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "marca, hierarquia, produto, conversão e ritmo",
       "ok": true
@@ -34,6 +36,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M01-principal-pt-BR-1440x900.png",
       "caracteres": 7249,
+      "html": 63860,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "marca, hierarquia, produto, conversão e ritmo",
       "ok": true
@@ -48,6 +52,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M01-principal-en-1440x900.png",
       "caracteres": 7483,
+      "html": 64021,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "marca, hierarquia, produto, conversão e ritmo",
       "ok": true
@@ -62,6 +68,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M02-principal-es-ES-390x844.png",
       "caracteres": 7421,
+      "html": 65298,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "navegação, leitura, CTA e composição móvel real",
       "ok": true
@@ -76,6 +84,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M02-principal-pt-BR-390x844.png",
       "caracteres": 7208,
+      "html": 63860,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "navegação, leitura, CTA e composição móvel real",
       "ok": true
@@ -90,6 +100,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M02-principal-en-390x844.png",
       "caracteres": 7444,
+      "html": 64021,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "navegação, leitura, CTA e composição móvel real",
       "ok": true
@@ -104,6 +116,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M02-erro-es-ES-390x844.png",
       "caracteres": 373,
+      "html": 22928,
+      "ecraDesenhado": true,
       "sujidade": [],
       "rendeu": true,
       "ok": true
@@ -118,6 +132,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M03-principal-es-ES-1440x900.png",
       "caracteres": 1066,
+      "html": 24053,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "shell, densidade, dados, navegação e estados",
       "ok": true
@@ -132,6 +148,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M03-principal-pt-BR-1440x900.png",
       "caracteres": 1046,
+      "html": 24011,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "shell, densidade, dados, navegação e estados",
       "ok": true
@@ -146,6 +164,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M03-principal-en-1440x900.png",
       "caracteres": 1083,
+      "html": 23969,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "shell, densidade, dados, navegação e estados",
       "ok": true
@@ -159,11 +179,12 @@
       "codigo": 404,
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M03-denied-es-ES-1440x900.png",
-      "caracteres": 0,
+      "caracteres": 414,
+      "html": 20929,
+      "ecraDesenhado": true,
       "sujidade": [],
-      "rendeu": false,
-      "ok": false,
-      "porque": "a rota respondeu 404 com um corpo vazio — não há ecrã desenhado para este estado"
+      "rendeu": true,
+      "ok": true
     },
     {
       "id": "M03",
@@ -174,11 +195,12 @@
       "codigo": 500,
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M03-erro-es-ES-1440x900.png",
-      "caracteres": 0,
+      "caracteres": 95,
+      "html": 19696,
+      "ecraDesenhado": false,
       "sujidade": [],
-      "rendeu": false,
-      "ok": false,
-      "porque": "a rota respondeu 500 com um corpo vazio — não há ecrã desenhado para este estado"
+      "rendeu": true,
+      "ok": true
     },
     {
       "id": "M04",
@@ -190,6 +212,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M04-principal-es-ES-390x844.png",
       "caracteres": 371,
+      "html": 21208,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "toque, velocidade, feedback e operação com uma mão",
       "ok": true
@@ -204,6 +228,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M04-principal-pt-BR-390x844.png",
       "caracteres": 362,
+      "html": 21161,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "toque, velocidade, feedback e operação com uma mão",
       "ok": true
@@ -218,6 +244,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M04-principal-en-390x844.png",
       "caracteres": 351,
+      "html": 21151,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "toque, velocidade, feedback e operação com uma mão",
       "ok": true
@@ -231,11 +259,12 @@
       "codigo": 404,
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M04-erro-es-ES-390x844.png",
-      "caracteres": 0,
+      "caracteres": 373,
+      "html": 17852,
+      "ecraDesenhado": true,
       "sujidade": [],
-      "rendeu": false,
-      "ok": false,
-      "porque": "a rota respondeu 404 com um corpo vazio — não há ecrã desenhado para este estado"
+      "rendeu": true,
+      "ok": true
     },
     {
       "id": "M04",
@@ -247,6 +276,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M04-vazio-es-ES-390x844.png",
       "caracteres": 627,
+      "html": 26365,
+      "ecraDesenhado": false,
       "sujidade": [],
       "rendeu": true,
       "ok": true
@@ -277,6 +308,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M05-principal-es-ES-1920x1080.png",
       "caracteres": 697,
+      "html": 28303,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "distância, volume, prioridade e mudança de estado",
       "ok": true
@@ -291,6 +324,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M05-principal-pt-BR-1920x1080.png",
       "caracteres": 678,
+      "html": 28271,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "distância, volume, prioridade e mudança de estado",
       "ok": true
@@ -305,6 +340,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M05-principal-en-1920x1080.png",
       "caracteres": 635,
+      "html": 28081,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "distância, volume, prioridade e mudança de estado",
       "ok": true
@@ -319,6 +356,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M05-principal-secundario-es-ES-1280x800.png",
       "caracteres": 697,
+      "html": 28303,
+      "ecraDesenhado": false,
       "sujidade": [],
       "ok": true
     },
@@ -332,6 +371,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M05-vazio-es-ES-1920x1080.png",
       "caracteres": 256,
+      "html": 19521,
+      "ecraDesenhado": false,
       "sujidade": [],
       "rendeu": true,
       "ok": true
@@ -363,6 +404,8 @@
       "erroDeRede": null,
       "ficheiro": "docs/visual/rv100/2026-09-06_e953a87/evidence/masters/M06-principal-es-ES-390x844.png",
       "caracteres": 848,
+      "html": 18350,
+      "ecraDesenhado": false,
       "sujidade": [],
       "prova": "tema BossaOS, marca do restaurante, desejo e clareza",
       "ok": true

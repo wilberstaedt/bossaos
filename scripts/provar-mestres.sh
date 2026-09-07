@@ -32,6 +32,14 @@ if [ -z "${MIGRATION_DATABASE_URL:-}${DATABASE_URL:-}" ]; then
 fi
 command -v psql >/dev/null || naomedi "psql nao encontrado"
 
+# O DIRECTORIO DE BUILD tambem e' desta corrida, e nao so a porta.
+#
+# Este guiao herdou o `pnpm build` para o `.next` por omissao — partilhado. Foi
+# essa partilha que produziu, esta noite, um `115x23` sem estilos e um `200`
+# seguido de `500` na mesma rota. Uma captura construida num directorio que
+# outro processo pode reescrever nao e' prova de nada.
+export NEXT_DIST_DIR="${NEXT_DIST_DIR:-.next-mestres}"
+
 PORTA="${PORTA_MESTRES:-3020}"
 SEMENTE="node --experimental-strip-types packages/db/prisma/semente-demonstracao.ts"
 

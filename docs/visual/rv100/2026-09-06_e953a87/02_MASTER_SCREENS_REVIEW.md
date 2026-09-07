@@ -112,39 +112,86 @@ porque reparou.**
 
 ---
 
-## Os quatro estados por explicar — e três são do PRODUTO, não do arnês
+## Correcção: dois dos «defeitos do produto» eram a MINHA medição
 
-### 1 · `M03 erro` — **500 numa rota que existe** (o mais sério)
+Reportei três estados como falhas do produto. **Dois não eram.**
 
-`/{idioma}/app/{org}/organization/unidades/nao-e-um-uuid` responde **500 com
-corpo vazio**.
+A minha captura usava `waitUntil: 'domcontentloaded'` e fotografava **antes** de
+o ecrã de erro renderizar. Com espera pelo `load` e pelo corpo a ter texto:
 
-O mecanismo está no ficheiro: `db.location.findFirst({ where: { id: locationId } })`
-leva o segmento do URL directamente para uma coluna `@db.Uuid`. Um identificador
-malformado **rebenta antes** de o `notFound()` da linha 1 chegar a ser chamado.
+| | o que reportei | medido com espera correcta |
+| --- | --- | --- |
+| `M03 denied` | «404 em branco, não há ecrã» | **414 caracteres, 20 929 de HTML, ecrã desenhado: SIM** |
+| `M04 erro` | «404 em branco» | **373 caracteres, 17 852 de HTML, ecrã desenhado: SIM** |
 
-**É entrada controlável pelo utilizador a produzir um crash não tratado.** A rota
-é autenticada, o que limita o alcance — não o transforma noutra coisa. E não é
-teoria: está no `mestres.json` com o código de resposta.
+O `NaoEncontrado.tsx` renderiza nos dois. **Escrevi que faltava um ecrã de
+`denied` e o ecrã existe** — o branco era a minha velocidade de obturador. E
+usei esses brancos como argumento de que o produto tinha uma lacuna.
 
-### 2 · `M03 denied` e `M04 erro` — 404 em branco
+**A hipótese do `not-found.tsx` na raiz também cai, e por medição:** o
+`notFound()` deste caminho é lançado na **página**
+(`unidades/[locationId]/page.tsx:51`), não num layout — o
+`[idioma]/not-found.tsx` sempre foi o resolvedor certo. Nenhum dos dois tinha de
+construir nada.
 
-Pedir a unidade de **outra casa** com a sessão da demonstração devolve **404 e
-zero caracteres**.
+**E o `M05 offline` não é defeito.** A medição estava certa — 697 antes e 697
+depois — e a leitura certa é a outra: o ecrã principal **não muda de propósito**,
+e o estado vive em `kds/…/ligacao`, alcançável pela cápsula «Tu estación de
+trabajo», com texto próprio e sobrevivendo a uma recarga. Fica pergunta de
+desenho, não defeito.
 
-**O isolamento está certo** — 404 e não 403, portanto não confirma que o recurso
-existe, que é a resposta correcta. **O que não existe é o ecrã.** O §7 pede um
-estado `denied/upgrade`, e o único componente de estado desenhado no
-repositório é o `NaoEncontrado.tsx`, que estas rotas não usam.
+---
 
-### 3 · `M05 offline` — o KDS não repara na queda da rede
+## O único estado que sobra: o 500 do M03
 
-Com a página aberta e a rede cortada por baixo: **697 caracteres antes, 697
-depois.** Idêntico.
+`/{idioma}/app/{org}/organization/unidades/nao-e-um-uuid` → **500**, com a página
+de erro por omissão do Next («This page couldn't load»), **em inglês numa rota
+`es-ES`**.
 
-O M04, na mesma prova, muda de 371 para 440. Portanto não é limitação do método:
-**é o KDS que não reage.** E é a superfície onde isso pesa mais — a cozinha
-continua a mostrar tarefas sem dizer que deixou de as receber.
+**Não é colisão de build.** Repeti com `NEXT_DIST_DIR=.next-mestres`, directório
+só meu, e o 500 mantém-se. A cura do `RV100-024` (`4d63b80`, 10:42:54) é
+ancestral do meu HEAD e o meu build correu às 10:51:16 — estava lá.
+
+**O caminho está ligado**, e é isso que torna o resultado interessante:
+
+```
+escopo.ts:131   apanha P2023 e lança  new IdentificadorMalFormado(causa)
+sessao.ts:140   comEscopoDoPedido envolve em semIdentificadorMalFormado
+sessao.ts:170   if (erro instanceof IdentificadorMalFormado) notFound();
+```
+
+**O que encontrei, e é facto:** existem **duas** verificações diferentes para a
+mesma coisa, e não são equivalentes.
+
+| onde | verificação | o que testa |
+| --- | --- | --- |
+| `sessao.ts:170` | `erro instanceof IdentificadorMalFormado` | identidade da classe |
+| `servidor.ts:61` | `ehIdentificadorMalFormado(erro)` | `erro.code === 'P2023'` |
+
+E a classe **não copia o `code`** (`escopo.ts:89-98`: guarda a causa em `causa` e
+mais nada). Portanto `ehIdentificadorMalFormado()` devolve **falso** para uma
+instância de `IdentificadorMalFormado`. As duas funções testam objectos
+diferentes, e para um dado erro no máximo uma delas acerta.
+
+A minha rota passa **só** pela primeira, porque `comEscopoDoPedido` usa
+`obterPrisma` directo e não o `obterBaseDeEcra` estendido.
+
+**Hipótese, e digo-o como hipótese:** o `instanceof` falha porque `@bossaos/db`
+está em `transpilePackages` e a classe pode existir em mais do que uma instância
+de módulo — o erro é criado numa e comparado noutra. É o modo de falha clássico
+do `instanceof` num monorepo transpilado, e explica o que se vê: cura presente,
+caminho ligado, e 500 na mesma.
+
+**Não a confirmei e não corrijo isto.** Confirmar exige instrumentar a cura, e
+a cura é do JR — mexer em tradução de erros por minha conta, no fim de um lote,
+é a mesma classe de risco que me fez não tocar no `destino()`.
+
+**A parte que vale para além deste 500:** a guarda do `RV100-024` conta *«128
+páginas sob um segmento de id, 128 cobertas»*. Isso conta páginas que **usam o
+invólucro** — não páginas que **devolvem 404** para um id mal formado. A minha
+medição exercita o comportamento HTTP e discorda da guarda. Uma guarda que conta
+a adopção do mecanismo e não o resultado dele fica verde enquanto o mecanismo
+falha, que é a família de verde que esta casa persegue há dias.
 
 ---
 
