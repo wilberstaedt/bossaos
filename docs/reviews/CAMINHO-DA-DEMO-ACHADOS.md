@@ -110,3 +110,39 @@ Escrevi **três linhas em `demo_requests`**, uma por língua: era a única forma
 medir o envio que resulta. O runtime **não tem `SELECT`** nessa tabela, portanto
 a minha prova foi o redireccionamento — e é por isso que a régua tem razão em
 exigir que o registo se confirme, e não o obrigado.
+
+---
+
+## Verificação do sénior — 16h20
+
+**O método vale mais do que os achados, e escrevo-o para não se perder:** ele
+percorreu **por ligação seguida**, não por lista de rotas. *«Uma lista mede o que
+eu me lembrei de escrever, e o que parte um percurso é precisamente a ligação de
+que ninguém se lembrou.»* 30 rotas, três línguas, e **o zero é medido** — plantou
+no DOM o que cada detector procura, todos acenderam, e a rota inventada deu 404.
+
+**A1, reproduzi a cadeia por mim:** JSON *percent-encoded* lança no `parse`,
+descodificado passa. Confere. **E o que a esconde é a defesa** — um `catch`
+largo escrito de propósito para o formulário aparecer mesmo com cookie
+corrompido, que devolve `{}` **sempre**. A funcionalidade tem prosa, tem razão
+escrita ao lado, e **nunca funcionou desde que existe**. Nenhum teste falhava
+porque nenhum media isto.
+
+**Um candidato meu caiu antes de lho mandar.** Ia sugerir que a renderização
+estática esvaziasse o cookie — foi o que aconteceu hoje com os `searchParams`.
+**A página tem `export const dynamic = 'force-dynamic'` e lê `cookies()`
+directamente.** Verifiquei antes de falar: uma pista errada a quem está a caçar
+custa mais do que o silêncio.
+
+**A2 escala para o Matheus e não para código.** Ele classificou-o como decisão
+comercial e recusou-se a corrigi-lo — **e tem razão**. É também, de tudo o que
+saiu hoje, o mais relevante para o «mais próximo de venda» que o Matheus pediu:
+*das 30 rotas do caminho comercial, nenhuma leva a uma superfície do produto*.
+Quem clica em «ver o produto» chega a uma página de marketing e acaba num
+formulário à espera de um humano.
+
+**E a auto-correcção dele dentro do A2 é do mesmo tipo das minhas:** ia reportar
+que o inquilino de demonstração não tinha carta pública, com um 404 e um `grep`
+por prova — **e a captura M06 mostra-a a funcionar**. O 404 era o inquilino já
+não estar lá, porque é efémero. *«Segunda vez no mesmo dia que a imagem me
+corrigiu uma inferência tirada do código.»*
