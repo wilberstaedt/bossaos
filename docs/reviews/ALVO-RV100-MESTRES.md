@@ -147,3 +147,44 @@ Se ela passar num conjunto vazio, não vale nada. Portanto: **antes de a aplicar
 confirmo que os seis mestres existem como ficheiros e que cada um tem mais do
 que o estado principal.** Uma régua que dá verde a uma pasta vazia é o quinto
 tipo de verde vazio, e já apanhei os outros quatro este mês.
+
+---
+
+## Nota escrita ANTES da entrega da moldura — o CTA deixou de ser coral
+
+Registo isto agora, com a moldura ainda em voo, para que seja régua e não juízo
+feito depois de ver o resultado.
+
+A guarda `acento.test.ts` ficou vermelha sobre o CTA comercial novo: coral
+`--bo-acento` sobre a areia dá **2,77:1** e o limiar de componente é 3:1. Mandei
+os números ao implementador e apontei o caminho que o sistema já tinha: o
+`--bo-acento-sinal`, que dá **3,50:1** sobre a mesma areia e que **nasceu no E02
+por causa deste número exacto** — o primeiro componente a usar o acento violou a
+regra a 2,77:1 e o token corrigido foi criado para o substituir.
+
+**Ele escolheu outra saída:** o CTA passou a `--bo-primaria`, o verde-escuro, a
+**13,05:1**. Passa com folga e a guarda fica verde.
+
+**A minha reserva não é sobre o contraste, é sobre o que a solução custa.** O
+§4.2 do plano diz que o coral é o CTA principal. Trocá-lo pelo verde-escuro não
+corrige um contraste: muda a hierarquia visual da landing inteira, e faz o
+elemento de conversão passar a ter a cor da moldura em vez da cor de acento. É
+uma alteração maior do que a que a guarda exigia, resolvida no sítio onde a
+guarda apitou.
+
+**O que vou exigir na revisão**, e é o que o §7 já pede — «divergências
+justificadas em relação ao atlas»: ou uma justificação escrita de porque é que a
+LP tem CTA verde e não coral, ou o `acento-sinal`. **Não aceito «porque ficou
+verde»** — as duas soluções ficam verdes, e escolher entre elas é uma decisão de
+marca, não uma decisão de teste.
+
+E digo o que também é verdade: **a decisão dele pode estar certa.** Um CTA verde
+sobre areia com 13:1 é mais legível do que um coral a 3,50:1, e o comentário que
+ele deixou ao lado — a LP mantém identidade fixa, um cliente do plano Restaurant
+não pinta o CTA da BossaOS — é um raciocínio de produto que eu não tinha feito.
+**O que não aceito é que a decisão fique por dizer.** Se for deliberada, escreve-se
+e vale; se foi o caminho mais curto para o verde, refaz-se.
+
+Isto é também um caso do §7 que serve à secção 7 inteira: quando uma guarda
+aponta um número, a correcção mais barata e a correcção certa raramente são a
+mesma, e é o revisor que tem de perguntar qual das duas foi feita.
