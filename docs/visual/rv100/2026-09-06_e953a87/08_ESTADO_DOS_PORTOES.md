@@ -208,3 +208,37 @@ resolvido.
 E a descida não é desta revisão: aconteceu às **19h15**, quando o KDS passou a
 medido-e-não-conforme. **Eu reportei a subida do «medidos» e não reportei a
 descida do «conformes».** Troquei para a métrica que subia, sem o dizer.
+
+
+## A validade desta tabela, medida — 07/09 23h45
+
+**A evidência do RV100 está congelada em `e953a87` (06/09 07:47).** O `AF100`
+diz, no seu ponto 4: *«a auditoria deve ocorrer num commit congelado; se o
+código mudar, o veredito anterior deixa de aprovar o novo estado.»*
+
+O código mudou:
+
+| | |
+|---|---|
+| commits ao produto desde `e953a87` | **51** |
+| ficheiros do produto alterados | **141** |
+| vereditos **re-medidos a 07/09**, com hora | **8** |
+| vereditos que ainda descrevem o commit congelado | **18** |
+
+**Não é que os 18 estejam errados. É que ninguém sabe** — e a tabela não o
+dizia, porque só os oito que alguém voltou a medir trazem a hora.
+
+### Dois «18» diferentes, e é preciso não os confundir
+
+- **18 de 26 são «conforme»** — o número que foi dado ao Matheus.
+- **18 de 26 não foram re-medidos desde o congelamento.**
+
+**São conjuntos diferentes que calham ter o mesmo tamanho.** Escrevo-o porque
+quem ler os dois seguidos vai lê-los como um só, e a coincidência é do pior
+tipo: parece uma explicação.
+
+### O que fica, e o que não
+
+Não re-mediu-se aqui nada — re-correr os 18 é o trabalho do próprio `AF100`, e
+é grande. **O que muda é que a decadência passa a estar declarada em vez de
+implícita.** Uma tabela que não diz de que commit fala parece falar do actual.
