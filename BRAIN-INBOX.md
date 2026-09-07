@@ -376,3 +376,45 @@ recuperável. Três saídas nomeadas, nenhuma escolhida — é decisão de produ
   decisão do Matheus e nenhum bloqueia o L1: privacidade/consentimento no
   formulário de demo, factos do piloto, o hero inglês, a política de
   equipamentos e as rotas legais do footer.
+
+---
+
+## [2026-09-07 · madrugada] — E34 assinado, 100%, e a secção 6 da RV100 quase fechada com dois implementadores
+
+### Decisões técnicas
+
+- **O `?section=` da landing não é defeito de produto.** As três URLs (MKT-001/002/003) servem o mesmo byte por causa do `force-static`. O atlas já lhes chama «secção da landing page» e escreve que «um endereço partilhável não pode mudar com o que o visitante rolou» — logo servir o mesmo byte é o comportamento correcto. **O que mentia era o `rota_sugerida`.** Mudou o critério de verificação, não o produto.
+- **Não medir móvel nas reservas antes da propagação.** São 29 das 46 dívidas de móvel, e a tentação era fechá-las. Mas o §8 propaga o redesenho depois da aprovação humana, e a evidência de móvel exige afirmar que *aquela* tela foi medida. **Medir antes é medir duas vezes.**
+- **Robots por negação e não por lista de proibidos.** «Entre os dois erros escolhi o que se descobre»: uma rota comercial que não aparece repara-se; uma rota de sessão nascida indexável não.
+- **O `NEXT_PUBLIC_SITE_URL` fica sem valor por omissão**, e cai em `localhost`. O repositório diz que `bossaos.com` é nome pretendido «sem posse presumida», e um `canonical` é reivindicação de posse legível por máquina. `localhost` falha à vista; um domínio plausível falharia em silêncio.
+- **O coral vive no escuro.** Nenhum dos três corais serve de fundo a botão cheio sobre a areia (verifiquei os 17 tokens; os nove fundos válidos são todos escuros), **mas o coral sobre o verde-escuro dá 4,71 e passa como texto**. O CTA coral existe numa secção escura — é composição, não token.
+
+### Learnings
+
+- **Nove formas de erro de instrumento**, escritas em `docs/reviews/COMO-REVISO.md` por forma e não por instância. Mais de quinze medições minhas erradas numa noite, e a que mais custou foi dar um facto errado a um implementador para escrever numa página pública — **a guarda que ele construiu tê-lo-ia desmentido na primeira corrida**.
+- **«O mecanismo está certo e a superfície desfá-lo» apareceu três vezes**, e é o defeito que uma revisão de código não encontra por construção: a FAQ prometia sincronização offline que o produto recusa fazer; a regra de espaçamento do KDS apontava a um `<a>` que o bilhete não tem; e a rota da demo distinguia dois erros que o ecrã mostrava com o mesmo texto.
+- **A bancada e o commit são coisas diferentes.** Com dois agentes a editar, a varredura das guardas dá vermelho e o `validar-no-commit.sh` — que corre as 40 contra o conteúdo do commit, num worktree à parte — dá verde. Escrito no repositório ontem de manhã, depois de o E32 e o E33 terem sido commitados com plantes lá dentro.
+- **Zero não é uma medição** enquanto o mesmo instrumento não acertar num alvo conhecido. Um detector partido e uma população vazia escrevem-se igual.
+- **Proteger trabalho em voo:** `git stash create` guarda sem tocar na bancada. E a etiqueta tem de dizer a verdade sobre o que apanhou — à segunda vez guardei trabalho de dois agentes com o nome de um.
+
+### O que foi feito
+
+- **E34 assinado → 36/36 etapas, 396/396 telas.** Fechadas as dez não-verdes do corredor; a última era premissa falsa do teste e não defeito do produto.
+- **RV100:** secções 2 a 5 verificadas, secção 9 medida em cinco regras, e a secção 6 com **nove lotes fechados com revisão escrita** — moldura, home, planos, motor de prova, capturas ligadas, implantação, demo, confiança/piloto e SEO.
+- **O herói de 728 → 1256**, com a métrica das folhas e não a saturada.
+- **Motor de prova construído:** inquilino «Bossa Demo», cinco composições reais, com aviso ao visitante de que os pratos e a comanda são inventados.
+- **13 de 21 achados fechados**, cada um verificado por mim e não pela tabela de quem os corrigiu. **Achado novo (RV100-021):** a única porta de conversão devolve o formulário vazio numa recusa do servidor.
+- **Guardas novas:** coral da arte fora da interface, expansão de texto (276 ecrãs, âmbito impresso), alcance das 792 composições, pilar offline, foco nos momentos reais.
+- **Cinco rotas do atlas corrigidas** — apontavam para caminhos em inglês onde o produto os tem em português; 163/165 endereços passou a 165/165.
+
+### Mudança de status do projecto
+
+**As 36 etapas funcionais estão fechadas.** O que resta da RV100 é a secção 6 a fechar (4 achados P2/P3), as seis telas-mestre, e depois **para**: o §12.4 diz que só o Matheus pode registar `APROVAÇÃO VISUAL HUMANA`, e o §7.1 acaba com «pare».
+
+### Próximo passo
+
+1. fechar a secção 6 — ritmo vertical, coral, herói inglês, FAQ;
+2. as seis telas-mestre, com a régua já escrita em `docs/reviews/ALVO-RV100-MESTRES.md`;
+3. **parar e esperar pelo Matheus.**
+
+**Duas coisas dependem dele e nenhuma é negociável por mim:** a aprovação visual, e os **300+ commits por empurrar** com a CI escura desde 05/09 — todo o verde desta noite é verde nesta máquina.
