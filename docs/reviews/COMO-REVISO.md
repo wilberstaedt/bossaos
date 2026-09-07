@@ -3183,3 +3183,44 @@ documentado e não mediu**, porque não há GNU nesta máquina. Podia ter escrit
 mesma frase sem a ressalva e eu não tinha maneira de saber. **Separar a metade
 medida da metade raciocinada, sem ninguém perguntar, é o que faz uma revisão
 valer alguma coisa.**
+
+---
+
+## O limite estava declarado na prosa e o runtime dizia verde — 07/09, 21h25
+
+O `validar-provas-frescas.sh` compara **`mtime` de artefacto** contra **data de
+commit do produto**. Num `clone` ou `worktree` fresco o git escreve todos os
+ficheiros agora, logo toda a prova fica «posterior ao produto».
+
+Medido, mesmo commit e os mesmos 65 artefactos:
+
+| | veredicto | saída |
+|---|---|---|
+| cópia de trabalho | **FALHOU** — 65 anteriores ao produto | 1 |
+| worktree fresco | **ok, «toda a prova é posterior»** | **0** |
+
+**A guarda declarava este limite — em prosa, no fim da saída.** E o runtime,
+que é o que uma máquina lê às três da manhã, dizia **verde**. Tinha o terceiro
+valor disponível e não o usava para o único caso em que não podia medir.
+
+**E a auto-sonda passava nos dois.** Ela força um `mtime` velho num ficheiro
+sintético, portanto acende sempre — provava o **mecanismo** enquanto a
+**população inteira** era ilegível. Um detector aceso sobre um alvo que não
+representa aquilo que vai medir. É o mesmo erro da minha varredura de há uma
+hora, do outro lado: lá o detector era cego, aqui é o alvo que não serve.
+
+### O discriminador não podia ser o óbvio
+
+«Os artefactos são todos recentes» não serve: **uma recaptura legítima escreve
+os 65 em segundos** e fica idêntica a um checkout. O que distingue é um
+**canário** — um ficheiro versionado que ninguém regenera. Se não tem alterações
+locais e mesmo assim o seu `mtime` é muito posterior ao seu próprio commit,
+então as datas foram reescritas por um checkout.
+
+| | canário | veredicto | saída |
+|---|---|---|---|
+| cópia de trabalho | 0 h de desvio → datas de produção | **FALHOU** | 1 |
+| worktree fresco | **105 h** de desvio → reescritas | **NÃO MEDI** | 2 |
+
+**Um limite escrito na prosa protege quem lê a prosa. O runtime tem de o dizer
+sozinho, na altura, e com o valor certo dos três.**

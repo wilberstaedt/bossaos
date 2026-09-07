@@ -60,6 +60,42 @@ if [ "${N_ARTEFACTOS:-0}" -eq 0 ]; then
 fi
 verde "$N_ARTEFACTOS artefactos de prova a comparar"
 
+# ── O canário: os `mtime` desta máquina querem dizer alguma coisa? ─────────
+#
+# Esta guarda compara `mtime` de artefacto contra data de COMMIT do produto, e
+# essa mistura tem um buraco que o texto do fim já declarava e o RUNTIME não:
+# num `clone` ou `worktree` fresco o git escreve todos os ficheiros AGORA, logo
+# toda a prova fica «posterior ao produto» e isto dizia **ok**.
+#
+# Medido a 07/09, mesmo commit e os mesmos 65 artefactos:
+#   cópia de trabalho -> FALHOU, 65 anteriores ao produto
+#   worktree fresco   -> ok, «toda a prova é posterior»
+#
+# E a auto-sonda passava nos DOIS, porque força um `mtime` velho num ficheiro
+# sintético: provava o mecanismo enquanto a população inteira era ilegível. Um
+# detector aceso sobre um alvo que não representa a população.
+#
+# O discriminador não pode ser «os artefactos são todos recentes» — uma
+# recaptura legítima escreve os 65 em segundos e ficava igual. Usa-se um
+# CANÁRIO: um ficheiro versionado que ninguém regenera. Se ele não tem
+# alterações locais e mesmo assim o seu `mtime` é muito posterior ao seu próprio
+# commit, então os tempos foram reescritos por um checkout — e aí a resposta
+# honesta é NÃO MEDI, nunca verde.
+CANARIO="docs/bossaos/CONTRATO_TECNICO.md"
+if [ -f "$CANARIO" ] && git diff --quiet -- "$CANARIO" 2>/dev/null; then
+  CAN_COMMIT=$(git log -1 --format='%ct' -- "$CANARIO" 2>/dev/null)
+  CAN_MTIME=$(stat -f '%m' "$CANARIO" 2>/dev/null || echo 0)
+  if [ -n "$CAN_COMMIT" ] && [ "${CAN_MTIME:-0}" -gt "$((CAN_COMMIT + 120))" ]; then
+    naomedi "os \`mtime\` desta cópia não são de produção: o canário \`$CANARIO\`"
+    echo "           não tem alterações locais e mesmo assim está $(( (CAN_MTIME - CAN_COMMIT) / 3600 ))h"
+    echo "           mais recente que o seu próprio commit. Isso é um checkout a"
+    echo "           reescrever datas, e num checkout esta guarda NÃO MEDE NADA."
+    echo "           Corre-a onde as capturas são produzidas."
+    exit "$NAO_MEDI"
+  fi
+fi
+verde "os \`mtime\` desta cópia são de produção (o canário confere com o seu commit)"
+
 # ── 3. A comparação, por DUAS medidas e não uma ───────────────────────────
 #
 # O `mtime` é a verdade nesta máquina e MENTE num clone: o git não guarda datas
