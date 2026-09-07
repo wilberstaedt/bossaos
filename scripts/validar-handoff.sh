@@ -17,9 +17,19 @@ ok()   { echo "  ok    $1"; }
 erro() { echo "  FALHA $1"; falhas=$((falhas + 1)); }
 
 # A etapa que o handoff declara, lida do mesmo modo em que está escrita.
+#
+# ── CONCLUIDO tambem e um estado, e eu criei-o sem avisar os leitores ────────
+#
+# A 07/09 corrigi o scripts/estado.sh para distinguir «acabou» de «nao consegui
+# ler» — e passou a devolver ATUAL=CONCLUIDO. Este leitor so sabia soletrar E##,
+# por isso ficou vermelho a dizer que o handoff e o medidor discordavam, quando o
+# que se passava e que o medidor tinha aprendido uma palavra que este nao sabia.
+#
+# Quem introduz um estado novo fica a dever a volta aos leitores desse estado.
+# Nao fiz essa volta e ela custou tres guardas vermelhas.
 etapa_do_handoff() {
-  grep -m1 -oE '\*\*Etapa atual:\*\*[[:space:]]*E[0-9]{2}' "${1:-$HANDOFF}" \
-    | grep -oE 'E[0-9]{2}' || true
+  grep -m1 -oE '\*\*Etapa atual:\*\*[[:space:]]*(E[0-9]{2}|CONCLUIDO)' "${1:-$HANDOFF}" \
+    | grep -oE 'E[0-9]{2}|CONCLUIDO' || true
 }
 
 echo "1. O handoff aponta para a etapa que o medidor calcula"

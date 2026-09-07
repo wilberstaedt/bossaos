@@ -1,6 +1,6 @@
 # HANDOFF — estado do motor BossaOS
 
-**Etapa atual:** E34 — **revisão, do sénior**, aberta em `20dd194`. É a única por validar, e é assim que o medidor a deriva. **Não é minha.**
+**Etapa atual:** CONCLUIDO — as 36 etapas funcionais estão validadas e as 396 telas rastreadas. O trabalho corrente é a **RV100** (`docs/RV100.md`), a reconstrução visual, cujo dossiê está em `docs/visual/rv100/2026-09-06_e953a87/`. **Duas coisas que uma sessão nova tem de saber antes de agir:** o §12.4 diz que só o Matheus pode registar `APROVAÇÃO VISUAL HUMANA` — o Claude emite `PRONTO PARA APROVAÇÃO VISUAL HUMANA` e pára; e há **190+ commits locais por empurrar**, com a CI escura desde 05/09, portanto todo o verde deste repositório é verde **nesta máquina**.
 **Estado:** **em revisão.** **35 de 36 etapas validadas**, atlas fechado em **396/396**. O E35 foi **assinado a 06/09** em `d273378` (`docs/reviews/E35.md`) — a última etapa de implementação. Do meu lado não há etapa aberta: o que corre são as **correcções que a revisão do E34 me encaminha**, uma de cada vez.
 
 **Correcção 1, encaminhada e fechada:** o fecho de caixa duplo, em `88f5a62`
