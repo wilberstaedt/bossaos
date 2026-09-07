@@ -205,3 +205,37 @@ construir uma dependência nova para resolver uma que não existe.
 **O que a desfez foi correr a coisa em vez de a raciocinar**, e o sinal foi o
 mesmo de sempre: um facto independente — cinco capturas a 200 — que contradizia
 o 404.
+
+---
+
+## As telas-mestre, indexadas — §7.1 passo 4, a 07/09
+
+Escrito acima que «a secção 7 começa quando» — começou, e acabou. Isto é o que existe.
+
+**25 capturas, 6 mestres, três línguas.** Todas em `evidence/masters/`, com o índice
+medido em `mestres.json` (código HTTP, caracteres visíveis, HTML, viewport, rota).
+
+**Frescura: 25 de 25 são posteriores à última alteração ao produto.** Verificado antes de
+apresentar, e é a condição que eu próprio pus para mostrar prova a alguém — a `validar-provas-frescas.sh`
+mede-a para toda a árvore, e para esta entrega está verde.
+
+| mestre | viewport | estados capturados |
+| --- | --- | --- |
+| **M01** Landing desktop | 1440x900 | `principal`×3 |
+| **M02** Landing telemóvel | 390x844 | `erro`×1, `principal`×3 |
+| **M03** Backoffice | 1440x900 | `denied`×1, `erro`×1, `principal`×3 |
+| **M04** Staff sala | 390x844 | `erro`×1, `offline`×1, `principal`×3, `vazio`×1 |
+| **M05** KDS cozinha | 1280x800 · 1920x1080 | `offline`×1, `principal`×3, `principal-secundario`×1, `vazio`×1 |
+| **M06** Carta pública | 390x844 | `principal`×1 |
+
+**O que MUDOU na recaptura das 11h35:** o `M03 erro` passou de `500 / 95 caracteres /
+ecrã desenhado FALSO` para `404 / 414 / VERDADEIRO`. Era a fotografia de um 500 que a cura
+do RV100-024 tinha acabado de apagar, e ia para aprovação humana como retrato do produto.
+As outras 23 saíram byte a byte iguais — o que, aqui, é sinal de captura determinista e não
+de instrumento partido: a diferença é que estas foram recapturadas nas MESMAS condições, e
+os brancos das 10h20 eram idênticos entre condições DIFERENTES.
+
+**Fora do índice, e declarado:** as 792 composições da §8 continuam a zero, por desenho —
+o plano põe-nas depois da aprovação humana, porque capturá-las antes é fotografar telas que
+ainda podem mudar.
+
