@@ -2541,3 +2541,37 @@ de mexer**, e a razão é a que já nos apanhou hoje: **uma correcção que fech
 de catorze deixa quatro vivos e ninguém dá por eles**. Foi assim que apareceu o
 resumo do portão a dar 338 de 396 — a soma tem de fechar antes de alguém começar
 a riscar itens.
+
+---
+
+## A catraca, e a prova que eu mostrei sem a ter guardado — 07/09
+
+**A catraca do cabeçalho é a peça certa para este momento.** Congela a dívida em
+**267** — «267 escrevem o bloco, 267 no inventário, 0 convertidos» — e **não
+obriga ninguém a converter**, porque converter é propagação e vive depois do
+portão de aprovação. *«Esta guarda só impede o 268.º.»*
+
+**Verifiquei o controlo eu:** plantei um 268.º ecrã com o bloco à mão e ela ficou
+**vermelha, exit 1, e nomeou-o**. Removido, árvore limpa.
+
+E declara o que não apanha — um cabeçalho copiado com classes **novas** — e o que
+não conta como duplicação: os 6 ficheiros que usam só a sobrancelha noutra
+composição. **Definiu o contentor antes de contar**, que é a diferença entre uma
+catraca e uma contagem.
+
+## E depois encontrei nove ficheiros meus por commitar
+
+Sete capturas do M05 e do M06, o `mestres.json`, e o `next-env.d.ts` do build.
+**Eram da minha recaptura das 16h28** — a mesma com que gerei e publiquei a
+página ao Matheus.
+
+**Publiquei prova que não existia em commit nenhum.** Quem clonasse o
+repositório não obtinha o que ele está a ver, e a frescura que eu **declarei
+dentro da própria página** — «25 de 25 posteriores ao produto» — era verificável
+**só na minha árvore de trabalho**.
+
+**É o mesmo defeito que ando a apanhar o dia todo, virado para mim.** Escrevi
+esta manhã que uma decisão registada no meu documento e não no canal dele «não
+está tomada, está guardada». Isto é a versão com artefactos: **uma prova mostrada
+a alguém tem de estar onde outra pessoa a possa ir buscar.** Até ao commit, é uma
+afirmação minha sobre ficheiros que só eu tenho.
