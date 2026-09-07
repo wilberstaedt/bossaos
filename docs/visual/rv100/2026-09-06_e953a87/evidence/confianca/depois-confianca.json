@@ -1,0 +1,955 @@
+{
+  "listaFechada": [
+    "pagamento",
+    "reserva.confirmar",
+    "conta.fechar",
+    "desconto.autorizar"
+  ],
+  "paginas": [
+    {
+      "rota": "trust",
+      "idioma": "es-ES",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 4,
+      "titulos": [
+        "Una base para trabajar con confianza",
+        "Una base para trabajar con confianza",
+        "Tus datos son tuyos",
+        "Decimos lo que no sabemos",
+        "Aislamiento entre restaurantes",
+        "Sin red, el límite está dicho"
+      ],
+      "pilarOffline": {
+        "existe": true,
+        "itens": [
+          "Cobrar",
+          "Confirmar una reserva",
+          "Cerrar la cuenta",
+          "Autorizar un descuento"
+        ]
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 2317
+    },
+    {
+      "rota": "trust",
+      "idioma": "es-ES",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 4,
+      "titulos": [
+        "Una base para trabajar con confianza",
+        "Una base para trabajar con confianza",
+        "Tus datos son tuyos",
+        "Decimos lo que no sabemos",
+        "Aislamiento entre restaurantes",
+        "Sin red, el límite está dicho"
+      ],
+      "pilarOffline": {
+        "existe": true,
+        "itens": [
+          "Cobrar",
+          "Confirmar una reserva",
+          "Cerrar la cuenta",
+          "Autorizar un descuento"
+        ]
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 2269
+    },
+    {
+      "rota": "trust",
+      "idioma": "es-ES",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 4,
+      "titulos": [
+        "Una base para trabajar con confianza",
+        "Una base para trabajar con confianza",
+        "Tus datos son tuyos",
+        "Decimos lo que no sabemos",
+        "Aislamiento entre restaurantes",
+        "Sin red, el límite está dicho"
+      ],
+      "pilarOffline": {
+        "existe": true,
+        "itens": [
+          "Cobrar",
+          "Confirmar una reserva",
+          "Cerrar la cuenta",
+          "Autorizar un descuento"
+        ]
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1675
+    },
+    {
+      "rota": "trust",
+      "idioma": "es-ES",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 4,
+      "titulos": [
+        "Una base para trabajar con confianza",
+        "Una base para trabajar con confianza",
+        "Tus datos son tuyos",
+        "Decimos lo que no sabemos",
+        "Aislamiento entre restaurantes",
+        "Sin red, el límite está dicho"
+      ],
+      "pilarOffline": {
+        "existe": true,
+        "itens": [
+          "Cobrar",
+          "Confirmar una reserva",
+          "Cerrar la cuenta",
+          "Autorizar un descuento"
+        ]
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1511
+    },
+    {
+      "rota": "trust",
+      "idioma": "es-ES",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 4,
+      "titulos": [
+        "Una base para trabajar con confianza",
+        "Una base para trabajar con confianza",
+        "Tus datos son tuyos",
+        "Decimos lo que no sabemos",
+        "Aislamiento entre restaurantes",
+        "Sin red, el límite está dicho"
+      ],
+      "pilarOffline": {
+        "existe": true,
+        "itens": [
+          "Cobrar",
+          "Confirmar una reserva",
+          "Cerrar la cuenta",
+          "Autorizar un descuento"
+        ]
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1511
+    },
+    {
+      "rota": "trust",
+      "idioma": "pt-BR",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 4,
+      "titulos": [
+        "Uma base para trabalhar com confiança",
+        "Uma base para trabalhar com confiança",
+        "Seus dados são seus",
+        "A gente diz o que não sabe",
+        "Isolamento entre restaurantes",
+        "Sem rede, o limite está dito"
+      ],
+      "pilarOffline": {
+        "existe": true,
+        "itens": [
+          "Cobrar",
+          "Confirmar uma reserva",
+          "Fechar a conta",
+          "Autorizar um desconto"
+        ]
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 2323
+    },
+    {
+      "rota": "trust",
+      "idioma": "pt-BR",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 4,
+      "titulos": [
+        "Uma base para trabalhar com confiança",
+        "Uma base para trabalhar com confiança",
+        "Seus dados são seus",
+        "A gente diz o que não sabe",
+        "Isolamento entre restaurantes",
+        "Sem rede, o limite está dito"
+      ],
+      "pilarOffline": {
+        "existe": true,
+        "itens": [
+          "Cobrar",
+          "Confirmar uma reserva",
+          "Fechar a conta",
+          "Autorizar um desconto"
+        ]
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 2241
+    },
+    {
+      "rota": "trust",
+      "idioma": "pt-BR",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 4,
+      "titulos": [
+        "Uma base para trabalhar com confiança",
+        "Uma base para trabalhar com confiança",
+        "Seus dados são seus",
+        "A gente diz o que não sabe",
+        "Isolamento entre restaurantes",
+        "Sem rede, o limite está dito"
+      ],
+      "pilarOffline": {
+        "existe": true,
+        "itens": [
+          "Cobrar",
+          "Confirmar uma reserva",
+          "Fechar a conta",
+          "Autorizar um desconto"
+        ]
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1651
+    },
+    {
+      "rota": "trust",
+      "idioma": "pt-BR",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 4,
+      "titulos": [
+        "Uma base para trabalhar com confiança",
+        "Uma base para trabalhar com confiança",
+        "Seus dados são seus",
+        "A gente diz o que não sabe",
+        "Isolamento entre restaurantes",
+        "Sem rede, o limite está dito"
+      ],
+      "pilarOffline": {
+        "existe": true,
+        "itens": [
+          "Cobrar",
+          "Confirmar uma reserva",
+          "Fechar a conta",
+          "Autorizar um desconto"
+        ]
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1459
+    },
+    {
+      "rota": "trust",
+      "idioma": "pt-BR",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 4,
+      "titulos": [
+        "Uma base para trabalhar com confiança",
+        "Uma base para trabalhar com confiança",
+        "Seus dados são seus",
+        "A gente diz o que não sabe",
+        "Isolamento entre restaurantes",
+        "Sem rede, o limite está dito"
+      ],
+      "pilarOffline": {
+        "existe": true,
+        "itens": [
+          "Cobrar",
+          "Confirmar uma reserva",
+          "Fechar a conta",
+          "Autorizar um desconto"
+        ]
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1459
+    },
+    {
+      "rota": "trust",
+      "idioma": "en",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 4,
+      "titulos": [
+        "A base you can work on with confidence",
+        "A base you can work on with confidence",
+        "Your data is yours",
+        "We say what we do not know",
+        "Isolation between restaurants",
+        "Off the network, the limit is stated"
+      ],
+      "pilarOffline": {
+        "existe": true,
+        "itens": [
+          "Taking payment",
+          "Confirming a booking",
+          "Closing the bill",
+          "Authorising a discount"
+        ]
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 2397
+    },
+    {
+      "rota": "trust",
+      "idioma": "en",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 4,
+      "titulos": [
+        "A base you can work on with confidence",
+        "A base you can work on with confidence",
+        "Your data is yours",
+        "We say what we do not know",
+        "Isolation between restaurants",
+        "Off the network, the limit is stated"
+      ],
+      "pilarOffline": {
+        "existe": true,
+        "itens": [
+          "Taking payment",
+          "Confirming a booking",
+          "Closing the bill",
+          "Authorising a discount"
+        ]
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 2208
+    },
+    {
+      "rota": "trust",
+      "idioma": "en",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 4,
+      "titulos": [
+        "A base you can work on with confidence",
+        "A base you can work on with confidence",
+        "Your data is yours",
+        "We say what we do not know",
+        "Isolation between restaurants",
+        "Off the network, the limit is stated"
+      ],
+      "pilarOffline": {
+        "existe": true,
+        "itens": [
+          "Taking payment",
+          "Confirming a booking",
+          "Closing the bill",
+          "Authorising a discount"
+        ]
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1679
+    },
+    {
+      "rota": "trust",
+      "idioma": "en",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 4,
+      "titulos": [
+        "A base you can work on with confidence",
+        "A base you can work on with confidence",
+        "Your data is yours",
+        "We say what we do not know",
+        "Isolation between restaurants",
+        "Off the network, the limit is stated"
+      ],
+      "pilarOffline": {
+        "existe": true,
+        "itens": [
+          "Taking payment",
+          "Confirming a booking",
+          "Closing the bill",
+          "Authorising a discount"
+        ]
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1511
+    },
+    {
+      "rota": "trust",
+      "idioma": "en",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 4,
+      "titulos": [
+        "A base you can work on with confidence",
+        "A base you can work on with confidence",
+        "Your data is yours",
+        "We say what we do not know",
+        "Isolation between restaurants",
+        "Off the network, the limit is stated"
+      ],
+      "pilarOffline": {
+        "existe": true,
+        "itens": [
+          "Taking payment",
+          "Confirming a booking",
+          "Closing the bill",
+          "Authorising a discount"
+        ]
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1511
+    },
+    {
+      "rota": "pilot",
+      "idioma": "es-ES",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 4,
+      "cartoes": 4,
+      "titulos": [
+        "Qué es un piloto, y qué no es",
+        "Aprende con la operación real",
+        "Qué es",
+        "A qué nos comprometemos",
+        "A qué te comprometes tú",
+        "Si sale mal",
+        "Y hay un escalón que puedes montar tú",
+        "Por qué no verás aquí ningún nombre"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [
+        "0,00"
+      ],
+      "alturaRolavel": 3137
+    },
+    {
+      "rota": "pilot",
+      "idioma": "es-ES",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 4,
+      "cartoes": 4,
+      "titulos": [
+        "Qué es un piloto, y qué no es",
+        "Aprende con la operación real",
+        "Qué es",
+        "A qué nos comprometemos",
+        "A qué te comprometes tú",
+        "Si sale mal",
+        "Y hay un escalón que puedes montar tú",
+        "Por qué no verás aquí ningún nombre"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [
+        "0,00"
+      ],
+      "alturaRolavel": 3065
+    },
+    {
+      "rota": "pilot",
+      "idioma": "es-ES",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 4,
+      "cartoes": 4,
+      "titulos": [
+        "Qué es un piloto, y qué no es",
+        "Aprende con la operación real",
+        "Qué es",
+        "A qué nos comprometemos",
+        "A qué te comprometes tú",
+        "Si sale mal",
+        "Y hay un escalón que puedes montar tú",
+        "Por qué no verás aquí ningún nombre"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [
+        "0,00"
+      ],
+      "alturaRolavel": 2251
+    },
+    {
+      "rota": "pilot",
+      "idioma": "es-ES",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 4,
+      "cartoes": 4,
+      "titulos": [
+        "Qué es un piloto, y qué no es",
+        "Aprende con la operación real",
+        "Qué es",
+        "A qué nos comprometemos",
+        "A qué te comprometes tú",
+        "Si sale mal",
+        "Y hay un escalón que puedes montar tú",
+        "Por qué no verás aquí ningún nombre"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [
+        "0,00"
+      ],
+      "alturaRolavel": 2035
+    },
+    {
+      "rota": "pilot",
+      "idioma": "es-ES",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 4,
+      "cartoes": 4,
+      "titulos": [
+        "Qué es un piloto, y qué no es",
+        "Aprende con la operación real",
+        "Qué es",
+        "A qué nos comprometemos",
+        "A qué te comprometes tú",
+        "Si sale mal",
+        "Y hay un escalón que puedes montar tú",
+        "Por qué no verás aquí ningún nombre"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [
+        "0,00"
+      ],
+      "alturaRolavel": 2035
+    },
+    {
+      "rota": "pilot",
+      "idioma": "pt-BR",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 4,
+      "cartoes": 4,
+      "titulos": [
+        "O que é um piloto, e o que não é",
+        "Aprenda com a operação real",
+        "O que é",
+        "Com o que a gente se compromete",
+        "Com o que você se compromete",
+        "Se der errado",
+        "E tem um plano que você monta sozinho",
+        "Por que você não vê nenhum nome aqui"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [
+        "0,00"
+      ],
+      "alturaRolavel": 3217
+    },
+    {
+      "rota": "pilot",
+      "idioma": "pt-BR",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 4,
+      "cartoes": 4,
+      "titulos": [
+        "O que é um piloto, e o que não é",
+        "Aprenda com a operação real",
+        "O que é",
+        "Com o que a gente se compromete",
+        "Com o que você se compromete",
+        "Se der errado",
+        "E tem um plano que você monta sozinho",
+        "Por que você não vê nenhum nome aqui"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [
+        "0,00"
+      ],
+      "alturaRolavel": 3097
+    },
+    {
+      "rota": "pilot",
+      "idioma": "pt-BR",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 4,
+      "cartoes": 4,
+      "titulos": [
+        "O que é um piloto, e o que não é",
+        "Aprenda com a operação real",
+        "O que é",
+        "Com o que a gente se compromete",
+        "Com o que você se compromete",
+        "Se der errado",
+        "E tem um plano que você monta sozinho",
+        "Por que você não vê nenhum nome aqui"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [
+        "0,00"
+      ],
+      "alturaRolavel": 2279
+    },
+    {
+      "rota": "pilot",
+      "idioma": "pt-BR",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 4,
+      "cartoes": 4,
+      "titulos": [
+        "O que é um piloto, e o que não é",
+        "Aprenda com a operação real",
+        "O que é",
+        "Com o que a gente se compromete",
+        "Com o que você se compromete",
+        "Se der errado",
+        "E tem um plano que você monta sozinho",
+        "Por que você não vê nenhum nome aqui"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [
+        "0,00"
+      ],
+      "alturaRolavel": 2063
+    },
+    {
+      "rota": "pilot",
+      "idioma": "pt-BR",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 4,
+      "cartoes": 4,
+      "titulos": [
+        "O que é um piloto, e o que não é",
+        "Aprenda com a operação real",
+        "O que é",
+        "Com o que a gente se compromete",
+        "Com o que você se compromete",
+        "Se der errado",
+        "E tem um plano que você monta sozinho",
+        "Por que você não vê nenhum nome aqui"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [
+        "0,00"
+      ],
+      "alturaRolavel": 2063
+    },
+    {
+      "rota": "pilot",
+      "idioma": "en",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 4,
+      "cartoes": 4,
+      "titulos": [
+        "What a pilot is, and what it is not",
+        "Learn on the real operation",
+        "What it is",
+        "What we commit to",
+        "What you commit to",
+        "If it goes badly",
+        "And there is a tier you can set up yourself",
+        "Why you will see no names here"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [
+        "0.00"
+      ],
+      "alturaRolavel": 3137
+    },
+    {
+      "rota": "pilot",
+      "idioma": "en",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 4,
+      "cartoes": 4,
+      "titulos": [
+        "What a pilot is, and what it is not",
+        "Learn on the real operation",
+        "What it is",
+        "What we commit to",
+        "What you commit to",
+        "If it goes badly",
+        "And there is a tier you can set up yourself",
+        "Why you will see no names here"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [
+        "0.00"
+      ],
+      "alturaRolavel": 3041
+    },
+    {
+      "rota": "pilot",
+      "idioma": "en",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 4,
+      "cartoes": 4,
+      "titulos": [
+        "What a pilot is, and what it is not",
+        "Learn on the real operation",
+        "What it is",
+        "What we commit to",
+        "What you commit to",
+        "If it goes badly",
+        "And there is a tier you can set up yourself",
+        "Why you will see no names here"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [
+        "0.00"
+      ],
+      "alturaRolavel": 2251
+    },
+    {
+      "rota": "pilot",
+      "idioma": "en",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 4,
+      "cartoes": 4,
+      "titulos": [
+        "What a pilot is, and what it is not",
+        "Learn on the real operation",
+        "What it is",
+        "What we commit to",
+        "What you commit to",
+        "If it goes badly",
+        "And there is a tier you can set up yourself",
+        "Why you will see no names here"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [
+        "0.00"
+      ],
+      "alturaRolavel": 2035
+    },
+    {
+      "rota": "pilot",
+      "idioma": "en",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 4,
+      "cartoes": 4,
+      "titulos": [
+        "What a pilot is, and what it is not",
+        "Learn on the real operation",
+        "What it is",
+        "What we commit to",
+        "What you commit to",
+        "If it goes badly",
+        "And there is a tier you can set up yourself",
+        "Why you will see no names here"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [
+        "0.00"
+      ],
+      "alturaRolavel": 2035
+    }
+  ]
+}

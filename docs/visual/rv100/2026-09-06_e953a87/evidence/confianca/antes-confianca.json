@@ -1,0 +1,775 @@
+{
+  "listaFechada": [
+    "pagamento",
+    "reserva.confirmar",
+    "conta.fechar",
+    "desconto.autorizar"
+  ],
+  "paginas": [
+    {
+      "rota": "trust",
+      "idioma": "es-ES",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 3,
+      "titulos": [
+        "Una base para trabajar con confianza",
+        "Una base para trabajar con confianza",
+        "Tus datos son tuyos",
+        "Decimos lo que no sabemos",
+        "Aislamiento entre restaurantes"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1871
+    },
+    {
+      "rota": "trust",
+      "idioma": "es-ES",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 3,
+      "titulos": [
+        "Una base para trabajar con confianza",
+        "Una base para trabajar con confianza",
+        "Tus datos son tuyos",
+        "Decimos lo que no sabemos",
+        "Aislamiento entre restaurantes"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1847
+    },
+    {
+      "rota": "trust",
+      "idioma": "es-ES",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 3,
+      "titulos": [
+        "Una base para trabajar con confianza",
+        "Una base para trabajar con confianza",
+        "Tus datos son tuyos",
+        "Decimos lo que no sabemos",
+        "Aislamiento entre restaurantes"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1407
+    },
+    {
+      "rota": "trust",
+      "idioma": "es-ES",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 3,
+      "titulos": [
+        "Una base para trabajar con confianza",
+        "Una base para trabajar con confianza",
+        "Tus datos son tuyos",
+        "Decimos lo que no sabemos",
+        "Aislamiento entre restaurantes"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1089
+    },
+    {
+      "rota": "trust",
+      "idioma": "es-ES",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 3,
+      "titulos": [
+        "Una base para trabajar con confianza",
+        "Una base para trabajar con confianza",
+        "Tus datos son tuyos",
+        "Decimos lo que no sabemos",
+        "Aislamiento entre restaurantes"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1089
+    },
+    {
+      "rota": "trust",
+      "idioma": "pt-BR",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 3,
+      "titulos": [
+        "Uma base para trabalhar com confiança",
+        "Uma base para trabalhar com confiança",
+        "Seus dados são seus",
+        "A gente diz o que não sabe",
+        "Isolamento entre restaurantes"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1901
+    },
+    {
+      "rota": "trust",
+      "idioma": "pt-BR",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 3,
+      "titulos": [
+        "Uma base para trabalhar com confiança",
+        "Uma base para trabalhar com confiança",
+        "Seus dados são seus",
+        "A gente diz o que não sabe",
+        "Isolamento entre restaurantes"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1819
+    },
+    {
+      "rota": "trust",
+      "idioma": "pt-BR",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 3,
+      "titulos": [
+        "Uma base para trabalhar com confiança",
+        "Uma base para trabalhar com confiança",
+        "Seus dados são seus",
+        "A gente diz o que não sabe",
+        "Isolamento entre restaurantes"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1383
+    },
+    {
+      "rota": "trust",
+      "idioma": "pt-BR",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 3,
+      "titulos": [
+        "Uma base para trabalhar com confiança",
+        "Uma base para trabalhar com confiança",
+        "Seus dados são seus",
+        "A gente diz o que não sabe",
+        "Isolamento entre restaurantes"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1037
+    },
+    {
+      "rota": "trust",
+      "idioma": "pt-BR",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 3,
+      "titulos": [
+        "Uma base para trabalhar com confiança",
+        "Uma base para trabalhar com confiança",
+        "Seus dados são seus",
+        "A gente diz o que não sabe",
+        "Isolamento entre restaurantes"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1037
+    },
+    {
+      "rota": "trust",
+      "idioma": "en",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 3,
+      "titulos": [
+        "A base you can work on with confidence",
+        "A base you can work on with confidence",
+        "Your data is yours",
+        "We say what we do not know",
+        "Isolation between restaurants"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1899
+    },
+    {
+      "rota": "trust",
+      "idioma": "en",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 3,
+      "titulos": [
+        "A base you can work on with confidence",
+        "A base you can work on with confidence",
+        "Your data is yours",
+        "We say what we do not know",
+        "Isolation between restaurants"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1758
+    },
+    {
+      "rota": "trust",
+      "idioma": "en",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 3,
+      "titulos": [
+        "A base you can work on with confidence",
+        "A base you can work on with confidence",
+        "Your data is yours",
+        "We say what we do not know",
+        "Isolation between restaurants"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1383
+    },
+    {
+      "rota": "trust",
+      "idioma": "en",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 3,
+      "titulos": [
+        "A base you can work on with confidence",
+        "A base you can work on with confidence",
+        "Your data is yours",
+        "We say what we do not know",
+        "Isolation between restaurants"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1061
+    },
+    {
+      "rota": "trust",
+      "idioma": "en",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 3,
+      "titulos": [
+        "A base you can work on with confidence",
+        "A base you can work on with confidence",
+        "Your data is yours",
+        "We say what we do not know",
+        "Isolation between restaurants"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1061
+    },
+    {
+      "rota": "pilot",
+      "idioma": "es-ES",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 0,
+      "titulos": [
+        "Aprende con la operación real",
+        "Así empezamos contigo",
+        "Un servicio contigo",
+        "Sigues tú"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1574
+    },
+    {
+      "rota": "pilot",
+      "idioma": "es-ES",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 0,
+      "titulos": [
+        "Aprende con la operación real",
+        "Así empezamos contigo",
+        "Un servicio contigo",
+        "Sigues tú"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1574
+    },
+    {
+      "rota": "pilot",
+      "idioma": "es-ES",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 0,
+      "titulos": [
+        "Aprende con la operación real",
+        "Así empezamos contigo",
+        "Un servicio contigo",
+        "Sigues tú"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1205
+    },
+    {
+      "rota": "pilot",
+      "idioma": "es-ES",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 0,
+      "titulos": [
+        "Aprende con la operación real",
+        "Así empezamos contigo",
+        "Un servicio contigo",
+        "Sigues tú"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1013
+    },
+    {
+      "rota": "pilot",
+      "idioma": "es-ES",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 0,
+      "titulos": [
+        "Aprende con la operación real",
+        "Así empezamos contigo",
+        "Un servicio contigo",
+        "Sigues tú"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1013
+    },
+    {
+      "rota": "pilot",
+      "idioma": "pt-BR",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 0,
+      "titulos": [
+        "Aprenda com a operação real",
+        "Como começamos com você",
+        "Um serviço junto com você",
+        "Você segue"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1652
+    },
+    {
+      "rota": "pilot",
+      "idioma": "pt-BR",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 0,
+      "titulos": [
+        "Aprenda com a operação real",
+        "Como começamos com você",
+        "Um serviço junto com você",
+        "Você segue"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1628
+    },
+    {
+      "rota": "pilot",
+      "idioma": "pt-BR",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 0,
+      "titulos": [
+        "Aprenda com a operação real",
+        "Como começamos com você",
+        "Um serviço junto com você",
+        "Você segue"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1205
+    },
+    {
+      "rota": "pilot",
+      "idioma": "pt-BR",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 0,
+      "titulos": [
+        "Aprenda com a operação real",
+        "Como começamos com você",
+        "Um serviço junto com você",
+        "Você segue"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1013
+    },
+    {
+      "rota": "pilot",
+      "idioma": "pt-BR",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 0,
+      "titulos": [
+        "Aprenda com a operação real",
+        "Como começamos com você",
+        "Um serviço junto com você",
+        "Você segue"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1013
+    },
+    {
+      "rota": "pilot",
+      "idioma": "en",
+      "largura": 360,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 0,
+      "titulos": [
+        "Learn on the real operation",
+        "How we start with you",
+        "One service with you",
+        "You carry on"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1574
+    },
+    {
+      "rota": "pilot",
+      "idioma": "en",
+      "largura": 390,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 0,
+      "titulos": [
+        "Learn on the real operation",
+        "How we start with you",
+        "One service with you",
+        "You carry on"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1574
+    },
+    {
+      "rota": "pilot",
+      "idioma": "en",
+      "largura": 768,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 0,
+      "titulos": [
+        "Learn on the real operation",
+        "How we start with you",
+        "One service with you",
+        "You carry on"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 1181
+    },
+    {
+      "rota": "pilot",
+      "idioma": "en",
+      "largura": 1280,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 0,
+      "titulos": [
+        "Learn on the real operation",
+        "How we start with you",
+        "One service with you",
+        "You carry on"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 989
+    },
+    {
+      "rota": "pilot",
+      "idioma": "en",
+      "largura": 1440,
+      "transbordo": 0,
+      "alvosPequenos": [],
+      "foraDoEcra": [],
+      "contrastes": [],
+      "seccoes": 2,
+      "cartoes": 0,
+      "titulos": [
+        "Learn on the real operation",
+        "How we start with you",
+        "One service with you",
+        "You carry on"
+      ],
+      "pilarOffline": {
+        "existe": false,
+        "itens": []
+      },
+      "citacoes": 0,
+      "imagens": [],
+      "numeros": [],
+      "alturaRolavel": 989
+    }
+  ]
+}

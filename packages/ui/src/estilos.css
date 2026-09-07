@@ -1339,6 +1339,11 @@ label.bo-planos__item input[type="radio"] {
   color: var(--bo-texto-secundario);
 }
 
+/* A lista do que exige servidor, dentro do quarto pilar. Marcadores a sério:
+   e' uma enumeracao fechada e le-se como tal. */
+.bo-mkt__lista-limite { margin: var(--bo-espaco-sm) 0; padding-inline-start: 1.25rem; }
+.bo-mkt__lista-limite li { margin-bottom: var(--bo-espaco-xs); }
+
 .bo-mkt__horas { font-size: 20px; margin: 0; }
 .bo-mkt__horas strong { font-family: var(--bo-fonte-titulo); font-size: 32px; line-height: 1.1; }
 

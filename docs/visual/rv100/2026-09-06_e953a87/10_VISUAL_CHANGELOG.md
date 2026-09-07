@@ -1146,3 +1146,198 @@ isso é maior do que este lote.
 - **Nada de teclado nem leitor de ecrã** sobre a caixa nova — o alvo de 44 px
   está medido, a navegação por teclado não.
 - **Não medi a aparência.** Secção 7, e é do Matheus.
+
+---
+
+## L1h — confiança e piloto (MKT-008 e MKT-010)
+
+Instrumento: `inspeccao/rv100-confianca.spec.ts`, guião
+`scripts/provar-confianca-mkt.sh`. Guarda do pilar:
+`scripts/validar-pilar-offline.sh`. Evidência em `evidence/confianca/`.
+
+### Uma correcção à instrução: são QUATRO acções, não cinco
+
+A instrução dizia *«cinco acções exigem servidor — `pagamento`,
+`reserva.confirmar`, `conta.fechar`, `desconto.autorizar` e `conflito`»*. Fui à
+fonte e executei-a:
+
+```
+ACCOES_QUE_EXIGEM_REDE = ["pagamento","reserva.confirmar","conta.fechar","desconto.autorizar"]
+total = 4
+exigeRede('conflito') = false
+```
+
+**`conflito` não é uma acção que exige rede.** É um ramo de resultado da
+sincronização (`'conflito' in r`, em `sincronizacao.ts:148`) e uma variante de
+erro de preço em `precos.ts`. Conceito diferente.
+
+Isto importa mais do que parece: se eu tivesse escrito «cinco» na página, a
+guarda que construí teria contradito a própria página no primeiro arranque.
+
+### E por isso o número não está escrito em lado nenhum
+
+A página não diz «quatro». Os nomes saem de `ACCOES_QUE_EXIGEM_REDE`, importada
+do `@bossaos/fila` — a mesma constante que o `PainelDaFila` usa para recusar. E o
+mapa é `Record<AccaoQueExigeRede, string>`: **uma acção nova na lista fechada
+parte o build** até alguém lhe dar nome na página.
+
+**Provei-o em vez de o afirmar**, contra o tipo real e sem tocar na fonte
+partilhada:
+
+| caso | resultado |
+| --- | --- |
+| mapa a que falta um membro | **TS2741** — `'desconto.autorizar' is missing` |
+| chave que não é membro | **TS2353** — `'accao.inventada' does not exist` |
+| mapa correcto (controlo positivo) | **compila limpo** |
+
+Sem o terceiro, os dois primeiros podiam estar a falhar por o tipo estar partido.
+
+Escrevi a primeira versão do `confianca4Nota` com «essas quatro» lá dentro — o
+número à mão que eu próprio tinha acabado de proibir. Apanhei-o e tirei-o das
+três línguas; a guarda passou a reprovar `cuatro|quatro|four|cinco|five` nessas
+chaves para não voltar.
+
+### O quarto pilar é o assunto sobre o qual a FAQ mentia
+
+O `faq4` prometia que «a sala continua a trabalhar e sincroniza quando a ligação
+volta», e as duas metades eram falsas. O pilar honesto **não é «funciona
+offline»**: é *o que se pode fazer sem rede está delimitado, e o que não se pode
+não finge*.
+
+| | antes | depois |
+| --- | ---: | ---: |
+| cartões na `/trust` | 3 | **4** |
+| pilar de operação degradada | **não existe** | existe, com a lista |
+| itens da lista vs lista fechada | — | **4 = 4**, nas três línguas |
+
+E a suite compara o conjunto renderizado com a constante importada — não com o
+número 4. Medir «tem quatro itens» ficaria verde no dia em que o produto passasse
+a cinco, que é exactamente como o `faq4` chegou onde chegou.
+
+### A guarda do quarto pilar
+
+Os outros três pilares têm guarda cada um. O quarto passa a ter
+`validar-pilar-offline.sh`, com **dois controlos negativos** e **um positivo**:
+
+- a lista fechada não está vazia;
+- cada membro tem nome nas três línguas;
+- **o par positivo:** compor e enfileirar um pedido continua a **não** exigir
+  rede — sem isto o pilar podia dizer «nada funciona sem rede», que é falso ao
+  contrário;
+- nenhuma chave do pilar escreve o número à mão;
+- **negativo:** uma acção a mais na lista fica sem nome e o detector vê;
+- **negativo:** `exigeRede` recusa uma acção inventada.
+
+### O piloto: factos de processo, e a ausência medida
+
+| | antes | depois |
+| --- | ---: | ---: |
+| secções | 2 | **4** |
+| cartões | 0 | **4** |
+| citações (`blockquote`/`q`/`cite`) | 0 | **0** |
+| imagens no `<main>` | 0 | **0** |
+| **todos** os números do texto | `[]` | **`['0,00']`** — e só |
+
+«Não nomeia terceiros» não se prova procurando nomes que não conhecemos.
+Medem-se as **formas** que a prova social toma: a citação tem etiqueta própria, o
+logótipo é uma imagem, e o número é um número. O terceiro é o que apanha o caso
+que importa — não se procura «500», recolhe-se **tudo** o que é número e
+exige-se que o conjunto seja o esperado. O único que aparece é o **€0,00 do
+Starter autogerido**, que sai de `precoDoPlano()`.
+
+A página diz **na própria página** porque é que não há nomes: publicar o nome de
+um restaurante é decisão dele e ainda não foi pedida. A ausência de prova social
+lê-se como falta de clientes se ninguém a explicar — explicada, lê-se como o que
+é, e impede que alguém «resolva» o vazio mais tarde com um logótipo que ninguém
+autorizou.
+
+### As chaves cruzadas: as duas páginas eram 100% de outras páginas
+
+| | antes | depois |
+| --- | --- | --- |
+| `/trust` | 5 chaves, **5 partilhadas — 100%** | 12 chaves, 5 partilhadas — **41%** |
+| `/pilot` | 8 chaves, **8 partilhadas — 100%** | 20 chaves, 6 partilhadas — **30%** |
+
+No piloto, as partilhadas que saíram são exactamente o defeito do RV100-013:
+`comecamosTitulo`, `passo3`, `passo3Texto`, `passo4`, `passo4Texto`. As que
+ficam são `pedirDemo`, `verPlanos`, `precoImposto`, `precoImplantacaoSozinho`
+(unidades e rótulos) e `pilotoTitulo`/`pilotoTexto`, que é o nome da própria
+página e o bloco da home que lhe aponta.
+
+**E fica um achado que não é meu para resolver:** as 5 chaves partilhadas da
+`/trust` são os três pilares e o cabeçalho, todos repetidos no bloco 10 da home.
+A `/trust` continua a ser esse bloco com mais espaço em tudo menos no quarto
+pilar. É o mesmo defeito que a `/product` tinha, noutra página, e é outro lote.
+
+### O teste que parti, e porquê — uma asserção a uma
+
+`marketing.spec.ts` passou de 65 para **58, com 7 vermelhos**. Todos com a mesma
+causa:
+
+| teste | causa |
+| --- | --- |
+| MKT-010 não transborda (× 5 larguras) | marcador não encontrado |
+| alvos de toque a 360 px | percorre TODAS as telas, pára no MKT-010 |
+| contraste WCAG a 360 px | idem |
+
+**A causa única: o marcador do MKT-010 era `.bo-mkt__passos`, e esse elemento
+ERA o defeito.** O RV100-013 diz que a página «recicla dois passos da
+implantação»; os passos eram `passo3` e `passo4`, iguais aos do
+`/getting-started`. A L1h tirou-os e com eles foi-se a âncora.
+
+**Quase reportei verde a mais.** A primeira corrida foi com `--reporter=line` e o
+fim da saída dizia «58 passed» sem listar falhas — só reparei porque o número
+tinha sido 65 nos dois lotes anteriores. Um verde sobre uma população que
+encolheu é o defeito que este repositório persegue há dias, e desta vez o
+denominador era a única pista.
+
+**A correcção não reescreve o teste para ficar verde, e é medível:** o `git diff`
+é **uma linha de código** e **zero linhas com `expect`**. As três asserções que
+correm sobre o MKT-010 continuam iguais e continuam a correr sobre aquela rota.
+O que mudou é o selector que espera pela página.
+
+A alternativa era manter um `.bo-mkt__passos` na página só para o selector
+encontrar — **inventar uma sequência de passos que não é verdade para satisfazer
+um instrumento**. Fabricar conteúdo é pior do que trocar uma âncora, e o motivo
+ficou escrito no próprio ficheiro.
+
+### Regressão
+
+`marketing.spec.ts` **65/65** com a população inteira de volta. Provas de nó do
+`@bossaos/fila` **24/24**. **396 IDs intactos.** Guardas verdes: pilar offline,
+classes, três línguas (2529 chaves), preços, dados fictícios, cobertura, suites
+com guião. `pnpm lint` limpo. **Zero anomalias nas 30 combinações**, antes e
+depois.
+
+### O que NÃO foi feito
+
+- **Expansão de texto: continua NÃO MEDI**, pela mesma razão — a base é
+  partilhada e a outra sessão continua nela.
+- **A `/trust` continua a repetir o bloco 10 da home** nos três primeiros
+  pilares. Medido acima, e é outro lote.
+- **Nada de teclado nem leitor de ecrã** sobre a lista nova do pilar.
+- **`11_OPEN_FINDINGS.md` não foi tocado** — o RV100-019 e o RV100-013 são para
+  o revisor fechar, não para mim.
+- **Não medi a aparência.** Secção 7, e é do Matheus.
+
+### Segunda limitação do `NEXT_DIST_DIR`, e esta é pior
+
+Na L1g registei que o `NEXT_DIST_DIR` isola o build servido e não isola o tipo.
+Encontrei a segunda neste lote, e é mais grave: **o Next reescreve o
+`apps/web/next-env.d.ts`, que é um ficheiro VERSIONADO**, para apontar à pasta
+configurada:
+
+```diff
+-import "./.next/types/routes.d.ts";
++import "./.next-revisao/types/routes.d.ts";
+```
+
+Com duas sessões a construir com pastas diferentes, esse ficheiro **oscila entre
+as duas** a cada build — e enquanto aponta para `.next-revisao`, um build com a
+pasta por omissão fica a referenciar tipos que não existem.
+
+Revertido no meu lado (`git checkout -- apps/web/next-env.d.ts`) e **não vai no
+commit**. Mas o balanço honesto é este: o `NEXT_DIST_DIR` resolve o servidor,
+não resolve o tipo, e **mexe num ficheiro versionado**. Para medir em paralelo a
+sério, a resposta é uma árvore de trabalho separada — e as duas limitações que
+encontrei são o argumento a favor disso, não contra.

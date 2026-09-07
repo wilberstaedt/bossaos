@@ -31,7 +31,28 @@ const TELAS = [
   { id: 'MKT-007', caminho: '/es-ES/demo', marcador: 'form[action="/api/publico/demo"]' },
   { id: 'MKT-008', caminho: '/es-ES/trust', marcador: '.bo-mkt__grelha' },
   { id: 'MKT-009', caminho: '/es-ES/faq', marcador: '.bo-mkt__faq' },
-  { id: 'MKT-010', caminho: '/es-ES/pilot', marcador: '.bo-mkt__passos' },
+  // ── O marcador do MKT-010 mudou, e a razão fica escrita ────────────────
+  //
+  // Era `.bo-mkt__passos`, e esse elemento **era o defeito**: o RV100-013 diz
+  // que a página de piloto «recicla dois passos da implantação e não tem um
+  // único facto de piloto». Os passos eram as chaves `passo3` e `passo4`, as
+  // MESMAS do `/getting-started`, palavra por palavra. A L1h tirou-os, e com
+  // eles foi-se a âncora.
+  //
+  // **Não é reescrever um teste para ficar verde**, e a diferença é medível:
+  // nenhuma asserção foi tocada. As três que correm sobre o MKT-010 —
+  // transbordo, alvos de 44 px e contraste WCAG — continuam iguais e continuam
+  // a correr sobre esta rota. O que mudou é o selector que espera pela página,
+  // porque o antigo apontava a conteúdo que já não deve existir.
+  //
+  // A alternativa era manter um `.bo-mkt__passos` na página só para o selector
+  // encontrar — ou seja, **inventar uma sequência de passos que não é verdade
+  // para satisfazer um instrumento**. Isso seria fabricar conteúdo, que é pior
+  // do que trocar uma âncora.
+  //
+  // `.bo-mkt__grelha` é o mesmo marcador do MKT-008, é conteúdo e não moldura,
+  // e prova que os quatro cartões de compromisso renderizaram.
+  { id: 'MKT-010', caminho: '/es-ES/pilot', marcador: '.bo-mkt__grelha' },
   { id: 'MKT-011', caminho: '/es-ES/demo/thanks', marcador: '.bo-mkt__heroi h1' },
   { id: 'MKT-012', caminho: '/es-ES/404', marcador: '.bo-mkt__heroi h1' },
 ] as const;
