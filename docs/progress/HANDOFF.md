@@ -28,6 +28,50 @@
 > o que se mexe, repõe-se — e é a segunda vez no mesmo dia._
 
 
+## Caminho da demonstração — A1 corrigido, A2 e A3 levantados
+
+Terceira etapa da ordem por venda. **Os três achados estão em ficheiro**, e a
+razão é uma regra nova que fica: *o que muda uma decisão vai para ficheiro, e a
+mensagem serve para dizer que o ficheiro existe*. Eu tinha devolvido os achados
+numa resposta de terminal, que chega truncada ao sénior — ele foi procurá-los e
+não estavam em lado nenhum. Ficheiro: `docs/reviews/CAMINHO-DA-DEMO-ACHADOS.md`.
+Régua: `docs/reviews/ALVO-CAMINHO-DA-DEMO.md`. Commits `b64419a` e `eba5453`.
+
+**A1 — a recusa devolvia um formulário vazio. Corrigido, e a minha primeira
+causa estava errada.** Publiquei que era o cookie *percent-encoded*: medi o
+frasco do navegador e concluí sobre o que o servidor lê, quando o
+`cookies().get()` do Next já devolve descodificado. A causa real, medida no
+cabeçalho do 303, é que o `destino()` construía o endereço com
+`new URL(pedido.url)` e **o anfitrião mudava no meio** — `127.0.0.1` a responder,
+`localhost` no `Location`. São sítios diferentes para o navegador: o
+`Set-Cookie` fica num, o GET seguinte vai ao outro, e o cookie nunca é enviado.
+**A cura é uma linha** — `Location` relativo — e a página não foi tocada.
+
+> **Alcançável por uma pessoa real, e é isso que lhe dá a severidade:** o padrão
+> do servidor exige ponto no domínio e o `type="email"` do navegador aceita
+> `joao@gmail`. Quem se esquece do `.com` perdia os cinco campos de uma vez.
+
+**A prova cobre a régua inteira** (`inspeccao/caminho-da-demo.spec.ts`): 15
+destinos nas três línguas, destino inventado a 404, e — o que a régua punha
+acima de tudo — o POST até ao obrigado **e o registo confirmado por `SELECT` na
+`demo_requests`**, porque *agradecer por nada é pior do que um erro*. O runtime
+não tem `SELECT` nessa tabela de propósito, portanto a confirmação usa a ligação
+de migração só para ler, e a consulta leva controlo próprio: devolve zero para
+um endereço nunca submetido.
+
+**Controlo negativo nos dois sentidos, e um terceiro A/B que me corrigiu:**
+reposto o redireccionamento absoluto a prova fica vermelha nos cinco campos;
+desligada a descodificação que eu tinha acrescentado, **continua verde** — foi
+assim que soube que a minha correcção não era a cura, e revi-a em vez de a
+deixar lá a somar ruído.
+
+**A2 (média, de negócio) e A3 (baixa, dívida) ficam levantados e não corrigidos.**
+O A2 — não haver demonstração para clicar — é decisão comercial e não conserto:
+das 30 rotas do percurso, nenhuma aponta para uma superfície do produto, e o
+inquilino `bossa-demo` é efémero. **E é ele que prende o ponto 4 da régua**: o
+aviso de demonstração não pode aparecer no caminho porque o caminho nunca chega
+ao ecrã. Fica em NÃO MEDI, preso ao A2.
+
 ## Montra — os quatro itens da régua, FECHADOS pelo sénior a 15h50
 
 A régua está em `docs/reviews/ALVO-MONTRA.md`, escrita **antes** de a entrega
