@@ -2675,6 +2675,32 @@ poderia falhar. **O meu erro tornou-se a razão documentada da escolha dele.**
 - **Verifiquei:** a guarda corre e passa — `131 → 131`, convite vivo,
   `EMAIL_PASSWORD_SIGN_UP_DISABLED`, saída 0. E a explicação do RLS, papel a
   papel, com a mesma consulta.
-- **NÃO verifiquei:** o controlo B dele — a guarda a recusar quando a população
-  mexe. Exige plantar uma linha dentro da janela de ~2 s entre as duas
-  contagens, e não o refiz. **Fica dito em vez de assumido.**
+- ~~**NÃO verifiquei:** o controlo B dele.~~ **Fechado às 23h15 — ver abaixo.**
+
+
+## 07/09 23h15 — o controlo B, que eu tinha deixado por verificar
+
+Disse no tick anterior que não tinha refeito o controlo dele — a guarda a
+**recusar** quando a população mexe. Um laço aberto por mim, fechado por mim.
+
+**À primeira, falhou-me:** plantei uma linha assim que o servidor respondeu, aos
+8 s — **cedo demais**. Caiu *antes* de a contagem inicial ser tirada, e a guarda
+viu `132 → 132` e passou.
+
+**Isso é INCONCLUSIVO, não é a guarda a falhar.** A população não mexeu entre as
+duas contagens; mexeu antes delas. Se eu tivesse reportado aquele verde como
+«a guarda não recusa», tinha acusado uma guarda que funciona — e tinha-o feito
+com uma corrida real a apoiar-me.
+
+**À segunda, com o método certo:** a janela é sub-segundo, e contra uma janela
+sub-segundo **não se adivinha o instante — aumenta-se a frequência de
+amostragem**. Semeei 5 linhas por segundo durante 4 s a partir do arranque:
+
+    SAIDA DA GUARDA = 1
+    FALHOU   a PRÓPRIA prova mexeu na população: 137 → 138 utilizadores
+
+**Recusa.** E a base ficou reposta em 131 — plantei com prefixo próprio e apaguei
+tudo no fim.
+
+**O invariante da contagem não é decorativo.** Dispara, e diz a coisa certa: não
+acusa o produto, acusa **a própria prova** de ter mexido no que estava a medir.
