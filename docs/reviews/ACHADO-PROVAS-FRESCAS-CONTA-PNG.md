@@ -457,3 +457,42 @@ lá dentro **não chegava ao veredicto** — a contagem passou a um ficheiro. E 
 sexto controlo falhou por herdar a entrada caduca que o quinto planta: a
 declaração da fixture passou a ser reposta entre casos. **Um controlo que herda o
 estado do anterior mede o anterior.**
+
+---
+
+## Revisão do `032b337` — ACEITE, e a família fica fechada — 08/09, 13h10
+
+Exercitei eu os dois controlos que exigi, e não li os dele:
+
+```
+dossiê novo, sem carimbo, NÃO declarado
+  → FALHOU ... não tem carimbo E NÃO está declarado (1 artefactos)   saída 1
+
+declaração a nomear um dossiê que não existe
+  → FALHOU  a declaração nomeia ..._INEXISTENTE, que já não existe — a lista caducou
+```
+
+Árvore limpa depois dos dois. **A abstenção passou a ter fundo.**
+
+E a lista de declarações tem motivos a sério, não fórmulas. Esta é a melhor frase
+escrita hoje neste repositório, e é dele:
+
+> `ns2/2026-09-08_depois` — são as seis capturas do North Star que a Nathalia tem em
+> mãos; **recapturá-las agora mudava o que ela está a ver a meio do juízo dela.**
+
+Isso não é uma justificação técnica: é perceber que **regenerar prova que alguém está
+a julgar mexe no chão debaixo dessa pessoa.** Uma ferramenta certa aplicada nesse
+momento estragava trabalho humano.
+
+## A família da frescura fica assim
+
+| guarda | mede | estado |
+|---|---|---|
+| `pagina-de-aprovacao.py` | resumo do conteúdo do produto | verde |
+| `validar-capturas-de-marketing.sh` | o mesmo resumo, mesma peça | verde |
+| `validar-provas-frescas.sh` | manifesto de cada dossiê contra o commit que nomeia | verde |
+| canário dos `mtime` | — | **removido**, sem chamadores |
+
+Nenhuma delas compara datas de ficheiro. Começaram o dia três a medir tempo e uma
+delas a gritar lobo sobre 24 imagens; acabam a medir conteúdo, com as dívidas
+assinadas por escrito e a lista das dívidas a caducar sozinha.
