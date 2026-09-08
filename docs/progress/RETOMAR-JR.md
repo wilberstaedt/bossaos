@@ -1344,3 +1344,37 @@ de um, diz-me e eu paro o que estiver a correr.
 A recaptura das telas-mestre, por ti. A guarda de frescura apanhou capturas
 envelhecidas por uma corrida falhada e tu escolheste **recapturar em vez de inventar
 uma data** — se voltares a esta linha, é essa a escolha certa e já está tomada.
+
+## A frescura, fechada — 08/09, 13h10. Não a refaças
+
+Se acordaste numa sessão nova, esta frente **está fechada** e custou a manhã inteira.
+Não a reabras sem ler isto.
+
+**As três guardas medem CONTEÚDO, nenhuma compara datas de ficheiro:**
+
+| guarda | pergunta |
+|---|---|
+| `pagina-de-aprovacao.py` | o resumo do produto de agora bate com o das capturas? |
+| `validar-capturas-de-marketing.sh` | a mesma pergunta, a mesma peça, sem cópia |
+| `validar-provas-frescas.sh` | cada dossiê retrata o commit que o **manifesto** nomeia |
+
+O **canário dos `mtime` foi removido** — tinha zero chamadores, e uma guarda que
+ninguém corre é uma guarda que ninguém testa.
+
+**Quatro coisas que já custaram medição e não se voltam a descobrir:**
+
+1. A regra por `mtime` recusava quando um formatador gravava um ficheiro por cima
+   com o mesmo texto. Foi isso que abriu tudo.
+2. A cura intermédia (usar o tempo do último commit para ficheiros limpos) **dá
+   verde numa reversão** — edita-se, captura-se, reverte-se, e as capturas mostram
+   código que já não existe. Foi rejeitada por isso, não por preguiça.
+3. O nome do dossiê **já não traz o sha**. Traz só a data. O commit vem do
+   manifesto, porque duas declarações do mesmo facto discordam — e discordaram em
+   quatro horas.
+4. Um dossiê sem carimbo é **NÃO MEDI**, mas tem de estar declarado em
+   `docs/progress/dossies-sem-carimbo.txt` com o motivo; não declarado é **FALHA**,
+   e a lista **caduca** se nomear um dossiê que já não existe.
+
+**Não recaptures o `ns2/2026-09-08_depois`.** Está declarado, e o motivo é humano e
+não técnico: são as seis capturas que a Nathalia tem em mãos, e regenerá-las mexe no
+chão debaixo do juízo dela a meio.
