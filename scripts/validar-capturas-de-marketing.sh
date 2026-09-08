@@ -44,7 +44,9 @@ IDIOMAS=(es-ES pt-BR en)
 # As cinco de secretária mais as três estreitas do telemóvel. Uma composição
 # que entre no guião de captura e não entre aqui fica sem guarda nenhuma.
 COMPOSICOES=(kds-cozinha-1280 sala-servico-1440 catalogo-1440 sala-tablet-834 carta-movel-390
-             catalogo-estreito-390 sala-estreita-390 kds-estreito-390)
+             catalogo-estreito-390 sala-estreita-390 kds-estreito-390
+  # §4.3: os quatro passos da comanda, cada um na largura em que e MOSTRADO.
+  fluxo-mesa-560 fluxo-mesa-estreito-390 fluxo-cocina-560 fluxo-cocina-estreito-390 fluxo-pase-560 fluxo-pase-estreito-390 fluxo-caja-560 fluxo-caja-estreito-390)
 
 echo "As cinco imagens que um comprador vê estão frescas e na língua dele?"
 

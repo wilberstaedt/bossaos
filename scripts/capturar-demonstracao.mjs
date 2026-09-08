@@ -67,6 +67,42 @@ const MANIFESTO = 'docs/visual/rv100/2026-09-06/evidence/demonstracao';
  * As composições. Cada uma diz **porque existe** — uma captura sem razão é uma
  * captura que ninguém sabe substituir quando o produto mudar.
  */
+/**
+ * ── §4.3: a comanda que atravessa o sistema ───────────────────────────────
+ *
+ * Quatro superfícies, **a mesma comanda nas quatro** — é isso que faz aquilo ser
+ * um percurso e não quatro ecrãs soltos. As rotas-folha usadas ficam aqui
+ * escritas, porque foram escolha minha e ninguém as tinha confirmado a
+ * renderizar.
+ *
+ * **Cada uma é capturada à largura em que vai ser MOSTRADA**, e não encolhida de
+ * 1440. Foi o defeito do dia inteiro: a `sala-estreita-390` já era a cura e
+ * nunca tinha sido levada ao resto — curar o caso e não a classe.
+ *   · 560 para a secretária, onde a composição põe duas por linha em 1280;
+ *   · 390 para o telemóvel, onde cada uma ocupa a coluna toda.
+ */
+const PASSO_DO_FLUXO = [
+  // O `foco` aponta ao CONTENTOR DA LISTA de cada tela, e não ao `main`: a
+  // primeira tentativa caiu no `main`, cujo topo é o cabeçalho, e os quatro
+  // cortes saíram de cabeçalho. Os selectores vieram do código de cada página e
+  // é a captura que os confirma — se algum não casar, o corte sai da viewport e
+  // vê-se logo.
+  { nome: 'mesa',   rota: (l) => `/${l}/app/bossa-demo/sala/floor`,
+    foco: '.ns-mesas, [data-teste="mapa-de-mesas"]' },
+  { nome: 'cocina', rota: (l) => `/${l}/kds/${DEMO.unidade}/${DEMO.estacaoQuente}`,
+    foco: '.bo-publico__lista' },
+  { nome: 'pase',   rota: (l) => `/${l}/kds/${DEMO.unidade}/${DEMO.estacaoQuente}/passe`,
+    foco: '.bo-publico__lista' },
+  { nome: 'caja',   rota: (l) => `/${l}/pos/${DEMO.unidade}/caixa`,
+    foco: '.bo-lista' },
+];
+const FLUXO = PASSO_DO_FLUXO.flatMap(({ nome, rota, foco }) => [
+  { nome: `fluxo-${nome}`, largura: 560, altura: 420, sessao: true, rota, foco,
+    porque: `§4.3, passo «${nome}» na largura da secretária — a mesma comanda nos quatro.` },
+  { nome: `fluxo-${nome}-estreito`, largura: 390, altura: 420, sessao: true, rota, foco,
+    porque: `§4.3, passo «${nome}» na largura do telemóvel, um para um.` },
+]);
+
 const COMPOSICOES = [
   {
     nome: 'kds-cozinha',
@@ -141,6 +177,7 @@ const COMPOSICOES = [
     rota: (l) => `/r/${SLUG_DA_DEMO}/${l}/menu`,
     largura: 390, altura: 844, sessao: false,
   },
+  ...FLUXO,
 ];
 
 /** Regista a conta pela porta real e dá-lhe pertença na demonstração. */
@@ -208,7 +245,40 @@ for (const idioma of IDIOMAS) {
   if (mau) reprovadas++;
 
   const ficheiro = `${DESTINO}/${idioma}/${c.nome}-${c.largura}.png`;
-  await pagina.screenshot({ path: ficheiro, animations: 'disabled' });
+  // ── `foco`: o corte vai ONDE a comanda está ─────────────────────────────
+  //
+  // Uma captura à largura de exibição é 1:1, mas a 560 a aplicação usa o
+  // desenho estreito e os primeiros 420 px são cabeçalho — o primeiro corte
+  // dos quatro passos saiu sem uma única mesa. Uma imagem nítida do sítio
+  // errado é o defeito de sempre com outra cara.
+  //
+  // O `foco` traz o elemento à vista e corta à volta dele, **sem escalar**: a
+  // largura continua a ser a de exibição e a altura é a do corte. Sem `foco`,
+  // captura-se a viewport como antes.
+  if (c.foco) {
+    // A LARGURA e' que tem de ser 1:1 — a altura da janela nao escala nada, so
+    // decide o que cabe. A primeira tentativa usou uma janela de 420 e o corte
+    // saiu do topo da pagina: com a pagina inteira a caber na janela, o limite
+    // que eu pus para nao cortar fora do documento puxou tudo para cima.
+    // Agora a janela e' alta, o elemento e' encontrado no documento inteiro, e
+    // o corte sai a' volta dele — mesma largura, sem transformacao.
+    await pagina.setViewportSize({ width: c.largura, height: 1200 });
+    await pagina.waitForLoadState('networkidle').catch(() => {});
+    const alvo = pagina.locator(c.foco).first();
+    const caixa = await alvo.boundingBox().catch(() => null);
+    const doc = await pagina.evaluate(() => document.documentElement.scrollHeight);
+    if (caixa) {
+      const topo = Math.max(0, Math.min(caixa.y - 24, Math.max(0, doc - c.altura)));
+      await pagina.screenshot({
+        path: ficheiro, animations: 'disabled',
+        clip: { x: 0, y: topo, width: c.largura, height: c.altura },
+      });
+    } else {
+      await pagina.screenshot({ path: ficheiro, animations: 'disabled' });
+    }
+  } else {
+    await pagina.screenshot({ path: ficheiro, animations: 'disabled' });
+  }
   registo.push({
     idioma, nome: c.nome, porque: c.porque, rota, largura: c.largura, altura: c.altura,
     estado, caminhoFinal, desviou, sujidade, ficheiro,
