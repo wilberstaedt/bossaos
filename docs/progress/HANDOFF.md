@@ -3231,3 +3231,96 @@ máquina teve quatro kernel panics sob carga.
 em vez de os repetir como se fossem meus.** O que está assinado é o que medi
 sozinho: a aritmética do coral, a do acento, o 1,00:1 do herói e o limiar
 insatisfazível.
+
+---
+
+## Fase 2 fechada — 08/09, commit `7e072ac`
+
+O JR voltou e fechou a lista. **As seis capturas estão feitas** e o portão
+`validar-no-commit` está a **0 falhas sobre o commit**.
+
+### O que a imagem apanhou e o número não
+
+As duas capturas que faltavam obrigaram a olhar, e olhar devolveu **três
+defeitos com todos os números do norte verdes**. Não é anedota: é o mesmo padrão
+do CTA verde-sobre-verde de ontem, três vezes seguidas no mesmo dia.
+
+**1 · As mesas saíam em azul sublinhado.** A `.ns-mesa` é um `<a>` e a regra
+declarava geometria sem declarar cor — o navegador decidiu por ela. **A linha
+769 deste mesmo ficheiro já tinha o comentário a descrever exactamente isto**,
+escrito noutro dia por outro motivo. O JR repetiu-o e diz que o repetiu.
+
+**2 · A sala não mostrava UMA mesa na primeira viewport de 390.** As sete
+pastilhas empilhavam-se e comiam o ecrã inteiro — num ecrã que um empregado abre
+de pé. Curado com uma classe própria, `.ns-sala-nav`, e **não** na
+`bo-publico__seccoes`: essa está em dezanove sítios e mexer nela era propagar
+para a carta pública e o KDS.
+
+> A cura levou **duas tentativas, e a primeira estava errada**. `min-width: 0`,
+> computado a `0px`, barra na mesma nos 789. Não era a pista — a `.bo-pagina` já
+> tem `minmax(0, 1fr)`. Era o **`margin: 0 auto`** da regra-base: um item de
+> grelha com margem automática deixa de esticar e passa a ser dimensionado pelo
+> conteúdo. Foi a medição da cadeia de ascendentes que o disse, depois de a
+> primeira hipótese ter ficado verde no computado e vermelha no ecrã.
+
+**3 · A landing partia o `larguras.spec.ts`** — que já existia — em três textos
+sobre coral: **3,73, 3,73 e 2,45 contra 4,5**. Sobre coral o 4,5 não existe (o
+tecto é 3,84 com branco e 3,73 com o verde). Não há cor que salve; só há sair de
+cima do coral. Disco do passo invertido (verde com anel coral), nota da secção
+com superfície própria, lead do fecho fora do painel. **Nenhuma régua foi tocada
+para isto ficar verde** — e o C6 do coral, que caiu a 7,2 % com as curas, voltou
+aos 8,2 % pela folga do painel, não pelo limiar.
+
+### O que passou a estar medido, e não estava
+
+| medição | antes | agora |
+|---|---|---|
+| primeira mesa dentro da dobra | não existia | medida, com controlo negativo que encolhe a dobra até a régua ter de acusar |
+| as duas referências em es-ES, pt-BR e en | **nenhuma suite visitava o `/floor`** | 12 combinações medidas, 12 esperadas |
+| zoom a 200 % (1.4.10) | não existia nestas telas | 0 px de corte nas duas |
+| conteúdo longo | media-se sobre uma sala já partida | 73 caracteres injectados, 0 px de corte |
+| foco e teclado | população sem o `/floor` | 40 elementos alcançados, **0 sem anel** |
+| contraste da tela Mesas | fora da população | `SALA-mesas` entrou no `superficies.spec.ts` — **12 superfícies, 12 medidas, 0 maus** |
+
+O contraste da tela nova entrou no motor que já existia em vez de ganhar um
+segundo: **duas opiniões sobre a mesma pergunta concordam até ao dia em que
+discordam** — e foi exactamente o que se viu aqui, com o `superficies` a passar
+a landing e o `larguras` a reprová-la no mesmo build.
+
+### Duas guardas que ficaram vermelhas por causa da Fase 2
+
+- **Plante em letra morta:** o `provar-host-no-navegador.sh` ancorava numa linha
+  que a reescrita da sala apagou. Reancorado na **lógica** (a derivação do estado
+  reservado), não na linha. 319 plantes pegam.
+- **Três suites que não eram nomeadas por guião nenhum** — não davam verde nem
+  vermelho, **desapareciam**. Correm dentro do `validar-sistema-ns2.sh`, que
+  passa a nomear as quatro em dois projectos, e estão declaradas com a razão do
+  `expansao.spec.ts` (a descoberta só varre `provar-*.sh`, por desenho).
+- E as quatro capturas da landing eram **irreproduzíveis** — guião de uma vez,
+  feito à mão. Passam a suite, no projecto **sem sessão**, porque com sessão o
+  cabeçalho troca a chamada e a captura deixa de ser a que o visitante vê.
+
+### O que fica levantado e NÃO decidido por mim
+
+1. **O nome do hóspede no cartão da mesa é um email** (`inspeccao@exemplo.example`
+   na semente). Em produção é o nome de uma pessoa, num ecrã que fica virado para
+   a sala. É decisão de produto, não minha.
+2. **A 390 o mapa fica numa coluna.** Cabem duas a 140 px, mas «insp-08 junto a
+   la ventana» parte-se em três linhas. Escolhi legibilidade; é reversível numa
+   linha e a escolha é discutível.
+3. **Seleccionar uma mesa não abre gaveta lateral** — continua a navegar. O §8
+   fala de mapa, não diz o que a mesa abre.
+4. **Verde a 32,0 %** contra os 35–45 % que o norte dá como orientativos.
+
+### Estado da máquina
+
+`ATENÇÃO` durante todo o lote (≈5 GB disponíveis, swap 1,36 GB). Os builds
+correram com cache quente, 12–50 s cada, e nenhum lote pesado foi subido. Sem
+kernel panic.
+
+### O que continua por medir, e é dito
+
+No checkout do portão as 13 guardas de navegador dão **NÃO MEDI** — não há build
+lá dentro, e é o comportamento correcto delas. **Foram corridas na bancada e
+estão verdes ali**: 95 testes verdes na bateria NS2 mais `larguras`, `foco` e
+`sala`. Verde na bancada não é verde no portão, e a diferença fica escrita.

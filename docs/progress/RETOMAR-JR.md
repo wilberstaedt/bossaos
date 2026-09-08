@@ -1195,3 +1195,40 @@ mede: proíbe.**
 **Falta para o portão:** as duas capturas das Mesas, os testes ES/PT/EN,
 contraste, foco, teclado, zoom e conteúdo longo, o preview publicado e a
 resposta dos sete pontos. **Depois pára.**
+
+---
+
+## Fase 2 fechada — 08/09, commit `7e072ac`
+
+**As seis capturas estão feitas** e o `validar-no-commit` está a **0 falhas sobre
+o commit**. O preview é a página de capturas decidida em
+`O-QUE-E-O-PREVIEW-DA-FASE-2.md`:
+**https://claude.ai/code/artifact/daf89118-390e-4a72-97fa-0860733d64fd**
+
+### As três coisas que a imagem apanhou e o número não
+
+1. **As mesas em azul sublinhado** — a `.ns-mesa` é um `<a>` e a regra dava
+   geometria sem dar cor. A linha 769 do mesmo ficheiro já descrevia isto.
+2. **Nenhuma mesa na primeira dobra a 390** — sete pastilhas empilhadas comiam o
+   ecrã. A cura precisou de **duas tentativas**: `min-width: 0` ficou `0px` no
+   computado e a barra continuou nos 789 px. Não era a pista (a `.bo-pagina` já
+   tem `minmax(0, 1fr)`), era o **`margin: 0 auto`** — margem automática desliga
+   o `stretch` de um item de grelha.
+3. **Três textos sobre coral abaixo de 4,5** no `larguras.spec.ts`, que já
+   existia. Sobre coral o 4,5 não existe. Saíram de cima do coral; **nenhuma
+   régua foi tocada**.
+
+### O que ficou medido e não estava
+
+12 combinações de idioma × referência × largura; zoom a 200 %; conteúdo longo
+injectado; 40 elementos de teclado com zero sem anel; a `SALA-mesas` dentro do
+`superficies.spec.ts` (12 superfícies, 0 maus). E as quatro capturas da landing,
+que eram feitas à mão, passaram a suite.
+
+### Levantado e não decidido por mim
+
+O email do hóspede no cartão da mesa; a coluna única a 390; a mesa que navega em
+vez de abrir gaveta; o verde a 32,0 % contra os 35–45 % orientativos.
+
+**Paro aqui.** A Fase 3 não começa e nenhuma aprovação é declarada em nome de
+ninguém.

@@ -49,3 +49,19 @@ E as razões não são de conforto:
 **Se e quando o redesign vai a produção.** Isso continua a ser do Matheus, é
 autorização por commit e por momento, e **não se herda desta decisão.** Aqui só
 se fixa o que a palavra «preview» quer dizer no portão da Fase 2.
+
+---
+
+## O preview existe — 08/09, commit `7e072ac`
+
+**https://claude.ai/code/artifact/daf89118-390e-4a72-97fa-0860733d64fd**
+
+Página de capturas, conforme decidido acima. **Produção não foi tocada.**
+
+Seis capturas do commit `7e072ac`, na ordem que a §11 pede: a primeira dobra da
+landing primeiro, porque é sobre ela que a pergunta é feita. A página diz, no
+corpo e não em rodapé, que nada está no ar e que a propagação só começa depois
+de uma resposta escrita.
+
+A página é privada por omissão — é o Matheus que decide se a partilha, e com
+quem. Não se declara aqui nenhuma aprovação em nome da Nathalia.
