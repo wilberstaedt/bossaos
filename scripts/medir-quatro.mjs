@@ -27,6 +27,12 @@
 //    vermelho.
 import { chromium } from 'playwright';
 
+/* O corpo de `page.evaluate` corre NO NAVEGADOR, nao aqui. O `eslint.config`
+ * da a `scripts/**` so os globais do Node, e bem — este ficheiro e' a
+ * excepcao e declara-a onde ela vive, em vez de alargar a regra para todos.
+ * globals: document, getComputedStyle */
+/* global document, getComputedStyle */
+
 const URL = process.argv[2];
 if (!URL) { console.error('uso: node scripts/medir-quatro.mjs <url>'); process.exit(2); }
 
