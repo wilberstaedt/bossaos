@@ -4315,3 +4315,62 @@ Matheus.
   uma era caro sem mudar o que há a fazer. Nem contadas como regressão nem varridas.
 - **Blocos 2 e 4** do norte continuam por construir; a régua de aceitação de ambos
   está escrita **antes** das entregas, em `ALVO-BLOCO-2.md` e `ALVO-BLOCO-4.md`.
+
+## A base local foi reposta, e as duas coisas que eu tinha escrito estavam erradas — 08/09
+
+**Quem chegar a esta máquina tem de saber isto antes de correr provas:** a
+`bossaos_dev` foi **largada e recriada** a 08/09, com autorização explícita e com
+os números à frente. Tinha **133 utilizadores** acumulados; tem **nove**.
+
+**A receita da reposição, que é a que faltava estar escrita:**
+
+    psql -d postgres -c 'DROP DATABASE bossaos_dev'
+    psql -d postgres -c 'CREATE DATABASE bossaos_dev OWNER bossaos_migrate'
+    pnpm --filter @bossaos/db exec prisma migrate deploy   # MIGRATION_DATABASE_URL
+    node --experimental-strip-types packages/db/prisma/fixtures.ts
+    node --experimental-strip-types packages/db/prisma/semente-inspeccao.ts
+    node --experimental-strip-types packages/db/prisma/semente-demonstracao.ts
+
+O `fixtures.ts` **vem primeiro e não é opcional** — é ele que cria `orgA`/`orgB`.
+Os dois primeiros passos são o que o `inspeccao/semear.ts` já fazia; a receita
+acima só o escreve por extenso.
+
+**Nove utilizadores, três organizações:** `ana@marina-oropesa.example`,
+`bruno@marina-barcelona.example`, `carla@exemplo.example`, `diogo@bossaos.example`
+(fixtures) · `demo@bossaos.invalid`, `sala@bossaos.invalid` (demonstração) ·
+`painel@`, `painel-b@`, `painel-c@inspeccao.example` (arnês). Organizações:
+`bossa-demo`, `marina-oropesa`, `marina-barcelona`.
+
+### Duas correcções minhas, ambas medidas, ambas em `76f9085`
+
+**1 · A «fuga lenta nas caixas» não existe.** Eu tinha escrito que cada semeadura
+deixava resíduo permanente e que ninguém o podia limpar. Base recém-criada, duas
+semeaduras seguidas: `registos=1 eventos=1 movimentos=2` nas duas. **A semeadura
+já é idempotente.** O `principal()` começa por `limpar()`, o `limparDemonstracao`
+desactiva os gatilhos antes de apagar, e o registo `insp-Caja 1` cai dentro do
+`PREFIXO`. Os `6/17/1` que eu tinha medido eram acumulação de meses numa base
+suja — e **já não posso reproduzir o incremento, porque larguei essa base.**
+
+**2 · A semente não está partida; corri o ponto de entrada errado.** O
+`inspeccao/semear.ts` corre `fixtures.ts` e só depois a semente, em dois
+processos e com a razão escrita. Não há ordem escondida. E `fixtures.ts` é um
+**script executável**, não um módulo: **ninguém importa `semear` — zero
+ocorrências.** As 12 que contei em `provas/` são funções locais homónimas.
+
+**A forma dos dois erros é a mesma e vale mais do que eles:** afirmei desenho a
+partir de uma medição feita em base suja, e afirmei uma impossibilidade sem
+procurar quem já fazia a coisa. O `caixa.test.ts` limpa as três tabelas com
+`DISABLE TRIGGER` desde antes de eu escrever que era impossível.
+
+### O que fica em aberto
+
+- **A terceira contagem não foi tirada.** O número esperado depois da primeira
+  corrida de provas sai agora de **nove**, e não dos cinco que eu tinha previsto.
+- **Corrida sozinha, a semente rebenta com uma chave estrangeira opaca** em vez
+  de dizer que falta o `fixtures.ts`. É mensagem de erro e não desenho; não lhe
+  toquei.
+- As duas decisões que o sénior deu a 08/09 — a semente chamar `semear()`, e
+  identificadores fixos nas três tabelas de caixa — **não foram executadas**,
+  porque as medições em que assentavam eram falsas. Aguarda palavra dele.
+- Continuam retidos: o quarto passo do bloco 2 (Caja), as três capturas da sala,
+  a regeneração da página das telas-mestre, e o bloco 4 (§4.5) por começar.
