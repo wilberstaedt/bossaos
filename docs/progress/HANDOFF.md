@@ -3820,3 +3820,44 @@ das três razões que dei hoje para esta mesma captura — **máquina**, **porta
 e agora — **duas estavam erradas**, e o padrão diz mais do que qualquer terceira
 explicação minha: **quando já erraste a causa duas vezes, o registo honesto é o
 percurso e não o veredicto.**
+
+---
+
+## Fase 0.4 FEITA, e o worktree constrói — 08/09
+
+As duas capturas do «antes» das Mesas estão em
+`docs/visual/ns2/2026-09-08_483c4a7/capturas/`, com o nome do padrão das da
+landing:
+
+- `antes-mesas-secretaria-primeira.png` (1440×900)
+- `antes-mesas-movel-primeira.png` (390×844)
+
+**Não é um achado estrutural: o worktree constrói.** Receita medida em
+`docs/reviews/COMO-CONSTRUIR-UM-COMMIT-ANTIGO.md`. A causa das três falhas era
+uma linha:
+
+> **copiar o `.env` não é exportá-lo.** O `postinstall` corre `prisma generate`,
+> que em Prisma 7 carrega o `prisma.config.ts`, e esse ficheiro **lança** se
+> `MIGRATION_DATABASE_URL` não estiver no ambiente. O `pnpm install` não lê
+> ficheiros `.env`.
+
+Com `set -a && . ./.env && set +a` antes do install: **install 0**, cliente do
+Prisma gerado, **build 0**, **`TS7006` 0**. Os `TS7006` eram o sintoma do cliente
+não gerado, como a revisão suspeitou — a suspeita estava certa e a verificação é
+que apontava a um caminho que também não existe no repositório principal.
+
+**O controlo que prova que é o «antes»:** uma captura do ecrã novo sairia
+igualmente nítida, por isso o guião exige `ns-mesa = 0` e itens de lista > 0.
+Medido: `ns-mesa=0 itens-de-lista=4` nas duas larguras.
+
+**E o par diz alguma coisa sozinho.** No «antes» a 390 não se vê **uma** mesa na
+primeira dobra — as sete pastilhas empilhadas comem o ecrã. No «depois» vêem-se
+duas inteiras. É o mesmo defeito que a captura das Mesas apanhou ontem, agora com
+o retrato dos dois lados.
+
+Tenant: o de **inspecção**, o mesmo das seis capturas do North Star — o «antes» e
+o «depois» comparam-se no mesmo sujeito. Aparecem as fixtures `insp-` com o email
+no cartão; **não lhes toquei**, é o achado do `sala.ts` que está na lista do
+Matheus.
+
+Worktree removido. Máquina em **OK** durante todo o lote (5076 MB disponíveis).
