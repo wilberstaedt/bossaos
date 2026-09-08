@@ -3783,3 +3783,40 @@ Worktree em `483c4a7`, confirmado como o «antes» — **zero ocorrências de
 `ns-mesa`** no `floor/page.tsx`. O primeiro `install` falhou por eu o correr com
 o Node da shell em vez do do `.nvmrc`, que é o descuito que o `provar-isolamento`
 recusa por desenho. **Meu, não bloqueio.**
+
+### 05h05 — tentei a 0.4, cheguei até onde, e paro
+
+**Não a fiz.** E desta vez **descrevo em vez de diagnosticar**, porque já errei a
+razão duas vezes esta noite e a terceira não seria melhor.
+
+**Até onde cheguei, por ordem:**
+
+1. Worktree em `483c4a7` — **criado e confirmado como o «antes»**: zero
+   ocorrências de `ns-mesa` no `floor/page.tsx`.
+2. `pnpm install` — **falhou**: corri-o com o Node da shell (v23) e não com o do
+   `.nvmrc` (22.23.2). **Meu.**
+3. `pnpm install` com o Node certo — **falhou no `postinstall`**:
+   `MIGRATION_DATABASE_URL em falta`, porque o `.env` não vem no checkout.
+4. `.env` copiado, `install` outra vez — **`postinstall` falhou na mesma**.
+5. `pnpm build` — **falhou** com dezenas de `TS7006 implicitly has an 'any'` em
+   páginas que consultam o Prisma. **Sintoma de cliente não gerado**, que é
+   consistente com o `postinstall` ter morrido.
+6. Fui verificar se o cliente existia — e **apontei a um caminho que também não
+   existe no repositório principal**, que constrói bem. **A minha verificação
+   estava errada.**
+
+**A máquina que existe para capturar o «antes» está lá** — o `autenticar.setup.ts`
+e o `capturas.spec.ts` estão no worktree, e a rota é
+`/es-ES/app/marina-oropesa/puerto/floor`, no projecto autenticado.
+
+**O que falta é fazer um worktree construir**, e isso é um problema de
+infra-estrutura de `build` que eu não vou desmontar às cinco da manhã a adivinhar.
+**Worktree removido** para não deixar disco ocupado.
+
+### E o que isto vale como registo
+
+Não escrevo «bloqueada por X». **Escrevo os seis passos e onde parei**, porque
+das três razões que dei hoje para esta mesma captura — **máquina**, **porta**,
+e agora — **duas estavam erradas**, e o padrão diz mais do que qualquer terceira
+explicação minha: **quando já erraste a causa duas vezes, o registo honesto é o
+percurso e não o veredicto.**
