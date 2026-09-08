@@ -46,3 +46,31 @@ O que mudou é quem o encontrou. As três primeiras fomos nós, a olhar. Esta fo
 guarda construída para a terceira** a acusar a quarta, num sítio onde ninguém estava
 a olhar. Uma família de instrumentos que começa a apanhar a sua própria classe de
 erro vale mais do que a soma das curas que a fizeram nascer.
+
+---
+
+## A pendência fecha-se sozinha na publicação — 08/09, 11h25
+
+Andei três ticks a adiar isto pela mesma razão — a máquina em ATENÇÃO — e a repetir
+«fica declarado». Uma pendência que se repete sem mudar não é uma pendência: é uma
+frase.
+
+Fui olhar para ela outra vez e a resposta estava do outro lado. Eu queria correr um
+`next build` local para ver o campo aparecer. Mas **assim que o pacote for publicado,
+o campo responde por HTTP de qualquer sítio**:
+
+```
+GET https://bossaos.mwdeveloper.tech/api/health  →  versao_do_build
+```
+
+Sem build, sem servidor levantado por mim, sem carga nesta máquina. **O caminho mais
+barato para exercer esta prova não é construir — é esperar pela publicação que já
+está a acontecer por outro motivo.**
+
+Fica assim, e é uma decisão e não um adiamento: **não gasto um build para antecipar
+uma medição que o deploy vai dar de graça.** Quando ele publicar, meço em público e
+fecho isto com o valor real, que é mais forte do que o valor de um servidor local
+meu.
+
+O que continua verdadeiro e não muda com isto: a revisão daquele lote foi **estática**
+e está declarada como tal. Os controlos foram exercidos pelo JR, não por mim.
