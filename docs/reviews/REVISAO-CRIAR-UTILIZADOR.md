@@ -67,3 +67,47 @@ ficheiro em causa está **por rastrear**, e o `git ls-files` não o vê. **Medi 
 população construída de modo a excluir o sujeito da pergunta.** A guarda da casa usa
 glob de shell e por isso viu-o. A diferença entre o meu verde e o vermelho dela é
 uma escolha de listagem que eu fiz sem reparar que era uma escolha.
+
+---
+
+## Fecho da revisão — 08/09, 07h50
+
+**Achado 1 (o teste não corria): CURADO, com prova.**
+
+`scripts/provar-criar-utilizador.sh` existe e **corre mesmo o ficheiro** — não é um
+guião vazio a satisfazer o nome:
+
+```
+node --test --test-reporter=tap --experimental-strip-types \
+  provas/criar-utilizador.test.ts
+```
+
+E a guarda da casa mudou de resposta, que é a prova que interessa:
+
+| | antes (07h00) | agora |
+|---|---|---|
+| `validar-suites-com-guiao.sh` | `FALHA provas/criar-utilizador.test.ts` | sem acusação |
+| provas de nó nomeadas por guião | 39 | **40** |
+
+A diferença é de **uma**, e é a certa. Não aceito isto por o vermelho ter
+desaparecido — um vermelho desaparece também quando se apaga o ficheiro. Aceito-o
+porque o contador do lado verde **subiu exactamente um**, e porque os dois controlos
+do próprio detector continuam a passar.
+
+**Achado 2 (`emailVerificado = true` por omissão): ABERTO.**
+
+Continua igual, e não há nota nenhuma a dizer porquê — procurei em `docs/`. Isso é o
+que me faz devolvê-lo em vez de o deixar cair: não é a decisão que me incomoda, é a
+ausência dela. A casa tem regra escrita para isto, na `validar-provas-na-ci.sh`:
+
+> Esta guarda não obriga nada a correr na CI. **Obriga a DECIDIR:** ou o ficheiro
+> aparece no `ci.yml`, ou aparece aqui em baixo com o motivo escrito. O que ela
+> torna impossível é a terceira hipótese, que é a que aconteceu: **ninguém decidiu.**
+
+Aplico-lhe a mesma régua. Ou o valor por omissão passa a `false` e quem tem a prova
+do endereço declara-a, ou fica `true` **com o motivo escrito ao lado**. As duas
+respostas fecham isto; o silêncio não.
+
+Não é teórico: esta função existe precisamente para ser chamada por um caminho de
+entrada que o Matheus ainda não escolheu. **O chamador que se vai esquecer do
+parâmetro é o que ainda não foi escrito.**
