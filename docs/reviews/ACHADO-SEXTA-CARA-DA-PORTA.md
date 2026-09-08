@@ -325,3 +325,47 @@ destruir a base. Depois da reposição, o esperado é o de **uma** semeadura:
     cash_registers 1 · cash_register_events 1 · cash_movements 2
 
 Se sair mais do que isso, alguma coisa correu duas vezes.
+
+---
+
+## O nono utilizador: a base está certa, o esperado é que estava errado — 17h20
+
+Contei a base depois da reposição: **9 utilizadores**, quando o esperado era 8. Fui
+procurar o intruso.
+
+Não há intruso. O nono é `carla@exemplo.example`, e nasce em
+`packages/db/prisma/fixtures.ts:99` — **é uma fixture**, ao lado da ana, do bruno e
+do diogo.
+
+Contadas em vez de enumeradas, o `fixtures.ts` cria **quatro**:
+
+```
+ana@marina-oropesa.example
+bruno@marina-barcelona.example
+carla@exemplo.example      ← a que faltava na lista
+diogo@bossaos.example
+```
+
+A tabela do esperado listava **três** e derivou **8**. O correcto é **9**, que é o que
+a base tem. **A reposição correu bem; a expectativa é que tinha um erro de menos um.**
+
+## O que isto ensina, e é a terceira vez hoje
+
+**Um número esperado derivado de uma lista escrita à mão herda as omissões da lista.**
+Foi o mesmo mecanismo três vezes hoje:
+
+- os «125 restos» generalizados a partir de um total sem olhar à distribuição;
+- as «três identidades órfãs», que eram uma contagem lida como dois conjuntos quando
+  um continha o outro;
+- e agora as «três fixtures», que são quatro.
+
+A cura é a mesma nas três: **derivar o esperado da fonte, não de uma enumeração**.
+Contar o que o `fixtures.ts` cria custa um `grep`; escrever à mão os que me lembro
+custa zero e mente uma vez em cada três.
+
+## E o teste de dois lados fez o seu trabalho
+
+Se eu tivesse pedido só «diz-me quantos ficam», o 9 passava por bom. Foi ter um
+**esperado explícito** que tornou a diferença de um visível — e a diferença apontou
+para uma fixture esquecida, não para um problema. **Uma expectativa errada que se
+descobre é melhor do que uma medição sem expectativa nenhuma.**
