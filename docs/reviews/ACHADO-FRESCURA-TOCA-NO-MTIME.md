@@ -125,3 +125,51 @@ recusa) são meus. Falta o JR olhar. E fica de pé o que já estava declarado: *
 carimbo que pus no gerador continua sem nunca ter corrido**, porque a geração que o
 usaria é justamente esta, que a guarda recusa — e com razão de forma, ainda que não
 de fundo.
+
+---
+
+## O bloco podia faltar em silêncio, e quem o viu não soube porquê — 08/09, 08h30
+
+O JR reviu o código e devolveu isto, que é a parte que interessa:
+
+> Uma coisa que não consigo explicar, e digo-o em vez de a arrumar. Na primeira
+> invocação deste lote, mesmo comando e mesmos dois ficheiros na mesma data, o bloco
+> não imprimiu. (…) **Não tenho terceira teoria e não construo uma.**
+
+Tinha razão em não construir. A causa é minha e é de limiar.
+
+**A recusa e a diagnose olhavam para números diferentes.** A recusa dispara se
+**alguma** captura for mais velha que o produto. A minha diagnose listava o que era
+mais recente que a captura **mais nova**. Um ficheiro de produto tocado *entre* a
+captura mais velha e a mais nova satisfaz a primeira e não a segunda — a guarda
+recusa e a explicação fica muda.
+
+Reproduzido com números, sem tocar no repositório:
+
+```
+capturas: [100, 110, 120]   produto: 115
+recusa dispara?    True (2 capturas velhas)
+diagnose imprime?  False
+```
+
+Com **25 capturas escritas ao longo de segundos**, um ficheiro gravado a meio cai
+nessa janela. Não é um caso raro: é o caso normal de quem grava enquanto se captura.
+
+**A cura é usar o limiar da recusa** — a mais velha das capturas acusadas. E isso dá
+uma propriedade melhor do que «costuma aparecer»: se existe uma captura mais velha
+que o produto, então o produto mais recente é, por definição, mais recente que essa
+captura. **A lista não pode ser vazia.** Verifiquei sobre mil configurações
+aleatórias de capturas e produto: zero casos de recusa com diagnose vazia.
+
+E, ao corrigir, apanhei-me a deixar o cabeçalho a dizer «mais recente que a ÚLTIMA
+captura» quando o limiar já era outro. Corrigido antes de commitar. **Um rótulo que
+descreve mal o próprio sujeito foi o defeito de toda esta noite; não o ia deixar
+escrito na cura dele.**
+
+### O que isto diz sobre o modo de trabalhar
+
+O JR não sabia a causa e escreveu a observação em bruto, sem a arredondar e sem
+inventar explicação. Se a tivesse arrumado com uma teoria plausível — «terá sido o
+buffer» — eu teria lido a teoria em vez do facto, e o buraco ficava lá. **Uma
+anomalia relatada crua vale mais do que uma anomalia explicada por adivinhação**, e
+foi a recusa dele em ter uma terceira teoria que tornou esta causa encontrável.

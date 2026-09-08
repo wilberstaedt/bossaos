@@ -100,10 +100,20 @@ if velhas:
     # mesmo. Uma recusa que so diz «esta velho» manda gastar um build inteiro,
     # e a 08/09 a causa foi um formatador a gravar dois ficheiros por cima com
     # o mesmo texto.
-    _novos = _porque(RAIZ, max(os.stat(os.path.join(RAIZ, e['ficheiro'])).st_mtime for e in L))
+    # O limiar tem de ser o MESMO que faz a recusa disparar. Era `max` sobre
+    # TODAS as capturas, e isso abria um buraco que o JR viu sem lhe achar a
+    # causa: um ficheiro de produto tocado ENTRE a captura mais velha e a mais
+    # nova torna algumas capturas velhas — a recusa dispara — mas nao e mais
+    # recente que a mais nova, e a diagnose ficava MUDA. Com 25 capturas
+    # escritas ao longo de segundos, isso nao e raro.
+    #
+    # Com o `min` sobre as ACUSADAS, o bloco nao pode faltar: se ha uma captura
+    # mais velha que o produto, existe por definicao um ficheiro de produto mais
+    # recente que ela. A ausencia da explicacao deixa de ser possivel.
+    _novos = _porque(RAIZ, min(os.stat(os.path.join(RAIZ, e['ficheiro'])).st_mtime for e in velhas))
     if _novos:
         print()
-        print("O que ficou mais recente que a ULTIMA captura:")
+        print("O que ficou mais recente que alguma das capturas acusadas:")
         _tocados = 0
         for _rel, _m, _mudou in _novos:
             _q = time.strftime('%H:%M:%S', time.localtime(_m))
