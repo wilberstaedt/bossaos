@@ -48,3 +48,52 @@ critério 6. O primeiro é da Nathalia.
 **E não decide o texto.** O headline e o lead do norte são literais; se o que está na
 página divergir, isso é **achado**, não é correcção nossa — não se reescreve a cópia
 do Matheus por iniciativa própria.
+
+---
+
+## Emenda ao critério 5, e é a terceira vez hoje — 08/09, 20h40
+
+O critério 5 dizia: «captura principal ≥ 650 px», medida na caixa da imagem. Passou
+com **667** e depois com **740**. E passou sobre **o ecrã errado**.
+
+O `sala-heroi-834` foi capturado de `/pos/{unidade}` ancorado no `h1`, e o que mostra
+é a **navegação do TPV** — «Operador, Venta de barra, Historial de cajas». O §4.2 pede
+«screenshot principal do **mapa/sala**». O JR viu-o e declarou-o em vez de fechar o
+herói.
+
+**O critério mediu uma propriedade real do sujeito errado.** É a terceira vez hoje: a
+tabela das escalas que eu tirei dos mestres em disco, a expectativa dos 13,6 px
+assente numa caixa declarada, e agora uma largura correcta sobre uma fotografia que
+não é a que o documento pede.
+
+E esta dói mais do que as outras duas, porque **escrevi esta régua depois de já ter
+escrito a lição**. Ter a regra não é usá-la.
+
+### O que o critério passa a exigir
+
+Uma largura não identifica um ecrã. Onde a régua **nomeia** um ecrã — «mapa/sala»,
+«KDS», «Staff móvel» — o critério passa a ter dois lados:
+
+1. **a geometria**, que já lá estava (≥ 650 px, legível, não ampliado);
+2. **a identidade**: o manifesto da captura regista de que rota saiu, e essa rota tem
+   de ser a do ecrã que o norte nomeia. Uma captura do TPV não serve o «mapa/sala»
+   por mais bem dimensionada que esteja.
+
+O segundo lado é verificável sem julgamento e **não custa medição nova** — o
+manifesto já grava o caminho. Faltava alguém compará-lo com o que o documento pede.
+
+### Os outros dois achados da fotografia
+
+**O telefone corta texto do KDS** («Marcar lista», «Empezar»). Isto **não é beleza**:
+é uma captura que mostra a interface truncada, e uma landing que corta os botões do
+produto está a mostrar o produto mal. **É trabalho.**
+
+**A linha coral atravessa texto.** Essa é composição, e a régua diz que a beleza é da
+Nathalia. Fica como achado, sem cura nossa.
+
+### E uma coisa que o JR apanhou contra a régua que eu escrevi
+
+O critério 9 pede que a linha «ligue as três superfícies», e ele mediu extremidades
+como a régua mandava. **Com `z-index: 0` a linha tocava as três e não se via**, atrás
+de superfícies opacas — e o critério passava na mesma. O norte diz «liga
+**visualmente**»; tocar é geometria, ver é outra coisa. Corrigiu antes de eu ver.
