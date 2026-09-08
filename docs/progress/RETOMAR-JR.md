@@ -1378,3 +1378,60 @@ ninguém corre é uma guarda que ninguém testa.
 **Não recaptures o `ns2/2026-09-08_depois`.** Está declarado, e o motivo é humano e
 não técnico: são as seis capturas que a Nathalia tem em mãos, e regenerá-las mexe no
 chão debaixo do juízo dela a meio.
+
+## A tarde de 08/09 — o §4, e porque é que o §8 verde não chegava
+
+Se acordaste numa sessão nova: a landing foi publicada às 11h23, o Matheus viu-a e
+disse que estava horrível. **Ele tinha razão, e a régua também — porque mediam coisas
+diferentes.**
+
+**O que ninguém tinha percebido:** as onze condições que se medem são o **§8**, as
+condições de **reprovação** — o que a página não pode fazer. A direcção vive no
+**§4.1 ao §4.8**, bloco a bloco, e **disso nunca se mediu nada**. Havia instrumento
+para metade do norte e essa metade era apresentada como se falasse de qualidade.
+
+**A fita métrica do §4 agora existe:** `scripts/medir-quatro.mjs`. Corre com
+`fnm exec --using=22.23.2 node scripts/medir-quatro.mjs <url>`, usa o **Chrome
+instalado** (`channel: 'chrome'`) em vez de descarregar o headless, mede a **1440 e a
+390**, e **declara a largura em cada linha**. Abstém-se do que não se mede naquela
+largura em vez de adivinhar.
+
+### Já corrigido (commitado, e à data disto NÃO publicado)
+
+1. **hambúrguer a meio + traço coral solto = um só defeito.** Um
+   `.bo-publico__cabecalho::after` — o «filete da casa» — participa como **item de
+   flex**, e com três itens o `space-between` dá-lhe a direita. Curado com
+   `.bo-publico--comercial .bo-publico__cabecalho::after { content: none; }`. **A
+   carta pública mantém o filete**, que lá cai numa grelha e faz sentido.
+2. **três itens de idioma → selector agrupado** (reutiliza o `GrupoMkt`; o rótulo diz
+   o idioma actual).
+3. **CTA do cabeçalho em coral — e a tipografia subiu com a cor.** Sobre coral **não
+   há cor de texto que chegue a 4,5:1**: o tecto é 3,84 com branco. A 19/700 entra na
+   faixa de texto grande da 1.4.3, onde o limiar é 3. **Não é preferência, é a única
+   saída legal** — não voltes a baixar esse tamanho sem tirar o coral.
+4. **CTA no cabeçalho móvel: duplicado, não movido.** Fica na `<nav>` porque é de lá
+   que a `marketing.spec.ts` prova as sete rotas; acrescentou-se uma segunda
+   instância no cabeçalho. **Não se afrouxa uma guarda para caber um desenho.**
+
+### A próxima etapa, e está retida pela máquina
+
+**Blocos 2 e 4**, e é construção e não afinação:
+
+- **§4.3** exige quatro **crops grandes da interface** — Mesa → Cocina → Pase → Caja,
+  que o norte nomeia — e **proíbe por palavras** «quatro cards iguais com parágrafos».
+  Hoje a página tem 4 títulos, 4 parágrafos e **zero imagens**: o anti-padrão nomeado,
+  implementado tal e qual.
+- **§4.5** exige **tabs ou narrativa alternável** e trocar o ecrã ao trocar de papel.
+  Hoje: **zero tabs, uma imagem para quatro papéis**.
+
+Precisa de build, servidor e corredor. O `mac-health` está em **ATENÇÃO** e por isso
+não avançou — declarado, não esquecido.
+
+### Duas coisas que continuam abertas e são do Matheus
+
+- **os preços**: o §4.6 dá Starter €19, Restaurant €79, Pro €149, e a página tem
+  **zero valores em euros**. Não é desobediência — o prompt E10 dizia «planos **sem
+  valores inventados**» e a página obedeceu; o norte respondeu depois e a resposta
+  nunca foi aplicada;
+- **o rótulo «Demo»** do CTA móvel, que é a única coisa do lote que não saiu de uma
+  medição.
