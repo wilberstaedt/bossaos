@@ -139,3 +139,37 @@ Não a apago: já me enganei hoje a chamar obsoleta a uma peça que outra coisa 
 (o canário), e a lição é a mesma — confirmar quem a lê antes de a tirar. Fica para o
 JR, com a pergunta certa: **ou a marca serve alguém e o comentário mente, ou não
 serve ninguém e sai com o comentário.**
+
+---
+
+## A marca saiu — 08/09
+
+**Fiz a pergunta antes da cura**, que é a que o canário ensinou esta manhã:
+**quem lê `apps/web/public/versao.txt`?**
+
+| onde procurei | leitores |
+|---|---|
+| todo o repositório (`grep -rn`) | **0** — as outras menções são prosa a explicar que foi abandonada |
+| `infra/` (compose, Dockerfile, papéis) | **0**. O que lá está é `LABEL bossaos.versao=${VERSAO}` |
+| `.github/` | **0** |
+| `docs/runbooks/publicar.md` | manda a pessoa fazer `docker inspect` à **etiqueta** |
+| o próprio `publicar.sh` | o portão 4 lê a **etiqueta**, na linha 304 |
+
+**Escrevia-se para ninguém.** Saiu a escrita, e saíram **os dois comentários** —
+não só o da linha 247. O primeiro dizia, à cabeça da secção, «é isto que torna o
+portão 4 possível sem tocar em código de produto», e deixar esse de pé enquanto
+se tirava a linha era o pior dos dois mundos: uma secção a prometer um mecanismo
+que já não existe.
+
+**Um comentário que descreve um mecanismo substituído manda a próxima pessoa
+confiar numa peça que não carrega peso.** É a mesma razão pela qual o canário
+saiu de manhã, e é por isso que o que ficou no lugar diz o que o portão 4 mede
+**hoje** — a etiqueta, por `docker inspect`, posta no `infra/web.Dockerfile`.
+
+Depois de sair: `bash -n` limpo, `provar-implantacao.sh` a **0 falhas**, e o
+portão em 0 entre as que mediram.
+
+**Fica dito o que isto NÃO resolve:** continua sem haver forma de ler de fora,
+por HTTP, que versão está no ar — a etiqueta só se lê com acesso ao Docker do
+servidor. Tirar a marca não fechou esse buraco; tirou uma peça que dizia
+fechá-lo e não fechava.

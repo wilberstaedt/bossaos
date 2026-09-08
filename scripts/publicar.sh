@@ -233,18 +233,28 @@ echo "    AUTORIZADO POR: $AUTORIZADO_POR"
 $SSH "[ -f $RAIZ/.env.prod ]" \
   || erro "$RAIZ/.env.prod não existe no servidor — cria-o lá, chmod 600"
 
-# ── A marca da versão, ANTES do build ───────────────────────────────────────
-# É isto que torna o portão 4 possível sem tocar em código de produto: um
-# ficheiro estático que o Next serve, escrito antes de construir. Se o build não
-# pegar, o servidor antigo continua a servir a marca ANTIGA — que é precisamente
-# a diferença que quero medir.
-# O envio: o commit inteiro, e nada do disco. Sem `--delete` em lado nenhum e
-# sem tocar no `.env.prod`, que vive lá e nunca sobe daqui.
+# ── O envio: o commit inteiro, e nada do disco ──────────────────────────────
+# Sem `--delete` em lado nenhum e sem tocar no `.env.prod`, que vive lá e nunca
+# sobe daqui.
+#
+# ── O que estava aqui e SAIU, a 08/09 ──────────────────────────────────────
+#
+# Escrevia-se `apps/web/public/versao.txt` antes do build, e dois comentários
+# diziam que era «o que torna o portão 4 possível». **Deixou de ser verdade:** o
+# portão 4 lê a etiqueta `bossaos.versao` da imagem, por `docker inspect`, e a
+# etiqueta é posta no `infra/web.Dockerfile`. A marca estática foi abandonada
+# porque o encaminhamento por idioma a intercepta — pedir `/versao.txt` devolve
+# `/es-ES/versao.txt`, e isso mede a casa em vez do build.
+#
+# Procurei quem a lia antes de a tirar, que é a pergunta que se faz ANTES da
+# cura: **zero leitores** no repositório, em `infra/` e na CI, e o
+# `docs/runbooks/publicar.md` manda a pessoa fazer `docker inspect` à etiqueta.
+# Escrevia-se para ninguém.
+#
+# Saiu com os comentários, e não só a escrita: **um comentário que descreve um
+# mecanismo substituído manda a próxima pessoa confiar numa peça que não carrega
+# peso.** É a mesma razão pela qual o canário saiu hoje de manhã.
 $SSH "mkdir -p $RAIZ && tar -x -C $RAIZ" < "$PACOTE"
-# A marca da versão, escrita DEPOIS de extrair e ANTES de construir. Se o build
-# não pegar, o contentor antigo continua a servir a marca antiga — que é
-# precisamente a diferença que o portão 4 mede.
-$SSH "mkdir -p $RAIZ/apps/web/public && echo '$VERSAO' > $RAIZ/apps/web/public/versao.txt"
 
 # ── Base, migrações e build, tudo no servidor ───────────────────────────────
 # Docker, como os outros tres produtos desta caixa. A primeira versao usava
