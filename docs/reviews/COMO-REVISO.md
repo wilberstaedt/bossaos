@@ -3503,3 +3503,36 @@ A regra, curta: **quando o assunto da revisão ainda não está no índice, a li
 tem de vir do disco.** E, mais geral: antes de aceitar um verde sobre uma população
 contada por mim, perguntar se o sujeito da pergunta está garantidamente **dentro**
 dela — não se o número é grande.
+
+## Dois agentes, uma árvore, e `git add -A` dos dois lados — 08/09, 07h20
+
+Comitei a correcção do portão com `git add -A` e a árvore ficou limpa. Li isso como
+«levei tudo o que era dele» e escrevi-o assim, alarmado. Fui medir: o commit tinha
+**cinco** ficheiros e nenhum era dele. Enganei-me para o lado do alarme, e o que me
+enganou foi um `head -6` que eu próprio pus na verificação — cortei a lista e depois
+raciocinei sobre o corte como se fosse a lista.
+
+A medição a sério dói mais do que o alarme. O ficheiro dele entrou **no commit
+anterior**, o da doutrina, também meu, também `git add -A`: **25 ficheiros**, com o
+`criar-utilizador.ts`, o teste, a semeadura e **as nove imagens da sala que a landing
+serve** — trabalho de produto arquivado debaixo de um título sobre `git ls-files`.
+
+E o simétrico aconteceu ao mesmo tempo: enquanto eu media, o JR comitou o dele —
+e levou os **meus** dois ficheiros do portão. Cada um de nós assinou trabalho do
+outro, na mesma meia hora, sem que nenhum tivesse feito nada de errado à sua vista.
+
+**A causa não é distracção, é topologia.** Dois agentes com uma árvore de trabalho
+partilhada, os dois a usar `git add -A`, comitam sempre o que o outro tem em curso —
+não é um risco, é o comportamento garantido do comando. `git add -A` significa
+«tudo o que está na árvore», e numa árvore partilhada «tudo» inclui o trabalho de
+quem não está a comitar.
+
+A regra, e é curta: **em árvore partilhada, encena-se por caminho.** `git add
+<ficheiros>`, nunca `-A`, nunca `.`. Custa uma linha mais comprida e devolve a
+propriedade dos commits.
+
+O que NÃO fiz, e é decisão e não esquecimento: não reescrevi a história para separar.
+Nada se perdeu, nada foi publicado, e o JR está vivo com um worktree aberto — um
+`reset` meu por baixo dele podia partir-lhe o estado a meio de uma corrida. **Entre
+uma história arrumada e um agente inteiro, escolho o agente**, e deixo escrito onde
+o trabalho dele está para quem o procurar não conclua que se perdeu: `aa06503`.
