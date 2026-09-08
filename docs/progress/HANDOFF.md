@@ -4449,3 +4449,28 @@ Resolvido isso, os três recortes saem.
 **O vermelho mantém-se**, como mandado: papéis 1, 2 e 3 a 4,6, 8,0 e 5,2 px; o
 papel 4 a 13,9. Os três lados do critério 6 ficam exercidos — ausência,
 ampliação plantada (`1,22×`), e a ilegibilidade a acusar de verdade sem plante.
+
+## Bloco 4 VERDE — 08/09
+
+`7e0a377`. Os oito critérios passam e o critério 6 passa nos **quatro** papéis:
+**11,9 / 11,9 / 11,9 / 13,9** px efectivos, nitidez 0,852/0,852/0,852/0,995 —
+nenhuma ampliação. Capturas em `docs/visual/rv100/2026-09-08_papeis`.
+
+**A cura foi uma linha entre dois ficheiros:** a `CONTA_DA_DEMO` tinha senha e
+nenhuma organização, a Marta tinha a pertença e nenhuma senha. A `membership` em
+`bossa-demo` passa a nascer na semeadura, **fora** do `if (!jaExiste)` — senão só
+curava bases novas, e a que existe hoje não é nova. O `carregarKds` não foi
+tocado: o 404 era a guarda a acertar.
+
+Os recortes de 560 entram como **nomes próprios** (`catalogoRecorte`,
+`kdsRecorte`, `tabletRecorte`), nunca por cima dos mestres, que continuam certos
+onde a ranhura é larga.
+
+**Controlo negativo com os três lados plantados:** ausência, `AMPLIADO 1,22×`, e
+`LEGIBILIDADE` com o mestre de volta — mais a verificação de que não acusa o
+papel 4.
+
+> **A seguir, e NÃO agora:** `docs/reviews/O-GROTESCO-NAO-E-DO-BLOCO-4.md` mostra
+> **12 de 13** sítios com o texto abaixo dos 11 px. Esta cura resolve **1**. A
+> propagação tem de ser pela **escolha da variante pela ranhura**, não à mão em
+> 13 sítios — senão o décimo quarto nasce errado.

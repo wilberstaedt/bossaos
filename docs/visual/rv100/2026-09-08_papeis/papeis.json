@@ -8,21 +8,21 @@
       "ficheiro": "papel-1.png",
       "papel": "Quien manda",
       "beneficio": "El catálogo, los precios y lo que pasó en el servicio, sin pedirle un informe a nadie.",
-      "imagem": "/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fcatalogo-1440.2-ekw4u_d_5zf.png&w=3840&q=75",
+      "imagem": "/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fcatalogo-recorte-560.2q0u0g-q6pgfo.png&w=3840&q=75",
       "largura": 1280
     },
     {
       "ficheiro": "papel-2.png",
       "papel": "Quien atiende",
       "beneficio": "Toma el pedido de pie y con una mano; lo que escribe llega a cocina sin volver a escribirse.",
-      "imagem": "/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fsala-tablet-834.3g7mgfvf1jt1q.png&w=3840&q=75",
+      "imagem": "/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fsala-tablet-recorte-560.0kbyhvzru810a.png&w=3840&q=75",
       "largura": 1280
     },
     {
       "ficheiro": "papel-3.png",
       "papel": "Quien cocina",
       "beneficio": "Una pantalla con lo que hay que preparar, en orden, con el tiempo contado desde el servidor y nunca desde el reloj de la tablet.",
-      "imagem": "/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fkds-cozinha-1280.1u663dbd1x53f.png&w=3840&q=75",
+      "imagem": "/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fkds-recorte-560.26i6yqovgqm56.png&w=3840&q=75",
       "largura": 1280
     },
     {
@@ -34,7 +34,7 @@
     }
   ],
   "impressaoDoProduto": {
-    "resumo": "7e5f605a950ee26b090f8f1d0be0f78ba6d7d491f4769f7c0eda33f25a7a056f",
+    "resumo": "fbec14b96e469b3272cfa044db8b16f9827a8934a317672a0221a8f730eefe61",
     "ficheiros": 735,
     "porFicheiro": {
       "apps/web/proxy.ts": "d7dccea720c55d1d05f4a4c3a47a0ee8045ad4bd993f429184ec20e886bc7525",
@@ -42,7 +42,7 @@
       "apps/web/app/robots.ts": "6be6c094cd7e17f0514ba1af34aee2cbe07b8e10ef51d49d173be06bad64eb89",
       "apps/web/app/sitemap.ts": "6cef1b43052195fa962d20c19672ccc8633812a5b526ce2605c08b67206db74b",
       "apps/web/app/[idioma]/layout.tsx": "f53031ccc6a6928a4d441fb5276799c9998330f65bc6c3782aacb8b98a7b62b4",
-      "apps/web/app/[idioma]/page.tsx": "9b825f8c8637640b67425cdeae126affd93d6f2ad66afc72ae818beb2788add4",
+      "apps/web/app/[idioma]/page.tsx": "015282701d770d8d99a63fec24109bbf11bc920f8cc0e1edfb75b8daf230c106",
       "apps/web/app/[idioma]/not-found.tsx": "a44a62a6d2da90a6fb41342ad79e8d3c681d1a2174dc2bfc2f12a4947a8c89b3",
       "apps/web/app/[idioma]/demo/page.tsx": "1cad0e33007ea55b40a10d43efa779669376a97f0c95eafe104b038b5209deff",
       "apps/web/app/[idioma]/demo/thanks/page.tsx": "1570840cbde825ab20b08615176628d95784c13a46aa11634511e63899f15305",
@@ -555,7 +555,7 @@
       "apps/web/src/componentes/BloqueioDePlano.tsx": "4d367b5842459b3666eb77f2aaba77710e5dde0d55e9565b897f60ec0a172998",
       "apps/web/src/componentes/Marketing.tsx": "92cc8d9cc09de5ddbb0b96c0b9d0b3988794fb885ba85609741b2f6d662289e1",
       "apps/web/src/componentes/opcoes.ts": "bf0bbb68393d958eb12dd901cc38f02569f1bacb49cbab8ef74f95e1b795125d",
-      "apps/web/src/componentes/Demonstracao.tsx": "91fa7a6c57ee3f74badf9ced79ef9533992ea8c6b34191179b18212e0f4f024f",
+      "apps/web/src/componentes/Demonstracao.tsx": "aaf17a974b64654cb5dcf40fdadfc1f86ed2acb2f38c23eac6048367b3647805",
       "apps/web/src/componentes/SitePublico.tsx": "5c395aa9be54996513b679a3c295a82990b4d4830e2793ad698697806c055665",
       "apps/web/src/componentes/PreviaDoTema.tsx": "35d944cb32fbabdfe3a5aafc790bd355bb36b94243eb56e1792b781cb0469ac7",
       "apps/web/src/componentes/DemoInteractiva.tsx": "6ae8aedfe28b52b61f19fc7c9cd9d68ba14dde2061d5b1d9c7c9b68dad3f67fc",
@@ -647,7 +647,7 @@
       "packages/db/prisma.config.ts": "e78339d58afd1cfbab7c1bd6fc5f6c2ae1a6e294c707d3dbab7406b3c383bcdb",
       "packages/db/prisma/fixtures.ts": "62342be1bb6ea30416f844775c0a328a49ae8c922fd6b4a717ab1b1831f6e268",
       "packages/db/prisma/semente-inspeccao.ts": "69744feb8552e41d6525b993a6b87b470fbe69b3f219472afaf11dfa43564d0a",
-      "packages/db/prisma/demonstracao-comum.ts": "3c6060ca2ce82ef6a059ff192e10192416a3b5321d7cc4ced2a92b244c8b84ba",
+      "packages/db/prisma/demonstracao-comum.ts": "666adcad4ffa1ea753a541e70de2cf64b104ce9ceaafca1b425302f959958b39",
       "packages/db/prisma/inspeccao-comum.ts": "e6dcdda18f9f2b140ac18800a4288085a6fca21ecf9561594cdeea12df860443",
       "packages/db/prisma/semente-demonstracao.ts": "a845598509d03c4c7c1d114bd0aebc4cc19755217b908779591fa94405524e9f",
       "packages/db/prisma/limpar-inspeccao.ts": "45562a3632744d91d23b7757fd0ef6ca97753c6376e4868570712062ea08cd8c",
@@ -773,8 +773,8 @@
       "packages/domain/src/portas/autorizacao.ts": "70b5d7862e6f566c8683c8677d18f6515aa07c97b55729fde371b744ddf05977",
       "packages/domain/src/portas/media.ts": "8a14e7f1caf3b0fdcdce4a4e066b86f0ffc9cb445e6896a55570e631ed0f8c5c"
     },
-    "quando": "2026-09-08T18:09:03+0200",
-    "commit": "d044c7a16bdca7bb8a30995358f3d73a544bb610",
+    "quando": "2026-09-08T18:35:29+0200",
+    "commit": "7e0a37797ba8f2ff2a099de27c7812a849eefb17",
     "arvoreLimpa": true
   }
 }

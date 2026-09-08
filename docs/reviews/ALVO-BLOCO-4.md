@@ -440,3 +440,58 @@ um commit meu.
 antes, nunca durante. Quis verificar a cura dos recortes assim que o commit apareceu e
 não corri por isto; verifica-se no tick seguinte, com ele quieto, e a espera custa
 menos do que a gravação perdida.
+
+---
+
+## VERDE. O bloco 4 fecha — 08/09
+
+`7e0a377`. **Os oito critérios passam**, e o critério 6 passa nos quatro papéis.
+
+| papel | fonte | servido | mostrado | nitidez | px efectivos |
+|---|---|---|---|---|---|
+| 1 catálogo | 560 | 560 | 477 | 0,852 | **11,9** |
+| 2 salão/tablet | 560 | 560 | 477 | 0,852 | **11,9** |
+| 3 KDS | 560 | 560 | 477 | 0,852 | **11,9** |
+| 4 carta | 390 | 390 | 388 | 0,995 | **13,9** |
+
+### A cura foi uma linha, e estava entre dois ficheiros
+
+A `CONTA_DA_DEMO` tinha **senha e nenhuma organização**; a Marta
+(`sala@bossaos.invalid`) tinha **a pertença e nenhuma senha**. A que entrava não
+pertencia, a que pertencia não entrava. Cada metade estava bem feita no seu
+ficheiro. A cura é a `membership` em `bossa-demo` na semeadura, junto de onde o
+utilizador nasce.
+
+**Fica FORA do `if (!jaExiste)` de propósito:** uma base onde a conta já existia
+sem pertença é exactamente a base que existe hoje, e um remendo que só corre em
+bases novas não cura nenhuma das que já andam por aí.
+
+**Não toquei no `carregarKds`:** o 404 era a guarda a acertar.
+
+### Os recortes, e o que quase entrou em vez deles
+
+Com a pertença, os três saem do inquilino **certo**: o KDS mostra «Croquetas
+caseras», «Pulpo a la gallega» e a comanda **A128** — o mesmo que o mestre. A
+primeira tentativa tinha apanhado `insp-Plato de cocina 1`, e a segunda o
+selector de organização com **200**.
+
+Ligados como **nomes próprios** — `catalogoRecorte`, `kdsRecorte`,
+`tabletRecorte` — e não por cima dos mestres: o mestre continua certo onde a
+ranhura é larga, e trocar a fonte partilhada curava um bloco e ampliava os
+outros. O `tabletRecorte` é o **salão** e não uma comanda, porque o `altTablet`
+diz «o mesmo salão num tablet» e trocar a imagem tornaria o texto falso.
+
+### Os três lados do critério 6, agora todos plantados
+
+1. **ausência** — as três acusações caladas sem defeito.
+2. **ampliação** — telefone esticado até 477: `AMPLIADO 1,22×`.
+3. **ilegibilidade** — mestre de 1440 de volta: `LEGIBILIDADE … 0,33× … 4,6px`,
+   **e não acusa o papel 4**, que está a 13,9.
+
+O terceiro passou a precisar de plante precisamente porque os recortes o
+calaram. Enquanto acusava sozinho, não precisava; a partir do momento em que
+ficou verde, uma acusação que ninguém viu recusar é uma frase.
+
+**E o plante do critério 3 morreu** quando troquei o papel 2 de composição.
+Apanhou-o a guarda `PLANTE-MORTO` do próprio plante — o controlo a proteger-se
+de mim.
