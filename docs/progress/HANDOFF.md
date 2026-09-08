@@ -3493,3 +3493,51 @@ hora a que essa pessoa acorda**, e nós continuamos a trabalhar nesse intervalo.
 
 **Seis minutos de validade.** Não é o artefacto que apodreceu depressa — é que
 estamos a produzir mais depressa do que ele consegue ser lido.
+
+## 08/09 03h10 — RETIRO a recomendação de publicar, e o erro é meu
+
+O JR foi refazer as capturas da sala e **travou**: o capturador reprova a 400 na
+inscrição, porque a conta que ele cria a cada corrida nascia pelo `sign-up/email`
+que **eu** mandei fechar.
+
+Seguiu o sintoma e o achado é maior. **Verifiquei-o antes de aceitar**, e com um
+autoteste ao detector:
+
+| | |
+|---|---|
+| ficheiros que criam conta ou credencial, no repo | **ZERO** |
+| plugins do `better-auth` | só `twoFactor` — **não há plugin de organização** |
+| o que `aceitarConvite` faz | dá **pertença**, a uma conta que já tem de existir |
+
+**A cadeia fecha-se sobre si própria.** Com o registo fechado, **não há porta
+nenhuma** para uma pessoa que ainda não tem conta — nem a do convite, porque o
+convite não a cria.
+
+### O erro é meu e está escrito na minha própria régua
+
+O `ALVO-REGISTO-ABERTO.md`, item 3: **«o convite não pode partir.»** Verifiquei-o
+com um pedido à rota `/api/convites/token-falso`, vi-a responder, e declarei o
+fluxo intacto.
+
+**A rota nunca partiu. Partiu o degrau anterior a ela.** Medi a rota e declarei o
+caminho — a mesma frase que passei a noite a dizer aos outros.
+
+### E o que isto revela é maior do que o erro
+
+**A porta aberta era portante.** Ninguém a desenhou como caminho de entrada — era
+um buraco de configuração — **mas era por lá que uma pessoa convidada arranjava
+conta antes de aceitar o convite**. O produto diz-se «só por convite» e o convite
+nunca soube criar contas: funcionava **por causa do buraco**.
+
+**Fechar um buraco que era load-bearing exige dar-lhe substituto**, e o
+substituto é de produto: **o convite passar a criar a conta.**
+
+### O que fiz já
+
+- **Retirei a recomendação de publicar** do item 00 da lista do Matheus, com a
+  razão e com a admissão de que estava errado às 02h35.
+- **Produção continua com a porta aberta** — o risco de hoje mantém-se, e
+  publicar como está seria pior: fechava a entrada de qualquer cliente novo.
+
+**As três saídas que o JR nomeou são da revisão e ele não as tomou a meio de uma
+recaptura. Foi a decisão certa.**
