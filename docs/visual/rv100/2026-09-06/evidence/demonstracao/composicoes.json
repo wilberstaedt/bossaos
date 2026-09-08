@@ -314,7 +314,7 @@
     }
   ],
   "impressaoDoProduto": {
-    "resumo": "012b7d1b9b8c86f3d9a1ab9f58b5c36f46a7081e6534e8b8759dd052947d6da0",
+    "resumo": "afe40333548e405ffb70c54044f4f482cc414365a72ca240ee0eef73698b265c",
     "ficheiros": 735,
     "porFicheiro": {
       "apps/web/proxy.ts": "d7dccea720c55d1d05f4a4c3a47a0ee8045ad4bd993f429184ec20e886bc7525",
@@ -833,7 +833,7 @@
       "apps/web/src/componentes/Marca.tsx": "c76e32aac3533212b14297c80823ad4a770c771104e951718265a53d07fcbe6d",
       "apps/web/src/componentes/MenuMkt.tsx": "b1ac4ca70dafa244f9eebe821974580e1aae596d40861f5e99d38cb8e28d66f2",
       "apps/web/src/componentes/BloqueioDePlano.tsx": "4d367b5842459b3666eb77f2aaba77710e5dde0d55e9565b897f60ec0a172998",
-      "apps/web/src/componentes/Marketing.tsx": "c4156ddc1384ca573ab6061b4fc0252ffa4a1989355674de553489a3a6d0b76e",
+      "apps/web/src/componentes/Marketing.tsx": "92cc8d9cc09de5ddbb0b96c0b9d0b3988794fb885ba85609741b2f6d662289e1",
       "apps/web/src/componentes/opcoes.ts": "bf0bbb68393d958eb12dd901cc38f02569f1bacb49cbab8ef74f95e1b795125d",
       "apps/web/src/componentes/Demonstracao.tsx": "91fa7a6c57ee3f74badf9ced79ef9533992ea8c6b34191179b18212e0f4f024f",
       "apps/web/src/componentes/SitePublico.tsx": "5c395aa9be54996513b679a3c295a82990b4d4830e2793ad698697806c055665",
@@ -880,7 +880,7 @@
       "apps/worker/src/index.ts": "fc85b438cf79aa1c9a07fc97cc178c5191b8ca9dea7670be0639b39247a098b7",
       "packages/ui/src/fichas.test.ts": "75cb2fa0b09863679b7a2799f7dd295404c7c2a1d9b1eaf80eeb5a0ad55e0abd",
       "packages/ui/src/fichas.ts": "ab12740503c625f51f12b5a89ab77ecebffa7045f9be5c981aff268281696ebb",
-      "packages/ui/src/estilos.css": "6b2937739742fd063513917965659751a0a57b940cb0b6ef6b4c2f47f2d8c9f2",
+      "packages/ui/src/estilos.css": "c3b58673c354aa422b0802196fae4b552bd3bc46ecc941c8d532d7b4bab1f640",
       "packages/ui/src/tema.test.ts": "340da5fbdb69cede7728d3d1071e6783c4c957b60d7054a51a3c0db97d9dd4d2",
       "packages/ui/src/contraste.test.ts": "c7964ebb0e581cf03140ef1b502d60cb58a2a238d7252ec62adb86ed2f9132a4",
       "packages/ui/src/acento.test.ts": "80395564a5b3dfdde8e300c1458785d3ccf7ada41f2baaeefc42791a5341d06e",
@@ -1053,8 +1053,8 @@
       "packages/domain/src/portas/autorizacao.ts": "70b5d7862e6f566c8683c8677d18f6515aa07c97b55729fde371b744ddf05977",
       "packages/domain/src/portas/media.ts": "8a14e7f1caf3b0fdcdce4a4e066b86f0ffc9cb445e6896a55570e631ed0f8c5c"
     },
-    "quando": "2026-09-08T13:44:57+0200",
-    "commit": "2307931ea85a4b521568ae99b1c67bc96f80125d",
+    "quando": "2026-09-08T13:57:46+0200",
+    "commit": "a433c504c9e383cfb580e506965ad1bd60d46bcb",
     "arvoreLimpa": true
   }
 }
