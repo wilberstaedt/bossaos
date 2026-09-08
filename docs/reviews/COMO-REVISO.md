@@ -3401,3 +3401,53 @@ afirmação falsa ANTES de a publicar**, em vez de a corrigir depois. Todas as
 outras entradas deste ficheiro nasceram de erros que chegaram a sair.
 
 Custou **duas linhas de `git log`**.
+
+## Uma guarda de frescura não sobrevive à publicação — 08/09, 06h20
+
+Fui varrer os artefactos que dei ao Matheus à procura de contradições entre eles,
+porque foram escritos a horas diferentes e ele vai agir sobre os três. Encontrei a
+que esperava — o guia das 23h15 ainda dizia «falta só a tua palavra» sobre um pacote
+cuja publicação eu tinha **retirado** às 03h10 — e encontrei outra que não esperava,
+que é pior.
+
+A página das telas-mestre abre com esta frase, escrita por mim:
+
+> Todas tiradas do build que se publica, e todas posteriores à última alteração ao
+> produto — **esta página recusa-se a gerar se assim não for**.
+
+A guarda existe, está em `scripts/pagina-de-aprovacao.py`, e **funciona**. Não é uma
+promessa vazia: `mais_recente_do_produto()` compara e aborta. O problema não é a
+guarda. É *quando* ela corre.
+
+Medi: a página nasceu às 16h29 de ontem e entraram **19 commits ao produto** depois
+disso — entre eles a Fase 1 e a Fase 2 inteiras do North Star, o herói, o mapa das
+Mesas, os cantos, o contraste. As 25 capturas mostram o desenho **de antes do
+redesenho**, numa página cujo trabalho é ser julgada, e por cima delas está uma
+garantia de que são posteriores ao produto.
+
+O que aprendi, e é o que quero que fique:
+
+**Uma guarda de frescura verifica no instante em que gera. O artefacto que ela
+autoriza vive muito depois desse instante.** Ela pode recusar-se a *nascer* velha;
+não se pode recusar a *ser lida* velha. Enquanto o artefacto fica no repositório
+isto quase não custa — quem o abre está a olhar para o commit. Quando o artefacto
+vai para um link permanente na mão de uma pessoa, a garantia deixa de descrever o
+ficheiro e passa a descrever um momento que já passou. **E ela envelhece a mentir
+para o lado errado: não fica em silêncio, fica a afirmar frescura.**
+
+Ligo isto ao que já estava escrito sobre validade das provas, mas é um caso à parte:
+ali o problema era eu esquecer-me de medir a idade da prova; aqui a prova traz a sua
+própria medição de idade, correcta, **e é essa medição que apodrece**. Um número
+errado eu apanho quando o releio. Uma garantia auto-referente eu leio como se fosse
+verdade, porque a li verdadeira uma vez.
+
+O que fiz agora, por esta ordem: escrevi à mão o aviso no artefacto publicado — o
+penso, para que ninguém julgue o desenho velho na próxima hora — e mandei o JR
+regenerar do build de HEAD com a guarda a passar por si, não contornada. O penso
+não é a cura, e digo-o dentro do próprio penso.
+
+O que ainda não fiz, e é a cura da classe e não deste caso: a página não mostra ao
+leitor a data e o commit que capturou, ao lado da frase que promete frescura. Se
+mostrasse, o leitor fazia a conta que eu tive de fazer com `git log`. **Uma garantia
+que o leitor não consegue verificar sozinho depende de eu me lembrar dela — e a
+lista das coisas de que me lembro é o sítio errado para guardar isto.**
