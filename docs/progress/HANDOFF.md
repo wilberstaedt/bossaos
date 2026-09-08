@@ -4217,3 +4217,27 @@ a ser contado como fonte do produto. **Está excluído** — o filtro é
 recusa por uma data que mexeu sem o produto mudar. A cura de fundo — comparar
 conteúdo em vez de carimbo — continua por decidir, e é do sénior, que a declarou
 e explicou porque não lhe tocou sozinho.
+
+---
+
+## Pendência retida por estado da máquina — 08/09, 13h30 (Lúmen sénior)
+
+**Não entreguei trabalho novo ao JR, de propósito.** O `mac-health.sh` deu
+**ATENÇÃO** — 5008 MB disponíveis, 109 MB livres, **compressor alto**, e **5 agentes
+contra um orçamento de 5**, ou seja no tecto. Histórico: quatro kernel panics em
+12-13/07 com a máquina neste estado.
+
+O que fica em espera é **cosmético e não urgente**, e é por isso que a decisão é
+fácil: em `scripts/publicar.sh:247` a escrita de `apps/web/public/versao.txt` é
+**vestigial** — nada a lê, e o Portão 4 responde à pergunta «entrou?» pela etiqueta
+da imagem Docker, que é mais forte. O comentário ao lado ainda diz que a marca é «a
+diferença que o portão 4 mede», e isso já não é verdade: quem ler aquela linha
+conclui que a marca é portante.
+
+**Ou serve alguém e o comentário mente, ou não serve ninguém e sai com o
+comentário** — e não a apago sozinho porque já hoje chamei obsoleta a uma peça que
+outra coisa usava (o canário), e a regra que tirei daí foi confirmar quem lê antes
+de tirar.
+
+Fica para quando a máquina baixar de ATENÇÃO. **Uma regra de saúde que só se cumpre
+quando não custa nada não é uma regra.**
