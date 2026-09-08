@@ -78,3 +78,64 @@ estar onde o erro está, não onde é confortável escrevê-la.**
 Números refrescados na mesma passagem, porque é sobre eles que ele decide: **23**
 commits ao produto por publicar (eram 16 às 02h35 e 19 às 06h), e **593** commits
 locais por enviar ao GitHub.
+
+---
+
+## RETIRO o achado — 08/09, 10h40. A casa já respondia, e melhor
+
+Fui terminar isto e o que encontrei desmente-me.
+
+**Primeiro, a causa que eu dei estava errada.** Teste diferencial em produção:
+
+```
+/og.png       → HTTP 200  (147 KB, image/png)   ← public/ É servido
+/versao.txt   → HTTP 307                        ← o ficheiro não está lá
+```
+
+`public/` funciona. Não é o encaminhamento a «engolir» um ficheiro que existe: o
+ficheiro **não existe** em produção, e por isso o pedido cai no router. A minha
+explicação — que eu já tinha marcado como hipótese não confirmada — era falsa.
+
+**Segundo, e é o que importa: o problema já estava resolvido, e melhor do que eu o
+teria resolvido.** O `publicar.sh` documenta o mesmo tropeço, nas suas palavras:
+
+> A primeira versão pedia `/versao.txt` e recebeu `/es-ES/versao.txt`: o
+> encaminhamento por idioma apanhou o ficheiro estático. **A sonda entrou pela porta
+> da frente e mediu o comportamento da casa em vez da versão.**
+
+E trocou o sujeito, que é a cura desta noite inteira: o **Portão 4** já não pergunta
+à aplicação que versão ela julga ser — lê a **etiqueta da imagem Docker**:
+
+```
+NO_AR = docker inspect --format '{{ .Config.Labels "bossaos.versao" }}' bossaos_web
+COINCIDE     → segue
+DIFERENTE:x  → erro «no ar está 'x' e eu construí 'y' — o build não pegou»
+NAO_SEI      → erro «isto NÃO é versão errada, é não saber»
+```
+
+Com o `/api/health` ao lado, são as duas metades: **serve**, e **é este build**.
+
+### O que eu disse ao Matheus, e que está errado
+
+> «quando mandares publicar, a pergunta *entrou?* vai ter como resposta um raciocínio
+> meu e não uma medição»
+
+**Falso.** É uma medição, feita pelo próprio portão, e distingue três respostas onde
+eu só imaginava duas. Corrigido na lista dele.
+
+Dizer a alguém que a ferramenta dele é mais fraca do que é tem custo real: ou o faz
+desconfiar de um deploy que está verificado, ou o põe a construir uma coisa que já
+existe. **Um alarme falso sobre uma ferramenta gasta a confiança nela, e a confiança
+é o que faz alguém usá-la.**
+
+### O que sobra, e é pequeno
+
+A escrita da marca na linha 247 é **vestigial** — nada a lê. E o comentário ao lado
+ainda diz «se o build não pegar, o contentor antigo continua a servir a marca antiga
+— que é precisamente a diferença que o portão 4 mede». **O portão 4 já não mede
+isso.** Quem ler aquela linha conclui que a marca é portante e não é.
+
+Não a apago: já me enganei hoje a chamar obsoleta a uma peça que outra coisa usava
+(o canário), e a lição é a mesma — confirmar quem a lê antes de a tirar. Fica para o
+JR, com a pergunta certa: **ou a marca serve alguém e o comentário mente, ou não
+serve ninguém e sai com o comentário.**
