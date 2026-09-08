@@ -129,3 +129,67 @@ uma pergunta de âmbito e não de mecanismo.
 
 **Onde estava.** Esta guarda continua a ser a única consumidora, e continua a
 medir `mtime`.
+
+---
+
+## Revisão do `c37bd6b`, e um achado maior por baixo — 08/09, 11h40
+
+**Aceito a correcção.** Corri-a: a referência passou de `d1f6c50` (nove PNGs) para
+`b61051c` (código), o controlo dos dois lados passa, e a acusação caiu de **77 para
+50**.
+
+E aceito com aplauso a parte metodológica, que foi dele e não minha: recusou-se a
+definir o commit «só imagens» como *aquilo que o filtro exclui*, porque **«estava a
+perguntar-lhe se concorda consigo próprio»**. Identificou-o pelas extensões que
+tocou. É o defeito da lista tirada da propriedade testada, e ele apanhou-o sozinho.
+
+Efeito lateral que ele mediu e vale registar: o portão passou de **13 abstenções
+para 12**. A `validar-capturas-de-marketing` deixou de se abster porque, num
+checkout, o conteúdo é o mesmo e as datas não. **Trocar tempo por conteúdo fê-la
+medir onde antes dizia «não sei».**
+
+## O achado: a população desta guarda é toda do sujeito errado
+
+Ele deixou-me uma pergunta de âmbito — os 6 artefactos do «antes» da Fase 0.4
+retratam um commit congelado de propósito, e uma guarda que exige toda a prova
+posterior ao produto vai acusá-los para sempre. **«Evidência do passado não é
+evidência obsoleta.»** Fui medir quanto disso havia, e há mais do que ele viu:
+
+```
+total em docs/visual:                          77
+em pasta datada (YYYY-MM-DD_<sha>):            77
+FORA de pasta datada:                           0
+```
+
+**Todos.** Cada artefacto vive numa pasta cujo nome já declara a data e o commit que
+retrata. E a guarda compara-os todos contra o **HEAD**.
+
+Um dossiê chamado `2026-09-06_e953a87` não pode ser posterior ao produto de hoje —
+não por estar desactualizado, mas **por construção**. Logo:
+
+- a acusação cresce monotonamente com a história do projecto;
+- e um número que só sobe deixa de informar. **Uma guarda que acusa 50 ensina a ser
+  ignorada**, e no dia em que uma acusação for verdadeira ela estará no meio das 50.
+
+Não é um detalhe da implementação: é a escolha fundadora — comparar contra `HEAD`
+uma população que se auto-declara histórica.
+
+## A cura, e ela usa o que já construímos hoje
+
+Cada artefacto passa a ser julgado contra **o commit que o seu próprio dossiê
+nomeia**, nunca contra o `HEAD`. A pergunta deixa de ser «isto é foto do presente?»,
+que uma pasta datada nunca pode satisfazer, e passa a ser **«isto retrata o commit
+que diz retratar?»** — que é verificável e que é a pergunta que interessa.
+
+Quatro respostas, e a terceira é a que a torna honesta:
+
+1. o dossiê traz `impressaoDoProduto` (o mecanismo do `bbe68c6`) e ela bate certo
+   com a árvore do commit nomeado → **ok**;
+2. traz e não bate → **falha**, e nomeia;
+3. **não traz** — os dossiês antigos — → **NÃO MEDI**, contado e nomeado. Não se
+   inventa um veredicto sobre o que não se pode saber retroactivamente;
+4. o sha nomeado não é um commit → **falha**: a declaração caducou.
+
+Isto converte uma guarda que grita 50 vezes numa que ou mede, ou se abstém a dizer
+porquê. E o carimbo que o JR construiu esta manhã para as capturas passa a ser a
+peça de que ela vive — a mesma peça, a terceira consumidora.
