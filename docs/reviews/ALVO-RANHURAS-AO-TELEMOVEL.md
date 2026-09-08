@@ -118,3 +118,80 @@ Ambas verificadas pelo controlo de 1280, que continua a passar nos quatro passos
 ### O que fica por medir, declarado
 
 **Um visor não é a matriz.** 360 e 430 existem e não foram medidos.
+
+---
+
+## Os quatro visores: 360, 375, 390 e 430 — 08/09
+
+    AMBITO_ESTREITO visor=360 composicoes=13 com_defeito=0
+    AMBITO_ESTREITO visor=375 composicoes=13 com_defeito=0
+    AMBITO_ESTREITO visor=390 composicoes=13 com_defeito=0
+    AMBITO_ESTREITO visor=430 composicoes=13 com_defeito=0
+
+**52 medições, zero defeitos.** E ficou **um** ficheiro de matriz estreita, não
+dois: `rv100-ranhuras-390` passou a `rv100-ranhuras-estreitas`, porque duas
+matrizes de telemóvel lado a lado acabariam por discordar uma da outra.
+
+### As três previsões saíram exactas, ao décimo
+
+| previsto | medido |
+|---|---|
+| 360: herói KDS a 295 → **10,6 px**, falha | `mostrada=295 px_efectivos=10.6` |
+| 430: caixa ~398, nitidez **1,02**, amplia | `mostrada=398 nitidez=1.021` |
+| 375: **11,1 px**, encostado | `px_efectivos=11.1` |
+
+**E havia mais do que o previsto a 360:** falhavam **quatro** e não uma. Além do
+herói, duas caixas do bento e uma do `ns2`, todas a **296**. A razão é uma cadeia
+de dois recuos — a página dá 16 e o cartão dá outros 16, e 360−64 = 296.
+
+### As curas são todas da caixa, como previsto
+
+1. **Tecto a 390 abaixo de 1024.** Abaixo de 768 serve o `<source>` estreito e
+   abaixo de 1024 o `sizes` cai na ranhura estreita: em qualquer dos casos o
+   ficheiro é a captura de 390, e **uma caixa maior do que ela amplia**. O
+   `min(390px, 100%)` guarda o caso normal. Isto sozinho cura os três de 430.
+2. **Abaixo de 400, o cartão devolve metade do recuo** (16 → 8): 312 e 11,2 px.
+3. **Abaixo de 400, a segunda moldura do herói passa de 90% a 100%**: 328 e
+   11,8 px.
+
+Nenhuma toca no desenho acima de 400, e nenhuma mexe nas fontes: capturar um
+conjunto de 320 seria multiplicar o trabalho por cada telefone que existe.
+
+### E a cascata apanhou-me, com as regras já certas
+
+As regras 2 e 3 ficaram primeiro **junto das outras de composição, 270 linhas
+acima** da `@media (max-width: 767px)` que põe a moldura do herói a 90%. Não
+pegaram — e não foi por causa da largura da consulta, porque as duas se aplicam a
+360. **Perderam por ORDEM, com a mesma especificidade.** A medição continuou nos
+295 e foi isso que o disse; a leitura do CSS não teria dito.
+
+Uma sobreposição de ecrã estreito tem de vir **depois de tudo o que sobrepõe**, e
+está agora no fim da folha com a razão escrita.
+
+### O controlo, e o `grep` que se acusou a si próprio
+
+O plante continua a ser tirar a variante estreita, e morde nos quatro visores.
+Mas a contagem teve de mudar: **o mesmo defeito aparece quatro vezes, uma por
+visor**, e o que a régua exige é que não sejam acusados os outros doze. Passa a
+contar **sítios**.
+
+A minha primeira versão extraía o sítio de qualquer linha e contou **13** — as
+treze medições — sobre um defeito só, e escreveu «reage ao plante» quando quem
+reagia era o `grep`. Filtra-se a acusação primeiro, extrai-se o sítio depois.
+
+**É a segunda vez hoje que o defeito está no meu instrumento e não no produto, e
+as duas vezes o guião acusou-se a si próprio de forma plausível.**
+
+### Guardas mexidas, e o que fizeram
+
+- `estilos.css` — três regras novas. **Apertou:** caixas que ampliavam deixam de
+  poder, e caixas pequenas de mais crescem.
+- a matriz estreita e o seu controlo, **renomeados** de `-390` para
+  `-estreitas` e estendidos de um visor a quatro. **Apertou:** mede 52 onde media
+  13, com guarda de população por visor.
+- o controlo de 1280 **não foi tocado** e continua a passar nos quatro passos.
+
+### O que continua por medir, declarado
+
+**Quatro visores não são todos os telefones.** 320, 412 e os dobráveis existem.
+Passou **nestes quatro**.

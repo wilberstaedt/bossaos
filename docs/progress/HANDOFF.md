@@ -4545,3 +4545,28 @@ Duas guardas mexidas, **as duas apertaram**: a contagem do controlo de 1280 para
 no `ES` maiúsculo de `/es-ES` (e por isso dizia que o plante não mordia quando
 mordia), e a spec de 1280 passou a usar `medir-ranhuras.ts`, a mesma medição da
 de 390.
+
+## A matriz estreita: quatro visores, 52 medições, zero defeitos — 08/09
+
+360, 375, 390 e 430. Ficou **um** ficheiro (`rv100-ranhuras-estreitas`) e não
+dois — duas matrizes de telemóvel acabariam por discordar.
+
+**As três previsões do sénior saíram exactas ao décimo:** 360 a 10,6 (falha), 430
+a nitidez 1,021 (amplia), 375 a 11,1 (encostado). **E havia mais a 360:** falhavam
+quatro, não uma — a cadeia de dois recuos (página 16 + cartão 16) deixa 296.
+
+**Curas, todas da caixa:** tecto a `min(390px, 100%)` abaixo de 1024 (cura os três
+de 430); abaixo de 400, o cartão devolve metade do recuo e a segunda moldura do
+herói passa a 100%.
+
+**A cascata apanhou-me:** as duas últimas regras ficaram 270 linhas ACIMA da
+`@media (max-width: 767px)` que põe a moldura a 90%, e perderam por **ordem**, não
+por largura. Estão agora no fim da folha. Foi a medição que o disse.
+
+**E o meu `grep` acusou-se a si próprio outra vez:** a contagem de sítios extraía
+de qualquer linha e dizia «13 acusadas» sobre um defeito só. Filtra-se a acusação
+primeiro. Segunda vez hoje que o defeito está no instrumento, e as duas de forma
+plausível.
+
+Controlo de 1280 **não tocado** e sem regressão. Por medir, declarado: 320, 412 e
+os dobráveis.

@@ -2375,6 +2375,17 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
    1,22× sem ninguém dar por isso. Quem não declara ranhura (o herói e a
    `/product`, por decidir) não define a variável e fica com `100%`. */
 .bo-mkt__composicao { max-width: var(--bo-ranhura, 100%); }
+/* ── Abaixo de 1024 a captura que serve tem 390, e a caixa não pode passá-la ─
+   O `<source>` estreito entra abaixo de 768 e o `sizes` cai na ranhura estreita
+   abaixo de 1024: em qualquer dos casos o ficheiro que chega é a captura de 390.
+   Uma caixa maior do que ela **amplia**, e ampliar não inventa detalhe. Medido a
+   430: a caixa pintava 398 para um ficheiro de 390 — 1,02×, de raspão, e é
+   exactamente o género de excesso que ninguém vê numa captura.
+   O `min()` guarda o caso normal: onde a caixa já é menor que 390, manda ela. */
+@media (max-width: 1023px) {
+  .bo-mkt__composicao { max-width: min(390px, 100%); }
+}
+
 .ns-moldura--sobreposta { box-shadow: 0 18px 44px rgba(16, 46, 53, 0.34); }
 
 /* ── 6 · Bento assimétrico ─────────────────────────────────────────────── */
@@ -2788,4 +2799,21 @@ h3.ns-linha-do-tempo__nome, h3.ns-titulo-pequeno, h3.ns-preco__nome { line-heigh
     display: inline-flex;
     padding: 0 var(--bo-espaco-md);
   }
+}
+
+/* ══ A 360, a caixa é pequena de mais ══════════════════════════════════════
+   A 360, o recuo da página (16) mais o do cartão (16) deixam **296** de caixa, e
+   296 com a captura de 390 põe o texto a 10,6 px — abaixo dos 11. A cura é a
+   CAIXA e não a fonte: capturar um conjunto de 320 seria multiplicar o trabalho
+   por cada telefone que existe.
+
+   ── E porque é que isto está no FIM do ficheiro ──────────────────────────
+   A primeira versão ficou junto das outras regras de composição, umas 270 linhas
+   acima da `@media (max-width: 767px)` que põe a segunda moldura do herói a 90%.
+   **Perdeu.** Não por causa da largura da consulta — as duas aplicam-se a 360 —
+   mas por ORDEM, com a mesma especificidade. Medido: a caixa continuou nos 295.
+   Uma sobreposição de ecrã estreito tem de vir depois de tudo o que sobrepõe. */
+@media (max-width: 400px) {
+  .ns-bento__area { padding-inline: 8px; }
+  .ns-heroi__segunda { width: 100%; }
 }
