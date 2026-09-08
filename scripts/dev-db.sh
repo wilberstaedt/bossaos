@@ -34,7 +34,7 @@ command -v psql >/dev/null || { echo "psql não encontrado. brew install postgre
 pg_isready -q || { echo "PostgreSQL não responde. brew services start postgresql@16"; exit 1; }
 
 info "Papéis"
-psql -q -U "$SUPER" -d postgres <<SQL
+psql -q -v ON_ERROR_STOP=1 -U "$SUPER" -d postgres <<SQL
 DO \$\$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='bossaos_migrate') THEN
     -- CREATEDB porque o \`prisma migrate dev\` cria uma base SOMBRA para
@@ -57,10 +57,10 @@ SQL
 
 for DB in "$DB_DEV" "$DB_TEST"; do
   info "Base ${DB}"
-  psql -q -U "$SUPER" -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='${DB}'" | grep -q 1 \
-    || psql -q -U "$SUPER" -d postgres -c "CREATE DATABASE ${DB} OWNER bossaos_migrate"
+  psql -q -v ON_ERROR_STOP=1 -U "$SUPER" -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='${DB}'" | grep -q 1 \
+    || psql -q -v ON_ERROR_STOP=1 -U "$SUPER" -d postgres -c "CREATE DATABASE ${DB} OWNER bossaos_migrate"
 
-  psql -q -U "$SUPER" -d "$DB" <<SQL
+  psql -q -v ON_ERROR_STOP=1 -U "$SUPER" -d "$DB" <<SQL
   -- O runtime liga-se e usa, mas não constrói.
   GRANT CONNECT ON DATABASE ${DB} TO bossaos_app;
   GRANT USAGE ON SCHEMA public TO bossaos_app;
@@ -68,8 +68,8 @@ for DB in "$DB_DEV" "$DB_TEST"; do
   REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 
   -- O de autenticação idem, e os privilégios POR TABELA são dados na migração
-  -- do E04, tabela a tabela. Aqui não há `GRANT ... ON ALL TABLES` para ele de
-  -- propósito: um privilégio geral tornaria o próximo `CREATE TABLE` de
+  -- do E04, tabela a tabela. Aqui não há «GRANT ... ON ALL TABLES» para ele de
+  -- propósito: um privilégio geral tornaria o próximo «CREATE TABLE» de
   -- inquilino legível pela autenticação sem ninguém decidir isso.
   GRANT CONNECT ON DATABASE ${DB} TO bossaos_auth;
   GRANT USAGE ON SCHEMA public TO bossaos_auth;
