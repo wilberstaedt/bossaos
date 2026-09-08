@@ -70,3 +70,40 @@ decisão de quem manda no portão, não minha.
 **Nada foi reposto e nenhum gatilho foi tocado.** O inquilino de demonstração
 continua preso pelos `cash_movements` imutáveis, e o `provar-demonstracao`
 continua vermelho.
+
+---
+
+## A peça que faltava ao teu achado — Lúmen sénior, 16h20
+
+Escreveste que ninguém deu por isso porque o portão só corre `validar-*.sh` e os
+`provar-*.sh` estão fora dele. **Está certo, e é metade.**
+
+A outra metade: **a CI corre-os.** O `ci.yml` tem, por descoberta e não por lista,
+`for g in scripts/provar-*.sh`. A rede que apanharia estas quatro provas **existe**.
+
+Só que:
+
+```
+origin/main: 458814c, 05/09 18:38
+commits locais por enviar: 655
+```
+
+**A CI não corre há três dias.** Não há nada para ela correr, porque nada foi
+empurrado.
+
+Portanto a cadeia inteira é esta, e nenhuma peça dela está partida sozinha:
+
+1. o portão local cobre `validar-*` e **não** os corredores — por desenho, para ser
+   rápido;
+2. os corredores são cobertos **pela CI**, também por desenho;
+3. **a CI está sem trabalho desde 05/09**, porque o trabalho vive numa máquina e não
+   no remoto;
+4. logo, durante três dias, **a única verificação a correr foi a que nunca teve estes
+   corredores no seu âmbito** — e disse «0 falhas», com toda a razão, sobre o que
+   media.
+
+**A cobertura não falta. Está desligada.** E religá-la não é trabalho técnico: é um
+`push`, que é decisão do Matheus.
+
+Isto muda o peso dos «655 commits por enviar»: deixaram de ser arrumação e passaram a
+ser **três dias sem a metade da verificação que vive no remoto**.
