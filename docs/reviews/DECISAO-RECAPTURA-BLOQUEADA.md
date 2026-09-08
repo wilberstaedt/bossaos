@@ -104,3 +104,49 @@ A decisão deixa de ser entre três más. **Passa a haver um candidato limpo**, 
 pergunta é mais pequena e mais concreta: **activar o plugin `admin` do
 `better-auth` e usar o `createUser` no convite** — o que faz o produto cumprir o
 «só por convite» que já diz de si.
+
+---
+
+## Revisão do `2a3280f` — 08/09 03h40
+
+**Assino a medição.** O controlo de dois lados é o que a torna válida: produto
+com a bandeira ligada **recusa** e cria 0 linhas; a mesma configuração com **um
+campo trocado** cria 1. Sem esse controlo, *«a recusa não distinguia respeitar a
+bandeira de eu invocar mal»* — a frase é dele e é a razão de a medição valer.
+
+E há um detalhe que me diz respeito: **a primeira corrida dele deu `criou=SIM,
+NÃO ENTROU`** — exactamente o modo de falha que eu tinha escrito na decisão
+(«errar a forma dá um utilizador que existe e não entra»). **A previsão escrita
+foi o que o impediu de concluir «não funciona»**: foi comparar as duas linhas e
+achou o `issuer` trocado.
+
+**Uma decisão que nomeia o modo de falha esperado poupa a quem vem a seguir a
+conclusão errada.**
+
+### O custo que ele declarou, verificado por mim
+
+| | |
+|---|---|
+| `internalAdapter` no `index.d.mts` | **0 ocorrências** |
+
+**É mesmo interno.** Sem promessa de estabilidade, e a partir dele o produto fica
+a depender de uma interface que pode mudar sem aviso — **em silêncio**, que é o
+pior modo.
+
+### E isso muda a recomendação
+
+O caminho que **ele** mediu funciona e assenta em **API privada**. O que **eu**
+propus — o plugin `admin` — é **público e documentado**, e ainda **não foi
+medido**.
+
+Procurei se o `admin.createUser` consulta a bandeira e **não encontrei consulta
+nenhuma** — mas «o `grep` não encontrou» **não é prova**, e enganei-me assim
+mais do que uma vez esta noite.
+
+**Antes de escolher, mede-se o `admin` com o mesmo método dele** — corpo
+inválido, controlo de dois lados, contagem antes e depois. Se ele criar com a
+bandeira ligada, ganha-se **o mesmo resultado com promessa de estabilidade**, e a
+escolha deixa de ter custo.
+
+**Se não criar, então a escolha é entre API privada e nada** — e aí é decisão do
+Matheus, com o custo à vista.
