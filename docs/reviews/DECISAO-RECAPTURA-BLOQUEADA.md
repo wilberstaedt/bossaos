@@ -150,3 +150,59 @@ escolha deixa de ter custo.
 
 **Se não criar, então a escolha é entre API privada e nada** — e aí é decisão do
 Matheus, com o custo à vista.
+
+---
+
+## Fecho, 08/09 04h00 — a minha alternativa era a pior, e a medição di-lo
+
+O JR mediu o plugin `admin`. **Não cria — e o motivo não é a bandeira.**
+
+    1 ordem (corpo invalido)       recusou INVALID_EMAIL              linhas=0
+    2 bandeira ligada              recusou Unknown argument `role`    linhas=0
+    3 controlo bandeira desligada  recusou Unknown argument `role`    linhas=0
+    utilizadores 131 antes e 131 depois
+
+**O controlo de dois lados não distinguiu nada, e ele disse-o** — a falha é
+anterior ao ponto de decisão. Mas há uma inversão elegante: **com a bandeira
+ligada a chamada chegou à ESCRITA na base.** Se o `disableSignUp` fosse
+consultado, teria recusado antes. **A minha suspeita por ausência de `grep`
+fica medida — por onde a execução chegou, não por onde o símbolo aparece.**
+
+### A terceira coisa, que nenhum de nós previu
+
+**O que falta são COLUNAS, não permissão.** Verifiquei as cinco:
+
+| | |
+|---|---|
+| `users.role`, `banned`, `banReason`, `banExpires` | **nenhuma existe** |
+| `sessions.impersonatedBy` | **não existe** |
+
+E o produto **já tem** o que elas duplicariam:
+
+- **`RoleAssignment`, com escopo.** O `users.role` do plugin seria um **segundo
+  conceito de papel, global por utilizador**, ao lado de um que tem âmbito.
+- **A sessão de suporte do E33** — *«temporária, visível ao inquilino, com
+  âmbito»*, e com **tecto**: «o suporte pode pedir menos; nunca mais». O
+  `impersonatedBy` seria uma **segunda via de personificação sem condição
+  nenhuma.**
+
+### Portanto corrijo-me
+
+**Eu propus o `admin` como o caminho limpo.** A medição mostra que é o **sujo**:
+não funciona, e fazê-lo funcionar exigiria **duplicar dois conceitos sensíveis à
+segurança, cada um numa versão mais fraca do que a que já existe.**
+
+**Sobra um caminho que funciona:** o `internalAdapter`, medido pelo JR, que cria
+**e entra**. O custo é real — API privada, sem promessa de estabilidade.
+
+### A minha recomendação, com a mitigação
+
+**Usar o `internalAdapter`, isolado atrás de uma função só, com uma prova que
+fixe o comportamento** — criar, entrar, e o `issuer` conferido contra o schema.
+
+Assim uma actualização da biblioteca **parte o teste em voz alta em vez de partir
+o produto em silêncio**, que é o modo de falha que torna a API privada perigosa.
+
+**A escolha continua a ser do Matheus.** O que mudou é que agora não há dúvidas
+por medir: **um caminho funciona com um custo nomeado, e o outro não funciona e
+custaria mais.**
