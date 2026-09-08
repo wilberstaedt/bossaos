@@ -127,6 +127,14 @@ def carimbar(destino, raiz='.'):
     resumo, por_ficheiro = impressao_do_produto(raiz)
     with open(destino, encoding='utf-8') as fh:
         manifesto = json.load(fh)
+    # Os dois manifestos desta casa têm formas diferentes: o `mestres.json` é um
+    # objecto e o `composicoes.json` é uma LISTA. Envolve-se a lista em vez de se
+    # criar um segundo ficheiro ao lado — a impressão pertence ao manifesto das
+    # capturas que descreve, e separá-los era garantir que um dia andam
+    # desemparelhados. O capturador reescreve a lista a cada corrida e o corredor
+    # volta a carimbar logo a seguir, portanto a forma converge sempre.
+    if isinstance(manifesto, list):
+        manifesto = {'capturas': manifesto}
     manifesto['impressaoDoProduto'] = {
         'resumo': resumo,
         'ficheiros': len(por_ficheiro),
@@ -247,7 +255,55 @@ def diferencas_do_produto(raiz, por_ficheiro_antes):
 # implementação, dois chamadores.
 
 
+def comparar(destino, raiz='.', sonda=False):
+    """Compara a impressão guardada num manifesto com a árvore de agora.
+
+    Devolve `(codigo, linhas)`: 0 igual, 1 diferente, 2 sem carimbo.
+
+    Com `sonda=True` estraga **uma** entrada da impressão guardada antes de
+    comparar, e exige que a comparação acuse. É a sonda desta guarda: um
+    comparador cego devolveria «igual» também aqui, e o verde da corrida normal
+    passaria a não querer dizer nada. A sonda mexe só na cópia em memória — não
+    escreve no manifesto nem toca no produto.
+    """
+    import json
+    with open(destino, encoding='utf-8') as fh:
+        manifesto = json.load(fh)
+    carimbo = manifesto.get('impressaoDoProduto') if isinstance(manifesto, dict) else None
+    if not carimbo:
+        return 2, ['sem carimbo do conteudo do produto neste manifesto']
+
+    guardado = dict(carimbo['porFicheiro'])
+    if sonda:
+        if not guardado:
+            return 2, ['a impressao guardada esta vazia — a sonda nao teria o que estragar']
+        primeiro = sorted(guardado)[0]
+        guardado[primeiro] = 'sonda' + guardado[primeiro][5:]
+
+    alterados, novos, sumidos = diferencas_do_produto(raiz, guardado)
+    linhas = ([f'alterado      {f}' for f in alterados]
+              + [f'novo          {f}' for f in novos]
+              + [f'desaparecido  {f}' for f in sumidos])
+    return (1 if linhas else 0), linhas
+
+
 if __name__ == '__main__':
+    if sys.argv[1:2] == ['--comparar'] and len(sys.argv) > 2:
+        _sonda = '--sonda' in sys.argv
+        _codigo, _linhas = comparar(sys.argv[2], sonda=_sonda)
+        if _sonda:
+            # A sonda inverte a leitura: aqui o SUCESSO e' a comparacao acusar.
+            if _codigo == 1:
+                print('SONDA ACENDEU')
+                raise SystemExit(0)
+            print(f'SONDA NAO ACENDEU (codigo {_codigo})')
+            raise SystemExit(2)
+        for _l in _linhas[:8]:
+            print(_l)
+        if len(_linhas) > 8:
+            print(f'… e mais {len(_linhas) - 8}')
+        raise SystemExit(_codigo)
+
     if sys.argv[1:2] == ['--carimbar'] and len(sys.argv) > 2:
         _r, _n = carimbar(sys.argv[2])
         print(f'impressao do produto carimbada: {_n} ficheiros, resumo {_r[:16]}')

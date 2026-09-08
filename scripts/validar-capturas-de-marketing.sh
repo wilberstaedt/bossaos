@@ -62,23 +62,37 @@ if [ "$PRESENTES" -eq 0 ]; then
 fi
 verde "$PRESENTES de $ESPERADAS capturas presentes"
 
-# ── 1 · FRESCURA, pela peça partilhada ────────────────────────────────────
-SAIDA_FRESCURA=$(python3 scripts/frescura_do_produto.py "${FICHEIROS[@]}" 2>&1)
-ESTADO_FRESCURA=$?
-# ── O canário, e a diferença entre «não sei» e «falhou» ───────────────────
+# ── 1 · FRESCURA, por CONTEÚDO e não por carimbo ──────────────────────────
 #
-# A peça partilhada devolve 2 quando as datas desta cópia foram reescritas por
-# um checkout — e aí esta guarda **não consegue medir**, porque os dois lados da
-# comparação ficam iguais e o verde não significa nada. Tratar esse 2 como
-# FALHOU seria trocar um cego por um alarmista; tratá-lo como 0 era o cegamento
-# que a guarda irmã tinha e que já custou um verde falso num worktree.
-if [ "$ESTADO_FRESCURA" -eq 2 ]; then
-  naomedi "$(printf '%s' "$SAIDA_FRESCURA" | sed -n 's/^REESCRITOS //p')"
-  echo "           Num checkout esta guarda NÃO MEDE NADA. Corre-a onde as"
-  echo "           capturas são produzidas."
+# Isto comparava `mtime` de captura contra `mtime` de fonte. A 08/09 um
+# formatador gravou dois ficheiros por cima com o **mesmo texto**, e esta guarda
+# ficou vermelha com 24 de 24 «anteriores ao produto» — sobre imagens que não
+# tinham nada de errado. **Uma guarda que grita lobo ensina a ignorá-la**, e esta
+# protege as primeiras imagens que um comprador vê.
+#
+# A pergunta é de conteúdo: o `provar-demonstracao.sh` carimba no
+# `composicoes.json`, no momento da captura, o resumo dos ficheiros de produto, e
+# aqui recalcula-se e compara-se. Mesmo desenho da página de aprovação e mesma
+# peça — e os quatro casos que o justificam estão exercidos no
+# `scripts/provar-frescura-por-conteudo.sh`, incluindo a REVERSÃO, que é o caso
+# que a regra por data de commit deixava passar.
+#
+# E o canário dos `mtime` sai DESTE caminho porque aqui já não há `mtime` — mas
+# **não é apagado**: a `validar-provas-frescas.sh` ainda o consulta. Uma peça só
+# fica obsoleta quando o ÚLTIMO caminho que a usa deixa de a usar.
+MANIFESTO="docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao/composicoes.json"
+if [ ! -s "$MANIFESTO" ]; then
+  naomedi "não há $MANIFESTO — sem manifesto não há carimbo com que comparar."
   exit "$NAO_MEDI"
 fi
-verde "os \`mtime\` desta cópia são de produção (o canário confere com o seu commit)"
+SAIDA_FRESCURA=$(python3 scripts/frescura_do_produto.py --comparar "$MANIFESTO" 2>&1)
+ESTADO_FRESCURA=$?
+if [ "$ESTADO_FRESCURA" -eq 2 ]; then
+  naomedi "este conjunto de capturas não tem carimbo do conteúdo do produto."
+  echo "           Foi tirado antes de a frescura passar a medir conteúdo. Uma"
+  echo "           recaptura resolve-o de vez."
+  exit "$NAO_MEDI"
+fi
 
 # ── 2 · IDIOMA: a mesma composição, somas diferentes ─────────────────────
 repetidas() {
@@ -109,16 +123,20 @@ N_REPETIDAS=$(printf '%s' "$REPETIDAS" | grep -c . | tr -d ' ')
 SONDA_DIR="$RAIZ_CAPTURAS/.sonda"
 mkdir -p "$SONDA_DIR"
 trap 'rm -rf "$SONDA_DIR"' EXIT INT TERM
-printf 'sonda' > "$SONDA_DIR/velha.png"
-touch -t 200001010000 "$SONDA_DIR/velha.png"
-SONDA_FRESCURA=$(python3 scripts/frescura_do_produto.py "$SONDA_DIR/velha.png" >/dev/null 2>&1; echo $?)
+# A sonda da frescura mudou de sujeito com a pergunta: já não se planta um
+# ficheiro velho, porque a data deixou de decidir. Estraga-se UMA entrada da
+# impressão guardada — só na cópia em memória, sem escrever no manifesto nem
+# tocar no produto — e exige-se que a comparação acuse. Um comparador cego
+# devolveria «igual» também aqui, e o verde da corrida normal não queria dizer
+# nada.
+SONDA_FRESCURA=$(python3 scripts/frescura_do_produto.py --comparar "$MANIFESTO" --sonda >/dev/null 2>&1; echo $?)
 cp "$RAIZ_CAPTURAS/${IDIOMAS[0]}/${COMPOSICOES[0]}.png" "$SONDA_DIR/a.png"
 cp "$SONDA_DIR/a.png" "$SONDA_DIR/b.png"
 SONDA_IDIOMA=$( [ "$(md5 -q "$SONDA_DIR/a.png")" = "$(md5 -q "$SONDA_DIR/b.png")" ] && echo acendeu || echo CEGA )
 rm -rf "$SONDA_DIR"; trap - EXIT INT TERM
 
-if [ "$SONDA_FRESCURA" != "1" ]; then
-  naomedi "a sonda da frescura não acendeu: um ficheiro datado de 2000 não foi visto como velho."
+if [ "$SONDA_FRESCURA" != "0" ]; then
+  naomedi "a sonda da frescura não acendeu: uma impressão estragada não foi vista como diferente."
   exit "$NAO_MEDI"
 fi
 if [ "$SONDA_IDIOMA" != "acendeu" ]; then
@@ -129,11 +147,13 @@ verde "as duas sondas acenderam e saíram"
 
 ambito() {
   echo "  âmbito:  ${#IDIOMAS[@]} idiomas × ${#COMPOSICOES[@]} composições = $ESPERADAS capturas."
-  echo "           $(printf '%s' "$SAIDA_FRESCURA" | sed -n 's/^MEDIDOS \([0-9]*\) VELHOS \([0-9]*\)/\1 medidas na frescura, \2 anteriores ao produto./p')"
-  echo "           Frescura: \`mtime\` contra a fonte \`.ts\`/\`.tsx\`/\`.css\` mais recente"
-  echo "           de \`apps/\` e \`packages/\` — a mesma pergunta da página de aprovação,"
-  echo "           na mesma peça. O \`next-env.d.ts\` fica de fora: é gerado, e seria"
-  echo "           a fonte mais nova a cada build."
+  echo "           Frescura: RESUMO DO CONTEÚDO dos ficheiros \`.ts\`/\`.tsx\`/\`.css\` de"
+  echo "           \`apps/\` e \`packages/\`, carimbado no momento da captura e recalculado"
+  echo "           aqui — a mesma pergunta da página de aprovação, na mesma peça. O"
+  echo "           \`next-env.d.ts\` fica de fora: é gerado."
+  echo "           NÃO se mede tempo: gravar por cima com o mesmo texto passa, e uma"
+  echo "           REVERSÃO recusa. As duas coisas estão exercidas no"
+  echo "           \`provar-frescura-por-conteudo.sh\`."
   echo "           Idioma: somas de verificação das IMAGENS, não o código. Foi por"
   echo "           elas serem iguais que o defeito se conheceu."
   echo "           FORA, e declarado: se as três estiverem igualmente ERRADAS, isto"
@@ -147,8 +167,11 @@ if [ "$PRESENTES" -lt "$ESPERADAS" ]; then
   ambito; exit "$FALHOU"
 fi
 if [ "$ESTADO_FRESCURA" -eq 1 ]; then
-  vermelho "há capturas anteriores à fonte mais recente do produto:"
-  printf '%s\n' "$SAIDA_FRESCURA" | grep '^VELHA' | sed 's/^VELHA /           /' | head -8
+  vermelho "o produto MUDOU desde que estas capturas foram tiradas:"
+  # O comparador nomeia. Uma recusa que só diz «está velho» manda procurar às
+  # cegas — e, quando a causa era uma data a mexer, mandava gastar um build.
+  printf '%s\n' "$SAIDA_FRESCURA" | sed 's/^/           /' | head -8
+  echo "           Isto NÃO é uma data a mexer: é o conteúdo a ser outro."
   echo "           A página que vende o produto mostraria o que ele já não é."
   ambito; exit "$FALHOU"
 fi
@@ -158,7 +181,7 @@ if [ "${N_REPETIDAS:-0}" -gt 0 ]; then
   ambito; exit "$FALHOU"
 fi
 
-verde "as $ESPERADAS são posteriores ao produto e distintas entre idiomas"
+verde "as $ESPERADAS mostram o produto de agora e são distintas entre idiomas"
 echo
 ambito
 exit "$OK"

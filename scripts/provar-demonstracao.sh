@@ -137,6 +137,27 @@ else
   erro "o capturador reprovou — ver as linhas acima"
 fi
 
+# ── O carimbo da impressao do produto, LOGO a seguir a captura ─────────────
+#
+# O mesmo que o `provar-mestres.sh` faz, e pela mesma razao: a frescura destas
+# imagens passa a ser uma pergunta de CONTEUDO. Antes comparava-se `mtime`, e um
+# formatador a gravar por cima com o mesmo texto punha esta guarda a gritar lobo
+# — sobre as imagens que um comprador ve primeiro.
+#
+# LIMITE declarado, igual: entre o build e esta linha ha uma janela de segundos.
+# Fecha-se nao editando o produto enquanto se captura, nao com outra regra.
+MANIFESTO_MKT="docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao/composicoes.json"
+if [ -s "$MANIFESTO_MKT" ]; then
+  if python3 scripts/frescura_do_produto.py --carimbar "$MANIFESTO_MKT" >/tmp/mkt-carimbo.txt 2>&1; then
+    verde "$(cat /tmp/mkt-carimbo.txt)"
+  else
+    erro "o carimbo da impressao falhou — as capturas ficam sem com que comparar"
+    tail -3 /tmp/mkt-carimbo.txt
+  fi
+else
+  erro "nao ha composicoes.json para carimbar"
+fi
+
 # As composicoes vivem DENTRO da aplicacao, que e' quem as importa.
 DESTINO="apps/web/src/demonstracao"
 # ── 3. O KDS existe EM CADA IDIOMA, e nao e' um ficheiro vazio ─────────────

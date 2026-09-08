@@ -365,3 +365,57 @@ Correu um build com a máquina em ATENÇÃO sem avisar antes, e disse-o sem eu
 perguntar. A regra é boa e foi quebrada; o que a mantém viva é exactamente isto —
 **uma regra que só se ouve quando é cumprida deixa de ser uma regra e passa a ser uma
 decoração.** Fica registado, sem mais.
+
+---
+
+## A `validar-capturas-de-marketing` migrada — 08/09
+
+Era a que estava a **gritar lobo**: saída 1, 24 de 24 «anteriores ao produto»,
+pelos mesmos dois ficheiros das 07h00:30 que têm o conteúdo do commit — sobre as
+primeiras imagens que um comprador vê. **Agora aceita, e aceita por medição.**
+
+    ok       24 de 24 capturas presentes
+    ok       as duas sondas acenderam e saíram
+    ok       as 24 mostram o produto de agora e são distintas entre idiomas
+    saida=0
+
+### O que mudou, e o que ficou igual
+
+- O `provar-demonstracao.sh` **carimba o `composicoes.json`** logo a seguir à
+  captura, como o corredor dos mestres.
+- A guarda chama `frescura_do_produto.py --comparar` — **a mesma peça**, não uma
+  cópia. As duas guardas fazem agora literalmente a mesma pergunta.
+- **A sonda mudou de sujeito com a pergunta.** Já não se planta um ficheiro
+  datado de 2000, porque a data deixou de decidir: estraga-se **uma** entrada da
+  impressão guardada, só em memória, e exige-se que a comparação acuse. Um
+  comparador cego diria «igual» também aí.
+- A sonda do idioma fica como estava — mede somas das imagens, e essa pergunta
+  não mudou.
+- A frase de sucesso deixou de dizer «posteriores ao produto». Uma guarda cuja
+  mensagem descreve a pergunta antiga ensina o modelo errado a quem a lê.
+
+### Uma decisão de forma
+
+`mestres.json` é um objecto e `composicoes.json` é uma **lista**. O `carimbar`
+envolve a lista (`{"capturas": [...], "impressaoDoProduto": {...}}`) em vez de
+escrever um segundo ficheiro ao lado: **a impressão pertence ao manifesto das
+capturas que descreve**, e separá-los era garantir que um dia andam
+desemparelhados. O capturador reescreve a lista a cada corrida e o corredor
+volta a carimbar logo a seguir, portanto a forma converge sempre.
+
+### O controlo negativo, ao vivo
+
+Acrescentei uma linha a `packages/ui/src/estilos.css`:
+
+    FALHOU   o produto MUDOU desde que estas capturas foram tiradas:
+             alterado      packages/ui/src/estilos.css
+             Isto NÃO é uma data a mexer: é o conteúdo a ser outro.
+
+Reposto com `touch -r`, e a guarda voltou a **saída 0**.
+
+### O canário
+
+**Fica**, e agora com uma só consumidora: a `validar-provas-frescas.sh`. Saiu
+deste caminho porque aqui já não há `mtime` — não porque tenha deixado de servir.
+Quando essa migrar, com desenho próprio (a população dela é outra: provas contra
+fontes, não capturas contra produto), o canário sai. **E não antes.**
