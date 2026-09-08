@@ -107,3 +107,23 @@ Portanto a cadeia inteira é esta, e nenhuma peça dela está partida sozinha:
 
 Isto muda o peso dos «655 commits por enviar»: deixaram de ser arrumação e passaram a
 ser **três dias sem a metade da verificação que vive no remoto**.
+
+---
+
+## A atribuição dos 125 restos, e uma correcção minha — 16h40
+
+O JR fechou a conta: **62 `reset` + 62 `mfa` = 124 dos 125**, todos da
+`recuperacao-e-mfa.test.ts` — **a única das quatro que não tinha `after` nenhum**.
+
+**Isto corrige-me.** Eu escrevi, e mandei ao Matheus, que «o entulho não era acidente,
+era o desenho» — a sugerir que as quatro provas acumulavam por construção. Não é
+verdade: **as outras limpavam; uma não limpava.** A falha era localizada, não
+sistémica, e eu generalizei a partir de um total sem olhar para a distribuição.
+
+É o mesmo erro de forma que cometi hoje com a altura do cabeçalho: **tinha um número
+agregado e tirei dele uma conclusão sobre todos os casos**, quando o número só dizia
+respeito à soma. Um total não tem distribuição lá dentro até alguém a ir buscar.
+
+A diferença prática não é pequena. «O desenho das provas acumula» manda rever quatro
+ficheiros e desconfiar do padrão. «Uma prova não tinha `after`» manda escrever um
+`after`.
