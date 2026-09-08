@@ -160,15 +160,28 @@ for mid in sorted(por):
 
 # O carimbo: que commit foi capturado e quando. Ver o comentario longo acima.
 _h = commit_capturado()
-_pngs = glob.glob(os.path.join(D, '*.png'))
-_quando = time.strftime('%d/%m/%Y as %Hh%M', time.localtime(max(os.path.getmtime(f) for f in _pngs))) if _pngs else None
-if _h and _quando:
-    carimbo = (f'Capturas de <strong>{_quando}</strong>, do commit <code>{_h}</code>. '
-               'Se o produto avancou desde esse commit, estas imagens ficaram para tras — '
-               'a garantia la em cima valia no instante em que esta pagina foi gerada, e nao se defende sozinha depois disso.')
-else:
-    carimbo = ('<strong>Nao sei de que commit sao estas capturas</strong> — o carimbo nao pôde ser lido. '
-               'Trate esta pagina como de idade desconhecida ate alguem o confirmar.')
+# O carimbo nomeia o RESUMO DO CONTEUDO, e o commit so como ponteiro humano.
+# O commit move-se por razoes que nao tocam no produto — um commit de
+# documentacao muda o `HEAD` e nao muda um pixel — e um leitor que compare
+# commits conclui «isto envelheceu» quando nao envelheceu. O resumo so muda
+# quando o produto muda, que e a pergunta que esta pagina levanta de si propria.
+# A data em ISO e para maquinas. Quem le esta pagina e uma pessoa.
+try:
+    _dt = time.strptime(str(_carimbo["quando"])[:19], '%Y-%m-%dT%H:%M:%S')
+    _quando_legivel = time.strftime('%d/%m/%Y as %Hh%M', _dt).replace(' as ', ' às ')
+except Exception:
+    _quando_legivel = str(_carimbo["quando"])
+
+carimbo = (
+    f'Capturas de <strong>{html.escape(_quando_legivel)}</strong>, '
+    f'do produto com o resumo <code>{_carimbo["resumo"][:16]}</code> '
+    f'({_carimbo["ficheiros"]} ficheiros)'
+    + (f', no commit <code>{_h}</code>' if _h else '')
+    + '. Este resumo muda quando o produto muda, e só então — '
+    'compara-o com o de agora para saber se estas imagens ainda retratam o produto. '
+    'A garantia lá em cima valia no instante em que esta página foi gerada, '
+    'e não se defende sozinha depois disso.'
+)
 
 nav = ''.join(f'<a href="#{m}">{m}</a>' for m in sorted(por))
 open(SAIDA, 'w', encoding='utf-8').write(f"""<title>Telas-mestre BossaOS</title>
