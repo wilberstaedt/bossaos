@@ -256,3 +256,42 @@ esquecimento; esta é **consequência de fazer bem.**
 **Não vai a lado nenhum antes de a Nathalia ver.** Ela está a ser convidada a
 julgar uma landing cujo herói mostra o produto anterior à noite de trabalho que
 lhe estamos a apresentar.
+
+---
+
+# 08/09 04h45 — re-verifiquei, porque a minha própria assinatura tinha prazo
+
+Assinei «12 de 12 cumprem» no `d257b2a`. Depois disso entraram **três commits ao
+produto**, e um deles — a cura dos cantos — mexe **na superfície comercial**.
+**A minha verificação era anterior a isso.**
+
+## Antes de medir, re-calibrei — e a razão importa
+
+**Ele editou a minha fita métrica** no `b52fc14`, pondo-a a julgar o raio. A
+mudança é boa e contida: julga só o **lado pequeno**, porque a cápsula é um
+idioma deliberado e reprová-la *«seria inventar uma falha que o revisor não
+apontou»*.
+
+**Mas o instrumento do revisor mudou de mãos para as do revisto.** Apontei-o
+primeiro à produção, cujos valores eu sabia de cor, e ele devolveu-os todos:
+588, 13 secções, 7103, 2 fundos, 10 689 no telemóvel.
+
+**Um instrumento que muda de mãos re-calibra-se antes de servir.**
+
+## E o resultado, contra `HEAD`
+
+**13 de 13.** Os doze aguentaram, e entrou o décimo terceiro:
+
+| | produção | `HEAD` |
+|---|---:|---:|
+| cantos abaixo de 14 px | **16** | **0** |
+
+Os outros ficam onde estavam: H1 **72**/**44**, H2 **48**, lead **21**, corpo
+**17**, cabeçalho **78**, herói **790**, captura **741**, **7** blocos, **5477**
+px, **4** fundos, e **9867** no telemóvel.
+
+## O que isto fecha
+
+**A verificação em que a Nathalia vai assentar deixou de ser velha.** Não estava
+errada — estava datada, e a diferença é a mesma que passei a noite a nomear nos
+outros. **Uma assinatura também tem prazo, e a minha tinha três commits.**
