@@ -3882,3 +3882,40 @@ Levou duas condições:
 captura que falta é cosmética. **Um repositório que não se consegue reconstruir
 num ponto do passado não é cosmético** — é a diferença entre ter história e ter
 um registo de que houve história.
+
+## 08/09 05h55 — corri a suite inteira, e o verde dela repousa em treze abstenções
+
+Declarei às 00h50 que **não** tinha corrido o `validar-no-commit` completo, só as
+quatro falhas uma a uma. Com a máquina livre e os dois lados parados, corri-o.
+
+    O que se publica esta medido: 0 falhas.
+    SAIDA=0
+
+**Zero falhas.** E ao lado, **13 `NÃO MEDI`** — eram **11** ao princípio da noite.
+
+### Os dois que passaram a abster-se são os dois corredores de hoje
+
+    validar-caminho-da-demo.sh
+    validar-sistema-ns2.sh
+
+**O segundo é a guarda que prova o sistema visual do North Star.** Corrida
+sozinha dá **saída 0**, com `AMBITO seccoes=5 bento=4 mesas=6 falhas=0`. Dentro
+da suite dá **`NÃO MEDI`**, porque ali não há `build` — e ela **recusa em vez de
+mentir**, que é exactamente como foi desenhada.
+
+**A guarda está certa. A frase é que não.**
+
+`«O que se publica está medido: 0 falhas»` **não é verdade como está escrito.**
+O verdadeiro é **«0 falhas entre os que mediram»** — e treze não mediram,
+incluindo o que responde pelo trabalho desta noite.
+
+### E há aqui uma coisa estrutural, não um descuido
+
+Cada guarda nova que precisa de `build` **entra na suite a abster-se**. Ontem
+eram 11; hoje 13. **Quanto melhor a cobertura fica, mais o verde da suite repousa
+em quem não olhou** — e a frase final não distingue as duas coisas.
+
+**Não a corrijo agora**: mexer no veredicto de uma suite às seis da manhã, com
+tudo o resto parado à espera de pessoas, é o tipo de mudança que se faz acordado
+e com alguém a rever. **Fica medido, nomeado, e por decidir** — que é o que tem
+de ficar quando a cura é maior do que o momento.
