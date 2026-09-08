@@ -3622,3 +3622,43 @@ instala no produto um papel e uma personificação paralelos aos que o E33 desen
 de propósito.
 
 Máquina em **ATENÇÃO** (4966 MB disponíveis, 55 livres). Só guião de node.
+
+## 08/09 03h45 — a última medição está entregue, e o estado da noite
+
+Passei ao JR a medição que falta: **o plugin `admin` cria com a bandeira
+ligada?** Com o método dele — corpo inválido, controlo de dois lados, contagem
+antes e depois — e com o aviso que a própria corrida dele deu: **não basta criar,
+tem de ENTRAR**, e compara-se o `issuer` antes de concluir.
+
+Se criar, ganha-se o mesmo resultado **com API pública**. Se não, a escolha é
+entre **API privada e nada** — e é do Matheus, com o custo à vista.
+
+### O que está parado, e em quê
+
+| | espera por |
+|---|---|
+| **Fase 3** do North Star | **a Nathalia** — aprovação escrita; silêncio não conta |
+| a recaptura das três da sala | a decisão de produto acima |
+| publicar os 16 commits | **retirei a recomendação**: fecharia a entrada de clientes novos |
+| a porta de registo em produção | continua **aberta**, e é o único risco vivo |
+| as fixtures `insp-*` em produção | ele |
+| as 20 decisões | ele |
+
+### O que a noite deixou provado
+
+- **Fase 2 do North Star entregue e verificada por mim**: 12 de 12 números,
+  `NORTH STAR PRONTA PARA NATHALIA` emitido, produção intacta.
+- **A linha de base a zero** — e foi preciso ressuscitar **sete plantes mortos**
+  e dois corredores para lá chegar.
+- **Um defeito de segurança encontrado, curado e provado** — e, ao ser curado,
+  **revelou que a porta que fechámos era portante**.
+
+### A frase que fica
+
+Quase tudo o que se apanhou hoje — o botão invisível, o anel a 1,00:1, o CTA
+verde sobre verde, as capturas velhas, as guardas cegas, os plantes mortos, o
+convite «intacto» — **teve a mesma forma: um instrumento correcto apontado ao
+sujeito errado.**
+
+E a cura foi sempre a mesma e nunca foi olhar com mais atenção: **foi trocar o
+sujeito da medição.**
