@@ -190,3 +190,27 @@ códigos deixa de saber qual mediu.
 
 As **três identidades órfãs** — `rv100-022`, `x` e `y` em `@inspeccao.example` —
 citadas por suites e criadas por ninguém.
+
+---
+
+## Revisão do `a52b977` — aceite, e o meu grep olhava ao nível errado — 17h00
+
+Verificado nas quatro: **zero `sign-up`** e **`after` em todas**. As duas coisas que
+importavam.
+
+Fui procurar `criarUtilizador` nelas e deu **zero**, e ia perguntar como e que a conta
+nasce. Não perguntei porque fui ver: existe `provas/conta-de-prova.ts`, uma ajuda
+partilhada que as quatro importam, com `criarContaDeProva` e `apagarContasDeProva`.
+
+**É melhor do que cada prova chamar directamente** — uma implementação, quatro
+chamadores — e é o argumento que ele próprio usou hoje de manhã para calcular o resumo
+do produto num sítio só. **O meu grep é que olhava ao nível errado**, e a ausência
+lia-se como falta quando era indirecção.
+
+Um detalhe do desenho que vale a pena: o `apagarContasDeProva` **devolve o número
+apagado**. Isso permite a uma prova afirmar uma invariante — «criei duas, apaguei
+duas» — em vez de confiar que a limpeza correu. É a diferença entre limpar e
+**provar que se limpou**.
+
+**O que não fiz:** não voltei a correr as quatro. A máquina está em ATENÇÃO e as
+corridas são dele, reportadas. A minha revisão é da estrutura.
