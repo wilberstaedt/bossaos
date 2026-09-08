@@ -2482,7 +2482,7 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
 
 .ns-papeis { display: grid; gap: var(--bo-espaco-xl); margin-top: var(--bo-espaco-xl); }
 @media (min-width: 1024px) { .ns-papeis { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: center; } }
-.ns-papeis__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--bo-espaco-lg); }
+.ns-papeis__beneficio { display: grid; gap: var(--bo-espaco-lg); align-content: center; }
 .ns-papeis__nome { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 22px; margin: 0 0 4px; }
 
 .ns-preco__nome { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 24px; margin: 0 0 var(--bo-espaco-sm); }

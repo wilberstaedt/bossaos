@@ -1,4 +1,4 @@
-import { Botao } from '@bossaos/ui';
+import { Botao, Separadores } from '@bossaos/ui';
 import { MENSALIDADES_NUM_ANO, MOEDA_COMERCIAL, precoDoPlano } from '@bossaos/domain';
 import { formatarDinheiro, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../src/componentes/Marketing.tsx';
@@ -65,6 +65,29 @@ export async function generateMetadata(
 }
 
 /** Os três planos, na ordem de progressão que o §6.5 pede. */
+/**
+ * ── Cada papel com a SUA tela ──────────────────────────────────────────────
+ *
+ * O §4.5 pede que ao trocar de papel troquem **o ecrã e o benefício**, juntos.
+ * Só a imagem faz uma galeria com legendas; só o texto faz quatro parágrafos
+ * com uma fotografia decorativa.
+ *
+ * O par não foi escolhido por estética: **a própria cópia de cada papel nomeia
+ * o artefacto que lhe corresponde.** «O catálogo, os preços» para quem manda;
+ * «anota o pedido em pé e com uma mão» para quem atende, e o `altTablet` diz
+ * literalmente «o aparelho que fica na mão de quem serve»; «uma tela com o que
+ * tem de preparar» para a cozinha; «lê o cardápio» para quem vem comer.
+ *
+ * A `sala` fica de fora de propósito: já é o ecrã do herói, e repeti-la aqui
+ * daria duas fotografias iguais na mesma página.
+ */
+const PAPEIS = [
+  { n: 1, qual: 'catalogo' },
+  { n: 2, qual: 'tablet' },
+  { n: 3, qual: 'kds' },
+  { n: 4, qual: 'carta' },
+] as const;
+
 const PLANOS = [
   { codigo: 'STARTER', nome: 'planoStarter', quem: 'planoStarterQuem' },
   { codigo: 'RESTAURANT', nome: 'planoRestaurant', quem: 'planoRestaurantQuem' },
@@ -229,20 +252,25 @@ export default async function Landing({
           <div>
             <h2 className="ns-titulo" id="t-papeis">{k.papeisTitulo}</h2>
             <p className="ns-lead">{k.papeisTexto}</p>
-            <div className="ns-papeis">
-              <ul className="ns-papeis__lista">
-                {[1, 2, 3, 4].map((n) => (
-                  <li key={n}>
-                    <h3 className="ns-papeis__nome">{kx[`papel${n}`]}</h3>
-                    <p className="ns-corpo">{kx[`papel${n}Texto`]}</p>
-                  </li>
-                ))}
-              </ul>
-              <div className="ns-moldura">
-                <Composicao qual="carta" idioma={idioma}
-                            tamanhos="(min-width: 1024px) 390px, 80vw" />
-              </div>
-            </div>
+            <Separadores
+              etiqueta={k.papeisTitulo}
+              separadores={PAPEIS.map(({ n, qual }) => ({
+                chave: `papel${n}`,
+                rotulo: kx[`papel${n}`] ?? '',
+                conteudo: (
+                  <div className="ns-papeis">
+                    <div className="ns-papeis__beneficio">
+                      <h3 className="ns-papeis__nome">{kx[`papel${n}`]}</h3>
+                      <p className="ns-corpo">{kx[`papel${n}Texto`]}</p>
+                    </div>
+                    <div className="ns-moldura">
+                      <Composicao qual={qual} idioma={idioma}
+                                  tamanhos="(min-width: 1024px) 390px, 80vw" />
+                    </div>
+                  </div>
+                ),
+              }))}
+            />
           </div>
         </section>
       ) : null}
