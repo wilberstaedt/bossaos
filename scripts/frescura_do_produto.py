@@ -139,3 +139,53 @@ if __name__ == '__main__':
     for f, porque in maus:
         print(f'VELHA {f} :: {porque}')
     raise SystemExit(1 if maus else 0)
+
+
+# ── Porque e que o produto ficou mais recente: mudou, ou so foi gravado? ────
+#
+# A comparacao acima e por `mtime`, e tem um buraco que custou tempo a 08/09:
+# um formatador que grava um ficheiro com o MESMO texto move o `mtime` e
+# envelhece, de uma vez, TODAS as capturas do repositorio.
+#
+# Medido nesse dia: as 06h59 a pagina de aprovacao dava 25/25 posteriores ao
+# produto; as 08h00 recusava as 25. Entre os dois momentos ninguem mudou o
+# produto - dois ficheiros foram tocados as 07h00:30 e o `git status` deles
+# estava VAZIO. Conteudo identico ao commit; so a data mexeu.
+#
+# Isto NAO muda o veredicto, e e de proposito: a guarda falha para o lado
+# seguro e assim deve continuar. O que muda e o que a recusa DIZ. Sem isto, a
+# resposta obvia a uma recusa e recapturar, e recapturar exige um build inteiro
+# - meia hora e, numa maquina com historico de kernel panic, um risco real.
+# **Mandar alguem curar o que nao esta partido e o custo que esta funcao evita.**
+def porque_e_que_o_produto_e_mais_recente(raiz, limite, quantos=8):
+    """Ficheiros de produto mais recentes que `limite`, e se mudaram de facto.
+
+    Devolve uma lista de `(caminho, mtime, mudou)`, ordenada do mais recente
+    para o mais antigo. O `mudou` e `True` se o ficheiro tem alteracoes por
+    commitar, `False` se o conteudo e o do commit, e `None` se nao se pode
+    saber - sem git, por exemplo. `None` nao se le como `False`: le-se como
+    nao sei, que e a unica resposta honesta quando o instrumento falta.
+    """
+    sujos = None
+    codigo, saida = _git(['status', '--porcelain'], raiz)
+    if codigo == 0:
+        sujos = set()
+        for linha in saida.splitlines():
+            if len(linha) > 3:
+                sujos.add(linha[3:].strip().strip('"'))
+
+    achados = []
+    for base in ('apps', 'packages'):
+        for r, _ds, fs in os.walk(os.path.join(raiz, base)):
+            if 'node_modules' in r or '/.next' in r:
+                continue
+            for f in fs:
+                if f in GERADOS or not f.endswith(EXTENSOES):
+                    continue
+                caminho = os.path.join(r, f)
+                m = os.stat(caminho).st_mtime
+                if m > limite:
+                    rel = os.path.relpath(caminho, raiz)
+                    achados.append((rel, m, None if sujos is None else (rel in sujos)))
+    achados.sort(key=lambda t: -t[1])
+    return achados[:quantos]

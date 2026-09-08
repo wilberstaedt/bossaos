@@ -22,6 +22,7 @@ SAIDA = sys.argv[1] if len(sys.argv) > 1 else '/tmp/telas-mestre.html'
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from frescura_do_produto import mais_recente_do_produto as _mais_recente  # noqa: E402
 from frescura_do_produto import mtimes_reescritos as _reescritos  # noqa: E402
+from frescura_do_produto import porque_e_que_o_produto_e_mais_recente as _porque  # noqa: E402
 
 def mais_recente_do_produto():
     return _mais_recente(RAIZ)
@@ -94,6 +95,29 @@ velhas = [e for e in L if os.stat(os.path.join(RAIZ, e['ficheiro'])).st_mtime < 
 if velhas:
     print(f"RECUSO: {len(velhas)} captura(s) anteriores a fonte mais recente do produto.")
     for e in velhas[:6]: print('   ', os.path.basename(e['ficheiro']))
+
+    # Antes de mandar recapturar, dizer O QUE ficou mais recente - e se mudou
+    # mesmo. Uma recusa que so diz «esta velho» manda gastar um build inteiro,
+    # e a 08/09 a causa foi um formatador a gravar dois ficheiros por cima com
+    # o mesmo texto.
+    _novos = _porque(RAIZ, max(os.stat(os.path.join(RAIZ, e['ficheiro'])).st_mtime for e in L))
+    if _novos:
+        print()
+        print("O que ficou mais recente que a ULTIMA captura:")
+        _tocados = 0
+        for _rel, _m, _mudou in _novos:
+            _q = time.strftime('%H:%M:%S', time.localtime(_m))
+            if _mudou is True:   _et = 'MUDOU (tem alteracoes por commitar)'
+            elif _mudou is False: _et = 'so o mtime - o conteudo e o do commit'; _tocados += 1
+            else:                 _et = 'nao sei se mudou (sem git)'
+            print(f"    {_q}  {_rel}  <- {_et}")
+        if _tocados == len(_novos):
+            print()
+            print("NENHUM deles mudou de conteudo: foram gravados por cima iguais.")
+            print("Recapturar NAO cura isto - a comparacao e por data de ficheiro,")
+            print("e o produto que as capturas mostram continua a ser o mesmo.")
+            print("Ver docs/reviews/ACHADO-FRESCURA-TOCA-NO-MTIME.md")
+            sys.exit(1)
     print("Recaptura antes de mostrar isto a alguem.")
     sys.exit(1)
 print(f"frescura: {len(L)}/{len(L)} capturas posteriores a fonte mais recente do produto")

@@ -69,3 +69,59 @@ geração que o usaria foi a que a guarda recusou. Não o dou por feito.
 Publiquei, essa sim, a página que o JR gerou às 06h59 — a que a guarda aprovou por
 si. Não lhe colei carimbo à mão: a página é legítima, e um carimbo escrito por mim
 ao lado de uma garantia gerada pela máquina confunde quem os lê a seguir.
+
+---
+
+## Metade curada — 08/09, 08h15
+
+Fiz a cura barata, e **de propósito não fiz a outra**.
+
+**O que mudou:** a recusa deixou de dizer só «está velho». Agora nomeia o que ficou
+mais recente que a última captura e, para cada um, se mudou de conteúdo ou se só lhe
+mexeram a data. Quando **nenhum** mudou, di-lo e acrescenta que recapturar não cura.
+Ao vivo, neste repositório:
+
+```
+O que ficou mais recente que a ULTIMA captura:
+    07:00:30  apps/web/src/staff/PainelDaFila.tsx  <- so o mtime - o conteudo e o do commit
+    07:00:30  apps/web/app/[idioma]/app/[orgSlug]/catalogo/page.tsx  <- so o mtime ...
+
+NENHUM deles mudou de conteudo: foram gravados por cima iguais.
+Recapturar NAO cura isto - a comparacao e por data de ficheiro,
+e o produto que as capturas mostram continua a ser o mesmo.
+```
+
+**O veredicto não mudou:** continua a recusar, e continua a sair 1. Isso é escolha,
+não meio caminho — ver abaixo.
+
+**Prova, dos dois lados.** Um detector que dissesse «só o mtime» para tudo dava
+exactamente o mesmo ecrã acima e não provava nada. Pus um ficheiro `.ts` novo em
+`packages/domain/src/` e voltei a correr:
+
+```
+07:10:04  packages/domain/src/CONTROLO-NEGATIVO-TEMPORARIO.ts  <- MUDOU (tem alteracoes por commitar)
+```
+
+A etiqueta mudou **e** a conclusão «NENHUM deles mudou» desapareceu, que é a parte
+que interessa: a frase que pouparia o build só aparece quando é verdadeira. Removido
+o ficheiro, tudo voltou ao estado anterior; a árvore ficou limpa.
+
+## Porque é que parei aqui
+
+A cura completa — medir **conteúdo** em vez de data — arrisca o único erro que esta
+guarda não pode cometer. Se eu enganar-me a decidir que um ficheiro «não mudou»,
+produzo um **verde falso**, e um verde falso aqui significa mostrar à Nathalia
+capturas de um produto que já não existe, com uma garantia por cima a dizer que são
+recentes. A cura que fiz só pode enganar para o lado de dizer demais.
+
+Escrevo isto porque a diferença não é de tamanho, é de direcção: **entre duas curas,
+a que erra para o lado seguro faz-se sozinha; a que erra para o lado perigoso espera
+por quem a reveja.**
+
+## Por rever — não assino o que escrevi
+
+`scripts/frescura_do_produto.py` (função nova) e `scripts/pagina-de-aprovacao.py` (a
+recusa) são meus. Falta o JR olhar. E fica de pé o que já estava declarado: **o
+carimbo que pus no gerador continua sem nunca ter corrido**, porque a geração que o
+usaria é justamente esta, que a guarda recusa — e com razão de forma, ainda que não
+de fundo.
