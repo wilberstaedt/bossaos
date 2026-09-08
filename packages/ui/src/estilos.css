@@ -1795,6 +1795,30 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
   border-bottom: 1px solid var(--bo-borda);
 }
 
+/* ── O filete da casa NÃO pertence à landing ─────────────────────────────
+ *
+ * O `.bo-publico__cabecalho::after` é «o filete da casa»: a faixa curta com a
+ * cor que **um restaurante configura na sua carta**. Na carta faz sentido — o
+ * cabeçalho lá é uma GRELHA com `justify-items: start`, e o filete cai numa
+ * linha própria por baixo do nome, que é o que ele é.
+ *
+ * Aqui a variante comercial trocou o cabeçalho para `flex` com
+ * `space-between`, e **um pseudo-elemento de um contentor de flex é um item de
+ * flex**. Deixou de ser um filete por baixo e passou a ser o TERCEIRO item da
+ * linha — e com três itens o `space-between` dá-lhe o lugar da direita e empurra
+ * o hamburguer para o meio.
+ *
+ * Medido a 390: marca em `24..169`, botão em `214..258`, e o `::after` de
+ * 64×3 px em `rgb(245, 102, 77)` no bordo direito. **Um sintoma só, com duas
+ * caras:** o botão a meio e um traço coral solto que parecia um indicador que
+ * perdeu o elemento a que pertencia.
+ *
+ * Sai por aqui e não do sítio onde nasceu: na carta ele continua certo. E sai
+ * inteiro em vez de ser reposicionado, porque **a landing não é a carta de casa
+ * nenhuma** — não há restaurante cuja marca ele possa estar a carregar, e o que
+ * ele pintava era a cor de recurso. */
+.bo-publico--comercial .bo-publico__cabecalho::after { content: none; }
+
 /* ① e ② — a assinatura, agora ligada ao início. */
 .bo-mkt__marca {
   display: inline-flex; align-items: center;
