@@ -214,3 +214,65 @@ duas» — em vez de confiar que a limpeza correu. É a diferença entre limpar 
 
 **O que não fiz:** não voltei a correr as quatro. A máquina está em ATENÇÃO e as
 corridas são dele, reportadas. A minha revisão é da estrutura.
+
+---
+
+## As «três identidades órfãs» não existem — correcção minha, 08/09
+
+**Medi antes de as semear, e não há nada para semear.** Os únicos
+`@inspeccao.example` na base são as **três `painel@`**, que a semeadura já cria.
+
+**Errei em dois sítios, e os dois são meus.** O primeiro foi a consulta: contei
+
+    painel%@inspeccao.example   → 3
+    %@inspeccao.example         → 3
+
+e li o segundo como «outros três». A segunda linha **inclui** a primeira: são as
+mesmas três. O segundo erro foi supor que **citar um email é precisar de uma
+conta**. Fui ver o que cada citação é:
+
+| email | o que é, de facto |
+|---|---|
+| `rv100-022@` | um valor dentro de um `INSERT` de alergénios |
+| `x@`, `y@`, `w@` | o `contacto:` de reservas e de listas de espera |
+| `actor@` | um rótulo de actor numa conta |
+| `rua@` | o `contacto:` de uma reserva |
+
+**Nenhuma é uma linha em `users`.** Não há órfãs, não há citação a remover, e
+esta parte estava resolvida antes de começar — eu é que a inventei a partir de
+uma contagem mal lida.
+
+## O que a base tem, e o que uma reposição deve devolver
+
+    AGORA                                   DEPOIS DA REPOSIÇÃO (esperado)
+    users                  133              5
+      painel@inspeccao       3                3   ← semente de inspecção
+      @exemplo.example     125                0   ← restos, curados hoje
+      @bossaos.invalid       2                2   ← Marta + conta de captura
+      ana@/bruno@/diogo@     3                3   ← `fixtures.ts`
+    organizations            3              3     ← insp A, insp B, demo
+    locations                4              4
+    cash_registers           6              ?
+    cash_register_events    17              ?
+    cash_movements           1              ?
+
+Os três nomeados (`ana@marina-oropesa`, `bruno@marina-barcelona`,
+`diogo@bossaos`) vêm do `packages/db/prisma/fixtures.ts` — são fixtures, não
+órfãos.
+
+**Os 5 = 3 + 2**, e os 128 que desaparecem são **entulho medido**: 125 restos
+mais 3 que a `fixtures.ts` repõe.
+
+### As três interrogações, e são um achado
+
+`cash_registers 6`, `cash_register_events 17`, `cash_movements 1` — e **só um
+registo e um evento eram meus**. O `semente-inspeccao.ts` **também cria
+movimentos de caixa** (linha 888). Como esse rasto é append-only, **a semeadura
+de inspecção acumula linhas que nenhuma limpeza tira**, corrida após corrida.
+
+É a **mesma classe** que travou o bloco 2 — e aqui já acontece há muito, em
+silêncio. Não sei quantas destas 24 linhas são de quantas corridas, e não o
+invento: depois da reposição fica-se a saber, porque o número passa a ser o de
+**uma** semeadura.
+
+**Não reponho nada até a sua palavra**, e os gatilhos continuam intactos.
