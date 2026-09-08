@@ -31,7 +31,7 @@
 export const FICHEIRO_DE_SESSAO = 'inspeccao/.sessao/estado.json';
 
 /** O email da conta do arnês. Do domínio da inspecção, para a limpeza o apanhar. */
-export const EMAIL_DO_ARNES = 'painel@inspeccao.example';
+export { EMAIL_DO_ARNES } from '../packages/db/prisma/inspeccao-comum.ts';
 
 /**
  * A SEGUNDA sessão, no outro inquilino — e é ela que torna a prova uma prova.
@@ -44,7 +44,7 @@ export const EMAIL_DO_ARNES = 'painel@inspeccao.example';
  * Esta conta vive na organização B e serve **o par**: o mesmo recurso, pedido
  * pelo dono, tem de aparecer.
  */
-export const EMAIL_DO_ARNES_B = 'painel-b@inspeccao.example';
+export { EMAIL_DO_ARNES_B } from '../packages/db/prisma/inspeccao-comum.ts';
 export const FICHEIRO_DE_SESSAO_B = 'inspeccao/.sessao/estado-b.json';
 
 /**
@@ -60,5 +60,5 @@ export const FICHEIRO_DE_SESSAO_B = 'inspeccao/.sessao/estado-b.json';
  * mais nada muda. Sem ela, «trocar de utilizador» não tinha como ser medido no
  * produto.
  */
-export const EMAIL_DO_ARNES_C = 'painel-c@inspeccao.example';
+export { EMAIL_DO_ARNES_C } from '../packages/db/prisma/inspeccao-comum.ts';
 export const FICHEIRO_DE_SESSAO_C = 'inspeccao/.sessao/estado-c.json';

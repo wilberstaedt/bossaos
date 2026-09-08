@@ -36,7 +36,10 @@ import {
  * apagar um requisito para chegar ao verde.
  */
 
-const SENHA = 'inspeccao-Muito-Longa-2026';
+// A senha vem da BASE, que e' quem a semeia. Tê-la aqui outra vez era ter duas
+// declarações do mesmo facto — e a semeadura e a entrada deixariam de poder
+// discordar só por sorte.
+import { SENHA_DO_ARNES as SENHA } from '../packages/db/prisma/inspeccao-comum.ts';
 const ORG_A = '11111111-1111-4111-8111-111111111111';
 const MARCA_A = 'aaaa1111-1111-4111-8111-111111111111';
 const ORG_B = '22222222-2222-4222-8222-222222222222';

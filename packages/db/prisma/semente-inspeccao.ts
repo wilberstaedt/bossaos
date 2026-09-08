@@ -31,6 +31,7 @@ import {
   ID_DO_KIOSK_PAUSADO,
   CHAVE_DE_INSPECCAO, CLIENTE_SAAS_DE_INSPECCAO,
   ID_DA_SESSAO_ESQUECIDA, ID_DA_SESSAO_VIVA, PREFIXO, SLUG_DE_INSPECCAO, SLUG_DE_INSPECCAO_B,
+  EMAIL_DO_ARNES, EMAIL_DO_ARNES_B, EMAIL_DO_ARNES_C, SENHA_DO_ARNES,
 } from './inspeccao-comum.ts';
 
 export { SLUG_DE_INSPECCAO, SLUG_DE_INSPECCAO_B };
@@ -2187,4 +2188,60 @@ async function principal(): Promise<void> {
   }
 }
 
+/**
+ * ── As contas por onde o arnês entra ──────────────────────────────────────
+ *
+ * O `autenticar.setup.ts` sabe fazer duas coisas: entrar, ou registar-se. O
+ * `disableSignUp` fechou a segunda hoje, e por isso as 128 credenciais que
+ * existem na base **deixaram de ser refazíveis** — descobriu-se ao propor repor
+ * a base, e repor ia custar o arnês inteiro. É a mesma cura que a semeadura da
+ * demonstração já leva desde esta manhã, aplicada à CLASSE e não a mais um caso.
+ *
+ * As exigências são as de sempre, e cada uma tem aqui a sua forma:
+ *   · a senha **nunca vem de argumento** — vem da constante que a base declara,
+ *     e é a mesma que a entrada usa, para não poderem discordar;
+ *   · **recusa criar uma segunda** se o email já existir, e por isso é
+ *     idempotente: a semeadura corre muitas vezes;
+ *   · **falha alto sem o segredo**, porque com outro a conta nasce e não entra —
+ *     e isso só se descobre quando alguém tenta;
+ *   · **não é alcançável por HTTP**: é semeadura, vive em `packages/db/prisma/`,
+ *     fora do `apps/web/app/`.
+ */
+async function semearContasDoArnes(): Promise<void> {
+  const { criarAutenticacao } = await import('../../auth/src/autenticacao.ts');
+  const { correioDeMemoria } = await import('../../auth/src/correio.ts');
+  const { criarUtilizador } = await import('../../auth/src/criar-utilizador.ts');
+
+  const url = process.env.AUTH_DATABASE_URL ?? process.env.MIGRATION_DATABASE_URL
+    ?? process.env.DATABASE_URL;
+  const segredo = process.env.BETTER_AUTH_SECRET;
+  if (!url || !segredo) {
+    throw new Error('AUTH_DATABASE_URL/BETTER_AUTH_SECRET em falta: as contas do arnês '
+      + 'nascem com o segredo do produto, senão existem e não entram.');
+  }
+
+  const auth = criarAutenticacao({
+    authDatabaseUrl: url,
+    segredo,
+    urlBase: process.env.BETTER_AUTH_URL ?? 'http://127.0.0.1:3000',
+    correio: correioDeMemoria(),
+  });
+
+  const prisma = abrirPrisma();
+  let criadas = 0;
+  try {
+    for (const email of [EMAIL_DO_ARNES, EMAIL_DO_ARNES_B, EMAIL_DO_ARNES_C]) {
+      const [{ n }] = await prisma.$queryRawUnsafe<{ n: number }[]>(
+        'SELECT count(*)::int AS n FROM users WHERE lower(email) = lower($1)', email);
+      if (Number(n) > 0) continue;
+      await criarUtilizador(auth, { email, senha: SENHA_DO_ARNES, nome: 'Inspeccao' });
+      criadas += 1;
+    }
+  } finally {
+    await prisma.$disconnect();
+  }
+  process.stdout.write(`contas do arnês: ${criadas} criada(s), as restantes já existiam\n`);
+}
+
 await principal();
+await semearContasDoArnes();

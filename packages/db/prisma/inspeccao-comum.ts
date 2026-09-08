@@ -45,6 +45,28 @@ export const SLUG_DE_INSPECCAO_B = 'insp-marina-barcelona';
 export const PREFIXO = 'insp-';
 
 /**
+ * ── As contas por onde o arnês entra ──────────────────────────────────────
+ *
+ * Vivem aqui, do lado da BASE, e não no arnês, porque quem as **cria** é a
+ * semeadura e quem as **usa** é o `autenticar.setup.ts`. Duas declarações do
+ * mesmo facto acabam sempre por discordar, e esta é a única maneira de a
+ * semeadura e a entrada não poderem divergir.
+ *
+ * Nasceram por `sign-up`, e essa porta fechou hoje. Foi a **quinta cara** da
+ * mesma cura: já tinha travado o cliente novo, a semeadura da demonstração, as
+ * telas-mestre e a recaptura da sala — e ninguém deu pelo arnês até se propor
+ * repor a base. Sem estas linhas, repor a base custava as 128 credenciais que
+ * ninguém consegue refazer.
+ *
+ * O domínio `.example` é reservado pela RFC 2606: não resolve e não é de
+ * ninguém.
+ */
+export const EMAIL_DO_ARNES = 'painel@inspeccao.example';
+export const EMAIL_DO_ARNES_B = 'painel-b@inspeccao.example';
+export const EMAIL_DO_ARNES_C = 'painel-c@inspeccao.example';
+export const SENHA_DO_ARNES = 'inspeccao-Muito-Longa-2026';
+
+/**
  * O kiosk do arnês — identificador FIXO, e é por isso que ele existe.
  *
  * O endereço do kiosk é `/kiosk/<deviceId>`, e um identificador gerado a cada
