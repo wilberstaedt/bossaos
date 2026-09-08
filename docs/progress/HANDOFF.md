@@ -4177,3 +4177,43 @@ séries:
 
 `pnpm verificar` continua a 17, todos anteriores e nenhum meu. Máquina em **OK**
 (5168 MB).
+
+### O carimbo e o diagnóstico da frescura, exercidos — 08/09
+
+`563d827` deixou escrito que o bloco novo do `pagina-de-aprovacao.py` **nunca
+correu** e não era dado por feito. **Corri-o.** Corre, e diz o que prometia:
+
+    RECUSO: 25 captura(s) anteriores a fonte mais recente do produto.
+    …
+    O que ficou mais recente que a ULTIMA captura:
+        07:00:30  apps/web/src/staff/PainelDaFila.tsx  <- so o mtime - o conteudo e o do commit
+        07:00:30  apps/web/app/[idioma]/app/[orgSlug]/catalogo/page.tsx  <- so o mtime - …
+
+    NENHUM deles mudou de conteudo: foram gravados por cima iguais.
+    Recapturar NAO cura isto
+
+**A recusa de agora é falsa, e é a própria mensagem a prová-lo.** A captura mais
+recente é de **06:58:51** e os dois ficheiros são de **07:00:30** — 99 segundos
+depois, com o conteúdo do commit. Não recapturei: seria gastar um build a curar o
+que não aconteceu, que é exactamente o que o `ACHADO-FRESCURA-TOCA-NO-MTIME.md`
+avisa.
+
+**Verificado que a mensagem sobrevive a log**, porque é lá que ela mais faz falta:
+com redireccionamento para ficheiro, **2 linhas**; por pipe, **2 linhas**.
+
+**Uma coisa que não consigo explicar, e digo-o em vez de a arrumar.** Na primeira
+invocação deste lote, com o mesmo comando e os mesmos dois ficheiros na mesma
+data, o bloco **não imprimiu** — saiu só «Recaptura antes de mostrar isto a
+alguém». Não voltou a acontecer, o `porque_e_que_o_produto_e_mais_recente`
+devolve os dois quando chamado à mão, e a hipótese do buffer está **medida e
+descartada**. Não tenho terceira teoria e não vou construir uma.
+
+**E uma correcção a mim próprio:** ia reportar que `apps/web/.next-mestres/` está
+a ser contado como fonte do produto. **Está excluído** — o filtro é
+`'/.next' in r`, e isso apanha `.next-mestres` por ser subcadeia. O meu varrimento
+é que usava um filtro por igualdade. O instrumento estava certo e o dedo era meu.
+
+**As capturas dos mestres não estão fechadas**, e a razão está acima: a guarda
+recusa por uma data que mexeu sem o produto mudar. A cura de fundo — comparar
+conteúdo em vez de carimbo — continua por decidir, e é do sénior, que a declarou
+e explicou porque não lhe tocou sozinho.
