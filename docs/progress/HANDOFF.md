@@ -4241,3 +4241,31 @@ de tirar.
 
 Fica para quando a máquina baixar de ATENÇÃO. **Uma regra de saúde que só se cumpre
 quando não custa nada não é uma regra.**
+
+---
+
+## Estado às 14h45 de 08/09 — quatro correcções à espera de uma palavra
+
+**Feito e NÃO publicado.** O Matheus vê a landing do `d5543d3` das 11h23, e desde
+então corrigiu-se, sobre exactamente o que ele apontou:
+
+1. o hambúrguer a meio e o traço coral solto — eram **o mesmo defeito**, um `::after`
+   a participar como item de flex (`57ec604`);
+2. os três itens de idioma → selector agrupado com o idioma actual (`2307931`);
+3. o CTA do cabeçalho em coral — **e a tipografia a 19/700 com ele**, porque sobre
+   coral o tecto de contraste é 3,84 e só a faixa de texto grande da 1.4.3 o admite;
+4. o CTA no cabeçalho móvel: decidido **duplicar, não mover**, para não afrouxar a
+   guarda das sete rotas.
+
+**A fita métrica do §4 continua a dar 11 desvios** — e está certa: mede o que está no
+ar, e no ar está a versão antiga. Isso não é falha das correcções, é a distância
+entre o repositório e o domínio.
+
+## Declarado, e é de máquina e não de vontade
+
+**Os blocos 2 e 4 não avançam hoje.** O §4.3 pede quatro capturas reais da interface
+— Mesa, Cocina, Pase e Caja, que o norte nomeia — e isso é build, servidor e
+corredor. O `mac-health` está em **ATENÇÃO**.
+
+Não é adiamento por gosto: é a mesma regra que cumpri de manhã, e ela vale mais
+quando custa alguma coisa.
