@@ -109,3 +109,54 @@ anterior ao produto.
 guarda que acusa para sempre uma coisa correcta é uma guarda que se aprende a
 ignorar. Fica dito, não corrigido — corrigi-la agora era mexer numa guarda no
 meio de uma entrega.
+
+---
+
+# Fase 2 fechada — revisão, 08/09 02h05
+
+## As duas coisas que apontei estão curadas, e vê-se
+
+| | antes | agora |
+|---|---|---|
+| texto dos cartões | **azul sublinhado**, ligações sem estilo | verde escuro, estilizado |
+| pastilhas no telemóvel | 7 linhas, **zero mesas acima da dobra** | rolam na horizontal, **duas mesas inteiras** visíveis |
+
+## A terceira não está — e a causa não é dele
+
+O email continua no mapa. **Mas não o acusei sem verificar**, e ainda bem:
+
+    packages/db/src/sala.ts:99     abertaPor: dados.actor.email
+
+**O campo é escrito com o email na camada de domínio.** Não é uma sobra da
+fixture nem um recuo do redesign: em produção, abrir uma mesa **grava o email de
+quem a abriu**, e o mapa mostra-o.
+
+A captura antiga do Matheus mostrava «Marta (sala)» apenas porque a **semente de
+demonstração** guarda um nome (`QUEM_ATENDE`); a de inspecção guarda o literal
+`inspeccao@exemplo.example`. **O redesign só tornou visível o que já lá estava** —
+num cartão maior.
+
+**Fica como achado com dono certo:** é `sala.ts`, é anterior a esta frente, e o
+§7.2 pede «sem expor PII indevida». A exposição é interna — só a vê quem tem
+sessão na unidade — o que modera a severidade e não a apaga: **um email é mais
+do que um nome, e um nome bastava.**
+
+## O que verifiquei da entrega dele
+
+- **A aritmética do coral já a tinha refeito**: o tecto é 3,84 com branco e 3,73
+  com o verde. **Sobre coral, 4,5 não existe.** A cura dele foi **sair de cima do
+  coral** — e escreveu a frase que interessa: *«nenhuma régua foi tocada para
+  isto ficar verde.»* **Mudou o desenho em vez de baixar o limiar.**
+- **Duas guardas ficaram vermelhas por causa dele e ele curou-as**, dizendo-o: o
+  plante do host reancorado **na lógica e não na linha**, e as três suites novas
+  que «desapareciam» por não serem nomeadas.
+
+## E a melhor coisa que ele escreveu esta noite
+
+Sobre o `min-width: 0` que não era a pista: **a causa era o `margin: 0 auto` da
+regra-base** — *«um item de grelha com margem automática deixa de esticar e passa
+a ser dimensionado pelo conteúdo»*. **A primeira cura estava errada e ele
+disse-o.**
+
+E sobre não duplicar o motor de contraste: *«duas opiniões sobre a mesma pergunta
+concordam até ao dia em que discordam.»*
