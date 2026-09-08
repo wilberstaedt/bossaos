@@ -4269,3 +4269,49 @@ corredor. O `mac-health` está em **ATENÇÃO**.
 
 Não é adiamento por gosto: é a mesma regra que cumpri de manhã, e ela vale mais
 quando custa alguma coisa.
+
+---
+
+## Estado às 16h50 de 08/09 — a porta tem seis caras, e a CI está desligada
+
+**Se chegaste agora, lê isto antes de tocar em qualquer coisa.**
+
+### O que está em curso
+
+As **quatro provas que se registavam** por `sign-up` estão a ser curadas: passam a
+criar a conta pela base com o `criarUtilizador` — têm cliente `pg`, não precisam de
+HTTP — mantendo o email carimbado que lhes dava isolamento, e **apagando a conta no
+fim**. A primeira (`provar-acesso`) passou de **nada a correr** para **28 casos**.
+
+### O que NÃO se faz sem palavra
+
+- **Não repor a base local.** Tem 133 credenciais; a semeadura repõe 3. Faltam **três
+  identidades `@inspeccao.example` citadas por suites e criadas por ninguém** — até
+  elas nascerem de uma semente, repor perde coisa que não é entulho. A autorização
+  vem depois disso.
+- **Não tocar nos gatilhos** `movimentos_sao_imutaveis` e
+  `acontecimentos_de_caixa_sao_imutaveis`. Protegem o rasto financeiro. Foi por eles
+  que o bloco 2 parou, e isso é um **conflito de requisitos do Matheus**, não um bug:
+  o §4.3 pede uma comanda até à Caja, e uma demonstração que chega à caixa **não é
+  removível**. Escalado, sem resposta.
+
+### O achado que muda a leitura de tudo
+
+**A CI corre os `provar-*.sh` por descoberta. E não corre desde 05/09**, porque há
+**655 commits locais por enviar**.
+
+O portão local cobre `validar-*` e não os corredores — por desenho, para ser rápido.
+Os corredores são cobertos pela CI, também por desenho. Com a CI sem trabalho, a
+única verificação a correr durante três dias foi a que **nunca teve estes corredores
+no âmbito** — e disse «0 falhas», com razão, sobre o que media.
+
+**A cobertura não falta: está desligada.** Religá-la é um `push`, e isso é decisão do
+Matheus.
+
+### Duas coisas registadas como não resolvidas, de propósito
+
+- **Três falhas no `provar-acesso`** (403/405 e um par do financeiro): **não
+  atribuídas**. A suite não corria desde 07/09, não há linha de base, e reconstruir
+  uma era caro sem mudar o que há a fazer. Nem contadas como regressão nem varridas.
+- **Blocos 2 e 4** do norte continuam por construir; a régua de aceitação de ambos
+  está escrita **antes** das entregas, em `ALVO-BLOCO-2.md` e `ALVO-BLOCO-4.md`.
