@@ -175,3 +175,54 @@ mostrá-la **ao tamanho dela, numa moldura de telefone**, e não esticada.
 
 **Vai para o JR, não para mim:** o bloco 4 é código dele, e quem revê não assina o que
 escreveu. Eu corrigi a régua; a moldura corrige-se do lado de lá.
+
+---
+
+## Retiro a tabela acima. Medi o ficheiro em disco, e o sujeito é o que o navegador recebe
+
+A tabela que escrevi há minutos — «0,33× / 0,57× / 0,37×, reduzidas, nítidas» — saiu
+de `sips` sobre os ficheiros em `apps/web/src/demonstracao/`. **Esses são os mestres.
+O navegador nunca os recebe.** O `naturalWidth` que a prova lê é o da variante
+servida, e é essa que decide o que se vê.
+
+O JR mediu, com o servidor de pé, que os quatro voltam com **o lado maior em 512**.
+Os números dele fecham ao décimo com isso, e os meus não fecham com nada:
+
+| | servido | ranhura | escala | texto de 14 px |
+|---|---|---|---|---|
+| papéis 1-3 | 512 | 477 | **0,93×** | **13,0 px** — o que ele mediu |
+| papel 4 (retrato 390×844, lado maior capado) | **237** | 362 | **1,53×** | **21,4 px** — o que ele mediu |
+
+**A medição dele estava certa e a minha estava errada.** É a quarta vez hoje que aponto
+um instrumento correcto ao sujeito errado, e a primeira em que escrevi o resultado
+numa régua e o commitei.
+
+### E isto expõe uma cegueira estrutural do critério 6, não um engano de aritmética
+
+O critério 6 divide `mostrada / natural`. **O `natural` é o ficheiro que chegou** — por
+isso a razão nunca pode ver a resolução que foi deitada fora *antes* de chegar.
+
+Um mestre de 1440 reduzido a 512 e mostrado a 477 dá **0,93×** e passa com folga. Mas
+o texto do recorte já foi destruído no 1440→512, e nenhuma razão entre o ecrã e o
+ficheiro servido consegue notar isso. **A régua daria verde a uma imagem estragada
+antes de lá chegar**, e é essa a forma de «grotesco» que se vê sem se conseguir
+apontar.
+
+O limite que acrescentei antes — escala ≤ 1,0 — apanha o papel 4 e **não apanha os
+outros três**. Não chega.
+
+### O critério 6 passa a ter três lados, e nenhum é uma razão sozinha
+
+1. **A variante servida não é mais estreita que a ranhura.** `servido ≥ ranhura`.
+   Ampliar é inventar píxeis, e mede-se aqui e não pela razão.
+2. **A variante servida não é uma redução violenta do mestre.** `servido / mestre ≥ ½`.
+   Uma redução maior deita fora o texto do recorte antes de qualquer ecrã o mostrar.
+3. **O texto efectivo continua ≥ 11 px.** O que já lá estava, e que sozinho nunca
+   chegou.
+
+O 2 é o que faltava, e é o único dos três que precisa de ir **buscar o mestre ao
+disco** para se poder responder. Uma prova que só olhe para dentro do navegador não
+consegue medi-lo — o navegador não sabe o que a imagem já foi.
+
+**A causa do 512 é do JR**, que está nela com o servidor vivo. Isto é a régua, e a
+régua estava errada antes de a causa aparecer.
