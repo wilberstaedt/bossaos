@@ -4115,3 +4115,20 @@ Estado final, medido depois de tudo:
     provar-criar-utilizador.sh        0 falhas
     validar-plantes.sh                320 plantes, 0 falhas
     validar-suites-com-guiao.sh       OK
+
+### Confirmação da frase do portão — o número saiu a treze
+
+Pedido em `a6c4a54`: *«quem correr o portão a seguir, olhe para a última linha e
+diga o número que saiu.»*
+
+**Corri-o**, no fecho do lote anterior, contra o commit `7d9ddbd` — que já inclui
+a mudança. As duas últimas linhas, verbatim:
+
+    0 falhas ENTRE AS QUE MEDIRAM. 13 guarda(s) nao mediram.
+    Sobre o que essas cobrem, isto nao diz nada - nem verde nem vermelho.
+
+**Treze, e não zero.** A frase distingue numa corrida real e não só nos ramos do
+arnês. A pendência fecha-se pela medição, não pela minha palavra: o número está
+acima e veio da saída do próprio guião.
+
+Máquina no momento dessa corrida: **OK**, 5319 MB disponíveis.
