@@ -299,3 +299,58 @@ deixaria de distinguir o defeito plantado do que já lá estava. Passa a medir
 **presença de acusação por critério**: cada frase tem de estar ausente sem plante
 e presente com ele. Exercido nos dois — `imagens distintas` com dois papéis a
 partilhar composição, e `AMPLIADO 1,22×` com o telefone esticado.
+
+---
+
+## Segunda correcção minha, e a decisão dos papéis 1-3 — 08/09
+
+Corri o controlo novo. O que ele mede desfaz **duas** coisas que eu escrevi:
+
+    papel1 fonte=1440 servido=640 mostrada=477 nitidez=0,745 escala_da_fonte=0,331 → 4,6 px
+    papel2 fonte= 834 servido=640 mostrada=477 nitidez=0,745 escala_da_fonte=0,572 → 8,0 px
+    papel3 fonte=1280 servido=640 mostrada=477 nitidez=0,745 escala_da_fonte=0,373 → 5,2 px
+    papel4 fonte= 390 servido=390 mostrada=388 nitidez=0,995 escala_da_fonte=0,995 → 13,9 px
+
+**O servido é 640, não 512.** O meu retiro trocou um número errado por outro — a
+reconciliação aritmética que fiz com os números do JR fechava ao décimo e mesmo assim
+apontava à causa errada. Duas grandezas diferentes podem produzir a mesma conta.
+
+**E as escalas da minha primeira tabela estavam certas.** 0,33× / 0,57× / 0,37× são,
+ao milésimo, a `escala_da_fonte` que o instrumento agora reporta. O que estava errado
+não era o número: era eu ter-lhe chamado **«reduzida, nítida»**. Essa razão é
+exactamente a que põe um texto de 14 px a 4,6 px. Retirei números certos por um
+motivo errado, depois de os ter interpretado ao contrário.
+
+O que eu tinha enredado eram **duas** grandezas com nomes parecidos, e é mérito do
+instrumento dele tê-las separado: a **nitidez** (o mostrado contra o ficheiro que
+chegou — está esticado?) e a **legibilidade** (o mostrado contra o mestre — quão
+pequeno ficou o texto original?). A primeira tabela usou a segunda razão e chamou-lhe
+a primeira.
+
+### A decisão: não é a ranhura, e não é o pipeline
+
+Alargar a ranhura não resolve. Para 14 px chegarem a 11:
+
+| | fonte | ranhura precisa de | ranhura real |
+|---|---|---|---|
+| catálogo | 1440 | **1131 px** | 477 |
+| KDS | 1280 | **1006 px** | 477 |
+| tablet | 834 | 655 px | 477 |
+
+E mesmo que se conseguisse no desktop, **num telemóvel a ranhura útil é ~350 px, o
+que põe o catálogo a 3,4 px e o KDS a 3,8 px.** Uma captura de ecrã de 1440 nunca é
+legível num telefone. Não é defeito de pipeline nem de CSS: é a aritmética.
+
+**A cura é a fonte, e a minha régua já a tinha escrito.** O critério 6 diz «**crops**
+legíveis» — recorte. O bloco está a mostrar **ecrãs inteiros** onde a régua pedia
+recortes, e ninguém reparou porque o critério media a razão e não o que estava dentro
+dela.
+
+É o mesmo princípio que curou o papel 4: mostrar ao tamanho dele. Para os três de
+paisagem, isso quer dizer capturar **uma região com sentido** — a lista de artigos do
+catálogo, a coluna de comandas do KDS — a uma largura perto daquela a que vai ser
+mostrada, em vez do ecrã todo encolhido a um terço.
+
+**Vermelho mantém-se até lá, e fez muito bem em declará-lo.** Afrouxar o limiar dos
+11 px para o esconder seria calibrar a guarda ao sintoma — e o texto continuaria a
+4,6 px na mesma, só que sem ninguém avisado.
