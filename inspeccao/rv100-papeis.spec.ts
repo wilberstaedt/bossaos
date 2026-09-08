@@ -35,7 +35,10 @@ const LARGURA = 1280;
 /** Quantos `Tab` se aceita gastar do topo até ao selector. */
 const TABS_NO_MAXIMO = 80;
 
-interface Estado { chave: string; imagem: string; beneficio: string }
+interface Estado {
+  chave: string; imagem: string; beneficio: string;
+  natural: number; mostrada: number;
+}
 
 test.describe('RV100 · §4.5 para cada pessoa, a tela certa', () => {
   test('trocar de papel troca o ecrã E o benefício, e chega-se lá por teclado', async ({ page }) => {
@@ -98,10 +101,17 @@ test.describe('RV100 · §4.5 para cada pessoa, a tela certa', () => {
       const lerEstado = async (): Promise<Estado> => page.evaluate(() => {
         const painel = document.querySelector('#papeis [role="tabpanel"]:not([hidden])');
         const activo = document.querySelector('#papeis [role="tab"][aria-selected="true"]');
+        const img = painel?.querySelector('img') as HTMLImageElement | null;
         return {
           chave: activo?.textContent?.trim() ?? '',
-          imagem: painel?.querySelector('img')?.getAttribute('src') ?? '',
+          imagem: img?.getAttribute('src') ?? '',
           beneficio: painel?.querySelector('p')?.textContent?.trim() ?? '',
+          natural: img?.naturalWidth ?? 0,
+          // A CAIXA, e nunca `img.width`: num painel escondido a caixa é 0 e o
+          // atributo continua a devolver a largura intrínseca. A primeira versão
+          // desta medição caía nesse atributo e comparava 390 com 1440 — dizia
+          // «51,7 px efectivos» sobre um painel que não estava sequer no ecrã.
+          mostrada: img ? Math.round(img.getBoundingClientRect().width) : 0,
         };
       });
 
@@ -117,6 +127,14 @@ test.describe('RV100 · §4.5 para cada pessoa, a tela certa', () => {
         if (!focoNoSeparador) {
           falhas.push(`${idioma} · depois da seta ${i} o foco não está no separador seleccionado`);
         }
+        // A imagem do painel novo pode ainda não ter chegado: medir aqui sem
+        // esperar dava `naturalWidth = 0` e a escala ficava por medir. Espera-se
+        // pelo carregamento — não se aceita o zero como se fosse uma medição.
+        await page.waitForFunction(() => {
+          const img = document.querySelector(
+            '#papeis [role="tabpanel"]:not([hidden]) img') as HTMLImageElement | null;
+          return !!img && img.naturalWidth > 0;
+        }, undefined, { timeout: 15_000 }).catch(() => undefined);
         estados.push(await lerEstado());
       }
 
@@ -156,6 +174,28 @@ test.describe('RV100 · §4.5 para cada pessoa, a tela certa', () => {
       if (coerencia.semAlvo !== 0) {
         falhas.push(`${idioma} · ${coerencia.semAlvo} separadores cujo aria-controls não aponta`
           + ' a um painel que exista');
+      }
+
+      // ── 6 · o recorte é legível? Mede-se a ESCALA, e só do que está no ecrã ─
+      //
+      // A régua pede `escala × 14 px ≥ 11 px`. A escala é a largura a que a
+      // imagem é MOSTRADA a dividir pela que ela tem de facto — e só se pode ler
+      // no painel visível, porque um painel escondido não tem caixa nenhuma.
+      for (const [i, e] of estados.entries()) {
+        if (!e.natural || !e.mostrada) {
+          falhas.push(`${idioma} · painel ${i + 1}: não deu para medir a escala`
+            + ` (natural=${e.natural}, mostrada=${e.mostrada}) — NÃO MEDI, e isso não é verde`);
+          continue;
+        }
+        const escala = e.mostrada / e.natural;
+        const efectivos = 14 * escala;
+        console.log(`ESCALA ${idioma} papel${i + 1} natural=${e.natural}`
+          + ` mostrada=${e.mostrada} escala=${escala.toFixed(3)}`
+          + ` px_efectivos=${efectivos.toFixed(1)}`);
+        if (efectivos < 11) {
+          falhas.push(`${idioma} · papel ${i + 1}: ${e.natural}px mostrados a ${e.mostrada}px`
+            + ` — o texto do recorte fica a ${efectivos.toFixed(1)}px e a régua pede 11`);
+        }
       }
 
       idiomasMedidos += 1;

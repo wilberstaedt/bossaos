@@ -2576,8 +2576,12 @@ h3.ns-linha-do-tempo__nome, h3.ns-titulo-pequeno, h3.ns-preco__nome { line-heigh
  * marca, a busca e os primeiros pratos — o que o §6 do norte chama «zoom/crop
  * em detalhes úteis». Cortar o rodapé de uma lista não esconde nada de quem
  * está a decidir comprar. */
-.ns-papeis .ns-moldura { max-height: 520px; }
-.ns-papeis .ns-moldura img { object-fit: cover; object-position: top; height: 520px; }
+/* 520 -> 420 quando o bloco passou a separadores. Com quatro papéis em lista, a
+   coluna de texto enchia os 520; com UM benefício de cada vez, sobravam ~230 px
+   de vazio ao lado da imagem — visto na captura, não deduzido. Encolher a
+   moldura fecha o vazio sem tirar ao ecrã o que ele tem para mostrar. */
+.ns-papeis .ns-moldura { max-height: 420px; }
+.ns-papeis .ns-moldura img { object-fit: cover; object-position: top; height: 420px; }
 .ns-bento__lado .ns-moldura { max-height: 380px; }
 .ns-bento__lado .ns-moldura img { object-fit: cover; object-position: top; height: 380px; }
 

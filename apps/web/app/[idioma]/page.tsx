@@ -264,8 +264,14 @@ export default async function Landing({
                       <p className="ns-corpo">{kx[`papel${n}Texto`]}</p>
                     </div>
                     <div className="ns-moldura">
+                      {/* A ranhura foi MEDIDA, não estimada: 477 px num visor de
+                          1280, porque a moldura é a coluna de 5fr de um 7fr/5fr.
+                          O `390px` que aqui estava era a promessa antiga e fazia
+                          o navegador escolher um ficheiro de 390 para uma caixa
+                          de 477 — ampliado 1,22×, que numa captura de ecrã é
+                          exactamente o texto a perder o fio. */}
                       <Composicao qual={qual} idioma={idioma}
-                                  tamanhos="(min-width: 1024px) 390px, 80vw" />
+                                  tamanhos="(min-width: 1024px) 40vw, 80vw" />
                     </div>
                   </div>
                 ),

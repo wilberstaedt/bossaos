@@ -773,8 +773,8 @@
       "packages/domain/src/portas/autorizacao.ts": "70b5d7862e6f566c8683c8677d18f6515aa07c97b55729fde371b744ddf05977",
       "packages/domain/src/portas/media.ts": "8a14e7f1caf3b0fdcdce4a4e066b86f0ffc9cb445e6896a55570e631ed0f8c5c"
     },
-    "quando": "2026-09-08T17:38:27+0200",
-    "commit": "057e5698d5034d8d0c04a3771ad9217dc045d171",
-    "arvoreLimpa": false
+    "quando": "2026-09-08T17:39:55+0200",
+    "commit": "428b0c5f52de2cfeecb6ab19458be23222c90e09",
+    "arvoreLimpa": true
   }
 }
