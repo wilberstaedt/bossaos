@@ -92,3 +92,30 @@ a 834 — que o §4.2 já obrigava.
 
 **FORA e declarado:** isto corre a 1280. **A matriz por ecrã estreito continua por
 medir**, e no telemóvel é onde as contas eram piores.
+
+### Matriz a 390 — fechada 08/09, verificada pelo revisor
+
+As treze composições medidas a **390** de visor: **0 com defeito**, nitidez 0,826-0,932
+(nada ampliado), texto de 14 px entre **11,6 e 12,9**. Corri os dois controlos eu: o de
+390 e o de 1280, que **não regrediu** depois de as duas medições passarem a partilhar
+`inspeccao/medir-ranhuras.ts`.
+
+Três coisas que o JR apanhou e que valem mais do que o verde:
+
+- **O plante de 1280 seria morto a 390.** Lá troca-se o recorte pelo mestre `sala` — e
+  o `sala` também tem variante de 390, portanto o número não se mexe. Um plante que não
+  muda a medição é um controlo exercido sem exercer nada. O plante que morde a 390 é
+  **tirar a variante estreita**: o texto cai a 8,9 px, e acusa uma só.
+- **O instrumento media a captura errada.** Abaixo de 768 quem serve é o `<source>`
+  estreito, mas a conta dividia a caixa pelo `width` do `<img>`, que é o do mestre
+  largo. É primo do `naturalWidth` que o critério 4 proíbe — e mais perigoso, porque
+  **o número saía plausível em vez de absurdo**.
+- **Um defeito real:** o herói KDS a 9,5 px, porque `.ns-heroi__segunda` é `width: 74%`
+  e 74 % de 358 são 265. Curado com 90 % abaixo de 768 — o mesmo ponto de corte onde o
+  `<source>` estreito entra.
+
+**A minha expectativa de 13,6 px não se confirmou, e a régua previa isso.** Assumia
+caixas de 380; as reais são 322-358, porque a página tem recuo. Foi o teste de dois
+lados a apontar a caixa, que era uma das duas causas que a régua nomeava.
+
+**FORA e declarado: um visor não é a matriz.** Passou **a 390**. 360 e 430 por medir.
