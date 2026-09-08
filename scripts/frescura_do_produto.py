@@ -185,7 +185,21 @@ def carimbar(destino, raiz='.'):
     def _git(args):
         return subprocess.run(['git', '-C', raiz] + args, capture_output=True, text=True)
     _sha = _git(['rev-parse', 'HEAD']).stdout.strip() or None
-    _sujo = _git(['status', '--porcelain', '--', 'apps', 'packages']).stdout.strip()
+    # ── O âmbito do «limpa» tem de ser o âmbito da IMPRESSÃO ──────────────
+    #
+    # Isto perguntava por `apps` e `packages` INTEIROS, e a impressão só cobre
+    # `.ts`, `.tsx` e `.css`. As capturas de marketing vivem em
+    # `apps/web/src/demonstracao/`, portanto **capturar suja o `apps/`** — e o
+    # carimbo tirado logo a seguir dizia `arvoreLimpa: false` para sempre. A
+    # guarda apanhou-o: «capturado com a árvore suja — não retrata commit
+    # nenhum». Estava certa sobre o que eu lhe disse, e eu é que lhe disse mal.
+    #
+    # É o mesmo defeito do `git log` sem filtro de extensão que se curou de
+    # manhã: **o medido tem de coincidir com o declarado.**
+    _sujo = _git(['status', '--porcelain', '--',
+                  'apps/*.ts', 'apps/*.tsx', 'apps/*.css',
+                  'packages/*.ts', 'packages/*.tsx', 'packages/*.css',
+                  ':(exclude)*next-env.d.ts']).stdout.strip()
 
     manifesto['impressaoDoProduto'] = {
         'resumo': resumo,

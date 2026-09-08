@@ -412,7 +412,7 @@
     }
   ],
   "impressaoDoProduto": {
-    "resumo": "78a6091a220c5d72b8556332f3fc6205d42458046b0a880adba080fb8ffb1762",
+    "resumo": "94441e1ec2e01d9b1a81d016820a4832c578099f71f6296f4f1a08a453b72488",
     "ficheiros": 735,
     "porFicheiro": {
       "apps/web/proxy.ts": "d7dccea720c55d1d05f4a4c3a47a0ee8045ad4bd993f429184ec20e886bc7525",
@@ -892,7 +892,7 @@
       "apps/web/app/api/publico/feedback/route.ts": "36912ac32f67e8df898d74975dff2dd2f9bfaffd307e632210dcb63c0c7b9028",
       "apps/web/app/api/publico/lead/route.ts": "b939d60291614767ab61919a0cea45b841f4d786eabb55474a4bd14daa4d7ca1",
       "apps/web/app/api/publico/reservar/route.ts": "2f2b38d2b5bb677e7505749b4ef5c68fc6de0eb1b2d060fcf0ec9ad53f6d1d08",
-      "apps/web/app/api/health/route.ts": "57d9df8fb1143cf74926796ad1637dbc4cd784bf7e15e60fb9bcff0e7628c556",
+      "apps/web/app/api/health/route.ts": "c1d83e98aad5e2372acceedcd372e391a6e9fcd5e047edcbb1513c50747edc77",
       "apps/web/app/api/kiosk/[deviceId]/dados/route.ts": "df892f05568c2fe78599c29c397801232b8438a5a3c041fd438bc199226bf95f",
       "apps/web/app/api/kiosk/[deviceId]/comecar/route.ts": "64a4a6ad6e79667955db9ff7c76ce44f45f59a30144edf927bf5158354ea5dd9",
       "apps/web/app/api/kiosk/[deviceId]/terminar/route.ts": "d4f410876a025c7c7c09e7c9ccf782b800e2708846f6eefe5d165ce111049032",
@@ -1151,8 +1151,8 @@
       "packages/domain/src/portas/autorizacao.ts": "70b5d7862e6f566c8683c8677d18f6515aa07c97b55729fde371b744ddf05977",
       "packages/domain/src/portas/media.ts": "8a14e7f1caf3b0fdcdce4a4e066b86f0ffc9cb445e6896a55570e631ed0f8c5c"
     },
-    "quando": "2026-09-08T08:57:30+0200",
-    "commit": "a96b12aa8d9cb56c88cc55eb1de928e01b41cfd0",
+    "quando": "2026-09-08T09:45:25+0200",
+    "commit": "4b2ed3276ca57c032570d68d99398d6dbb59eaa7",
     "arvoreLimpa": true
   }
 }

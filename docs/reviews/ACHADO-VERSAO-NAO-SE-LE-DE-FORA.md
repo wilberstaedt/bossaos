@@ -173,3 +173,46 @@ portão em 0 entre as que mediram.
 por HTTP, que versão está no ar — a etiqueta só se lê com acesso ao Docker do
 servidor. Tirar a marca não fechou esse buraco; tirou uma peça que dizia
 fechá-lo e não fechava.
+
+---
+
+## A resposta passou a existir de fora — 08/09
+
+    ok  com VERSAO definida: HTTP 200 e versao_do_build=a1b2c3d
+    ok  sem VERSAO: HTTP 200 e versao_do_build=desconhecida (nao desapareceu)
+    ok  o health continua a trazer o que ja trazia (estado e ts)
+
+**Uma correcção à premissa:** o `ENV BOSSAOS_VERSAO` **já existia** no
+`infra/web.Dockerfile` — a promoção do `ARG` estava feita. O que faltava era o
+**leitor**: ninguém lia aquela variável. Só a rota mudou.
+
+**Não substitui a etiqueta, e o nome do campo di-lo.** `versao_do_build` é o que
+o build DIZ que é; o portão 4 continua a ler `bossaos.versao` por `docker
+inspect`, que é o que compara o construído com o que está no ar. Um responde de
+fora; o outro mede.
+
+Sem a variável o campo sai `desconhecida` e **nunca desaparece** — ausente lê-se
+como «build antigo», presente-a-dizer-desconhecida lê-se como «não sei». Usa-se
+`||` e não `??`, porque `docker compose build` com `VERSAO=` passa cadeia vazia e
+não ausência. E não passa pelo `loadEnv` de propósito: fazer o ecrã da vivacidade
+depender de um carregamento que pode lançar era trocar uma pergunta por um
+problema.
+
+**A prova é pela porta.** A primeira versão importava a rota num teste de nó e não
+corre — o `next/server` não resolve fora do build. E ainda bem: o terceiro
+controlo é «o health continua a responder», e isso só se sabe pedindo. O corredor
+acusa, medido: plantei o campo a desaparecer sem a variável e ele disse *«o campo
+DESAPARECEU — ausente lê-se como build antigo, não como não sei»*.
+
+### E a guarda de ontem apanhou um defeito meu de hoje
+
+Ao recapturar, a `validar-provas-frescas` recusou: *«capturado com a árvore suja
+— não retrata commit nenhum»*. **Estava certa sobre o que eu lhe disse, e eu é
+que lhe disse mal.**
+
+O `arvoreLimpa` perguntava por `apps` e `packages` **inteiros**, e a impressão só
+cobre `.ts`, `.tsx` e `.css`. As capturas de marketing vivem em
+`apps/web/src/demonstracao/`, portanto **capturar suja o `apps/`** — e o carimbo
+tirado a seguir dizia `arvoreLimpa: false` para sempre. É o mesmo defeito do
+`git log` sem filtro de extensão que se curou de manhã: **o medido tem de
+coincidir com o declarado.** Corrigido, e o dossiê voltou a bater.
