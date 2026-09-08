@@ -1232,3 +1232,58 @@ vez de abrir gaveta; o verde a 32,0 % contra os 35–45 % orientativos.
 
 **Paro aqui.** A Fase 3 não começa e nenhuma aprovação é declarada em nome de
 ninguém.
+
+### Actualização 04h30 — a decisão da porta, e o que NÃO se refaz
+
+**Se retomaste aqui, isto é o mais importante da noite e não está acima.**
+
+#### O bloqueio, numa frase
+
+**Fechar o registo por email fechou a ÚNICA porta.** Nada no código nem na
+biblioteca cria uma conta; o convite **dá pertença a uma conta que já tem de
+existir**. A porta aberta **era portante** — era por lá que uma pessoa convidada
+arranjava conta antes de aceitar o convite.
+
+**Isto bloqueia TRÊS coisas, e são a mesma:** a recaptura das três imagens da
+sala, a **Fase 0.4** (o «antes» das Mesas), e **qualquer cliente novo** no código
+não publicado.
+
+#### As medições JÁ FEITAS — não as repitas
+
+| pergunta | resposta | quem |
+|---|---|---|
+| a API do servidor respeita o `disableSignUp`? | **sim** — `EMAIL_PASSWORD_SIGN_UP_DISABLED`, 0 linhas | sénior |
+| o `$context.internalAdapter` cria? | **sim, e ENTRA** pelo `signInEmail` real | JR |
+| o plugin `admin` cria? | **não** — faltam **colunas**, não permissão | JR |
+| o `admin` consulta a bandeira? | **não** — com ela ligada a chamada chegou à **escrita** | JR |
+
+**Todas com controlo de dois lados e contagem de utilizadores antes e depois.**
+Nenhuma criou nada.
+
+#### A decisão tomada — não a reabras
+
+**Nenhuma das três saídas** (reabrir o registo · escrever a credencial por SQL ·
+deixar a conta viva). **Todas pagavam com segurança ou integridade de teste para
+consertar um problema cosmético.** A recaptura **fica bloqueada e declarada**, e
+a guarda das capturas fica **vermelha — o que está certo, porque diz a verdade.**
+
+#### Duas armadilhas caras que já se pagaram aqui
+
+1. **`criou=SIM, NÃO ENTROU`** — criar não é entrar. O `issuer` da linha tem de
+   bater com o `@default` do schema (`local:credential`), senão nasce um
+   utilizador que existe e não entra.
+2. **O plugin `admin` traria dois conceitos duplicados**: `users.role` (global)
+   ao lado do `RoleAssignment` **com escopo**, e `impersonatedBy` **sem condição
+   nenhuma** ao lado da sessão de suporte do E33, que é temporária, visível ao
+   inquilino, com âmbito e com tecto. **Não é só «não funciona»: fazê-lo
+   funcionar seria pior.**
+
+#### O que fica com o Matheus, e é dele
+
+**Como é que um cliente novo passa a ter conta.** Recomendação do sénior: o
+`internalAdapter`, **isolado atrás de uma função só**, com prova que fixe
+**criar, entrar e o `issuer`** — para que uma actualização da biblioteca parta o
+teste **em voz alta** em vez de partir o produto **em silêncio**. É API privada:
+zero ocorrências no `index.d.mts`.
+
+**Não implementes nenhuma das duas sem ele decidir.**
