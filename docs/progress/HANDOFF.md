@@ -3541,3 +3541,40 @@ substituto é de produto: **o convite passar a criar a conta.**
 
 **As três saídas que o JR nomeou são da revisão e ele não as tomou a meio de uma
 recaptura. Foi a decisão certa.**
+
+---
+
+## A pergunta técnica do `97174d6` está respondida — 08/09
+
+Detalhe em `docs/reviews/RESPOSTA-PORTA-DO-SERVIDOR.md`, guião em
+`packages/auth/medicoes/porta-do-servidor.mjs`.
+
+**Sim, existe porta sem rota HTTP e sem senha escrita à mão.** Medido contra a
+base real, com limpeza e contagem (131 antes, 131 depois):
+
+- **A API pública respeita a bandeira.** `signUpEmail` recusa com
+  `EMAIL_PASSWORD_SIGN_UP_DISABLED`. O controlo — a mesma configuração com um só
+  campo trocado — **cria**, e é ele que torna a recusa legível. Das 41 funções do
+  `auth.api`, só o `signUpEmail` cria identidade.
+- **O `$context` tem `internalAdapter` com `createUser`/`createAccount` e o
+  `ctx.password.hash` da biblioteca.** A conta assim criada **entra pelo
+  `signInEmail` real**, e a entrada verifica mesmo (senha errada → recusa).
+
+**O detalhe que quase me fez responder ao contrário:** a primeira corrida deu
+`criou=SIM  NÃO ENTROU`, exactamente o modo de falha que a decisão previu por
+escrito. **Era defeito meu.** Comparei a linha do `sign-up` real com a minha e só
+o `issuer` diferia — `local:credential` contra o `@default("credential")` do
+schema. Tudo o resto igual, incluindo o comprimento 161 da senha.
+
+**Custos declarados:** o `internalAdapter` é interface interna, sem promessa de
+estabilidade; e `local:credential` é um literal acoplado ao interior da
+biblioteca.
+
+**Não implementei nada.** A decisão foi «nenhuma das três» e esta é uma quarta,
+encontrada depois — a pergunta era para decidir entre cura limpa e remendo, e
+decidir é da revisão. A pergunta de produto (como é que um cliente novo passa a
+ter conta) continua com o Matheus: uma porta de servidor serve arnês e semente,
+não serve quem recebe um convite.
+
+Máquina em **ATENÇÃO** durante o lote (5027 MB disponíveis, 189 livres). Sem
+build e sem lote de agentes — só o guião de node e leituras à base.
