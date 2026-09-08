@@ -129,61 +129,80 @@ export function MolduraMkt({
         </a>
       )}
       navegacao={(
-        <MenuMkt rotuloAbrir={m.comum.abrirMenu} rotuloFechar={m.comum.fechar}>
-          <nav className="bo-publico__seccoes" aria-label={mkt.navegacaoPrincipal}>
-            {PAGINAS_PRINCIPAIS.map((p) => ligacao(p.rota, k[p.chave] ?? p.rota))}
+        <>
+          {/* ── O CTA do cabeçalho ao telemóvel ─────────────────────────
+              O §4.1 pede «mobile com logo, CTA curto e menu real», e a 390 o
+              cabeçalho tinha marca e hamburguer e mais nada: o CTA existia mas
+              vivia dentro do painel do `MenuMkt`, que está fechado.
 
-            {/* ③ Os secundários num grupo, e não em mais três pílulas iguais. */}
-            <GrupoMkt rotulo={mkt.recursos} activo={recursoActivo}>
-              {PAGINAS_RECURSOS.map((p) => ligacao(p.rota, k[p.chave] ?? p.rota))}
-            </GrupoMkt>
+              É uma SEGUNDA instância e não o mesmo movido, e a diferença é a
+              que interessa: o de baixo continua dentro da `<nav>`, que é de onde
+              a `marketing.spec.ts` prova que as sete rotas se alcançam da
+              landing. Mover partia essa prova, e afrouxar a guarda para caber
+              um desenho é a coisa que não se faz.
 
-            {/* O CTA fica DENTRO da mesma `<nav>` de propósito: é a partir dela
-                que a regressão prova que as sete rotas se alcançam da landing, e
-                movê-lo para fora seria partir essa prova para arrumar marcação.
-                O que o separa dos outros é o desenho, não o sítio. */}
-            <a
-              className="bo-mkt__cta"
-              href={`/${idioma}/demo`}
-              aria-current={actual === '/demo' ? 'page' : undefined}
-            >
-              {mkt.pedirDemo}
-            </a>
-          </nav>
-
-          {/* ④ Os idiomas num SELECTOR e não em três itens soltos.
-              O §4.1 pede «idiomas agrupados em um seletor compacto, não três
-              itens concorrendo com o CTA», e eram três ligações lado a lado,
-              medidas a ocupar `x=1017..1157` — 140 px a competir com o CTA que
-              está imediatamente à esquerda.
-              Reutiliza o `GrupoMkt`, que já é o mecanismo de agrupar desta
-              barra (os «Recursos» usam-no). Um selector novo aqui seria uma
-              segunda forma de fazer a mesma coisa, e a próxima pessoa teria de
-              escolher entre as duas sem saber porquê.
-              O rótulo é o idioma ACTUAL: um selector que não diz o que está
-              seleccionado obriga a abri-lo para saber onde se está. */}
-          <nav className="bo-mkt__idiomas" aria-label={m.entrar.idioma}>
-            <GrupoMkt rotulo={idioma.slice(0, 2).toUpperCase()} activo>
-              {IDIOMAS.map((x) => (
-                <a
-                  key={x}
-                  href={`/${x}${caminho}`}
-                  lang={x}
-                  hrefLang={x}
-                  aria-label={NOME_DO_IDIOMA[x]}
-                  aria-current={x === idioma ? 'true' : undefined}
-                >
-                  {NOME_DO_IDIOMA[x]}
-                </a>
-              ))}
-            </GrupoMkt>
-          </nav>
-
-          {/* ⑤ A entrada na conta. A rota existe desde o E04. */}
-          <a className="bo-mkt__entrar" href={`/${idioma}/auth/login`}>
-            {m.entrar.accao}
+              Só aparece abaixo dos 768 — acima, o de dentro da barra já está
+              visível, e dois CTA na mesma linha eram um defeito e não uma
+              correcção. */}
+          <a className="bo-mkt__cta bo-mkt__cta--movel" href={`/${idioma}/demo`}>
+            {mkt.pedirDemoCurto}
           </a>
-        </MenuMkt>
+          <MenuMkt rotuloAbrir={m.comum.abrirMenu} rotuloFechar={m.comum.fechar}>
+              <nav className="bo-publico__seccoes" aria-label={mkt.navegacaoPrincipal}>
+                {PAGINAS_PRINCIPAIS.map((p) => ligacao(p.rota, k[p.chave] ?? p.rota))}
+
+                {/* ③ Os secundários num grupo, e não em mais três pílulas iguais. */}
+                <GrupoMkt rotulo={mkt.recursos} activo={recursoActivo}>
+                  {PAGINAS_RECURSOS.map((p) => ligacao(p.rota, k[p.chave] ?? p.rota))}
+                </GrupoMkt>
+
+                {/* O CTA fica DENTRO da mesma `<nav>` de propósito: é a partir dela
+                    que a regressão prova que as sete rotas se alcançam da landing, e
+                    movê-lo para fora seria partir essa prova para arrumar marcação.
+                    O que o separa dos outros é o desenho, não o sítio. */}
+                <a
+                  className="bo-mkt__cta"
+                  href={`/${idioma}/demo`}
+                  aria-current={actual === '/demo' ? 'page' : undefined}
+                >
+                  {mkt.pedirDemo}
+                </a>
+              </nav>
+
+              {/* ④ Os idiomas num SELECTOR e não em três itens soltos.
+                  O §4.1 pede «idiomas agrupados em um seletor compacto, não três
+                  itens concorrendo com o CTA», e eram três ligações lado a lado,
+                  medidas a ocupar `x=1017..1157` — 140 px a competir com o CTA que
+                  está imediatamente à esquerda.
+                  Reutiliza o `GrupoMkt`, que já é o mecanismo de agrupar desta
+                  barra (os «Recursos» usam-no). Um selector novo aqui seria uma
+                  segunda forma de fazer a mesma coisa, e a próxima pessoa teria de
+                  escolher entre as duas sem saber porquê.
+                  O rótulo é o idioma ACTUAL: um selector que não diz o que está
+                  seleccionado obriga a abri-lo para saber onde se está. */}
+              <nav className="bo-mkt__idiomas" aria-label={m.entrar.idioma}>
+                <GrupoMkt rotulo={idioma.slice(0, 2).toUpperCase()} activo>
+                  {IDIOMAS.map((x) => (
+                    <a
+                      key={x}
+                      href={`/${x}${caminho}`}
+                      lang={x}
+                      hrefLang={x}
+                      aria-label={NOME_DO_IDIOMA[x]}
+                      aria-current={x === idioma ? 'true' : undefined}
+                    >
+                      {NOME_DO_IDIOMA[x]}
+                    </a>
+                  ))}
+                </GrupoMkt>
+              </nav>
+
+              {/* ⑤ A entrada na conta. A rota existe desde o E04. */}
+              <a className="bo-mkt__entrar" href={`/${idioma}/auth/login`}>
+                {m.entrar.accao}
+              </a>
+              </MenuMkt>
+        </>
       )}
       rodape={(
         <div className="bo-mkt__rodape">

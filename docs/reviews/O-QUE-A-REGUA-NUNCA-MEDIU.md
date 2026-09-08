@@ -235,3 +235,45 @@ E **não é uma guarda**: mede e relata, não recusa, não entra no `validar-no-
 O que fazer com um desvio é de quem desenha — a fita só impede que se descubra tarde.
 
 **Por rever: o código é meu.** Fica para o JR, como sempre.
+
+---
+
+## O CTA ao telemóvel: duplicado, não movido — 08/09
+
+Decisão do sénior, e a razão é a que eu tinha escalado: **não se afrouxa uma
+guarda para caber um desenho.**
+
+O CTA de dentro da `<nav>` **fica onde está** — é dele que a `marketing.spec.ts`
+prova que as sete rotas se alcançam da landing. Acrescentou-se uma **segunda
+instância** no cabeçalho, visível só abaixo dos 768.
+
+    ── 1440px ──  altura=75  CTA visiveis=1
+       bo-mkt__cta "Pedir una demo"  x=900..1096  19px/700  bg=rgb(216,90,68)
+       bo-mkt__grupo-botao "ES▾"     x=1112..1157            ← 45 px, eram 140
+    ── 390px ──   altura=75  CTA visiveis=1
+       bo-mkt__marca                 x=24..169
+       bo-mkt__cta--movel "Demo"     x=205..286  19px/700  bg=rgb(216,90,68)
+       bo-mkt__abrir "☰"             x=322..366
+
+**Um CTA visível em cada largura**, e não dois — acima dos 768 o da barra já lá
+está, e dois na mesma linha eram um defeito e não uma correcção.
+
+**Nenhuma guarda foi tocada**, e nenhuma contou CTAs: `marketing.spec.ts` passa
+com a alcançabilidade intacta, e as **141** do lote correm verdes, com
+`superficies=12 medidas=12 maus=0`.
+
+### A escolha que fiz e que é revertível numa linha
+
+O rótulo curto. O §4.1 pede «CTA curto» e não havia nenhum: o `pedirDemo` é
+«Pedir una demo», e a 390 sobram ~120 px depois da marca (145), do hamburguer
+(44) e das duas folgas — a 19/700 não cabe. Acrescentei `pedirDemoCurto` nos três
+idiomas com **«Demo»**, que é a mesma palavra em es, pt e en.
+
+**É a única coisa aqui que não saiu de uma medição**, e digo-o por isso. Se a
+palavra devia ser outra, é uma linha em três ficheiros.
+
+## O que fica declarado como próxima etapa
+
+**Os blocos 2 e 4**, retidos com a máquina em `ATENÇÃO`. O bloco 2 precisa das
+quatro capturas reais da interface que o norte nomeia — Mesa, Cocina, Pase e
+Caja — e isso é build, servidor e corredor.

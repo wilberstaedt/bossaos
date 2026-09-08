@@ -2709,3 +2709,23 @@ h3.ns-linha-do-tempo__nome, h3.ns-titulo-pequeno, h3.ns-preco__nome { line-heigh
   }
   .ns-sala-nav > a { flex: 0 0 auto; }
 }
+
+/* ── §4.1: o CTA curto do cabeçalho ao telemóvel ───────────────────────────
+ *
+ * Segunda instância do CTA, e não a mesma movida. O de dentro da `<nav>` fica
+ * onde está, porque é de lá que a `marketing.spec.ts` prova que as sete rotas se
+ * alcançam da landing — e **não se afrouxa uma guarda para caber um desenho**.
+ *
+ * Só abaixo dos 768: acima, o da barra já está visível, e dois CTA na mesma
+ * linha eram um defeito e não uma correcção.
+ *
+ * O rótulo é curto porque o espaço é aritmético: a 390 sobram ~120 px depois da
+ * marca (145), do hamburguer (44) e das duas folgas. «Pedir una demo» a 19/700
+ * não cabe; por isso existe o `pedirDemoCurto`. */
+.bo-publico--comercial .bo-mkt__cta--movel { display: none; }
+@media (max-width: 767px) {
+  .bo-publico--comercial .bo-mkt__cta--movel {
+    display: inline-flex;
+    padding: 0 var(--bo-espaco-md);
+  }
+}
