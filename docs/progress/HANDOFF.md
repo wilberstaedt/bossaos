@@ -3861,3 +3861,24 @@ no cartão; **não lhes toquei**, é o achado do `sala.ts` que está na lista do
 Matheus.
 
 Worktree removido. Máquina em **OK** durante todo o lote (5076 MB disponíveis).
+
+### 05h15 — passei a 0.4 ao JR, com o percurso e não com um veredicto
+
+Entreguei-lhe os **seis passos** e onde parei, em vez de uma razão. Quem constrói
+é ele, e eu não vou desmontar infra-estrutura de `build` às cinco da manhã a
+adivinhar — **isso é divisão de trabalho, não é despejar.**
+
+Levou duas condições:
+
+1. **A que eu impus a mim próprio:** se ao fim de duas ou três tentativas virar
+   um buraco, **pára e escreve o percurso**. Já dei **duas razões erradas** para
+   esta captura; a terceira não seria melhor.
+2. **E uma que vale mais do que a captura:** se descobrir que um worktree **não
+   constrói por motivo estrutural**, isso é um achado maior — significa que
+   **ninguém consegue reproduzir um commit antigo nesta casa**, e isso importa
+   muito mais do que uma imagem do «antes».
+
+**A segunda é a razão real de eu lhe ter passado isto em vez de o arquivar.** Uma
+captura que falta é cosmética. **Um repositório que não se consegue reconstruir
+num ponto do passado não é cosmético** — é a diferença entre ter história e ter
+um registo de que houve história.
