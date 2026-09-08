@@ -143,6 +143,9 @@ export async function semearContaDeCaptura(): Promise<void> {
     urlBase: process.env.BETTER_AUTH_URL ?? 'http://127.0.0.1:3000',
     correio: correioDeMemoria(),
   });
+  // Sem `emailVerificado`, e o silêncio aqui é deliberado: `bossaos.invalid` é
+  // um domínio reservado que não resolve, portanto ninguém verificou nem podia
+  // verificar este endereço. `false` é o que aconteceu.
   await criarUtilizador(auth, {
     email: CONTA_DA_DEMO, senha: SENHA_DA_DEMO, nome: 'Bossa Demo',
   });

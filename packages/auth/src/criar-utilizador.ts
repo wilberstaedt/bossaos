@@ -50,14 +50,35 @@ export interface ContaNova {
   email: string;
   senha: string;
   nome: string;
-  /** O convite prova o endereço; a semeadura não tem a quem o provar. */
+  /**
+   * **Por omissão `false`, e a omissão é a decisão.**
+   *
+   * `emailVerified` é a afirmação «este endereço foi provado». Quem a faz tem de
+   * ter a prova — e quem chama esta função com pressa não tem. O convite tem: o
+   * endereço prova-se por lá ter chegado, e é o `autenticacao.ts` que o escreve
+   * («o convite JÁ prova o email — foi para lá que ele foi»).
+   *
+   * A primeira versão desta função tinha `true` por omissão, **e contradizia o
+   * comentário que estava na linha de cima**, que dizia que a semeadura não tem
+   * a quem provar nada. Ninguém tinha decidido; tinha-se escolhido o valor mais
+   * cómodo e escrito o argumento contrário ao lado.
+   *
+   * Medido antes de mudar: **nada em `apps/` ou `packages/` lê `emailVerified`**
+   * — nenhum ecrã o mostra, nenhum portão o consulta, e o
+   * `requireEmailVerification` já está a `false`, portanto não trava a entrada.
+   * O campo hoje não custa nada, e é por isso que a escolha se faz agora e não
+   * quando custar: **o chamador que se vai esquecer deste parâmetro é o caminho
+   * de entrada que ainda não foi escrito.** Com `true` por omissão, esquecê-lo
+   * afirmava uma prova que ninguém tinha; com `false`, esquecê-lo não afirma
+   * nada — e quem tiver a prova declara-a.
+   */
   emailVerificado?: boolean;
 }
 
 /** Devolve o `id` do utilizador criado. */
 export async function criarUtilizador(
   auth: Autenticacao,
-  { email, senha, nome, emailVerificado = true }: ContaNova,
+  { email, senha, nome, emailVerificado = false }: ContaNova,
 ): Promise<string> {
   const ctx = await auth.$context;
 

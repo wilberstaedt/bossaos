@@ -35,6 +35,11 @@ ALVO=packages/auth/src/criar-utilizador.ts
 # `-p` e a diferenca entre restaurar e restaurar BEM: sem ele a copia nasce
 # com a hora de agora, e o `touch -r` la em baixo repoe essa em vez da
 # original. O controlo 3 deste ficheiro apanhou-me nisto.
+# A data ANTES de tudo. A primeira versao deste controlo perguntava se o
+# `mtime` era recente, e isso confunde «o corredor mexeu» com «alguem acabou
+# de editar o ficheiro» — deu vermelho na primeira vez que editei a funcao a
+# serio. A pergunta certa nao e' «e recente», e «ficou como estava».
+MT_ANTES=$(stat -f '%m' "$ALVO" 2>/dev/null || echo 0)
 ORIG=$(mktemp); cp -p "$ALVO" "$ORIG"
 restaurar() {
   cp "$ORIG" "$ALVO"
@@ -98,12 +103,12 @@ restaurar; trap - EXIT INT TERM
 #
 # Um controlo do proprio corredor: se isto falhar, provar esta funcao passa a
 # envelhecer 49 capturas de cada vez, e ninguem daria por isso.
-AGORA=$(date +%s)
-MT=$(stat -f '%m' "$ALVO" 2>/dev/null || echo "$AGORA")
-if [ "$((AGORA - MT))" -lt 60 ]; then
-  vermelho "o restauro deixou o \`mtime\` novo — isto envelhece as capturas sem o produto mudar"
+MT_DEPOIS=$(stat -f '%m' "$ALVO" 2>/dev/null || echo 0)
+if [ "$MT_DEPOIS" != "$MT_ANTES" ]; then
+  vermelho "o restauro mudou o \`mtime\` ($MT_ANTES -> $MT_DEPOIS) — isto envelhece as"
+  echo "          capturas sem o produto mudar"
 else
-  verde "o restauro repos a data do ficheiro (nao envelheceu prova alheia)"
+  verde "o restauro repos a data exacta ($MT_ANTES) — nao envelheceu prova alheia"
 fi
 
 echo

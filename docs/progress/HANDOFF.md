@@ -4132,3 +4132,48 @@ arnês. A pendência fecha-se pela medição, não pela minha palavra: o número
 acima e veio da saída do próprio guião.
 
 Máquina no momento dessa corrida: **OK**, 5319 MB disponíveis.
+
+### O `emailVerificado` decidido — passa a `false` por omissão
+
+Ponto aberto do `REVISAO-CRIAR-UTILIZADOR.md`: o valor por omissão não tinha nota
+a explicá-lo. **A ausência era pior do que parecia** — o `true` contradizia o
+comentário da linha imediatamente acima, que dizia que a semeadura *não tem a
+quem provar nada*. Não estava decidido: estava escolhido o valor cómodo, com o
+argumento contrário ao lado.
+
+**Medido antes de mudar:** `emailVerified` não é lido em lado nenhum de `apps/`
+ou `packages/` — nenhum ecrã o mostra, nenhum portão o consulta, e o
+`requireEmailVerification` já está a `false`. **Hoje não custa nada, e é por isso
+que se decide agora e não quando custar.**
+
+**Fica `false`.** `emailVerified` é a afirmação «este endereço foi provado», e
+quem a faz tem de ter a prova. Com `true` por omissão, **esquecer o parâmetro
+afirmava uma prova que ninguém tinha**; com `false`, esquecê-lo não afirma nada —
+e quem tiver a prova declara-a. O convite tem-na, e é o `autenticacao.ts` que já
+o escreve.
+
+A semeadura não passa o parâmetro, **e o silêncio dela está declarado**:
+`bossaos.invalid` é reservado e não resolve, portanto ninguém verificou nem podia
+verificar aquele endereço.
+
+### E o controlo do `mtime` estava errado
+
+Ao editar a função a sério, o controlo 3 do corredor deu vermelho — e **não devia**:
+ele perguntava se o `mtime` era *recente*, o que confunde «o corredor mexeu» com
+«alguém acabou de editar o ficheiro». Passou a guardar a data **antes** de tocar
+em nada e a comparar a exacta. Um controlo que acusa quem está certo é pior do
+que não ter controlo.
+
+### Estado depois de tudo
+
+A mudança à fonte envelheceu as 49 capturas, como devia. Recapturadas as duas
+séries:
+
+    pagina-de-aprovacao.py            saida 0 · 25/25 posteriores ao produto
+    /tmp/telas-mestre.html            3.11 MB · 25 capturas · 6 mestres
+    validar-capturas-de-marketing.sh  saida 0
+    provar-demonstracao.sh            OK · 24 composicoes
+    provar-criar-utilizador.sh        0 falhas
+
+`pnpm verificar` continua a 17, todos anteriores e nenhum meu. Máquina em **OK**
+(5168 MB).
