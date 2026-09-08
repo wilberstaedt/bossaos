@@ -72,3 +72,60 @@ buraco que curámos hoje nas capturas, mais estreito.
 
 Continua a ser esta a única consumidora, e portanto continua a ficar. Nada muda aí
 com (a) — só com (b).
+
+---
+
+## A cura barata, feita — 08/09
+
+O filtro entrou no próprio `git log`, que é o que faz **o medido coincidir com o
+declarado**:
+
+    FILTRO_DE_PRODUTO=(
+      apps/'*.ts' apps/'*.tsx' apps/'*.css'
+      packages/'*.ts' packages/'*.tsx' packages/'*.css'
+      ':(exclude)*next-env.d.ts'
+    )
+
+A referência passou de `d1f6c50` (08:07, **nove PNG e zero código**) para
+`b61051c` (07:01, **dois `.ts`**). O `next-env.d.ts` fica de fora como na peça
+partilhada: listas divergentes fariam duas guardas medir produtos diferentes.
+
+### O controlo tem dois lados, e nenhum é afirmado
+
+    ok   o filtro tem os dois lados: exclui d1f6c50 (sem código) e conta b61051c (com código)
+
+Os dois commits são **reais e escolhidos na corrida**, não `sha` cravados — um
+`sha` no ficheiro envelhecia no dia seguinte. E **a escolha do commit «só
+imagens» não vem do filtro**: se eu o definisse como «o que o filtro exclui» e
+depois exigisse que o filtro o excluísse, estava a perguntar-lhe se concorda
+consigo próprio. Ele é identificado pelas **extensões que tocou**.
+
+Os dois lados recusam por motivos opostos e ambos estão escritos: um filtro que
+não exclua nada é o defeito de volta; um que exclua de mais dá verde para sempre.
+
+### Um efeito que não era o objectivo
+
+O portão passou de **13 abstenções para 12**. A que deixou de se abster é a
+`validar-capturas-de-marketing`, e a razão é a migração de ontem: **num checkout
+o conteúdo é o mesmo e as datas não**. Ao trocar tempo por conteúdo, ela deixou
+de precisar do canário e passou a medir onde antes dizia «não sei».
+
+### O que a guarda continua a acusar, e é outra pergunta
+
+**50 artefactos**, e são de três naturezas que ela não distingue:
+
+| | |
+|---|---|
+| 39 do dossiê **RV100** | evidência de uma interpretação que o North Star substituiu |
+| 6 em `ns2/2026-09-08_a3935ea` | as capturas do «depois» — **genuinamente velhas**, são anteriores ao `b61051c` |
+| 6 em `ns2/2026-09-08_483c4a7` | o «antes» da Fase 0.4 — **retratam um commit congelado de propósito** |
+
+A última linha é a que interessa: **evidência do passado não é evidência
+obsoleta**, e uma guarda que exige que toda a prova seja posterior ao produto vai
+acusá-la para sempre. Não é a cura de fundo nem lhe toquei — fica dito, porque é
+uma pergunta de âmbito e não de mecanismo.
+
+### O canário
+
+**Onde estava.** Esta guarda continua a ser a única consumidora, e continua a
+medir `mtime`.

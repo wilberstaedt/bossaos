@@ -35,13 +35,81 @@ naomedi()  { echo "  NÃO MEDI $1"; }
 echo "A prova é mais nova do que o produto que retrata?"
 
 # ── 1. A referência: quando é que o produto mudou pela última vez ──────────
-PRODUTO=$(git log -1 --format='%ct' -- apps packages 2>/dev/null)
-PRODUTO_H=$(git log -1 --format='%h %ci' -- apps packages 2>/dev/null)
+#
+# ── O sujeito medido tem de ser o sujeito DECLARADO ───────────────────────
+#
+# Isto era `git log -1 -- apps packages`, **sem filtro de extensão**, enquanto o
+# cabeçalho deste ficheiro e a peça partilhada dizem que produto é `.ts`, `.tsx`
+# e `.css`. O medido e o declarado eram coisas diferentes, e a diferença apareceu
+# a 08/09: a referência apontava o `d1f6c50`, um commit que mudou **nove PNG da
+# demonstração e zero ficheiros de código**.
+#
+# A consequência não é cosmética: **recapturar imagens passava a contar como
+# alterar o produto**, e invalidava as 77 provas de uma vez. Uma guarda que
+# recusa por uma coisa que não é o seu sujeito ensina a ignorá-la.
+#
+# O filtro vive no próprio `git log` — é a cura barata, e tem a virtude de fazer
+# o medido coincidir com o declarado sem mudar a pergunta.
+#
+# `next-env.d.ts` fica de fora porque é gerado, como na peça partilhada. Se as
+# duas listas divergirem, duas guardas passam a medir produtos diferentes sem
+# ninguém dar por isso.
+FILTRO_DE_PRODUTO=(
+  apps/'*.ts' apps/'*.tsx' apps/'*.css'
+  packages/'*.ts' packages/'*.tsx' packages/'*.css'
+  ':(exclude)*next-env.d.ts'
+)
+PRODUTO=$(git log -1 --format='%ct' -- "${FILTRO_DE_PRODUTO[@]}" 2>/dev/null)
+PRODUTO_H=$(git log -1 --format='%h %ci' -- "${FILTRO_DE_PRODUTO[@]}" 2>/dev/null)
 if [ -z "$PRODUTO" ]; then
   naomedi "não encontrei um commit que toque em apps/ ou packages/ — sem referência não há comparação."
   exit "$NAO_MEDI"
 fi
 verde "última alteração ao produto: $PRODUTO_H"
+
+# ── O CONTROLO, e tem de ter DOIS lados ───────────────────────────────────
+#
+# Um filtro que exclua tudo dá verde para sempre; um que não exclua nada é o
+# defeito de volta. Por isso mede-se nos dois sentidos, e com commits REAIS
+# deste repositório, escolhidos agora e não escritos à mão — um `sha` cravado
+# aqui envelhecia no dia seguinte.
+#
+# **A escolha do commit «só imagens» não pode vir do filtro.** Se eu o definisse
+# como «o que o filtro exclui» e depois exigisse que o filtro o excluísse, estava
+# a perguntar-lhe se concorda consigo próprio. Ele é identificado pelas
+# EXTENSÕES que tocou.
+SO_IMAGENS=''
+while read -r c; do
+  [ -n "$c" ] || continue
+  if ! git show --name-only --format='' "$c" -- apps packages \
+      | grep -qE '\.(ts|tsx|css)$'; then
+    SO_IMAGENS="$c"; break
+  fi
+done <<EOF
+$(git log -12 --format='%h' -- apps packages 2>/dev/null)
+EOF
+
+if [ -z "$SO_IMAGENS" ]; then
+  naomedi "não há, nos últimos 12 commits a apps/ ou packages/, nenhum que toque"
+  echo "           só em ficheiros que não são código. Sem ele não se pode provar"
+  echo "           que o filtro exclui — e um filtro por provar não é um filtro."
+  exit "$NAO_MEDI"
+fi
+
+FILTRADOS=$(git log -40 --format='%h' -- "${FILTRO_DE_PRODUTO[@]}" 2>/dev/null)
+if printf '%s\n' "$FILTRADOS" | grep -qx "$SO_IMAGENS"; then
+  vermelho "o filtro NÃO exclui um commit sem código ($SO_IMAGENS) — recapturar"
+  echo "           imagens voltaria a contar como alterar o produto."
+  exit "$FALHOU"
+fi
+COM_CODIGO=$(git log -1 --format='%h' -- "${FILTRO_DE_PRODUTO[@]}" 2>/dev/null)
+if ! git show --name-only --format='' "$COM_CODIGO" -- apps packages \
+    | grep -qE '\.(ts|tsx|css)$'; then
+  vermelho "o filtro escolheu $COM_CODIGO, que não toca em código nenhum —"
+  echo "           está a excluir de mais, e um filtro assim dá verde para sempre."
+  exit "$FALHOU"
+fi
+verde "o filtro tem os dois lados: exclui $SO_IMAGENS (sem código) e conta $COM_CODIGO (com código)"
 
 # ── 2. A população: os artefactos de prova ────────────────────────────────
 #
