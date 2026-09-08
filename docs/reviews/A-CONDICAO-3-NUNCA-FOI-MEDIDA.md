@@ -68,3 +68,48 @@ respeitado:
 
 Era exactamente esse o caso. **Era uma razão que se podia ter medido antes — e a
 régua até dizia como.**
+
+---
+
+## Correcção: ela FOI medida — mas numa largura só
+
+Fui ver o meu instrumento antes de aceitar a caracterização, e ela muda o que
+falta fazer.
+
+O `inspeccao/ns2-visual.spec.ts` **tem** a condição 3, e mede a propriedade certa
+com o limiar certo:
+
+```ts
+const escala = d.capaNatural ? d.capaLargura / d.capaNatural : 0;
+const textoNoEcra = 14 * escala;
+if (textoNoEcra < 11) falhas.push(`C3: texto de 14px do produto chega a …`);
+```
+
+E passou — `C3 capa=667/720 escala=0.93 texto14=13.0px`.
+
+**O que nunca foi medido não é a condição: é a largura onde ela reprova.** O
+bloco das onze condições corre a **1440×900** (linha 201), onde a captura vem a
+0,93 da natural. A reprovação de 4,1 px é a **390**, onde a mesma captura vem a
+0,29 — e essa largura nunca entrou na população deste bloco.
+
+**É a mesma família do dia, e desta vez é minha:** não é um detector cego, é um
+detector aceso sobre uma população que não contém o caso que falha. Verde sobre a
+metade que passa.
+
+### O que isto muda em concreto
+
+Não é preciso escrever a medição — ela existe. É preciso **alargar a população**
+do bloco às duas larguras, e isso é uma linha. Escrever uma medição nova por cima
+de uma que já existe deixava duas a dizer coisas diferentes sobre a mesma
+condição, que é como se perde a próxima.
+
+### O que NÃO fiz, e porquê
+
+**Não alarguei a população, e não toquei na landing.** As duas mudam o veredicto
+de uma superfície que está **publicada desde as 12h**, e a decisão sobre ela está
+neste momento com o Matheus. Alargar a população torna o portão vermelho por uma
+razão verdadeira — é informação, não estrago — mas é uma luz que se acende a meio
+de uma conversa que não é minha.
+
+**Digo e espero.** Está a uma linha, e a cura do produto (a
+`sala-estreita-390.png`, que já existe e vem a 1,00) está diagnosticada por si.
