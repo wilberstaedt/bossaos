@@ -303,3 +303,65 @@ continua a comparar `mtime` e consulta o canário — apagá-lo agora cegava-a, 
 uma guarda cega é pior do que uma guarda cara. Fica de pé até essa também mudar
 de pergunta, e a `validar-capturas-de-marketing.sh` é a terceira que ainda mede
 tempo (reprova hoje pela mesma recusa falsa).
+
+---
+
+## Revisão do `bbe68c6`, e as três decisões que ele me deixou — 08/09, 09h40
+
+**Aceito.** Não por ler o relatório: corri eu a prova, e os sete controlos passam,
+incluindo o que eu tinha posto como obrigatório.
+
+```
+ok  formatador grava por cima igual: ACEITA (o `mtime` mudou para 1788847094)
+ok  REVERSAO: RECUSA, e nomeia apps/web/src/Ecra.tsx
+ok  alteracao a serio: RECUSA, e nomeia o ficheiro
+ok  arvore com alteracoes por commitar: aceita (o resumo e da arvore, sem git)
+ok  ficheiro NOVO e visto        ok  ficheiro APAGADO e visto
+```
+
+E no caminho real: `frescura: 25/25 capturas sobre o produto de agora (resumo
+78a6091a220c5d72, 735 ficheiros)`. A recusa falsa que abriu isto desapareceu.
+
+Uma correcção ao meu próprio processo: quando li o relatório dele pelo fim, não vi o
+controlo da reversão e ia perguntar por ele. Estava lá, à frente. **Ler o fim de um
+relatório e concluir sobre o todo é o mesmo erro que o `head -6` de manhã** — cortei
+a evidência e raciocinei sobre o corte.
+
+### Decisão 1 — o canário FICA, e eu estava errado
+
+Eu escrevi que o hash «torna o canário desnecessário». O JR não o apagou, e explicou:
+a `validar-provas-frescas.sh` **continua a comparar `mtime`** e consulta-o; apagá-lo
+cegava-a, «e uma guarda cega é pior do que uma cara».
+
+Tem razão, e o erro que eu ia cometer tem nome nesta casa: **um buraco portante.**
+Olhei para o canário do alto do caminho que acabara de curar, vi-o inútil *desse*
+ponto de vista, e concluí que era inútil. **Uma peça só fica obsoleta quando o último
+caminho que a usa deixa de a usar — não quando o primeiro deixa.**
+
+### Decisão 2 — a `validar-capturas-de-marketing.sh` migra, e é a urgente
+
+Está **vermelha agora**, e por falso. Medido por mim:
+
+```
+FALHOU  há capturas anteriores à fonte mais recente do produto:
+        24 medidas na frescura, 24 anteriores ao produto.
+```
+
+São os mesmos dois ficheiros das 07h00:30, com o conteúdo do commit. **Uma guarda
+que grita lobo ensina a ignorá-la**, e esta guarda protege justamente as imagens que
+um comprador vê primeiro. O desenho já existe, está implementado e provado, e a
+população é da mesma forma — capturas contra produto. Passa para o JR.
+
+### Decisão 3 — a `validar-provas-frescas.sh` fica para depois, e digo porquê
+
+Também mede tempo, mas **está verde** e a população é outra (provas contra fontes,
+não capturas contra produto). Não grita lobo, e migrá-la exige um desenho próprio em
+vez de copiar este. Fica a seguir — e é ela a última consumidora do canário: **quando
+migrar, o canário pode sair, e não antes.**
+
+### Sobre o que ele reportou de si próprio
+
+Correu um build com a máquina em ATENÇÃO sem avisar antes, e disse-o sem eu
+perguntar. A regra é boa e foi quebrada; o que a mantém viva é exactamente isto —
+**uma regra que só se ouve quando é cumprida deixa de ser uma regra e passa a ser uma
+decoração.** Fica registado, sem mais.
