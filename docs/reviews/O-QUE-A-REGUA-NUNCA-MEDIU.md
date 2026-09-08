@@ -86,3 +86,45 @@ Uma ressalva, e é de decisão e não de medição: **pôr preços reais numa p�
 tem consequências** — compromete-te com um número à frente de qualquer concorrente que
 o leia. O norte é documento dele e nomeia os três valores, portanto a direcção está
 escrita; mas a confirmação de que se publicam **hoje** é dele, e não a assumo.
+
+---
+
+## Os blocos 2 e 4 fazem exactamente o que o norte proíbe por palavras — 08/09, 14h00
+
+Viewport de 500 px, e estas medições não dependem da largura: são contagens de nós.
+
+**§4.3, Bloco 2 «Uma comanda atravessa o sistema».** O norte exige «use **quatro
+crops grandes da interface** conectados por uma linha de ritmo» e proíbe, por
+palavras: «**não use quatro cards iguais com parágrafos**».
+
+Medido: **4 títulos, 4 parágrafos, ZERO imagens.** Os quatro cartões chamam-se «Se
+reserva o se pide», «La cocina la ve», «Sale al pase», «Se cobra».
+
+Não é uma aproximação imperfeita do que foi pedido. É **o anti-padrão nomeado no
+documento**, implementado tal e qual, e sem nenhuma das quatro imagens que o
+substituiriam.
+
+**§4.5, Bloco 4 «Para cada pessoa, a tela certa».** O norte exige «use **tabs ou
+narrativa alternável** acessível» e «ao trocar papel, **troque screenshot** e
+benefício», e diz «**evite quatro novos cards de texto**».
+
+Medido: **zero tabs, uma única imagem para quatro papéis, 4 títulos e 5 parágrafos.**
+Com uma imagem só, trocar de papel não pode trocar de ecrã — o mecanismo que a
+especificação pede não existe.
+
+## Isto fecha o diagnóstico
+
+O que eu vi de manhã e chamei «forma genérica que se reconhece como feita por
+ferramenta» — círculos numerados, quatro colunas de texto — **é literalmente aquilo
+que o norte proíbe pelo nome**. Não era gosto meu nem dele: estava escrito, e não foi
+seguido.
+
+E explica a frase dele: «são muitos erros, você tem vários arquivos md te mostrando
+para onde ir.» Estão lá, com esta precisão, e ninguém os mediu.
+
+## O tamanho do que falta, dito sem disfarce
+
+Isto não é um conserto de uma linha como o do cabeçalho. O bloco 2 precisa de quatro
+capturas reais da interface, e o bloco 4 de um mecanismo alternável com um ecrã por
+papel. **É construção, não afinação** — e é o trabalho da landing, não a propagação
+às 396 telas, que continua a esperar pela Nathalia.
