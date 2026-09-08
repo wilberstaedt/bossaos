@@ -3139,9 +3139,9 @@ a ser **2 contra 3**.
 
 ### O que fica por fazer da Fase 0
 
-**0.4 — capturar «Mesas em tempo real»**, o «antes» da segunda tela-mestre.
-Continua por fazer: exige sessão e `build`, o JR está a construir a landing, e a
-máquina está em `ATENÇÃO`. **Declarado, não esquecido.**
+~~**0.4 — capturar «Mesas em tempo real»**… a máquina está em `ATENÇÃO`.~~
+**RAZÃO ERRADA, corrigida às 04h20 — ver o fim deste ficheiro.** Não é a
+máquina: é a mesma porta fechada que trava a recaptura.
 
 ## 08/09 01h00 — a landing da Fase 2 entregue, e uma discrepância que corrige os dois
 
@@ -3662,3 +3662,45 @@ sujeito errado.**
 
 E a cura foi sempre a mesma e nunca foi olhar com mais atenção: **foi trocar o
 sujeito da medição.**
+
+
+## 08/09 04h20 — a Fase 0.4 não estava bloqueada pela máquina, e eu escrevi que estava
+
+Com os dois lados parados e a máquina em `OK`, fui finalmente fazer a **Fase
+0.4** — a captura do «antes» das Mesas, que declarei em falta duas vezes.
+
+**Não deu, e a razão que eu tinha registado estava errada.**
+
+Primeiro corrigi-me numa suposição: pensei que o commit do congelamento fosse
+anterior à cura do registo, e é o contrário —
+
+| | |
+|---|---|
+| cura do registo (`fe64a4b`) | **07/09 22:37** |
+| congelamento da Fase 0 (`483c4a7`) | **08/09 00:00** |
+
+**A Fase 0 foi congelada depois de a porta fechar.** E depois medi o que decide:
+
+    conta de demonstração: 0 credenciais
+    utilizadores de inspecção: 0
+
+**Não há sessão para capturar uma tela autenticada.** Nem no «antes», nem no
+«depois», nem em lado nenhum — porque nenhuma conta pode nascer.
+
+### Portanto a razão muda, e a razão importa
+
+Eu tinha escrito que a 0.4 estava **bloqueada pela máquina**. **Está bloqueada
+pela porta.** Uma razão errada num registo manda a próxima pessoa **esperar por
+uma máquina** em vez de resolver o que a trava — é a mesma família do comentário
+que aponta para a causa errada, e essa lição é de ontem de manhã.
+
+### O que isto consolida para o Matheus
+
+A decisão de produto que está com ele **não bloqueia uma coisa: bloqueia três.**
+
+1. a recaptura das três imagens da sala na landing;
+2. **a Fase 0.4** — o «antes» da segunda tela-mestre, que a Nathalia não tem;
+3. **qualquer cliente novo**, no código não publicado.
+
+**São o mesmo bloqueio com três caras**, e eu estava a contá-las como problemas
+separados.
