@@ -58,3 +58,23 @@ raciocínio não distingue um deploy que correu de um deploy que falhou a meio.
 
 **Uma marca de versão que a própria aplicação esconde é a mesma doença desta noite
 inteira:** o instrumento existe, está correcto, e não está apontado ao sujeito.
+
+---
+
+## A correcção chegou à lista dele — 08/09, 09h00
+
+Corrigi no artefacto que o Matheus vai abrir, e corrigi a **frase de topo**, não só
+o rodapé. Ela dizia «o código publicado tem zero ocorrências de `disableSignUp`», e
+«publicado» é exactamente a palavra ambígua que me enganou: serve para o GitHub e
+para o que está no ar, e neste projecto essas duas coisas divergiram há 593 commits.
+
+Passou a dizer «o que está no ar», com a nota a apontar para a explicação.
+
+**Podia ter deixado só a nota lá em baixo e não deixei.** Uma correcção que vive
+quatro blocos abaixo da afirmação errada chega tarde: quem lê de cima para baixo já
+partiu para verificar a coisa errada antes de chegar à emenda. **A emenda tem de
+estar onde o erro está, não onde é confortável escrevê-la.**
+
+Números refrescados na mesma passagem, porque é sobre eles que ele decide: **23**
+commits ao produto por publicar (eram 16 às 02h35 e 19 às 06h), e **593** commits
+locais por enviar ao GitHub.
