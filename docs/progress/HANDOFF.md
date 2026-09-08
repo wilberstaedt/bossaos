@@ -3578,3 +3578,47 @@ não serve quem recebe um convite.
 
 Máquina em **ATENÇÃO** durante o lote (5027 MB disponíveis, 189 livres). Sem
 build e sem lote de agentes — só o guião de node e leituras à base.
+
+---
+
+## O plugin `admin`, medido — e deu uma terceira coisa — 08/09
+
+Detalhe em `docs/reviews/RESPOSTA-PORTA-DO-ADMIN.md`, guião em
+`packages/auth/medicoes/porta-do-admin.mjs`. Instância **de medição**: o produto
+não ganhou o plugin.
+
+    1 ordem (corpo invalido)      recusou INVALID_EMAIL             linhas=0
+    2 bandeira ligada             recusou  Unknown argument `role`  linhas=0
+    3 controlo bandeira desligada recusou  Unknown argument `role`  linhas=0
+    utilizadores 131 antes e 131 depois
+
+**Não cria, e não é a bandeira que o impede.** As duas corridas dão o mesmo erro
+do Prisma — o controlo de dois lados não distinguiu nada porque a falha é
+anterior à decisão.
+
+**Mas prova uma coisa ao contrário:** com a bandeira **ligada** a chamada chegou à
+**escrita na base**. Se o `disableSignUp` fosse consultado, tinha recusado antes.
+**O caminho do admin não consulta a bandeira** — a suspeita por ausência de
+`grep` está medida, por onde a execução chegou.
+
+**A terceira coisa: o que falta são COLUNAS, não permissão.** O plugin escreve
+`role`, `banned`, `banReason`, `banExpires` em `users` e `impersonatedBy` em
+`sessions`. Nenhuma existe.
+
+Isso muda a forma da escolha, e não para melhor:
+
+- **`role` em `users`** cria um **segundo conceito de papel**, global por
+  utilizador, ao lado do `Papel` por organização que o produto já tem.
+- **`impersonatedBy` em `sessions`** é uma **segunda via de personificação**, ao
+  lado da sessão de suporte do E33 — que tem quatro condições, e esta não tem
+  nenhuma.
+
+**Por medir, e digo-o:** se a conta nasceria utilizável. Nunca houve linha,
+portanto não houve `signInEmail` nem `issuer` para comparar.
+
+**Não implementei nenhuma das duas.** A escolha já não é «privada contra
+pública»: é entre uma interface sem promessa de estabilidade e uma migração que
+instala no produto um papel e uma personificação paralelos aos que o E33 desenhou
+de propósito.
+
+Máquina em **ATENÇÃO** (4966 MB disponíveis, 55 livres). Só guião de node.
