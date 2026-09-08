@@ -4059,3 +4059,31 @@ minha edição à fita **não acrescentou nenhum**: `document` 11, `getComputedS
 3, `scrollTo` 2, iguais em HEAD e agora.
 
 Máquina em **OK** durante todo o lote (5319 MB disponíveis).
+
+---
+
+## Pendência declarada — 08/09, 07h40 (Lúmen sénior)
+
+**A frase nova do `validar-no-commit.sh` não foi vista numa corrida real.**
+
+Mudei o portão para contar abstenções: ele dizia «O que se publica esta medido: 0
+falhas» tanto com zero como com treze guardas abstidas. Agora distingue. O que está
+provado, e como:
+
+- os três ramos da frase, num arnês com controlo dos dois lados
+  (`provas-de-mao/prova-frase-do-portao.sh`): o novo distingue, e prova-se que o
+  **velho não distinguia** — senão a mudança não teria curado nada;
+- que o ficheiro real contém exactamente as frases testadas, porque o arnês é uma
+  cópia da lógica e não a lógica;
+- que o contador sobrevive ao padrão usado (subshell na condição, incremento no
+  `else`), e que nenhuma das três chamadas a `naomedi` está dentro de subshell ou
+  pipeline — onde o incremento se perderia em silêncio.
+
+**O que falta:** uma corrida verdadeira do portão, para ver o número sair a treze e
+não a zero. Não a corri, e a razão é a máquina: às 07h35 o `mac-health.sh` deu
+**ATENÇÃO** — 55 MB livres, compressor alto, 5 agentes contra um orçamento de 4, que
+é o estado que deu quatro kernel panics em 12-13/07 — e o JR tinha um build a
+correr. **Um build meu por cima disso arriscava a sessão inteira dos dois.**
+
+Fica assim de propósito: **provado nos ramos, por confirmar no todo.** Quem correr
+o portão a seguir, olhe para a última linha e diga o número que saiu.
