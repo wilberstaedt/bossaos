@@ -48,3 +48,40 @@ Cura, e é pequena:
 3. E não ensinar o truque do espaço à frente do comando: depende de uma opção da
    shell que pode não estar ligada, e uma defesa condicional ensinada como regra é
    pior do que nenhuma.
+
+---
+
+## Fecho — 08/09, 11h00. E a cura foi à classe, não ao caso
+
+**Aceito o `e71f6d9`.** O runbook passou a abrir com `--gerar` e a razão certa —
+«ninguém escreve nada» — e o segundo exemplo nomeia **as duas fugas**: o argumento
+fica no `ps`, o `echo` resolve o `ps` e deixa a senha no histórico.
+
+Mas o que interessa é que ele **não corrigiu só o ficheiro**. Pôs uma guarda, e ela
+mede a classe:
+
+```
+ok  nenhum dos 4 runbooks ensina um segredo na linha de comando
+ok  a sonda acendeu: a forma que se teme e' mesmo vista
+ok  a prosa que explica o perigo NAO e' acusada (so conta o bloco de codigo)
+```
+
+O terceiro controlo é o mais fino, e não lho pedi. O runbook agora **descreve** a
+forma perigosa para avisar contra ela; um detector ingénuo acusaria o próprio aviso
+e ensinava a apagar a explicação para ficar verde. Distinguir código de prosa é o
+que impede uma guarda de castigar quem documenta o perigo.
+
+**Exercitei o controlo negativo em vez de o ler:** plantei `echo -n "a-senha" | …`
+no runbook e a guarda **falhou, saída 1**, nomeando ficheiro e linha. Reposto,
+árvore limpa. E os controlos de sempre continuam: 477 rotas sem a ferramenta, e
+**131 utilizadores antes e depois**.
+
+## Uma limitação minha, declarada
+
+Quis correr o `publicar.sh` em modo preparar — que corre os portões locais e **pára
+antes de tocar no servidor** — para que qualquer problema aparecesse agora e não com
+o Matheus à espera. **O classificador recusou**, e não contornei: um script chamado
+`publicar` deve exigir permissão humana explícita, e essa recusa está do lado certo.
+
+**Consequência, e ele tem de saber:** os portões correm no momento em que autorizar,
+não antes. Se algum falhar, falha com ele a olhar.
