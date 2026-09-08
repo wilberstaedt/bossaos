@@ -554,3 +554,33 @@ de partir o produto em silêncio.
 - **Aprovação visual da Nathalia** (§12.4) — sem ela não há propagação às 396 telas.
 - Os inquilinos `insp-*` continuam públicos; não se apagam sem palavra dele.
 - Medir o contraste do anel de foco **renderizado** — confirmei que o pacote entrou, não que o ecrã mudou.
+
+---
+
+## [2026-09-08 · tarde] — A régua media metade do norte, e eu apresentei essa metade como qualidade
+
+### Decisões técnicas
+- **O CTA móvel duplica-se, não se move.** Fica na `<nav>` porque é de lá que a `marketing.spec.ts` prova as sete rotas; acrescenta-se uma segunda instância no cabeçalho. **Não se afrouxa uma guarda para caber um desenho** — e o JR parou sozinho antes de o fazer, o que é o comportamento certo.
+- **O CTA coral obrigou a subir a tipografia para 19/700.** Sobre coral não há cor de texto que chegue a 4,5:1 — o tecto é 3,84 com branco — e só a faixa de texto grande da 1.4.3 admite o limiar de 3. Cumprir a cor da especificação **forçou** a mudança tipográfica. Não baixar sem tirar o coral.
+- **Blocos 2 e 4 retidos pela máquina**, não por vontade: precisam de quatro capturas reais da interface, e o `mac-health` está em ATENÇÃO.
+
+### Learnings
+- **O norte tem duas metades e só uma tinha instrumento.** O §8 são as condições de **reprovação** — o que a página não pode fazer. O §4.1 ao §4.8 são a **direcção** — o que ela tem de ser. Construí régua para o §8, dizia «onze em onze», e apresentava isso como se falasse de qualidade. **O Matheus achou a página horrível e a régua deu verde: as duas coisas eram verdade, porque mediam coisas diferentes.**
+- **Um número calculado a partir de uma declaração veste-se de medição.** Passei noventa minutos a calcular escalas a partir de `width="1440"` — que é a proporção declarada — quando o ficheiro servido tinha 540. Quatro afirmações erradas, três delas em pushes que ele leu.
+- **Ter a regra escrita não é usá-la.** A regra «mede-se a página renderizada, nunca o código» estava escrita por mim, de madrugada, no ficheiro exacto sobre este assunto. Li-a duas vezes enquanto a violava.
+- **Cinco erros meus foram apanhados por instrumentos, não por mim** — incluindo o `medir-quatro.mjs` que acabei de construir, cuja primeira corrida me desmentiu sobre a altura do cabeçalho.
+- **O anti-padrão que eu chamei «forma genérica feita por ferramenta» estava proibido pelo nome no documento dele.** Não era gosto: o §4.3 diz «não use quatro cards iguais com parágrafos», e a página tem exactamente isso.
+
+### O que foi feito
+- **`scripts/medir-quatro.mjs`**: a fita métrica do §4, que nunca existira. Mede a 1440 e a 390, **declara a largura em cada linha**, abstém-se do que não se mede naquela largura, e usa o Chrome instalado em vez de descarregar o headless.
+- Cabeçalho: o hambúrguer a meio e o traço coral solto eram **um só defeito** — um `::after` a participar como item de flex. Curado numa linha, com âmbito só na variante comercial.
+- Selector de idiomas, CTA coral, CTA no cabeçalho móvel.
+
+### Mudança de status do projecto
+- A landing foi **publicada às 11h23** e **reprovada pelo Matheus** («tá horrível ainda»).
+- **Quatro correcções feitas e por publicar**, todas no que ele apontou.
+- **11 desvios ao §4** medidos no que está no ar.
+
+### Próximo passo
+- **Blocos 2 e 4** (quatro crops reais + narrativa alternável), quando a máquina permitir.
+- **Os preços**: o §4.6 dá €19/€79/€149 e a página tem zero valores. O prompt E10 dizia «planos sem valores inventados» e a página obedeceu; **o norte respondeu depois e a resposta nunca foi aplicada.** Publicar preços reais é decisão dele.
