@@ -94,7 +94,7 @@ const semBandeira = await tentar(controlo, 'controlo (bandeira desligada)');
 const pelaPortaInterna = async () => {
   await apagar();
   const ctx = await produto.$context;
-  let criou = 'NAO';
+  let criou;
   try {
     const u = await ctx.internalAdapter.createUser({ email: EMAIL, name: 'Porta', emailVerified: true });
     await ctx.internalAdapter.createAccount({

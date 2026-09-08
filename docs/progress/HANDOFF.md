@@ -3986,3 +3986,76 @@ que era.
 **A página publicada continua com o aviso à mão, e continua a ser o penso.**
 
 Máquina em **ATENÇÃO** durante o lote (4914 MB disponíveis, 83 livres).
+
+---
+
+## A porta que faltava, e as quatro caras destrancadas — 08/09
+
+`criarUtilizador` existe, isolado, e o corredor dos mestres passa.
+
+### A função
+
+`packages/auth/src/criar-utilizador.ts` — **uma só**, sobre
+`ctx.internalAdapter.createUser` + `createAccount` com `ctx.password.hash`. O
+comentário diz por extenso que é **API privada do `better-auth`**, com **zero
+ocorrências no `index.d.mts`**, e que a mitigação é ser a única a tocar-lhe.
+Exporta `ISSUER_DE_CREDENCIAL = 'local:credential'`, porque com o `@default` da
+coluna a conta existe e **não entra**.
+
+### A prova que a prende
+
+`provas/criar-utilizador.test.ts`, **2 testes, 0 falhas**. O primeiro fixa as
+três coisas **de uma vez**: cria, **entra** com a senha criada pelo
+`signInEmail` real, e o `issuer` sai certo. O segundo é o controlo negativo:
+simula uma função que devolve sem escrever e exige que a asserção do primeiro
+**acuse** — se ela não acusasse, o verde não provava nada.
+
+### A conta nasce na semeadura
+
+`demonstracao-comum.ts` ganhou `semearContaDeCaptura()`: **o ficheiro que apaga a
+conta passou a ser o que a cria.** Importação relativa e **nenhuma dependência de
+pacote nova** — `@bossaos/auth` já depende de `@bossaos/db`, e declarar o inverso
+fecharia um ciclo. Usa o **segredo do produto**: com outro, a conta nascia e não
+entrava.
+
+### O resultado
+
+| corredor | antes | agora |
+|---|---|---|
+| `provar-mestres.sh` | 400 na inscrição, **0 capturas** | **25 capturas** |
+| `provar-demonstracao.sh` | 400 na inscrição | **OK**, 24 composições |
+| `validar-capturas-de-marketing.sh` | 24 anteriores ao produto | **verde**, 0 anteriores |
+| `pagina-de-aprovacao.py` | `RECUSO`, saída 1, sem ficheiro | **saída 0** |
+
+A guarda de frescura **aceitou por si**:
+
+    frescura: 25/25 capturas posteriores a fonte mais recente do produto
+    escrito /tmp/telas-mestre.html: 3.02 MB · 25 capturas · 6 mestres
+
+E as **nove** da sala (três composições × três idiomas) foram refeitas: o herói
+da landing deixou de vender uma tela em lista.
+
+### Duas coisas que ficam levantadas e não curadas
+
+1. **`provar-mestres.sh` linha 169 procura o ficheiro errado.** Testa
+   `$DESTINO/kds-cozinha-1280.png` — que é o nome das capturas de **marketing** —
+   dentro da pasta dos **mestres**, onde o KDS é o **M05** e saiu bem nos três
+   idiomas. **Esta verificação nunca pode ter passado**, e uma guarda que nunca
+   passou não prova nada. Não lhe toquei: consertá-la para o meu corredor ficar
+   verde é a coisa que não se faz sozinho.
+2. **`M05 offline` continua «por explicar»** — o estado desenha igual ao
+   principal (681 caracteres nos dois). O ficheiro saiu byte a byte igual ao
+   anterior, portanto é anterior a este trabalho.
+
+### E o `pnpm verificar`
+
+Estava **vermelho antes desta sessão**: `validar-icones-da-navegacao.mjs` é de
+07/09 13h28 e falha com globais de navegador dentro de `page.evaluate`. Eu tinha
+somado a isso — as minhas medições em `packages/*/medicoes/` ficavam sem globais
+de Node porque o eslint só os dá a `scripts/**`. **Corrigi o que era meu:** o
+alcance no `eslint.config.mjs` e duas atribuições mortas. De **77 para 17**, e os
+17 que restam são o padrão anterior, em ficheiros que não são meus. Medido que a
+minha edição à fita **não acrescentou nenhum**: `document` 11, `getComputedStyle`
+3, `scrollTo` 2, iguais em HEAD e agora.
+
+Máquina em **OK** durante todo o lote (5319 MB disponíveis).

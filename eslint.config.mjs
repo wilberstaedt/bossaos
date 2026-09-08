@@ -35,7 +35,13 @@ export default tseslint.config(
     // o lint acusa `process` e `console` de não existirem — que é verdade num
     // browser e falso aqui, e uma regra que dá o veredicto certo pelo motivo
     // errado ensina a ignorá-la.
-    files: ['scripts/**/*.mjs', 'scripts/**/*.js'],
+    // As medições de `packages/*/medicoes/` são guiões de Node como os de
+    // `scripts/`, e só vivem dentro de um pacote por RESOLUÇÃO: o `better-auth`
+    // é dependência do `@bossaos/auth` e não resolve a partir da raiz. Ficavam
+    // sem globais de Node e o `pnpm verificar` acusava `process` e `console`
+    // como indefinidos — um veredicto certo pelo motivo errado, que é o que a
+    // nota acima já dizia.
+    files: ['scripts/**/*.mjs', 'scripts/**/*.js', 'packages/*/medicoes/**/*.mjs'],
     languageOptions: { globals: globals.node },
   },
   {

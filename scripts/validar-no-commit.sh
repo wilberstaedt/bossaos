@@ -30,9 +30,25 @@ cd "$(dirname "$0")/.."
 REF="${1:-HEAD}"
 
 falhas=0
+# ── As abstencoes contam-se, ainda que nao reprovem ────────────────────────
+#
+# O `naomedi` so imprimia. A frase final saia igual com zero abstencoes e com
+# treze: «O que se publica esta medido: 0 falhas». Corri a suite inteira a 08/09
+# e foram TREZE as guardas que se abstiveram - a frase dizia que o que se
+# publica estava medido, e sobre treze delas nao estava nada.
+#
+# Nao as conto como vermelho, e o motivo esta escrito mais abaixo: contar
+# abstencao como falha ensina a ignorar o vermelho. Mas nao contar de todo
+# ensina pior - ensina a ler «0 falhas» como «medido», que e a mesma frase para
+# duas coisas diferentes.
+#
+# A casa ja tinha o remedio ao lado: o `provar-prontidao.sh` conta as
+# verificacoes emitidas e recusa-se a dizer «Prontidao provada» abaixo de um
+# piso - «VERDE COM ZERO MEDIDO». Isto e a mesma ideia, no portao que se le mais.
+abstencoes=0
 erro()    { printf '  \033[31mFALHA\033[0m    %s\n' "$1"; falhas=$((falhas+1)); }
 ok()      { printf '  \033[32mok\033[0m       %s\n' "$1"; }
-naomedi() { printf '  NAO MEDI %s\n' "$1"; }
+naomedi() { printf '  NAO MEDI %s\n' "$1"; abstencoes=$((abstencoes+1)); }
 
 GUARDAS=$(cd scripts && ls validar-*.sh | grep -v '^validar-no-commit.sh$')
 
@@ -141,5 +157,12 @@ else
 fi
 
 echo
-[ "$falhas" -eq 0 ] && echo "  O que se publica esta medido: 0 falhas." || echo "  $falhas FALHA(S)."
+if [ "$falhas" -ne 0 ]; then
+  echo "  $falhas FALHA(S)."
+elif [ "$abstencoes" -eq 0 ]; then
+  echo "  O que se publica esta medido: 0 falhas, e nenhuma guarda se absteve."
+else
+  echo "  0 falhas ENTRE AS QUE MEDIRAM. $abstencoes guarda(s) nao mediram."
+  echo "  Sobre o que essas cobrem, isto nao diz nada - nem verde nem vermelho."
+fi
 exit "$falhas"

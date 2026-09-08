@@ -95,7 +95,7 @@ console.log(`  2 bandeira ligada             ${comBandeira}`.padEnd(74) + `linha
 // A mesma instância com um só campo trocado. Sem isto, uma recusa em 2 não
 // distingue «respeita a bandeira» de «invoquei mal».
 let entrou = '(nao aplicavel)';
-let issuer = '(sem linha)';
+let issuer;
 if (nasceuLigado > 0) {
   // Não basta criar: o revisor lembrou o modo de falha que quase me enganou.
   try { await produto.api.signInEmail({ body: { email: EMAIL, password: SENHA } }); entrou = 'ENTROU'; }
