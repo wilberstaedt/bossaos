@@ -85,9 +85,9 @@ const RANHURA_DO_PAPEL = '(min-width: 1024px) 40vw, 80vw';
  * daria duas fotografias iguais na mesma página.
  */
 const PAPEIS = [
-  { n: 1, qual: 'catalogo', tamanhos: RANHURA_DO_PAPEL, telefone: false },
-  { n: 2, qual: 'tablet', tamanhos: RANHURA_DO_PAPEL, telefone: false },
-  { n: 3, qual: 'kds', tamanhos: RANHURA_DO_PAPEL, telefone: false },
+  { n: 1, qual: 'catalogoRecorte', tamanhos: RANHURA_DO_PAPEL, telefone: false },
+  { n: 2, qual: 'tabletRecorte', tamanhos: RANHURA_DO_PAPEL, telefone: false },
+  { n: 3, qual: 'kdsRecorte', tamanhos: RANHURA_DO_PAPEL, telefone: false },
   // ── O quarto não é um ecrã pequeno: é OUTRO aparelho ─────────────────────
   //
   // As outras três fontes são de paisagem — 1440×900, 834×1112, 1280×800 — e

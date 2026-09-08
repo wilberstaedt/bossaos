@@ -51,6 +51,9 @@ export const DEMO = {
   unidade: 'd0000000-0000-4000-8000-000000000003',
   utilizador: 'd0000000-0000-4000-8000-000000000004',
   pertenca: 'd0000000-0000-4000-8000-000000000005',
+  // A pertença da CONTA DE CAPTURA. Ver `semearContaDeCaptura`: sem ela, a conta
+  // entra no produto e não é de organização nenhuma.
+  pertencaDaCaptura: 'd0000000-0000-4000-8000-000000000006',
   categoria: 'd0000000-0000-4000-8000-000000000010',
   menu: 'd0000000-0000-4000-8000-000000000011',
   zona: 'd0000000-0000-4000-8000-000000000012',
@@ -127,12 +130,13 @@ export async function semearContaDeCaptura(): Promise<void> {
   }
 
   const prisma = abrirPrisma();
+  let jaExiste = false;
   try {
     // Idempotente, como o resto da semeadura: se a conta sobreviveu a uma
     // corrida interrompida, não se duplica.
     const [{ n }] = await prisma.$queryRawUnsafe<{ n: bigint }[]>(
       'SELECT count(*)::int AS n FROM users WHERE email = $1', CONTA_DA_DEMO);
-    if (Number(n) > 0) return;
+    jaExiste = Number(n) > 0;
   } finally {
     await prisma.$disconnect();
   }
@@ -146,9 +150,52 @@ export async function semearContaDeCaptura(): Promise<void> {
   // Sem `emailVerificado`, e o silêncio aqui é deliberado: `bossaos.invalid` é
   // um domínio reservado que não resolve, portanto ninguém verificou nem podia
   // verificar este endereço. `false` é o que aconteceu.
-  await criarUtilizador(auth, {
-    email: CONTA_DA_DEMO, senha: SENHA_DA_DEMO, nome: 'Bossa Demo',
-  });
+  if (!jaExiste) {
+    await criarUtilizador(auth, {
+      email: CONTA_DA_DEMO, senha: SENHA_DA_DEMO, nome: 'Bossa Demo',
+    });
+  }
+
+  // ── A linha que ninguém tinha escrito ──────────────────────────────────
+  //
+  // A conta de captura tinha SENHA e não tinha ORGANIZAÇÃO. A Marta
+  // (`sala@bossaos.invalid`) tinha a pertença e não tinha senha. **A que entra
+  // não pertencia, e a que pertencia não entrava.** Cada metade estava bem feita
+  // no seu ficheiro — a conta nasce aqui, pela porta do `better-auth`, desde que
+  // o `disableSignUp` fechou o registo; a Marta nasce por SQL na semente, com a
+  // pertença ao lado — e ninguém escreveu a linha que as junta.
+  //
+  // O sintoma era um **404 no `/kds/…` e no `/pos/…`**, e o 404 era a guarda a
+  // ACERTAR: o `carregarKds` percorre as organizações do actor e não encontra a
+  // unidade no âmbito de quem não é de lá. Não se toca na guarda.
+  //
+  // Trocar a captura para a Marta **não é opção**: ela não tem credencial, e
+  // forjar-lhe sessão mede um cookie e não o produto — que é a razão escrita
+  // neste mesmo ficheiro para a conta de captura entrar pela porta real.
+  //
+  // Fica FORA do `if (!jaExiste)` de propósito: uma base onde a conta já existia
+  // sem pertença é exactamente a base que existe hoje, e um remendo que só corre
+  // em bases novas não cura nenhuma das que já estão por aí.
+  const ligacao = abrirPrisma();
+  try {
+    await ligacao.$executeRawUnsafe(`
+      INSERT INTO memberships (id, organization_id, user_id, estado, updated_at)
+        SELECT '${DEMO.pertencaDaCaptura}', '${DEMO.org}', u.id, 'ACTIVO', now()
+          FROM users u WHERE u.email = $1
+         AND NOT EXISTS (
+           SELECT 1 FROM memberships m
+            WHERE m.organization_id = '${DEMO.org}' AND m.user_id = u.id)`,
+      CONTA_DA_DEMO);
+    await ligacao.$executeRawUnsafe(`
+      INSERT INTO role_assignments (id, organization_id, membership_id, papel, updated_at)
+        SELECT gen_random_uuid(), '${DEMO.org}', '${DEMO.pertencaDaCaptura}', 'OWNER', now()
+         WHERE EXISTS (SELECT 1 FROM memberships WHERE id = '${DEMO.pertencaDaCaptura}')
+           AND NOT EXISTS (
+             SELECT 1 FROM role_assignments
+              WHERE membership_id = '${DEMO.pertencaDaCaptura}')`);
+  } finally {
+    await ligacao.$disconnect();
+  }
 }
 
 export function abrirPrisma(): PrismaClient {

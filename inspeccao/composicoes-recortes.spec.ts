@@ -86,7 +86,7 @@ test('os três recortes, um por ecrã e por idioma', async ({ page }) => {
       { nome: 'kds-recorte-560', ancora: '[data-teste="bilhete"]',
         visor: { width: 1280, height: 900 },
         caminho: `/${idioma}/kds/${DEMO.unidade}/${DEMO.estacaoQuente}` },
-      { nome: 'sala-tablet-recorte-560', ancora: 'main',
+      { nome: 'sala-tablet-recorte-560', ancora: 'h1',
         visor: { width: 834, height: 1112 },
         caminho: `/${idioma}/pos/${DEMO.unidade}` },
     ];

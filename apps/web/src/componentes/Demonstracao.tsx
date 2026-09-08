@@ -3,16 +3,25 @@ import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import salaServicoEs from '../demonstracao/es-ES/sala-servico-1440.png';
 import kdsCozinhaEs from '../demonstracao/es-ES/kds-cozinha-1280.png';
 import catalogoEs from '../demonstracao/es-ES/catalogo-1440.png';
+import catalogoRecorteEs from '../demonstracao/es-ES/catalogo-recorte-560.png';
+import kdsRecorteEs from '../demonstracao/es-ES/kds-recorte-560.png';
+import tabletRecorteEs from '../demonstracao/es-ES/sala-tablet-recorte-560.png';
 import salaTabletEs from '../demonstracao/es-ES/sala-tablet-834.png';
 import cartaMovelEs from '../demonstracao/es-ES/carta-movel-390.png';
 import salaServicoPt from '../demonstracao/pt-BR/sala-servico-1440.png';
 import kdsCozinhaPt from '../demonstracao/pt-BR/kds-cozinha-1280.png';
 import catalogoPt from '../demonstracao/pt-BR/catalogo-1440.png';
+import catalogoRecortePt from '../demonstracao/pt-BR/catalogo-recorte-560.png';
+import kdsRecortePt from '../demonstracao/pt-BR/kds-recorte-560.png';
+import tabletRecortePt from '../demonstracao/pt-BR/sala-tablet-recorte-560.png';
 import salaTabletPt from '../demonstracao/pt-BR/sala-tablet-834.png';
 import cartaMovelPt from '../demonstracao/pt-BR/carta-movel-390.png';
 import salaServicoEn from '../demonstracao/en/sala-servico-1440.png';
 import kdsCozinhaEn from '../demonstracao/en/kds-cozinha-1280.png';
 import catalogoEn from '../demonstracao/en/catalogo-1440.png';
+import catalogoRecorteEn from '../demonstracao/en/catalogo-recorte-560.png';
+import kdsRecorteEn from '../demonstracao/en/kds-recorte-560.png';
+import tabletRecorteEn from '../demonstracao/en/sala-tablet-recorte-560.png';
 import salaTabletEn from '../demonstracao/en/sala-tablet-834.png';
 import cartaMovelEn from '../demonstracao/en/carta-movel-390.png';
 import catalogoEstreitoEs from '../demonstracao/es-ES/catalogo-estreito-390.png';
@@ -49,7 +58,22 @@ import kdsEstreitoEn from '../demonstracao/en/kds-estreito-390.png';
  * e um salto no herói é o defeito que o §6.1 proíbe no sticky, pela mesma razão.
  */
 
-export type NomeDaComposicao = 'sala' | 'kds' | 'catalogo' | 'tablet' | 'carta';
+/**
+ * ── Os RECORTES têm nome PRÓPRIO, e não substituem os mestres ─────────────
+ *
+ * Um mestre de 1440 numa ranhura de 477 põe um texto de 14 px a **4,6** —
+ * ilegível por aritmética e não por CSS: para lá chegar seriam precisos 1131 px
+ * de ranhura, e num telemóvel a ranhura útil são ~350. A cura é a FONTE, e é o
+ * que o critério 6 sempre pediu ao dizer «crops»: um **recorte** de 560 de uma
+ * região com sentido — a lista de artigos, a coluna de comandas, o salão.
+ *
+ * Ficam com nome próprio em vez de substituírem o `catalogo`/`kds`/`tablet`
+ * porque o mestre continua **certo** onde a ranhura é larga. Trocar a fonte
+ * partilhada curava um bloco e ampliava os outros.
+ */
+export type NomeDaComposicao =
+  | 'sala' | 'kds' | 'catalogo' | 'tablet' | 'carta'
+  | 'catalogoRecorte' | 'kdsRecorte' | 'tabletRecorte';
 
 /**
  * ── A fonte segue o IDIOMA, e antes não seguia ────────────────────────────
@@ -70,14 +94,20 @@ export type NomeDaComposicao = 'sala' | 'kds' | 'catalogo' | 'tablet' | 'carta';
 const FONTES: Record<Idioma, Record<NomeDaComposicao, StaticImageData>> = {
   'es-ES': {
     sala: salaServicoEs, kds: kdsCozinhaEs, catalogo: catalogoEs,
+    catalogoRecorte: catalogoRecorteEs, kdsRecorte: kdsRecorteEs,
+    tabletRecorte: tabletRecorteEs,
     tablet: salaTabletEs, carta: cartaMovelEs,
   },
   'pt-BR': {
     sala: salaServicoPt, kds: kdsCozinhaPt, catalogo: catalogoPt,
+    catalogoRecorte: catalogoRecortePt, kdsRecorte: kdsRecortePt,
+    tabletRecorte: tabletRecortePt,
     tablet: salaTabletPt, carta: cartaMovelPt,
   },
   en: {
     sala: salaServicoEn, kds: kdsCozinhaEn, catalogo: catalogoEn,
+    catalogoRecorte: catalogoRecorteEn, kdsRecorte: kdsRecorteEn,
+    tabletRecorte: tabletRecorteEn,
     tablet: salaTabletEn, carta: cartaMovelEn,
   },
 };
@@ -106,14 +136,20 @@ const FONTES: Record<Idioma, Record<NomeDaComposicao, StaticImageData>> = {
 const ESTREITAS: Record<Idioma, Partial<Record<NomeDaComposicao, StaticImageData>>> = {
   'es-ES': {
     sala: salaEstreitaEs, kds: kdsEstreitoEs, catalogo: catalogoEstreitoEs,
+    catalogoRecorte: catalogoEstreitoEs, kdsRecorte: kdsEstreitoEs,
+    tabletRecorte: salaEstreitaEs,
     tablet: salaEstreitaEs,
   },
   'pt-BR': {
     sala: salaEstreitaPt, kds: kdsEstreitoPt, catalogo: catalogoEstreitoPt,
+    catalogoRecorte: catalogoEstreitoPt, kdsRecorte: kdsEstreitoPt,
+    tabletRecorte: salaEstreitaPt,
     tablet: salaEstreitaPt,
   },
   en: {
     sala: salaEstreitaEn, kds: kdsEstreitoEn, catalogo: catalogoEstreitoEn,
+    catalogoRecorte: catalogoEstreitoEn, kdsRecorte: kdsEstreitoEn,
+    tabletRecorte: salaEstreitaEn,
     tablet: salaEstreitaEn,
   },
 };
@@ -122,6 +158,10 @@ const ESTREITAS: Record<Idioma, Partial<Record<NomeDaComposicao, StaticImageData
  *  que varia é o texto, e disso trata o `mensagensDe`. Um facto, um sítio. */
 const ALT: Record<NomeDaComposicao, string> = {
   sala: 'altSala', kds: 'altKds', catalogo: 'altCatalogo',
+  // O recorte é do MESMO ecrã: o texto alternativo continua verdadeiro, e é por
+  // isso que o `tabletRecorte` é o SALÃO e não uma comanda — o `altTablet` diz
+  // «o mesmo salão num tablet», e trocar a imagem tornaria o texto falso.
+  catalogoRecorte: 'altCatalogo', kdsRecorte: 'altKds', tabletRecorte: 'altTablet',
   tablet: 'altTablet', carta: 'altCarta',
 };
 

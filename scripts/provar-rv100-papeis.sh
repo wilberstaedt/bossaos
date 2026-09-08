@@ -61,14 +61,15 @@ BASE="$(correr)"
 echo "$BASE" | grep -E 'ESCALA es-ES' | sed 's/^/     /'
 ausente 'imagens distintas' "$BASE"
 ausente 'AMPLIADO' "$BASE"
+ausente 'LEGIBILIDADE' "$BASE"
 
 echo "2. Critério 3 · dois papéis com a MESMA composição"
 python3 - "$ALVO" <<'PY'
 import io, sys
 p = sys.argv[1]
 s = io.open(p, encoding='utf-8').read()
-velho = "{ n: 2, qual: 'tablet', tamanhos: RANHURA_DO_PAPEL, telefone: false },"
-novo = "{ n: 2, qual: 'catalogo', tamanhos: RANHURA_DO_PAPEL, telefone: false },"
+velho = "{ n: 2, qual: 'tabletRecorte', tamanhos: RANHURA_DO_PAPEL, telefone: false },"
+novo = "{ n: 2, qual: 'catalogoRecorte', tamanhos: RANHURA_DO_PAPEL, telefone: false },"
 if s.count(velho) != 1:
     sys.stderr.write('PLANTE-MORTO: o papel 2 nao esta como o guiao espera\n')
     raise SystemExit(3)
@@ -102,25 +103,40 @@ else
 fi
 cp -p "$GUARDADO" "$ALVO"
 
-echo "4. Critério 6 · o terceiro lado exerce-se sozinho"
-# A LEGIBILIDADE não precisa de plante: está a acusar DE VERDADE, agora, sobre
-# os papéis 1, 2 e 3. Uma guarda que está a recusar neste momento é a prova mais
-# forte que existe de que sabe recusar — plantar por cima disso não acrescentava
-# nada. O que se verifica aqui é que a acusação nomeia os papéis certos.
-if echo "$BASE" | grep -q 'papel 4: LEGIBILIDADE'; then
-  echo "  FALHA acusa o papel 4, que está a 13,9 px — a acusação apanha quem não deve"
+echo "4. Critério 6 · o mestre inteiro de volta na ranhura estreita"
+# O terceiro lado. Enquanto os papéis 1-3 mostravam mestres, esta acusação
+# disparava de verdade e não precisava de plante. Agora que os recortes a
+# calaram, ela TEM de ser plantada — senão passa a ser uma frase que ninguém viu
+# recusar. Planta-se o que existia antes: o mestre de 1440 na ranhura de 477.
+python3 - "$ALVO" <<'PLANTE'
+import io, sys
+p = sys.argv[1]
+s = io.open(p, encoding='utf-8').read()
+velho = "{ n: 1, qual: 'catalogoRecorte', tamanhos: RANHURA_DO_PAPEL, telefone: false },"
+novo = "{ n: 1, qual: 'catalogo', tamanhos: RANHURA_DO_PAPEL, telefone: false },"
+if s.count(velho) != 1:
+    sys.stderr.write('PLANTE-MORTO: o papel 1 nao esta como o guiao espera\n')
+    raise SystemExit(3)
+io.open(p, 'w', encoding='utf-8').write(s.replace(velho, novo))
+PLANTE
+if [ $? -ne 0 ]; then
+  echo "  FALHA o plante da legibilidade não pegou — a fonte mudou de forma"
   falhas=$((falhas + 1))
 else
-  QUANTOS=$(echo "$BASE" | grep -c 'LEGIBILIDADE' || true)
-  echo "  ok    acusa os papéis de mestre inteiro e NÃO acusa o papel 4 ($QUANTOS acusações)"
+  SAIDA4="$(correr)"
+  presente 'LEGIBILIDADE' "$SAIDA4"
+  # E não pode acusar quem está bem: uma acusação que apanha os quatro não
+  # distingue o mestre do recorte, e era isso que a tornaria ruído.
+  if echo "$SAIDA4" | grep -q 'papel 4: LEGIBILIDADE'; then
+    echo "  FALHA acusa também o papel 4, que está a 13,9 px — não distingue"
+    falhas=$((falhas + 1))
+  else
+    echo "  ok    e NÃO acusa o papel 4, que está a 13,9 px"
+  fi
 fi
+cp -p "$GUARDADO" "$ALVO"
 
 echo
-echo "  DECLARADO, e não é plante nenhum: a prova está VERMELHA por LEGIBILIDADE"
-echo "           nos papéis 1, 2 e 3 — fontes de 1440, 834 e 1280 px mostradas a"
-echo "           477 (0,33× 0,57× 0,37×), o que põe um texto de 14 px a 4,6, 8,0"
-echo "           e 5,2 px, e o critério 6 pede 11. Não se afrouxa a guarda para o"
-echo "           esconder: fica vermelho e é decisão do sénior."
 echo
 if [ "$falhas" -gt 0 ]; then
   echo "  âmbito:  os dois controlos negativos do bloco 4, exercidos por acusação."
@@ -129,5 +145,5 @@ fi
 echo "  ok    cada critério só acusa quando o defeito dele está plantado"
 echo "  âmbito:  mede que o critério 3 e o novo limite do critério 6 recusam quando"
 echo "           têm o que recusar, e ficam calados quando não têm. FORA, e"
-echo "           declarado: a legibilidade dos três recortes de paisagem."
+echo "           declarado: se os quatro papéis são os certos para o negócio."
 exit 0
