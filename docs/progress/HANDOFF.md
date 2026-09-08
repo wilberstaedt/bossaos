@@ -4570,3 +4570,31 @@ plausível.
 
 Controlo de 1280 **não tocado** e sem regressão. Por medir, declarado: 320, 412 e
 os dobráveis.
+
+## §4.2, o herói escuro: oito verdes e cinco achados — 08/09
+
+`AMBITO_HEROI criterios=13 ok=8 falha=5 nao_medi=0 texto_divergente=1`.
+`inspeccao/rv100-heroi.spec.ts` + `scripts/provar-rv100-heroi.sh`. Detalhe em
+`docs/reviews/ACHADOS-DO-HEROI-4-2.md`. **Nenhum dos cinco foi curado.**
+
+- **10 · o estado não é um estado.** É uma cadeia de tradução, literal por
+  construção — e o texto nem sequer diz um estado, é uma legenda sobre a comanda.
+  **Não o liguei a dado nenhum:** um rótulo ligado a algo que diz sempre
+  «Sincronizado» seria a mesma fotografia com mais passos. **Achado, vai ao sénior.**
+- **8 e 9 · a terceira superfície não existe.** O norte pede sala + KDS + **Staff
+  móvel**; a página tem duas. O 9 não se pode medir com duas — o que falta não é
+  a linha coral, é a superfície que ela ligaria.
+- **2 · contentor a 1200, o norte pede 1240-1280.** Curável e não é copy, **mas
+  cascateia** sobre a propagação fechada hoje: o transbordo da `/product` saiu de
+  `1200 − 128 = 1072`. Não reabro por iniciativa própria.
+- **13 e o lead · copy divergente.** CTA 2 é `Ver el producto` e o norte diz
+  `Ver cómo funciona`; o lead troca **reservas** e **gestão** por **web**. O
+  headline bate. A prova **acusa em vez de corrigir**.
+
+**O 11 foi medido a meio do carregamento**, não depois: imagens atrasadas 4 s e
+medição no `domcontentloaded`. Duas molduras, zero vazias — salvas pelo esboço
+desfocado. Não é «não vi nenhuma».
+
+**Controlo feito agora e não depois:** os cinco vermelhos provam que a prova
+recusa, mas só desses cinco; os oito verdes estavam por provar. O plante tira a
+sombra do KDS, o critério 7 recusa e **arrasta zero**.
