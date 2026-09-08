@@ -4374,3 +4374,38 @@ procurar quem já fazia a coisa. O `caixa.test.ts` limpa as três tabelas com
   porque as medições em que assentavam eram falsas. Aguarda palavra dele.
 - Continuam retidos: o quarto passo do bloco 2 (Caja), as três capturas da sala,
   a regeneração da página das telas-mestre, e o bloco 4 (§4.5) por começar.
+
+## Bloco 4 (§4.5) FEITO, com o critério 3 exercido e recusado — 08/09
+
+Entrega em `428b0c5` e `23a4bb2`; a tabela contra a régua está no fim de
+`docs/reviews/ALVO-BLOCO-4.md`. **Os oito critérios passam.**
+
+O bloco tinha quatro papéis em lista estática e **uma** fotografia; passa a ter
+quatro painéis, um por papel, cada um com **o seu ecrã e o seu benefício**.
+Reutilizei o `Separadores` de `packages/ui` em vez de construir um selector novo.
+
+**O que não se aceitou por inspecção:** a prova carrega `Tab` desde o topo do
+documento — 12 tabulações até ao selector — e depois setas, e mede o que mudou no
+ecrã. E `scripts/provar-rv100-papeis.sh` planta as quatro composições iguais e
+exige vermelho **pelo motivo certo**.
+
+**Três defeitos meus apanhados pelo caminho:** o `sizes` prometia 390 px para uma
+ranhura de 477 (ampliava 1,22×); a minha medição do critério 6 lia painéis
+escondidos pelo atributo em vez da caixa; e a moldura deixava ~230 px de vazio.
+Os três corrigidos e escritos.
+
+**Por decidir, e declarado:** o quarto papel amplia 1,53× e passa a régua na
+mesma, porque ampliar conta como «mais legível» na fórmula — não inventei limiar
+novo. Capturas em `docs/visual/rv100/2026-09-08_papeis`, a retratar `23a4bb2`.
+
+**Nota de arrumação:** não existe ficheiro de «matriz de execução» em
+`docs/progress/`. Quem rastreia blocos é este HANDOFF e as réguas
+`ALVO-BLOCO-*.md`; o resultado foi para a régua, que é onde se compara promessa
+com entrega.
+
+**Pendência que MORDEU hoje:** `infra/papeis.sh` exige um `.env.prod` que não
+existe nesta máquina, e por isso as permissões de `bossaos_app`/`bossaos_auth`
+**nunca foram aplicadas à base recriada**. O projecto `preparar` da inspecção
+falha com **500** por causa disso. A prova deste bloco corre com `--no-deps`
+porque a landing é pública, mas **todas as suites com sessão estão bloqueadas
+até os papéis serem repostos.**
