@@ -3446,8 +3446,29 @@ penso, para que ninguém julgue o desenho velho na próxima hora — e mandei o 
 regenerar do build de HEAD com a guarda a passar por si, não contornada. O penso
 não é a cura, e digo-o dentro do próprio penso.
 
-O que ainda não fiz, e é a cura da classe e não deste caso: a página não mostra ao
-leitor a data e o commit que capturou, ao lado da frase que promete frescura. Se
-mostrasse, o leitor fazia a conta que eu tive de fazer com `git log`. **Uma garantia
-que o leitor não consegue verificar sozinho depende de eu me lembrar dela — e a
-lista das coisas de que me lembro é o sítio errado para guardar isto.**
+A cura da classe é mostrar ao leitor a data e o commit capturados, ao lado da frase
+que promete frescura — para ele fazer sozinho a conta que eu tive de fazer com
+`git log`. **Uma garantia que o leitor não consegue verificar sozinho depende de eu
+me lembrar dela, e a lista das coisas de que me lembro é o sítio errado para guardar
+isto.**
+
+E acrescento a parte que só vi ao acabar de escrever isto acima, porque escrevi-a
+como trabalho por fazer e não era. Fui verificar a terceira página, a que a Nathalia
+vai julgar, e ela fecha assim:
+
+> Capturas de 8 de Setembro de 2026, do commit `b52fc14`.
+
+**A cura já estava construída, por mim, numa página irmã.** Fui ainda medir se o
+carimbo mentia — dois commits entraram depois dele, e as próprias imagens mudaram de
+bytes nesse intervalo — e não mentia: `e4d3dee` diz «capturas refeitas *sobre*
+b52fc14», os dois commits seguintes não tocaram uma linha do que se vê, e o carimbo
+nomeia **o commit que foi capturado**, não a data em que o ficheiro foi escrito. É o
+sujeito certo: a idade que interessa é a do código retratado, não a do retrato.
+
+O que falhou, então, não foi inventar a cura. Foi **não a ter levado comigo**. Duas
+páginas minhas, feitas com dias de intervalo, uma com o carimbo e outra com uma
+promessa que envelhece sozinha — e a que ficou sem carimbo é justamente a mais
+antiga, a que teve mais tempo para apodrecer. **Uma prática que vive na página onde
+me lembrei dela não é uma prática; é uma coincidência.** Quando encontrar a próxima,
+a pergunta a fazer não é «está curado aqui», é «onde é que isto já devia estar e não
+está».
