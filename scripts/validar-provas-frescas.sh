@@ -1,242 +1,149 @@
 #!/usr/bin/env bash
-# ── Uma prova mais velha do que o produto que ela retrata ──────────────────
+# ── A prova retrata o commit que diz retratar? ─────────────────────────────
 #
-# As 25 capturas das telas-mestre foram tiradas às 10h54. A cura do RV100-024
-# entrou às 11h32 e mexeu no `servidor.ts` e no `escopo.ts` — no PRODUTO. O
-# `M03-erro` passou a ser a fotografia de um 500 que já não existe, e ia seguir
-# para aprovação humana como retrato do produto.
+# Esta guarda perguntava «isto é foto do presente», comparando cada artefacto
+# com o HEAD. A pergunta estava errada na fundação, e não em detalhe:
 #
-# ── E esta armadilha é de outra família ────────────────────────────────────
+#   **os 77 artefactos vivem em pastas com nome `data_commit`, e zero estão
+#   fora.** Um dossiê chamado `2026-09-06_e953a87` não pode ser posterior ao
+#   produto de hoje **por construção** — não por estar desactualizado. Logo a
+#   acusação só podia crescer, e um número que só sobe deixa de informar. Chegou
+#   a 50. Uma guarda que acusa 50 ensina a ser ignorada, e no dia em que uma
+#   acusação for verdadeira estará no meio das outras.
 #
-# Todas as outras desta noite foram o INSTRUMENTO a medir mal: o alfabeto que
-# perdia um alérgeno, o código de erro que mudava com o caminho, o detector que
-# via a definição e julgava ser uma chamada. Esta não.
+# A pergunta passa a ser a que a pasta já faz: **isto retrata o commit que diz
+# retratar.** Cada dossiê é julgado contra o `sha` do seu próprio nome, nunca
+# contra o HEAD.
 #
-# Aqui a medição estava CERTA no momento em que foi feita, e deixou de descrever
-# o produto **sem que nada nela mudasse**. Nenhum controlo interno a apanha: a
-# captura continua nítida, o teste que a gerou continua verde, e o número que
-# ela mostra continua a ser o número que foi medido. O que envelheceu foi a
-# relação entre ela e o mundo — e isso não se vê por dentro dela.
+# ── Quatro respostas, e nenhuma inventada ─────────────────────────────────
 #
-# Por isso o que se compara aqui não é conteúdo: é TEMPO.
+#   ok        traz `impressaoDoProduto` e bate com a árvore do commit nomeado
+#   FALHOU    traz e não bate — e diz QUAIS ficheiros
+#   NÃO MEDI  não traz. É o caso dos dossiês antigos, e não se inventa veredicto
+#             sobre o que não se pode saber retroactivamente: o carimbo teria de
+#             ter sido escrito no momento da captura, e não foi.
+#   FALHOU    o `sha` nomeado não é um commit — a declaração caducou
 #
-# Três respostas:
-#   OK (0)        toda a prova é posterior à última alteração ao produto
-#   FALHOU (1)    há prova mais velha do que o produto que retrata
-#   NÃO MEDI (2)  não há prova, não há commit de produto, ou a sonda não acendeu
+# ── O que isto NÃO mede, declarado ────────────────────────────────────────
+#
+# O CONTEÚDO da prova. Um dossiê que bate com o seu commit e mostra a coisa
+# errada passa aqui — mede-se que retrata o que promete, não que promete o que
+# devia. E o `mtime` deixou de entrar: por isso o canário dos `mtimes_reescritos`
+# **já não é consultado aqui**. Não o apaguei; ver a nota no fim.
 set -uo pipefail
-cd "$(dirname "$0")/.."
+# A raiz dos dossiês é configurável para a guarda poder ser CORRIDA sobre um
+# repositório de mentira. Sem isso, os três controlos que ela exige — bate,
+# não bate, e sem carimbo — só se podiam afirmar, e afirmar não é exercer.
+if [ -z "${RAIZ_DOSSIES:-}" ]; then cd "$(dirname "$0")/.."; fi
 
 OK=0; FALHOU=1; NAO_MEDI=2
 verde()    { echo "  ok       $1"; }
 vermelho() { echo "  FALHOU   $1"; }
 naomedi()  { echo "  NÃO MEDI $1"; }
 
-echo "A prova é mais nova do que o produto que retrata?"
+echo "A prova retrata o commit que diz retratar?"
 
-# ── 1. A referência: quando é que o produto mudou pela última vez ──────────
-#
-# ── O sujeito medido tem de ser o sujeito DECLARADO ───────────────────────
-#
-# Isto era `git log -1 -- apps packages`, **sem filtro de extensão**, enquanto o
-# cabeçalho deste ficheiro e a peça partilhada dizem que produto é `.ts`, `.tsx`
-# e `.css`. O medido e o declarado eram coisas diferentes, e a diferença apareceu
-# a 08/09: a referência apontava o `d1f6c50`, um commit que mudou **nove PNG da
-# demonstração e zero ficheiros de código**.
-#
-# A consequência não é cosmética: **recapturar imagens passava a contar como
-# alterar o produto**, e invalidava as 77 provas de uma vez. Uma guarda que
-# recusa por uma coisa que não é o seu sujeito ensina a ignorá-la.
-#
-# O filtro vive no próprio `git log` — é a cura barata, e tem a virtude de fazer
-# o medido coincidir com o declarado sem mudar a pergunta.
-#
-# `next-env.d.ts` fica de fora porque é gerado, como na peça partilhada. Se as
-# duas listas divergirem, duas guardas passam a medir produtos diferentes sem
-# ninguém dar por isso.
-FILTRO_DE_PRODUTO=(
-  apps/'*.ts' apps/'*.tsx' apps/'*.css'
-  packages/'*.ts' packages/'*.tsx' packages/'*.css'
-  ':(exclude)*next-env.d.ts'
+RELATORIO=$(python3 - <<'PY'
+import json, os, re, sys
+sys.path.insert(0, 'scripts')
+from frescura_do_produto import impressao_do_commit
+
+NOME = re.compile(r'^\d{4}-\d{2}-\d{2}_([0-9a-f]{7,40})$')
+RAIZ = os.environ.get('RAIZ_DOSSIES', 'docs/visual')
+
+dossies = []
+for familia in sorted(os.listdir(RAIZ)) if os.path.isdir(RAIZ) else []:
+    caminho = os.path.join(RAIZ, familia)
+    if not os.path.isdir(caminho):
+        continue
+    for nome in sorted(os.listdir(caminho)):
+        m = NOME.match(nome)
+        if m:
+            dossies.append((os.path.join(caminho, nome), m.group(1)))
+
+if not dossies:
+    print('SEM-DOSSIES')
+    raise SystemExit(0)
+
+for pasta, sha in dossies:
+    artefactos = sum(1 for r, _d, fs in os.walk(pasta)
+                     for f in fs if f.endswith(('.png', '.json')))
+    carimbos = []
+    for r, _d, fs in os.walk(pasta):
+        for f in fs:
+            if not f.endswith('.json'):
+                continue
+            caminho = os.path.join(r, f)
+            try:
+                with open(caminho, encoding='utf-8') as fh:
+                    dados = json.load(fh)
+            except Exception:
+                continue
+            if isinstance(dados, dict) and dados.get('impressaoDoProduto'):
+                carimbos.append((caminho, dados['impressaoDoProduto']))
+
+    if not carimbos:
+        print(f'NAOMEDI\t{pasta}\t{sha}\t{artefactos}\tsem carimbo do conteudo')
+        continue
+
+    try:
+        _resumo, arvore = impressao_do_commit(sha)
+    except ValueError as e:
+        print(f'FALHA\t{pasta}\t{sha}\t{artefactos}\t{e}')
+        continue
+
+    for caminho, carimbo in carimbos:
+        guardado = carimbo['porFicheiro']
+        difs = ([f'alterado {k}' for k in sorted(guardado)
+                 if k in arvore and arvore[k] != guardado[k]]
+                + [f'a mais {k}' for k in sorted(set(guardado) - set(arvore))]
+                + [f'a menos {k}' for k in sorted(set(arvore) - set(guardado))])
+        rotulo = os.path.relpath(caminho, pasta)
+        if difs:
+            print(f'FALHA\t{pasta}\t{sha}\t{artefactos}\t{rotulo}: '
+                  f'{len(difs)} diferenca(s) — ' + '; '.join(difs[:3]))
+        else:
+            print(f'OK\t{pasta}\t{sha}\t{artefactos}\t{rotulo}')
+PY
 )
-PRODUTO=$(git log -1 --format='%ct' -- "${FILTRO_DE_PRODUTO[@]}" 2>/dev/null)
-PRODUTO_H=$(git log -1 --format='%h %ci' -- "${FILTRO_DE_PRODUTO[@]}" 2>/dev/null)
-if [ -z "$PRODUTO" ]; then
-  naomedi "não encontrei um commit que toque em apps/ ou packages/ — sem referência não há comparação."
-  exit "$NAO_MEDI"
-fi
-verde "última alteração ao produto: $PRODUTO_H"
 
-# ── O CONTROLO, e tem de ter DOIS lados ───────────────────────────────────
-#
-# Um filtro que exclua tudo dá verde para sempre; um que não exclua nada é o
-# defeito de volta. Por isso mede-se nos dois sentidos, e com commits REAIS
-# deste repositório, escolhidos agora e não escritos à mão — um `sha` cravado
-# aqui envelhecia no dia seguinte.
-#
-# **A escolha do commit «só imagens» não pode vir do filtro.** Se eu o definisse
-# como «o que o filtro exclui» e depois exigisse que o filtro o excluísse, estava
-# a perguntar-lhe se concorda consigo próprio. Ele é identificado pelas
-# EXTENSÕES que tocou.
-SO_IMAGENS=''
-while read -r c; do
-  [ -n "$c" ] || continue
-  if ! git show --name-only --format='' "$c" -- apps packages \
-      | grep -qE '\.(ts|tsx|css)$'; then
-    SO_IMAGENS="$c"; break
-  fi
-done <<EOF
-$(git log -12 --format='%h' -- apps packages 2>/dev/null)
-EOF
-
-if [ -z "$SO_IMAGENS" ]; then
-  naomedi "não há, nos últimos 12 commits a apps/ ou packages/, nenhum que toque"
-  echo "           só em ficheiros que não são código. Sem ele não se pode provar"
-  echo "           que o filtro exclui — e um filtro por provar não é um filtro."
+if [ "$RELATORIO" = 'SEM-DOSSIES' ] || [ -z "$RELATORIO" ]; then
+  naomedi "não há pastas com o nome \`data_commit\` em docs/visual — nada a julgar."
   exit "$NAO_MEDI"
 fi
 
-FILTRADOS=$(git log -40 --format='%h' -- "${FILTRO_DE_PRODUTO[@]}" 2>/dev/null)
-if printf '%s\n' "$FILTRADOS" | grep -qx "$SO_IMAGENS"; then
-  vermelho "o filtro NÃO exclui um commit sem código ($SO_IMAGENS) — recapturar"
-  echo "           imagens voltaria a contar como alterar o produto."
-  exit "$FALHOU"
-fi
-COM_CODIGO=$(git log -1 --format='%h' -- "${FILTRO_DE_PRODUTO[@]}" 2>/dev/null)
-if ! git show --name-only --format='' "$COM_CODIGO" -- apps packages \
-    | grep -qE '\.(ts|tsx|css)$'; then
-  vermelho "o filtro escolheu $COM_CODIGO, que não toca em código nenhum —"
-  echo "           está a excluir de mais, e um filtro assim dá verde para sempre."
-  exit "$FALHOU"
-fi
-verde "o filtro tem os dois lados: exclui $SO_IMAGENS (sem código) e conta $COM_CODIGO (com código)"
+N_OK=$(printf '%s\n' "$RELATORIO" | grep -c '^OK' || true)
+N_FALHA=$(printf '%s\n' "$RELATORIO" | grep -c '^FALHA' || true)
+N_NAOMEDI=$(printf '%s\n' "$RELATORIO" | grep -c '^NAOMEDI' || true)
 
-# ── 2. A população: os artefactos de prova ────────────────────────────────
-#
-# Se não houver nenhum, isto é NÃO MEDI e não «está tudo fresco»: um corpo de
-# prova vazio passa em qualquer comparação de datas.
-# `mapfile` não existe no bash 3.2 do macOS. A primeira versão usava-o, a lista
-# ficou por definir, e a guarda deu VERDE com população vazia — a falha que ela
-# existe para apagar, dentro dela própria. Agora a lista vem por linha, e a
-# contagem é verificada antes de valer alguma coisa.
-LISTA=/tmp/bossaos-provas-frescas.txt
-find docs/visual -type f \( -name '*.png' -o -name '*.json' \) 2>/dev/null | sort > "$LISTA"
-N_ARTEFACTOS=$(grep -c . "$LISTA" || true)
-if [ "${N_ARTEFACTOS:-0}" -eq 0 ]; then
-  naomedi "zero artefactos de prova em docs/visual — não há o que comparar."
-  exit "$NAO_MEDI"
-fi
-verde "$N_ARTEFACTOS artefactos de prova a comparar"
-
-# ── O canário: os `mtime` desta máquina querem dizer alguma coisa? ─────────
-#
-# Esta guarda compara `mtime` de artefacto contra data de COMMIT do produto, e
-# essa mistura tem um buraco que o texto do fim já declarava e o RUNTIME não:
-# num `clone` ou `worktree` fresco o git escreve todos os ficheiros AGORA, logo
-# toda a prova fica «posterior ao produto» e isto dizia **ok**.
-#
-# Medido a 07/09, mesmo commit e os mesmos 65 artefactos:
-#   cópia de trabalho -> FALHOU, 65 anteriores ao produto
-#   worktree fresco   -> ok, «toda a prova é posterior»
-#
-# E a auto-sonda passava nos DOIS, porque força um `mtime` velho num ficheiro
-# sintético: provava o mecanismo enquanto a população inteira era ilegível. Um
-# detector aceso sobre um alvo que não representa a população.
-#
-# O discriminador não pode ser «os artefactos são todos recentes» — uma
-# recaptura legítima escreve os 65 em segundos e ficava igual. Usa-se um
-# CANÁRIO: um ficheiro versionado que ninguém regenera. Se ele não tem
-# alterações locais e mesmo assim o seu `mtime` é muito posterior ao seu próprio
-# commit, então os tempos foram reescritos por um checkout — e aí a resposta
-# honesta é NÃO MEDI, nunca verde.
-# A mecanica do canario saiu daqui para `frescura_do_produto.py`: a guarda das
-# capturas de marketing precisava da MESMA pergunta, e duas copias dela — uma em
-# bash e outra em python — era a duplicacao que este repositorio passou o dia a
-# fechar. Uma implementacao, dois leitores.
-if ! CANARIO_SAIDA=$(python3 scripts/frescura_do_produto.py --canario 2>&1); then
-  naomedi "$(printf '%s' "$CANARIO_SAIDA" | sed -n 's/^REESCRITOS //p')"
-  echo "           Num checkout esta guarda NAO MEDE NADA. Corre-a onde a prova"
-  echo "           e produzida."
-  exit "$NAO_MEDI"
-fi
-verde "os \`mtime\` desta cópia são de produção (o canário confere com o seu commit)"
-
-# ── 3. A comparação, por DUAS medidas e não uma ───────────────────────────
-#
-# O `mtime` é a verdade nesta máquina e MENTE num clone: o git não guarda datas
-# de ficheiro, e num `clone` fresco tudo fica com a hora do checkout — mais nova
-# do que qualquer commit, e a guarda ficava verde para sempre sem medir nada.
-#
-# A primeira versão somava-lhe a data do COMMIT do artefacto, para cobrir o
-# clone. Deu 24 falsos: recapturei as telas-mestre, 23 saíram byte a byte iguais,
-# o git não vê alteração nenhuma e o commit continua o antigo — e elas descrevem
-# o produto actual. Uma segunda medida que acusa quem está certo é pior do que
-# uma medida só.
-#
-# Fica o `mtime`, que é a pergunta certa: **quando é que isto foi produzido**.
-# E fica escrito o que ele não sabe, em vez de o disfarçar com uma regra que
-# inventa vermelhos.
-velhos() {
-  local a mt
-  while IFS= read -r a; do
-    [ -n "$a" ] || continue
-    mt=$(stat -f '%m' "$a" 2>/dev/null || echo 0)
-    [ "${mt:-0}" -lt "$PRODUTO" ] && echo "$a"
-  done < "$LISTA"
-  return 0
-}
-
-VELHOS=$(velhos)
-N_VELHOS=$(printf '%s' "$VELHOS" | grep -c . || true)
-
-# ── 4. A SONDA: a guarda sabe ver um artefacto velho? ─────────────────────
-#
-# Um zero aqui confirma o que se espera — e um zero que confirma o que se espera
-# não mediu nada. Planta-se uma captura com data anterior ao produto e exige-se
-# que ela apareça. Sem isto, uma guarda com o `find` errado ficava verde para
-# sempre e ninguém dava por ela.
-SONDA=docs/visual/.sonda-frescura.png
-printf 'sonda' > "$SONDA"
-touch -t 200001010000 "$SONDA"
-SONDA_VISTA=$(
-  mt=$(stat -f '%m' "$SONDA" 2>/dev/null || echo 0)
-  [ "${mt:-0}" -lt "$PRODUTO" ] && echo sim || echo nao
-)
-rm -f "$SONDA"
-if [ "$SONDA_VISTA" != 'sim' ]; then
-  naomedi "a sonda não acendeu: um ficheiro datado de 2000 não foi visto como velho."
-  exit "$NAO_MEDI"
-fi
-if [ -e "$SONDA" ]; then
-  naomedi "a sonda não foi removida — a guarda deixou lixo na árvore."
-  exit "$NAO_MEDI"
-fi
-verde "a sonda acendeu e saiu: um artefacto anterior ao produto é visto"
+printf '%s\n' "$RELATORIO" | while IFS=$'\t' read -r estado pasta sha n resto; do
+  case "$estado" in
+    OK)      verde "$pasta retrata $sha ($n artefactos, $resto)" ;;
+    FALHA)   vermelho "$pasta NÃO retrata $sha ($n artefactos)"; echo "           $resto" ;;
+    NAOMEDI) naomedi "$pasta — $resto ($n artefactos)" ;;
+  esac
+done
 
 ambito() {
-  echo "  âmbito:  $N_ARTEFACTOS artefactos em docs/visual — $((N_ARTEFACTOS - N_VELHOS)) posteriores"
-  echo "           ao produto e ${N_VELHOS:-0} anteriores. Referência: $PRODUTO_H."
-  echo "           Medida: \`mtime\` — quando o artefacto foi produzido nesta máquina."
-  echo "           LIMITE declarado: num clone fresco o git não guarda datas de"
-  echo "           ficheiro e todos ficam com a hora do checkout. Nessa máquina esta"
-  echo "           guarda não mede nada, e é por isso que corre onde se captura."
-  echo "           FORA: o CONTEÚDO da prova. Isto não diz que a captura está certa —"
-  echo "           diz que não é anterior ao produto que retrata. Uma prova fresca e"
-  echo "           errada passa aqui, e é outra guarda que a apanha."
+  echo "  âmbito:  ${N_OK} dossiê(s) a bater com o seu commit, ${N_FALHA} a não bater,"
+  echo "           ${N_NAOMEDI} sem carimbo."
+  echo "           Cada um é julgado contra o \`sha\` do PRÓPRIO nome, nunca contra o"
+  echo "           HEAD: uma pasta datada não pode ser foto do presente, e exigir-lho"
+  echo "           era garantir uma acusação que só cresce."
+  echo "           FORA, e declarado: o CONTEÚDO da prova. Um dossiê que bate com o"
+  echo "           seu commit e mostra a coisa errada passa aqui."
+  echo "           Sem carimbo é NÃO MEDI e nunca verde: o carimbo teria de ter sido"
+  echo "           escrito no momento da captura, e não se inventa retroactivamente."
 }
 
-if [ "${N_VELHOS:-0}" -gt 0 ]; then
-  vermelho "$N_VELHOS artefacto(s) de prova são anteriores à última alteração ao produto:"
-  # Por pasta, porque é a pasta que diz de quem é o artefacto e quem o recaptura.
-  printf '%s\n' "$VELHOS" | sed 's|/[^/]*$||' | sort | uniq -c \
-    | sort -rn | head -8 | sed 's/^/           /'
-  echo "           Uma prova assim continua nítida e continua a mostrar o que mediu."
-  echo "           O que ela já não mostra é o produto — e nada dentro dela o diz."
-  ambito
-  exit "$FALHOU"
-fi
-
-verde "toda a prova é posterior à última alteração ao produto"
 echo
+if [ "${N_FALHA:-0}" -gt 0 ]; then
+  ambito; exit "$FALHOU"
+fi
+if [ "${N_OK:-0}" -eq 0 ]; then
+  naomedi "nenhum dossiê pôde ser medido — ${N_NAOMEDI} sem carimbo e zero a bater."
+  ambito; exit "$NAO_MEDI"
+fi
+verde "${N_OK} dossiê(s) retratam o commit que dizem retratar"
 ambito
 exit "$OK"

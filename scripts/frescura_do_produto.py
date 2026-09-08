@@ -255,6 +255,68 @@ def diferencas_do_produto(raiz, por_ficheiro_antes):
 # implementação, dois chamadores.
 
 
+def impressao_do_commit(sha, raiz='.'):
+    """A mesma impressão, mas sobre a ÁRVORE DE UM COMMIT em vez do disco.
+
+    É o que permite perguntar «isto retrata o commit que diz retratar» em vez de
+    «isto é foto do presente». A segunda pergunta é a que uma pasta datada nunca
+    pode satisfazer: um dossiê chamado `2026-09-06_e953a87` não pode ser
+    posterior ao produto de hoje **por construção**, e uma guarda que o exige
+    acusa-o para sempre.
+
+    Devolve `(resumo, por_ficheiro)` na mesma forma que a `impressao_do_produto`,
+    e é essa igualdade de forma que faz a comparação ser possível. Levanta
+    `ValueError` se o `sha` não for um commit — uma declaração a caducar não é o
+    mesmo que uma prova errada, e quem chama distingue as duas.
+    """
+    import subprocess
+    def git(args):
+        return subprocess.run(['git', '-C', raiz] + args, capture_output=True)
+
+    tipo = git(['cat-file', '-t', sha])
+    if tipo.returncode != 0 or tipo.stdout.decode().strip() != 'commit':
+        raise ValueError(f'{sha} nao e um commit neste repositorio')
+
+    listagem = git(['ls-tree', '-r', '-z', '--format=%(objectname) %(path)', sha,
+                    'apps', 'packages'])
+    if listagem.returncode != 0:
+        raise ValueError(f'nao consegui ler a arvore de {sha}')
+
+    alvos = []
+    for entrada in listagem.stdout.split(b'\0'):
+        if not entrada:
+            continue
+        objecto, _, caminho = entrada.partition(b' ')
+        rel = caminho.decode('utf-8')
+        nome = rel.rsplit('/', 1)[-1]
+        if nome in GERADOS or not rel.endswith(EXTENSOES):
+            continue
+        # As mesmas exclusões da leitura em disco. `node_modules` e `.next` não
+        # costumam estar versionados, mas se um dia estiverem os dois lados têm
+        # de continuar a medir o mesmo produto.
+        if 'node_modules/' in rel or '/.next' in ('/' + rel):
+            continue
+        alvos.append((objecto.decode(), rel))
+
+    por_ficheiro = {}
+    if alvos:
+        pedido = '\n'.join(o for o, _ in alvos).encode() + b'\n'
+        lote = subprocess.run(['git', '-C', raiz, 'cat-file', '--batch'],
+                              input=pedido, capture_output=True)
+        fluxo = lote.stdout
+        pos = 0
+        for (_objecto, rel) in alvos:
+            fim = fluxo.index(b'\n', pos)
+            _sha, _tipo, tamanho = fluxo[pos:fim].split()
+            inicio = fim + 1
+            conteudo = fluxo[inicio:inicio + int(tamanho)]
+            pos = inicio + int(tamanho) + 1
+            por_ficheiro[rel] = hashlib.sha256(conteudo).hexdigest()
+
+    linhas = ''.join(f'{k}:{v}\n' for k, v in sorted(por_ficheiro.items()))
+    return hashlib.sha256(linhas.encode('utf-8')).hexdigest(), por_ficheiro
+
+
 def comparar(destino, raiz='.', sonda=False):
     """Compara a impressão guardada num manifesto com a árvore de agora.
 

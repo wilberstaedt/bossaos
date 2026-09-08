@@ -193,3 +193,57 @@ Quatro respostas, e a terceira é a que a torna honesta:
 Isto converte uma guarda que grita 50 vezes numa que ou mede, ou se abstém a dizer
 porquê. E o carimbo que o JR construiu esta manhã para as capturas passa a ser a
 peça de que ela vive — a mesma peça, a terceira consumidora.
+
+---
+
+## A cura de fundo, feita: cada dossiê contra o seu próprio commit — 08/09
+
+A pergunta mudou de **«isto é foto do presente»** para **«isto retrata o commit
+que diz retratar»**. Cada dossiê é julgado contra o `sha` do próprio nome, nunca
+contra o HEAD.
+
+### O instrumento, calibrado antes de servir
+
+`impressao_do_commit(sha)` — a mesma impressão, sobre a **árvore de um commit**:
+`git ls-tree` filtrado pelas mesmas extensões, e `git cat-file --batch` para o
+conteúdo. Apontada primeiro a um sujeito de resposta conhecida:
+
+    commit HEAD : 78a6091a220c5d72  735 ficheiros  (0.90s)
+    disco       : 78a6091a220c5d72  735 ficheiros
+    CALIBRACAO  : iguais
+
+### O que a guarda diz agora
+
+    NÃO MEDI docs/visual/ns2/2026-09-08_483c4a7 — sem carimbo do conteudo (6 artefactos)
+    NÃO MEDI docs/visual/ns2/2026-09-08_a3935ea — sem carimbo do conteudo (6 artefactos)
+    FALHOU   docs/visual/rv100/2026-09-06_e953a87 NÃO retrata e953a87 (65 artefactos)
+             evidence/masters/mestres.json: 111 diferenca(s) — alterado …/floor/page.tsx; …
+
+**A acusação deixou de ser um número que só sobe** — era 77, depois 50 — e passou
+a ser uma frase que se pode agir: aquele dossiê chama-se `e953a87` e as suas
+capturas foram refeitas hoje. **O nome afastou-se do conteúdo**, e isso é
+verdade, não ruído. Curar é decidir se o dossiê se re-data ou se as capturas
+voltam ao commit que ele nomeia — e essa decisão não é minha.
+
+### Os três controlos, exercidos
+
+Um repositório de mentira com um commit real, um dossiê `data_sha`, e **a guarda
+corrida lá dentro** — não a lógica dela imitada:
+
+    ok    carimbo que BATE: aceita (saida 0)
+    ok    carimbo ESTRAGADO: recusa (saida 1) e nomeia
+    ok    SEM carimbo: NAO MEDI (saida 2), e nao verde
+
+E o controlo do controlo, porque três verdes de um contador que nunca acende não
+valem nada: plantei a expectativa errada — exigir `0` onde a guarda dá `2` — e o
+corredor foi a **saída 1**. Reposto, voltou a **0**.
+
+Para isto ser possível a guarda ganhou `RAIZ_DOSSIES`. Sem ela, os três controlos
+só se podiam afirmar.
+
+### O canário ficou, e agora não tem consumidores
+
+Esta guarda deixou de comparar `mtime`, portanto **já não o consulta** — e era a
+última. Não o apaguei: a regra é sua e é boa, e quem a aplica agora sou eu a
+dizer-lhe que a condição se cumpriu. **O canário está pronto a sair, e a decisão
+é do senhor.**

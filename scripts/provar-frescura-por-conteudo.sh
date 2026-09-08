@@ -121,6 +121,74 @@ sys.exit(1 if FALHAS else 0)
 PY
 ESTADO=$?
 
+# ── Os três controlos do «retrata o commit que diz retratar» ───────────────
+#
+# Exercidos e não afirmados: monta-se um repositório de mentira com um commit
+# real, um dossiê com o nome `data_sha`, e corre-se A GUARDA lá dentro.
 echo
-[ "$ESTADO" -eq 0 ] && { echo "  A frescura mede conteudo: 0 falhas."; exit 0; }
+echo "A guarda dos dossies: bate, nao bate, e sem carimbo"
+
+GUARDA="$PWD/scripts/validar-provas-frescas.sh"
+FRESCURA="$PWD/scripts"
+CAIXA=$(mktemp -d)
+echo 0 > "$CAIXA/falhas"
+trap 'rm -rf "$CAIXA"' EXIT INT TERM
+
+(
+  cd "$CAIXA" || exit 1
+  git init -q .; git config user.email t@t; git config user.name t
+  mkdir -p apps/web/src
+  echo 'export const x = 1;' > apps/web/src/Ecra.tsx
+  git add -A >/dev/null; git commit -qm 'produto'
+  SHA=$(git rev-parse --short HEAD)
+
+  mkdir -p "docs/visual/prova/2026-01-01_$SHA"
+  MAN="docs/visual/prova/2026-01-01_$SHA/manifesto.json"
+  printf 'imagem' > "docs/visual/prova/2026-01-01_$SHA/uma.png"
+  echo '{}' > "$MAN"
+  PYTHONPATH="$FRESCURA" python3 - "$MAN" "$SHA" <<'PYX'
+import json, sys
+from frescura_do_produto import impressao_do_commit
+resumo, por = impressao_do_commit(sys.argv[2])
+json.dump({'impressaoDoProduto': {'resumo': resumo, 'ficheiros': len(por),
+                                  'porFicheiro': por, 'quando': 'fixture'}},
+          open(sys.argv[1], 'w'))
+PYX
+
+  correr() { RAIZ_DOSSIES=docs/visual PYTHONPATH="$FRESCURA" bash "$GUARDA" >"$1" 2>&1; echo $?; }
+
+  E=$(correr /tmp/fc-bate.txt)
+  if [ "$E" = 0 ] && grep -q 'retrata' /tmp/fc-bate.txt; then
+    echo "  ok    carimbo que BATE: aceita (saida 0)"
+  else
+    echo $(( $(cat "$CAIXA/falhas") + 1 )) > "$CAIXA/falhas"; echo "  FALHA carimbo que bate nao foi aceite (saida $E)"; sed 's/^/          /' /tmp/fc-bate.txt | head -4
+  fi
+
+  python3 - "$MAN" <<'PYX'
+import json, sys
+d = json.load(open(sys.argv[1]))
+k = sorted(d['impressaoDoProduto']['porFicheiro'])[0]
+d['impressaoDoProduto']['porFicheiro'][k] = '0' * 64
+json.dump(d, open(sys.argv[1], 'w'))
+PYX
+  E=$(correr /tmp/fc-estragado.txt)
+  if [ "$E" = 1 ] && grep -q 'NÃO retrata' /tmp/fc-estragado.txt; then
+    echo "  ok    carimbo ESTRAGADO: recusa (saida 1) e nomeia"
+  else
+    echo $(( $(cat "$CAIXA/falhas") + 1 )) > "$CAIXA/falhas"; echo "  FALHA carimbo estragado nao foi recusado (saida $E)"; sed 's/^/          /' /tmp/fc-estragado.txt | head -4
+  fi
+
+  echo '{}' > "$MAN"
+  E=$(correr /tmp/fc-sem.txt)
+  if [ "$E" = 2 ] && grep -q 'NÃO MEDI' /tmp/fc-sem.txt; then
+    echo "  ok    SEM carimbo: NAO MEDI (saida 2), e nao verde"
+  else
+    echo $(( $(cat "$CAIXA/falhas") + 1 )) > "$CAIXA/falhas"; echo "  FALHA sem carimbo nao deu NAO MEDI (saida $E)"; sed 's/^/          /' /tmp/fc-sem.txt | head -4
+  fi
+)
+
+echo
+if [ "$ESTADO" -eq 0 ] && [ "$(cat "$CAIXA/falhas" 2>/dev/null || echo 0)" = 0 ]; then
+  echo "  A frescura mede conteudo: 0 falhas."; exit 0
+fi
 echo "  A frescura por conteudo tem falhas."; exit 1
