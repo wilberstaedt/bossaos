@@ -419,3 +419,51 @@ Reposto com `touch -r`, e a guarda voltou a **saída 0**.
 deste caminho porque aqui já não há `mtime` — não porque tenha deixado de servir.
 Quando essa migrar, com desenho próprio (a população dela é outra: provas contra
 fontes, não capturas contra produto), o canário sai. **E não antes.**
+
+---
+
+## Revisão do `d1f6c50` — a guarda de marketing, e uma sabotagem — 08/09, 10h05
+
+**Aceito.** A guarda passou a medir conteúdo, está verde (saída 0) e a mensagem
+antiga — «posteriores ao produto» — desapareceu. Isso foi decisão dele e é a certa:
+**uma guarda cuja mensagem descreve a pergunta antiga ensina o modelo errado a quem
+a lê.** Ninguém lho disse.
+
+Mas o relatório dizia «as duas sondas acenderam e saíram», e isso é um resumo. Uma
+sonda que existe não é uma sonda que protege. Fui parti-la:
+
+```
+cegar diferencas_do_produto  →  return ([], [], [])   (comparador que nunca vê diferença)
+```
+
+A guarda **não passou a verde**. Saiu **2**, e disse:
+
+```
+NÃO MEDI  a sonda da frescura não acendeu: uma impressão estragada
+          não foi vista como diferente.
+```
+
+É a resposta certa e nas três dimensões: não diz verde, que seria mentira; não diz
+vermelho, porque as capturas podem estar boas e o partido é o instrumento; diz **não
+medi** e nomeia a razão. **Uma guarda que detecta a própria cegueira vale mais do que
+uma que acerta enquanto está sã.**
+
+### A minha primeira tentativa não chegou a correr, e parecia ter corrido
+
+Cegou o nome errado — a função é `diferencas_do_produto` e eu procurei
+`diferencas`. A sabotagem não foi aplicada, a guarda correu normal e deu **0** — e
+eu tinha escrito, ao lado do comando, a etiqueta «0 = a sonda NÃO protege».
+
+Se tivesse lido a minha própria etiqueta em vez de reparar na excepção que passou
+antes dela, publicava exactamente o contrário da verdade sobre o trabalho dele.
+
+**Um controlo que não chega a ser aplicado é indistinguível de um controlo aplicado
+que não encontrou nada.** Os dois dão verde, e o verde tem o mesmo aspecto. Antes de
+correr a experiência, o passo que faltava é o barato: **verificar que a sabotagem
+está lá** — foi o `grep -c SABOTAGEM` da segunda tentativa, e é ele que separa uma
+experiência de uma encenação.
+
+E há uma propriedade nova que tornou isto seguro de fazer: reparei o ficheiro com
+`cp` e a árvore ficou limpa **sem eu me preocupar com datas**. Com a frescura a medir
+`mtime`, esta revisão teria envelhecido 24 capturas e mandado alguém recapturar. É a
+cura dele a pagar-se no primeiro uso.
