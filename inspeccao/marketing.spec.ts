@@ -22,7 +22,15 @@ import {
  */
 
 const TELAS = [
-  { id: 'MKT-001', caminho: '/es-ES', marcador: '.bo-mkt__heroi h1' },
+  // Reancorado a 08/09: a Fase 2 do North Star trocou o herói da landing de
+  // `.bo-mkt__heroi` para `.ns-heroi`, e este marcador passou a não existir. O
+  // efeito não foi um vermelho útil — foi o `visitar` a rebentar ANTES das
+  // verificações, portanto o transbordo, os alvos de 44 px e o contraste a 360
+  // deixaram de correr sobre a landing e ninguém deu por isso, porque esta
+  // suite está na dívida e nenhum corredor a chama.
+  // As outras páginas de marketing continuam com `.bo-mkt__heroi` e por isso só
+  // esta linha muda.
+  { id: 'MKT-001', caminho: '/es-ES', marcador: '.ns-heroi h1' },
   { id: 'MKT-002', caminho: '/es-ES?section=product', marcador: '#t-product' },
   { id: 'MKT-003', caminho: '/es-ES?section=plans', marcador: '#t-plans' },
   { id: 'MKT-004', caminho: '/es-ES/product', marcador: '.bo-mkt__heroi h1' },
@@ -128,7 +136,10 @@ test.describe('a navegação da landing alcança tudo', () => {
   test('cada página da família é alcançável a partir da landing', async ({ page }) => {
     // O defeito que isto apanha: uma página nova que existe e não se alcança de
     // lado nenhum. A rota responde, e por isso ninguém repara.
-    await visitar(page, '/es-ES', '.bo-mkt__heroi h1');
+    // Segundo marcador do mesmo herói, cravado aqui em vez de vir da tabela —
+    // por isso sobreviveu ao reancoramento da linha MKT-001 e continuou a
+    // rebentar antes da asserção que interessa.
+    await visitar(page, '/es-ES', '.ns-heroi h1');
     const alcancaveis = await page.locator('.bo-publico__seccoes a').evaluateAll(
       (as) => as.map((a) => new URL((a as HTMLAnchorElement).href).pathname));
     for (const esperada of [

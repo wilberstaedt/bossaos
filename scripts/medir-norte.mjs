@@ -39,7 +39,17 @@ for (const [w,h,k] of [[1440,900,'sec'],[390,844,'mov']]) {
     const cab = document.querySelector('header');
     const logo = document.querySelector('header img, header svg');
     const corpos={}; for (const e of document.querySelectorAll('p,li')) { const t=px(e); if(t) corpos[t]=(corpos[t]||0)+1; }
-    const raios={}; for (const e of document.querySelectorAll('div,article,section,a,button')) { const r=getComputedStyle(e).borderTopLeftRadius; if(r&&r!=='0px') raios[r]=(raios[r]||0)+1; }
+    const raios={}; const raiosFora=[];
+    for (const e of document.querySelectorAll('div,article,section,a,button')) {
+      const r=getComputedStyle(e).borderTopLeftRadius; if(!r||r==='0px') continue;
+      raios[r]=(raios[r]||0)+1;
+      // So o lado PEQUENO. O §3.3 pede 14-24 e o achado nomeou os 10px; a
+      // capsula (raio enorme, pastilhas e botoes) e um idioma proprio e
+      // deliberado, e reprova-la aqui seria inventar uma falha que o revisor
+      // nao reclamou. O ambito fica dito em vez de suposto.
+      const v=parseFloat(r);
+      if (v>0 && v<14) raiosFora.push(`${e.tagName.toLowerCase()}.${(e.className||'').toString().trim().split(/\s+/)[0]||'-'} ${r}`);
+    }
     const capturas=[...document.querySelectorAll('img')].map(i=>Math.round(i.getBoundingClientRect().width)).filter(x=>x>200);
     const fundos=new Set([...document.querySelectorAll('section')].map(s=>getComputedStyle(s).backgroundColor));
     return { h1:px(h1), h2:h2.length?[Math.min(...h2),Math.max(...h2)]:null,
@@ -49,7 +59,7 @@ for (const [w,h,k] of [[1440,900,'sec'],[390,844,'mov']]) {
       logo:logo?Math.round(logo.getBoundingClientRect().width):null,
       heroi:h1?.closest('section')?Math.round(h1.closest('section').getBoundingClientRect().height):null,
       captura:capturas.length?Math.max(...capturas):0,
-      raios:Object.entries(raios).sort((a,b)=>b[1]-a[1]).slice(0,3),
+      raios:Object.entries(raios).sort((a,b)=>b[1]-a[1]).slice(0,3), raiosFora,
       blocos:document.querySelectorAll('section').length, altura:document.body.scrollHeight,
       fundos:fundos.size };
   });
@@ -68,4 +78,18 @@ for (const [n,v0,a] of L) { const v=Array.isArray(v0)?v0[0]:v0; console.log(`  $
 console.log(`  ${'Fundos distintos'.padEnd(22)} ${String(out.sec.fundos).padStart(6)}   alvo >=3          ${out.sec.fundos>=3?'cumpre':'ABAIXO'}`);
 console.log(`  ${'Altura telemovel'.padEnd(22)} ${String(out.mov.altura).padStart(6)}`);
 console.log(`  raios: ${out.sec.raios.map(r=>r[0]+'x'+r[1]).join(' ')}`);
+// ── O decimo quarto numero, que estava na folha e nao estava na tabela ──────
+//
+// O ALVO.raio [14,24] existia aqui desde o inicio e nunca foi lido: a fita
+// IMPRIMIA a contagem dos raios e nunca a julgava. Treze elementos a 10px
+// passaram assim por baixo de doze linhas verdes. Imprimir um numero nao e
+// verifica-lo — agora ha um veredicto e ha os nomes.
+const fora = out.sec.raiosFora ?? [];
+console.log(`  ${'Cantos abaixo de 14'.padEnd(22)} ${String(fora.length).padStart(6)}   alvo ${ALVO.raio[0]}-${ALVO.raio[1]}       ${fora.length===0?'cumpre':'ABAIXO (14)'}`);
+if (fora.length) {
+  const porTipo={}; for (const f of fora) porTipo[f]=(porTipo[f]||0)+1;
+  for (const [k,n] of Object.entries(porTipo).sort((a,b)=>b[1]-a[1])) console.log(`           ${String(n).padStart(3)}x  ${k}`);
+}
+console.log(`  AMBITO: julga-se o lado pequeno (0 < raio < 14). A capsula fica`);
+console.log(`          fora por desenho — e um idioma, nao um canto por arrumar.`);
 await b.close();

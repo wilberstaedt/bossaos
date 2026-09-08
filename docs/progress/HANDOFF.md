@@ -3359,3 +3359,65 @@ A introdução dizia **«aqui estão as dezasseis»** com vinte itens na página
 tinha uma frase duplicada da edição anterior. **Um número num texto meu que
 apodreceu em quatro horas** — a mesma coisa que passei a noite a apanhar nos
 outros. Corrigido antes de publicar, não depois.
+
+---
+
+## O décimo quarto número, e uma suite que estava morta — 08/09
+
+A revisão do sénior (`d257b2a`) encaminhou um achado pequeno e verdadeiro: **o
+§3.3 pede cantos entre 14 e 24 px nas áreas de marketing e havia treze elementos
+a 10 px.** Está curado, e curar levantou uma coisa pior.
+
+### Os cantos
+
+Os treze eram **botões e ligações, não cartões**, e vinham todos do
+`--bo-raio-controlo: 10px` — que tem **dezassete usos** na folha. Mudá-lo na raiz
+arrumava a landing e mexia nas 396 telas do painel. **A cura é por âmbito:**
+
+    .bo-publico--comercial { --bo-raio-controlo: var(--bo-raio-cartao); }
+
+Uma linha. 16 px, não 20, porque é o mesmo raio do cartão e assim o botão e o
+cartão concordam na área de marketing. **E não é cápsula de propósito** — o §3.3
+diz, duas linhas abaixo, «não use pílula para toda navegação ou botão».
+
+**Uma cura por âmbito só está certa se o âmbito segurar**, e isso é medido:
+
+    CANTOS marketing  comRaio=26  abaixoDe14=0
+    CANTOS painel     comRaio=29  abaixoDe14=18
+
+As duas metades correm no mesmo teste e pinam o detector **nos dois sentidos**:
+um detector cego falhava a segunda linha, um detector preso falhava a primeira.
+Se as duas ficarem iguais, o token vazou — e a mensagem do teste di-lo.
+
+### A fita passou a julgar
+
+O `ALVO.raio:[14,24]` estava no `medir-norte.mjs` **desde o início e nunca era
+lido**: a fita imprimia a contagem dos raios e nunca a julgava. Treze elementos
+passaram por baixo de doze linhas verdes. Agora há veredicto e há os nomes — é a
+nota do próprio sénior aplicada ao instrumento dele: *imprimir um número não é
+verificá-lo.*
+
+Os outros doze números não se mexeram com a cura: cabeçalho 78, herói 790,
+captura 741, blocos 7, altura 5477, fundos 4, telemóvel 9867.
+
+### E a `marketing.spec.ts` estava morta há um dia
+
+Detalhe em `docs/reviews/ACHADO-MARKETING-SEM-CORREDOR.md`. Resumo: a Fase 2
+trocou `.bo-mkt__heroi` por `.ns-heroi`, o marcador vive **dentro do `visitar`**,
+e por isso **sete testes rebentavam antes de medir** — transbordo em cinco
+larguras, elementos fora do ecrã, alvos de 44 px, contraste a 360 e a
+alcançabilidade das oito páginas. Nada disso corria.
+
+Reancorado nos dois sítios (o segundo estava cravado à mão dentro do teste e
+sobreviveu ao primeiro reancoramento). **68 verdes**, e as cinco verificações
+voltaram a correr.
+
+**O que fica por decidir e não é meu:** a suite continua sem corredor, na
+`EM_DIVIDA` com tecto 8. Acrescentá-la ao `validar-sistema-ns2.sh` seria mentir
+sobre o âmbito — essa guarda é do norte e a `marketing.spec.ts` cobre oito telas.
+**O tecto fica em 8 e a dívida fica declarada.**
+
+### Estado
+
+Máquina em **ATENÇÃO** durante todo o lote (5030 MB disponíveis, 751 livres, swap
+1,35 GB). Dois builds completos, um servidor de cada vez, sem lote de agentes.

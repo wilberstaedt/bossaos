@@ -174,6 +174,58 @@ test.describe('North Star v2 — as duas referências em três idiomas', () => {
       .toBeLessThanOrEqual(1);
   });
 
+  /**
+   * §3.3 — «cantos entre 14 e 24 px nas áreas de marketing», e a CONTENÇÃO.
+   *
+   * A revisão do sénior mediu treze elementos a 10 px na landing e escreveu a
+   * nota que interessa: **imprimir um número não é verificá-lo.** O alvo
+   * `raio:[14,24]` estava na fita desde o início e nunca era lido — treze
+   * elementos passaram por baixo de doze linhas verdes.
+   *
+   * A cura foi redefinir o `--bo-raio-controlo` no âmbito comercial, e não na
+   * raiz, porque esse token tem dezassete usos e mexer nele arrumava a landing
+   * e mexia nas 396 telas. **Uma cura por âmbito só está certa se o âmbito
+   * segurar**, e é por isso que este teste tem duas metades: a landing não pode
+   * ter cantos pequenos, e o painel TEM de continuar a tê-los. Se as duas
+   * ficarem iguais, o token vazou — e o verde da primeira metade estaria a
+   * pagar-se com propagação silenciosa na segunda.
+   */
+  test('cantos: 14 a 24 no marketing, e o painel intacto', async ({ page }) => {
+    test.setTimeout(900_000);
+
+    const pequenos = async (caminho: string) => {
+      const r = await page.goto(caminho, { waitUntil: 'networkidle' });
+      expect(r?.status(), `POPULACAO-ZERO: ${caminho} deu ${r?.status()}`).toBe(200);
+      return page.evaluate(() => {
+        const fora: string[] = []; let comRaio = 0;
+        document.querySelectorAll<HTMLElement>('div,article,section,a,button').forEach((el) => {
+          const v = parseFloat(getComputedStyle(el).borderTopLeftRadius);
+          if (!v) return;
+          comRaio += 1;
+          // Só o lado pequeno. A cápsula é um idioma declarado no §3.3, não um
+          // canto por arrumar, e reprová-la seria inventar uma falha.
+          if (v < 14) fora.push(`${el.tagName.toLowerCase()}.${el.className.toString().trim().split(/\s+/)[0] || '-'} ${v}px`);
+        });
+        return { fora, comRaio };
+      });
+    };
+
+    const mkt = await pequenos('/es-ES');
+    console.log(`CANTOS marketing comRaio=${mkt.comRaio} abaixoDe14=${mkt.fora.length}`);
+    expect(mkt.comRaio, 'POPULACAO-ZERO: nenhum elemento com raio na landing').toBeGreaterThan(0);
+    expect(mkt.fora, `§3.3 pede 14-24 nas áreas de marketing:\n${mkt.fora.join('\n')}`).toEqual([]);
+
+    // ── A contenção, que é o controlo desta cura ──────────────────────────
+    const painel = await pequenos(`/es-ES/app/${ORG}/${UNIDADE}/floor`);
+    console.log(`CANTOS painel comRaio=${painel.comRaio} abaixoDe14=${painel.fora.length}`);
+    expect(painel.comRaio, 'POPULACAO-ZERO: nenhum elemento com raio no painel').toBeGreaterThan(0);
+    expect(painel.fora.length,
+      'o painel deixou de ter cantos de controlo: ou o `--bo-raio-controlo` vazou do'
+      + ' âmbito comercial para a raiz, ou alguém redesenhou as 396 telas. Nos dois'
+      + ' casos o verde do marketing acima deixou de ser uma cura por âmbito.')
+      .toBeGreaterThan(0);
+  });
+
   test('foco e teclado: chega-se lá, e vê-se que se chegou', async ({ page }) => {
     test.setTimeout(900_000);
 

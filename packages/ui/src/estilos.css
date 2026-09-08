@@ -2491,6 +2491,22 @@ h3.ns-linha-do-tempo__nome, h3.ns-titulo-pequeno, h3.ns-preco__nome { line-heigh
 /* O cabeçalho comercial: 102 px contra os 72–80 do §4.1. Escopado a
    `--comercial` DE PROPÓSITO — a mesma classe serve a carta pública do
    restaurante, e encolher o cabeçalho dela não foi pedido nem medido. */
+/* ── §3.3: «cantos entre 14 e 24 px nas áreas de marketing» ────────────────
+ *
+ * A revisão mediu treze elementos a 10 px — e são todos botões e ligações, não
+ * cartões. Vinham do `--bo-raio-controlo: 10px`, que tem DEZASSETE usos nesta
+ * folha: mudá-lo na raiz arrumava a landing e mexia nas 396 telas do painel.
+ * Isso é propagação, e não é o que está autorizado.
+ *
+ * Por isso o token é REDEFINIDO no âmbito, e não redefinido para todos: a
+ * superfície comercial declara o seu raio e o componente continua a pedir o
+ * mesmo nome. É o contrato de superfície que esta folha já usa para a cor.
+ *
+ * 16 px e não 20: é o mesmo `--bo-raio-cartao`, portanto na área de marketing o
+ * botão e o cartão passam a concordar. E não é cápsula de propósito — o §3.3
+ * diz, duas linhas abaixo, «não use pílula para toda navegação ou botão». */
+.bo-publico--comercial { --bo-raio-controlo: var(--bo-raio-cartao); }
+
 .bo-publico--comercial .bo-publico__cabecalho { padding-block: 4px; }
 
 /* ── A landing NS2 sai do contentor da moldura, e só ela ───────────────────
