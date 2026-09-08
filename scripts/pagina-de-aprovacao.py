@@ -10,7 +10,7 @@ produto. Exclui `next-env.d.ts` e o que mais a construcao gera: um ficheiro que
 o build escreve faz toda a prova parecer velha em cada corrida, e uma guarda
 permanentemente vermelha e uma guarda ignorada.
 """
-import json, base64, html, collections, os, glob, sys, subprocess
+import json, base64, html, collections, os, glob, sys, subprocess, time
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 D = os.path.join(RAIZ, 'docs/visual/rv100/2026-09-06_e953a87/evidence/masters')
@@ -25,6 +25,38 @@ from frescura_do_produto import mtimes_reescritos as _reescritos  # noqa: E402
 
 def mais_recente_do_produto():
     return _mais_recente(RAIZ)
+
+# ── O carimbo, que e a metade que faltava a esta pagina ─────────────────────
+#
+# A guarda de frescura desta pagina FUNCIONA: recusa-se a gerar se alguma
+# captura for anterior a fonte mais recente do produto. Medido a 08/09, recusou
+# mesmo - codigo 1, zero ficheiros.
+#
+# O que ela nao pode fazer e defender a pagina DEPOIS de gerada. Ela corre no
+# instante em que a pagina nasce; a pagina vive num link permanente muito para
+# alem desse instante. Medido a 08/09: a versao publicada as 16h29 de 07/09
+# tinha 19 commits ao produto por cima dela - o redesenho inteiro - e continuava
+# a afirmar, no topo, ser posterior a ultima alteracao ao produto.
+#
+# Uma guarda de frescura pode recusar-se a NASCER velha. Nao se pode recusar a
+# SER LIDA velha. E envelhece a mentir para o lado errado: nao fica em silencio,
+# fica a afirmar frescura.
+#
+# A cura e dar ao leitor a conta que eu tive de fazer com `git log`: dizer que
+# commit foi capturado. A pagina irma `Sete blocos e uma sala` ja o fazia - «do
+# commit b52fc14» - e nao foi trazida para aqui. Uma pratica que vive so na
+# pagina onde alguem se lembrou dela nao e uma pratica.
+#
+# Se o commit nao se puder obter, NAO se inventa nem se omite: diz-se que nao se
+# sabe. Um carimbo ausente e um leitor avisado; um carimbo falso e pior do que
+# nenhum.
+def commit_capturado():
+    try:
+        r = subprocess.run(['git', '-C', RAIZ, 'rev-parse', '--short', 'HEAD'],
+                           capture_output=True, text=True, check=True)
+        return r.stdout.strip() or None
+    except Exception:
+        return None
 
 L = []
 def anda(o):
@@ -100,6 +132,18 @@ for mid in sorted(por):
     <h2>{html.escape(nome)}</h2><p>{html.escape(desc)}</p></header>
     <div class="fita">{''.join(cart)}</div></section>""")
 
+# O carimbo: que commit foi capturado e quando. Ver o comentario longo acima.
+_h = commit_capturado()
+_pngs = glob.glob(os.path.join(D, '*.png'))
+_quando = time.strftime('%d/%m/%Y as %Hh%M', time.localtime(max(os.path.getmtime(f) for f in _pngs))) if _pngs else None
+if _h and _quando:
+    carimbo = (f'Capturas de <strong>{_quando}</strong>, do commit <code>{_h}</code>. '
+               'Se o produto avancou desde esse commit, estas imagens ficaram para tras — '
+               'a garantia la em cima valia no instante em que esta pagina foi gerada, e nao se defende sozinha depois disso.')
+else:
+    carimbo = ('<strong>Nao sei de que commit sao estas capturas</strong> — o carimbo nao pôde ser lido. '
+               'Trate esta pagina como de idade desconhecida ate alguem o confirmar.')
+
 nav = ''.join(f'<a href="#{m}">{m}</a>' for m in sorted(por))
 open(SAIDA, 'w', encoding='utf-8').write(f"""<title>Telas-mestre BossaOS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -147,6 +191,7 @@ figcaption{{padding:11px 13px 13px;display:flex;flex-direction:column;gap:5px}}
 .limites h2{{font-family:var(--t);font-weight:600;font-size:17px;margin:0 0 10px}}
 .limites ul{{margin:0;padding-left:19px}}.limites li{{margin-bottom:9px}}.limites li:last-child{{margin-bottom:0}}
 .selo{{margin-top:26px;border-left:3px solid var(--acento);padding:2px 0 2px 15px}}
+.carimbo{{margin:22px 0 0;font-size:13px;color:var(--sec);line-height:1.6;border-top:1px solid var(--borda);padding-top:14px}}
 .selo p{{margin:0 0 7px}}.selo p:last-child{{margin:0}}
 strong{{font-weight:600}}
 @media (max-width:520px){{.cap{{flex-basis:88vw}}}}
@@ -172,5 +217,6 @@ grupos, o item aceso a seguir a rota, e o trocador já não mostra o teu email.<
 <div class="selo"><p><strong>PRONTO PARA APROVAÇÃO VISUAL HUMANA.</strong></p>
 <p>Só tu podes registar a aprovação. Silêncio, ausência de comentário ou aprovação minha não libertam nada —
 e se reprovares alguma, ajusto os mestres e volto a apresentar o conjunto afectado inteiro, não só a peça.</p></div>
+<p class="carimbo">{carimbo}</p>
 </div>""")
 print(f"escrito {SAIDA}: {os.path.getsize(SAIDA)/1024/1024:.2f} MB · {n} capturas · {len(por)} mestres")
