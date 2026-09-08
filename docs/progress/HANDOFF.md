@@ -3324,3 +3324,38 @@ No checkout do portão as 13 guardas de navegador dão **NÃO MEDI** — não h�
 lá dentro, e é o comportamento correcto delas. **Foram corridas na bancada e
 estão verdes ali**: 95 testes verdes na bateria NS2 mais `larguras`, `foco` e
 `sala`. Verde na bancada não é verde no portão, e a diferença fica escrita.
+
+## 08/09 02h40 — a lista dele actualizada, e a coisa com pressa posta em primeiro
+
+O portão está emitido e a Fase 3 está bloqueada na Nathalia. **Pendência
+registada.** O que avança sem ela é a lista do Matheus, que estava das 22h00 e
+não sabia nada da noite do North Star.
+
+**Passou de 16 para 20**, e mudei a ordem por uma razão: **há uma coisa em aberto
+no ar e as outras dezanove não têm pressa.**
+
+### O item 00, e é o único urgente
+
+**A porta de registo continua aberta em produção.** Verifiquei agora: o código
+publicado tem **zero** ocorrências de `disableSignUp`. Encontrei às 22h30; são
+02h40. **Quatro horas.** E há **16 commits ao produto** por publicar, dos quais
+este é um.
+
+Pu-lo **acima** de tudo o resto e numa secção própria, porque numa lista de vinte
+coisas o que importa não é estar lá: é ser encontrado. **Uma coisa urgente
+enterrada no meio de dezanove que não têm pressa é uma coisa que ninguém lê a
+tempo.**
+
+### As três que a noite acrescentou
+
+- **17** — o North Star pronto, e **a decisão é da Nathalia**, não dele; o que
+  lhe cabe é encaminhar.
+- **18** — o email no mapa de mesas, que vem do `sala.ts` e **não do redesign**.
+- **19** — os treze cantos a 10 px.
+
+### E corrigi um número podre meu
+
+A introdução dizia **«aqui estão as dezasseis»** com vinte itens na página, e
+tinha uma frase duplicada da edição anterior. **Um número num texto meu que
+apodreceu em quatro horas** — a mesma coisa que passei a noite a apanhar nos
+outros. Corrigido antes de publicar, não depois.
