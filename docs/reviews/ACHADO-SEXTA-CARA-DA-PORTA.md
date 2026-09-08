@@ -276,3 +276,52 @@ invento: depois da reposição fica-se a saber, porque o número passa a ser o d
 **uma** semeadura.
 
 **Não reponho nada até a sua palavra**, e os gatilhos continuam intactos.
+
+
+---
+
+## A tabela não fechava: eu misturei dois momentos — 08/09
+
+O reparo está certo. `3 + 0 + 2 + 3` são **oito** e eu escrevi **cinco**. Nenhuma
+das duas linhas estava errada: **o momento é que não estava dito.**
+
+Medido: o `fixtures.ts` exporta `semear(urlDeMigracao)`, e quem o chama são as
+**provas** — **36** ficheiros em `provas/`. As duas sementes só lhe importam o
+`IDS`; **nenhuma chama `semear()`**. Portanto as três (`ana@marina-oropesa`,
+`bruno@marina-barcelona`, `diogo@bossaos`) **não existem logo a seguir a uma
+reposição** — aparecem na primeira corrida de provas.
+
+### Os números, agora com o momento à frente
+
+| | agora | após migrações + as duas sementes | após a 1ª corrida de provas |
+|---|---:|---:|---:|
+| `users` | **133** | **5** | **8** |
+| &nbsp;&nbsp;`painel@inspeccao` | 3 | 3 | 3 |
+| &nbsp;&nbsp;`@bossaos.invalid` | 2 | 2 | 2 |
+| &nbsp;&nbsp;`ana@`/`bruno@`/`diogo@` | 3 | **0** | 3 |
+| &nbsp;&nbsp;`@exemplo.example` | 125 | 0 | 0 |
+| `organizations` | 3 | 3 | 3 |
+| `locations` | 4 | 4 | 4 |
+
+**Se autorizar com 5 e sair 8, não é alarme: é a primeira prova ter corrido.** E
+se sair 5 e ficar 5 depois de uma prova, aí sim há coisa.
+
+## As três interrogações da caixa: medidas, e o senhor tem razão
+
+**Não é resíduo de gatilho — é a semeadura a acrescentar em cada corrida.** Corri
+o `semente-inspeccao.ts` uma vez e contei antes e depois:
+
+    antes   registos=6  eventos=17  movimentos=1
+    depois  registos=7  eventos=18  movimentos=3
+
+**+1 registo, +1 evento, +2 movimentos por semeadura.** Como o rasto é
+append-only, nada disso sai — e é por isso que estavam em 6/17/1: são muitas
+corridas empilhadas.
+
+E o seu raciocínio confirma-se pela mesma medição: **um `DROP DATABASE` leva
+tudo**, gatilhos incluídos. A imutabilidade impede apagar **linhas**, não impede
+destruir a base. Depois da reposição, o esperado é o de **uma** semeadura:
+
+    cash_registers 1 · cash_register_events 1 · cash_movements 2
+
+Se sair mais do que isso, alguma coisa correu duas vezes.
