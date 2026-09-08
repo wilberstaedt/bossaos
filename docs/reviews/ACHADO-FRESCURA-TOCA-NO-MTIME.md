@@ -235,3 +235,71 @@ uma guarda que decide o que a Nathalia vê não é sítio para eu assinar o meu 
 código. Fica-lhe o desenho, com os quatro casos acima a servir de teste, e o caso da
 reversão a ser o controlo negativo obrigatório: **uma implementação que não recuse a
 reversão não implementou isto.**
+
+---
+
+## A cura por conteúdo, implementada — 08/09
+
+**A regra que estava escrita aqui estava errada, e o sénior corrigiu-a antes de
+alguém lhe pegar:** usar a data do último commit para ficheiros limpos dá **verde
+numa reversão**. Alguém edita, captura com a edição, reverte — o ficheiro fica
+limpo, o commit é antigo, e as capturas mostram código que já não existe. **A
+regra grosseira do `mtime` apanhava esse caso; a "melhor" não.**
+
+O erro das duas é o mesmo: **medem TEMPO quando a pergunta é de CONTEÚDO.**
+
+### O que foi feito
+
+- `frescura_do_produto.impressao_do_produto(raiz)` — sha256 do conteúdo de cada
+  ficheiro de produto, mais um resumo. Mesmo âmbito da `mais_recente_do_produto`,
+  de propósito: âmbitos diferentes fariam duas guardas medir produtos diferentes.
+  **735 ficheiros em 0,33 s.**
+- `diferencas_do_produto` — devolve alterados, novos e desaparecidos, para a
+  recusa poder **nomear**. Uma recusa que só diz «mudou» manda procurar às cegas.
+- `frescura_do_produto.py --carimbar <manifesto>` — escreve a impressão no
+  `mestres.json`. **O carimbo é calculado em Python e não no capturador, que é
+  JavaScript:** duas implementações do mesmo resumo concordam até ao dia em que
+  uma muda de ordenação, e nesse dia a guarda recusa tudo sem nada ter mudado.
+- `provar-mestres.sh` carimba **logo a seguir à captura**.
+- `pagina-de-aprovacao.py` recalcula e compara. Sem carimbo, responde **NÃO
+  MEDI** — não cai para `mtime` em silêncio.
+
+### Os quatro casos, exercidos
+
+`scripts/provar-frescura-por-conteudo.sh`, sobre uma árvore de mentira — provar
+isto no repositório obrigava a editar e reverter o produto para provar uma
+guarda:
+
+    ok    produto intacto: aceita
+    ok    formatador grava por cima igual: ACEITA (o `mtime` mudou para 1788846731)
+    ok    REVERSAO: RECUSA, e nomeia apps/web/src/Ecra.tsx
+    ok    alteracao a serio: RECUSA, e nomeia o ficheiro
+    ok    arvore com alteracoes por commitar: aceita (o resumo e da arvore, sem git)
+    ok    ficheiro NOVO e visto
+    ok    ficheiro APAGADO e visto
+
+**A reversão não é afirmada, é exercida** — é o controlo que separa esta
+implementação de uma que só parece funcionar.
+
+### E no caminho real
+
+    frescura: 25/25 capturas sobre o produto de agora (resumo 78a6091a220c5d72, 735 ficheiros)
+
+**A recusa falsa que abriu este documento desapareceu:** os dois ficheiros de
+`07:00:30` têm o conteúdo do commit, portanto o resumo não mexeu. E a recusa
+verdadeira dispara — acrescentei uma linha a `packages/ui/src/estilos.css` e:
+
+    RECUSO: o produto mudou desde que estas 25 capturas foram tiradas.
+        alterado       packages/ui/src/estilos.css
+
+Reposto o ficheiro **com `touch -r`**, para não envelhecer nada.
+
+### O canário: concordo em parte, e NÃO o apaguei
+
+O bónus era verdadeiro para **este** caminho: sem `mtime`, o canário dos
+`mtimes_reescritos` não tem função aqui, e por isso saiu do
+`pagina-de-aprovacao.py`. **Mas não é apagável.** A `validar-provas-frescas.sh`
+continua a comparar `mtime` e consulta o canário — apagá-lo agora cegava-a, e
+uma guarda cega é pior do que uma guarda cara. Fica de pé até essa também mudar
+de pergunta, e a `validar-capturas-de-marketing.sh` é a terceira que ainda mede
+tempo (reprova hoje pela mesma recusa falsa).

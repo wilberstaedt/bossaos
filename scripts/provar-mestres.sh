@@ -163,6 +163,33 @@ else
   erro "o capturador reprovou — ver as linhas acima"
 fi
 
+# ── O carimbo da impressao do produto, LOGO a seguir a captura ─────────────
+#
+# E' o que torna a frescura uma pergunta de CONTEUDO: guarda-se o resumo dos
+# ficheiros de produto no momento em que as capturas foram tiradas, e a guarda
+# recalcula e compara. Sem isto, o `mestres.json` fica sem carimbo e a
+# `pagina-de-aprovacao.py` nao tem contra o que comparar.
+#
+# LIMITE declarado: entre o build e esta linha ha uma janela. Se alguem editar o
+# produto DURANTE a corrida, o carimbo descreve a arvore do fim e as capturas
+# mostram a do meio. A janela e' de segundos e nao se fecha com uma terceira
+# regra sobre tempo - fecha-se nao editando o produto enquanto se captura.
+# A pasta dos MESTRES, escrita por extenso. O `$DESTINO` deste ficheiro so
+# nasce na linha 190 e aponta para a pasta de MARKETING — usa-lo aqui era
+# carimbar o manifesto errado, ou rebentar com `set -u`.
+MESTRES_DIR="${DESTINO_MESTRES:-docs/visual/rv100/2026-09-06_e953a87/evidence/masters}"
+MANIFESTO="$MESTRES_DIR/mestres.json"
+if [ -s "$MANIFESTO" ]; then
+  if python3 scripts/frescura_do_produto.py --carimbar "$MANIFESTO" >/tmp/mestres-carimbo.txt 2>&1; then
+    verde "$(cat /tmp/mestres-carimbo.txt)"
+  else
+    erro "o carimbo da impressao falhou — as capturas ficam sem com que comparar"
+    tail -3 /tmp/mestres-carimbo.txt
+  fi
+else
+  erro "nao ha mestres.json para carimbar"
+fi
+
 # As composicoes vivem DENTRO da aplicacao, que e' quem as importa.
 DESTINO="apps/web/src/demonstracao"
 # ── 3. O KDS existe, e nao e' um ficheiro vazio ────────────────────────────

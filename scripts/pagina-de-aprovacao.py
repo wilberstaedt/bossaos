@@ -22,7 +22,7 @@ SAIDA = sys.argv[1] if len(sys.argv) > 1 else '/tmp/telas-mestre.html'
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from frescura_do_produto import mais_recente_do_produto as _mais_recente  # noqa: E402
 from frescura_do_produto import mtimes_reescritos as _reescritos  # noqa: E402
-from frescura_do_produto import porque_e_que_o_produto_e_mais_recente as _porque  # noqa: E402
+from frescura_do_produto import diferencas_do_produto as _diferencas  # noqa: E402
 
 def mais_recente_do_produto():
     return _mais_recente(RAIZ)
@@ -66,7 +66,8 @@ def anda(o):
         for v in o.values(): anda(v)
     elif isinstance(o, list):
         for v in o: anda(v)
-anda(json.load(open(os.path.join(D, 'mestres.json'))))
+MANIFESTO = json.load(open(os.path.join(D, 'mestres.json')))
+anda(MANIFESTO)
 
 # ── Antes de comparar datas, perguntar se as datas querem dizer alguma coisa ──
 #
@@ -82,55 +83,46 @@ anda(json.load(open(os.path.join(D, 'mestres.json'))))
 # **Ruído determinista é pior do que ruído.** Reproduz-se, parece uma medição, e
 # sobrevive à verificação de quem desconfiar e correr outra vez.
 #
-# A resposta honesta num sítio onde as datas foram reescritas não é «recuso» nem
-# «aprovo» — é NÃO MEDI. O canário vive na peça partilhada; aqui só se pergunta.
-if _reescritos(RAIZ):
-    print("NAO MEDI: as datas de ficheiro desta copia foram reescritas por um")
-    print("          checkout, e a frescura das capturas mede-se por elas.")
-    print("          Corre isto onde as capturas sao produzidas.")
+# ── A frescura, medida por CONTEÚDO ────────────────────────────────────────
+#
+# Isto comparava `mtime` de captura contra `mtime` de fonte, e essa pergunta está
+# errada nos dois sentidos. Um formatador que grava o mesmo texto por cima
+# recusava tudo — recusa falsa, e cara, porque manda gastar um build. E a
+# "correcção óbvia", usar a data do último commit para ficheiros limpos, é pior:
+# deixa passar uma REVERSÃO, em que as capturas mostram código que já não existe.
+#
+# A pergunta é de conteúdo. O `provar-mestres.sh` carimba no `mestres.json`, no
+# momento da captura, o resumo dos ficheiros de produto; aqui recalcula-se e
+# compara-se. Os quatro casos ficam certos de uma vez, e estão exercidos no
+# `scripts/provar-frescura-por-conteudo.sh` — incluindo a reversão, que é o
+# controlo que separa esta implementação de uma que só parece funcionar.
+#
+# Não há canário de `mtime` neste caminho porque não há `mtime` neste caminho:
+# num `clone` fresco o resumo do conteúdo é o mesmo, que é precisamente a
+# propriedade que faltava.
+_carimbo = MANIFESTO.get('impressaoDoProduto') if isinstance(MANIFESTO, dict) else None
+if not _carimbo:
+    print("NAO MEDI: este conjunto de capturas nao tem carimbo do conteudo do produto.")
+    print("          Foi tirado antes de a frescura passar a medir conteudo, e nao ha")
+    print("          contra o que comparar. Uma recaptura resolve-o de vez.")
     sys.exit(2)
 
-produto = mais_recente_do_produto()
-velhas = [e for e in L if os.stat(os.path.join(RAIZ, e['ficheiro'])).st_mtime < produto]
-if velhas:
-    print(f"RECUSO: {len(velhas)} captura(s) anteriores a fonte mais recente do produto.")
-    for e in velhas[:6]: print('   ', os.path.basename(e['ficheiro']))
-
-    # Antes de mandar recapturar, dizer O QUE ficou mais recente - e se mudou
-    # mesmo. Uma recusa que so diz «esta velho» manda gastar um build inteiro,
-    # e a 08/09 a causa foi um formatador a gravar dois ficheiros por cima com
-    # o mesmo texto.
-    # O limiar tem de ser o MESMO que faz a recusa disparar. Era `max` sobre
-    # TODAS as capturas, e isso abria um buraco que o JR viu sem lhe achar a
-    # causa: um ficheiro de produto tocado ENTRE a captura mais velha e a mais
-    # nova torna algumas capturas velhas — a recusa dispara — mas nao e mais
-    # recente que a mais nova, e a diagnose ficava MUDA. Com 25 capturas
-    # escritas ao longo de segundos, isso nao e raro.
-    #
-    # Com o `min` sobre as ACUSADAS, o bloco nao pode faltar: se ha uma captura
-    # mais velha que o produto, existe por definicao um ficheiro de produto mais
-    # recente que ela. A ausencia da explicacao deixa de ser possivel.
-    _novos = _porque(RAIZ, min(os.stat(os.path.join(RAIZ, e['ficheiro'])).st_mtime for e in velhas))
-    if _novos:
-        print()
-        print("O que ficou mais recente que alguma das capturas acusadas:")
-        _tocados = 0
-        for _rel, _m, _mudou in _novos:
-            _q = time.strftime('%H:%M:%S', time.localtime(_m))
-            if _mudou is True:   _et = 'MUDOU (tem alteracoes por commitar)'
-            elif _mudou is False: _et = 'so o mtime - o conteudo e o do commit'; _tocados += 1
-            else:                 _et = 'nao sei se mudou (sem git)'
-            print(f"    {_q}  {_rel}  <- {_et}")
-        if _tocados == len(_novos):
-            print()
-            print("NENHUM deles mudou de conteudo: foram gravados por cima iguais.")
-            print("Recapturar NAO cura isto - a comparacao e por data de ficheiro,")
-            print("e o produto que as capturas mostram continua a ser o mesmo.")
-            print("Ver docs/reviews/ACHADO-FRESCURA-TOCA-NO-MTIME.md")
-            sys.exit(1)
-    print("Recaptura antes de mostrar isto a alguem.")
+_alterados, _novos, _sumidos = _diferencas(RAIZ, _carimbo['porFicheiro'])
+if _alterados or _novos or _sumidos:
+    print(f"RECUSO: o produto mudou desde que estas {len(L)} capturas foram tiradas.")
+    for _rot, _lista in (('alterado', _alterados), ('novo', _novos), ('desaparecido', _sumidos)):
+        for _f in _lista[:6]:
+            print(f"    {_rot:14s} {_f}")
+    _total = len(_alterados) + len(_novos) + len(_sumidos)
+    if _total > 18:
+        print(f"    … e mais {_total - 18}")
+    print()
+    print(f"Carimbo das capturas: {_carimbo['resumo'][:16]} ({_carimbo['ficheiros']} ficheiros,")
+    print(f"                      {_carimbo['quando']})")
+    print("Isto NAO e' uma data a mexer: e' o conteudo a ser outro. Recaptura.")
     sys.exit(1)
-print(f"frescura: {len(L)}/{len(L)} capturas posteriores a fonte mais recente do produto")
+print(f"frescura: {len(L)}/{len(L)} capturas sobre o produto de agora "
+      f"(resumo {_carimbo['resumo'][:16]}, {_carimbo['ficheiros']} ficheiros)")
 
 NOMES = {'M01': ('Landing, desktop', 'A página que o cliente encontra primeiro, a 1440 de largura.'),
  'M02': ('Landing, telemóvel', 'A mesma página a 390 — onde a maior parte das visitas chega.'),
