@@ -128,3 +128,69 @@ Isto não é um conserto de uma linha como o do cabeçalho. O bloco 2 precisa de
 capturas reais da interface, e o bloco 4 de um mecanismo alternável com um ecrã por
 papel. **É construção, não afinação** — e é o trabalho da landing, não a propagação
 às 396 telas, que continua a esperar pela Nathalia.
+
+---
+
+## §4.1: as três corrigidas e a quarta respondida — 08/09
+
+Medido no renderizado, com a **largura declarada em cada linha**.
+
+### Antes
+
+    1440px  cabecalho altura=59  logo=145
+            a.bo-mkt__cta "Pedir una demo"  bg=rgb(16,46,53)  16px/700
+            a "ES" x=1017..1061 · a "PT" x=1065..1109 · a "EN" x=1113..1157
+    390px   cabecalho altura=59
+            a.bo-mkt__marca  +  button.bo-mkt__abrir     ← e mais nada
+
+### Depois
+
+    1440px  altura=75  idiomas-soltos=0  selectores=1
+            CTA: 19px/700 bg=rgb(216,90,68) cor=rgb(16,46,53)
+    390px   altura=75  idiomas-soltos=0  selectores=1
+
+### 1 · A altura, e a conta é simples
+
+59 = **50** do logotipo + **8** de `padding-block` + **1** da borda. Os 4 px de
+cada lado foram meus, da Fase 2, para trazer o cabeçalho de 102 para dentro da
+faixa; depois o cabeçalho perdeu a linha da navegação para dentro do menu e a
+mesma regra passou a dar 59. **12 de cada lado dão 75**, no meio dos 72–80.
+
+### 2 · Os idiomas: um selector, não três itens
+
+Eram três ligações a ocupar `x=1017..1157` — **140 px imediatamente à direita do
+CTA**, que é literalmente «três itens concorrendo com o CTA».
+
+Reutiliza o **`GrupoMkt`**, que já é o mecanismo de agrupar desta barra (os
+«Recursos» usam-no). Um selector novo seria uma segunda forma de fazer a mesma
+coisa, e a próxima pessoa teria de escolher entre as duas sem saber porquê. O
+rótulo é o **idioma actual**: um selector que não diz o que está seleccionado
+obriga a abri-lo para saber onde se está.
+
+### 3 · O CTA coral, e o tamanho subiu com a cor
+
+O do herói já estava certo (`rgb(216,90,68)`), portanto o desvio era só no
+cabeçalho.
+
+**E a cor obrigou o tamanho.** Sobre coral não há cor de texto que chegue a
+4,5:1 — o tecto é **3,84** com branco e **3,73** com o verde. A **16 px normais**
+isto seria uma falha de contraste; a **19/700** entra na faixa de texto grande da
+1.4.3, onde o limiar é 3, e passa. Não é preferência: é a mesma impossibilidade
+do coral que já se tinha provado, e a saída é a mesma — o tamanho. Os dois CTA
+deixam de ser dois desenhos.
+
+Confirmado por medição e não por mim: `AMBITO superficies=12 medidas=12 maus=0`.
+
+### 4 · O CTA ao telemóvel: falta mesmo
+
+**Confirmo.** A 390 o cabeçalho tem `a.bo-mkt__marca` e `button.bo-mkt__abrir`, e
+mais nada. O CTA **existe**, mas vive dentro do painel do `MenuMkt`, que ao
+telemóvel está colapsado — só aparece depois de abrir o menu. O §4.1 pede «mobile
+com logo, **CTA curto** e menu real».
+
+**Não o construí, e digo porquê.** O CTA está dentro da `<nav>` de propósito: é
+dela que a `marketing.spec.ts` prova que as sete rotas se alcançam da landing.
+Tirá-lo de lá parte essa prova, e a saída — alargar o selector da guarda ao
+cabeçalho inteiro — é mexer numa guarda para acomodar uma mudança de desenho.
+**Isso quer decisão, não iniciativa**, e é vizinho dos blocos 2 e 4 que ficaram
+reservados para etapa própria.

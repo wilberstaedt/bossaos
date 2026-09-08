@@ -1920,14 +1920,24 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
    `<a>` dentro de `.bo-publico__seccoes`, cuja regra-base o arredondava a
    `999px`. Com a classe sozinha o botão saía cápsula — medido, não suposto: a
    primeira passagem devolveu `capsulas: 1` a 1280 e a 1440 px. */
+/* ── §4.1: «Pedir una demo como CTA coral» ──────────────────────────────
+ * Estava a `var(--bo-primaria)`, o verde escuro — medido `rgb(16,46,53)`. O do
+ * heroi ja estava certo, portanto o desvio era so aqui.
+ *
+ * E o tamanho SOBE com a cor, porque sobre coral nao ha escolha de cor de texto
+ * que chegue a 4.5:1 — o tecto e 3.84 com branco e 3.73 com o verde. A 16 px
+ * normais isto seria uma falha de contraste; a 19/700 entra na faixa de TEXTO
+ * GRANDE da 1.4.3, onde o limiar e 3, e passa. O CTA do heroi ja usa 19/700, e
+ * assim os dois deixam de ser dois desenhos. */
 .bo-publico--comercial .bo-mkt__cta {
   display: inline-flex; align-items: center; justify-content: center;
   min-height: var(--bo-toque-publico);
   padding: 0 var(--bo-espaco-xl);
   border: 1px solid var(--bo-primaria);
   border-radius: var(--bo-raio-controlo);
-  background: var(--bo-primaria); color: var(--bo-texto-inverso);
+  background: var(--bo-acento-sinal); color: var(--bo-primaria);
   font-weight: 700; text-decoration: none;
+  font-size: 19px;
 }
 
 /* O grupo dos secundários. */
@@ -2531,7 +2541,13 @@ h3.ns-linha-do-tempo__nome, h3.ns-titulo-pequeno, h3.ns-preco__nome { line-heigh
  * diz, duas linhas abaixo, «não use pílula para toda navegação ou botão». */
 .bo-publico--comercial { --bo-raio-controlo: var(--bo-raio-cartao); }
 
-.bo-publico--comercial .bo-publico__cabecalho { padding-block: 4px; }
+/* ── §4.1: «altura entre 72 e 80 px» ────────────────────────────────────
+ * Media 59, e a conta e' simples: o logotipo tem 50, o `padding-block` dava 4
+ * de cada lado e a borda 1 — 50+8+1. Os 4 px foram meus, da Fase 2, para trazer
+ * o cabecalho de 102 para dentro da faixa; depois o cabecalho perdeu a linha da
+ * navegacao para dentro do menu e a mesma regra passou a dar 59.
+ * 12 de cada lado dao 50+24+1 = 75, no meio da faixa. */
+.bo-publico--comercial .bo-publico__cabecalho { padding-block: 12px; }
 
 /* ── A landing NS2 sai do contentor da moldura, e só ela ───────────────────
  *

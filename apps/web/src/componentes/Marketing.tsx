@@ -151,20 +151,32 @@ export function MolduraMkt({
             </a>
           </nav>
 
-          {/* ④ Os três idiomas, com a rota mantida. */}
+          {/* ④ Os idiomas num SELECTOR e não em três itens soltos.
+              O §4.1 pede «idiomas agrupados em um seletor compacto, não três
+              itens concorrendo com o CTA», e eram três ligações lado a lado,
+              medidas a ocupar `x=1017..1157` — 140 px a competir com o CTA que
+              está imediatamente à esquerda.
+              Reutiliza o `GrupoMkt`, que já é o mecanismo de agrupar desta
+              barra (os «Recursos» usam-no). Um selector novo aqui seria uma
+              segunda forma de fazer a mesma coisa, e a próxima pessoa teria de
+              escolher entre as duas sem saber porquê.
+              O rótulo é o idioma ACTUAL: um selector que não diz o que está
+              seleccionado obriga a abri-lo para saber onde se está. */}
           <nav className="bo-mkt__idiomas" aria-label={m.entrar.idioma}>
-            {IDIOMAS.map((x) => (
-              <a
-                key={x}
-                href={`/${x}${caminho}`}
-                lang={x}
-                hrefLang={x}
-                aria-label={NOME_DO_IDIOMA[x]}
-                aria-current={x === idioma ? 'true' : undefined}
-              >
-                {x.slice(0, 2).toUpperCase()}
-              </a>
-            ))}
+            <GrupoMkt rotulo={idioma.slice(0, 2).toUpperCase()} activo>
+              {IDIOMAS.map((x) => (
+                <a
+                  key={x}
+                  href={`/${x}${caminho}`}
+                  lang={x}
+                  hrefLang={x}
+                  aria-label={NOME_DO_IDIOMA[x]}
+                  aria-current={x === idioma ? 'true' : undefined}
+                >
+                  {NOME_DO_IDIOMA[x]}
+                </a>
+              ))}
+            </GrupoMkt>
           </nav>
 
           {/* ⑤ A entrada na conta. A rota existe desde o E04. */}
