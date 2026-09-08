@@ -2195,6 +2195,24 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
 }
 .bo-mkt__figura { margin: 0; min-width: 0; }
 .bo-mkt__figura--estreita { max-width: 390px; }
+/* ── Transbordo medido, para o mestre de 1440 caber na banda ───────────────
+   O `main` é 1200 com 64 px de recuo de cada lado, o que dá 1072 de conteúdo —
+   e 1072 põe o mestre de 1440 a 10,4 px, abaixo dos 11. A banda de 1072 é
+   [1072, 1364] e não há variante que lá caiba; alargar a caixa para **1152** faz
+   o mestre que já lá está servir, e dá 11,2 px.
+   80 px de transbordo, 40 para cada lado: 1072+80 = 1152, e 1152 continua dentro
+   dos 1200 do `main`, portanto a página não passa a rolar na horizontal.
+   **1131 daria exactamente 11,0**, encostado ao limiar — 1152 deixa margem. */
+/* Só a partir de 1200: abaixo disso o `main` já não tem 64 px de recuo para
+   emprestar, e `calc(100% + 80px)` punha a página a rolar na horizontal — que é
+   o que a régua do E02 proíbe. */
+@media (min-width: 1200px) {
+  .bo-mkt__figura--transbordo {
+    width: calc(100% + 80px);
+    margin-inline: -40px;
+    max-width: none;
+  }
+}
 .bo-mkt__figura--media { max-width: 640px; }
 .bo-mkt__legenda { color: var(--bo-texto-secundario); margin-top: var(--bo-espaco-md); }
 

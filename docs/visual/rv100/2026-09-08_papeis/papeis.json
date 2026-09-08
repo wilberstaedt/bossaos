@@ -22,7 +22,7 @@
       "ficheiro": "papel-3.png",
       "papel": "Quien cocina",
       "beneficio": "Una pantalla con lo que hay que preparar, en orden, con el tiempo contado desde el servidor y nunca desde el reloj de la tablet.",
-      "imagem": "/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fkds-recorte-560.26i6yqovgqm56.png&w=3840&q=75",
+      "imagem": "/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fkds-recorte-560.3bejuye22gv-x.png&w=3840&q=75",
       "largura": 1280
     },
     {
@@ -34,7 +34,7 @@
     }
   ],
   "impressaoDoProduto": {
-    "resumo": "fbec14b96e469b3272cfa044db8b16f9827a8934a317672a0221a8f730eefe61",
+    "resumo": "3e07b8d09e3b87f60d7fef169a721886baab9d9d5e552918a0eb5c3635a6aedb",
     "ficheiros": 735,
     "porFicheiro": {
       "apps/web/proxy.ts": "d7dccea720c55d1d05f4a4c3a47a0ee8045ad4bd993f429184ec20e886bc7525",
@@ -42,7 +42,7 @@
       "apps/web/app/robots.ts": "6be6c094cd7e17f0514ba1af34aee2cbe07b8e10ef51d49d173be06bad64eb89",
       "apps/web/app/sitemap.ts": "6cef1b43052195fa962d20c19672ccc8633812a5b526ce2605c08b67206db74b",
       "apps/web/app/[idioma]/layout.tsx": "f53031ccc6a6928a4d441fb5276799c9998330f65bc6c3782aacb8b98a7b62b4",
-      "apps/web/app/[idioma]/page.tsx": "015282701d770d8d99a63fec24109bbf11bc920f8cc0e1edfb75b8daf230c106",
+      "apps/web/app/[idioma]/page.tsx": "eb8b46ab1818a131e9e620356a91ea64d0e0bb3bf50aaae048aa8a413c0a4d4a",
       "apps/web/app/[idioma]/not-found.tsx": "a44a62a6d2da90a6fb41342ad79e8d3c681d1a2174dc2bfc2f12a4947a8c89b3",
       "apps/web/app/[idioma]/demo/page.tsx": "1cad0e33007ea55b40a10d43efa779669376a97f0c95eafe104b038b5209deff",
       "apps/web/app/[idioma]/demo/thanks/page.tsx": "1570840cbde825ab20b08615176628d95784c13a46aa11634511e63899f15305",
@@ -66,7 +66,7 @@
       "apps/web/app/[idioma]/kds/[locationId]/[stationId]/ligacao/page.tsx": "855bbd4acfb3787b9883f194ba1e7957a6753d257ab673cfd7d003dbaacc08c6",
       "apps/web/app/[idioma]/interno/estruturas/[qual]/page.tsx": "85c319de4313aacad9fc324ce74a13a58924b5aa0248dc2e5013b8dacaef64e4",
       "apps/web/app/[idioma]/interno/catalogo/page.tsx": "171e027ba55d864222297ddf40ae2178fe9083471565d658323ec12c34092b83",
-      "apps/web/app/[idioma]/interno/ns2/page.tsx": "3f8d60eb72c802288796a5e010501a479378cb1e694bd0d4be7bf408139da261",
+      "apps/web/app/[idioma]/interno/ns2/page.tsx": "61cc2fbbb2efecb569dd9ca74086bcc44b08322224cd9c3249241929306741f2",
       "apps/web/app/[idioma]/privacy/page.tsx": "8cf1b3ee65ee9ced7db0c82bb394a4c3bb9bf2a324c18f0513dc75369a9875c1",
       "apps/web/app/[idioma]/app/[orgSlug]/layout.tsx": "29c9aab268f05afd984ae8e881f035c403b0f23981581fb809deff4cc0adba91",
       "apps/web/app/[idioma]/app/[orgSlug]/page.tsx": "162b9e565247da06204f6450f064fcbff95d2bdce9eb42d4fb22bcdb5fd19550",
@@ -322,7 +322,7 @@
       "apps/web/app/[idioma]/platform/auditoria/page.tsx": "2af69462d30d4bf7f6e30aff767d5d806742660d88b43d8547dba90b31a74a29",
       "apps/web/app/[idioma]/platform/promocoes/page.tsx": "11844dfd7292d36418bf3e61a590bde237af5d1d980ebe897054ade30a0c43f0",
       "apps/web/app/[idioma]/platform/trabalhos/page.tsx": "a6553fd7137ed2329b764a875f632bcef991591ef388583ddccbc4c0eb7b5cbf",
-      "apps/web/app/[idioma]/product/page.tsx": "49666fa9d2e7f66353259754f4733acbc238e997b46b5920f2f506e79dcaf90d",
+      "apps/web/app/[idioma]/product/page.tsx": "8d5af425a905e14cf8964e7bf4e9aa269d0f4adad103dafbfd2861accbe0d434",
       "apps/web/app/[idioma]/pos/page.tsx": "b3dc22518e3263c2ad108373d4766c6240458b85cedddf2acd821e8043bfe024",
       "apps/web/app/[idioma]/pos/[locationId]/page.tsx": "de26e79dd5beb5671b0435b6c1a74ecd686d16deb8db124b452de63f6238294a",
       "apps/web/app/[idioma]/pos/[locationId]/balcao/page.tsx": "9216f96c30bbec9d6afb5b35cd1b4de3d2cb3b498603a75f4aa2cb641b748c93",
@@ -346,7 +346,7 @@
       "apps/web/app/[idioma]/pos/[locationId]/conta/[billId]/cortesia/page.tsx": "fe7ebd146cb81860b5f0b9b79f041ca8b26a6f1db71a1bee51e3eb03a73acab7",
       "apps/web/app/[idioma]/pos/[locationId]/conta/[billId]/anular/page.tsx": "422e4f51fdd343382e3958d1e4aa981363a58b911ab48783688638135d1b54fc",
       "apps/web/app/[idioma]/pos/[locationId]/conta/[billId]/recibo/page.tsx": "d315ff1d226d8b7f570b00f1f145e49d1957e5423bfa389b914ad7824f641214",
-      "apps/web/app/[idioma]/getting-started/page.tsx": "68896ceffcf39e82f95783164c4adacc0a9c9b666d4b580bed4721bbfbd1164d",
+      "apps/web/app/[idioma]/getting-started/page.tsx": "441a5ec2e7eb7cf6b302c5d67bd6f1dfc5c1b060c1763ffcbc0b322a87132023",
       "apps/web/app/[idioma]/pilot/page.tsx": "2e6a1e6d8137eeff71f9c1cd6859385f8ef3ae539e19e8add317b8c3087aca6e",
       "apps/web/app/[idioma]/kiosk/[deviceId]/page.tsx": "b90a74ab27a6ff841995ea593a8136ef6ba43afcb2bea3de829935f28e586f7c",
       "apps/web/app/[idioma]/kiosk/[deviceId]/pausado/page.tsx": "1bb2f8882602e5c6a51507da88bb07b081529b0d9b3f95802fe77987ddbd0fdb",
@@ -555,7 +555,7 @@
       "apps/web/src/componentes/BloqueioDePlano.tsx": "4d367b5842459b3666eb77f2aaba77710e5dde0d55e9565b897f60ec0a172998",
       "apps/web/src/componentes/Marketing.tsx": "92cc8d9cc09de5ddbb0b96c0b9d0b3988794fb885ba85609741b2f6d662289e1",
       "apps/web/src/componentes/opcoes.ts": "bf0bbb68393d958eb12dd901cc38f02569f1bacb49cbab8ef74f95e1b795125d",
-      "apps/web/src/componentes/Demonstracao.tsx": "aaf17a974b64654cb5dcf40fdadfc1f86ed2acb2f38c23eac6048367b3647805",
+      "apps/web/src/componentes/Demonstracao.tsx": "6b6ed831212e89072fca0be4ef1378ee4cda08048aeb226332e47dd7d2f94bfc",
       "apps/web/src/componentes/SitePublico.tsx": "5c395aa9be54996513b679a3c295a82990b4d4830e2793ad698697806c055665",
       "apps/web/src/componentes/PreviaDoTema.tsx": "35d944cb32fbabdfe3a5aafc790bd355bb36b94243eb56e1792b781cb0469ac7",
       "apps/web/src/componentes/DemoInteractiva.tsx": "6ae8aedfe28b52b61f19fc7c9cd9d68ba14dde2061d5b1d9c7c9b68dad3f67fc",
@@ -600,7 +600,7 @@
       "apps/worker/src/index.ts": "fc85b438cf79aa1c9a07fc97cc178c5191b8ca9dea7670be0639b39247a098b7",
       "packages/ui/src/fichas.test.ts": "75cb2fa0b09863679b7a2799f7dd295404c7c2a1d9b1eaf80eeb5a0ad55e0abd",
       "packages/ui/src/fichas.ts": "ab12740503c625f51f12b5a89ab77ecebffa7045f9be5c981aff268281696ebb",
-      "packages/ui/src/estilos.css": "e9684430fabe76d9425d3b812f9d59ec6105b94174fdf5ed9351216bc415a503",
+      "packages/ui/src/estilos.css": "9d76e09aa34331cce60568c867164743806e4b97dc2fbfb5cc33a7c224738707",
       "packages/ui/src/tema.test.ts": "340da5fbdb69cede7728d3d1071e6783c4c957b60d7054a51a3c0db97d9dd4d2",
       "packages/ui/src/contraste.test.ts": "c7964ebb0e581cf03140ef1b502d60cb58a2a238d7252ec62adb86ed2f9132a4",
       "packages/ui/src/acento.test.ts": "80395564a5b3dfdde8e300c1458785d3ccf7ada41f2baaeefc42791a5341d06e",
@@ -773,8 +773,8 @@
       "packages/domain/src/portas/autorizacao.ts": "70b5d7862e6f566c8683c8677d18f6515aa07c97b55729fde371b744ddf05977",
       "packages/domain/src/portas/media.ts": "8a14e7f1caf3b0fdcdce4a4e066b86f0ffc9cb445e6896a55570e631ed0f8c5c"
     },
-    "quando": "2026-09-08T18:35:29+0200",
-    "commit": "7e0a37797ba8f2ff2a099de27c7812a849eefb17",
-    "arvoreLimpa": true
+    "quando": "2026-09-08T19:18:55+0200",
+    "commit": "93690ee988199afb9c3a9ab49752abff0c65c306",
+    "arvoreLimpa": false
   }
 }

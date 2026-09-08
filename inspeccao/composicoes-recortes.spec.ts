@@ -114,6 +114,18 @@ test('os três recortes, um por ecrã e por idioma', async ({ page }) => {
       { nome: 'tablet-estreito-390', modo: 'visor', ancora: 'h1',
         visor: VISOR_ESTREITO,
         caminho: `/${idioma}/pos/${DEMO.unidade}` },
+      // ── E a do herói, que é a única que não cabia em nenhuma das duas ────
+      //
+      // A caixa do herói pinta 667 e a banda dela é [667, 849]. Nem 390 nem 560
+      // lá cabem: 560 seria ampliado 1,19×. E encolher o herói para 477 esbarra
+      // no §4.2, que escreve **captura de pelo menos 650 px** — enquanto deixar
+      // o mestre de 1440 esbarra na outra frase do mesmo parágrafo, que manda o
+      // utilizador ler os títulos sem ampliar a página. As duas frases juntas
+      // não deixam escolha: **834**, que serve os 667 a 11,2 px.
+      { nome: 'sala-heroi-834', modo: 'recorte', ancora: 'h1',
+        largura: 834, altura: 520,
+        visor: { width: 1280, height: 900 },
+        caminho: `/${idioma}/pos/${DEMO.unidade}` },
     ] as const;
 
     mkdirSync(`${DESTINO}/${idioma}`, { recursive: true });
@@ -153,11 +165,10 @@ test('os três recortes, um por ecrã e por idioma', async ({ page }) => {
 
       // No modo `visor` não há recorte: o que se guarda é o que se vê a 390,
       // que é um desenho próprio do produto e não um terço de um ecrã largo.
+      const largura = ('largura' in r ? r.largura : RECORTE.largura) as number;
+      const altura = ('altura' in r ? r.altura : RECORTE.altura) as number;
       const janela = r.modo === 'recorte'
-        ? {
-          x: Math.round(caixa.x), y: Math.round(caixa.y),
-          width: RECORTE.largura, height: RECORTE.altura,
-        }
+        ? { x: Math.round(caixa.x), y: Math.round(caixa.y), width: largura, height: altura }
         : undefined;
       await page.screenshot({
         path: `${DESTINO}/${idioma}/${r.nome}.png`,
@@ -165,7 +176,7 @@ test('os três recortes, um por ecrã e por idioma', async ({ page }) => {
         ...(janela ? { clip: janela } : {}),
       });
       const medida = r.modo === 'recorte'
-        ? `${RECORTE.largura}x${RECORTE.altura}`
+        ? `${largura}x${altura}`
         : `${r.visor.width}x${r.visor.height}`;
       console.log(`RECORTE ${idioma}/${r.nome}.png ${medida} de ${r.caminho}`);
     }

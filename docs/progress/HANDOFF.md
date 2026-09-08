@@ -4494,3 +4494,28 @@ Migram juntas.
 kds **ampliado 1,286×**, 5,4 px) e duas largas da `/product` (10,4 px). A prova
 falha nelas de propósito — a falha É a declaração, e some quando o Matheus e a
 Nathalia decidirem entre encolher o herói para 477 ou capturar `sala` a 834.
+
+## As treze composições verdes, e a spec das ranhuras com controlo — 08/09
+
+`composicoes=13 abencoadas_com_defeito=0 por_decidir=0`. **Nenhum dos quatro
+«por decidir» era decisão** — a correcção foi do sénior e está em
+`docs/reviews/OS-QUATRO-POR-DECIDIR-NAO-SAO-DECISOES.md`.
+
+- **herói KDS** 5,4 → **12,3** px: `kdsRecorte` já existia. E a promessa dizia 380
+  para uma caixa de 494, o que o ampliava 1,286× — trocar só a fonte deixava a
+  mentira de pé.
+- **`/product` ×3** → **11,2 / 12,6 / 11,2**: caixa 1072 → 1152 por transbordo
+  medido, só acima de 1200. Alargar curou a legibilidade e **estragou a nitidez**
+  (1,067) até a promessa passar a dizer 1152.
+- **herói sala** 6,5 → **11,2**: três capturas a 834. O §4.2 já tinha decidido —
+  «captura de pelo menos 650 px» e «ler os títulos sem ampliar» não deixam escolha.
+
+**Três vezes o mesmo defeito, e mudou de lado das três:** a distância entre a
+ranhura declarada e a pintada — 390→477, 380→494, 960→1152.
+
+**`scripts/provar-rv100-ranhuras.sh` criado.** A spec ficou verde e nesse momento
+deixou de ter prova de que sabe recusar. O plante é o simétrico — mestre de 1440
+numa ranhura de 477 — e a metade que o torna prova é acusar **uma só**, deixando
+os outros doze em paz.
+
+Bloco 4 sem regressão: 8 passos ok, três plantes a recusar. Dossiê recarimbado.

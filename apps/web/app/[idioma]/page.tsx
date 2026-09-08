@@ -177,12 +177,12 @@ export default async function Landing({
                 aberta e a cozinha onde apareceu. */}
             <figure className="ns-heroi__media">
               <div className="ns-moldura">
-                <Composicao qual="sala" idioma={idioma} prioritaria
-                            ranhuraPorDecidir="(min-width: 1024px) 720px, 100vw" />
+                <Composicao qual="salaHeroi" idioma={idioma} prioritaria
+                            ranhuraPorDecidir="(min-width: 1024px) 667px, 100vw" />
               </div>
               <div className="ns-moldura ns-moldura--sobreposta ns-heroi__segunda">
-                <Composicao qual="kds" idioma={idioma}
-                            ranhuraPorDecidir="(min-width: 1024px) 380px, 60vw" />
+                <Composicao qual="kdsRecorte" idioma={idioma}
+                            ranhuraPorDecidir="(min-width: 1024px) 494px, 60vw" />
               </div>
             </figure>
           </div>

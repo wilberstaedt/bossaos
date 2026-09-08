@@ -1,7 +1,7 @@
 import { Botao } from '@bossaos/ui';
 import { mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
-import { AvisoDeDemonstracao, Composicao, RANHURA_LARGA } from '../../../src/componentes/Demonstracao.tsx';
+import { AvisoDeDemonstracao, Composicao } from '../../../src/componentes/Demonstracao.tsx';
 import type { Metadata } from 'next';
 import { metadadosDaRota } from '../../../src/seo/metadados.ts';
 
@@ -69,11 +69,11 @@ export default async function Produto({ params }: { params: Promise<{ idioma: Id
         <h2 id="t-comanda">{k.prodComandaTitulo}</h2>
         <p className="bo-publico__texto">{k.prodComandaTexto}</p>
         <div className="bo-mkt__par">
-          <figure className="bo-mkt__figura">
-            <Composicao qual="sala" idioma={idioma} prioritaria ranhuraPorDecidir={RANHURA_LARGA} />
+          <figure className="bo-mkt__figura bo-mkt__figura--transbordo">
+            <Composicao qual="sala" idioma={idioma} prioritaria ranhuraPorDecidir="(min-width: 1200px) 1152px, 100vw" />
           </figure>
-          <figure className="bo-mkt__figura">
-            <Composicao qual="kds" idioma={idioma} ranhuraPorDecidir={RANHURA_LARGA} />
+          <figure className="bo-mkt__figura bo-mkt__figura--transbordo">
+            <Composicao qual="kds" idioma={idioma} ranhuraPorDecidir="(min-width: 1200px) 1152px, 100vw" />
           </figure>
         </div>
         <p className="bo-mkt__legenda">{k.heroiLegenda}</p>
@@ -83,8 +83,8 @@ export default async function Produto({ params }: { params: Promise<{ idioma: Id
       <section className="bo-mkt__seccao" aria-labelledby="t-catalogo">
         <h2 id="t-catalogo">{k.prodCatalogoTitulo}</h2>
         <p className="bo-publico__texto">{k.prodCatalogoTexto}</p>
-        <figure className="bo-mkt__figura">
-          <Composicao qual="catalogo" idioma={idioma} ranhuraPorDecidir={RANHURA_LARGA} />
+        <figure className="bo-mkt__figura bo-mkt__figura--transbordo">
+          <Composicao qual="catalogo" idioma={idioma} ranhuraPorDecidir="(min-width: 1200px) 1152px, 100vw" />
         </figure>
       </section>
 
