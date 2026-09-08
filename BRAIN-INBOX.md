@@ -527,3 +527,30 @@ de partir o produto em silêncio.
 ### Próximo passo
 - **Por consertar:** a marca de versão (`/versao.txt`) dá 404 em produção, portanto ninguém confirma de fora que versão está no ar — e a primeira pergunta depois de publicar é «entrou?».
 - **Por migrar:** `validar-provas-frescas.sh`, a última que ainda mede `mtime`. Quando migrar, o canário sai.
+
+---
+
+## [2026-09-08 · 11h23] — Publicado: a porta fechou e a landing subiu no mesmo movimento
+
+### Decisões técnicas
+- **Publicado `d5543d3`** com autorização textual do Matheus («E quero a lp atualizada», Telegram 11h17), depois de ele ter respondido a política às 10h40 («por agora sou eu que crio contas»). **Política respondida não era autorização** — esperei pela segunda frase, e disse-lho.
+- Foram **24 commits ao produto de uma vez**, porque a cura da porta (`fe64a4b`, 22h37 de 07/09) é **antepassada** do redesenho: não havia como publicar a landing sem fechar o registo. Isso não era escolha, era a ordem da história.
+
+### Learnings
+- **Uma lista de decisões envelhece no sítio mais visível.** Minutos depois do deploy, o item 00 ainda dizia «a porta está aberta em produção» — a primeira coisa que ele leria, a mandá-lo agir sobre coisa já feita. Corrigir o corpo não chegou: **o título dizia o contrário do corpo**, e um título é o que se lê primeiro.
+- **Verificar de fora, não pela palavra do próprio script.** O portão 4 disse «no ar e confirmado», e ainda assim fui medir: `versao_do_build: d5543d3` no `/api/health`, `disableSignUp` presente nesse commit, landing de 66977 → 70290 bytes, sete superfícies a 200.
+- **Uma pendência pode fechar-se pelo outro lado.** Andei três ticks a adiar a prova do `versao_do_build` por causa da máquina; ela fechou-se sozinha na publicação, medida em público e sem gastar build nenhum.
+
+### O que foi feito
+- Publicação com os quatro portões; migrações sem pendências; contentor recriado.
+- Verificação pós-deploy de sete superfícies públicas: todas 200, entre 0,2 e 1,0 s.
+- Ferramenta `criar-conta.mjs` + runbook, revistos por mim com seis controlos exercidos — e a falha que encontrei foi no **runbook**, não na ferramenta: ensinava a pôr a senha no histórico, que é o que a ferramenta recusa.
+
+### Mudança de status do projecto
+- **O registo público está FECHADO em produção.** As contas passam a nascer por comando do Matheus no servidor.
+- A landing do North Star, o mapa das Mesas e o anel de foco estão no ar.
+
+### Próximo passo
+- **Aprovação visual da Nathalia** (§12.4) — sem ela não há propagação às 396 telas.
+- Os inquilinos `insp-*` continuam públicos; não se apagam sem palavra dele.
+- Medir o contraste do anel de foco **renderizado** — confirmei que o pacote entrou, não que o ecrã mudou.
