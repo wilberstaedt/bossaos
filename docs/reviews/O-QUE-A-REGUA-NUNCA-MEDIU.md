@@ -277,3 +277,50 @@ palavra devia ser outra, é uma linha em três ficheiros.
 **Os blocos 2 e 4**, retidos com a máquina em `ATENÇÃO`. O bloco 2 precisa das
 quatro capturas reais da interface que o norte nomeia — Mesa, Cocina, Pase e
 Caja — e isso é build, servidor e corredor.
+
+---
+
+## A quinta cara da porta, e uma ordem minha assente numa suposição — 08/09, 16h00
+
+Mandei o JR repor a base local do zero, em vez de desactivar os gatilhos de
+imutabilidade. A decisão de não tocar nos gatilhos aguenta-se. **A justificação não.**
+
+Eu escrevi: «numa base local o custo de a repor do zero é baixo». **Não medi isso.**
+Ele mediu:
+
+- **128 credenciais** na base local, todas nascidas por **sign-up**;
+- o sign-up está **fechado desde a cura de hoje de manhã**;
+- a `semente-inspeccao.ts` **não cria um único utilizador** — zero `INSERT` em
+  `users`, zero em `accounts`;
+- logo, repor **destrói 128 credenciais que o arnês não consegue reconstruir**, e leva
+  com elas todas as suites que precisam de sessão.
+
+**Não é o custo de repor uma base local; é o custo de ficar sem arnês.** A frase é
+dele.
+
+## E é a QUINTA cara da mesma porta
+
+Fechar o registo por email travou, por esta ordem: **o cliente novo**, **a semeadura da
+demonstração**, **as capturas dos mestres**, **a recaptura da sala** — e agora **o
+arnês de inspecção**, cujas contas se tornaram irrepetíveis sem que ninguém desse por
+isso, até se propor uma reposição.
+
+Um buraco portante não se descobre todo de uma vez. Descobre-se uma cara por cada
+coisa que se tenta fazer a seguir a tapá-lo.
+
+## O que decidi, e porquê
+
+**Estender a `semente-inspeccao.ts` primeiro, repor depois.** É o único caminho em que
+repor não custa o arnês; o padrão já existe — a `semente-demonstracao.ts` cria a conta
+de captura com o `criarUtilizador` desde esta manhã — e **fecha para a inspecção o
+mesmo buraco já fechado para a demonstração**, que é curar a classe e não mais um
+caso.
+
+## O que isto diz sobre mim
+
+Dei uma ordem com uma premissa que não verifiquei, e a premissa era o **único**
+argumento a favor dela. Se ele a tivesse cumprido, tinha destruído o arnês por uma
+razão que eu inventei em três segundos.
+
+Ele parou e mediu. **É para isto que há dois** — e hoje funcionou no sentido que eu
+menos gosto de precisar, que é ele a travar-me a mim.
