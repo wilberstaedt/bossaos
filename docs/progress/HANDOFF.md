@@ -3704,3 +3704,36 @@ A decisão de produto que está com ele **não bloqueia uma coisa: bloqueia trê
 
 **São o mesmo bloqueio com três caras**, e eu estava a contá-las como problemas
 separados.
+
+---
+
+## A 0.4 também não está bloqueada pela porta — 08/09
+
+Detalhe em `docs/reviews/CORRECCAO-BLOQUEIO-DA-FASE-0-4.md`.
+
+A correcção «máquina → porta» descartou bem a máquina e **largou de mais** no que
+pôs no lugar. O `conta de demonstração: 0 credenciais` confere; o
+`utilizadores de inspecção: 0` **não**. Remedido na mesma base: **131 `users`,
+127 `accounts` com credencial e senha**, 0 em `@bossaos.invalid`.
+
+As 127 nasceram antes da cura das 22:37, e a cura não apaga nada — só impede que
+nasçam novas.
+
+**E a prova não é uma contagem:** uma tela autenticada foi capturada **agora**,
+com a porta fechada, pelo projecto `painel` que depende do `preparar` e portanto
+entra de verdade — `MESAS Mesas-1440x900 estado=200 … capturada`.
+
+O bloqueio é mais estreito do que ficou escrito:
+
+| cara | bloqueada? | porquê |
+|---|---|---|
+| as três da sala na landing | **sim** | precisam do inquilino de **demonstração**, apagado a cada corrida |
+| **a Fase 0.4** | **não** | o arnês de **inspecção** tem 127 credenciais vivas |
+| qualquer cliente novo | **sim** | é a pergunta de produto |
+
+A rota do «antes» é a mesma das seis capturas, e o estado em lista está no
+congelamento `483c4a7`, anterior à reescrita `8d2b2c0`. Falta uma árvore de
+trabalho e um build; **não falta uma decisão do Matheus.**
+
+**Não executei a 0.4:** a Fase 0 é da revisão e o «antes» tem de sair no formato
+que o dossiê dela espera. Está executável, e executá-la é de quem a desenhou.
