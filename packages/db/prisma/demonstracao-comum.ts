@@ -86,6 +86,68 @@ export const QUEM_ATENDE = 'Marta (sala)';
 export const CONTA_DA_DEMO = 'demo@bossaos.invalid';
 export const SENHA_DA_DEMO = 'demonstracao-Muito-Longa-2026';
 
+/**
+ * A conta de captura nasce AQUI, na semeadura — e não por registo.
+ *
+ * ── Porquê ────────────────────────────────────────────────────────────────
+ *
+ * Ela nascia no `sign-up/email`, e o `disableSignUp: true` fechou essa porta.
+ * O `limparDemonstracao` (mais abaixo, neste mesmo ficheiro) apaga-a a cada
+ * corrida, com as credenciais do `better-auth`, portanto **cada corrida tem de
+ * a criar** — e deixou de conseguir. Medido: `provar-mestres.sh` e
+ * `provar-demonstracao.sh` a reprovarem com «a inscrição da conta de
+ * demonstração falhou: 400», antes da primeira fotografia.
+ *
+ * O ficheiro que a APAGA é o ficheiro que a CRIA. Era essa simetria que faltava.
+ *
+ * ── A importação relativa, e porque não é uma dependência nova ────────────
+ *
+ * `@bossaos/auth` depende de `@bossaos/db`. Declarar o inverso no
+ * `package.json` fecharia um ciclo entre pacotes. Não é preciso: este ficheiro
+ * não é importado pelo `src/` do `db` — é um módulo de semeadura e limpeza,
+ * corrido por caminho com `node --experimental-strip-types`. A importação é
+ * relativa e **nenhuma dependência de pacote é acrescentada**.
+ *
+ * ── O segredo tem de ser o do produto ─────────────────────────────────────
+ *
+ * Não é zelo: se o segredo daqui não for o mesmo que a aplicação usa, a conta
+ * nasce e **não entra** — o modo de falha que já custou uma medição.
+ */
+export async function semearContaDeCaptura(): Promise<void> {
+  const { criarAutenticacao } = await import('../../auth/src/autenticacao.ts');
+  const { correioDeMemoria } = await import('../../auth/src/correio.ts');
+  const { criarUtilizador } = await import('../../auth/src/criar-utilizador.ts');
+
+  const url = process.env.AUTH_DATABASE_URL ?? process.env.MIGRATION_DATABASE_URL
+    ?? process.env.DATABASE_URL;
+  const segredo = process.env.BETTER_AUTH_SECRET;
+  if (!url || !segredo) {
+    throw new Error('AUTH_DATABASE_URL/BETTER_AUTH_SECRET em falta: a conta de captura '
+      + 'nasce com o segredo do produto, senão existe e não entra.');
+  }
+
+  const prisma = abrirPrisma();
+  try {
+    // Idempotente, como o resto da semeadura: se a conta sobreviveu a uma
+    // corrida interrompida, não se duplica.
+    const [{ n }] = await prisma.$queryRawUnsafe<{ n: bigint }[]>(
+      'SELECT count(*)::int AS n FROM users WHERE email = $1', CONTA_DA_DEMO);
+    if (Number(n) > 0) return;
+  } finally {
+    await prisma.$disconnect();
+  }
+
+  const auth = criarAutenticacao({
+    authDatabaseUrl: url,
+    segredo,
+    urlBase: process.env.BETTER_AUTH_URL ?? 'http://127.0.0.1:3000',
+    correio: correioDeMemoria(),
+  });
+  await criarUtilizador(auth, {
+    email: CONTA_DA_DEMO, senha: SENHA_DA_DEMO, nome: 'Bossa Demo',
+  });
+}
+
 export function abrirPrisma(): PrismaClient {
   const url = process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL;
   if (!url) throw new Error('MIGRATION_DATABASE_URL ou DATABASE_URL em falta');

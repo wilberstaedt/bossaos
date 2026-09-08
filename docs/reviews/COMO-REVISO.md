@@ -3472,3 +3472,34 @@ antiga, a que teve mais tempo para apodrecer. **Uma prática que vive na página
 me lembrei dela não é uma prática; é uma coincidência.** Quando encontrar a próxima,
 a pergunta a fazer não é «está curado aqui», é «onde é que isto já devia estar e não
 está».
+
+## `git ls-files` é o instrumento errado para auditar trabalho por commitar — 08/09, 06h50
+
+A rever a porta nova do JR, quis saber se algum ficheiro de prova fica por correr.
+Contei a população assim:
+
+```
+for t in $(git ls-files 'provas/*.test.ts'); do ...
+```
+
+**41 ficheiros, zero órfãos.** Verde. E estava errado: o ficheiro em causa é
+`provas/criar-utilizador.test.ts`, ainda **por rastrear** — e o `git ls-files` só
+lista o que está no índice. A guarda da casa usa glob de shell, viu-o, e acusou-o.
+
+O que me interessa aqui não é o erro, é **porque é que ele não deu sinal**. Uma
+população que exclui o sujeito costuma dar zero, e zero acende-me a luz. Esta deu
+**41** — um número grande, plausível, tranquilizador — porque a exclusão era de um
+só ficheiro, e por acaso o único que a pergunta perseguia. **A população parecia
+cheia; faltava-lhe exactamente uma linha, e era a linha da pergunta.**
+
+E o filtro não foi um descuido de sintaxe. `git ls-files` é o hábito certo em quase
+tudo o que faço aqui — respeita o `.gitignore`, ignora lixo de build, dá listas
+estáveis. **Ao rever trabalho por commitar, esse mesmo hábito passa a excluir, por
+construção, precisamente aquilo que estou a rever.** Um instrumento correcto
+apontado ao sujeito errado, outra vez, e desta vez o que o desapontou foi o hábito
+de o apontar bem.
+
+A regra, curta: **quando o assunto da revisão ainda não está no índice, a listagem
+tem de vir do disco.** E, mais geral: antes de aceitar um verde sobre uma população
+contada por mim, perguntar se o sujeito da pergunta está garantidamente **dentro**
+dela — não se o número é grande.

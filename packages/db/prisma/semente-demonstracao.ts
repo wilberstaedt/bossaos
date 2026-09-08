@@ -1,6 +1,6 @@
 import {
   DEMO, NOME_DA_DEMO, QUEM_ATENDE, SLUG_DA_DEMO,
-  abrirPrisma, limparDemonstracao, restosDaDemonstracao,
+  abrirPrisma, limparDemonstracao, restosDaDemonstracao, semearContaDeCaptura,
 } from './demonstracao-comum.ts';
 
 /**
@@ -329,6 +329,12 @@ async function principal(): Promise<void> {
   } finally {
     await prisma.$disconnect();
   }
+
+  // A conta por onde as capturas entram. Fica DEPOIS do cenário e fora do
+  // `finally` do Prisma: se a semeadura do inquilino falhar, não há sala para
+  // fotografar e criar a conta seria deixar uma linha órfã na base.
+  await semearContaDeCaptura();
+  process.stdout.write('conta de captura pronta (criada na semeadura, sem registo)\n');
 }
 
 await principal();
