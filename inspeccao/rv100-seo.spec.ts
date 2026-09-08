@@ -26,7 +26,7 @@ import { ROTAS_INDEXAVEIS } from '../apps/web/src/seo/rotas.ts';
  */
 
 const FASE = process.env.RV100_FASE ?? '';
-const DESTINO = 'docs/visual/rv100/2026-09-06_e953a87/evidence/seo';
+const DESTINO = 'docs/visual/rv100/2026-09-06/evidence/seo';
 
 async function lerCabeca(pagina: import('@playwright/test').Page) {
   return pagina.evaluate(() => {

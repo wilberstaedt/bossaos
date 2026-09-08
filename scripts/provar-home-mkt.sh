@@ -17,7 +17,7 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 
 FASE="${1:-}"
-DESTINO="docs/visual/rv100/2026-09-06_e953a87/evidence/home"
+DESTINO="docs/visual/rv100/2026-09-06/evidence/home"
 
 naomedi() { printf '  NAO MEDI %s\n' "$1"; exit 2; }
 

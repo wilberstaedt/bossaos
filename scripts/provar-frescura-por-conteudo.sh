@@ -150,8 +150,14 @@ trap 'rm -rf "$CAIXA"' EXIT INT TERM
 import json, sys
 from frescura_do_produto import impressao_do_commit
 resumo, por = impressao_do_commit(sys.argv[2])
+import subprocess
+sha = subprocess.run(['git', 'rev-parse', 'HEAD'], capture_output=True, text=True).stdout.strip()
+# O carimbo da fixture tem de ter a MESMA forma do que o produto escreve — com
+# `commit` e `arvoreLimpa`. Sem eles a guarda abstem-se, e um controlo que se
+# abstem nao e um controlo.
 json.dump({'impressaoDoProduto': {'resumo': resumo, 'ficheiros': len(por),
-                                  'porFicheiro': por, 'quando': 'fixture'}},
+                                  'porFicheiro': por, 'quando': 'fixture',
+                                  'commit': sha, 'arvoreLimpa': True}},
           open(sys.argv[1], 'w'))
 PYX
 

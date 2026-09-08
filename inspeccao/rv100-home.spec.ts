@@ -45,7 +45,7 @@ import {
  */
 
 const FASE = process.env.RV100_FASE ?? '';
-const DESTINO = 'docs/visual/rv100/2026-09-06_e953a87/evidence/home';
+const DESTINO = 'docs/visual/rv100/2026-09-06/evidence/home';
 
 /** Onde a métrica do herói se mede, e o que ela ignora. */
 async function medirHome(pagina: import('@playwright/test').Page) {

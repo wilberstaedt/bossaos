@@ -38,7 +38,7 @@ import {
  */
 
 const FASE = process.env.RV100_FASE ?? '';
-const DESTINO = 'docs/visual/rv100/2026-09-06_e953a87/evidence/moldura';
+const DESTINO = 'docs/visual/rv100/2026-09-06/evidence/moldura';
 
 const ROTAS = [
   { id: 'MKT-001', nome: 'home', caminho: '/es-ES' },

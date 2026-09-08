@@ -54,7 +54,7 @@ import {
  */
 
 const FASE = process.env.RV100_FASE ?? '';
-const DESTINO = 'docs/visual/rv100/2026-09-06_e953a87/evidence/implantacao';
+const DESTINO = 'docs/visual/rv100/2026-09-06/evidence/implantacao';
 
 /** Um valor monetário no texto visível, em qualquer das três línguas. */
 const MOEDA = /\d[\d.,]*\s*€|€\s*\d/;

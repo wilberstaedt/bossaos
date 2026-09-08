@@ -61,7 +61,7 @@ const DESTINO = process.env.DESTINO_CAPTURAS ?? 'apps/web/src/demonstracao';
  * com números espanhóis por baixo seria o mesmo defeito com outra cara.
  */
 const IDIOMAS = ['es-ES', 'pt-BR', 'en'];
-const MANIFESTO = 'docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao';
+const MANIFESTO = 'docs/visual/rv100/2026-09-06/evidence/demonstracao';
 
 /**
  * As composições. Cada uma diz **porque existe** — uma captura sem razão é uma

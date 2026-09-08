@@ -146,7 +146,7 @@ fi
 #
 # LIMITE declarado, igual: entre o build e esta linha ha uma janela de segundos.
 # Fecha-se nao editando o produto enquanto se captura, nao com outra regra.
-MANIFESTO_MKT="docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao/composicoes.json"
+MANIFESTO_MKT="docs/visual/rv100/2026-09-06/evidence/demonstracao/composicoes.json"
 if [ -s "$MANIFESTO_MKT" ]; then
   if python3 scripts/frescura_do_produto.py --carimbar "$MANIFESTO_MKT" >/tmp/mkt-carimbo.txt 2>&1; then
     verde "$(cat /tmp/mkt-carimbo.txt)"

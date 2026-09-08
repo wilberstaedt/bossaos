@@ -24,7 +24,7 @@ const PAGINAS = [
   { rota: '/demo', nome: 'demo' },
 ] as const;
 
-const DESTINO = 'docs/visual/rv100/2026-09-06_e953a87';
+const DESTINO = 'docs/visual/rv100/2026-09-06';
 
 test('as oito superfícies comerciais, medidas a 1440x900', async ({ page }) => {
   mkdirSync(`${DESTINO}/evidence/baseline`, { recursive: true });

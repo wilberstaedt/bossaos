@@ -30,7 +30,7 @@ guardar_next_env
 trap repor_next_env EXIT INT TERM
 
 FASE="${1:-}"
-DESTINO="docs/visual/rv100/2026-09-06_e953a87/evidence/implantacao"
+DESTINO="docs/visual/rv100/2026-09-06/evidence/implantacao"
 naomedi() { printf '  NAO MEDI %s\n' "$1"; exit 2; }
 
 case "$FASE" in ''|antes|depois) ;; *) naomedi "fase '$FASE' desconhecida" ;; esac

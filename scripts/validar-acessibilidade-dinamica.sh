@@ -34,7 +34,7 @@ verde()    { echo "  ok       $1"; }
 vermelho() { echo "  FALHOU   $1"; }
 naomedi()  { echo "  NÃO MEDI $1"; }
 
-DOSSIE="docs/visual/rv100/2026-09-06_e953a87/evidence/accessibility"
+DOSSIE="docs/visual/rv100/2026-09-06/evidence/accessibility"
 
 echo "A acessibilidade dinâmica: o que só o navegador mede"
 

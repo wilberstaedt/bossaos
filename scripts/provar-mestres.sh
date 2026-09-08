@@ -177,7 +177,7 @@ fi
 # A pasta dos MESTRES, escrita por extenso. O `$DESTINO` deste ficheiro so
 # nasce na linha 190 e aponta para a pasta de MARKETING — usa-lo aqui era
 # carimbar o manifesto errado, ou rebentar com `set -u`.
-MESTRES_DIR="${DESTINO_MESTRES:-docs/visual/rv100/2026-09-06_e953a87/evidence/masters}"
+MESTRES_DIR="${DESTINO_MESTRES:-docs/visual/rv100/2026-09-06/evidence/masters}"
 MANIFESTO="$MESTRES_DIR/mestres.json"
 if [ -s "$MANIFESTO" ]; then
   if python3 scripts/frescura_do_produto.py --carimbar "$MANIFESTO" >/tmp/mestres-carimbo.txt 2>&1; then

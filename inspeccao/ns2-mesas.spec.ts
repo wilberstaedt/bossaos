@@ -14,7 +14,7 @@ import { expect, test } from '@playwright/test';
  */
 
 const ROTA = '/es-ES/app/marina-oropesa/puerto/floor';
-const DESTINO = 'docs/visual/ns2/2026-09-08_a3935ea';
+const DESTINO = 'docs/visual/ns2/2026-09-08_depois';
 
 test.describe('North Star v2 — as capturas das Mesas', () => {
   test('secretária e telemóvel, com a tela carregada', async ({ page }) => {

@@ -40,7 +40,7 @@ import {
  */
 
 const FASE = process.env.RV100_FASE ?? '';
-const DESTINO = 'docs/visual/rv100/2026-09-06_e953a87/evidence/confianca';
+const DESTINO = 'docs/visual/rv100/2026-09-06/evidence/confianca';
 
 async function medirPagina(pagina: import('@playwright/test').Page) {
   return pagina.evaluate(() => {

@@ -43,7 +43,7 @@ import { abrirSessao } from './sessao-da-demo.mjs';
 const PORTA = process.env.PORTA_MESTRES ?? '3020';
 const BASE = `http://127.0.0.1:${PORTA}`;
 const DESTINO = process.env.DESTINO_MESTRES
-  ?? 'docs/visual/rv100/2026-09-06_e953a87/evidence/masters';
+  ?? 'docs/visual/rv100/2026-09-06/evidence/masters';
 
 /** Uma casa que não é a da demonstração — para o estado `denied` ser real. */
 const OUTRA_CASA = '11111111-1111-4111-8111-111111111111';

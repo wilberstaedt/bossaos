@@ -46,7 +46,7 @@ import { LARGURAS } from './ajudas.ts';
  */
 
 const FASE = process.env.RV100_FASE ?? '';
-const DESTINO = 'docs/visual/rv100/2026-09-06_e953a87/evidence/fecho';
+const DESTINO = 'docs/visual/rv100/2026-09-06/evidence/fecho';
 /** Uma página por ficheiro: estado partilhado não sobrevive a um worker reiniciado. */
 const PARCIAIS = `${DESTINO}/.parciais-${FASE}`;
 

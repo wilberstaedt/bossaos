@@ -16,7 +16,7 @@ import { expect, test } from '@playwright/test';
  * e a captura passava a mostrar uma landing que nenhum visitante vê.
  */
 
-const DESTINO = 'docs/visual/ns2/2026-09-08_a3935ea';
+const DESTINO = 'docs/visual/ns2/2026-09-08_depois';
 
 test.describe('North Star v2 — as capturas da landing', () => {
   test('primeira viewport e página inteira, a 1440 e a 390', async ({ page }) => {

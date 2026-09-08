@@ -295,3 +295,69 @@ dossiê fica com a **data**, que serve para um humano navegar, e larga o sha.
 
 A linha `FALHOU` sai **duplicada** na saída. Não muda o veredicto; suja um relatório
 que existe para ser lido depressa.
+
+---
+
+## As três, feitas — 08/09
+
+### 1 · O canário saiu, e levou a família
+
+Fui verificar antes de cortar e o alcance era maior do que «um import morto».
+**Zero consumidores medidos** para toda a família que media tempo:
+
+| saiu | consumidores |
+|---|---|
+| `mtimes_reescritos` + `--canario` | 0 (o import em `pagina-de-aprovacao.py` era morto) |
+| `mais_recente_do_produto` | 0 fora do módulo |
+| `velhas`, `porque_e_que_o_produto_e_mais_recente` | 0 |
+| o modo de CLI por caminhos | 0 |
+
+Cortar só o canário deixava o modo por caminhos a medir `mtime` **sem a rede que
+o tornava honesto** — pior do que estava. Saiu tudo: **417 → 203 linhas**, e o
+módulo exporta agora exactamente as cinco funções que alguém chama.
+
+A razão é a sua e fica escrita no cabeçalho do módulo: *uma guarda que ninguém
+corre é uma guarda que ninguém testa*. A lição — os `mtime` mentem num clone
+fresco — vive no `COMO-REVISO` e no histórico.
+
+**E um susto meu:** a minha regra de corte comeu o `carimbar`, que tem dois
+consumidores. Apanhei-o por listar os exportados depois do corte, em vez de
+confiar no diff. Reposto do commit anterior.
+
+### 2 · O manifesto manda, e o nome da pasta só traz a data
+
+O carimbo passou a registar `commit` e `arvoreLimpa`. O segundo não é enfeite: se
+a árvore tinha alterações por commitar, as capturas **não retratam commit
+nenhum** — retratam uma árvore, e guardar o `sha` calando isso era prometer uma
+verificação que não podia passar.
+
+As pastas foram renomeadas, e duas caíam na mesma data — o discriminador passou a
+ser um **nome**, que é o que um humano navega:
+
+    2026-09-06_e953a87  →  2026-09-06
+    2026-09-08_483c4a7  →  2026-09-08_antes
+    2026-09-08_a3935ea  →  2026-09-08_depois
+
+28 ficheiros de código seguiram o nome, e **os caminhos guardados dentro dos
+próprios manifestos também** — esses só apareceram quando o gerador rebentou a ler
+uma imagem que já não estava ali. Nos comentários que contam a HISTÓRIA repus o
+nome antigo: a história aconteceu com o nome antigo.
+
+### 3 · Uma linha por dossiê
+
+    ok  docs/visual/rv100/2026-09-06 retrata o que diz (65 artefactos):
+        evidence/demonstracao/composicoes.json = a96b12a | evidence/masters/mestres.json = a96b12a
+
+E ao arrumar a duplicação encontrei pior, na própria guarda que existe para isto:
+**um manifesto que não se podia medir desaparecia atrás de outro que batia.**
+Verde sobre nada. As abstenções acompanham agora sempre o veredicto.
+
+### Os controlos, exercidos
+
+    ok    carimbo que BATE: aceita (saida 0)
+    ok    carimbo ESTRAGADO: recusa (saida 1) e nomeia
+    ok    SEM carimbo: NAO MEDI (saida 2), e nao verde
+
+A fixture teve de passar a carimbar com `commit` e `arvoreLimpa` — **com a forma
+antiga a guarda abstinha-se, e um controlo que se abstém não é um controlo.** Foi
+a corrida que o disse, não eu.

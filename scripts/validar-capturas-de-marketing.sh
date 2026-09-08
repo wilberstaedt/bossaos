@@ -80,7 +80,7 @@ verde "$PRESENTES de $ESPERADAS capturas presentes"
 # E o canário dos `mtime` sai DESTE caminho porque aqui já não há `mtime` — mas
 # **não é apagado**: a `validar-provas-frescas.sh` ainda o consulta. Uma peça só
 # fica obsoleta quando o ÚLTIMO caminho que a usa deixa de a usar.
-MANIFESTO="docs/visual/rv100/2026-09-06_e953a87/evidence/demonstracao/composicoes.json"
+MANIFESTO="docs/visual/rv100/2026-09-06/evidence/demonstracao/composicoes.json"
 if [ ! -s "$MANIFESTO" ]; then
   naomedi "não há $MANIFESTO — sem manifesto não há carimbo com que comparar."
   exit "$NAO_MEDI"

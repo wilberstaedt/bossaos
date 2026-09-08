@@ -13,19 +13,14 @@ permanentemente vermelha e uma guarda ignorada.
 import json, base64, html, collections, os, glob, sys, subprocess, time
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-D = os.path.join(RAIZ, 'docs/visual/rv100/2026-09-06_e953a87/evidence/masters')
+D = os.path.join(RAIZ, 'docs/visual/rv100/2026-09-06/evidence/masters')
 SAIDA = sys.argv[1] if len(sys.argv) > 1 else '/tmp/telas-mestre.html'
 
 # A mecânica saiu daqui para `frescura_do_produto.py`, e não por arrumação: a
 # guarda das capturas de marketing precisava da MESMA pergunta, e uma segunda
 # cópia dela seria a duplicação que este repositório passou o dia a fechar.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from frescura_do_produto import mais_recente_do_produto as _mais_recente  # noqa: E402
-from frescura_do_produto import mtimes_reescritos as _reescritos  # noqa: E402
 from frescura_do_produto import diferencas_do_produto as _diferencas  # noqa: E402
-
-def mais_recente_do_produto():
-    return _mais_recente(RAIZ)
 
 # ── O carimbo, que e a metade que faltava a esta pagina ─────────────────────
 #
