@@ -58,3 +58,49 @@ escrevi até tinha o item certo — «o convite não pode partir» — e eu veri
 contra a rota em vez de contra o caminho.
 
 **Uma porta que ninguém abriu de propósito pode estar a segurar o telhado.**
+
+---
+
+## Addendum, 03h35 — a pergunta que eu deixei em aberto tem resposta
+
+Escrevi acima que **não sabia** se a API do servidor respeita o `disableSignUp`,
+e que ler o núcleo minificado seria adivinhar. **Não adivinhei: medi.**
+
+Montei a instância de autenticação com as opções reais e chamei
+`auth.api.signUpEmail` com **corpo inválido de propósito** — senha de um
+carácter — pela mesma razão que o JR usou: **nada é criado em nenhum dos dois
+resultados.**
+
+    recusou com: EMAIL_PASSWORD_SIGN_UP_DISABLED
+    utilizadores com esse email, depois: 0
+
+**O `disableSignUp` trava as duas portas** — a HTTP e a do servidor. A saída
+limpa que eu esperava (a semente criar a conta pela API) **não existe com a
+bandeira ligada**.
+
+### E há um caminho que eu não conhecia
+
+O plugin **`admin`** vem no pacote instalado — não é dependência nova — e expõe
+**`createUser`**.
+
+Isso é **nativo da biblioteca**: sem reabrir rota HTTP, sem senha escrita à mão,
+com a cifra feita por quem sabe. É o candidato a cura limpa para as duas coisas
+que faltam: **a conta da demonstração** e, sobretudo, **o convite criar a conta**.
+
+### O que verifiquei e o que NÃO verifiquei
+
+- **Verifiquei:** que o plugin existe no pacote e expõe `createUser`.
+- **NÃO verifiquei:** que ele cria com o `disableSignUp` ligado. Exige activá-lo
+  primeiro, e activar um plugin de administração é decisão com consequências
+  próprias.
+
+**Dizer «existe `createUser`, logo resolve» seria repetir esta noite inteira** —
+foi assim que eu declarei o convite intacto tendo medido só a rota. **A
+existência de uma porta não é a prova de que ela abre.**
+
+## O que isto muda para o Matheus
+
+A decisão deixa de ser entre três más. **Passa a haver um candidato limpo**, e a
+pergunta é mais pequena e mais concreta: **activar o plugin `admin` do
+`better-auth` e usar o `createUser` no convite** — o que faz o produto cumprir o
+«só por convite» que já diz de si.
