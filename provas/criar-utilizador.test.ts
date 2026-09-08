@@ -59,8 +59,15 @@ describe('criarUtilizador — a porta que não é a rota de registo', () => {
 
     // 2 · a conta ENTRA pela porta real do produto. É esta que separa «criou
     //     linhas» de «tem conta», e é a que a primeira versão falhava.
-    const entrada = await auth.api.signInEmail({ body: { email: EMAIL, password: SENHA } });
-    assert.ok(entrada, 'criou o utilizador e ele não entra');
+    // O `signInEmail` LANÇA quando recusa — não devolve algo falso. Sem este
+    // `catch`, uma conta que não entra saía como um `APIError` cru e a frase
+    // que a explica nunca chegava a aparecer. Medido a plantar o `issuer`.
+    let entrou = false;
+    try {
+      await auth.api.signInEmail({ body: { email: EMAIL, password: SENHA } });
+      entrou = true;
+    } catch { entrou = false; }
+    assert.ok(entrou, 'criou o utilizador e ele não entra');
 
     // 3 · o issuer é o que o `sign-in` procura, e não o `@default` da coluna
     const { rows: cs } = await sql.query(

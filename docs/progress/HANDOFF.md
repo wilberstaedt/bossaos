@@ -4087,3 +4087,31 @@ correr. **Um build meu por cima disso arriscava a sessão inteira dos dois.**
 
 Fica assim de propósito: **provado nos ramos, por confirmar no todo.** Quem correr
 o portão a seguir, olhe para a última linha e diga o número que saiu.
+
+### Adenda — o corredor, e dois defeitos meus que os controlos apanharam
+
+A `validar-suites-com-guiao` acusou a prova nova: **sem corredor, ela
+desaparecia**. Escrito `scripts/provar-criar-utilizador.sh`, com plante próprio —
+o `issuer` volta ao `@default` da coluna e a prova **tem de acusar a ENTRADA**,
+que é o defeito real que já aconteceu. **320 plantes** agora, 0 em letra morta.
+
+Duas coisas partiram-se, e foram os meus próprios controlos a dizê-lo:
+
+1. **O `signInEmail` LANÇA, não devolve falso.** A minha asserção nunca corria e
+   a falha saía como `APIError` cru — a frase que a explica nunca aparecia. Só se
+   viu porque o plante a exercitou.
+2. **`cp` sem `-p` não preserva a data.** O restauro repunha a hora da cópia, e
+   provar esta função passava a **envelhecer 49 capturas de cada vez** sem o
+   produto mudar. O controlo 3 do próprio corredor apanhou-o — e depois as duas
+   guardas de frescura confirmaram o estrago, que era real: recapturei as duas
+   séries em vez de forjar uma data.
+
+Estado final, medido depois de tudo:
+
+    pagina-de-aprovacao.py            saida 0 · 25/25 posteriores ao produto
+    /tmp/telas-mestre.html            3.11 MB · 25 capturas · 6 mestres
+    validar-capturas-de-marketing.sh  saida 0
+    provar-demonstracao.sh            OK · 24 composicoes
+    provar-criar-utilizador.sh        0 falhas
+    validar-plantes.sh                320 plantes, 0 falhas
+    validar-suites-com-guiao.sh       OK
