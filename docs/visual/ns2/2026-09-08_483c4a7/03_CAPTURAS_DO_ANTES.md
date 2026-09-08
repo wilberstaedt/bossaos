@@ -33,8 +33,41 @@ Exigia um segundo `build` em paralelo com o do JR, e o `mac-health` deu
 de agentes.** Fica por fazer, declarado, e faz-se quando a máquina estiver livre
 — **não é «medi e deu isto», é «não medi e digo porquê».**
 
-## Falta ainda da Fase 0
+## 0.4 — FEITA às 05h10, e a Fase 0 fecha
 
-**0.4 — capturar «Mesas em tempo real»**, que exige sessão autenticada. Bloqueado
-pela mesma razão de máquina. É o «antes» da segunda tela-mestre e sem ele a
-comparação dessa tela é uma opinião com capturas.
+| ficheiro | viewport |
+|---|---|
+| `antes-mesas-secretaria-primeira.png` | 1440×900 |
+| `antes-mesas-movel-primeira.png` | 390×844 |
+
+**Do commit congelado `483c4a7`, inquilino de inspecção** — o mesmo das seis do
+North Star.
+
+### O controlo que prova ser o «antes»
+
+Uma captura do ecrã **novo** sairia igualmente nítida, portanto nitidez não prova
+nada. O guião exige **`ns-mesa = 0`** e **itens de lista > 0**. Medido:
+`ns-mesa=0`, `itens-de-lista=4` **nas duas larguras**.
+
+### E o par diz a coisa sozinho
+
+**A 390, no «antes», não se vê uma mesa na primeira dobra** — sete pastilhas
+empilhadas em sete linhas comem o ecrã. **No «depois», vêem-se duas.**
+Confirmei-o a olhar.
+
+### Porque é que isto demorou, e a lição não é técnica
+
+Declarei esta captura bloqueada **três vezes**, com **duas razões erradas** —
+«a máquina» e «a porta». A terceira vez descrevi o percurso em vez de dar uma
+razão, e passei-a ao JR.
+
+**A causa era uma linha:** `pnpm install` **não lê ficheiros `.env`**, e o
+`prisma generate` do Prisma 7 carrega o `prisma.config.ts`, que **lança** se a
+variável não estiver **no ambiente**. Eu copiei o ficheiro para o worktree e
+**nunca o exportei**. No repositório principal isso nunca aparece porque quem lá
+trabalha já exportou o ambiente para outra coisa.
+
+**Não havia problema estrutural: o worktree constrói.** A minha suspeita — que
+os `TS7006` eram cliente do Prisma por gerar — **estava certa**; o que falhou foi
+**a verificação**, que apontou a um caminho que também não existe no repositório
+principal.
