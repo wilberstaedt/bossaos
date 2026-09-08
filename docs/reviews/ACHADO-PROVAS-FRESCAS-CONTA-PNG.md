@@ -247,3 +247,51 @@ Esta guarda deixou de comparar `mtime`, portanto **já não o consulta** — e e
 última. Não o apaguei: a regra é sua e é boa, e quem a aplica agora sou eu a
 dizer-lhe que a condição se cumpriu. **O canário está pronto a sair, e a decisão
 é do senhor.**
+
+---
+
+## Revisão do `b322845` — a guarda apanhou-nos a nós — 08/09, 12h10
+
+**Aceito, e ela funciona melhor do que eu esperava: a primeira coisa que acusou fomos
+nós.**
+
+```
+FALHOU  docs/visual/rv100/2026-09-06_e953a87 NÃO retrata e953a87 (65 artefactos)
+```
+
+Verifiquei, e a acusação é **verdadeira**. A pasta chama-se `e953a87` e as capturas
+lá dentro são de **hoje às 07h56**, tiradas sobre `b61051c` — fomos nós que as
+regenerámos para dentro de um dossiê com o nome de outro commit. **O nome da pasta
+mente sobre o conteúdo**, e mentia desde as 07h56 sem ninguém dar por isso.
+
+Uma guarda cuja estreia é apanhar o erro de quem a mandou fazer é uma boa guarda.
+
+### O canário: zero chamadores, e por isso sai
+
+O JR deixou-o de pé «à minha decisão, já sem consumidores». Fui verificar em vez de
+aceitar — foi por não verificar que quase o apaguei cedo de mais de manhã — e o
+refino é este: `pagina-de-aprovacao.py:24` **ainda o importa**, mas
+`grep '_reescritos('` não encontra **uma única chamada**. Import morto, zero
+consumidores. A condição que eu próprio pus está cumprida.
+
+**Decisão: sai, e a razão não é ser inútil — é que uma guarda que ninguém corre é uma
+guarda que ninguém testa.** Fica com ar de rede de segurança e ninguém sabe se ainda
+apara. É a mesma família do verde vazio: a aparência de protecção sem a protecção.
+A lição que ela encerra — que os `mtime` mentem num clone fresco — está escrita no
+`COMO-REVISO` e no histórico, e é isso que se guarda, não o código.
+
+### E o que causou a acusação não se cura na guarda
+
+Cura-se em **não declarar o mesmo facto duas vezes**. Hoje, «que commit é que estas
+capturas retratam» está escrito em dois sítios: o **nome da pasta** e a
+`impressaoDoProduto` **dentro do manifesto**. Duas declarações do mesmo facto acabam
+sempre por discordar, e discordaram — em quatro horas.
+
+O manifesto é o que deve mandar: é escrito pela corrida que captura, é verificável
+contra a árvore, e não depende de alguém se lembrar de renomear uma pasta. O nome do
+dossiê fica com a **data**, que serve para um humano navegar, e larga o sha.
+
+### Defeito pequeno
+
+A linha `FALHOU` sai **duplicada** na saída. Não muda o veredicto; suja um relatório
+que existe para ser lido depressa.
