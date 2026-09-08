@@ -160,3 +160,50 @@ disse-o.**
 
 E sobre não duplicar o motor de contraste: *«duas opiniões sobre a mesma pergunta
 concordam até ao dia em que discordam.»*
+
+---
+
+# Os catorze números, medidos POR MIM — 08/09 02h20
+
+Andei vários ticks a dizer «os números dele continuam por verificar da minha
+parte». Estão verificados. Máquina em `OK`, build do commit final, servidor a
+responder 200 em `/es-ES`, e a fita **calibrada** de `scripts/medir-norte.mjs`.
+
+| | alvo | antes | **medido por mim** |
+|---|---|---:|---:|
+| H1 secretária | 68–76 | 52 | **72** |
+| H1 telemóvel | 42–48 | 34 | **44** |
+| H2 secretária | 44–56 | **26** | **48** |
+| Lead secretária | 19–22 | 16 | **21** |
+| Corpo | 16–18 | 16 | **17** |
+| Cabeçalho | 72–80 | 102 | **78** |
+| Logótipo | 145–165 | 145 | **145** |
+| Herói | ≥ 760 | 759 | **790** |
+| Captura maior | ≥ 650 | 588 | **741** |
+| Blocos `<section>` | ≤ 8 | 13 | **7** |
+| Altura secretária | 4500–5500 | 7103 | **5477** |
+| Fundos distintos | ≥ 3 | 2 | **4** |
+
+**Doze de doze cumprem.** E o telemóvel desceu de 10 689 para **9867 px**.
+
+## Os meus números não são exactamente os dele, e está certo assim
+
+Ele declarou herói **776**, captura **667**, altura **5205**. Eu meço **790**,
+**741**, **5477**. **Não é discrepância: é a página a mudar depois de ele medir.**
+As três curas do coral moveram texto e mudaram o traçado. **Os meus são do
+commit final; os dele eram verdadeiros quando os escreveu.**
+
+Registo-o porque a tentação era escrever «confirmado» e repetir os números dele.
+**Confirmar o veredicto não é confirmar os algarismos.**
+
+## E um que a minha tabela não checava
+
+    raios: 10px ×13   20px ×7   18px ×5
+
+O §3.3 pede **cantos entre 14 e 24 px nas áreas de marketing**, e **treze
+elementos estão a 10 px**. Os 20 e os 18 cumprem; os 10 não.
+
+**Não estava na minha lista de doze** — eu tinha-o posto na folha dos catorze e
+não o traduzi em verificação. **A fita mostrava-o e eu não olhava.** Fica como
+achado pequeno e verdadeiro, e como nota sobre a fita: **imprimir um número não
+é verificá-lo.**
