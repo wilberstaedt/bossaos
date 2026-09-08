@@ -1,111 +1,120 @@
 #!/usr/bin/env bash
-# ── O §4.5 troca mesmo o ecrã, ou só parece? ───────────────────────────────
+# ── Os dois critérios do bloco 4 recusam mesmo, ou só parecem? ─────────────
 #
-# A prova `inspeccao/rv100-papeis.spec.ts` exige quatro imagens distintas e
-# quatro benefícios distintos nos quatro papéis. Uma exigência dessas é fácil de
-# escrever e fácil de nunca ter recusado nada — e a régua do bloco 4 diz que
-# **não se aceita por inspecção**.
+# A régua do bloco 4 diz que o critério 3 (ao trocar de papel troca o ecrã E o
+# benefício) e o critério 6 (nunca ampliar) **não se aceitam por inspecção**.
+# Este guião planta o defeito exacto de cada um e exige a acusação dele.
 #
-# Este guião planta o defeito exacto que o critério 3 existe para apanhar: põe as
-# **quatro composições iguais**, que é o carrossel de fotografias com legendas
-# que o §4.5 proíbe. Se a prova continuar verde com as quatro iguais, então o que
-# ela mede não é a troca de ecrã e nunca mediu.
+# ── Porque é que isto mede PRESENÇA DE ACUSAÇÃO, e não verde/vermelho ──────
 #
-# **E confirma o MOTIVO do vermelho.** Um vermelho por outra razão — a página a
-# não abrir, a sessão a faltar — provaria só que alguma coisa se partiu. Por isso
-# exige-se a frase «imagens distintas» na saída.
+# A primeira versão exigia «verde antes, vermelho depois». Deixou de servir no
+# momento em que a prova passou a ter um vermelho VERDADEIRO por outra razão — a
+# legibilidade dos três recortes de paisagem. Com a suite já vermelha, um
+# controlo verde→vermelho não distingue o defeito que ele planta do que já lá
+# estava, e um controlo que não distingue não exerce nada.
+#
+# Pergunta-se, por critério: **esta acusação aparece só quando o defeito dela lá
+# está?** É mais estreito, e é o que um controlo negativo tem de fazer.
 set -uo pipefail
 cd "$(dirname "$0")/.."
-
-# O ambiente carrega-se aqui, como nos outros 77 guiões `provar-*`. Sem isto o
-# guião só passa numa shell que por acaso já tenha o `.env` exportado, e numa
-# shell limpa fica vermelho pelo motivo errado — que é precisamente o defeito que
-# um controlo negativo existe para não ter.
-if [[ -f .env ]]; then set -a; . ./.env; set +a; fi
-: "${DATABASE_URL:?DATABASE_URL em falta}"
-: "${MIGRATION_DATABASE_URL:?MIGRATION_DATABASE_URL em falta}"
+if [ -f .env ]; then set -a; . ./.env; set +a; fi
 
 ALVO='apps/web/app/[idioma]/page.tsx'
 GUARDADO="$(mktemp)"
 cp -p "$ALVO" "$GUARDADO"
+falhas=0
 
 repor() {
   cp -p "$GUARDADO" "$ALVO"
-  # Compara-se com a CÓPIA e não com o HEAD. A primeira versão perguntava
-  # `git diff --quiet`, e isso acusava sempre que o ficheiro tivesse trabalho por
-  # commitar — que é precisamente o estado em que este guião corre enquanto o
-  # bloco está a ser feito. Acusou à primeira corrida, com a fonte já reposta.
-  if cmp -s "$GUARDADO" "$ALVO"; then
-    echo "  (a fonte foi reposta)"
-  else
-    echo "  FALHA a fonte NÃO voltou ao que era — a cópia está em $GUARDADO"
-    return
-  fi
-  rm -f "$GUARDADO"
+  # Compara-se com a CÓPIA e não com o HEAD: `git diff` acusa sempre que houver
+  # trabalho por commitar, que é o estado em que este guião corre.
+  if cmp -s "$GUARDADO" "$ALVO"; then rm -f "$GUARDADO"; echo "  (a fonte foi reposta)"
+  else echo "  FALHA a fonte NÃO voltou ao que era — a cópia está em $GUARDADO"; fi
 }
 trap repor EXIT INT TERM
 
-correr() { # imprime a saída, devolve o código do playwright
+correr() {
   pnpm exec playwright test inspeccao/rv100-papeis.spec.ts \
     --project=chromium --no-deps --reporter=line 2>&1
 }
 
-falhas=0
-echo "1. Como está, tem de passar"
-SAIDA="$(correr)"; CODIGO=$?
-echo "$SAIDA" | grep -E 'AMBITO|TECLADO' | sed 's/^/     /'
-if [ "$CODIGO" -eq 0 ]; then echo "  ok    verde antes do plante"
-else echo "  FALHA já estava vermelho antes do plante — o controlo não diria nada"; falhas=$((falhas+1)); fi
+ausente() { # $1 = frase  $2 = saída
+  if echo "$2" | grep -q "$1"; then
+    echo "  FALHA \"$1\" aparece SEM plante — a acusação não distingue nada"
+    falhas=$((falhas + 1))
+  else
+    echo "  ok    \"$1\" ausente quando o defeito não lá está"
+  fi
+}
+presente() { # $1 = frase  $2 = saída
+  if echo "$2" | grep -q "$1"; then
+    echo "  ok    recusou, e pelo motivo certo:"
+    echo "$2" | grep -o ".\{0,24\}$1.\{0,58\}" | head -2 | sed 's/^/           /'
+  else
+    echo "  FALHA plantei o defeito e \"$1\" NÃO apareceu — este critério nunca recusou nada"
+    falhas=$((falhas + 1))
+  fi
+}
 
-echo "2. Com as quatro composições IGUAIS, tem de recusar"
+echo "1. Como está: as duas acusações têm de estar AUSENTES"
+BASE="$(correr)"
+echo "$BASE" | grep -E 'ESCALA es-ES' | sed 's/^/     /'
+ausente 'imagens distintas' "$BASE"
+ausente 'AMPLIADO' "$BASE"
+
+echo "2. Critério 3 · dois papéis com a MESMA composição"
 python3 - "$ALVO" <<'PY'
 import io, sys
 p = sys.argv[1]
 s = io.open(p, encoding='utf-8').read()
-velho = """const PAPEIS = [
-  { n: 1, qual: 'catalogo' },
-  { n: 2, qual: 'tablet' },
-  { n: 3, qual: 'kds' },
-  { n: 4, qual: 'carta' },
-] as const;"""
-novo = """const PAPEIS = [
-  // PLANTE: as quatro iguais. O bloco vira uma galeria com legendas.
-  { n: 1, qual: 'carta' },
-  { n: 2, qual: 'carta' },
-  { n: 3, qual: 'carta' },
-  { n: 4, qual: 'carta' },
-] as const;"""
+velho = "{ n: 2, qual: 'tablet', tamanhos: RANHURA_DO_PAPEL, telefone: false },"
+novo = "{ n: 2, qual: 'catalogo', tamanhos: RANHURA_DO_PAPEL, telefone: false },"
 if s.count(velho) != 1:
-    sys.stderr.write(f'PLANTE-MORTO: a tabela PAPEIS nao esta como o guiao espera ({s.count(velho)} ocorrencias)\n')
+    sys.stderr.write('PLANTE-MORTO: o papel 2 nao esta como o guiao espera\n')
     raise SystemExit(3)
 io.open(p, 'w', encoding='utf-8').write(s.replace(velho, novo))
 PY
 if [ $? -ne 0 ]; then
-  echo "  FALHA o plante não pegou — a fonte mudou de forma e este controlo deixou de exercer nada"
-  falhas=$((falhas+1))
+  echo "  FALHA o plante do critério 3 não pegou — a fonte mudou de forma"
+  falhas=$((falhas + 1))
 else
-  SAIDA="$(correr)"; CODIGO=$?
-  if [ "$CODIGO" -eq 0 ]; then
-    echo "  FALHA continuou VERDE com as quatro imagens iguais — o critério 3 não mede a troca de ecrã"
-    falhas=$((falhas+1))
-  elif echo "$SAIDA" | grep -q 'imagens distintas'; then
-    echo "  ok    recusou, e recusou pelo motivo certo:"
-    echo "$SAIDA" | grep -oE '[a-z-]+ · [0-9]+ imagens distintas[^—]*' | head -3 | sed 's/^/           /'
-  else
-    echo "  FALHA ficou vermelho, mas NÃO por causa das imagens iguais — está a recusar outra coisa"
-    echo "$SAIDA" | grep -E 'Error|expect' | head -3 | sed 's/^/           /'
-    falhas=$((falhas+1))
-  fi
+  presente 'imagens distintas' "$(correr)"
 fi
+cp -p "$GUARDADO" "$ALVO"
+
+echo "3. Critério 6 · o telefone esticado até à ranhura de paisagem"
+python3 - "$ALVO" <<'PY'
+import io, sys
+p = sys.argv[1]
+s = io.open(p, encoding='utf-8').read()
+velho = "{ n: 4, qual: 'carta', tamanhos: '390px', telefone: true },"
+novo = "{ n: 4, qual: 'carta', tamanhos: RANHURA_DO_PAPEL, telefone: false },"
+if s.count(velho) != 1:
+    sys.stderr.write('PLANTE-MORTO: o papel 4 nao esta como o guiao espera\n')
+    raise SystemExit(3)
+io.open(p, 'w', encoding='utf-8').write(s.replace(velho, novo))
+PY
+if [ $? -ne 0 ]; then
+  echo "  FALHA o plante do critério 6 não pegou — a fonte mudou de forma"
+  falhas=$((falhas + 1))
+else
+  presente 'AMPLIADO' "$(correr)"
+fi
+cp -p "$GUARDADO" "$ALVO"
 
 echo
+echo "  DECLARADO, e não é plante nenhum: a prova está VERMELHA por LEGIBILIDADE"
+echo "           nos papéis 1, 2 e 3 — fontes de 1440, 834 e 1280 px mostradas a"
+echo "           477 (0,33× 0,57× 0,37×), o que põe um texto de 14 px a 4,6, 8,0"
+echo "           e 5,2 px, e o critério 6 pede 11. Não se afrouxa a guarda para o"
+echo "           esconder: fica vermelho e é decisão do sénior."
+echo
 if [ "$falhas" -gt 0 ]; then
-  echo "  âmbito:  o critério 3 do bloco 4 (troca o ecrã E o benefício), exercido com plante."
+  echo "  âmbito:  os dois controlos negativos do bloco 4, exercidos por acusação."
   exit 1
 fi
-echo "  ok    o critério 3 recusa quando as quatro telas são a mesma"
-echo "  âmbito:  mede a TROCA de ecrã e de texto ao mudar de papel, nas três línguas,"
-echo "           com o plante a confirmar que a exigência já recusou alguma coisa."
-echo "           FORA, e declarado: se os quatro papéis são os certos para o negócio"
-echo "           (é do Matheus), e se o bloco é bonito (é da Nathalia)."
+echo "  ok    cada critério só acusa quando o defeito dele está plantado"
+echo "  âmbito:  mede que o critério 3 e o novo limite do critério 6 recusam quando"
+echo "           têm o que recusar, e ficam calados quando não têm. FORA, e"
+echo "           declarado: a legibilidade dos três recortes de paisagem."
 exit 0

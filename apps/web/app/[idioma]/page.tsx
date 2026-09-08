@@ -65,6 +65,9 @@ export async function generateMetadata(
 }
 
 /** Os três planos, na ordem de progressão que o §6.5 pede. */
+/** A ranhura das três composições de paisagem: a coluna de 5fr de um 7fr/5fr. */
+const RANHURA_DO_PAPEL = '(min-width: 1024px) 40vw, 80vw';
+
 /**
  * ── Cada papel com a SUA tela ──────────────────────────────────────────────
  *
@@ -82,10 +85,21 @@ export async function generateMetadata(
  * daria duas fotografias iguais na mesma página.
  */
 const PAPEIS = [
-  { n: 1, qual: 'catalogo' },
-  { n: 2, qual: 'tablet' },
-  { n: 3, qual: 'kds' },
-  { n: 4, qual: 'carta' },
+  { n: 1, qual: 'catalogo', tamanhos: RANHURA_DO_PAPEL, telefone: false },
+  { n: 2, qual: 'tablet', tamanhos: RANHURA_DO_PAPEL, telefone: false },
+  { n: 3, qual: 'kds', tamanhos: RANHURA_DO_PAPEL, telefone: false },
+  // ── O quarto não é um ecrã pequeno: é OUTRO aparelho ─────────────────────
+  //
+  // As outras três fontes são de paisagem — 1440×900, 834×1112, 1280×800 — e
+  // cabem na ranhura de 477 px **reduzidas** (0,33× 0,57× 0,37×), com píxeis a
+  // sobrar. A `carta` é 390×844: um retrato de telemóvel. Esticá-la até aos 477
+  // ampliava-a 1,53×, e uma ampliação não inventa detalhe — só engorda o que já
+  // lá estava. O texto ficava MAIOR e mais borrado ao mesmo tempo.
+  //
+  // A vista do cliente é mesmo um telefone. Mostra-se **ao tamanho dela**, 390
+  // por 390, numa moldura de telefone dentro da ranhura — não se recaptura a
+  // carta em largura de secretária, porque isso seria mentir sobre o produto.
+  { n: 4, qual: 'carta', tamanhos: '390px', telefone: true },
 ] as const;
 
 const PLANOS = [
@@ -254,7 +268,7 @@ export default async function Landing({
             <p className="ns-lead">{k.papeisTexto}</p>
             <Separadores
               etiqueta={k.papeisTitulo}
-              separadores={PAPEIS.map(({ n, qual }) => ({
+              separadores={PAPEIS.map(({ n, qual, tamanhos, telefone }) => ({
                 chave: `papel${n}`,
                 rotulo: kx[`papel${n}`] ?? '',
                 conteudo: (
@@ -263,15 +277,14 @@ export default async function Landing({
                       <h3 className="ns-papeis__nome">{kx[`papel${n}`]}</h3>
                       <p className="ns-corpo">{kx[`papel${n}Texto`]}</p>
                     </div>
-                    <div className="ns-moldura">
+                    <div className={telefone ? 'ns-moldura ns-moldura--telefone' : 'ns-moldura'}>
                       {/* A ranhura foi MEDIDA, não estimada: 477 px num visor de
                           1280, porque a moldura é a coluna de 5fr de um 7fr/5fr.
-                          O `390px` que aqui estava era a promessa antiga e fazia
-                          o navegador escolher um ficheiro de 390 para uma caixa
-                          de 477 — ampliado 1,22×, que numa captura de ecrã é
-                          exactamente o texto a perder o fio. */}
-                      <Composicao qual={qual} idioma={idioma}
-                                  tamanhos="(min-width: 1024px) 40vw, 80vw" />
+                          O `390px` que aqui esteve para todas era a promessa
+                          antiga e fazia o navegador escolher um ficheiro de 390
+                          para uma caixa de 477. Agora cada papel diz a sua
+                          ranhura, e a do telefone é a largura real da fonte. */}
+                      <Composicao qual={qual} idioma={idioma} tamanhos={tamanhos} />
                     </div>
                   </div>
                 ),

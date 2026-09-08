@@ -2581,6 +2581,25 @@ h3.ns-linha-do-tempo__nome, h3.ns-titulo-pequeno, h3.ns-preco__nome { line-heigh
    de vazio ao lado da imagem — visto na captura, não deduzido. Encolher a
    moldura fecha o vazio sem tirar ao ecrã o que ele tem para mostrar. */
 .ns-papeis .ns-moldura { max-height: 420px; }
+/* ── O quarto papel é um TELEFONE, e mostra-se ao tamanho dele ──────────────
+   390 px é a largura real da fonte, e por isso a escala é 1,00: píxeis reais,
+   sem ampliar. `margin-inline: auto` centra-o na ranhura de 477 — e é margem
+   automática numa caixa com `max-width`, não num item de grelha a contar com
+   `stretch`. O raio maior e a moldura fina dão-lhe cara de aparelho, que é o
+   que ele é: a vista de quem senta à mesa e aponta ao código. */
+.ns-papeis .ns-moldura--telefone {
+  /* `width` DEFINIDA e `justify-self`, nunca `margin-inline: auto`.
+     A primeira versão usava a margem automática, e numa GRELHA isso desliga o
+     `stretch` do item: a moldura deixa de ter largura definida, o `width: 100%`
+     da imagem fica sem base, e o navegador cai no aspecto — 420 × 390/844 =
+     **194 px**. Medido: moldura 197, imagem 195. Ficava um telefone em
+     miniatura a fingir que era o tamanho real. */
+  width: 390px;
+  max-width: 100%;
+  justify-self: center;
+  border-radius: 28px;
+  border: 1px solid var(--bo-borda);
+}
 .ns-papeis .ns-moldura img { object-fit: cover; object-position: top; height: 420px; }
 .ns-bento__lado .ns-moldura { max-height: 380px; }
 .ns-bento__lado .ns-moldura img { object-fit: cover; object-position: top; height: 380px; }

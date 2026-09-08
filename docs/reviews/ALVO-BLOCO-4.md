@@ -226,3 +226,76 @@ consegue medi-lo — o navegador não sabe o que a imagem já foi.
 
 **A causa do 512 é do JR**, que está nela com o servidor vivo. Isto é a régua, e a
 régua estava errada antes de a causa aparecer.
+
+---
+
+## O papel 4 ao tamanho dele, e o instrumento que estava a mentir — 08/09
+
+### A cura pedida
+
+O quarto papel passa a ter **moldura de telefone**: `tamanhos='390px'`, largura
+**390 px definida** e `justify-self: center` na ranhura de 477. **Nitidez 0,995**
+— píxeis reais, sem ampliar. A carta **não** foi recapturada em largura de
+secretária: a vista do cliente é mesmo um telefone.
+
+**A armadilha pelo caminho:** a primeira versão centrava com `margin-inline:
+auto`. Numa **grelha** isso desliga o `stretch` do item, a moldura fica sem
+largura definida, o `width: 100%` da imagem perde a base e o navegador cai no
+aspecto — 420 × 390/844 = **194 px**. Medido: moldura 197, imagem 195. Ficava um
+telefone em miniatura a fingir que estava ao tamanho real. Cura: largura
+definida + `justify-self`, nunca margem automática num item de grelha.
+
+### O meu instrumento media a coisa errada, e por isso os meus números mentiram
+
+Eu media `img.naturalWidth`. **Num `<img>` com `srcset` e `sizes`, o
+`naturalWidth` vem corrigido pela densidade** — não é a largura do ficheiro.
+Dava **237** para uma fonte de 390, e **512** para as três de paisagem, fossem
+elas 1440×900, 834×1112 ou 1280×800. Eram todas o mesmo artefacto, e eu li-o
+como se fosse um limite do optimizador.
+
+Confirmei-o buscando o recurso e descodificando-o no navegador: `naturalWidth`
+237, **bitmap 390×844**. A prova passa a medir o ficheiro descodificado.
+
+**Consequência: os 1,53× que eu declarei estavam errados.** O plante do controlo
+mede o valor real do desenho antigo — **1,22×**.
+
+### Duas perguntas, que eu tinha misturadas numa
+
+| | pergunta | base de comparação | limiar |
+|---|---|---|---|
+| **nitidez** | o ficheiro chega para a caixa? | ficheiro **servido** | **≤ 1,00** |
+| **legibilidade** | o texto lá dentro lê-se? | fonte **original** | **≥ 11 px** |
+
+Usar o ficheiro servido para a legibilidade responde à pergunta errada: uma fonte
+de 1440 servida a 640 já encolheu o texto para 6 px antes de chegar ao ecrã. Foi
+essa confusão que produziu o meu «13,0 px» verde.
+
+### Medido agora, e o resultado tem um vermelho
+
+| papel | fonte | servido | mostrado | nitidez | escala da fonte | px efectivos |
+|---|---|---|---|---|---|---|
+| 1 catálogo | 1440 | 640 | 477 | 0,745 | **0,331** | **4,6** |
+| 2 tablet | 834 | 640 | 477 | 0,745 | **0,572** | **8,0** |
+| 3 kds | 1280 | 640 | 477 | 0,745 | **0,373** | **5,2** |
+| 4 carta | 390 | 390 | 388 | **0,995** | **0,995** | **13,9** |
+
+**A nitidez passa nos quatro.** O novo limite está cumprido e exercido.
+
+**A legibilidade falha nos três de paisagem**, e o papel 4 — o que estava
+errado — é agora **o único que passa**. As escalas 0,33× 0,57× 0,37× são as que
+o próprio sénior mediu e chamou «nítidas»: são-no, porque reduzir é nítido. Mas
+o critério 6 não pergunta pela nitidez, pergunta pelo **tamanho do texto**, e por
+essa fórmula um texto de 14 px fica a 4,6 px.
+
+**Não afrouxei nada e não escondi.** A prova fica vermelha. **É decisão sua:** ou
+os três recortes passam a mostrar menos ecrã (menos conteúdo, maior), ou o
+critério 6 deixa de valer para recortes de contexto, ou a régua passa a ter dois
+limiares. Não escolho por si.
+
+### O controlo negativo mudou de forma, e a razão está na medição
+
+Era «verde antes, vermelho depois». Com a suite vermelha por legibilidade, isso
+deixaria de distinguir o defeito plantado do que já lá estava. Passa a medir
+**presença de acusação por critério**: cada frase tem de estar ausente sem plante
+e presente com ele. Exercido nos dois — `imagens distintas` com dois papéis a
+partilhar composição, e `AMPLIADO 1,22×` com o telefone esticado.

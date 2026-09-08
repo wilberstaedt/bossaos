@@ -4409,3 +4409,22 @@ existe nesta máquina, e por isso as permissões de `bossaos_app`/`bossaos_auth`
 falha com **500** por causa disso. A prova deste bloco corre com `--no-deps`
 porque a landing é pública, mas **todas as suites com sessão estão bloqueadas
 até os papéis serem repostos.**
+
+## O papel 4 curado, e o meu instrumento a mentir — 08/09
+
+Bloco 4: o quarto papel passa a **moldura de telefone** ao tamanho dele (390 px,
+nitidez **0,995**). A carta não foi recapturada larga — a vista do cliente é um
+telefone. Detalhe e tabela em `docs/reviews/ALVO-BLOCO-4.md`.
+
+**Duas correcções minhas.** `margin-inline: auto` num item de **grelha** desliga
+o `stretch`: a moldura ficou sem largura definida e o telefone saiu a 195 px a
+fingir tamanho real. E, mais grave, **eu media `naturalWidth`, que num `<img>`
+com `srcset` vem corrigido pela densidade** — dava 237 para uma fonte de 390 e
+512 para todas as de paisagem. Os meus «1,53×» estavam errados: o valor real do
+desenho antigo é **1,22×**, medido pelo plante.
+
+**Vermelho declarado, e é decisão do sénior:** separadas as duas perguntas
+(nitidez contra o ficheiro servido, legibilidade contra a fonte original), a
+**nitidez passa nos quatro** mas a **legibilidade falha nos papéis 1, 2 e 3** —
+0,33× 0,57× 0,37× põem um texto de 14 px a 4,6, 8,0 e 5,2 px, e o critério pede
+11. O papel 4 é agora o único que passa. Não afrouxei a guarda.

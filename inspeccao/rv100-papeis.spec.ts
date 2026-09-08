@@ -37,7 +37,11 @@ const TABS_NO_MAXIMO = 80;
 
 interface Estado {
   chave: string; imagem: string; beneficio: string;
-  natural: number; mostrada: number;
+  /** Largura do ficheiro que o navegador REALMENTE recebeu e descodificou. */
+  natural: number;
+  /** Largura da FONTE original, que o `next/image` põe no atributo `width`. */
+  fonte: number;
+  mostrada: number;
 }
 
 test.describe('RV100 · §4.5 para cada pessoa, a tela certa', () => {
@@ -98,7 +102,7 @@ test.describe('RV100 · §4.5 para cada pessoa, a tela certa', () => {
       console.log(`TECLADO ${idioma} tabs_ate_ao_selector=${tabs}`);
 
       // ── 3 · percorrer os quatro POR SETA, e recolher os dois de cada vez ─
-      const lerEstado = async (): Promise<Estado> => page.evaluate(() => {
+      const lerEstado = async (): Promise<Estado> => page.evaluate(async () => {
         const painel = document.querySelector('#papeis [role="tabpanel"]:not([hidden])');
         const activo = document.querySelector('#papeis [role="tab"][aria-selected="true"]');
         const img = painel?.querySelector('img') as HTMLImageElement | null;
@@ -106,11 +110,27 @@ test.describe('RV100 · §4.5 para cada pessoa, a tela certa', () => {
           chave: activo?.textContent?.trim() ?? '',
           imagem: img?.getAttribute('src') ?? '',
           beneficio: painel?.querySelector('p')?.textContent?.trim() ?? '',
-          natural: img?.naturalWidth ?? 0,
+          // ── Os PÍXEIS REAIS, e não o `naturalWidth` ──────────────────────
+          //
+          // Num `<img>` com `srcset` e `sizes`, o `naturalWidth` vem **corrigido
+          // pela densidade** — não é a largura do ficheiro. Media-o e dava 237
+          // para uma fonte de 390, e 512 para as três de paisagem, fossem elas
+          // 1440×900 ou 1280×800. Eram todos o mesmo artefacto, e eu li-o como
+          // se fosse um limite do optimizador.
+          //
+          // O que se mede aqui é o ficheiro que o navegador REALMENTE recebeu,
+          // descodificado. É mais caro e é o único número que responde à
+          // pergunta «isto está a ser ampliado?».
+          natural: img ? await fetch(img.currentSrc)
+            .then((r) => r.blob())
+            .then((b) => createImageBitmap(b))
+            .then((bm) => bm.width)
+            .catch(() => 0) : 0,
           // A CAIXA, e nunca `img.width`: num painel escondido a caixa é 0 e o
-          // atributo continua a devolver a largura intrínseca. A primeira versão
-          // desta medição caía nesse atributo e comparava 390 com 1440 — dizia
-          // «51,7 px efectivos» sobre um painel que não estava sequer no ecrã.
+          // atributo continua a devolver a largura intrínseca. Uma versão desta
+          // medição caiu nesse atributo e dizia «51,7 px efectivos» sobre um
+          // painel que não estava sequer no ecrã.
+          fonte: Number(img?.getAttribute('width') ?? 0),
           mostrada: img ? Math.round(img.getBoundingClientRect().width) : 0,
         };
       });
@@ -187,14 +207,32 @@ test.describe('RV100 · §4.5 para cada pessoa, a tela certa', () => {
             + ` (natural=${e.natural}, mostrada=${e.mostrada}) — NÃO MEDI, e isso não é verde`);
           continue;
         }
-        const escala = e.mostrada / e.natural;
-        const efectivos = 14 * escala;
-        console.log(`ESCALA ${idioma} papel${i + 1} natural=${e.natural}`
-          + ` mostrada=${e.mostrada} escala=${escala.toFixed(3)}`
+        // ── Duas perguntas diferentes, e eu estava a misturá-las ──────────
+        //
+        //   NITIDEZ    o ficheiro recebido chega para a caixa? Compara-se com o
+        //              FICHEIRO SERVIDO. Acima de 1,0 está a ser ampliado, e
+        //              ampliar não inventa detalhe.
+        //   LEGIBILIDADE  o texto lá dentro ainda se lê? Compara-se com a FONTE
+        //              ORIGINAL, porque é nela que o texto tinha 14 px. Usar o
+        //              ficheiro servido como base responde à pergunta errada:
+        //              uma fonte de 1440 servida a 640 já encolheu o texto para
+        //              6 px antes de chegar ao ecrã.
+        const nitidez = e.mostrada / e.natural;
+        const escalaDaFonte = e.fonte ? e.mostrada / e.fonte : 0;
+        const efectivos = 14 * escalaDaFonte;
+        console.log(`ESCALA ${idioma} papel${i + 1} fonte=${e.fonte}`
+          + ` servido=${e.natural} mostrada=${e.mostrada}`
+          + ` nitidez=${nitidez.toFixed(3)} escala_da_fonte=${escalaDaFonte.toFixed(3)}`
           + ` px_efectivos=${efectivos.toFixed(1)}`);
+        if (nitidez > 1.0001) {
+          falhas.push(`${idioma} · papel ${i + 1}: AMPLIADO ${nitidez.toFixed(2)}× —`
+            + ` ficheiro de ${e.natural}px esticado até ${e.mostrada}px.`
+            + ' Ampliar não inventa detalhe: fica maior e mais borrado.');
+        }
         if (efectivos < 11) {
-          falhas.push(`${idioma} · papel ${i + 1}: ${e.natural}px mostrados a ${e.mostrada}px`
-            + ` — o texto do recorte fica a ${efectivos.toFixed(1)}px e a régua pede 11`);
+          falhas.push(`${idioma} · papel ${i + 1}: LEGIBILIDADE — fonte de ${e.fonte}px`
+            + ` mostrada a ${e.mostrada}px (${escalaDaFonte.toFixed(2)}×), o texto de 14px`
+            + ` fica a ${efectivos.toFixed(1)}px e a régua pede 11`);
         }
       }
 
