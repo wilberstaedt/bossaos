@@ -13,7 +13,7 @@ que a descobri-lo a ajustar o critério até a entrega passar.
 | # | exige | instrumento | limiar |
 |---|---|---|---|
 | 1 | quatro **crops da interface**, não cartões de texto | `medir-quatro.mjs`, contagem de `img` no bloco | **≥ 4** |
-| 2 | **a mesma comanda** nos quatro | leitura das quatro imagens: o identificador do pedido tem de coincidir | **4 iguais** |
+| 2 | **a mesma comanda** nos quatro | **manifesto da captura**, não a minha vista (ver abaixo) | **4 iguais** |
 | 3 | crops **legíveis**, não encolhidos | escala da captura × 14 px | **≥ 11 px no ecrã** |
 | 4 | uma frase por passo, **até 16 palavras** | contagem de palavras nos quatro parágrafos | **≤ 16** cada |
 | 5 | **linha de ritmo** a ligar os quatro | existe elemento visual contínuo entre eles | presente |
@@ -45,3 +45,29 @@ seriam o bloco**. O §4.3 pede «**uma única comanda demonstrativa real** atrav
 → Cocina → Pase → Caja» — é a **mesma** comanda que transforma quatro capturas num
 percurso. Sem isso é uma galeria, e uma galeria é o anti-padrão com imagens em vez de
 parágrafos.
+
+
+---
+
+## Emenda ao critério 2, antes de haver entrega — 15h50
+
+Escrevi «leitura das quatro imagens: o identificador do pedido tem de coincidir». Fui
+reler e **isso põe o critério que decide a depender dos meus olhos** — os mesmos que
+hoje leram um rectângulo vazio onde havia uma imagem a carregar, um corte onde havia
+um canto arredondado, e três vezes um número errado.
+
+**Um critério que só eu consigo verificar a olho não é um critério: é uma opinião com
+número.**
+
+**Como passa a medir-se:** o corredor que produz as capturas **regista, por captura,
+qual a comanda que estava no ecrã** — o identificador que já existe nos dados
+semeados. O critério 2 passa a ser uma comparação de quatro cadeias de texto, e
+qualquer pessoa a repete.
+
+Se o corredor não conseguir registar isso, a resposta ao critério 2 é **NÃO MEDI** — e
+um bloco cujo critério decisivo não se mede não fecha. **Não o dou por satisfeito
+porque as imagens me parecem a mesma comanda.**
+
+Isto é preparação, não exigência nova: prefiro descobrir agora que o critério não era
+mensurável do que descobri-lo no momento em que tenho a entrega à frente e vontade de
+a aceitar.
