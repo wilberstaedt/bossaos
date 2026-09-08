@@ -62,3 +62,29 @@ decisão ser do Matheus e não de gosto de ninguém:
   acento e passam a ser um bloco.
 
 Três saídas: largar a cor, encurtar para uma linha, ou ficar. **Fica na lista dele.**
+
+---
+
+## Os botões: fui verificar e NÃO há achado — 08/09, 13h15
+
+Na fotografia do Matheus os dois botões empilhados pareciam ter larguras diferentes, e
+ia entregar isso como defeito. Antes disso fui à captura que o JR tirou a 390
+(`docs/visual/ns2/botoes-390.png`), que é a medição que eu não consigo fazer.
+
+**Larguras praticamente iguais.** A diferença vem do comprimento do texto — os botões
+têm largura por conteúdo, e em espanhol «Pedir una demo» e «Ver el producto» quase
+coincidem. Na fotografia dele, em português, as palavras são mais díspares e a
+diferença nota-se mais.
+
+**Não é defeito objectivo, é largura por conteúdo.** Não o entrego, e registo que
+verifiquei — porque hoje já escalei três leituras de imagem que não se aguentaram, e
+a diferença entre este caso e esses é ter ido ver antes de falar.
+
+## O estado que interessa agora
+
+A cura está **commitada e não publicada**. O Matheus continua a ver o cabeçalho
+partido, porque o que está no ar é o `d5543d3` das 11h23 e a correcção veio depois.
+
+Publicar é decisão dele, por commit e por momento — não estico a autorização das
+11h17, que era para aquele pacote. **O que me cabe é ter isto pronto e dizer-lho numa
+linha, não perguntar outra vez.**
