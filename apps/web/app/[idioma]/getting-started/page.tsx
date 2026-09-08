@@ -2,7 +2,7 @@ import { Botao } from '@bossaos/ui';
 import { MOEDA_COMERCIAL, precoDoPlano } from '@bossaos/domain';
 import { formatarDinheiro, formatarNumero, mensagensDe, type Idioma } from '@bossaos/i18n';
 import { MolduraMkt } from '../../../src/componentes/Marketing.tsx';
-import { AvisoDeDemonstracao, Composicao, RANHURA_METADE } from '../../../src/componentes/Demonstracao.tsx';
+import { AvisoDeDemonstracao, Composicao } from '../../../src/componentes/Demonstracao.tsx';
 import type { Metadata } from 'next';
 import { metadadosDaRota } from '../../../src/seo/metadados.ts';
 
@@ -129,10 +129,10 @@ export default async function Comecamos({ params }: { params: Promise<{ idioma: 
         <div className="bo-mkt__heroi-media">
           <figure className="bo-mkt__figura">
             <Composicao
-              qual="tablet"
+              qual="tabletRecorte"
               idioma={idioma}
               prioritaria
-              tamanhos={RANHURA_METADE}
+              ranhura="larga"
             />
             <figcaption className="bo-mkt__legenda">{k.implantacaoHeroiLegenda}</figcaption>
           </figure>

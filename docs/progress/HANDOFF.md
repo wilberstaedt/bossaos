@@ -4474,3 +4474,23 @@ papel 4.
 > **12 de 13** sítios com o texto abaixo dos 11 px. Esta cura resolve **1**. A
 > propagação tem de ser pela **escolha da variante pela ranhura**, não à mão em
 > 13 sítios — senão o décimo quarto nasce errado.
+
+## Propagação das ranhuras: 13 medidas, 0 abençoadas com defeito — 08/09
+
+Os três passos feitos. **Nove capturas novas** completam o conjunto das duas
+larguras (390 e 560). **A ranhura passou a tipo** — `RANHURAS = { estreita: 380,
+larga: 477 }` — com o `sizes` **e** o `max-width` a derivarem da mesma constante
+via `--bo-ranhura`, para a declaração e a caixa não poderem discordar. O build
+recusou os oito sítios de texto livre no momento em que o tipo entrou.
+
+**A lição do passo três:** migrar a ranhura e deixar a fonte não cura nada — com
+as ranhuras já a 477, seis composições continuavam a servir mestres de 1440.
+Migram juntas.
+
+`inspeccao/rv100-ranhuras.spec.ts` mede todas as composições das 4 páginas:
+`composicoes=13 abencoadas_com_defeito=0 por_decidir=4`.
+
+**Vermelhas e declaradas** (desenho, não defeito): herói da landing (sala 6,5 px;
+kds **ampliado 1,286×**, 5,4 px) e duas largas da `/product` (10,4 px). A prova
+falha nelas de propósito — a falha É a declaração, e some quando o Matheus e a
+Nathalia decidirem entre encolher o herói para 477 ou capturar `sala` a 834.

@@ -44,9 +44,19 @@ import {
 const IDIOMAS = ['es-ES', 'pt-BR', 'en'] as const;
 const DESTINO = 'apps/web/src/demonstracao';
 
-/** A janela: 560 de largura, e uma altura próxima do que a moldura mostra. */
-const LARGURA = 560;
-const ALTURA = 500;
+/**
+ * As duas larguras abençoadas, e as duas formas de as tirar.
+ *
+ * **560 é recorte**: uma janela de largura fixa sobre o ecrã real, ancorada numa
+ * região com sentido, com o texto ao tamanho a que foi desenhado.
+ *
+ * **390 é visor inteiro**: põe-se o navegador a 390×844 e fotografa-se o que se
+ * vê. É como as `*-estreito-390` existentes foram feitas, e é o que faz sentido
+ * — a 390 o produto tem um desenho próprio, e recortar 390 de um ecrã largo
+ * mostraria um terço de um layout que ninguém vê assim.
+ */
+const RECORTE = { largura: 560, altura: 500 } as const;
+const VISOR_ESTREITO = { width: 390, height: 844 } as const;
 
 test('os três recortes, um por ecrã e por idioma', async ({ page }) => {
   test.setTimeout(900_000);
@@ -79,17 +89,32 @@ test('os três recortes, um por ecrã e por idioma', async ({ page }) => {
     // página: a lista de artigos, a COLUNA de comandas, e o salão no tablet —
     // que é o que o `altTablet` já promete, «o aparelho que fica na mão de quem
     // serve». Trocar o salão por uma comanda tornaria o texto alternativo falso.
+    // A âncora de cada um é o que dá sentido ao recorte, e não o canto da
+    // página: a lista de artigos, a COLUNA de comandas, o salão, a carta.
     const regioes = [
-      { nome: 'catalogo-recorte-560', ancora: 'main',
+      { nome: 'catalogo-recorte-560', modo: 'recorte', ancora: 'main',
         visor: { width: 1280, height: 900 },
         caminho: `/${idioma}/app/${SLUG_DA_DEMO}/catalogo` },
-      { nome: 'kds-recorte-560', ancora: '[data-teste="bilhete"]',
+      { nome: 'kds-recorte-560', modo: 'recorte', ancora: '[data-teste="bilhete"]',
         visor: { width: 1280, height: 900 },
         caminho: `/${idioma}/kds/${DEMO.unidade}/${DEMO.estacaoQuente}` },
-      { nome: 'sala-tablet-recorte-560', ancora: 'h1',
+      // O salão em ecrã largo e o salão no tablet são composições diferentes do
+      // MESMO ecrã, e é isso que o `altTablet` já diz: «o mesmo salão num
+      // tablet». O que muda é o visor, não a página.
+      { nome: 'sala-recorte-560', modo: 'recorte', ancora: 'h1',
+        visor: { width: 1280, height: 900 },
+        caminho: `/${idioma}/pos/${DEMO.unidade}` },
+      { nome: 'sala-tablet-recorte-560', modo: 'recorte', ancora: 'h1',
         visor: { width: 834, height: 1112 },
         caminho: `/${idioma}/pos/${DEMO.unidade}` },
-    ];
+      { nome: 'carta-recorte-560', modo: 'recorte', ancora: 'h1',
+        visor: { width: 1280, height: 900 },
+        caminho: `/r/${SLUG_DA_DEMO}/${idioma}/menu` },
+      // ── E a que faltava do lado estreito ────────────────────────────────
+      { nome: 'tablet-estreito-390', modo: 'visor', ancora: 'h1',
+        visor: VISOR_ESTREITO,
+        caminho: `/${idioma}/pos/${DEMO.unidade}` },
+    ] as const;
 
     mkdirSync(`${DESTINO}/${idioma}`, { recursive: true });
 
@@ -126,18 +151,23 @@ test('os três recortes, um por ecrã e por idioma', async ({ page }) => {
         continue;
       }
 
+      // No modo `visor` não há recorte: o que se guarda é o que se vê a 390,
+      // que é um desenho próprio do produto e não um terço de um ecrã largo.
+      const janela = r.modo === 'recorte'
+        ? {
+          x: Math.round(caixa.x), y: Math.round(caixa.y),
+          width: RECORTE.largura, height: RECORTE.altura,
+        }
+        : undefined;
       await page.screenshot({
         path: `${DESTINO}/${idioma}/${r.nome}.png`,
         animations: 'disabled',
-        clip: {
-          x: Math.round(caixa.x),
-          y: Math.round(caixa.y),
-          width: LARGURA,
-          height: ALTURA,
-        },
+        ...(janela ? { clip: janela } : {}),
       });
-      console.log(`RECORTE ${idioma}/${r.nome}.png ${LARGURA}x${ALTURA}`
-        + ` de ${r.caminho}`);
+      const medida = r.modo === 'recorte'
+        ? `${RECORTE.largura}x${RECORTE.altura}`
+        : `${r.visor.width}x${r.visor.height}`;
+      console.log(`RECORTE ${idioma}/${r.nome}.png ${medida} de ${r.caminho}`);
     }
   }
 

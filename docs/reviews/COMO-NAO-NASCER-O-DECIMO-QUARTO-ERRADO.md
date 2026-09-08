@@ -82,3 +82,72 @@ grande** — passa de 720 para ~477. A alternativa é capturar `sala` a 834 e ma
 
 Isso é decisão do Matheus e da Nathalia, não minha: a régua mede legibilidade, e as
 duas opções são legíveis. **Registo as duas com o preço de cada uma e não escolho.**
+
+---
+
+## Executado — 08/09
+
+### UM · o conjunto das duas larguras está completo
+
+Nove capturas novas: `sala` e `carta` a 560 (2 × 3) e `tablet` a 390 (1 × 3).
+Saem do inquilino `bossa-demo` pelo mesmo capturador dos recortes do bloco 4, com
+a guarda de identidade do ecrã. Duas formas, e a diferença é de propósito:
+
+- **560 é recorte** — janela de largura fixa ancorada numa região com sentido.
+- **390 é visor inteiro** — põe-se o navegador a 390×844 e fotografa-se. A 390 o
+  produto tem desenho próprio; recortar 390 de um ecrã largo mostraria um terço
+  de um layout que ninguém vê assim.
+
+### DOIS · a ranhura é um tipo, e o CSS deriva da mesma constante
+
+`RANHURAS = { estreita: 380, larga: 477 }`, `type Ranhura = keyof typeof RANHURAS`.
+O `sizes` deriva da constante **e o `max-width` também**, por `--bo-ranhura` que o
+componente escreve. Era essa a distância que o bloco 4 mediu: o `sizes` prometia
+390 e a caixa tinha 477. **Agora a declaração e a caixa não podem discordar.**
+
+A saída tem nome próprio — `ranhuraPorDecidir` — em vez de um `tamanhos?: string`
+opcional, para `grep` dar a lista exacta e ninguém lá cair por distracção.
+
+**A guarda provou-se ao falhar:** assim que o tipo entrou, o build recusou os
+**oito** sítios de texto livre de uma vez. É o aceite 1 do E01.
+
+### TRÊS · migrados, e a lição foi que a ranhura não chega
+
+Migrar a ranhura e deixar a fonte **não cura nada**: com as ranhuras já a 477, seis
+composições continuavam a servir mestres de 1440 e davam 4,6 px. A ranhura e a
+fonte migram **juntas**, e é isso que o `rv100-ranhuras.spec.ts` mede.
+
+Um caso mereceu decisão: a caixa do bento pinta **420**, que é uma das ranhuras
+sem fonte na banda. Não se alargou a caixa nem se inventou largura: **declarou-se
+a estreita**, e o `max-width` fecha-a nos 380. Precisou de uma fonte de 390 de
+largura REAL (`tabletEstreito`) — a variante estreita do `<picture>` só entra
+abaixo de 768, portanto declarar `estreita` num ecrã de secretária continuava a
+servir a de 560.
+
+### Medido: 13 composições, 4 páginas
+
+    AMBITO composicoes=13 abencoadas_com_defeito=0 por_decidir=4
+
+| página | ranhura | fonte | mostrado | nitidez | px |
+|---|---|---|---|---|---|
+| `/` bento catálogo | 477 | 560 | 477 | 0,852 | **11,9** |
+| `/` bento tablet | 380 | 390 | 380 | 0,990 | **13,6** |
+| `/` papéis | 477 | 560 | 477 | 0,852 | **11,9** |
+| `/product` carta | 380 | 390 | 380 | 0,990 | **13,6** |
+| `/product` tablet | 477 | 560 | 477 | 0,852 | **11,9** |
+| `/getting-started` | 477 | 560 | 477 | 0,852 | **11,9** |
+| `/interno/ns2` ×2 | 477 | 560 | 477 | 0,852 | **11,9** |
+
+### Vermelhas e declaradas, como mandado
+
+| página | ranhura | fonte | mostrado | nitidez | px |
+|---|---|---|---|---|---|
+| `/` herói sala | por decidir | 1440 | 667 | 0,889 | **6,5** |
+| `/` herói kds | por decidir | 1280 | 494 | **1,286** | **5,4** |
+| `/product` sala | por decidir | 1440 | 1072 | 0,993 | **10,4** |
+| `/product` catálogo | por decidir | 1440 | 1072 | 0,993 | **10,4** |
+
+O herói pequeno **amplia 1,286×** — não é só ilegível, é ampliado. Fica aqui e
+não se cura: mexer no herói é a decisão de desenho que não é nossa.
+
+`/product` KDS passa (11,7) e por isso não está nesta lista.

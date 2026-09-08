@@ -65,9 +65,6 @@ export async function generateMetadata(
 }
 
 /** Os três planos, na ordem de progressão que o §6.5 pede. */
-/** A ranhura das três composições de paisagem: a coluna de 5fr de um 7fr/5fr. */
-const RANHURA_DO_PAPEL = '(min-width: 1024px) 40vw, 80vw';
-
 /**
  * ── Cada papel com a SUA tela ──────────────────────────────────────────────
  *
@@ -85,9 +82,9 @@ const RANHURA_DO_PAPEL = '(min-width: 1024px) 40vw, 80vw';
  * daria duas fotografias iguais na mesma página.
  */
 const PAPEIS = [
-  { n: 1, qual: 'catalogoRecorte', tamanhos: RANHURA_DO_PAPEL, telefone: false },
-  { n: 2, qual: 'tabletRecorte', tamanhos: RANHURA_DO_PAPEL, telefone: false },
-  { n: 3, qual: 'kdsRecorte', tamanhos: RANHURA_DO_PAPEL, telefone: false },
+  { n: 1, qual: 'catalogoRecorte', ranhura: 'larga', telefone: false },
+  { n: 2, qual: 'tabletRecorte', ranhura: 'larga', telefone: false },
+  { n: 3, qual: 'kdsRecorte', ranhura: 'larga', telefone: false },
   // ── O quarto não é um ecrã pequeno: é OUTRO aparelho ─────────────────────
   //
   // As outras três fontes são de paisagem — 1440×900, 834×1112, 1280×800 — e
@@ -99,7 +96,7 @@ const PAPEIS = [
   // A vista do cliente é mesmo um telefone. Mostra-se **ao tamanho dela**, 390
   // por 390, numa moldura de telefone dentro da ranhura — não se recaptura a
   // carta em largura de secretária, porque isso seria mentir sobre o produto.
-  { n: 4, qual: 'carta', tamanhos: '390px', telefone: true },
+  { n: 4, qual: 'carta', ranhura: 'estreita', telefone: true },
 ] as const;
 
 const PLANOS = [
@@ -181,11 +178,11 @@ export default async function Landing({
             <figure className="ns-heroi__media">
               <div className="ns-moldura">
                 <Composicao qual="sala" idioma={idioma} prioritaria
-                            tamanhos="(min-width: 1024px) 720px, 100vw" />
+                            ranhuraPorDecidir="(min-width: 1024px) 720px, 100vw" />
               </div>
               <div className="ns-moldura ns-moldura--sobreposta ns-heroi__segunda">
                 <Composicao qual="kds" idioma={idioma}
-                            tamanhos="(min-width: 1024px) 380px, 60vw" />
+                            ranhuraPorDecidir="(min-width: 1024px) 380px, 60vw" />
               </div>
             </figure>
           </div>
@@ -226,8 +223,8 @@ export default async function Landing({
             <div className="ns-bento">
               <article className="ns-bento__area ns-bento__area--principal">
                 <div className="ns-moldura">
-                  <Composicao qual="catalogo" idioma={idioma}
-                              tamanhos="(min-width: 1024px) 640px, 100vw" />
+                  <Composicao qual="catalogoRecorte" idioma={idioma}
+                              ranhura="larga" />
                 </div>
                 <h3 className="ns-bento__nome">{k.modulo1}</h3>
                 <p className="ns-corpo">{k.modulo1Texto}</p>
@@ -247,8 +244,8 @@ export default async function Landing({
                     <p className="ns-corpo">{k.modulo4Texto}</p>
                   </div>
                   <div className="ns-moldura ns-moldura--sobreposta">
-                    <Composicao qual="tablet" idioma={idioma}
-                                tamanhos="(min-width: 1024px) 420px, 100vw" />
+                    <Composicao qual="tabletEstreito" idioma={idioma}
+                                ranhura="estreita" />
                   </div>
                 </div>
               </article>
@@ -268,7 +265,7 @@ export default async function Landing({
             <p className="ns-lead">{k.papeisTexto}</p>
             <Separadores
               etiqueta={k.papeisTitulo}
-              separadores={PAPEIS.map(({ n, qual, tamanhos, telefone }) => ({
+              separadores={PAPEIS.map(({ n, qual, ranhura, telefone }) => ({
                 chave: `papel${n}`,
                 rotulo: kx[`papel${n}`] ?? '',
                 conteudo: (
@@ -284,7 +281,7 @@ export default async function Landing({
                           antiga e fazia o navegador escolher um ficheiro de 390
                           para uma caixa de 477. Agora cada papel diz a sua
                           ranhura, e a do telefone é a largura real da fonte. */}
-                      <Composicao qual={qual} idioma={idioma} tamanhos={tamanhos} />
+                      <Composicao qual={qual} idioma={idioma} ranhura={ranhura} />
                     </div>
                   </div>
                 ),

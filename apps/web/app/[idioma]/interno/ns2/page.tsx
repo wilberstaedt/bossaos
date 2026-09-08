@@ -64,7 +64,7 @@ export default async function SistemaNs2({
             </Botao>
           </p>
           <div className="ns-moldura" data-ns="moldura">
-            <Composicao qual="sala" idioma={idioma} tamanhos="(min-width: 1024px) 720px, 100vw" />
+            <Composicao qual="salaRecorte" idioma={idioma} ranhura="larga" />
           </div>
         </div>
       </section>
@@ -76,7 +76,7 @@ export default async function SistemaNs2({
           <div className="ns-bento">
             <div className="ns-bento__area ns-bento__area--principal">
               <div className="ns-moldura ns-moldura--sobreposta">
-                <Composicao qual="kds" idioma={idioma} tamanhos="(min-width: 1024px) 640px, 100vw" />
+                <Composicao qual="kdsRecorte" idioma={idioma} ranhura="larga" />
               </div>
             </div>
             <div className="ns-bento__area ns-bento__area--media"><h3 className="ns-titulo">Carta</h3></div>

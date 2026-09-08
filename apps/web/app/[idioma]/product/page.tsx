@@ -70,10 +70,10 @@ export default async function Produto({ params }: { params: Promise<{ idioma: Id
         <p className="bo-publico__texto">{k.prodComandaTexto}</p>
         <div className="bo-mkt__par">
           <figure className="bo-mkt__figura">
-            <Composicao qual="sala" idioma={idioma} prioritaria tamanhos={RANHURA_LARGA} />
+            <Composicao qual="sala" idioma={idioma} prioritaria ranhuraPorDecidir={RANHURA_LARGA} />
           </figure>
           <figure className="bo-mkt__figura">
-            <Composicao qual="kds" idioma={idioma} tamanhos={RANHURA_LARGA} />
+            <Composicao qual="kds" idioma={idioma} ranhuraPorDecidir={RANHURA_LARGA} />
           </figure>
         </div>
         <p className="bo-mkt__legenda">{k.heroiLegenda}</p>
@@ -84,7 +84,7 @@ export default async function Produto({ params }: { params: Promise<{ idioma: Id
         <h2 id="t-catalogo">{k.prodCatalogoTitulo}</h2>
         <p className="bo-publico__texto">{k.prodCatalogoTexto}</p>
         <figure className="bo-mkt__figura">
-          <Composicao qual="catalogo" idioma={idioma} tamanhos={RANHURA_LARGA} />
+          <Composicao qual="catalogo" idioma={idioma} ranhuraPorDecidir={RANHURA_LARGA} />
         </figure>
       </section>
 
@@ -95,7 +95,7 @@ export default async function Produto({ params }: { params: Promise<{ idioma: Id
         <h2 id="t-carta">{k.prodCartaTitulo}</h2>
         <p className="bo-publico__texto">{k.prodCartaTexto}</p>
         <figure className="bo-mkt__figura bo-mkt__figura--estreita">
-          <Composicao qual="carta" idioma={idioma} tamanhos="390px" />
+          <Composicao qual="carta" idioma={idioma} ranhura="estreita" />
         </figure>
       </section>
 
@@ -104,7 +104,7 @@ export default async function Produto({ params }: { params: Promise<{ idioma: Id
         <h2 id="t-tablet">{k.prodTabletTitulo}</h2>
         <p className="bo-publico__texto">{k.prodTabletTexto}</p>
         <figure className="bo-mkt__figura bo-mkt__figura--media">
-          <Composicao qual="tablet" idioma={idioma} tamanhos="(min-width: 768px) 640px, 100vw" />
+          <Composicao qual="tabletRecorte" idioma={idioma} ranhura="larga" />
         </figure>
       </section>
 

@@ -2350,6 +2350,13 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
    não desenha uma caixa à volta: eleva o próprio ecrã com sombra e raio. */
 .ns-moldura { display: block; border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px rgba(16, 46, 53, 0.28); }
 .ns-moldura img, .ns-moldura picture { display: block; width: 100%; height: auto; }
+/* ── A caixa não pode ser mais larga do que a ranhura DECLARADA ────────────
+   A `Composicao` escreve `--bo-ranhura` a partir da mesma constante que gera o
+   `sizes`. Sem isto, a declaração e a caixa podiam discordar — e discordaram: no
+   bloco 4 o `sizes` prometia 390 e a caixa tinha 477, e a imagem vinha ampliada
+   1,22× sem ninguém dar por isso. Quem não declara ranhura (o herói e a
+   `/product`, por decidir) não define a variável e fica com `100%`. */
+.bo-mkt__composicao { max-width: var(--bo-ranhura, 100%); }
 .ns-moldura--sobreposta { box-shadow: 0 18px 44px rgba(16, 46, 53, 0.34); }
 
 /* ── 6 · Bento assimétrico ─────────────────────────────────────────────── */
@@ -2594,7 +2601,10 @@ h3.ns-linha-do-tempo__nome, h3.ns-titulo-pequeno, h3.ns-preco__nome { line-heigh
      da imagem fica sem base, e o navegador cai no aspecto — 420 × 390/844 =
      **194 px**. Medido: moldura 197, imagem 195. Ficava um telefone em
      miniatura a fingir que era o tamanho real. */
-  width: 390px;
+  /* 380, que é a ranhura estreita abençoada — a mesma constante que gera o
+     `sizes`. Era 390, a largura do FICHEIRO, e isso voltava a ser a caixa a
+     discordar da declaração, ainda que por dez píxeis. */
+  width: 380px;
   max-width: 100%;
   justify-self: center;
   border-radius: 28px;

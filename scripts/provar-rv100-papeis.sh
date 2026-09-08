@@ -68,8 +68,8 @@ python3 - "$ALVO" <<'PY'
 import io, sys
 p = sys.argv[1]
 s = io.open(p, encoding='utf-8').read()
-velho = "{ n: 2, qual: 'tabletRecorte', tamanhos: RANHURA_DO_PAPEL, telefone: false },"
-novo = "{ n: 2, qual: 'catalogoRecorte', tamanhos: RANHURA_DO_PAPEL, telefone: false },"
+velho = "{ n: 2, qual: 'tabletRecorte', ranhura: 'larga', telefone: false },"
+novo = "{ n: 2, qual: 'catalogoRecorte', ranhura: 'larga', telefone: false },"
 if s.count(velho) != 1:
     sys.stderr.write('PLANTE-MORTO: o papel 2 nao esta como o guiao espera\n')
     raise SystemExit(3)
@@ -88,8 +88,8 @@ python3 - "$ALVO" <<'PY'
 import io, sys
 p = sys.argv[1]
 s = io.open(p, encoding='utf-8').read()
-velho = "{ n: 4, qual: 'carta', tamanhos: '390px', telefone: true },"
-novo = "{ n: 4, qual: 'carta', tamanhos: RANHURA_DO_PAPEL, telefone: false },"
+velho = "{ n: 4, qual: 'carta', ranhura: 'estreita', telefone: true },"
+novo = "{ n: 4, qual: 'carta', ranhura: 'larga', telefone: false },"
 if s.count(velho) != 1:
     sys.stderr.write('PLANTE-MORTO: o papel 4 nao esta como o guiao espera\n')
     raise SystemExit(3)
@@ -112,8 +112,8 @@ python3 - "$ALVO" <<'PLANTE'
 import io, sys
 p = sys.argv[1]
 s = io.open(p, encoding='utf-8').read()
-velho = "{ n: 1, qual: 'catalogoRecorte', tamanhos: RANHURA_DO_PAPEL, telefone: false },"
-novo = "{ n: 1, qual: 'catalogo', tamanhos: RANHURA_DO_PAPEL, telefone: false },"
+velho = "{ n: 1, qual: 'catalogoRecorte', ranhura: 'larga', telefone: false },"
+novo = "{ n: 1, qual: 'catalogo', ranhura: 'larga', telefone: false },"
 if s.count(velho) != 1:
     sys.stderr.write('PLANTE-MORTO: o papel 1 nao esta como o guiao espera\n')
     raise SystemExit(3)
