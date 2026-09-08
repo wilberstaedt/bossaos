@@ -412,7 +412,7 @@
     }
   ],
   "impressaoDoProduto": {
-    "resumo": "94441e1ec2e01d9b1a81d016820a4832c578099f71f6296f4f1a08a453b72488",
+    "resumo": "202b7cb0654601be0b12bd274da3beb297b8c36f678be4899206783e8a4be381",
     "ficheiros": 735,
     "porFicheiro": {
       "apps/web/proxy.ts": "d7dccea720c55d1d05f4a4c3a47a0ee8045ad4bd993f429184ec20e886bc7525",
@@ -978,7 +978,7 @@
       "apps/worker/src/index.ts": "fc85b438cf79aa1c9a07fc97cc178c5191b8ca9dea7670be0639b39247a098b7",
       "packages/ui/src/fichas.test.ts": "75cb2fa0b09863679b7a2799f7dd295404c7c2a1d9b1eaf80eeb5a0ad55e0abd",
       "packages/ui/src/fichas.ts": "ab12740503c625f51f12b5a89ab77ecebffa7045f9be5c981aff268281696ebb",
-      "packages/ui/src/estilos.css": "969fb79b36c9f515dd224805bf607fb6c16a4c2690eb733b63aee7400a820bbb",
+      "packages/ui/src/estilos.css": "fa83719b4feef6342b8046160feff7f3e31a37b844d67cc2848cb0f8bc158029",
       "packages/ui/src/tema.test.ts": "340da5fbdb69cede7728d3d1071e6783c4c957b60d7054a51a3c0db97d9dd4d2",
       "packages/ui/src/contraste.test.ts": "c7964ebb0e581cf03140ef1b502d60cb58a2a238d7252ec62adb86ed2f9132a4",
       "packages/ui/src/acento.test.ts": "80395564a5b3dfdde8e300c1458785d3ccf7ada41f2baaeefc42791a5341d06e",
@@ -1151,8 +1151,8 @@
       "packages/domain/src/portas/autorizacao.ts": "70b5d7862e6f566c8683c8677d18f6515aa07c97b55729fde371b744ddf05977",
       "packages/domain/src/portas/media.ts": "8a14e7f1caf3b0fdcdce4a4e066b86f0ffc9cb445e6896a55570e631ed0f8c5c"
     },
-    "quando": "2026-09-08T09:45:25+0200",
-    "commit": "4b2ed3276ca57c032570d68d99398d6dbb59eaa7",
+    "quando": "2026-09-08T12:55:38+0200",
+    "commit": "57ec604ad73c7104864e8f211339921a977e3928",
     "arvoreLimpa": true
   }
 }
