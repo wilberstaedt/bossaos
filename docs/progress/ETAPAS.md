@@ -119,3 +119,41 @@ caixas de 380; as reais são 322-358, porque a página tem recuo. Foi o teste de
 lados a apontar a caixa, que era uma das duas causas que a régua nomeava.
 
 **FORA e declarado: um visor não é a matriz.** Passou **a 390**. 360 e 430 por medir.
+
+### Matriz estreita — fechada 08/09, verificada pelo revisor
+
+**52 medições** — as treze composições a **360, 375, 390 e 430** — com **zero
+defeitos**. Corri o controlo eu: planta um mestre sem variante estreita, apanha-o a
+8,2-8,6 px nos quatro visores, acusa **um sítio só** e confirma que é o plantado.
+As mudanças de CSS estão todas dentro de `max-width: 1023px` e `max-width: 400px`,
+portanto **nada pode regredir acima de 1024** — verificado no diff, sem gastar outra
+corrida.
+
+Ficou **um** ficheiro de matriz estreita e não dois: o de 390 passou a
+`rv100-ranhuras-estreitas`, porque duas matrizes de telemóvel lado a lado acabariam
+por discordar uma da outra.
+
+**As três previsões que escrevi antes saíram exactas, ao décimo:** 360 → 10,6 px
+(falha), 430 → nitidez 1,021 (amplia), 375 → 11,1 px (encostado). A diferença para a
+minha previsão anterior, que falhou, é que esta partiu de uma caixa **medida** e a
+outra de uma **declarada**.
+
+**Mas previ uma falha a 360 e havia quatro.** Além do herói, duas áreas do bento e
+uma do `ns2`, todas a 296 — a cadeia de dois recuos, 16 da página mais 16 do cartão.
+A aritmética da que modelei estava certa; **o meu modelo de quais elementos estavam
+em risco estava incompleto**, e um acerto ao décimo numa não compensa não ter visto
+as outras três.
+
+### O achado do JR: a cascata, com as regras já certas
+
+As duas regras de cura ficaram primeiro **270 linhas acima** da `@media
+(max-width: 767px)` que põe a moldura do herói a 90 %. Não pegaram — e **não por
+causa da largura da consulta**, porque as duas se aplicam a 360. Perderam por
+**ORDEM**, com a mesma especificidade, e a medição continuou nos 295 com as regras
+escritas e correctas.
+
+Uma sobreposição de ecrã estreito tem de vir **depois** de tudo o que sobrepõe. Ficou
+escrito ao lado da regra, com a medição que o provou.
+
+**FORA e declarado: quatro visores não são todos os telefones.** 320, 412 e os
+dobráveis ficam por medir.
