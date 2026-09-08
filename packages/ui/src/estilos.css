@@ -2354,7 +2354,13 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
 /* «Não aceite uma lista de textos como mapa de mesas»: isto é uma GRELHA
    espacial, cada mesa com forma, capacidade e estado. O estado não vive só na
    cor — leva rótulo — porque cor sozinha não é informação acessível. */
-.ns-mesas { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: var(--bo-espaco-md); }
+.ns-mesas { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--bo-espaco-md); }
+/* 132 px era estreito de mais para o que o cartão CARREGA: «insp-08 junto a la
+   ventana» partia-se em três linhas e o cartão crescia para o triplo da altura.
+   O número saiu de olhar a captura, não da folha. `auto-fill` e não `auto-fit`
+   de propósito — a mesa mantém o mesmo tamanho com quatro ou com quarenta, que
+   é o que faz disto um mapa e não uma barra que se estica. */
+@media (min-width: 768px) { .ns-mesas { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); } }
 .ns-mesa {
   border-radius: 16px; border: 1px solid var(--bo-borda); background: #FFFFFF;
   padding: var(--bo-espaco-md); min-height: 112px;
@@ -2365,6 +2371,12 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
      para fora da faixa e a sala rolava 25 px a 390. É a mesma linha que o
      `.bo-publico__conteudo` já tinha, e pela mesma razão. */
   min-width: 0; overflow-wrap: anywhere;
+  /* As mesmas duas que faltavam na `.bo-staff .bo-lista a` da linha 769, e pela
+     mesma razão — só que desta vez fui eu a repeti-las. A mesa é um `<a>`, e
+     uma regra que declara geometria e cala a cor deixa o navegador decidir: os
+     quatro cartões saíram em azul sublinhado num ecrã que não tem nada azul.
+     Os números do norte estavam todos verdes; quem viu isto foi a captura. */
+  color: var(--bo-sobre-superficie); text-decoration: none;
 }
 .ns-mesa__nome { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 20px; }
 .ns-mesa__capacidade { font-size: 14px; color: var(--bo-texto-secundario); }
@@ -2408,9 +2420,26 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
 .ns-fluxo__marca {
   position: absolute; top: 0; inset-inline-start: 50%; transform: translateX(-50%);
   width: 30px; height: 30px; border-radius: 999px;
-  background: var(--bo-acento-sinal); color: var(--bo-primaria);
+  /* Era disco coral com dígito verde escuro: 3.73:1 a 15 px/700, e a WCAG
+     1.4.3 pede 4.5 abaixo dos 18,66 px negrito. Sobre coral esse 4.5 NÃO
+     EXISTE — o tecto é 3.84 com branco e 3.73 com o verde, e os dois intervalos
+     não se tocam. Não há cor de dígito que salve este disco.
+     Por isso inverte-se: o disco passa a verde com o dígito claro, e o coral
+     fica no ANEL. A cor do ritmo mantém-se onde não carrega texto. */
+  background: var(--bo-primaria); color: var(--bo-superficie-base);
+  border: 2px solid var(--bo-acento-sinal);
   display: grid; place-items: center; font-weight: 700; font-size: 15px;
 }
+/* A nota de rodapé da secção coral — a linha da cobrança e a ligação «que
+   inclui cada plano» — vivia directamente sobre o coral, a 2.45:1. Mesmo
+   problema, e o texto é pequeno por natureza: é uma nota. Ganha superfície
+   própria em vez de mudar de cor para uma cor que não chega. */
+.ns-nota-coral {
+  display: inline-block; background: var(--bo-superficie-base);
+  color: var(--bo-sobre-superficie); border-radius: var(--bo-raio-capsula);
+  padding: var(--bo-espaco-sm) var(--bo-espaco-lg); margin-top: var(--bo-espaco-lg);
+}
+.ns-nota-coral a { color: var(--bo-sobre-superficie); }
 .ns-fluxo__nome { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 20px; margin: var(--bo-espaco-md) 0 4px; }
 
 .ns-bento__nome { font-family: var(--bo-fonte-titulo); font-weight: 700; font-size: 22px; margin: var(--bo-espaco-md) 0 4px; }
@@ -2513,7 +2542,12 @@ h3.ns-linha-do-tempo__nome, h3.ns-titulo-pequeno, h3.ns-preco__nome { line-heigh
 .ns-seccao--coral h2.ns-titulo { color: var(--bo-primaria); }
 .ns-fecho--coral {
   background: var(--bo-acento-sinal); color: var(--bo-primaria);
-  border-radius: 24px; padding: var(--bo-espaco-xl);
+  border-radius: 24px;
+  /* O painel ficou com o título e o botão depois de o lead sair para o verde,
+     e com o `xl` de antes passou a apertado — texto grande encostado à
+     dobra do cartão. A folga é de desenho e tem um efeito medido: o coral da
+     página tinha caído a 7.2% e o §8 pede 8 no mínimo. */
+  padding: clamp(32px, 4.4vw, 72px) var(--bo-espaco-xl);
 }
 .ns-fecho--coral .ns-titulo, .ns-fecho--coral .ns-lead { color: var(--bo-primaria); }
 
@@ -2563,3 +2597,59 @@ h3.ns-linha-do-tempo__nome, h3.ns-titulo-pequeno, h3.ns-preco__nome { line-heigh
    coral dá 3,73:1 de fundo e leva texto claro por cima. */
 .ns-fecho--coral { --bo-accao: var(--bo-primaria); --bo-sobre-accao: var(--bo-texto-inverso); }
 .ns-seccao--coral { --bo-accao: var(--bo-primaria); --bo-sobre-accao: var(--bo-texto-inverso); }
+
+/* ── 10 · A navegação da sala num telemóvel ─────────────────────────────────
+ *
+ * A captura de 390 mostrou «Mesas en tiempo real» sem UMA mesa na primeira
+ * viewport: as sete pastilhas em `flex-wrap` empilham-se sete vezes e comem o
+ * ecrã inteiro. Num ecrã que um empregado abre de pé, com o tabuleiro na outra
+ * mão, o conteúdo estava todo abaixo da dobra. Os números do norte diziam
+ * verde — quem viu isto foi a imagem.
+ *
+ * ── Porque é uma classe nova e não uma correcção na `bo-publico__seccoes` ──
+ *
+ * Porque essa classe está em DEZANOVE sítios: a carta pública, o KDS, as
+ * reservas, o visitante, o marketing. Mudar `flex-wrap` lá dentro mudava a
+ * carta que o cliente lê ao balcão, e isso é propagação — não é o que me foi
+ * pedido e não é o que eu meço aqui.
+ *
+ * `.ns-sala-nav` vive no `NavegacaoDaSala`, e o alcance é declarado: as SETE
+ * telas da família sala (floor, plano, zonas, combinações, abrir, mesas,
+ * devices). Zero telas públicas.
+ *
+ * A faixa rola em vez de embrulhar, e só abaixo de 768 px — no computador as
+ * sete cabem numa linha e não há nada a resolver. `scroll-padding` para a
+ * pastilha activa não ficar colada à margem quando o navegador a traz à vista
+ * pelo teclado. */
+@media (max-width: 767px) {
+  .ns-sala-nav {
+    flex-wrap: nowrap; overflow-x: auto; scroll-padding-inline: var(--bo-margem-movel);
+    /* ── `min-width: 0`, e é a TERCEIRA vez hoje ─────────────────────────
+       Sem esta linha a barra media 789 px numa janela de 390 e a sala cortava
+       439 px na horizontal — com `overflow-x: auto` escrito duas linhas acima.
+       O `overflow` não corta nada quando é a PRÓPRIA CAIXA que cresce: um item
+       de flex ou de grelha tem `min-width: auto`, que quer dizer «não encolhas
+       abaixo do teu conteúdo», e ganha ao `overflow`.
+       Já apareceu no `.bo-publico__conteudo` e no `.ns-mesa`. Fica, porque é
+       necessário — mas AQUI não era suficiente, e essa parte custou-me uma
+       medição errada: pus esta linha, o `min-width` computado passou a `0px`,
+       e a barra continuou nos 789. A `.bo-pagina` já tinha `minmax(0, 1fr)`,
+       portanto a pista nunca foi o problema.
+
+       O problema é a linha de baixo, e é o `margin: 0 auto` que a regra-base
+       `.bo-publico__seccoes` traz: **um item de grelha com margem automática
+       deixa de esticar**. O `stretch` desliga-se, a caixa passa a ser
+       dimensionada pelo conteúdo, e nenhum `overflow` a trava porque não há
+       nada a transbordar — a caixa É do tamanho do conteúdo. A margem existe
+       para centrar a barra na carta pública, onde ela é um bloco solto; aqui
+       dentro da grelha do painel ela é o que parte o telemóvel.
+
+       E a captura não mostra nada disto: um recorte de viewport corta o que
+       transborda e sai nítido. Foi o `scrollWidth` que o disse. */
+    min-width: 0; margin-inline: 0;
+    /* Sem isto o `overflow-x` corta o anel de foco em cima e em baixo: a
+       pastilha continua alcançável pelo teclado e deixa de se ver alcançada. */
+    padding-block: 4px;
+  }
+  .ns-sala-nav > a { flex: 0 0 auto; }
+}

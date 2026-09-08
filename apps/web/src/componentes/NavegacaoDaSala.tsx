@@ -24,7 +24,7 @@ export function NavegacaoDaSala({
   const s = mensagensDe(idioma).salaE13 as unknown as Record<string, string>;
   const base = `/${idioma}/app/${orgSlug}/${locationSlug}/floor`;
   return (
-    <nav className="bo-publico__seccoes" aria-label={s.sala}>
+    <nav className="bo-publico__seccoes ns-sala-nav" aria-label={s.sala}>
       {SECCOES_DA_SALA.map((x) => (
         <a key={x.rota} href={`${base}${x.rota}`}
            aria-current={actual === x.rota ? 'page' : undefined}>

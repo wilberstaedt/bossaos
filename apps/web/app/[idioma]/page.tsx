@@ -287,7 +287,7 @@ export default async function Landing({
                 </article>
               ))}
             </div>
-            <p className="ns-corpo">
+            <p className="ns-corpo ns-nota-coral">
               {k.cobrancaTitulo} · {MENSALIDADES_NUM_ANO}× · <a href={`/${idioma}/plans`}>{k.comparar}</a>
             </p>
           </div>
@@ -337,9 +337,14 @@ export default async function Landing({
                 </details>
               ))}
             </div>
+            {/* O lead saiu do painel coral e ficou sobre o verde da secção.
+                Não é arranjo de gosto: 21 px normal sobre coral dá 3.73:1, e
+                sobre coral não existe cor nenhuma que chegue a 4.5. Sobre o
+                verde escuro o texto claro passa com folga. O painel coral fica
+                com o que aguenta o coral — o título grande e o botão. */}
+            <p className="ns-lead">{k.ctaFinalTexto}</p>
             <div className="ns-fecho ns-fecho--coral">
               <h3 className="ns-titulo">{k.ctaFinalTitulo}</h3>
-              <p className="ns-lead">{k.ctaFinalTexto}</p>
               <p className="ns-chamada">
                 <Botao tom="primario" className="ns-accao-heroi" href={`/${idioma}/demo`}>
                   {k.pedirDemo}

@@ -152,6 +152,13 @@ test.describe('Superfícies: nada desaparece dentro do seu fundo', () => {
       { id: 'KDS-unidade', url: `/es-ES/kds/${a.unidadeDoStaff}`, escura: true },
       { id: 'AUTH-login', url: '/es-ES/auth/login', escura: true },
       { id: 'PAINEL-catalogo', url: '/es-ES/app/marina-oropesa/catalogo', escura: false },
+      // A segunda referência do North Star v2. Entrou aqui, e não num motor de
+      // contraste próprio, porque o motor já existe e duplicá-lo era criar uma
+      // segunda opinião sobre a mesma pergunta — que é como se perde um
+      // defeito: as duas concordam até ao dia em que discordam.
+      // O IDIOMA fica em es-ES de propósito: a cor não muda com a língua. O que
+      // muda com a língua é o COMPRIMENTO, e isso mede-se no `ns2-idiomas`.
+      { id: 'SALA-mesas', url: '/es-ES/app/marina-oropesa/puerto/floor', escura: false },
       { id: 'MKT-landing', url: '/es-ES', escura: false },
       { id: 'MKT-demo', url: '/es-ES/demo', escura: false },
       { id: 'MKT-faq', url: '/es-ES/faq', escura: false },

@@ -147,9 +147,14 @@ plantar <<'PYSALA' || true
 import io
 p = 'apps/web/app/[idioma]/app/[orgSlug]/[locationSlug]/floor/page.tsx'
 s = io.open(p, encoding='utf-8').read()
-antigo = "                {!mesa.sessao && aChegar.get(mesa.id) ? ("
-assert antigo in s, 'o aviso da reserva a chegar nao esta onde se esperava'
-io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, "                {false ? (", 1))
+# Reancorado: a sala deixou de ser uma lista de <li> e passou a mapa, e o
+# aviso da reserva deixou de ser um ternario no JSX — passou a ser o estado
+# derivado no `estadoDa`. O plante segue a LOGICA, nao a linha: uma mesa com
+# reserva a chegar passa a dizer «livre», que e exactamente a ponte que o
+# FLOOR-006 verifica.
+antigo = "aChegar.get(mesa.id) ? 'reservada' : 'livre'"
+assert antigo in s, 'a derivacao do estado reservado nao esta onde se esperava'
+io.open(p, 'w', encoding='utf-8').write(s.replace(antigo, "'livre'", 1))
 PYSALA
 exigir_vermelho "caiu a ponte: a reserva deixou de aparecer na sala antes da hora" \
   'FLOOR-006: a mesa livre com reserva anuncia-a' /tmp/bossaos-host-nav-sala.txt \
