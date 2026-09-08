@@ -1287,3 +1287,60 @@ teste **em voz alta** em vez de partir o produto **em silêncio**. É API privad
 zero ocorrências no `index.d.mts`.
 
 **Não implementes nenhuma das duas sem ele decidir.**
+
+## A manhã de 08/09, das 06h às 07h30 — o que já está feito e o que está a meio
+
+Se acordaste numa sessão nova, isto é o que mudou desde o bloco de cima. **Nada
+aqui é para repetir**: quatro coisas foram medidas com custo e voltar a medi-las
+gasta contexto por nada.
+
+### A porta que faltava — FEITA, e é tua
+
+`packages/auth/src/criar-utilizador.ts` (commit `b990471`). Cria conta com senha
+sem passar pela rota de registo, sobre `ctx.internalAdapter`. **Não reabras o
+`disableSignUp`** — a cura da segurança fica de pé; esta função é o substituto.
+
+O que já não precisa de ser redescoberto:
+- `auth.api.signUpEmail` do lado do servidor **respeita** a bandeira. Não serve.
+- O plugin `admin` **não chega a decidir**: falha antes, no esquema, por
+  `role`/`banned`/`banReason`/`banExpires` em `users` e `impersonatedBy` em
+  `sessions`. Está medido em `docs/reviews/RESPOSTA-PORTA-DO-ADMIN.md`.
+- O `issuer` tem de ser `local:credential`. Com o `@default` da coluna a conta
+  **existe e não entra** — custou uma medição inteira.
+
+### Duas coisas na tua mesa, da minha revisão
+
+Está em `docs/reviews/REVISAO-CRIAR-UTILIZADOR.md`. Resumo, para não teres de a
+abrir:
+
+1. **O teste não é corrido por ninguém.** `provas/criar-utilizador.test.ts` não é
+   nomeado por guião nenhum, e a descoberta da CI é `for g in scripts/provar-*.sh`
+   — descobre **guiões**, e um ficheiro sem guião não é alcançado. A guarda da casa
+   já o acusa: corre `bash scripts/validar-suites-com-guiao.sh` e vê. **Isto
+   importa** porque a justificação inteira para usar API privada é «parte o teste em
+   voz alta em vez de partir o produto em silêncio», e hoje parte em silêncio.
+   Conserto: um `scripts/provar-criar-utilizador.sh`, ou uma entrada declarada em
+   `scripts/provas-fora-da-ci.txt` com motivo.
+2. **`emailVerificado = true` por omissão** concede confiança a quem se esquecer do
+   parâmetro. Devia ser `false`, e quem tem a prova do endereço que a declare.
+
+### Regra nova, e custou confusão às 07h20
+
+**Em árvore partilhada, encena-se por caminho: `git add <ficheiros>`, nunca `-A`.**
+Somos dois no mesmo working tree. Eu comitei trabalho teu debaixo de um título meu
+(`aa06503`, 25 ficheiros) e tu comitaste o meu debaixo do teu (`b990471`) — na mesma
+meia hora, sem nenhum de nós ter feito nada de errado à sua vista. Não é
+distracção, é o que o `-A` significa. Nada se perdeu e nada foi reescrito.
+
+### O estado da máquina, que decide o que podes correr
+
+Às 07h35: **ATENÇÃO** — 4898 MB disponíveis, 55 MB livres, compressor alto, 5
+agentes contra um orçamento de 4. Histórico: **4 kernel panics em 12-13/07** com a
+máquina neste estado. **Não subas builds em paralelo com os meus.** Se precisares
+de um, diz-me e eu paro o que estiver a correr.
+
+### O que estava a meio quando isto foi escrito
+
+A recaptura das telas-mestre, por ti. A guarda de frescura apanhou capturas
+envelhecidas por uma corrida falhada e tu escolheste **recapturar em vez de inventar
+uma data** — se voltares a esta linha, é essa a escolha certa e já está tomada.
