@@ -34,7 +34,7 @@
     }
   ],
   "impressaoDoProduto": {
-    "resumo": "efdc66f622cb09a36e30e82b51302c863c7c3bc781ffd921aa9ec1be82866490",
+    "resumo": "7e5f605a950ee26b090f8f1d0be0f78ba6d7d491f4769f7c0eda33f25a7a056f",
     "ficheiros": 735,
     "porFicheiro": {
       "apps/web/proxy.ts": "d7dccea720c55d1d05f4a4c3a47a0ee8045ad4bd993f429184ec20e886bc7525",
@@ -42,7 +42,7 @@
       "apps/web/app/robots.ts": "6be6c094cd7e17f0514ba1af34aee2cbe07b8e10ef51d49d173be06bad64eb89",
       "apps/web/app/sitemap.ts": "6cef1b43052195fa962d20c19672ccc8633812a5b526ce2605c08b67206db74b",
       "apps/web/app/[idioma]/layout.tsx": "f53031ccc6a6928a4d441fb5276799c9998330f65bc6c3782aacb8b98a7b62b4",
-      "apps/web/app/[idioma]/page.tsx": "8f73f3be1de28976817ea632a767bb2dc341798f731d923704e2b1f7fa09599a",
+      "apps/web/app/[idioma]/page.tsx": "9b825f8c8637640b67425cdeae126affd93d6f2ad66afc72ae818beb2788add4",
       "apps/web/app/[idioma]/not-found.tsx": "a44a62a6d2da90a6fb41342ad79e8d3c681d1a2174dc2bfc2f12a4947a8c89b3",
       "apps/web/app/[idioma]/demo/page.tsx": "1cad0e33007ea55b40a10d43efa779669376a97f0c95eafe104b038b5209deff",
       "apps/web/app/[idioma]/demo/thanks/page.tsx": "1570840cbde825ab20b08615176628d95784c13a46aa11634511e63899f15305",
@@ -600,7 +600,7 @@
       "apps/worker/src/index.ts": "fc85b438cf79aa1c9a07fc97cc178c5191b8ca9dea7670be0639b39247a098b7",
       "packages/ui/src/fichas.test.ts": "75cb2fa0b09863679b7a2799f7dd295404c7c2a1d9b1eaf80eeb5a0ad55e0abd",
       "packages/ui/src/fichas.ts": "ab12740503c625f51f12b5a89ab77ecebffa7045f9be5c981aff268281696ebb",
-      "packages/ui/src/estilos.css": "9994a2bcb75fa62be0a35b051e515779eeaccc3ae97c2e4ba01bf5a46da5e3d4",
+      "packages/ui/src/estilos.css": "e9684430fabe76d9425d3b812f9d59ec6105b94174fdf5ed9351216bc415a503",
       "packages/ui/src/tema.test.ts": "340da5fbdb69cede7728d3d1071e6783c4c957b60d7054a51a3c0db97d9dd4d2",
       "packages/ui/src/contraste.test.ts": "c7964ebb0e581cf03140ef1b502d60cb58a2a238d7252ec62adb86ed2f9132a4",
       "packages/ui/src/acento.test.ts": "80395564a5b3dfdde8e300c1458785d3ccf7ada41f2baaeefc42791a5341d06e",
@@ -773,8 +773,8 @@
       "packages/domain/src/portas/autorizacao.ts": "70b5d7862e6f566c8683c8677d18f6515aa07c97b55729fde371b744ddf05977",
       "packages/domain/src/portas/media.ts": "8a14e7f1caf3b0fdcdce4a4e066b86f0ffc9cb445e6896a55570e631ed0f8c5c"
     },
-    "quando": "2026-09-08T17:44:57+0200",
-    "commit": "23a4bb233a50a5c495245131a8598d6297daade7",
+    "quando": "2026-09-08T18:09:03+0200",
+    "commit": "d044c7a16bdca7bb8a30995358f3d73a544bb610",
     "arvoreLimpa": true
   }
 }
