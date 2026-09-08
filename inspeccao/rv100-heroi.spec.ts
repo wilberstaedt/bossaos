@@ -98,7 +98,6 @@ test('§4.2 · o herói escuro, treze critérios', async ({ page }) => {
     const texto = heroi.querySelector('h1')?.parentElement as HTMLElement;
     const cx = (e: Element) => e.getBoundingClientRect();
     const sinal = heroi.querySelector('.ns-sinal') as HTMLElement | null;
-    const antes = getComputedStyle(media, '::before');
     return {
       alturaHeroi: Math.round(cx(heroi).height),
       larguraContentor: Math.round(cx(interno).width),
@@ -116,12 +115,24 @@ test('§4.2 · o herói escuro, treze critérios', async ({ page }) => {
         };
       }),
       // ── 9 · a linha que liga: extremidades, não presença ────────────────
-      ligacao: antes.content !== 'none'
-        ? {
-          existe: true, cor: antes.backgroundColor || antes.borderColor,
-          largura: antes.width, altura: antes.height,
-        }
-        : { existe: false, cor: '', largura: '', altura: '' },
+      // ── 9 · «liga» mede-se pelas EXTREMIDADES ─────────────────────────
+      //
+      // A linha é um elemento e não um `::before` precisamente para isto: um
+      // pseudo-elemento não dá caixa a quem mede. Toca = as duas caixas
+      // cruzam-se nos dois eixos. Presença não é ligação.
+      ligacao: (() => {
+        const l = media.querySelector('.ns-heroi__linha');
+        if (!l) return { existe: false, toca: [] as boolean[], cor: '' };
+        const lb = cx(l);
+        return {
+          existe: true,
+          cor: getComputedStyle(l).backgroundColor,
+          toca: molduras.map((d) => {
+            const b = cx(d);
+            return lb.y < b.bottom && lb.bottom > b.y && lb.x < b.right && lb.right > b.x;
+          }),
+        };
+      })(),
       titulo: heroi.querySelector('h1')?.textContent?.trim() ?? '',
       lead: heroi.querySelector('.ns-lead')?.textContent?.trim() ?? '',
       ctas: [...heroi.querySelectorAll('.ns-accao-heroi')].map((a) => ({
@@ -166,10 +177,14 @@ test('§4.2 · o herói escuro, treze critérios', async ({ page }) => {
       : `só há ${m.superficies.length} superfícies no herói, e o norte pede três`);
   if (!terceira) {
     diz(9, 'linha coral liga as TRÊS superfícies', false,
-      'não se pode medir «liga as três» com duas — o que falta é a superfície,'
-      + ` e a ligação declarada é ${m.ligacao.existe ? 'um ::before que existe' : 'inexistente'}`);
+      'não se pode medir «liga as três» com duas — o que falta é a superfície');
+  } else if (!m.ligacao.existe) {
+    diz(9, 'linha coral liga as TRÊS superfícies', false, 'não há linha nenhuma');
   } else {
-    diz(9, 'linha coral liga as TRÊS superfícies', null, 'por medir');
+    const tocadas = m.ligacao.toca.filter(Boolean).length;
+    diz(9, 'linha coral liga as TRÊS superfícies', tocadas === 3,
+      `toca ${tocadas} de ${m.ligacao.toca.length}: ${JSON.stringify(m.ligacao.toca)}`
+      + ` · cor ${m.ligacao.cor}`);
   }
   diz(10, 'estado REAL, não rótulo fixo', false,
     m.sinal === null ? 'não há sinal nenhum no herói'

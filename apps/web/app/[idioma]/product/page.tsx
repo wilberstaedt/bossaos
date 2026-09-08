@@ -70,10 +70,10 @@ export default async function Produto({ params }: { params: Promise<{ idioma: Id
         <p className="bo-publico__texto">{k.prodComandaTexto}</p>
         <div className="bo-mkt__par">
           <figure className="bo-mkt__figura bo-mkt__figura--transbordo">
-            <Composicao qual="sala" idioma={idioma} prioritaria ranhuraPorDecidir="(min-width: 1200px) 1152px, 100vw" />
+            <Composicao qual="sala" idioma={idioma} prioritaria ranhuraPorDecidir="(min-width: 1200px) 1232px, 100vw" />
           </figure>
           <figure className="bo-mkt__figura bo-mkt__figura--transbordo">
-            <Composicao qual="kds" idioma={idioma} ranhuraPorDecidir="(min-width: 1200px) 1152px, 100vw" />
+            <Composicao qual="kds" idioma={idioma} ranhuraPorDecidir="(min-width: 1200px) 1232px, 100vw" />
           </figure>
         </div>
         <p className="bo-mkt__legenda">{k.heroiLegenda}</p>
@@ -84,7 +84,7 @@ export default async function Produto({ params }: { params: Promise<{ idioma: Id
         <h2 id="t-catalogo">{k.prodCatalogoTitulo}</h2>
         <p className="bo-publico__texto">{k.prodCatalogoTexto}</p>
         <figure className="bo-mkt__figura bo-mkt__figura--transbordo">
-          <Composicao qual="catalogo" idioma={idioma} ranhuraPorDecidir="(min-width: 1200px) 1152px, 100vw" />
+          <Composicao qual="catalogo" idioma={idioma} ranhuraPorDecidir="(min-width: 1200px) 1232px, 100vw" />
         </figure>
       </section>
 

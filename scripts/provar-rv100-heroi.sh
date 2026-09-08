@@ -32,14 +32,17 @@ correr() {
 
 verdes() { echo "$1" | grep -oE 'CRITERIO [0-9]+ ok' | sort -u | wc -l | tr -d ' '; }
 
-echo "1. Como está: oito verdes e cinco vermelhos, e os vermelhos são o achado"
+echo "1. Como está: onze verdes e dois vermelhos, e os dois vão ao Matheus"
 BASE="$(correr)"
 echo "$BASE" | grep -E 'AMBITO_HEROI' | sed 's/^/     /'
 VERDES_ANTES=$(verdes "$BASE")
-if [ "$VERDES_ANTES" -eq 8 ]; then
-  echo "  ok    oito critérios verdes antes do plante"
+# 8 -> 11: a terceira superfície e o contentor a 1280 curaram três critérios.
+# O número está aqui de propósito e não é `-gt`: se mudar, é porque o herói
+# mudou, e isso tem de ser dito e não absorvido.
+if [ "$VERDES_ANTES" -eq 11 ]; then
+  echo "  ok    onze critérios verdes antes do plante"
 else
-  echo "  FALHA esperava 8 verdes e vi $VERDES_ANTES — o controlo mede outra coisa"
+  echo "  FALHA esperava 11 verdes e vi $VERDES_ANTES — o controlo mede outra coisa"
   falhas=$((falhas + 1))
 fi
 if echo "$BASE" | grep -q 'CRITERIO 7 ok'; then
@@ -74,21 +77,20 @@ else
     falhas=$((falhas + 1))
   fi
   VERDES_DEPOIS=$(verdes "$COM_PLANTE")
-  if [ "$VERDES_DEPOIS" -eq 7 ]; then
-    echo "  ok    e arrastou zero: sete verdes ficam verdes"
+  if [ "$VERDES_DEPOIS" -eq 10 ]; then
+    echo "  ok    e arrastou zero: dez verdes ficam verdes"
   else
-    echo "  FALHA sobraram $VERDES_DEPOIS verdes e deviam ser 7 — o plante mexeu noutros"
+    echo "  FALHA sobraram $VERDES_DEPOIS verdes e deviam ser 10 — o plante mexeu noutros"
     falhas=$((falhas + 1))
   fi
 fi
 cp -p "$GUARDADO" "$ALVO"
 
 echo
-echo "  DECLARADO: cinco critérios estão VERMELHOS e são achado, não defeito deste"
-echo "           guião — o Staff móvel que não existe (8 e 9), o estado que é"
-echo "           rótulo fixo (10), o contentor a 1200 (2) e o CTA secundário (13)."
-echo "           Mais o lead, que diverge do §4.2. Nenhum se cura por iniciativa"
-echo "           nossa: os de texto e o do estado vão ao sénior."
+echo "  DECLARADO: dois critérios ficam VERMELHOS e vão ao MATHEUS, não a nós —"
+echo "           o 10, o estado que é rótulo fixo (as saídas honestas são sinal"
+echo "           verdadeiro ou emendar o §4.2), e o 13 mais o lead, que é a cópia"
+echo "           dele. Não se reescreve por iniciativa nossa."
 echo
 if [ "$falhas" -gt 0 ]; then
   echo "  âmbito:  o controlo dos critérios VERDES do §4.2."

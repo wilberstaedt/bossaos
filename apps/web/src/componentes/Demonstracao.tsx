@@ -6,6 +6,7 @@ import catalogoEs from '../demonstracao/es-ES/catalogo-1440.png';
 import catalogoRecorteEs from '../demonstracao/es-ES/catalogo-recorte-560.png';
 import salaRecorteEs from '../demonstracao/es-ES/sala-recorte-560.png';
 import salaHeroiEs from '../demonstracao/es-ES/sala-heroi-834.png';
+import staffMovelEs from '../demonstracao/es-ES/staff-movel-390.png';
 import cartaRecorteEs from '../demonstracao/es-ES/carta-recorte-560.png';
 import tabletEstreitoEs from '../demonstracao/es-ES/tablet-estreito-390.png';
 import kdsRecorteEs from '../demonstracao/es-ES/kds-recorte-560.png';
@@ -18,6 +19,7 @@ import catalogoPt from '../demonstracao/pt-BR/catalogo-1440.png';
 import catalogoRecortePt from '../demonstracao/pt-BR/catalogo-recorte-560.png';
 import salaRecortePt from '../demonstracao/pt-BR/sala-recorte-560.png';
 import salaHeroiPt from '../demonstracao/pt-BR/sala-heroi-834.png';
+import staffMovelPt from '../demonstracao/pt-BR/staff-movel-390.png';
 import cartaRecortePt from '../demonstracao/pt-BR/carta-recorte-560.png';
 import tabletEstreitoPt from '../demonstracao/pt-BR/tablet-estreito-390.png';
 import kdsRecortePt from '../demonstracao/pt-BR/kds-recorte-560.png';
@@ -30,6 +32,7 @@ import catalogoEn from '../demonstracao/en/catalogo-1440.png';
 import catalogoRecorteEn from '../demonstracao/en/catalogo-recorte-560.png';
 import salaRecorteEn from '../demonstracao/en/sala-recorte-560.png';
 import salaHeroiEn from '../demonstracao/en/sala-heroi-834.png';
+import staffMovelEn from '../demonstracao/en/staff-movel-390.png';
 import cartaRecorteEn from '../demonstracao/en/carta-recorte-560.png';
 import tabletEstreitoEn from '../demonstracao/en/tablet-estreito-390.png';
 import kdsRecorteEn from '../demonstracao/en/kds-recorte-560.png';
@@ -86,7 +89,8 @@ import kdsEstreitoEn from '../demonstracao/en/kds-estreito-390.png';
 export type NomeDaComposicao =
   | 'sala' | 'kds' | 'catalogo' | 'tablet' | 'carta'
   | 'catalogoRecorte' | 'kdsRecorte' | 'tabletRecorte'
-  | 'salaRecorte' | 'cartaRecorte' | 'tabletEstreito' | 'salaHeroi';
+  | 'salaRecorte' | 'cartaRecorte' | 'tabletEstreito' | 'salaHeroi'
+  | 'staffMovel';
 
 /**
  * ── A fonte segue o IDIOMA, e antes não seguia ────────────────────────────
@@ -110,6 +114,7 @@ const FONTES: Record<Idioma, Record<NomeDaComposicao, StaticImageData>> = {
     catalogoRecorte: catalogoRecorteEs, kdsRecorte: kdsRecorteEs,
     salaRecorte: salaRecorteEs, cartaRecorte: cartaRecorteEs,
     salaHeroi: salaHeroiEs,
+    staffMovel: staffMovelEs,
     tabletEstreito: tabletEstreitoEs,
     tabletRecorte: tabletRecorteEs,
     tablet: salaTabletEs, carta: cartaMovelEs,
@@ -119,6 +124,7 @@ const FONTES: Record<Idioma, Record<NomeDaComposicao, StaticImageData>> = {
     catalogoRecorte: catalogoRecortePt, kdsRecorte: kdsRecortePt,
     salaRecorte: salaRecortePt, cartaRecorte: cartaRecortePt,
     salaHeroi: salaHeroiPt,
+    staffMovel: staffMovelPt,
     tabletEstreito: tabletEstreitoPt,
     tabletRecorte: tabletRecortePt,
     tablet: salaTabletPt, carta: cartaMovelPt,
@@ -128,6 +134,7 @@ const FONTES: Record<Idioma, Record<NomeDaComposicao, StaticImageData>> = {
     catalogoRecorte: catalogoRecorteEn, kdsRecorte: kdsRecorteEn,
     salaRecorte: salaRecorteEn, cartaRecorte: cartaRecorteEn,
     salaHeroi: salaHeroiEn,
+    staffMovel: staffMovelEn,
     tabletEstreito: tabletEstreitoEn,
     tabletRecorte: tabletRecorteEn,
     tablet: salaTabletEn, carta: cartaMovelEn,
@@ -162,6 +169,7 @@ const ESTREITAS: Record<Idioma, Partial<Record<NomeDaComposicao, StaticImageData
     tabletRecorte: tabletEstreitoEs,
     salaRecorte: salaEstreitaEs, cartaRecorte: cartaMovelEs,
     salaHeroi: salaEstreitaEs,
+    staffMovel: staffMovelEs,
     tabletEstreito: tabletEstreitoEs,
     tablet: salaEstreitaEs,
   },
@@ -171,6 +179,7 @@ const ESTREITAS: Record<Idioma, Partial<Record<NomeDaComposicao, StaticImageData
     tabletRecorte: tabletEstreitoPt,
     salaRecorte: salaEstreitaPt, cartaRecorte: cartaMovelPt,
     salaHeroi: salaEstreitaPt,
+    staffMovel: staffMovelPt,
     tabletEstreito: tabletEstreitoPt,
     tablet: salaEstreitaPt,
   },
@@ -180,6 +189,7 @@ const ESTREITAS: Record<Idioma, Partial<Record<NomeDaComposicao, StaticImageData
     tabletRecorte: tabletEstreitoEn,
     salaRecorte: salaEstreitaEn, cartaRecorte: cartaMovelEn,
     salaHeroi: salaEstreitaEn,
+    staffMovel: staffMovelEn,
     tabletEstreito: tabletEstreitoEn,
     tablet: salaEstreitaEn,
   },
@@ -194,7 +204,7 @@ const ALT: Record<NomeDaComposicao, string> = {
   // «o mesmo salão num tablet», e trocar a imagem tornaria o texto falso.
   catalogoRecorte: 'altCatalogo', kdsRecorte: 'altKds', tabletRecorte: 'altTablet',
   salaRecorte: 'altSala', cartaRecorte: 'altCarta', tabletEstreito: 'altTablet',
-  salaHeroi: 'altSala',
+  salaHeroi: 'altSala', staffMovel: 'altStaff',
   tablet: 'altTablet', carta: 'altCarta',
 };
 

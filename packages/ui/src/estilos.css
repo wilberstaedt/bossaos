@@ -99,7 +99,11 @@
   --bo-toque-operacao: 48px;
 
   /* ── Grade ─────────────────────────────────────────────────────────────── */
-  --bo-largura-maxima: 1200px;
+  /* 1200 -> 1280 a 08/09: o §4.2 pede um contentor de 1240-1280 e o herói
+     media 1200. A cascata que eu temia sobre a propagação das ranhuras **foi
+     medida e não existe** — a `/product` pinta a caixa dela e não
+     «contentor menos 128». Alargar dá mais 73 px à captura do herói. */
+  --bo-largura-maxima: 1280px;
   --bo-margem-movel: 24px;
   --bo-margem-secretaria: 64px;
 
@@ -2198,10 +2202,13 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
 /* ── Transbordo medido, para o mestre de 1440 caber na banda ───────────────
    O `main` é 1200 com 64 px de recuo de cada lado, o que dá 1072 de conteúdo —
    e 1072 põe o mestre de 1440 a 10,4 px, abaixo dos 11. A banda de 1072 é
-   [1072, 1364] e não há variante que lá caiba; alargar a caixa para **1152** faz
-   o mestre que já lá está servir, e dá 11,2 px.
-   80 px de transbordo, 40 para cada lado: 1072+80 = 1152, e 1152 continua dentro
-   dos 1200 do `main`, portanto a página não passa a rolar na horizontal.
+   [1072, 1364] e não há variante que lá caiba; alargar a caixa faz o mestre que
+   já lá está servir.
+   80 px de transbordo, 40 para cada lado. Com o contentor a 1280 o conteúdo é
+   1152 e a caixa fica **1232**, dentro dos 1280 do `main` — a página não passa a
+   rolar na horizontal. (Com o contentor a 1200 dava 1152; quando ele alargou, a
+   promessa ficou nos 1152 e a caixa foi para 1232, e a matriz apanhou o
+   **1,027× de ampliação**. A promessa acompanha a caixa, sempre.)
    **1131 daria exactamente 11,0**, encostado ao limiar — 1152 deixa margem. */
 /* Só a partir de 1200: abaixo disso o `main` já não tem 64 px de recuo para
    emprestar, e `calc(100% + 80px)` punha a página a rolar na horizontal — que é
@@ -2471,7 +2478,7 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
   .ns-heroi__grelha { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--bo-espaco-xl); }
 }
 .ns-heroi__media { margin: 0; position: relative; display: grid; gap: var(--bo-espaco-md); }
-.ns-heroi__segunda { width: 74%; margin-left: auto; margin-top: calc(var(--bo-espaco-xl) * -1); }
+.ns-heroi__segunda { width: 62%; margin-left: auto; margin-top: calc(var(--bo-espaco-xl) * -1); }
 /* ── A 390 os 74% davam 265, e 265 não chega ───────────────────────────────
    A coluna do herói pinta 358 num visor de 390, e 74% disso são 265 px. Com a
    fonte estreita de 390 a servir, 265 põe o texto a **9,5 px** — abaixo dos 11
@@ -2682,12 +2689,50 @@ h3.ns-linha-do-tempo__nome, h3.ns-titulo-pequeno, h3.ns-preco__nome { line-heigh
    visualmente as três superfícies». Não é ornamento solto — nasce da moldura
    principal e corre até à segunda, que é o percurso que a comanda faz. */
 .ns-heroi__media { position: relative; }
-.ns-heroi__media::before {
-  content: ''; position: absolute; z-index: 0;
-  inset-inline: 8%; top: 46%; height: 10px; border-radius: 999px;
+/* A linha deixou de ser `::before`: a régua do §4.2 manda medir as EXTREMIDADES
+   («liga» é verbo com consequência geométrica), e um pseudo-elemento não dá
+   caixa a quem mede. Elemento real, `aria-hidden`, e a mesma aparência. */
+.ns-heroi__linha {
+  /* z-index 3 e não 0: com 0 a linha ficava ATRÁS de superfícies opacas e o
+     critério 9 passava na mesma, porque «tocar» é geometria e o norte diz «liga
+     VISUALMENTE». Uma linha que toca três caixas e não se vê é verde sobre
+     nada — a mesma família dos verdes vazios que ando a fechar. */
+  position: absolute; z-index: 3; display: block;
+  /* 53% saiu de uma MEDIÇÃO e não de um palpite: as três caixas só se cruzam
+     numa faixa de 12 px (547-559 a 1440), porque a sala acaba onde o KDS
+     começa. Fora dessa faixa a linha toca duas e o critério 9 recusa — e
+     recusou, quando o KDS estreitou de 74% para 62% e mudou de altura. */
+  inset-inline: 4%; top: 53%; height: 10px; border-radius: 999px;
   background: var(--bo-acento-sinal);
 }
-.ns-heroi__media > * { position: relative; z-index: 1; }
+.ns-heroi__media > *:not(.ns-heroi__linha) { position: relative; z-index: 1; }
+/* ── A terceira superfície, e a aritmética que fixa os dois tamanhos ───────
+   O telefone do Staff sobrepõe-se em baixo à ESQUERDA, do lado oposto ao KDS,
+   para a linha coral atravessar as três em vez de passar por cima de duas.
+
+   **Os dois não cabem lado a lado, e isso é uma conta e não um gosto.** Para o
+   KDS ler a 11 px a caixa dele precisa de 440; para o Staff ler, 306. São 746
+   numa coluna de 714. A sobreposição é forçada.
+
+   Encostam-se os dois ao mínimo: KDS a 62% (443 px, 11,1) e Staff a 43% (307 px,
+   11,0). Assim tocam-se em 35 px em vez de 128, que é a diferença entre um
+   telefone pousado sobre a esquina do KDS e um telefone a tapá-lo.
+
+   Medi primeiro com 74% e 44% e **fui ver a captura**: o telefone cobria o KDS
+   quase todo. Os números passavam. */
+/* `.ns-heroi__media > .ns-heroi__terceira` e não `.ns-heroi__terceira`: a regra
+   `.ns-heroi__media > *:not(...)` acima tem especificidade 0,2,0 e ganhava a
+   0,1,0 **independentemente da ordem**. O telefone ficava em fluxo, caía para
+   uma terceira linha da grelha e a linha coral passava a tocar só o KDS.
+   Medido: y 993-1366, fora da moldura. É a cascata a apanhar-me pela segunda
+   vez hoje — a primeira foi por ordem, esta é por especificidade. */
+.ns-heroi__media > .ns-heroi__terceira {
+  /* 26% -> 44%. A 26% a caixa dava 186 px para uma captura de 390, o que punha
+     o texto do Staff a **6,7 px** — e o §4.2 pede «Staff mobile sobreposto em
+     tamanho LEGÍVEL». Para chegar aos 11 px a caixa tem de ter 306, que são 44%
+     dos 714 da coluna. O tamanho não é escolha estética: sai da conta. */
+  position: absolute; left: 0; top: 40%; width: 43%; z-index: 2;
+}
 
 /* O destaque do Restaurant é EDITORIAL, que é o que o §4.6 pede em vez de um
    crachá «popular» sem justificação: uma faixa coral no topo do cartão, com o
@@ -2816,4 +2861,23 @@ h3.ns-linha-do-tempo__nome, h3.ns-titulo-pequeno, h3.ns-preco__nome { line-heigh
 @media (max-width: 400px) {
   .ns-bento__area { padding-inline: 8px; }
   .ns-heroi__segunda { width: 100%; }
+}
+
+/* ══ Abaixo de 768 as três superfícies EMPILHAM ════════════════════════════
+   A sobreposição é um desenho de ecrã largo. Num telefone, 44% de uma coluna de
+   328 são **144 px**, e 144 com a captura de 390 põe o texto do Staff a 5,2 px —
+   pior do que o defeito que a terceira superfície veio curar.
+
+   Para chegar aos 11 px a caixa precisa de 306, que são 93% da coluna: aí já não
+   é uma sobreposição, é um bloco. Então é um bloco, e assume-se.
+
+   E a linha coral desaparece: com as três empilhadas não há nada para ela
+   atravessar, e uma linha que não liga é ornamento. O critério 9 mede a 1440,
+   que é onde a sobreposição existe. */
+@media (max-width: 767px) {
+  .ns-heroi__media > .ns-heroi__terceira {
+    position: static;
+    width: 100%;
+  }
+  .ns-heroi__linha { display: none; }
 }

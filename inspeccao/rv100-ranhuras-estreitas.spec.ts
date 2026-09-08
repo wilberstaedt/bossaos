@@ -42,7 +42,12 @@ import { PAGINAS, julgar, medirComposicoes } from './medir-ranhuras.ts';
  * a página caber sem rolar mais do que o necessário.
  */
 const VISORES = [360, 375, 390, 430] as const;
-const ESPERADAS = 13;
+/**
+ * 13 -> 14 a 08/09: o herói ganhou a terceira superfície que o §4.2 pedia pelo
+ * nome, o Staff móvel. A guarda de população **disparou sozinha** quando ela
+ * apareceu, que é exactamente para isso que existe.
+ */
+const ESPERADAS = 14;
 
 test('as composições nos visores estreitos', async ({ page }) => {
   test.setTimeout(1_800_000);

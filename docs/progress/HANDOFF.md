@@ -4598,3 +4598,29 @@ desfocado. Não é «não vi nenhuma».
 **Controlo feito agora e não depois:** os cinco vermelhos provam que a prova
 recusa, mas só desses cinco; os oito verdes estavam por provar. O plante tira a
 sombra do KDS, o critério 7 recusa e **arrasta zero**.
+
+## §4.2: onze de treze, e a fotografia ainda não está bem — 08/09
+
+`criterios=13 ok=11 falha=2`. As duas que restam vão ao Matheus: o estado (10) e a
+cópia (13 + lead). Construí a terceira superfície (Staff móvel, capturado do
+`bossa-demo`) e alarguei o contentor para 1280 — **a cascata que eu temia não
+existia**, e foi medida em vez de suposta.
+
+**A cascata apanhou-me duas vezes hoje:** de manhã por ordem, à tarde por
+**especificidade** — `.ns-heroi__media > *:not(...)` é 0,2,0 e ganhava à minha
+regra de 0,1,0, deixando o telefone em fluxo fora da moldura.
+
+**E a minha própria guarda deu verde sobre nada:** a linha coral tocava as três
+caixas com `z-index: 0` e **não se via**. «Tocar» é geometria; o norte diz «liga
+visualmente». Só o apanhei ao olhar para a captura. Está a `z-index: 3`.
+
+**Os tamanhos são uma conta:** KDS precisa de 440 px e Staff de 306, e a coluna
+tem 714. A sobreposição é forçada; encostei ambos ao mínimo legível.
+
+**O que fica mal e não inventei cura:** a captura principal mostra a **navegação
+do TPV** e não um mapa/sala (o critério 5 só mede largura, e passou sobre o ecrã
+errado); o telefone corta texto do KDS; a linha atravessa texto.
+
+**Buraco da declaração fechado:** `sem_declaracao` conta-se haja ou não defeito,
+com assinatura obrigatória, e o terceiro plante exerce-o. A guarda de população da
+matriz estreita disparou sozinha quando a superfície nova apareceu (13 → 14).

@@ -114,6 +114,15 @@ test('os três recortes, um por ecrã e por idioma', async ({ page }) => {
       { nome: 'tablet-estreito-390', modo: 'visor', ancora: 'h1',
         visor: VISOR_ESTREITO,
         caminho: `/${idioma}/pos/${DEMO.unidade}` },
+      // ── A terceira superfície do herói ──────────────────────────────────
+      //
+      // O §4.2 pede «Staff mobile sobreposto», e Staff é um ECRÃ e não um
+      // tamanho: usar a `sala-estreita-390` seria pôr a sala a fazer de Staff.
+      // Vai a 390 de visor porque é a largura em que o Staff é usado — quem
+      // anda em serviço tem o telefone na mão.
+      { nome: 'staff-movel-390', modo: 'visor', ancora: 'h1',
+        visor: VISOR_ESTREITO,
+        caminho: `/${idioma}/staff/${DEMO.unidade}/andamento` },
       // ── E a do herói, que é a única que não cabia em nenhuma das duas ────
       //
       // A caixa do herói pinta 667 e a banda dela é [667, 849]. Nem 390 nem 560

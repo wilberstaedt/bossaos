@@ -184,6 +184,18 @@ export default async function Landing({
                 <Composicao qual="kdsRecorte" idioma={idioma}
                             ranhuraPorDecidir="(min-width: 1024px) 494px, 60vw" />
               </div>
+                {/* A TERCEIRA superfície, que o §4.2 pede pelo nome: «Staff
+                    mobile sobreposto em tamanho legível». Faltava, e sem ela o
+                    critério da linha que «liga as três» não se podia medir — o
+                    que faltava não era a linha, era a superfície. */}
+                <div className="ns-moldura ns-moldura--sobreposta ns-heroi__terceira">
+                  <Composicao qual="staffMovel" idioma={idioma}
+                              ranhuraPorDecidir="(min-width: 1024px) 314px, 40vw" />
+                </div>
+                {/* A linha coral é um ELEMENTO e não um `::before`: a régua manda
+                    medir as extremidades, e um pseudo-elemento não dá geometria a
+                    quem mede. Decorativa, portanto escondida de quem ouve. */}
+                <span className="ns-heroi__linha" aria-hidden="true" />
             </figure>
           </div>
         </section>

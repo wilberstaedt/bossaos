@@ -89,3 +89,79 @@ já corrigi duas vezes hoje. O plante tira a sombra da moldura sobreposta:
 
 **A segunda linha é a que o torna prova.** Um plante que apagasse metade do
 quadro estaria a medir a minha edição e não o critério.
+
+---
+
+## Curados três, e a fotografia continua a não estar bem — 08/09
+
+    AMBITO_HEROI criterios=13 ok=11 falha=2 nao_medi=0 texto_divergente=1
+
+**Onze de treze.** As duas que restam são as que vão ao Matheus: o estado (10) e a
+cópia (13 + lead).
+
+| # | antes | agora |
+|---|---|---|
+| 2 | contentor 1200 | **1280** |
+| 6 | 11,2 px | **12,0 px** |
+| 8 | superfície inexistente | **11,0 px** |
+| 9 | não se podia medir | **toca 3 de 3** |
+
+O contentor: **a cascata que eu temia não existia** e o sénior mediu-a em vez de a
+supor. Alargar deu mais 73 px à captura do herói.
+
+### A cascata apanhou-me duas vezes, e da segunda por especificidade
+
+A terceira superfície ficou em fluxo e caiu para uma terceira linha da grelha —
+`y 993-1366`, fora da moldura. A regra `.ns-heroi__media > *:not(...)` tem
+especificidade **0,2,0** e ganhava à minha `.ns-heroi__terceira` de **0,1,0**
+*independentemente da ordem*. Hoje de manhã a cascata apanhou-me por ordem; à
+tarde por especificidade.
+
+### A linha coral: um elemento, e à frente
+
+Passou de `::before` a elemento real porque **a régua manda medir extremidades e
+um pseudo-elemento não dá caixa a quem mede**. E depois: com `z-index: 0` ela
+tocava as três caixas e **não se via**, atrás de superfícies opacas. O critério 9
+passava na mesma — «tocar» é geometria e o norte diz «liga **visualmente**».
+**Verde sobre nada, na guarda que eu próprio escrevi.** Só o vi ao olhar para a
+captura. Está a `z-index: 3`.
+
+E a posição saiu de uma medição: as três só se cruzam numa faixa de **12 px**
+(547-559 a 1440), porque a sala acaba onde o KDS começa. Fora dela o critério
+recusa — e recusou, quando o KDS estreitou e mudou de altura.
+
+### Os dois tamanhos são uma conta, não um gosto
+
+Para o KDS ler a 11 px precisa de 440; o Staff precisa de 306. **São 746 numa
+coluna de 714** — a sobreposição é forçada. Encostei os dois ao mínimo: KDS 62%
+(11,1) e Staff 43% (11,0), o que os põe a tocar-se em 35 px em vez de 128.
+
+Medi primeiro com 74% e 44%, **os números passaram, e fui ver a captura: o
+telefone cobria o KDS quase todo.**
+
+## O que fica mal, e não invento a cura
+
+**A fotografia ainda não está bem, e digo-o em vez de a dar por fechada:**
+
+1. **A captura principal não é um mapa/sala.** O `sala-heroi-834` saiu de
+   `/pos/{unidade}` ancorado no `h1` e mostra a **navegação do TPV** — «Operador,
+   Venta de barra, Historial de cajas». O §4.2 pede «screenshot principal do
+   **mapa/sala**». O critério 5 só mede a largura, portanto passou sobre o ecrã
+   errado — a mesma família do recorte que eu quase entreguei esta manhã.
+2. **O telefone ainda corta texto do KDS** («Marcar lista», «Empezar»).
+3. **A linha atravessa texto** em vez de correr por um espaço livre.
+
+Os três são de composição e a régua diz que a beleza é da Nathalia — mas **o 1 não
+é beleza, é o ecrã errado**, e fica como achado a par dos outros dois.
+
+## O buraco da declaração, fechado
+
+`sem_declaracao` passa a contar-se **haja ou não defeito**, e cada ausência tem de
+estar assinada. O terceiro plante do controlo tira a declaração a um sítio cujos
+números continuam bons e exige que a guarda o apanhe:
+
+    ok  apanhou a declaração que falta, mesmo com os números bons
+    ok  e não inventou defeito nenhum: os números continuam bons
+
+E a guarda de população da matriz estreita **disparou sozinha** quando a terceira
+superfície apareceu: 13 → 14. Era para isso que existia.
