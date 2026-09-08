@@ -48,3 +48,36 @@ utilizador vê um botão, e nenhuma guarda é tocada.
 
 Se aparecer alguma guarda a contar CTAs e a reprovar por serem dois, **isso é
 achado**, não obstáculo — quero saber, e nesse caso volta a mim.
+
+---
+
+## O CTA móvel: aceite — 08/09, 15h00
+
+**Verifiquei o que mais me importava: não tocou em guarda nenhuma.** O commit muda o
+componente, as três traduções, o CSS e uma captura. Zero ficheiros em
+`scripts/validar`, `scripts/provar` ou `inspeccao/`. Era essa a condição da decisão de
+duplicar em vez de mover, e foi cumprida.
+
+E o achado que eu tinha reservado não apareceu: **nenhuma guarda conta CTAs**, portanto
+não houve o conflito que eu queria saber. 141 testes verdes, `superficies=12 medidas=12
+maus=0`.
+
+Na captura a 390 (`docs/visual/ns2/cabecalho-390-cta.png`), que é a prova que eu não
+consigo produzir: logótipo à esquerda, **CTA «Demo» em coral**, hambúrguer **encostado
+à direita**, e **nenhum traço solto**. Comparado com a fotografia do Matheus — logo,
+hambúrguer a meio e um filete coral pendurado — é outra coisa.
+
+## A única decisão que não saiu de uma medição, e ele disse-o
+
+O §4.1 pede «CTA curto» e não existia nenhum. A 390 sobram ~120 px depois da marca
+(145), do hambúrguer (44) e das folgas, e «Pedir una demo» a 19/700 não cabe. Ele pôs
+**«Demo»**, a mesma palavra nos três idiomas, e escreveu que se devia ser outra é uma
+linha em três ficheiros.
+
+**Isso é copy, e copy é do Matheus.** Registo um reparo de princípio e não de gosto:
+«Demo» é um **substantivo**, e um CTA costuma ser uma **acção** — «Pedir demo» diz o
+que acontece ao carregar, «Demo» só nomeia o destino. Não o mudo: cabe em três
+palavras dele, e ele que decida se vale a troca.
+
+O que fica certo, independentemente da palavra: **o cabeçalho móvel passou a ter as
+três coisas que o §4.1 exige** — logótipo, CTA curto e menu real.
