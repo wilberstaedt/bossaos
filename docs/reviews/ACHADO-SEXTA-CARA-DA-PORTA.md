@@ -127,3 +127,66 @@ respeito à soma. Um total não tem distribuição lá dentro até alguém a ir 
 A diferença prática não é pequena. «O desenho das provas acumula» manda rever quatro
 ficheiros e desconfiar do padrão. «Uma prova não tinha `after`» manda escrever um
 `after`.
+
+---
+
+## As quatro curadas — 08/09
+
+**A lista está confirmada e não há quinta prova.** Varrimento do repositório
+inteiro: restam duas chamadas ao registo, no `autenticar.setup.ts` e no
+`sessao-da-demo.mjs`, e as duas já entram porque as sementes criam as contas.
+
+### O padrão, igual nas quatro
+
+A conta **nasce por dentro**, com o `criarContaDeProva`; a sessão continua a vir
+do **`sign-in` real** — é isso que impede a cura de ser um cookie forjado. **O
+carimbo `Date.now()` fica**: era a boa parte, e é ele que isola as corridas.
+
+O ajudante vive num sítio só, `provas/conta-de-prova.ts`, com o par
+`criar`/`apagar` junto — separá-los era repetir o defeito que gerou os restos.
+
+    provar-acesso.sh              25 passam · 3 por atribuir (ver abaixo)
+    provar-recuperacao-e-mfa.sh   saída 0, com o controlo negativo a acender
+    provar-catalogo.sh            saída 0
+    provar-jornada.sh             saída 0
+
+### A fonte dos restos, atribuída
+
+    reset   62
+    mfa     62
+    carla    1
+    ────────────
+            125
+
+**124 dos 125 são do `recuperacao-e-mfa`** — a única das quatro **sem `after`
+nenhum**. As outras já limpavam: o `acesso` e o `catalogo-http` no próprio
+ficheiro, o `jornada` no corredor.
+
+Ganhou limpeza, e está medido que funciona: depois de uma corrida completa, a
+base tem **133 utilizadores e 125 `@exemplo.example`** — exactamente os mesmos de
+antes. Criou e apagou.
+
+### O que NÃO fiz, e é a condição que me deram
+
+**Não pus limpeza no `jornada`.** Ele declara, no próprio `after`, que não limpa
+de propósito: cria uma organização real e o rasto dela em `audit_events` é
+**append-only por gatilho**, para toda a gente, incluindo a credencial de
+migração. Quem limpa é o `scripts/provar-jornada.sh`, com trap e com a
+verificação de que o gatilho voltou.
+
+**É a mesma classe do `cash_movements` que travou o bloco 2** — e aqui já estava
+resolvida, no sítio certo: num guião, não num teste que pode morrer a meio e
+deixar a auditoria sem protecção.
+
+### Uma consequência que medi e curei
+
+Ao tirar o registo, **todo o tráfego de autenticação passou para uma rota que
+aceita 3 pedidos por 10 segundos**. No `acesso`, o caso do `Origin` chegava com a
+janela saturada e recebia **429 onde espera 403** — que é outra pergunta. Passou
+a esperar a janela, em vez de aceitar os dois códigos: um teste que aceita dois
+códigos deixa de saber qual mediu.
+
+### O que falta para a base ficar reponível
+
+As **três identidades órfãs** — `rv100-022`, `x` e `y` em `@inspeccao.example` —
+citadas por suites e criadas por ninguém.

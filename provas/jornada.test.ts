@@ -3,6 +3,12 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHmac } from 'node:crypto';
 import { Client } from 'pg';
+// Sem o `apagarContasDeProva`: esta prova NÃO limpa, de propósito, e o motivo
+// está escrito no `after` — a jornada cria uma organização real e o rasto dela
+// em `audit_events` é append-only por gatilho. Quem limpa é o
+// `scripts/provar-jornada.sh`, com trap e com a verificação de que o gatilho
+// voltou. Importar o apagador aqui era prometer uma limpeza que não acontece.
+import { autenticacaoDeProva, criarContaDeProva } from './conta-de-prova.ts';
 
 /**
  * A JORNADA — J01, J02 e J11, de ponta a ponta.
@@ -219,19 +225,35 @@ async function verComoEstranho(caminho: string) {
  * Uma conta criada pela porta do produto. O limitador de abuso é respeitado —
  * desligá-lo para a prova passar seria apagar um requisito para chegar ao verde.
  */
+const auth = autenticacaoDeProva();
+/** O que esta corrida criou — e que esta corrida apaga. */
+const criadas: string[] = [];
+
 async function inscrever(email: string, nome: string) {
-  let inscricao: Response | undefined;
+  // ── A conta nasce POR DENTRO; a entrada continua a ser a real ───────────
+  //
+  // O comentário acima dizia «criada pela porta do produto», e essa porta fechou
+  // a 07/09 às 22h37. Com email carimbado, nunca havia entrada possível: esta
+  // prova ia sempre ao registo e partiu-se inteira, sem ninguém dar por isso —
+  // o portão só corre `validar-*.sh`.
+  //
+  // **O carimbo fica**: é ele que isola uma corrida da seguinte. E o limitador
+  // continua respeitado, que era a boa razão do laço.
+  await criarContaDeProva(auth, email, SENHA);
+  criadas.push(email);
+
+  let entrada: Response | undefined;
   for (let tentativa = 0; tentativa < 6; tentativa++) {
-    inscricao = await fetch(`${BASE}/api/auth/sign-up/email`, {
+    entrada = await fetch(`${BASE}/api/auth/sign-in/email`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', origin: BASE },
-      body: JSON.stringify({ email, password: SENHA, name: nome }),
+      body: JSON.stringify({ email, password: SENHA }),
     });
-    if (inscricao.status !== 429) break;
+    if (entrada.status !== 429) break;
     await dormir(11_000);
   }
-  assert.ok(inscricao?.ok, `inscrição de ${nome} falhou: ${inscricao?.status}`);
-  return (inscricao.headers.getSetCookie?.() ?? []).map((c) => c.split(';')[0]).join('; ');
+  assert.ok(entrada?.ok, `entrada de ${nome} falhou: ${entrada?.status}`);
+  return (entrada.headers.getSetCookie?.() ?? []).map((c) => c.split(';')[0]).join('; ');
 }
 
 before(async () => {

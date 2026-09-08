@@ -1,6 +1,7 @@
 import { after, before, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from 'pg';
+import { autenticacaoDeProva, criarContaDeProva } from './conta-de-prova.ts';
 import { IDS } from '../packages/db/prisma/fixtures.ts';
 
 /**
@@ -37,21 +38,27 @@ let grupo = '';
 const opcoes: string[] = [];
 
 const dormir = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const auth = autenticacaoDeProva();
 
 async function registar(): Promise<void> {
+  // A conta nasce POR DENTRO; a sessão continua a vir da porta. O registo
+  // fechou a 07/09 às 22h37 e, como o email é carimbado, esta prova ia
+  // sempre lá — partiu-se inteira sem ninguém dar por isso, porque o portão
+  // só corre `validar-*.sh`. O carimbo fica: é ele que isola as corridas.
+  await criarContaDeProva(auth, CONTA, SENHA);
   let r: Response | undefined;
   for (let i = 0; i < 6; i++) {
-    r = await fetch(`${BASE}/api/auth/sign-up/email`, {
+    r = await fetch(`${BASE}/api/auth/sign-in/email`, {
       method: 'POST',
       // `origin` é obrigatório: a biblioteca recusa mutações sem ele. É a
       // validação de origem a funcionar, e não se desliga para a prova passar.
       headers: { 'content-type': 'application/json', origin: BASE },
-      body: JSON.stringify({ email: CONTA, password: SENHA, name: 'Dona do catálogo' }),
+      body: JSON.stringify({ email: CONTA, password: SENHA }),
     });
     if (r.status !== 429) break;
     await dormir(11_000);
   }
-  assert.ok(r?.ok, `registo falhou: ${r?.status} ${await r?.text()}`);
+  assert.ok(r?.ok, `entrada falhou: ${r?.status} ${await r?.text()}`);
   cookie = (r.headers.getSetCookie?.() ?? []).map((c) => c.split(';')[0]).join('; ');
   const { rows } = await sql.query('SELECT id FROM users WHERE email = $1', [CONTA]);
   userId = rows[0].id;

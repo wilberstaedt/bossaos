@@ -1,6 +1,10 @@
-import { before, describe, it } from 'node:test';
+import { after, before, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHmac } from 'node:crypto';
+import { Client } from 'pg';
+import {
+  apagarContasDeProva, autenticacaoDeProva, criarContaDeProva,
+} from './conta-de-prova.ts';
 
 /**
  * O aceite 3 do E04: *"Recuperação e MFA funcionam no ambiente de teste e
@@ -165,21 +169,43 @@ async function esperarMensagem(para: string, segundos = 20): Promise<string> {
 
 // ── Contas ──────────────────────────────────────────────────────────────────
 
+const auth = autenticacaoDeProva();
+/** O que esta corrida criou — e que esta corrida apaga. */
+const criadas: string[] = [];
+
 async function registar(email: string): Promise<string> {
-  let r: Response | undefined;
-  for (let tentativa = 0; tentativa < 6; tentativa++) {
-    r = await fetch(`${BASE}/api/auth/sign-up/email`, {
-      method: 'POST', headers: mutacao(),
-      body: JSON.stringify({ email, password: SENHA, name: email.split('@')[0] }),
-    });
-    if (r.status !== 429) break;
-    await dormir(11_000);
-  }
-  const bolacha = bolachas(r!);
-  const lido = await ler(r!);
-  assert.ok(lido.ok, `registo de ${email} falhou: ${lido.status} ${lido.texto}`);
-  return bolacha;
+  // ── A conta nasce POR DENTRO; a entrada continua a ser a real ───────────
+  //
+  // Isto pedia a rota de registo, que fechou a 07/09 às 22h37. Como o email é
+  // carimbado, nunca existia antes — a prova ia SEMPRE ao registo e partiu-se
+  // inteira, sem ninguém dar por isso: o portão só corre `validar-*.sh`.
+  //
+  // **O carimbo fica**: é ele que isola uma corrida da seguinte.
+  //
+  // E esta prova é a fonte de metade dos restos: não tinha `after` NENHUM, por
+  // isso cada corrida deixava contas na base — 125 delas, uma por corrida. Quem
+  // cria passa a apagar.
+  await criarContaDeProva(auth, email, SENHA);
+  criadas.push(email);
+  const { cookie } = await entrar(email, SENHA);
+  return cookie;
 }
+
+after(async () => {
+  if (criadas.length === 0) return;
+  const url = process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL;
+  if (!url) return;
+  const sql = new Client({ connectionString: url });
+  await sql.connect();
+  try {
+    const saíram = await apagarContasDeProva(sql, criadas);
+    // A diferença entre o que se pediu e o que saiu é onde os restos nascem.
+    assert.equal(saíram, criadas.length,
+      `pedi para apagar ${criadas.length} conta(s) e saíram ${saíram}`);
+  } finally {
+    await sql.end();
+  }
+});
 
 async function entrar(email: string, senha: string) {
   let r: Response | undefined;

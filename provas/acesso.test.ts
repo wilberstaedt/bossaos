@@ -2,6 +2,7 @@ import { after, before, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from 'pg';
 import { IDS } from '../packages/db/prisma/fixtures.ts';
+import { autenticacaoDeProva, criarContaDeProva } from './conta-de-prova.ts';
 
 /**
  * A prova do E04.
@@ -26,6 +27,7 @@ const MIG = process.env.MIGRATION_DATABASE_URL;
 if (!MIG) throw new Error('MIGRATION_DATABASE_URL em falta');
 
 const SENHA = 'uma-senha-bem-comprida-para-provas-123';
+const auth = autenticacaoDeProva();
 const marca = Date.now();
 
 /**
@@ -71,19 +73,32 @@ const dormir = (ms: number) => new Promise((r) => setTimeout(r, ms));
  * e a protecção tem um caso próprio que a mede, mais abaixo.
  */
 async function registar(email: string): Promise<string> {
+    // ── A conta nasce POR DENTRO; a sessão continua a vir da porta ──────
+    //
+    // Isto pedia a rota de registo, que fechou a 07/09 às 22h37. Como o
+    // email é carimbado, nunca existia antes — logo nunca havia entrada
+    // possível e a prova ia SEMPRE ao registo. Partiu-se inteira, e ninguém
+    // deu por isso porque o portão só corre `validar-*.sh`.
+    //
+    // **O carimbo fica**: é ele que isola uma corrida da seguinte. O que sai
+    // é o registo, que esta prova nem precisava — ela tem cliente `pg`.
+    //
+    // A entrada continua a ser a REAL: é isso que impede a cura de ser um
+    // cookie forjado.
+    await criarContaDeProva(auth, email, SENHA);
   let r: Response | undefined;
   for (let tentativa = 0; tentativa < 6; tentativa++) {
-    r = await fetch(`${BASE}/api/auth/sign-up/email`, {
+    r = await fetch(`${BASE}/api/auth/sign-in/email`, {
       method: 'POST',
       headers: mutacao(),
-      body: JSON.stringify({ email, password: SENHA, name: email.split('@')[0] }),
+      body: JSON.stringify({ email, password: SENHA }),
     });
     if (r.status !== 429) break;
     // Espera fixa, um pouco acima da janela do limitador. Escalonar tornava o
     // arranque imprevisível e foi o que fez esta prova exceder dez minutos.
     await dormir(11_000);
   }
-  assert.ok(r?.ok, `registo de ${email} falhou: ${r?.status} ${await r?.text()}`);
+  assert.ok(r?.ok, `entrada de ${email} falhou: ${r?.status} ${await r?.text()}`);
   const cookie = (r.headers.getSetCookie?.() ?? []).map((c) => c.split(';')[0]).join('; ');
   cookies.set(email, cookie);
 
@@ -196,13 +211,26 @@ describe('O PAR — ausência e presença, com o MESMO identificador', () => {
     // Descoberto a correr: a primeira versão desta prova não enviava `origin` e
     // todos os registos falharam com MISSING_OR_NULL_ORIGIN. Era a biblioteca a
     // fazer o que devia. Fica medido em vez de contornado.
-    const r = await fetch(`${BASE}/api/auth/sign-in/email`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ email: CONTAS.donaA, password: SENHA }),
-    });
-    assert.equal(r.status, 403);
-    assert.match(await r.text(), /ORIGIN/i);
+    // A espera é a mesma do arranque, e a razão mudou hoje: as contas passaram a
+    // nascer por dentro e a ENTRAR pela porta, portanto todo o tráfego de
+    // autenticação desta prova concentrou-se numa rota que aceita **3 pedidos
+    // por 10 segundos**. Este caso chegava com a janela saturada e recebia 429 —
+    // que não é «recusado por falta de Origin», é outra pergunta.
+    //
+    // Espera-se a janela em vez de aceitar o 429: um teste que aceitasse os dois
+    // códigos deixava de saber qual deles mediu.
+    let r: Response | undefined;
+    for (let tentativa = 0; tentativa < 6; tentativa++) {
+      r = await fetch(`${BASE}/api/auth/sign-in/email`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: CONTAS.donaA, password: SENHA }),
+      });
+      if (r.status !== 429) break;
+      await dormir(11_000);
+    }
+    assert.equal(r?.status, 403);
+    assert.match(await r!.text(), /ORIGIN/i);
   });
 
   it('a autenticação trava o abuso — vinte tentativas seguidas dão 429', async () => {
