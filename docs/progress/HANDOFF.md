@@ -3352,6 +3352,10 @@ tempo.**
   lhe cabe é encaminhar.
 - **18** — o email no mapa de mesas, que vem do `sala.ts` e **não do redesign**.
 - **19** — os treze cantos a 10 px.
+  > **Curado em `b52fc14`, depois de esta lista ser escrita.** Zero abaixo de
+  > 14 px no marketing, 18 mantidos no painel — a cura foi por âmbito e a
+  > contenção é medida. **Não vale a pena o Matheus abrir este.** Registo-o aqui
+  > em vez de riscar o item: quem o fecha é quem o abriu.
 
 ### E corrigi um número podre meu
 
