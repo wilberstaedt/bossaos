@@ -41,7 +41,7 @@ export default tseslint.config(
     // sem globais de Node e o `pnpm verificar` acusava `process` e `console`
     // como indefinidos — um veredicto certo pelo motivo errado, que é o que a
     // nota acima já dizia.
-    files: ['scripts/**/*.mjs', 'scripts/**/*.js', 'packages/*/medicoes/**/*.mjs'],
+    files: ['scripts/**/*.mjs', 'scripts/**/*.js', 'packages/*/medicoes/**/*.mjs', 'packages/*/ferramentas/**/*.mjs'],
     languageOptions: { globals: globals.node },
   },
   {

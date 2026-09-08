@@ -62,7 +62,7 @@ describe('criarUtilizador — a porta que não é a rota de registo', () => {
     // O `signInEmail` LANÇA quando recusa — não devolve algo falso. Sem este
     // `catch`, uma conta que não entra saía como um `APIError` cru e a frase
     // que a explica nunca chegava a aparecer. Medido a plantar o `issuer`.
-    let entrou = false;
+    let entrou: boolean;
     try {
       await auth.api.signInEmail({ body: { email: EMAIL, password: SENHA } });
       entrou = true;
