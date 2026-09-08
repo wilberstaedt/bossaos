@@ -492,3 +492,38 @@ Só sobra um caminho medido — o `internalAdapter` do `better-auth`, que **cria
 entra** — e recomendo-o **isolado atrás de uma função, com prova que fixe criar,
 entrar e o `issuer`**, para que uma actualização parta o teste em voz alta em vez
 de partir o produto em silêncio.
+
+---
+
+## [2026-09-08 · manhã] — As guardas passaram a medir conteúdo, e três verdes meus eram falsos
+
+### Decisões técnicas
+- **A frescura das capturas mede CONTEÚDO, não tempo.** Guarda-se o resumo do conteúdo dos ficheiros de produto no momento da captura, no manifesto ao lado delas, e a guarda recalcula e compara. Motivo: a regra por `mtime` recusava quando um formatador gravava um ficheiro por cima com o mesmo texto — e mandava alguém gastar um build inteiro a curar o que não tinha acontecido. Cobre os quatro casos, incluindo a reversão.
+- **A cura intermédia que eu tinha proposto foi rejeitada por mim próprio**: usar o tempo do último commit para ficheiros limpos dá VERDE numa reversão (edita-se, captura-se, reverte-se → as capturas mostram código que já não existe). A regra grosseira apanhava esse caso e a minha, mais fina, não.
+- **O canário dos `mtime` FICA**, com uma só consumidora (`validar-provas-frescas.sh`). Eu tinha dito que o hash o tornava desnecessário; o JR mostrou que apagá-lo cegava uma guarda viva.
+- **O carimbo da página de aprovação nomeia o resumo do conteúdo, não o commit.** Um commit de documentação move o `HEAD` sem mudar um pixel, e um leitor que compare commits conclui que a página envelheceu quando não envelheceu.
+- **`criarUtilizador` sobre `internalAdapter`** é a porta que substitui o registo fechado; `emailVerificado` passou a `false` por omissão, porque um valor por omissão não deve conceder confiança.
+- **Em árvore partilhada por dois agentes, encena-se por caminho** (`git add <ficheiros>`, nunca `-A`).
+
+### Learnings
+- **Uma guarda de frescura verifica no instante em que gera; o artefacto que ela autoriza vive muito para além desse instante.** Pode recusar-se a nascer velha, não a ser lida velha — e envelhece a afirmar frescura, não em silêncio. A cura é o carimbo que o leitor consegue verificar sozinho.
+- **Um controlo que não chega a ser aplicado é indistinguível de um controlo aplicado que não encontrou nada.** Os dois dão verde. Confirmar que a sabotagem está lá ANTES de correr a experiência é o passo barato que separa uma experiência de uma encenação.
+- **`git ls-files` é o instrumento errado para auditar trabalho por commitar** — exclui por construção o que se está a rever. Deu-me 41 ficheiros e zero órfãos sobre uma população que não continha o sujeito.
+- **A emenda tem de estar onde o erro está**, não no rodapé: quem lê de cima para baixo já partiu para verificar a coisa errada antes de chegar à correcção.
+- **«Publicado no GitHub» e «no ar em produção» não são a mesma coisa** neste projecto: o `publicar.sh` publica de um commit local, e as duas coisas divergiram há 593 commits.
+- **Uma peça só fica obsoleta quando o ÚLTIMO caminho que a usa deixa de a usar**, não quando o primeiro deixa.
+- Ler o fim de um relatório e concluir sobre o todo é o mesmo erro que cortar a saída com `head` e raciocinar sobre o corte. Fi-lo duas vezes na mesma manhã.
+
+### O que foi feito
+- Guarda de frescura por conteúdo implementada (JR) e revista por mim a correr a prova, não a lê-la: sete controlos, incluindo a reversão exercida.
+- `validar-capturas-de-marketing.sh` migrada para a mesma pergunta. Revi-a **partindo o comparador**: em vez de passar a verde, saiu «NÃO MEDI — uma impressão estragada não foi vista como diferente».
+- Telas-mestre recapturadas e republicadas, agora com carimbo do conteúdo.
+- Portão `validar-no-commit.sh` passou a contar abstenções: dizia a mesma frase com zero e com treze.
+- Lista de decisões do Matheus corrigida na frase de topo do item 00 e com os números refrescados (23 commits ao produto por publicar, 593 locais).
+
+### Mudança de status do projecto
+- Sem mudança de fase: continua 36/36 etapas e 396/396 telas. **Tudo o que resta espera pessoas** — a decisão da porta (Matheus) e a aprovação visual (Nathalia).
+
+### Próximo passo
+- **Por consertar:** a marca de versão (`/versao.txt`) dá 404 em produção, portanto ninguém confirma de fora que versão está no ar — e a primeira pergunta depois de publicar é «entrou?».
+- **Por migrar:** `validar-provas-frescas.sh`, a última que ainda mede `mtime`. Quando migrar, o canário sai.
