@@ -418,3 +418,77 @@ recuperável. Três saídas nomeadas, nenhuma escolhida — é decisão de produ
 3. **parar e esperar pelo Matheus.**
 
 **Duas coisas dependem dele e nenhuma é negociável por mim:** a aprovação visual, e os **300+ commits por empurrar** com a CI escura desde 05/09 — todo o verde desta noite é verde nesta máquina.
+
+---
+
+## [2026-09-08] — A noite do North Star, e um buraco que era portante
+
+### Decisões técnicas
+
+- **O coral não muda de valor, e está demonstrado que não pode.** Nenhum coral
+  serve `3:1` sobre areia **e** `4,5:1` com texto verde: para o primeiro é
+  preciso L ≤ 0,2684, para o segundo L ≥ 0,2795, e **os intervalos não se
+  tocam**. A saída foi o **tamanho do texto** — com texto grande basta 3:1, e o
+  CTA é 19 px/700 por razão medida, não estética.
+- **Curas por âmbito, nunca na raiz.** Os cantos e o token de acção foram
+  redefinidos **na superfície comercial**, com o componente a continuar a pedir
+  o mesmo nome. As 396 telas não foram tocadas. Prefixo `ns-` para o novo.
+- **O «preview» da Fase 2 é uma página de capturas, não um deploy.** Publicar o
+  redesign no domínio seria a propagação que o norte proíbe antes da aprovação.
+- **Nenhuma das três saídas** para desbloquear a recaptura: todas pagavam com
+  segurança ou integridade de teste para consertar um problema cosmético.
+- **Onde o limiar era impossível, mudou-se o desenho e não a régua.** Três
+  textos saíram de cima do coral. **Nenhuma régua foi tocada para ficar verde.**
+
+### Learnings
+
+- **Quase todos os defeitos tiveram a mesma forma: um instrumento correcto
+  apontado ao sujeito errado.** O botão invisível, o anel a 1,00:1, o CTA verde
+  sobre verde, as guardas «cegas» que eram o meu vocabulário, os plantes mortos,
+  o convite que declarei intacto tendo medido só a rota. **A cura nunca foi
+  olhar com mais atenção — foi trocar o sujeito da medição.**
+- **Um buraco pode ser portante.** Fechei o registo aberto por segurança e
+  descobri que era a **única** porta: o convite dá pertença a uma conta que tem
+  de existir, e nada no código a cria. **Fechar um buraco exige perguntar o que
+  se apoiava nele.**
+- **Imprimir um número não é verificá-lo.** A minha própria fita tinha o limiar
+  dos cantos definido e nunca o lia — imprimia a contagem há horas e eu não
+  olhava. Foi o JR que o apontou.
+- **Um limiar que nenhuma escolha satisfaz não mede: proíbe.** Sobre o coral,
+  4,5 é impossível — o melhor que existe é 3,84.
+- **Ruído determinista é pior do que ruído.** Uma recusa tirada de 67 ms de
+  ordem de escrita do git reproduzia-se em dois checkouts: parecia medição e
+  sobrevivia a quem desconfiasse e corresse outra vez.
+- **A validade de um artefacto para uma pessoa mede-se contra a hora a que ela
+  acorda**, não contra o commit. A lista de decisões teve **seis minutos** de
+  validade.
+- **Uma decisão que nomeia o modo de falha esperado** poupa a quem vem a seguir
+  a conclusão errada — foi o que impediu o JR de concluir «não funciona».
+
+### O que foi feito
+
+- **Auditoria de frontend** com quatro especialistas e régua comum; o gerador de
+  invisibilidade (`#102E35` declarado com quatro nomes) identificado.
+- **Defeito de segurança encontrado, curado e provado**: o registo por email
+  estava aberto na API, sem página. Guarda com contagem de utilizadores como
+  invariante.
+- **North Star v2, Fases 0, 1 e 2**: landing e «Mesas em tempo real»
+  reconstruídas. **12 de 12 números do norte cumprem**, verificados por mim.
+  `NORTH STAR PRONTA PARA NATHALIA` emitido. Produção **intacta**.
+- **Linha de base a zero** — exigiu ressuscitar **sete plantes em letra morta**,
+  dois corredores de suite e uma suite que não corria há um dia.
+
+### Mudança de status do projeto
+
+- **A entrada de clientes novos está bloqueada no código não publicado.** Em
+  produção ainda funciona porque a cura não foi publicada.
+- **A Fase 3 do redesign espera aprovação escrita da Nathalia.** Silêncio não
+  conta, por desenho.
+
+### Próximo passo
+
+**Decisão de produto do Matheus:** como é que um cliente novo passa a ter conta.
+Só sobra um caminho medido — o `internalAdapter` do `better-auth`, que **cria e
+entra** — e recomendo-o **isolado atrás de uma função, com prova que fixe criar,
+entrar e o `issuer`**, para que uma actualização parta o teste em voz alta em vez
+de partir o produto em silêncio.
