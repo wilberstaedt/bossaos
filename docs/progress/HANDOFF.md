@@ -3425,3 +3425,33 @@ sobre o âmbito — essa guarda é do norte e a `marketing.spec.ts` cobre oito t
 
 Máquina em **ATENÇÃO** durante todo o lote (5030 MB disponíveis, 751 livres, swap
 1,35 GB). Dois builds completos, um servidor de cada vez, sem lote de agentes.
+
+---
+
+## A recaptura das três da sala está BLOQUEADA — 08/09
+
+Detalhe em `docs/reviews/ACHADO-NINGUEM-NASCE.md`. Resumo, porque muda o
+primeiro item da lista do Matheus:
+
+**Fechar o registo tirou a única porta por onde nasce uma conta.** Medido no
+servidor, com o controlo primeiro: `sign-up/email` dá **400
+`EMAIL_PASSWORD_SIGN_UP_DISABLED`**, `convites/aceitar` dá **401 `sem_sessao`**,
+e nada no repositório insere em `accounts` — os dois ficheiros que a nomeiam só
+apagam. **Quem nunca teve conta não consegue usar o convite dele.**
+
+O capturador da demonstração cria a conta a cada corrida (a limpeza apaga-a de
+propósito, com as credenciais do better-auth), e por isso reprova a 400. **O
+sintoma é meu e a causa também.**
+
+**As três da sala continuam por refazer** e a `validar-capturas-de-marketing`
+continua vermelha com as 24 anteriores à fonte. Não forcei passagem: as três
+saídas — reabrir o registo, escrever a credencial por SQL contra o contrato do
+`schema.prisma:465`, ou deixar a conta viva enfraquecendo o controlo 4 do
+`provar-demonstracao.sh` — são decisões da revisão, não minhas a meio de uma
+recaptura.
+
+O resto do `provar-demonstracao.sh` está verde: semeadura determinista com
+controlo negativo, KDS nos três idiomas, e a limpeza devolveu a base ao que era
+(`2/3/3/0/0/131` antes e depois).
+
+Máquina em **OK** durante o lote (5054 MB disponíveis).
