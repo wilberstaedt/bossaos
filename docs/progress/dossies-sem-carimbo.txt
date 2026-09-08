@@ -1,0 +1,14 @@
+# Dossiês de prova sem carimbo do conteúdo — declarados, com o motivo.
+#
+# Um dossiê sem carimbo é NÃO MEDI: não se sabe que commit ele retrata, e não se
+# inventa retroactivamente. Mas uma abstenção sem consequência é uma dívida que
+# ninguém assina — cresce sempre que alguém captura sem carimbar, e ninguém é
+# avisado no momento em que isso acontece, que é o único em que sai barato.
+#
+# Por isso: **um dossiê sem carimbo que não esteja aqui é FALHA, não abstenção.**
+# E esta lista CADUCA — uma entrada que nomeie um dossiê que já não existe é
+# falha, senão a lista vira arrumação permanente.
+#
+# Formato: <caminho>  <TAB>  <motivo>
+docs/visual/ns2/2026-09-08_antes	tirado às 05h30 de 08/09, horas antes de o carimbo do conteúdo existir. É o «antes» das Mesas, capturado do congelamento 483c4a7 — recapturá-lo só para o carimbar seria refazer o retrato de um commit que não mudou.
+docs/visual/ns2/2026-09-08_depois	tirado às 01h e refeito às 06h58 de 08/09, também antes do carimbo. São as seis capturas do North Star que a Nathalia tem em mãos; recapturá-las agora mudava o que ela está a ver a meio do juízo dela.

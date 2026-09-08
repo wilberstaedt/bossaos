@@ -415,3 +415,45 @@ decidir**:
 
 Assim a dívida de hoje fica assumida por escrito e a de amanhã não se cria em
 silêncio.
+
+---
+
+## A abstenção passa a ter fundo — 08/09
+
+O defeito que encontrou com um dossiê novo: **NÃO MEDI com saída 0**. Não é o da
+manhã — aquele eram abstenções escondidas. Este é o seguinte: **uma abstenção
+visível mas sem consequência, que é uma dívida que ninguém assina.** Cresce
+sempre que alguém captura sem carimbar, e ninguém é avisado no momento em que
+isso acontece — o único em que sai barato.
+
+Curado como a casa já faz: **não obriga a carimbar, obriga a DECIDIR.** O que
+passa a ser impossível é a terceira hipótese, ninguém ter decidido.
+
+- `docs/progress/dossies-sem-carimbo.txt` — o caminho e o motivo, por linha.
+- Sem carimbo **e declarado** → NÃO MEDI, com o motivo impresso ao lado.
+- Sem carimbo **e não declarado** → **FALHA**.
+- Entrada que nomeia um dossiê que já não existe → **FALHA**. Sem isto a lista
+  vira arrumação permanente: cresce, ninguém a lê, e um dia declara coisas que
+  desapareceram — que é o mesmo que não declarar nada.
+
+Os dois dossiês de hoje ficaram declarados, e o motivo é o que o senhor apontou:
+foram tirados de madrugada, **horas antes de o carimbo existir**. O `_antes`
+retrata um congelamento que não mudou; o `_depois` são as seis capturas que a
+Nathalia tem em mãos, e recapturá-las agora mudava o que ela está a ver a meio
+do juízo dela.
+
+### Os seis controlos, exercidos
+
+    ok    carimbo que BATE: aceita (saida 0)
+    ok    carimbo ESTRAGADO: recusa (saida 1) e nomeia
+    ok    sem carimbo e NAO declarado: FALHA (saida 1)
+    ok    sem carimbo e DECLARADO: passa como NAO MEDI (saida 2)
+    ok    entrada que nomeia um dossie INEXISTENTE: FALHA (saida 1)
+    ok    SEM carimbo: NAO MEDI (saida 2), e nao verde
+
+**Duas coisas partiram-se pelo caminho e foram as corridas a dizê-lo.** O
+`while` que lê o relatório corre num subshell por causa do pipe, e o `vermelho`
+lá dentro **não chegava ao veredicto** — a contagem passou a um ficheiro. E o
+sexto controlo falhou por herdar a entrada caduca que o quinto planta: a
+declaração da fixture passou a ser reposta entre casos. **Um controlo que herda o
+estado do anterior mede o anterior.**

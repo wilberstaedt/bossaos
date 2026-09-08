@@ -43,6 +43,25 @@ naomedi()  { echo "  NÃO MEDI $1"; }
 
 echo "A prova retrata o commit que diz retratar?"
 
+# ── A dívida sem carimbo tem de ser ASSINADA ──────────────────────────────
+#
+# Um dossiê sem carimbo é NÃO MEDI — não se sabe que commit retrata, e não se
+# inventa retroactivamente. Mas **uma abstenção sem consequência é uma dívida que
+# ninguém assina**: cresce sempre que alguém captura sem carimbar, e ninguém é
+# avisado no momento em que isso acontece, que é o único em que sai barato.
+#
+# É a forma que a `validar-provas-na-ci` já usa: não obriga nada a correr,
+# obriga a DECIDIR. O que passa a ser impossível é a terceira hipótese —
+# ninguém ter decidido.
+DECLARACOES="${DECLARACOES_SEM_CARIMBO:-docs/progress/dossies-sem-carimbo.txt}"
+declarado() {
+  [ -f "$DECLARACOES" ] || return 1
+  grep -v '^#' "$DECLARACOES" 2>/dev/null | grep -q "^$1	"
+}
+motivo_declarado() {
+  grep -v '^#' "$DECLARACOES" 2>/dev/null | grep "^$1	" | head -1 | cut -f2-
+}
+
 RELATORIO=$(python3 - <<'PY'
 import json, os, re, sys
 sys.path.insert(0, 'scripts')
@@ -147,17 +166,47 @@ N_OK=$(printf '%s\n' "$RELATORIO" | grep -c '^OK' || true)
 N_FALHA=$(printf '%s\n' "$RELATORIO" | grep -c '^FALHA' || true)
 N_NAOMEDI=$(printf '%s\n' "$RELATORIO" | grep -c '^NAOMEDI' || true)
 
+NAO_ASSINADOS=$(mktemp); echo 0 > "$NAO_ASSINADOS"
+trap 'rm -f "$NAO_ASSINADOS"' EXIT INT TERM
 printf '%s\n' "$RELATORIO" | while IFS=$'\t' read -r estado pasta n resto; do
   case "$estado" in
     OK)      verde "$pasta retrata o que diz ($n artefactos): $resto" ;;
     FALHA)   vermelho "$pasta NÃO retrata o que diz ($n artefactos)"; echo "           $resto" ;;
-    NAOMEDI) naomedi "$pasta — $resto ($n artefactos)" ;;
+    NAOMEDI)
+      if declarado "$pasta"; then
+        naomedi "$pasta — $resto ($n artefactos)"
+        echo "           declarado: $(motivo_declarado "$pasta")"
+      else
+        echo $(( $(cat "$NAO_ASSINADOS") + 1 )) > "$NAO_ASSINADOS"
+        vermelho "$pasta não tem carimbo E NÃO está declarado ($n artefactos)"
+        echo "           Ou se carimba, ou se declara em $DECLARACOES com o motivo."
+        echo "           Uma abstenção que ninguém assina é uma dívida que cresce sozinha."
+      fi
+      ;;
   esac
 done
 
+# ── A LISTA CADUCA ────────────────────────────────────────────────────────
+#
+# Uma entrada que nomeie um dossiê que já não existe é falha. Sem isto a lista
+# vira arrumação permanente: cresce, ninguém a lê, e um dia declara coisas que
+# desapareceram — que é o mesmo que não declarar nada.
+CADUCAS=0
+if [ -f "$DECLARACOES" ]; then
+  while IFS=$'\t' read -r caminho _motivo; do
+    case "$caminho" in ''|'#'*) continue ;; esac
+    if [ ! -d "$caminho" ]; then
+      vermelho "a declaração nomeia $caminho, que já não existe — a lista caducou"
+      CADUCAS=$((CADUCAS + 1))
+    fi
+  done < "$DECLARACOES"
+fi
+
 ambito() {
   echo "  âmbito:  ${N_OK} dossiê(s) a bater com o seu commit, ${N_FALHA} a não bater,"
-  echo "           ${N_NAOMEDI} sem carimbo."
+  echo "           ${N_NAOMEDI} sem carimbo — e cada um TEM de estar declarado em"
+  echo "           $DECLARACOES, com o motivo. Sem carimbo e sem declaração é FALHA:"
+  echo "           uma abstenção que ninguém assina é uma dívida que cresce sozinha."
   echo "           Cada um é julgado contra o commit que o PRÓPRIO MANIFESTO nomeia,"
   echo "           nunca contra o HEAD nem contra o nome da pasta. O nome traz só a"
   echo "           data: um facto declarado em dois sítios acaba por discordar consigo"
@@ -169,7 +218,8 @@ ambito() {
 }
 
 echo
-if [ "${N_FALHA:-0}" -gt 0 ]; then
+N_NAO_ASSINADOS=$(cat "$NAO_ASSINADOS" 2>/dev/null || echo 0)
+if [ "${N_FALHA:-0}" -gt 0 ] || [ "${N_NAO_ASSINADOS:-0}" -gt 0 ] || [ "$CADUCAS" -gt 0 ]; then
   ambito; exit "$FALHOU"
 fi
 if [ "${N_OK:-0}" -eq 0 ]; then

@@ -161,7 +161,8 @@ json.dump({'impressaoDoProduto': {'resumo': resumo, 'ficheiros': len(por),
           open(sys.argv[1], 'w'))
 PYX
 
-  correr() { RAIZ_DOSSIES=docs/visual PYTHONPATH="$FRESCURA" bash "$GUARDA" >"$1" 2>&1; echo $?; }
+  correr() { RAIZ_DOSSIES=docs/visual DECLARACOES_SEM_CARIMBO="${DECL:-/dev/null}" \
+             PYTHONPATH="$FRESCURA" bash "$GUARDA" >"$1" 2>&1; echo $?; }
 
   E=$(correr /tmp/fc-bate.txt)
   if [ "$E" = 0 ] && grep -q 'retrata' /tmp/fc-bate.txt; then
@@ -184,7 +185,49 @@ PYX
     echo $(( $(cat "$CAIXA/falhas") + 1 )) > "$CAIXA/falhas"; echo "  FALHA carimbo estragado nao foi recusado (saida $E)"; sed 's/^/          /' /tmp/fc-estragado.txt | head -4
   fi
 
+  # ── A dívida sem carimbo tem de ser assinada ────────────────────────────
+  #
+  # Um dossiê sem carimbo é NÃO MEDI, mas uma abstenção sem consequência é uma
+  # dívida que ninguém assina. Os três casos, exercidos com a guarda a correr.
   echo '{}' > "$MAN"
+
+  DECL="$CAIXA/declaracoes.txt"
+  : > "$DECL"
+  E=$(RAIZ_DOSSIES=docs/visual DECLARACOES_SEM_CARIMBO="$DECL" PYTHONPATH="$FRESCURA" \
+      bash "$GUARDA" >/tmp/fc-nao-decl.txt 2>&1; echo $?)
+  if [ "$E" = 1 ] && grep -q 'NÃO está declarado' /tmp/fc-nao-decl.txt; then
+    echo "  ok    sem carimbo e NAO declarado: FALHA (saida 1)"
+  else
+    echo $(( $(cat "$CAIXA/falhas") + 1 )) > "$CAIXA/falhas"
+    echo "  FALHA sem carimbo e nao declarado devia falhar (saida $E)"
+    sed 's/^/          /' /tmp/fc-nao-decl.txt | head -4
+  fi
+
+  printf 'docs/visual/prova/2026-01-01_%s\tfixture: declarado de proposito\n' "$SHA" > "$DECL"
+  E=$(RAIZ_DOSSIES=docs/visual DECLARACOES_SEM_CARIMBO="$DECL" PYTHONPATH="$FRESCURA" \
+      bash "$GUARDA" >/tmp/fc-decl.txt 2>&1; echo $?)
+  if [ "$E" = 2 ] && grep -q 'declarado: fixture' /tmp/fc-decl.txt; then
+    echo "  ok    sem carimbo e DECLARADO: passa como NAO MEDI (saida 2)"
+  else
+    echo $(( $(cat "$CAIXA/falhas") + 1 )) > "$CAIXA/falhas"
+    echo "  FALHA sem carimbo e declarado devia passar (saida $E)"
+    sed 's/^/          /' /tmp/fc-decl.txt | head -4
+  fi
+
+  printf 'docs/visual/prova/nao-existe\tfixture: entrada caduca\n' >> "$DECL"
+  E=$(RAIZ_DOSSIES=docs/visual DECLARACOES_SEM_CARIMBO="$DECL" PYTHONPATH="$FRESCURA" \
+      bash "$GUARDA" >/tmp/fc-caduca.txt 2>&1; echo $?)
+  if [ "$E" = 1 ] && grep -q 'a lista caducou' /tmp/fc-caduca.txt; then
+    echo "  ok    entrada que nomeia um dossie INEXISTENTE: FALHA (saida 1)"
+  else
+    echo $(( $(cat "$CAIXA/falhas") + 1 )) > "$CAIXA/falhas"
+    echo "  FALHA entrada caduca devia falhar (saida $E)"
+    sed 's/^/          /' /tmp/fc-caduca.txt | head -4
+  fi
+
+  # A declaração volta a ter SÓ a entrada válida: o caso seguinte mede o
+  # carimbo em falta, não a entrada caduca que o controlo anterior plantou.
+  printf 'docs/visual/prova/2026-01-01_%s\tfixture: declarado de proposito\n' "$SHA" > "$DECL"
   E=$(correr /tmp/fc-sem.txt)
   if [ "$E" = 2 ] && grep -q 'NÃO MEDI' /tmp/fc-sem.txt; then
     echo "  ok    SEM carimbo: NAO MEDI (saida 2), e nao verde"
