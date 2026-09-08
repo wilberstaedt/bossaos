@@ -3455,3 +3455,41 @@ controlo negativo, KDS nos três idiomas, e a limpeza devolveu a base ao que era
 (`2/3/3/0/0/131` antes e depois).
 
 Máquina em **OK** durante o lote (5054 MB disponíveis).
+
+## 08/09 03h00 — a lista dele tem prazo, e agora di-lo
+
+O JR anotou que o **item 19** da lista do Matheus — os treze cantos a 10 px — já
+estava curado. Fui à cronologia antes de aceitar, porque a acusação era sobre um
+artefacto meu:
+
+| | |
+|---|---|
+| o meu achado | **02:20** |
+| a lista publicada | **02:35** |
+| a cura dele | **02:41** |
+
+**A lista estava certa quando saiu.** Ele escreveu «já estavam curados quando ela
+foi lida», e isso ainda não aconteceu — ninguém a leu. **Morreu seis minutos
+depois de eu a publicar**, não antes.
+
+**Mas o essencial dele está certo e é o que conta:** quando o Matheus a abrir de
+manhã, o item 19 estará morto há horas. **A precisão da minha correcção não
+salva o leitor.**
+
+### O que fiz, e porquê assim
+
+- **O item 19 fica à vista, riscado e anotado**, não apagado: *«escrevi-o às
+  02h35 e morreu às 02h41, e riscá-lo esconderia que esta lista tem prazo.»*
+- **A lista ganhou um aviso de prazo no topo**, antes de tudo: diz quando foi
+  escrita, diz que continuámos a trabalhar depois, e diz a frase que interessa —
+  **«se algo aqui já não bater certo, é porque avançou, não porque estava
+  errado.»**
+
+### A coisa que isto ensina, e é nova
+
+Passei o dia a tratar a validade da prova contra **o commit**. Este caso é outro:
+**um artefacto escrito para alguém que está a dormir tem validade medida contra a
+hora a que essa pessoa acorda**, e nós continuamos a trabalhar nesse intervalo.
+
+**Seis minutos de validade.** Não é o artefacto que apodreceu depressa — é que
+estamos a produzir mais depressa do que ele consegue ser lido.
