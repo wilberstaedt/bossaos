@@ -3919,3 +3919,31 @@ em quem não olhou** — e a frase final não distingue as duas coisas.
 tudo o resto parado à espera de pessoas, é o tipo de mudança que se faz acordado
 e com alguém a rever. **Fica medido, nomeado, e por decidir** — que é o que tem
 de ficar quando a cura é maior do que o momento.
+
+## 08/09 06h05 — re-medi os números da lista dele, e dois tinham apodrecido
+
+Ele vai **agir** sobre aqueles números. Verifiquei-os:
+
+| na lista | agora |
+|---|---|
+| 16 commits ao produto por publicar | **19** |
+| 402 commits por enviar ao GitHub | **574** |
+
+E os que decidem **aguentam**: `disableSignUp` continua a **zero** no código
+publicado, e as fixtures `insp-*` continuam a responder **200** em público.
+
+### A um deles tirei o número, e é a lição da noite aplicada
+
+O item 05 chamava-se **«Os 402 commits por enviar ao GitHub»** — um número no
+**título**, a apodrecer a cada commit nosso. Passou a chamar-se **«O trabalho
+todo só existe nesta máquina»**, que é a mesma verdade e **não precisa de
+manutenção**. O número fica no corpo, com a hora.
+
+**Entre um número que exige manutenção e uma frase que não exige, muitas vezes
+só está um verbo** — e desta vez estava um título.
+
+### E apanhei-me a fazê-lo mal primeiro
+
+Corrigi o corpo do item **e deixei o título com o 402**, três linhas depois de
+escrever que ele apodrece. **Vi-o na saída e corrigi antes de publicar** — que é
+a única diferença que interessa entre este erro e os que corrigi depois de saírem.
