@@ -361,3 +361,57 @@ Verde sobre nada. As abstenções acompanham agora sempre o veredicto.
 A fixture teve de passar a carimbar com `commit` e `arvoreLimpa` — **com a forma
 antiga a guarda abstinha-se, e um controlo que se abstém não é um controlo.** Foi
 a corrida que o disse, não eu.
+
+---
+
+## Revisão do `4b59dc7` — os três controlos passam, e falta um portão — 08/09, 12h40
+
+**Aceito.** Corri-a: **saída 0**, o nome da pasta largou o sha, e o veredicto vem do
+manifesto — `rv100/2026-09-06 retrata o que diz (65 artefactos)`.
+
+E aceito com nota o que ele encontrou sozinho ao arrumar a linha duplicada, que era
+pior do que a linha: **«um manifesto que não se podia medir desaparecia atrás de
+outro que batia. Verde sobre nada.»** As abstenções passaram a acompanhar sempre o
+veredicto. Isso é a doença desta casa apanhada dentro da guarda que existe para a
+apanhar.
+
+Outra que é dele e vale citar: a fixture teve de passar a carimbar a sério porque,
+com a forma antiga, **a própria guarda se abstinha** — «e um controlo que se abstém
+não é um controlo. Foi a corrida que o disse, não eu.»
+
+## O que falta, e encontrei-o com um controlo ao vivo
+
+O âmbito declara: **1 dossiê a bater, 0 a não bater, 2 sem carimbo.** Está tudo
+nomeado — nada escondido. Mas a saída é **0**.
+
+Fui ver se isso trava alguma coisa. Criei um dossiê novo, vazio de manifesto:
+
+```
+NÃO MEDI docs/visual/ns2/2026-09-08_CONTROLO-TEMPORARIO — sem carimbo (1 artefactos)
+saída = 0
+```
+
+**Um dossiê acabado de nascer sem carimbo entra sem resistência.** O conjunto das
+abstenções não tem fundo: cresce sempre que alguém captura sem carimbar, e ninguém
+é avisado no momento em que isso acontece — que é o único momento em que é barato
+corrigir.
+
+Isto não é o mesmo defeito de manhã (aí as abstenções estavam escondidas; aqui estão
+à vista). É o defeito **seguinte**: uma abstenção visível mas sem consequência é uma
+dívida que ninguém assina.
+
+## A cura é a que a casa já usa
+
+Como na `validar-provas-na-ci.sh`, que não obriga nada a correr — **obriga a
+decidir**:
+
+- os dossiês sem carimbo que existem hoje (`ns2/2026-09-08_antes` e `_depois`) são
+  **legítimos**: foram tirados de madrugada, horas antes de o carimbo existir.
+  Declaram-se num ficheiro, com esse motivo escrito;
+- **qualquer dossiê sem carimbo que não esteja declarado passa a ser FALHA**, não
+  abstenção;
+- e a declaração **caduca**: uma entrada que nomeie um dossiê que já não existe é
+  falha, para a lista não virar arrumação permanente.
+
+Assim a dívida de hoje fica assumida por escrito e a de amanhã não se cria em
+silêncio.
