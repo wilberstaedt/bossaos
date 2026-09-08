@@ -194,3 +194,44 @@ Tirá-lo de lá parte essa prova, e a saída — alargar o selector da guarda ao
 cabeçalho inteiro — é mexer numa guarda para acomodar uma mudança de desenho.
 **Isso quer decisão, não iniciativa**, e é vizinho dos blocos 2 e 4 que ficaram
 reservados para etapa própria.
+
+---
+
+## Construí a fita métrica que faltava, e a primeira corrida corrigiu-me — 08/09, 14h20
+
+`scripts/medir-quatro.mjs`. Mede o §4 nas duas larguras, declara a largura em cada
+bloco, e abstém-se do que não se pode medir naquela largura em vez de adivinhar.
+
+**Primeira corrida contra a landing publicada: 18 medidas, 11 desvios, 1 abstenção.**
+
+E o que ela fez primeiro foi desmentir-me:
+
+| eu disse | a fita mediu |
+|---|---|
+| «altura do cabeçalho 59 px, viola 72–80» | **78 px a 1440** — dentro da spec. Os 59 são **a 390** |
+| «não julgo o herói, o viewport é 500» | **790 px a 1440** — acima do mínimo de 760 ✓ |
+
+A altura do cabeçalho **não é uma violação geral: é um desvio só no telemóvel**. Eu
+medi numa largura, não a declarei no veredicto, e generalizei. É a quinta vez hoje —
+e desta vez foi o instrumento novo a apanhar-me, o que é exactamente para o que ele
+serve.
+
+## Os onze desvios, com a largura ao lado
+
+- **CTA do cabeçalho** `rgb(16,46,53)` em vez de coral — nas duas larguras;
+- **3 itens de idioma** visíveis a 1440, quando a spec proíbe três por palavras;
+- **cabeçalho a 59 px** a 390 (spec 72–80);
+- **móvel sem CTA** (spec: logo, CTA curto e menu real);
+- **bloco 2 com 0 imagens** e 4 parágrafos, nas duas larguras;
+- **bloco 4 com 0 tabs**, nas duas larguras;
+- **0 valores em euros**, nas duas larguras.
+
+## Duas notas de construção
+
+Usa o **Chrome instalado** em vez de descarregar o headless do Playwright: eram
+centenas de MB na máquina dele para uma medição que o browser que ele já tem faz.
+
+E **não é uma guarda**: mede e relata, não recusa, não entra no `validar-no-commit`.
+O que fazer com um desvio é de quem desenha — a fita só impede que se descubra tarde.
+
+**Por rever: o código é meu.** Fica para o JR, como sempre.
