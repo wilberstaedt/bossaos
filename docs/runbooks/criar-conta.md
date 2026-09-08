@@ -9,19 +9,36 @@ servidor.
 
 ## Como se usa
 
-Com a senha vinda de fora, por `stdin`:
+### Primeiro: deixar a senha ser gerada
 
-```bash
-echo -n 'a-senha-escolhida' | node --experimental-strip-types \
-  packages/auth/ferramentas/criar-conta.mjs alguem@casa.pt
-```
-
-Ou com uma senha gerada, impressa **uma vez**:
+**É a via mais segura, porque ninguém escreve nada.** A senha é impressa uma vez
+e não fica guardada em lado nenhum.
 
 ```bash
 node --experimental-strip-types \
   packages/auth/ferramentas/criar-conta.mjs alguem@casa.pt --gerar
 ```
+
+### Segundo: uma senha escolhida, sem a escrever na linha
+
+Se a senha tiver de ser escolhida, **não a ponha na linha de comando nem num
+`echo`**. A ferramenta recusa o argumento porque ele fica no histórico da shell e
+visível no `ps` — e um `echo … | …` resolve o `ps` e **deixa a senha literal no
+`.zsh_history`**, que é exactamente o que a recusa existe para impedir.
+
+O `read -rs` não ecoa o que se escreve e não entra no histórico:
+
+```bash
+read -rs SENHA
+printf '%s' "$SENHA" | node --experimental-strip-types \
+  packages/auth/ferramentas/criar-conta.mjs alguem@casa.pt
+unset SENHA
+```
+
+> **Não se ensina aqui o truque do espaço antes do comando.** Depende de uma
+> opção da shell (`HIST_IGNORE_SPACE`) que pode não estar ligada, e **uma defesa
+> condicional ensinada como regra é pior do que nenhuma**: quem a usa julga-se
+> protegido e pode não estar.
 
 Precisa de `AUTH_DATABASE_URL` e `BETTER_AUTH_SECRET` no ambiente. **O segredo
 tem de ser o da aplicação** — com outro, a conta nasce e não entra, e isso só se

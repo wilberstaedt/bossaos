@@ -109,6 +109,71 @@ print(len([k for k, v in d.items() if 'criar-conta' in k or 'criar-conta' in str
   fi
 fi
 
+# ── 6 · A documentacao nao pode ensinar a janela ──────────────────────────
+#
+# A ferramenta recusa a senha em argumento, e o runbook abria com
+# `echo -n 'a-senha' | …`. O `echo` e builtin, portanto o `ps` esta a salvo — mas
+# a linha fica no `.zsh_history` com a senha literal, que e exactamente o que a
+# recusa existe para impedir. **Fechar a porta da frente e documentar a janela.**
+#
+# Varre TODOS os runbooks e nao so este: a classe e «ensinar um segredo escrito
+# na linha de comando», e o proximo runbook a nascer tem a mesma tentacao.
+#
+# AMBITO declarado: procura a FORMA `echo …| <ferramenta de credencial>`. Um
+# segredo ensinado de outra maneira passa aqui — mede-se a forma conhecida, nao
+# todas as formas possiveis.
+# So conta o que esta DENTRO de um bloco de codigo. A primeira versao varria o
+# ficheiro inteiro e acusou a minha propria PROSA — a frase que explica o perigo
+# tem a mesma forma da linha que o comete. Um detector que nao distingue o aviso
+# do acto ensina a ignora-lo.
+segredos_na_linha() {
+  python3 - "$@" <<'PYX'
+import glob, sys, re
+alvos = sys.argv[1:] or sorted(glob.glob('docs/runbooks/*.md'))
+padrao = re.compile(r'echo[^|]*\|[^|]*(criar-conta|senha|password|secret)')
+for f in alvos:
+    dentro = False
+    for n, linha in enumerate(open(f, encoding='utf-8'), 1):
+        if linha.lstrip().startswith('```'):
+            dentro = not dentro
+            continue
+        if dentro and padrao.search(linha):
+            print(f'{f}:{n}:{linha.rstrip()}')
+PYX
+}
+ACHADOS=$(segredos_na_linha)
+if [ -n "$ACHADOS" ]; then
+  vermelho 'um runbook ENSINA a passar um segredo por `echo` na linha de comando:'
+  printf '%s\n' "$ACHADOS" | head -4 | sed 's/^/          /'
+  echo '          O `echo` salva o `ps` e deixa a senha no historico da shell.'
+else
+  N_RUNBOOKS=$(ls docs/runbooks/*.md 2>/dev/null | wc -l | tr -d ' ')
+  if [ "${N_RUNBOOKS:-0}" -eq 0 ]; then
+    echo "  NAO MEDI  nao ha runbooks para varrer — populacao vazia."
+  else
+    verde "nenhum dos $N_RUNBOOKS runbooks ensina um segredo na linha de comando"
+  fi
+fi
+
+# A sonda: um runbook de mentira com a linha que se teme, DENTRO de um bloco de
+# codigo. Sem o ponto no nome — `docs/runbooks/*.md` nao casa com ficheiros
+# ocultos, e a primeira sonda nao acendeu por isso e nao por o grep estar mal.
+SONDA=docs/runbooks/sonda-do-segredo.md
+printf '```bash\necho -n a-senha | node criar-conta.mjs a@b.cd\n```\n' > "$SONDA"
+if segredos_na_linha "$SONDA" | grep -q 'sonda-do-segredo'; then
+  verde "a sonda acendeu: a forma que se teme e' mesmo vista"
+else
+  vermelho "a sonda NAO acendeu — o varrimento nao ve a linha que existe para ver"
+fi
+# E o outro lado: a PROSA que explica o perigo nao pode ser acusada.
+printf 'um `echo -n a-senha | criar-conta` deixa a senha no historico.\n' > "$SONDA"
+if [ -z "$(segredos_na_linha "$SONDA")" ]; then
+  verde "a prosa que explica o perigo NAO e' acusada (so conta o bloco de codigo)"
+else
+  vermelho "acusou prosa fora de bloco de codigo — o aviso nao pode contar como o acto"
+fi
+rm -f "$SONDA"
+
 apagar
 DEPOIS=$(contar)
 if [ "$ANTES" != "$DEPOIS" ]; then
