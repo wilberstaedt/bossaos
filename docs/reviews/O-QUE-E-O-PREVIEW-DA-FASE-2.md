@@ -74,3 +74,34 @@ que retrata um commit anterior ao actual é a armadilha que a
 `validar-provas-frescas.sh` existe para apanhar. Verificado nela: **6 artefactos
 posteriores ao produto** — os seis desta frente. Os outros 69 do `docs/visual`
 são o dossiê RV100, de outra frente e anteriores por natureza.
+
+---
+
+## Addendum, 08/09 05h30 — porque é que o «antes» NÃO entra na página dela
+
+A Fase 0.4 fechou e agora existem **quatro capturas do «antes»** — duas da
+landing e duas das Mesas. A página que a Nathalia vai abrir tem **seis imagens,
+todas do «depois»**, e nenhuma comparação.
+
+**Não as acrescentei, e é decisão e não esquecimento.**
+
+O §11 diz o que ela tem de conseguir fazer: *«olhar a primeira viewport e
+responder **isso parece a BossaOS**»*. **Isso é um juízo de identidade, não de
+melhoria.**
+
+Um antes/depois transforma a pergunta em **«está melhor?»** — e essa responde-se
+sempre que sim, porque o antes era mau. **É argumento, não é juízo.** A página
+foi construída para **apresentar e não persuadir**, e diz isso de si própria.
+
+### Mas o par existe e vale — só que para outra pessoa
+
+**A Nathalia julga identidade. O Matheus julga progresso.** Foi ele que escreveu
+«ainda tá feio», e é a ele que o par serve.
+
+Portanto o número foi para a **lista dele**, no item 17, em texto:
+
+> na tela das mesas, **no telemóvel, antes não se via uma única mesa** no
+> primeiro ecrã — sete pastilhas empilhadas comiam-no todo. **Agora vêem-se
+> duas.**
+
+**Dar a mesma prova às duas pessoas seria dar a pergunta errada a uma delas.**
