@@ -3947,3 +3947,42 @@ só está um verbo** — e desta vez estava um título.
 Corrigi o corpo do item **e deixei o título com o 402**, três linhas depois de
 escrever que ele apodrece. **Vi-o na saída e corrigi antes de publicar** — que é
 a única diferença que interessa entre este erro e os que corrigi depois de saírem.
+
+---
+
+## A página das telas-mestre não se regenera — quarta cara da mesma porta — 08/09
+
+Detalhe em `docs/reviews/ACHADO-MESTRES-A-QUARTA-CARA.md`.
+
+**A guarda de frescura recusou sozinha, e não a contornei:**
+
+    RECUSO: 25 captura(s) anteriores a fonte mais recente do produto.
+    Recaptura antes de mostrar isto a alguem.
+    codigo de saida: 1 · ficheiro gerado: NAO
+
+Não há página nova. Não há artefacto com aviso colado por cima que alguém possa
+confundir com o produto de agora.
+
+**«É só recapturar» não era.** O `provar-mestres.sh` reprova no mesmo 400:
+
+    Error: a inscrição da conta de demonstração falhou: 400
+        at abrirSessao (scripts/sessao-da-demo.mjs:65)
+        at capturar-mestres.mjs:131
+
+**Saíram zero capturas, não 25** — o `abrirSessao` lança antes da primeira
+fotografia, e nem as superfícies públicas chegam a ser visitadas. A conta
+`demo@bossaos.invalid` está a 0: apagada a cada corrida pelo `limparDemonstracao`,
+e não pode renascer com o `sign-up` fechado.
+
+**E os mestres não têm a saída da 0.4.** A 0.4 usou o inquilino de inspecção; os
+mestres têm o `SLUG_DA_DEMO` cravado nas rotas e existem para mostrar o cenário
+«Bossa Demo». Trocar de inquilino não é recapturar — é mudar o que a página
+mostra, e a instrução era não mudar o desenho de nada.
+
+O resto do corredor está verde e prova que só falta a conta: semeadura
+determinista com controlo negativo, build corrido, e a limpeza devolveu a base ao
+que era.
+
+**A página publicada continua com o aviso à mão, e continua a ser o penso.**
+
+Máquina em **ATENÇÃO** durante o lote (4914 MB disponíveis, 83 livres).
