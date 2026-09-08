@@ -65,3 +65,12 @@ de uma resposta escrita.
 
 A página é privada por omissão — é o Matheus que decide se a partilha, e com
 quem. Não se declara aqui nenhuma aprovação em nome da Nathalia.
+
+### Republicado a 08/09 — commit `b52fc14`
+
+As seis capturas foram refeitas depois da cura dos cantos do §3.3. **O URL é o
+mesmo**; o que mudou foi o conteúdo, e mudou porque o produto mudou: um preview
+que retrata um commit anterior ao actual é a armadilha que a
+`validar-provas-frescas.sh` existe para apanhar. Verificado nela: **6 artefactos
+posteriores ao produto** — os seis desta frente. Os outros 69 do `docs/visual`
+são o dossiê RV100, de outra frente e anteriores por natureza.
