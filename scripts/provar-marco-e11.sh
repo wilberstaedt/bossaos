@@ -12,6 +12,14 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
+# O ambiente carrega-se aqui, como nos outros 77 guiões `provar-*`. Sem isto o
+# guião só passa numa shell que por acaso já tenha o `.env` exportado, e numa
+# shell limpa fica vermelho pelo motivo errado — que é precisamente o defeito que
+# um controlo negativo existe para não ter.
+if [[ -f .env ]]; then set -a; . ./.env; set +a; fi
+: "${DATABASE_URL:?DATABASE_URL em falta}"
+: "${MIGRATION_DATABASE_URL:?MIGRATION_DATABASE_URL em falta}"
+
 falhas=0
 pendentes=0
 titulo() { echo; echo "── $1"; }

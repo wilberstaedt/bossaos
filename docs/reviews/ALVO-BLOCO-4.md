@@ -103,3 +103,75 @@ quem serve»; «uma tela com o que tem de preparar» → `kds`; «lê o cardápi
 - **As capturas são em `es-ES`**, quatro, à largura a que são mostradas (1280;
   a secção sai a 1200). Dossiê `docs/visual/rv100/2026-09-08_papeis`, a retratar
   `23a4bb2` pelo carimbo do próprio manifesto.
+
+---
+
+## A revisão do sénior — 08/09, corrida por mim e não lida
+
+Corri `scripts/provar-rv100-papeis.sh` eu próprio. **À primeira, ficou vermelho** — e
+não pela obra: a minha shell não tinha `DATABASE_URL`. Fica o que importa disso:
+
+**O guião não me deu falso verde.** Detectou «já estava vermelho antes do plante — o
+controlo não diria nada» e recusou-se a concluir seja o que for. Um controlo negativo
+que concluísse dali estaria a certificar o meu ambiente, não o produto.
+
+### Um achado real: a prova só passava na shell de quem a escreveu
+
+**77 dos 85 guiões `provar-*` carregam o `.env` explicitamente. Este era um dos 8 que
+não carregavam.** Dos 8, só **2** correm playwright e portanto precisavam mesmo —
+este e o `provar-marco-e11.sh`, que é meu. Contei os 8 e fui medir quais precisavam,
+em vez de os declarar todos partidos: hoje já derivei três números de listas escritas
+à mão e os três estavam errados.
+
+Ambos levaram a linha da convenção local. Depois disso, **da mesma shell limpa que
+tinha falhado**:
+
+    TECLADO es-ES tabs_ate_ao_selector=12
+    AMBITO es-ES separadores=4 imagens_no_bloco=4 imagens_distintas=4
+                 beneficios_distintos=4 nomes_distintos=4     (idem pt-BR e en)
+    2. Com as quatro composições IGUAIS  →  recusou pelo motivo certo:
+       «1 imagens distintas nos quatro papéis»
+
+Os critérios **1, 2, 3 e 4 estão verificados por mim**, ao vivo, com o plante
+exercido. O critério 3 — o decisivo — recusa mesmo.
+
+### Um alarme meu que era falso
+
+Contei **2 `expect(`** no ficheiro e quase escrevi que os critérios 5, 6 e 7 não eram
+medidos. **Contar `expect(` não é contar o que se mede:** a prova acumula num vector
+`falhas[]` e afirma uma vez no fim, o que é melhor do que muitos `expect` porque
+reporta tudo de uma vez. Os três estão lá, e há ainda uma guarda `POPULACAO-ZERO`
+explícita contra verde sobre nada.
+
+### Correcção à régua: o meu critério 8 estava mal escrito
+
+Escrevi «zero ficheiros em `scripts/validar`, `scripts/provar`, `inspeccao/`». O
+`git show` acusa três — e os três **nasceram** nestes commits: são as provas.
+Acrescentar uma prova não é afrouxar uma guarda. **A redacção certa é «zero guardas
+PRÉ-EXISTENTES modificadas»**, e medida assim (`--diff-filter`, A contra M) o
+resultado é zero. Fica corrigido aqui em vez de o critério continuar a acusar quem
+escreve provas novas.
+
+### E uma cegueira da régua que a entrega expôs
+
+**O critério 6 mede o tamanho do texto e nunca mede se os píxeis são reais.** Medi as
+quatro fontes:
+
+| papel | ficheiro | natural | numa ranhura de 477 |
+|---|---|---|---|
+| 1 catálogo | `catalogo-1440.png` | 1440×900 | 0,33× — reduzida, nítida |
+| 2 tablet | `sala-tablet-834.png` | 834×1112 | 0,57× — reduzida, nítida |
+| 3 KDS | `kds-cozinha-1280.png` | 1280×800 | 0,37× — reduzida, nítida |
+| 4 carta | `carta-movel-390.png` | **390×844** | **1,22×+ — AMPLIADA** |
+
+Uma ampliação **passa** no critério 6: o texto fica maior, e mais borrado. A régua
+premiava exactamente o defeito. **Passa a valer também: escala ≤ 1,0** — nunca
+ampliar, porque não há como inventar píxeis que não foram capturados.
+
+E há um segundo lado, de forma e não de nitidez: `carta-movel-390.png` é 390×844,
+**retrato de telemóvel**, esticado numa ranhura de paisagem. A vista do cliente é
+mesmo um telefone — recapturá-la larga seria mentir sobre o produto. O caminho é
+mostrá-la **ao tamanho dela, numa moldura de telefone**, e não esticada.
+
+**Vai para o JR, não para mim:** o bloco 4 é código dele, e quem revê não assina o que
+escreveu. Eu corrigi a régua; a moldura corrige-se do lado de lá.
