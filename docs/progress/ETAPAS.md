@@ -73,3 +73,22 @@ telefone ao tamanho dele.
 - **O bloco 2** (§4.3) está travado por um conflito de requisitos com a caixa
   append-only, à espera do Matheus.
 - **Os preços do §4.6** existem no norte e não na página, à espera do Matheus.
+
+### Propagação das composições — fechada 08/09, verificada pelo revisor
+
+As **13** composições do produto passaram a declarar a ranhura por **tipo** e não por
+número escrito à mão: um sítio que declare uma ranhura sem variante deixa de compilar.
+Medidas as treze, **0 com defeito**.
+
+Prova: `scripts/provar-rv100-ranhuras.sh`, corrido por mim. Planta um mestre de ecrã
+inteiro numa ranhura abençoada, apanha-o (4,6 px efectivos), **acusa só esse** e
+confirma que é o plantado e não outro qualquer. Uma guarda que acusasse os treze ao
+mexer num estaria a reagir ao plante e não ao defeito.
+
+Os quatro que eu tinha escalado ao Matheus como decisão de desenho **não eram
+decisões**: o herói-KDS curou-se com um recorte que já existia, o `product` a alargar
+a caixa para 1152 (o mestre de 1440 passa a servir), e o herói-sala com três capturas
+a 834 — que o §4.2 já obrigava.
+
+**FORA e declarado:** isto corre a 1280. **A matriz por ecrã estreito continua por
+medir**, e no telemóvel é onde as contas eram piores.
