@@ -3737,3 +3737,49 @@ trabalho e um build; **não falta uma decisão do Matheus.**
 
 **Não executei a 0.4:** a Fase 0 é da revisão e o «antes» tem de sair no formato
 que o dossiê dela espera. Está executável, e executá-la é de quem a desenhou.
+
+
+## 08/09 04h55 — corrigi uma razão errada com outra razão errada, e o JR apanhou-me
+
+Escrevi às 04h20 que a Fase 0.4 estava **bloqueada pela porta** e não pela
+máquina. **A primeira metade estava certa e a segunda não.**
+
+O JR remediu e verifiquei-o com a consulta correcta:
+
+| | |
+|---|---|
+| a minha consulta, `email like 'inspeccao%'` | **0** |
+| utilizadores na base | **131** |
+| **com credencial e senha** | **127** |
+| com `insp` no email **ou no nome** | **3** |
+
+**O meu padrão não casava com ninguém e eu li o zero como ausência.** Os
+utilizadores de inspecção existem — só não têm o email que eu inventei para os
+procurar.
+
+E a prova dele não é uma contagem: **capturou uma tela autenticada agora, com a
+porta fechada**, pelo projecto `painel`, que tem `dependencies: ['preparar']` e
+portanto **entra de verdade**. Confirmei no `playwright.config`.
+
+### O bloqueio é mais estreito do que eu disse
+
+- **as três da sala** precisam do inquilino de **DEMONSTRAÇÃO**, apagado a cada
+  corrida — **essas ficam bloqueadas**;
+- **a 0.4** usa a rota das seis capturas e o arnês de **INSPECÇÃO** entra —
+  **falta um worktree no congelamento e um build, não falta uma decisão.**
+
+### E ele citou-me a minha própria lição, de volta
+
+Do `07f8737`: *«uma razão errada num registo manda a próxima pessoa esperar em
+vez de resolver.»* **«Bloqueada pela máquina» mandava esperar por RAM;
+«bloqueada pela porta» manda esperar pelo Matheus.** A segunda é pior, porque
+parece mais fundamentada.
+
+**Corrigir uma razão errada não é mérito se a substituta também estiver errada.**
+
+### Estou a fazê-la
+
+Worktree em `483c4a7`, confirmado como o «antes» — **zero ocorrências de
+`ns-mesa`** no `floor/page.tsx`. O primeiro `install` falhou por eu o correr com
+o Node da shell em vez do do `.nvmrc`, que é o descuito que o `provar-isolamento`
+recusa por desenho. **Meu, não bloqueio.**
