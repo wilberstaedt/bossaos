@@ -2461,6 +2461,15 @@ ol.bo-mkt__passos { list-style: none; margin: 0; padding: 0; }
 }
 .ns-heroi__media { margin: 0; position: relative; display: grid; gap: var(--bo-espaco-md); }
 .ns-heroi__segunda { width: 74%; margin-left: auto; margin-top: calc(var(--bo-espaco-xl) * -1); }
+/* ── A 390 os 74% davam 265, e 265 não chega ───────────────────────────────
+   A coluna do herói pinta 358 num visor de 390, e 74% disso são 265 px. Com a
+   fonte estreita de 390 a servir, 265 põe o texto a **9,5 px** — abaixo dos 11
+   que o §4.2 exige para ler os títulos sem ampliar a página. 90% dá 322, que são
+   11,6 px. O ponto de corte é o mesmo 767 em que o `<source>` estreito entra:
+   duas regras que dependem uma da outra devem partir no mesmo sítio. */
+@media (max-width: 767px) {
+  .ns-heroi__segunda { width: 90%; }
+}
 .ns-chamada { display: flex; flex-wrap: wrap; gap: var(--bo-espaco-md); margin: var(--bo-espaco-lg) 0 0; }
 /* O sinal em lima: continuidade, nunca perigo nem dinheiro. */
 .ns-sinal { color: var(--bo-realce); font-weight: 600; font-size: 15px; margin-top: var(--bo-espaco-md); }

@@ -4519,3 +4519,29 @@ numa ranhura de 477 — e a metade que o torna prova é acusar **uma só**, deix
 os outros doze em paz.
 
 Bloco 4 sem regressão: 8 passos ok, três plantes a recusar. Dossiê recarimbado.
+
+## A matriz a 390: treze verdes, com dois achados — 08/09
+
+`AMBITO390 visor=390 composicoes=13 com_defeito=0`, os seis critérios da régua
+passam. **Passou a 390**, e dizer «no telemóvel» seria dizer mais do que se mediu
+— 360 e 430 ficam por medir.
+
+**A expectativa de 13,6 px não se confirmou e não é defeito:** saiu 11,6-12,9,
+porque as caixas reais a 390 são 322-358 e não 380 (a página tem recuo).
+
+**Dois achados, e o primeiro foi meu.** A medição dava 6,0 px no herói: abaixo de
+768 serve o `<source>` estreito — a original de 390 tal e qual — e eu dividia a
+caixa pelo `width` do `<img>`, que é o do mestre largo. Media a captura errada. É
+prima do `naturalWidth`, com a diferença de que o número era plausível.
+
+**O segundo é do produto:** herói KDS a 9,5 px, porque `.ns-heroi__segunda` é
+`width: 74%` e 74% de 358 são 265. Curado com 90% abaixo de 768 — o mesmo ponto
+onde o `<source>` estreito entra. Passou a 11,6.
+
+**O plante de 1280 seria morto a 390** (o mestre tem variante estreita e o número
+não se mexe); o que morde é tirar-lhe a variante — 8,9 px, e acusa uma só.
+
+Duas guardas mexidas, **as duas apertaram**: a contagem do controlo de 1280 parava
+no `ES` maiúsculo de `/es-ES` (e por isso dizia que o plante não mordia quando
+mordia), e a spec de 1280 passou a usar `medir-ranhuras.ts`, a mesma medição da
+de 390.

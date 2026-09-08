@@ -59,14 +59,19 @@ if [ $? -ne 0 ]; then
   falhas=$((falhas + 1))
 else
   COM_PLANTE="$(correr)"
-  ACUSADAS=$(echo "$COM_PLANTE" | grep -cE '^\s+/[a-z-]+.*(ILEGÍVEL|AMPLIADO)' || true)
+  # A acusação sai duas vezes no relatório — na lista e no diff — por isso
+  # conta-se com `sort -u`. E a classe aceita maiúsculas: a anterior era
+  # `[a-z0-9/-]`, que parava no `ES` de `/es-ES`, e por isso o guião dizia que o
+  # plante não tinha mordido quando tinha.
+  ACUSADAS=$(echo "$COM_PLANTE" | grep -oE '/[A-Za-z0-9/-]+ #[0-9]+:[^|]*(ILEGÍVEL|AMPLIADO) [0-9.]+' \
+    | sort -u | wc -l | tr -d ' ')
   if [ "${ACUSADAS:-0}" -eq 0 ]; then
     echo "  FALHA plantei o mestre de 1440 numa ranhura de 477 e ela NÃO o apanhou"
     falhas=$((falhas + 1))
   else
     echo "  ok    apanhou-o:"
-    echo "$COM_PLANTE" | grep -oE '/[a-z0-9/-]+ #[0-9]+:.*(ILEGÍVEL|AMPLIADO) [0-9.]+' \
-      | head -2 | sed 's/^/           /'
+    echo "$COM_PLANTE" | grep -oE '/[A-Za-z0-9/-]+ #[0-9]+:[^|]*(ILEGÍVEL|AMPLIADO) [0-9.]+' \
+      | sort -u | head -2 | sed 's/^/           /'
     # ── E a metade que a torna prova ────────────────────────────────────────
     if [ "$ACUSADAS" -eq 1 ]; then
       echo "  ok    e acusa UMA só — os outros doze ficam de fora"
