@@ -207,3 +207,52 @@ elementos estão a 10 px**. Os 20 e os 18 cumprem; os 10 não.
 não o traduzi em verificação. **A fita mostrava-o e eu não olhava.** Fica como
 achado pequeno e verdadeiro, e como nota sobre a fita: **imprimir um número não
 é verificá-lo.**
+
+---
+
+# 08/09 02h55 — o herói vende uma tela que já não existe
+
+## O que a recaptura curou
+
+**O CTA está corrigido.** «Pedir una demo» tem agora **caixa coral** e «Ver el
+producto» é o secundário claro. O verde-sobre-verde desapareceu e a hierarquia
+está no sentido certo. **Confirmado a olhar para a captura nova.**
+
+## E o que ela não podia curar
+
+A imagem **dentro** do herói mostra a tela das Mesas **em lista** — linhas com
+`07 · Terraza`, `Comensales: 3 · Abierta 19:22 · Marta (sala)`, distintivos
+`Libre` à direita.
+
+**O produto já não é assim.** A Fase 2 substituiu essa lista por uma **grelha de
+cartões** com estado, capacidade, duração e borda a codificar o estado. Foi a
+condição 9 do norte e está feita.
+
+**Logo: a landing nova vende uma tela que foi substituída há quatro horas.**
+
+E o §4.2 do norte pede exactamente **«o produto real como protagonista»**. O
+protagonista está lá, grande e legível — **e é uma fotografia de algo que já não
+existe.**
+
+## A guarda já dizia, e desta vez eu corri-a
+
+    validar-capturas-de-marketing   FALHOU
+      apps/web/src/demonstracao/es-ES/sala-servico-1440.png  :: anterior a fonte do produto
+      apps/web/src/demonstracao/es-ES/sala-estreita-390.png  :: anterior a fonte do produto
+      apps/web/src/demonstracao/es-ES/sala-tablet-834.png    :: anterior a fonte do produto
+      … 24 ao todo, nos três idiomas
+
+**As três da sala são as que importam** — são capturas da tela reescrita. As
+outras cinco estão vermelhas por arrasto: o produto mexeu, a guarda compara
+contra o produto inteiro.
+
+## O que isto tem de novo, e é o que me interessa
+
+**O defeito foi criado por consertar o produto.** Não houve descuido: a tela
+melhorou, e ao melhorar **envelheceu as imagens que a vendem**. É a terceira
+forma desta doença hoje e a mais difícil de antecipar — as outras duas eram
+esquecimento; esta é **consequência de fazer bem.**
+
+**Não vai a lado nenhum antes de a Nathalia ver.** Ela está a ser convidada a
+julgar uma landing cujo herói mostra o produto anterior à noite de trabalho que
+lhe estamos a apresentar.
