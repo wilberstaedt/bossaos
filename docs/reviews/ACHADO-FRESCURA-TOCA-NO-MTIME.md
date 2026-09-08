@@ -173,3 +173,65 @@ inventar explicação. Se a tivesse arrumado com uma teoria plausível — «ter
 buffer» — eu teria lido a teoria em vez do facto, e o buraco ficava lá. **Uma
 anomalia relatada crua vale mais do que uma anomalia explicada por adivinhação**, e
 foi a recusa dele em ter uma terceira teoria que tornou esta causa encontrável.
+
+---
+
+## A cura que eu propus tem um buraco, e é do lado perigoso — 08/09, 09h15
+
+Voltei a olhar para a cura que deixei escrita aqui em cima — «o produto é mais
+recente se algum ficheiro tem alterações por commitar, ou se o commit de produto
+mais recente é posterior às capturas» — e ela **falha no caso da reversão**:
+
+```
+commit antigo (t=10) → alguém edita (t=50) → CAPTURA-SE com a edição (t=60)
+                                           → alguém reverte para o commit (t=70)
+```
+
+As capturas mostram código editado que **já não existe no produto**.
+
+| regra | produto | captura | veredicto |
+|---|---|---|---|
+| por `mtime` | 70 | 60 | **RECUSA** — certo |
+| por conteúdo (a minha) | 10 | 60 | **VERDE** — errado |
+
+A regra grosseira apanha-o e a minha, mais fina, não. E falha exactamente na
+direcção que esta guarda não pode falhar: **verde sobre capturas que retratam código
+que já não existe.** Deixei isto escrito como «a cura», e a pessoa seguinte — que
+provavelmente seria o JR — ia implementá-la em boa fé.
+
+### A cura certa: hash no momento da captura
+
+O erro das duas regras é o mesmo, e é o desta noite inteira: **ambas medem TEMPO
+quando a pergunta é sobre CONTEÚDO.** Uma mede a hora do ficheiro, a outra a hora do
+commit; nenhuma pergunta se o produto é o mesmo.
+
+A pergunta certa responde-se assim:
+
+1. **No momento da captura**, calcular o hash do conteúdo dos ficheiros de produto
+   (os mesmos `.ts/.tsx/.css` de hoje) e guardá-lo ao lado das capturas, no
+   `mestres.json`.
+2. **Na guarda**, recalcular e comparar. Diferente → recusa. Igual → passa.
+
+O que isso resolve, caso a caso:
+
+| situação | hash |
+|---|---|
+| formatador grava por cima, texto igual | igual → **passa** (o falso de hoje) |
+| reversão depois da captura | diferente → **recusa** (o falso da minha proposta) |
+| alteração a sério | diferente → **recusa** |
+| capturas tiradas de árvore com alterações por commitar | funciona — o hash é da árvore, não do git |
+
+E há um bónus que vale por si: **deixa de depender de `mtime`**. Isso arruma de vez o
+problema para que o canário existe — no `clone` ou `worktree` fresco o git reescreve
+todas as datas e a comparação fica cega. Com hash, um checkout fresco dá o mesmo
+hash, porque o conteúdo é o mesmo. **O canário passa a ser desnecessário**, e isso é
+o sinal de que o sujeito passou a estar certo: a defesa contra a medição ilegível
+deixa de ser precisa quando se mede a coisa que não mente.
+
+### O que faço com isto
+
+Não implemento. **É trabalho para o JR e revisão para mim** — é essa a divisão, e
+uma guarda que decide o que a Nathalia vê não é sítio para eu assinar o meu próprio
+código. Fica-lhe o desenho, com os quatro casos acima a servir de teste, e o caso da
+reversão a ser o controlo negativo obrigatório: **uma implementação que não recuse a
+reversão não implementou isto.**
