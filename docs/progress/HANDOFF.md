@@ -4428,3 +4428,24 @@ desenho antigo é **1,22×**, medido pelo plante.
 **nitidez passa nos quatro** mas a **legibilidade falha nos papéis 1, 2 e 3** —
 0,33× 0,57× 0,37× põem um texto de 14 px a 4,6, 8,0 e 5,2 px, e o critério pede
 11. O papel 4 é agora o único que passa. Não afrouxei a guarda.
+
+## A cura pela fonte está medida e bloqueada por acesso — 08/09
+
+**A aritmética fecha:** um recorte de 560 px na ranhura de 477 dá **11,9 px**
+efectivos — verificado ligando-o ao papel 1. A banda útil é **477-607**.
+
+**Mas o recorte era do ecrã errado.** `/app/bossa-demo/catalogo` devolveu 200 e
+serviu o selector de organização; o recorte saiu impecável e do sítio errado. Só
+o apanhei ao olhar para o ficheiro. **Revertido**: papel 1 voltou ao mestre, PNGs
+apagados, encanamento removido. O capturador (`inspeccao/composicoes-recortes.spec.ts`)
+ganhou a guarda que faltava — compara o `pathname` onde ficou com o que pediu.
+
+**Pendência declarada, e é ACESSO e não desenho:** `/kds/{unidade}/{estação}` e
+`/pos/{unidade}` dão **404** para o inquilino de demonstração. A estação e a
+unidade existem; as mesmas rotas respondem no `marina-oropesa` com a conta do
+arnês. **A conta de captura do `bossa-demo` não é pessoal daquela unidade.**
+Resolvido isso, os três recortes saem.
+
+**O vermelho mantém-se**, como mandado: papéis 1, 2 e 3 a 4,6, 8,0 e 5,2 px; o
+papel 4 a 13,9. Os três lados do critério 6 ficam exercidos — ausência,
+ampliação plantada (`1,22×`), e a ilegibilidade a acusar de verdade sem plante.

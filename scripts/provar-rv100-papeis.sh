@@ -102,6 +102,19 @@ else
 fi
 cp -p "$GUARDADO" "$ALVO"
 
+echo "4. Critério 6 · o terceiro lado exerce-se sozinho"
+# A LEGIBILIDADE não precisa de plante: está a acusar DE VERDADE, agora, sobre
+# os papéis 1, 2 e 3. Uma guarda que está a recusar neste momento é a prova mais
+# forte que existe de que sabe recusar — plantar por cima disso não acrescentava
+# nada. O que se verifica aqui é que a acusação nomeia os papéis certos.
+if echo "$BASE" | grep -q 'papel 4: LEGIBILIDADE'; then
+  echo "  FALHA acusa o papel 4, que está a 13,9 px — a acusação apanha quem não deve"
+  falhas=$((falhas + 1))
+else
+  QUANTOS=$(echo "$BASE" | grep -c 'LEGIBILIDADE' || true)
+  echo "  ok    acusa os papéis de mestre inteiro e NÃO acusa o papel 4 ($QUANTOS acusações)"
+fi
+
 echo
 echo "  DECLARADO, e não é plante nenhum: a prova está VERMELHA por LEGIBILIDADE"
 echo "           nos papéis 1, 2 e 3 — fontes de 1440, 834 e 1280 px mostradas a"

@@ -354,3 +354,69 @@ mostrada, em vez do ecrã todo encolhido a um terço.
 **Vermelho mantém-se até lá, e fez muito bem em declará-lo.** Afrouxar o limiar dos
 11 px para o esconder seria calibrar a guarda ao sintoma — e o texto continuaria a
 4,6 px na mesma, só que sem ninguém avisado.
+
+---
+
+## A cura pela fonte: medida, e bloqueada por acesso — 08/09
+
+**A aritmética confirma-se, e a cura funciona.** Capturei um recorte de 560 px e
+liguei-o ao papel 1. Medido: `fonte=560 servido=560 mostrada=477 nitidez=0,852
+px_efectivos=**11,9**`. Exactamente a previsão. **A banda é 477-607**: abaixo de
+477 o ficheiro seria ampliado; acima de 607 o texto cai dos 11. O `560` não é
+número novo — é o que os `fluxo-*-560.png` já usavam aqui.
+
+### Mas o recorte era do ecrã errado, e eu quase o entreguei
+
+`/es-ES/app/bossa-demo/catalogo` devolveu **200** e serviu **«Elige tu
+organización»** — o selector de organização. A conta de captura entrou, mas sem
+âmbito naquele inquilino. **O recorte saiu impecável, legível, e do ecrã
+errado.** Só o vi porque olhei para o ficheiro; o meu teste de estado
+(`status < 400`) não distingue as duas coisas, e eu tinha escrito o comentário a
+avisar disso mesmo três linhas acima.
+
+**Reverti tudo:** o papel 1 voltou ao mestre, os PNGs errados foram apagados e o
+encanamento do `catalogoRecorte` saiu. Um activo errado no repositório é uma
+armadilha para quem vier a seguir.
+
+**O capturador ganhou a guarda que faltava:** compara o `pathname` onde ficou com
+o que pediu, e recusa se foi desviado.
+
+### O que bloqueia, e é acesso e não desenho
+
+| recorte | resultado |
+|---|---|
+| catálogo | **200 mas desviado** para o selector de organização |
+| KDS | **404** em `/kds/{unidade}/{estação}` |
+| salão no tablet | **404** em `/pos/{unidade}` |
+
+A estação existe (`production_stations`, `Cocina caliente`) e a unidade também.
+As mesmas rotas respondem no `marina-oropesa` com a conta do arnês: **são
+superfícies de pessoal, e a conta de captura do `bossa-demo` não é pessoal
+daquela unidade.** É autorização, não dados.
+
+**Primeira tentativa, e o erro que quase repeti:** capturei do `marina-oropesa`,
+e o KDS saiu com `insp-Plato de cocina 1` e `insp-K000`. Dados do arnês a
+caminho da landing. Os mestres mostram o `bossa-demo` — «Croquetas caseras»,
+comanda A128.
+
+### Fica vermelho, como mandado
+
+| papel | fonte | mostrado | nitidez | px efectivos | |
+|---|---|---|---|---|---|
+| 1 catálogo | 1440 | 477 | 0,745 | **4,6** | vermelho |
+| 2 tablet | 834 | 477 | 0,745 | **8,0** | vermelho |
+| 3 kds | 1280 | 477 | 0,745 | **5,2** | vermelho |
+| 4 carta | 390 | 388 | 0,995 | **13,9** | verde |
+
+**A pendência é uma só e é concreta:** dar à conta de captura do `bossa-demo`
+acesso de pessoal à `Sala principal`, ou capturar por outra via. Feito isso, os
+três recortes saem e a aritmética já está verificada.
+
+### Os três lados do critério 6, exercidos
+
+1. **ausência** — sem defeito, nenhuma das acusações aparece.
+2. **ampliação** — com o telefone esticado até 477: `AMPLIADO 1,22×`.
+3. **ilegibilidade** — **não precisa de plante: está a acusar agora**, 18 vezes,
+   sobre os papéis 1, 2 e 3. E verifica-se que **não** acusa o papel 4, que está
+   a 13,9. Uma guarda a recusar de verdade é a prova mais forte de que sabe
+   recusar; plantar por cima disso não acrescentava nada.
