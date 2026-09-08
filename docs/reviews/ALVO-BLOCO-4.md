@@ -420,3 +420,23 @@ três recortes saem e a aritmética já está verificada.
    sobre os papéis 1, 2 e 3. E verifica-se que **não** acusa o papel 4, que está
    a 13,9. Uma guarda a recusar de verdade é a prova mais forte de que sabe
    recusar; plantar por cima disso não acrescentava nada.
+
+---
+
+## Perigo operacional: este controlo negativo não se corre a dois
+
+`scripts/provar-rv100-papeis.sh` **escreve em `apps/web/app/[idioma]/page.tsx`** —
+guarda uma cópia, planta o defeito, corre, e repõe. Entre o plante e a reposição, o
+ficheiro na árvore está deliberadamente errado.
+
+Numa árvore partilhada por dois agentes, isso é uma janela em que **uma gravação do
+outro é perdida na reposição**, sem erro nenhum: o guião repõe a cópia que fez, e a
+cópia é anterior ao trabalho dele.
+
+Não é teórico — é a mesma classe do `git add -A` que hoje varreu ficheiros do JR para
+um commit meu.
+
+**Regra: só se corre quando o outro está parado.** Confirmar com `maestri check`
+antes, nunca durante. Quis verificar a cura dos recortes assim que o commit apareceu e
+não corri por isto; verifica-se no tick seguinte, com ele quieto, e a espera custa
+menos do que a gravação perdida.
