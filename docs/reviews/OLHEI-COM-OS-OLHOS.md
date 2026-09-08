@@ -51,3 +51,47 @@ Só as observações que não dependem de ler píxeis:
 juízo visual através deste canal falha. O que resolve é a fotografia do ecrã DELE,
 como da última vez — as quatro fotografias dele apanharam o que nenhuma medição
 minha tinha visto.
+
+---
+
+## O que dá para medir sem o meu olho — 08/09, 11h50
+
+Das três coisas que ficaram de pé, uma delas não precisa de juízo visual nenhum: a
+legibilidade das capturas do herói é **aritmética**.
+
+| composição | intrínseco | `sizes` promete | escala | texto de 14 px fica |
+|---|---|---|---|---|
+| Mesas | 1440 | 420 px | 0,29 | **4,1 px** |
+| KDS | 1280 | 420 px | 0,33 | **4,6 px** |
+| sala estreita (telemóvel) | 390 | 390 px | 1,00 | 14 px |
+
+**A cura já existe neste projecto.** A `sala-estreita-390.png` é capturada à largura
+em que é mostrada, um para um — e nasceu precisamente deste defeito, quando se
+mediu que «no telemóvel, texto que no produto tem 14 px chega a 3,3 px».
+
+Foi aplicada ao telemóvel e **não ao herói de secretária**, que continua a encolher
+capturas a um terço. É o padrão que atravessou o dia inteiro: **curou-se o caso e não
+a classe.**
+
+## E uma ressalva honesta, que é do outro lado
+
+**Isto não é automaticamente um defeito.** Uma captura de produto mostrada pequena
+pode ser uma escolha legítima: transmite «existe um sistema a sério» como textura,
+sem se propor a ser lida. A pergunta que decide não é «lê-se?», é **«o que é que
+esta imagem está aqui a fazer?»**:
+
+- se está a dar **atmosfera**, 4 px de texto não é problema — é grão;
+- se está a dar **prova** de que o produto existe e funciona, então não prova nada,
+  porque não se lê.
+
+Duas saídas, e a escolha entre elas é de desenho, não minha:
+
+1. **capturar à largura do slot** (como se fez para o telemóvel) — o ecrã inteiro,
+   legível, mas com menos detalhe visível;
+2. **recortar em vez de encolher** — mostrar um pedaço do KDS a 1:1, com três
+   comandas legíveis, em vez do ecrã todo ilegível.
+
+**Não vou escolher nem construir nenhuma delas por minha conta.** Disse-lhe há uma
+hora que não ia mexer no desenho pelo meu gosto e dizer-lhe que estava resolvido, e
+acabei de demonstrar, duas vezes em cinco minutos, que o meu olho por este canal não
+é de fiar. Levo-lhe os números e as duas saídas; a escolha é dele.
