@@ -1,49 +1,52 @@
-# A semente de inspecção nunca conseguiu correr numa base vazia
+# CORRIGIDO: a semente corre numa base vazia — eu é que a corri mal
 
-> 08/09. Descoberto ao executar o DROP autorizado. **A reposição parou aqui.**
+> 08/09. Este ficheiro afirmava que `semente-inspeccao.ts` nunca tinha conseguido
+> correr numa base vazia, e que havia uma «ordem escondida» no repositório.
+> **As duas coisas são falsas.**
 
-## O que aconteceu
+## O que se passou de facto
 
-Depois do `DROP`, do `CREATE`, das migrações e das duas sementes:
+Depois do `DROP` corri `semente-inspeccao.ts` **directamente**, e ela rebentou em
+`categories_organization_id_fkey` porque `IDS.orgA` não existia. Concluí que a
+semente estava partida. Não estava: **eu usei o ponto de entrada errado.**
 
-    esperado  5 utilizadores
-    real      2 utilizadores
+O ponto de entrada é `inspeccao/semear.ts`, e ele faz exactamente a ordem certa:
 
-A semente da demonstração passou. **A semente de inspecção rebentou:**
+    execFileSync(node, ['packages/db/prisma/fixtures.ts'])        // cria orgA/orgB
+    execFileSync(node, ['packages/db/prisma/semente-inspeccao.ts'])
 
-    Invalid `prisma.category.create()`
-    Foreign key constraint violated on the constraint: `categories_organization_id_fkey`
+A ordem **não está escondida**: está escrita em código, num ficheiro chamado
+`semear.ts`, com um comentário a explicar porque é que corre em dois processos
+(a credencial de migração não entra no processo do arnês). Eu chamei-lhe ordem
+escondida sem ter aberto o ficheiro que a declara.
 
-## Porquê
+E `fixtures.ts` não é «um módulo que as provas importam»: é **um script
+executável**, com um bloco `if (import.meta.url === ...)` no fim que chama
+`semear(url)` quando o ficheiro é corrido. **Ninguém importa `semear` — zero
+ocorrências no repositório inteiro.** A minha afirmação anterior de que «36
+provas chamam `semear()`» era falsa: as 12 ocorrências que contei em `provas/`
+são funções locais com o mesmo nome, e nenhuma é esta.
 
-`semente-inspeccao.ts` **importa `IDS` de `fixtures.ts` e nunca cria as
-organizações a que os `IDS` se referem.** Na linha 51 cria a primeira categoria
-com `organizationId: IDS.orgA`, e `orgA` não existe. Quem cria `orgA` é
-`fixtures.ts::semear()` — e nenhuma das duas sementes o chama.
+## A medição, com o ponto de entrada certo
 
-**Numa base que nunca esteve vazia isto nunca se via:** `orgA` estava sempre lá,
-deixada por uma corrida de provas anterior. A semente parecia idempotente e
-auto-suficiente porque nunca correu contra o vazio. Foi preciso um `DROP` para o
-descobrir, e é o mesmo padrão dos outros dois achados desta semana — a base suja
-escondia a dependência.
+Base recém-criada, migrações, e depois `fixtures.ts` → `semente-inspeccao.ts` →
+`semente-demonstracao.ts`. **Ambas as sementes passam.** Nove utilizadores:
 
-## Porque é que faltam exactamente três
+    ana@marina-oropesa.example      bruno@marina-barcelona.example   } fixtures
+    carla@exemplo.example           diogo@bossaos.example            }
+    demo@bossaos.invalid            sala@bossaos.invalid             } demonstração
+    painel@inspeccao.example        painel-b@inspeccao.example       } arnês
+    painel-c@inspeccao.example                                       }
 
-`semearContasDoArnes()` é a **última** coisa do ficheiro (linha 2247). A semente
-morre na linha 51, portanto as três contas do arnês — `painel@`, `painel-b@`,
-`painel-c@` — nunca chegam a ser criadas. A conta fecha:
+Três organizações: `bossa-demo`, `marina-oropesa`, `marina-barcelona`.
 
-    5 esperados = 2 (demonstração) + 3 (arnês)
-    2 reais     = 2 (demonstração) + 0, a semente morreu antes de lá chegar
+**Nove, e não cinco.** A minha tabela de contagens esperadas estava errada pela
+terceira vez, e sempre pelo mesmo motivo: omiti o `fixtures.ts` por acreditar que
+era só das provas.
 
-## De caminho, confirma o achado das caixas pelo outro lado
+## O que fica, e é real mas pequeno
 
-Base recém-criada: `cash_registers 0`, `cash_register_events 0`,
-`cash_movements 0`. Os `6/17/1` que eu tinha medido **não têm nenhuma parte
-legítima**: eram resíduo acumulado na totalidade. Ver
-[[ACHADO-FUGA-LENTA-NAS-CAIXAS]].
-
-## O que NÃO fiz
-
-Não mexi na semente e não continuei a reposição. Um número errado a seguir a um
-`DROP` é o pior sítio para improvisar, e a ordem era parar e dizer.
+Corrida sozinha, a semente falha com um erro de chave estrangeira opaco em vez de
+dizer «falta correr o `fixtures.ts` primeiro». A dependência está declarada no
+`semear.ts`, mas **não no sítio onde rebenta**. Isso é uma mensagem de erro
+melhor, não uma mudança de desenho — e não a faço sem ordem.

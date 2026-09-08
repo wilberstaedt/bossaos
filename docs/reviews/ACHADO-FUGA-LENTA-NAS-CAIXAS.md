@@ -1,68 +1,50 @@
-# A semeadura acrescenta linhas de caixa que ninguém pode apagar
+# CORRIGIDO: a fuga nas caixas não existe
 
-> 08/09. Medido ao investigar por que razão a base tinha `cash_registers 6`,
-> `cash_register_events 17` e `cash_movements 1` quando só **um** registo e **um**
-> evento eram meus.
+> 08/09. Este ficheiro afirmava que cada semeadura deixava resíduo permanente nas
+> três tabelas de caixa. **Está errado, e a medição que o desmente está aqui.**
+> Deixo o erro escrito porque a forma dele importa mais do que a conclusão.
 
-## A medição
+## O que eu tinha afirmado
 
-Corri o `packages/db/prisma/semente-inspeccao.ts` uma vez e contei antes e depois:
+Que uma corrida da semeadura levava `registos 6→7`, `eventos 17→18` e
+`movimentos 1→3`, que os gatilhos `movimentos_sao_imutaveis` e
+`acontecimentos_de_caixa_sao_imutaveis` impediam qualquer remoção, e que
+portanto **ninguém** podia limpar aquilo. Chamei-lhe fuga lenta por desenho.
 
-    antes   registos=6  eventos=17  movimentos=1
-    depois  registos=7  eventos=18  movimentos=3
+## A medição que desmente
 
-**+1 registo, +1 acontecimento e +2 movimentos por semeadura.**
+Numa base recém-criada — `DROP`, `CREATE`, migrações — semeei **duas vezes** e
+contei aos três momentos:
 
-## Porque é que isso não se desfaz
+    inicio         registos=0  eventos=0  movimentos=2? não: 0
+    1a semeadura   registos=1  eventos=1  movimentos=2
+    2a semeadura   registos=1  eventos=1  movimentos=2
 
-Os `cash_movements` e os `cash_register_events` são **append-only por gatilho** —
-`movimentos_sao_imutaveis` e `acontecimentos_de_caixa_sao_imutaveis` — e o
-bloqueio vale **para toda a gente, incluindo `bossaos_migrate`**, que é a dona
-das tabelas. Medido hoje, com a mensagem do próprio Postgres:
+**A segunda semeadura não acrescenta uma única linha.** A semeadura **já é
+idempotente** nas três tabelas. Não há fuga, e não há nada a decidir sobre
+identificadores fixos.
 
-    REGISTO_IMUTAVEL: cash_movements não se altera nem se apaga;
-    a correcção é um registo novo
+O mecanismo estava à vista e eu não o segui: o `principal()` da semente começa
+por `await limpar(prisma)`, e o `limparDemonstracao` **desactiva os gatilhos**
+(`ALTER TABLE ... DISABLE TRIGGER USER`, linhas 209-216 de `inspeccao-comum.ts`)
+antes de apagar, e volta a ligá-los no fim. O registo semeado chama-se
+`insp-Caja 1`, que cai dentro do `PREFIXO` que a limpeza usa. Está coberto.
 
-O `limparDemonstracao` aborta nelas, e por isso **nem a limpeza da demonstração
-consegue devolver a base ao que era** quando há caixa semeada.
+## Onde é que eu errei, que é o que interessa
 
-## O que isto é
+**Medi numa base suja e li o resultado como se fosse desenho.** Os `6/17/1` que
+encontrei eram estado acumulado de meses de corridas sobre uma base que nunca
+tinha sido reposta; o incremento que observei nessa base era quase de certeza uma
+limpeza que falhou a meio por causa de outro resto, e não a semeadura a
+acrescentar por construção. **Já não o posso reproduzir: essa base foi largada.**
+Digo-o em vez de arranjar uma explicação que já não posso medir.
 
-**Uma fuga lenta por desenho.** É do mesmo género dos 125 restos de
-`@exemplo.example` — corridas que deixam linhas atrás — com uma diferença que
-inverte a gravidade: **os 125 eram limpáveis e foram limpos hoje; estas não são
-limpáveis por ninguém.** Só desaparecem com a base.
+E a segunda parte foi pior do que a primeira: escrevi *«não são limpáveis por
+ninguém»* sem ter procurado quem as limpava. Bastavam-me três linhas de `grep` —
+o `caixa.test.ts` limpa-se exactamente assim, com o mesmo `DISABLE TRIGGER`, e
+está no repositório desde antes de eu escrever a frase. **Afirmei uma
+impossibilidade a partir de uma falha que observei uma vez.**
 
-Os 6/17/1 encontrados não são um resíduo antigo: são **muitas corridas
-empilhadas**, e o número sobe sempre que alguém semeia.
+## O que fica, e é pequeno
 
-## Devia a semeadura ser idempotente nestas três tabelas?
-
-**Acho que sim, e a razão não é arrumação.**
-
-O argumento a favor de não ser é sério e é o que existe hoje: a imutabilidade do
-rasto de dinheiro é uma garantia do produto, e um seed que «actualizasse» um
-movimento existente estaria a fazer, em desenvolvimento, exactamente o que o
-produto proíbe em produção. Uma semente que contorna a garantia ensina que a
-garantia se contorna.
-
-**Mas idempotente não quer dizer apagar nem alterar.** Quer dizer **não criar
-outra vez o que já existe** — e isso respeita a garantia inteira:
-
-- as outras entidades da semente já são idempotentes por identificador fixo (o
-  `DEMO.caixa`, o `DEMO.pedido`, todos os `d0000000-…`), e é assim que a
-  semeadura pode correr muitas vezes;
-- dar identificadores fixos aos registos, acontecimentos e movimentos da
-  inspecção fá-los cair na mesma regra: **existe? não cria.** Nada é apagado,
-  nada é alterado, e o gatilho nunca é tocado;
-- e o efeito colateral é o que interessa: a base deixa de crescer por correr.
-
-**A objecção que fica de pé, e não é minha para resolver:** com identificador
-fixo, uma semeadura deixa de conseguir *acrescentar* movimentos novos a cada
-corrida — e se alguma prova depende de haver mais movimentos a cada passagem,
-isso parte-a. Não medi essa dependência, e não a presumo.
-
-## O que NÃO fiz
-
-Não mexi na semeadura. Isto é desenho, não limpeza, e foi pedido que ficasse
-escrito antes de alguém tocar.
+Nada sobre caixas. A pergunta dos identificadores fixos não chega a colocar-se.
